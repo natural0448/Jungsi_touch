@@ -61,6 +61,10 @@ import {
   type RuntimeBudgetStage,
   type RuntimeRequestBudget,
 } from "./runtime_budget.ts";
+import {
+  type RequestScopedCurrentPagePortsFactory,
+  resolveCurrentPageRequestPorts,
+} from "./current_page_request_ports.review-only.ts";
 import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./management_postgres.ts";
 import { NativeForecastInputs } from "./native_data_provider.ts";
@@ -124,7 +128,7 @@ export interface RuntimeComposition {
   /** Separate reviewed configuration only; no authority is installed by default. */
   readonly currentPage?: {
     assert(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
-    readonly ports: CurrentPagePorts;
+    readonly ports: CurrentPagePorts | RequestScopedCurrentPagePortsFactory;
     readonly limits: CurrentPageLimits;
     readonly policy: RuntimeRoutePolicy;
     readonly projection: PublicResponseProjection;
@@ -267,13 +271,22 @@ async function invokeCurrentPageService(
   clock: RequestClockPort,
   request: ApiExecution,
   boundary?: ApiExecutionBoundary,
+  budget?: RuntimeRequestBudget,
 ): Promise<unknown> {
   if (
     !config || request.operation !== CURRENT_PAGE_OPERATION_ID ||
     !boundary?.admission || boundary.signal.aborted
   ) throw new AccessError("security_policy_unavailable", 503);
-  const service = new HistoryCurrentPageService(config.ports, clock, config.limits);
-  return await service.execute(request as ApiExecution & CurrentPageExecution, boundary);
+  const execution = request as ApiExecution & CurrentPageExecution;
+  const ports = await resolveCurrentPageRequestPorts(
+    config.ports,
+    execution,
+    boundary,
+    budget,
+    clock,
+  );
+  const service = new HistoryCurrentPageService(ports, clock, config.limits);
+  return await service.execute(execution, boundary);
 }
 function operation(policies: readonly ApiRoutePolicy[], request: Request): ApiOperationId | null {
   const pathname = new URL(request.url).pathname;
@@ -595,10 +608,18 @@ export class NativeRuntimeApi {
         // No approved revision-bound authority or bounded evidence adapter exists yet.
         null,
       );
+      let inputAdmission: PreparedUsageAdmission | undefined;
+      let currentPageBudget: RuntimeRequestBudget | undefined;
       const business: ApiBusinessPort = {
         execute: async (r, boundary) => {
           if (r.operation === CURRENT_PAGE_OPERATION_ID) {
-            return await invokeCurrentPageService(this.config.currentPage, this.clock, r, boundary);
+            return await invokeCurrentPageService(
+              this.config.currentPage,
+              this.clock,
+              r,
+              boundary,
+              currentPageBudget,
+            );
           }
           if (
             r.operation === "report.export" && Object.keys(r.query).length &&
@@ -645,8 +666,6 @@ export class NativeRuntimeApi {
           return await profiles.execute(r);
         },
       };
-      let inputAdmission: PreparedUsageAdmission | undefined;
-      let currentPageBudget: RuntimeRequestBudget | undefined;
       const handler = createApiHandler(requestPolicies, {
         ...(this.currentPageEnabled
           ? {

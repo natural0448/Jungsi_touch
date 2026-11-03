@@ -165,7 +165,7 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 | 소스 진입점 | 경로 | SHA-256 |
 | --- | --- | --- |
 | native_entry | supabase/functions/jungsi-api/index.ts | ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2 |
-| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | 53f4c48faf0eed9f7ef4071d728dcb71f73ce21a6774cf63739bddbde6a78e38 |
+| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | 45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7 |
 
 | 서버 설정 이름 | 허용된 기존 이름 | 현재 상태 | 입력의 의미 |
 | --- | --- | --- | --- |
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=791b470dcf4eaf351c0056cc4d6b4aa8ad26b8bcb2cfa8a507ce7814383355bd -->
+<!-- jungsi:generated spec_sha256=79d34f734c0a1af85547cb871ef4de54bc4db84d791097027289431f679adbd7 -->
 
 
 ## 기존 운영 조회의 후속 검수

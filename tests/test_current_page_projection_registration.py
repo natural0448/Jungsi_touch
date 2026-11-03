@@ -25,12 +25,14 @@ class CurrentPageRegistrationTests(unittest.TestCase):
             runner.current_page_projection_registration(spec, self.before)
 
     def test_changed_hash_count_or_activation_is_rejected(self):
-        for mutation in ("hash", "count", "activation", "guide_hash", "guide_count"):
+        for mutation in ("hash", "count", "activation", "guide_hash", "guide_count", "scope_issuer", "standalone"):
             spec, before = copy.deepcopy(self.spec), dict(self.before)
             if mutation == "hash": before[self.contract["test_path"]] = "0" * 64
             elif mutation == "count": spec["current_public_supply_contract"]["current_page_projection_verification"]["test_count"] = 1
             elif mutation == "guide_hash": before[self.contract["guide_test_paths"][0]] = "0" * 64
             elif mutation == "guide_count": spec["current_public_supply_contract"]["current_page_projection_verification"]["guide_test_count"] = 1
+            elif mutation == "scope_issuer": before["supabase/functions/_shared/jungsi/application/current_guide_scope_issuer.campus.review-only.ts"] = "0" * 64
+            elif mutation == "standalone": before["supabase/functions/_shared/jungsi/application/r27_standalone.ts"] = "0" * 64
             else: spec["current_public_supply_contract"]["current_page_projection_verification"]["production_ready"] = True
             with self.assertRaisesRegex(runner.EdgeFailure, "current_page_projection_source_or_test_binding_invalid"):
                 runner.current_page_projection_registration(spec, before)
@@ -46,12 +48,13 @@ class CurrentPageRouteRegistrationTests(unittest.TestCase):
         self.assertEqual(runner.current_page_route_registration(self.spec, self.before), self.contract)
 
     def test_missing_or_modified_scope_fails_closed(self):
-        for mutation in ("missing", "source", "schema", "test_count", "activation"):
+        for mutation in ("missing", "source", "schema", "guard", "test_count", "activation"):
             spec, before = copy.deepcopy(self.spec), dict(self.before)
             contract = spec["current_public_supply_contract"]["current_page_route_verification"]
             if mutation == "missing": del spec["current_public_supply_contract"]["current_page_route_verification"]
             elif mutation == "source": before[contract["test_paths"][0]] = "0" * 64
             elif mutation == "schema": before[contract["schema_path"]] = "0" * 64
+            elif mutation == "guard": before["supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts"] = "0" * 64
             elif mutation == "test_count": contract["test_count"] = 1
             else: contract["production_ready"] = True
             with self.assertRaises(runner.EdgeFailure):

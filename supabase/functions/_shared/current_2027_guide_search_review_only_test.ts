@@ -926,3 +926,146 @@ Deno.test("historical-only candidate cannot become a 2027 row merely by name", a
   old.guide!.academic_year = 2026;
   await rejects(() => integratedDirect(f));
 });
+
+Deno.test("unknown campus does not suppress independently confirmed initial zero or history pending", async () => {
+  const f = fixture(), raw = f.state.records[0].row;
+  raw.quota_value = 0;
+  raw.quota_literal_state = "numeric_literal";
+  raw.metadata = {
+    quota_stage: "initial",
+    source_url: "https://university.example/guide",
+    source_as_of: "2026-10-01",
+  };
+  const previous = f.authority.classifyTargets;
+  f.authority.classifyTargets = async (ctx, keys) =>
+    (await previous(ctx, keys)).map((v) =>
+      v.target.offering_pk !== "A" ? v : ({
+        target: v.target,
+        decision: "INCLUDE" as const,
+        quota: {
+          value: 0,
+          status: "verified_official" as const,
+          stage: "initial" as const,
+          unit: "명",
+          condition: "unknown" as const,
+          condition_text: null,
+          source_url: "https://university.example/guide",
+          source_as_of: "2026-10-01",
+        },
+      })
+    );
+  const result = await integratedDirect(f, false, true),
+    items = result.items as Array<Record<string, unknown>>;
+  const offering = items[0].offering as Record<string, unknown>,
+    quota = items[0].recruitment as Record<string, unknown>,
+    history = items[0].history as Record<string, unknown>;
+  assert(
+    offering.offering_id === "2027:A" && offering.campus === null && quota.value === 0 &&
+      quota.stage === "initial" && history.status === "pending",
+  );
+});
+Deno.test("separate campus grant is displayed while a neighboring unknown remains null", async () => {
+  const f = fixture(), previous = f.authority.verifyGuideScope!;
+  f.authority.verifyGuideScope = async (ctx, claims) =>
+    (await previous(ctx, claims)).map((v) =>
+      v.target.offering_pk === "A"
+        ? {
+          ...v,
+          campus_state: "confirmed_value" as const,
+          campus_value: "Synthetic Campus",
+          campus_origin: "separate_grant" as const,
+        }
+        : v
+    );
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const a = items[0].offering as Record<string, unknown>,
+    b = items[1].offering as Record<string, unknown>;
+  assert(
+    a.campus === "Synthetic Campus" && b.campus === null && a.offering_id === "2027:A" &&
+      b.offering_id === "2027:B",
+  );
+});
+
+Deno.test("verified rollover-only pending is omitted while confirmed initial zero remains", async () => {
+  const f = fixture(), raw = f.state.records[1].row;
+  f.state.records[0].row.quota_literal_state = "conditional_carryover";
+  raw.quota_value = 0;
+  raw.quota_literal_state = "numeric_literal";
+  raw.metadata = {
+    quota_stage: "initial",
+    source_url: "https://university.example/guide",
+    source_as_of: "2026-10-01",
+  };
+  const scope = f.authority.verifyGuideScope!;
+  f.authority.verifyGuideScope = async (ctx, claims) =>
+    (await scope(ctx, claims)).map((v) =>
+      v.target.offering_pk === "A"
+        ? {
+          ...v,
+          enrollment: "HOLD" as const,
+          practical: "HOLD" as const,
+          enrollment_basis: "rollover_only_pending" as const,
+        }
+        : v
+    );
+  const prior = f.authority.classifyTargets;
+  f.authority.classifyTargets = async (ctx, keys) =>
+    (await prior(ctx, keys)).map((v) =>
+      v.target.offering_pk !== "B" ? v : {
+        target: v.target,
+        decision: "INCLUDE" as const,
+        quota: {
+          value: 0,
+          status: "verified_official" as const,
+          stage: "initial" as const,
+          unit: "명",
+          condition: "unknown" as const,
+          condition_text: null,
+          source_url: "https://university.example/guide",
+          source_as_of: "2026-10-01",
+        },
+      }
+    );
+  const result = await integratedDirect(f, false, true),
+    items = result.items as Array<Record<string, unknown>>;
+  const offering = items[0].offering as Record<string, unknown>,
+    quota = items[0].recruitment as Record<string, unknown>;
+  assert(
+    items.length === 1 && offering.offering_id === "2027:B" && quota.value === 0 &&
+      quota.stage === "initial",
+  );
+  assert(quota.carryover_status === "unresolved" && result.next_cursor !== null);
+});
+Deno.test("conditional text alone never hides an unverified enrollment or confirmed null count", async () => {
+  const f = fixture();
+  f.state.records[0].row.quota_literal_state = "conditional_carryover";
+  f.state.scopeEnrollment.set("A", "HOLD");
+  f.state.scopePractical.set("A", "HOLD");
+  f.state.records[1].row.quota_value = null;
+  f.state.records[1].row.quota_literal_state = "json_null";
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  const offering = items[1].offering as Record<string, unknown>,
+    quota = items[1].recruitment as Record<string, unknown>;
+  assert(
+    items.length === 2 && items[0].offering === null && offering.offering_id === "2027:B" &&
+      quota.value === null && quota.status === "pending_value_missing",
+  );
+});
+Deno.test("conditional-only proof with membership conflict remains anonymous pending", async () => {
+  const f = fixture();
+  f.state.membership.set("A", "HOLD");
+  const scope = f.authority.verifyGuideScope!;
+  f.authority.verifyGuideScope = async (ctx, claims) =>
+    (await scope(ctx, claims)).map((v) =>
+      v.target.offering_pk === "A"
+        ? {
+          ...v,
+          enrollment: "HOLD" as const,
+          practical: "HOLD" as const,
+          enrollment_basis: "rollover_only_pending" as const,
+        }
+        : v
+    );
+  const result = await integratedDirect(f), items = result.items as Array<Record<string, unknown>>;
+  assert(items.length === 2 && items[0].offering === null && items[1].offering !== null);
+});

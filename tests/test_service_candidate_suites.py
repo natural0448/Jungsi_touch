@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "c3b86bf087cd6bcd95d80badf45154e1e29900208c389225f5115bd8e35f7b45"
+MANIFEST_SHA256 = "0b7c1c13be2d6929a8a09f468978f069329fc2af4dbc6460dd078efb4c249f6c"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -39,7 +39,8 @@ SERVICE_ROOTS = ["tests/service_end/" + name for name in (
     "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
     "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts",
 )]
-P1_ROOTS = ["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"]
+P1_ROOTS = ["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs", "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs"]
+P1_MULTIPART_CASES = ['real validators accept per-part synthetic history and retain 85 pending as unpublished input', 'missing track or group is rejected without conversion to null', 'absent campus stays page-bound UNKNOWN without changing source or becoming confirmed null', 'ambiguous grant campuses remain held instead of selecting a value', 'absent campus does not convert quota zero, null or missing stage', 'same school and PK with conflicting track or group is held when campus is absent', 'same PK conflicts across campus presence and separate source pages hold only related claims', 'same PK collisions hold present-campus and formerly excluded claims', 'source page also honors the requested max_depth before schema validation', 'explicit null is a separate input value and does not issue prior-decision approval', 'existing q requires real previous qualified context and never authorizes the new publication', 'a source scope candidate is not a prior-decision approval', 'unverified initial stage stays unspecified while native source stage and zero are preserved', 'explicit review-pending scope stays held and is not promoted by a different grant', 'global duplicate identities across parts fail closed', 'previous head and source head are checked before and after their reads', 'false or null from current-head assertions is rejected', 'compressed and source page alterations fail their own pins', 'part and compressed input arrays reject getters and sparse elements', 'source bytes and all input rows, including held rows, consume explicit budgets', 'mutable limits are snapshotted before the first asynchronous boundary', 'combined source and baseline cannot exceed the existing row limit', 'unsealed evidence and missing scope context do not create publication authority', '151 synthetic parts and 15476 prior rows above 64 MiB are validated part by part']
 SEARCH_ROOTS = ["tests/search503/test_combined_search503_end.synthetic.v5.mjs",
                 "tests/search503/test_search503_stream_limits.synthetic.v4.mjs",
                 "tests/search503/test_search503_reader_unlock.synthetic.v3.mjs",
@@ -300,7 +301,7 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
 class ReviewSuites(unittest.TestCase):
     def test_p1_deno_80(self):
         data = load_manifest()
-        suite = verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 80)
+        suite = verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 104)
         manual = ["tests/p1_review/fixtures/p1_public_registry_799.reference.json",
                   "src/jungsi_touch/application/public_response_schemas.json"]
         if suite["manual_read_files"] != manual:
@@ -312,6 +313,7 @@ class ReviewSuites(unittest.TestCase):
             {"cases": 37, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"cases": 19, "status": "PASS_SYNTHETIC_ONLY", "v2_source_gate": True, "synthetic_http": True, "actual_data": False},
             {"cases": 24, "status": "PASS_SYNTHETIC_ONLY", "v2_source_gate": True, "synthetic_http": True, "actual_data": False},
+            {"status": "PASS_SYNTHETIC_PRELIGHT_ONLY", "tests": 24, "cases": P1_MULTIPART_CASES, "db_calls": 0, "storage_calls": 0, "output_parts": "NOT_BUILT", "publication": "NOT_RUN"},
         ]
         for root, wanted in zip(P1_ROOTS, expected):
             args = [str(DENO), "run", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
@@ -319,7 +321,7 @@ class ReviewSuites(unittest.TestCase):
                     "--deny-net", "--deny-env", "--deny-run", "--deny-sys", "--deny-ffi", root]
             if json.loads(invoke(args, 90)) != wanted:
                 raise AssertionError("P1 exact result or case count mismatch: " + root)
-        verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 80)
+        verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 104)
 
     def test_service_p1_deno_46(self):
         data = load_manifest()

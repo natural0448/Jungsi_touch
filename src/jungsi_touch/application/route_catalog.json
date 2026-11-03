@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "791b470dcf4eaf351c0056cc4d6b4aa8ad26b8bcb2cfa8a507ce7814383355bd",
+  "source_sha256": "79d34f734c0a1af85547cb871ef4de54bc4db84d791097027289431f679adbd7",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3899,24 +3899,25 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "c3b86bf087cd6bcd95d80badf45154e1e29900208c389225f5115bd8e35f7b45"
+        "sha256": "0b7c1c13be2d6929a8a09f468978f069329fc2af4dbc6460dd078efb4c249f6c"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "b307b77000b34c2747a17d5f57f83df02e320d221c34e0e17a5ad05fa775c55b"
+        "sha256": "7a78fc90ead8c30071e0fed10eafa5b153dbc04970087e7d963c832912c20846"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "837725ab0d1b4df9a55e937896fbead3d88f908451af6931dfef50f489b4eb72"
+        "sha256": "07e48f57576061f245ea12e7a451f6835b04d103e9fd0a55778a5a602c56406d"
       },
       "groups": {
         "p1_review": {
           "roots": [
             "tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs",
             "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs",
-            "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"
+            "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs",
+            "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs"
           ],
-          "test_count": 80
+          "test_count": 104
         },
         "service_end": {
           "roots": [
@@ -4092,7 +4093,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "8f5bdc6c6ff9f1d01a65b93baabaf8a29a543d1d218345a88d8694e92a9d8f27"
+          "sha256": "08cf33dbe7b510da02196d659407e5ac1176c6fcdb1df45d9ac95c198df77470"
         }
       ],
       "tests": [
@@ -4568,7 +4569,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "53f4c48faf0eed9f7ef4071d728dcb71f73ce21a6774cf63739bddbde6a78e38"
+            "sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
@@ -5008,7 +5009,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "53f4c48faf0eed9f7ef4071d728dcb71f73ce21a6774cf63739bddbde6a78e38"
+            "sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",

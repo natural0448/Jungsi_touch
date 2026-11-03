@@ -12,6 +12,7 @@ import {
   type CursorScope,
   type HistoryClaim,
   HistoryCurrentPageService,
+  PENDING_CURRENT_HISTORY,
   type PhysicalKey,
   type QuotaDecision,
 } from "./history_current_page.ts";
@@ -613,6 +614,95 @@ Deno.test("cursor requires same scope and preserves earlier incomplete status", 
     "stale_cursor",
     409,
   );
+});
+
+Deno.test("explicit pending history keeps verified initial recruitment available without claiming history", async () => {
+  const f = await fixture();
+  f.state.rows = [{ ...offering("current-1"), campus: null }];
+  f.state.scope = [quota("current-1", 5)];
+  const out = asJson(
+    await f.service({
+      histories: PENDING_CURRENT_HISTORY,
+      recruitment_evidence: {
+        verify: () =>
+          Promise.resolve([{
+            target: target("current-1"),
+            finality: "pending" as const,
+            carryover_status: "unresolved" as const,
+          }]),
+      },
+    }).execute(f.execute(), f.boundary),
+  );
+  eq(out.items[0].offering.offering_id, "2027:current-1");
+  eq(out.items[0].offering.campus, null);
+  eq(out.items[0].recruitment.value, 5);
+  eq(out.items[0].recruitment.status, "verified_official");
+  eq(out.items[0].recruitment.stage, "initial");
+  eq(out.items[0].recruitment.carryover_status, "unresolved");
+  eq(out.items[0].history.status, "pending");
+  eq(out.items[0].history.items.length, 0);
+  eq(f.state.counts.history, 0);
+
+  f.state.scope = [{ target: target("current-1"), decision: "HOLD", quota: null }];
+  const held = asJson(
+    await f.service({ histories: PENDING_CURRENT_HISTORY }).execute(
+      f.execute(),
+      f.boundary,
+    ),
+  );
+  eq(held.items[0].offering, null);
+  eq(held.items[0].recruitment, null);
+  await rejects(
+    () => f.service({ histories: null }).execute(f.execute(), f.boundary),
+    "security_policy_unavailable",
+    503,
+  );
+
+  f.state.rows.push(offering("current-2"));
+  f.state.scope = [quota("current-1", 0), quota("current-2", 5)];
+  const both = asJson(
+    await f.service({ histories: PENDING_CURRENT_HISTORY }).execute(
+      f.execute(),
+      f.boundary,
+    ),
+  );
+  eq(both.items[0].recruitment.value, 0);
+  eq(both.items[0].recruitment.stage, "initial");
+  eq(both.items[1].recruitment.value, 5);
+  eq(both.items[0].history.status, "pending");
+  eq(both.items[1].history.status, "pending");
+
+  let historyCalls = 0;
+  const watchedHistory = {
+    read: (...args: Parameters<typeof PENDING_CURRENT_HISTORY.read>) => {
+      historyCalls++;
+      return PENDING_CURRENT_HISTORY.read(...args);
+    },
+  };
+  for (const failure of ["begin", "current"] as const) {
+    const authority = {
+      ...f.ports.authority!,
+      [failure === "begin" ? "begin" : "assertCurrent"]: () =>
+        Promise.reject(new AccessError("security_policy_unavailable", 503)),
+    };
+    await rejects(
+      () => f.service({ authority, histories: watchedHistory }).execute(f.execute(), f.boundary),
+      "security_policy_unavailable",
+      503,
+    );
+  }
+  const aborted = new AbortController();
+  aborted.abort();
+  await rejects(
+    () =>
+      f.service({ histories: watchedHistory }).execute(
+        f.execute(),
+        { ...f.boundary, signal: aborted.signal },
+      ),
+    "security_policy_unavailable",
+    503,
+  );
+  eq(historyCalls, 0);
 });
 
 Deno.test("quota missing, initial zero and final zero keep distinct meanings", async () => {

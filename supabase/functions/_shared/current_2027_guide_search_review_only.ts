@@ -56,8 +56,9 @@ export interface GuideSearchAuthority extends CurrentPageAuthority {
     publication: string,
     catalogHead: string,
   ): void;
-  /** Independently verify the source fingerprint AND every projected display field,
-   * bound to the current approved composite head and physical release. */
+  /** Verify source fingerprint and projected fields against the approved head and
+   * physical release. In direct mode campus is separately classified by the scope
+   * authority; an unknown campus alone must not make verified recruitment HOLD. */
   classifyGuideProjections(
     context: CurrentPagePortContext,
     claims: readonly GuideProjectionClaim[],
@@ -78,6 +79,11 @@ export interface GuideSearchAuthority extends CurrentPageAuthority {
         target: PhysicalKey;
         enrollment: "CONFIRMED" | "HOLD" | "EXCLUDE";
         practical: "NON_PRACTICAL" | "HOLD" | "EXCLUDE";
+        /** Only independently verified conditional-only recruitment awaiting official rollover. */
+        enrollment_basis?: "unknown" | "rollover_only_pending";
+        campus_state?: "unknown" | "confirmed_null" | "confirmed_value";
+        campus_value?: string | null;
+        campus_origin?: "unknown" | "source" | "separate_grant";
       }
     >[]
   >;
@@ -607,7 +613,7 @@ function createGuideSearchPageAdapter(
         ? await authority.classifyGuideProjections(context, claims)
         : [];
       check();
-      const projectionSeen = new Set<string>();
+      const projectionSeen = new Set<string>(), projectionHeld = new Set<string>();
       for (const item of dense(projections, keys.length)) {
         const target = physical(data(item, "target")),
           id = keyId(target),
@@ -618,11 +624,14 @@ function createGuideSearchPageAdapter(
         ) return fail();
         projectionSeen.add(id);
         const claim = claims.find((c) => keyId(c.target) === id)!;
-        if (decision === "HOLD" || claim.rowFingerprint === null) markHeld(context, target);
-        else if (catalogFactory) rememberClaim(context, claim);
+        if (decision === "HOLD" || claim.rowFingerprint === null) {
+          projectionHeld.add(id);
+          markHeld(context, target);
+        } else if (catalogFactory) rememberClaim(context, claim);
       }
       if (projectionSeen.size !== keys.length) return fail();
-      const scopedExclusions = new Set<string>();
+      const scopedExclusions = new Set<string>(), conditionalOnlyPending = new Set<string>();
+      const verifiedCampuses = new Map<string, string | null>();
       if (catalogFactory && keys.length) {
         if (typeof authority.verifyGuideScope !== "function") return fail();
         const rawScope = await authority.verifyGuideScope(context, claims);
@@ -632,16 +641,36 @@ function createGuideSearchPageAdapter(
           const target = physical(data(item, "target")),
             id = keyId(target),
             enrollment = data(item, "enrollment"),
-            practical = data(item, "practical");
+            practical = data(item, "practical"),
+            enrollmentBasis = data(item, "enrollment_basis", true) ?? "unknown",
+            campusState = data(item, "campus_state", true) ?? "unknown",
+            campusValue = data(item, "campus_value", true) ?? null,
+            campusOrigin = data(item, "campus_origin", true) ?? "unknown";
           if (
             !unique.has(id) || seen.has(id) || typeof enrollment !== "string" ||
             typeof practical !== "string" ||
             !["CONFIRMED", "HOLD", "EXCLUDE"].includes(enrollment) ||
-            !["NON_PRACTICAL", "HOLD", "EXCLUDE"].includes(practical)
+            !["NON_PRACTICAL", "HOLD", "EXCLUDE"].includes(practical) ||
+            !["unknown", "rollover_only_pending"].includes(enrollmentBasis as string) ||
+            enrollmentBasis === "rollover_only_pending" &&
+              (enrollment !== "HOLD" || practical !== "HOLD") ||
+            !["unknown", "confirmed_null", "confirmed_value"].includes(campusState as string) ||
+            !["unknown", "source", "separate_grant"].includes(campusOrigin as string) ||
+            campusState === "confirmed_value" &&
+              (typeof campusValue !== "string" || !label(campusValue)) ||
+            campusState !== "confirmed_value" && campusValue !== null ||
+            campusState === "unknown" && campusOrigin !== "unknown" ||
+            campusState !== "unknown" && campusOrigin === "unknown"
           ) return fail();
+          verifiedCampuses.set(
+            id,
+            campusState === "confirmed_value" ? campusValue as string : null,
+          );
+          if (enrollmentBasis === "rollover_only_pending") conditionalOnlyPending.add(id);
           seen.add(id);
-          if (enrollment === "HOLD" || practical === "HOLD") markHeld(context, target);
-          else if (enrollment === "EXCLUDE" || practical === "EXCLUDE") scopedExclusions.add(id);
+          if (enrollment === "HOLD" || practical === "HOLD") {
+            if (enrollmentBasis !== "rollover_only_pending") markHeld(context, target);
+          } else if (enrollment === "EXCLUDE" || practical === "EXCLUDE") scopedExclusions.add(id);
         }
         if (seen.size !== keys.length) return fail();
       }
@@ -665,9 +694,25 @@ function createGuideSearchPageAdapter(
         publicCounts.set(k.offering_pk, (publicCounts.get(k.offering_pk) ?? 0) + 1);
       }
       for (const k of keys) if (publicCounts.get(k.offering_pk)! > 1) markHeld(context, k);
+      // Suppress only independently verified conditional-only, unconfirmed rollover.
+      // Conflicting projection, source signals or membership remain ordinary HOLD.
+      const deferred = new Set(
+        selected.filter((r) => {
+          const id = keyId(r.offering.key);
+          return conditionalOnlyPending.has(id) && !projectionHeld.has(id) && !r.scopeConflict &&
+            membership.get(id) === "VERIFIED" && publicCounts.get(r.offering.key.offering_pk) === 1;
+        }).map((r) => keyId(r.offering.key)),
+      );
+      for (const row of selected) {
+        const id = keyId(row.offering.key);
+        if (conditionalOnlyPending.has(id) && !deferred.has(id)) {
+          markHeld(context, row.offering.key);
+        }
+      }
       const classifiedKeys = Object.freeze(
         keys.filter((k) =>
-          membership.get(keyId(k)) === "VERIFIED" && publicCounts.get(k.offering_pk) === 1 &&
+          !deferred.has(keyId(k)) && membership.get(keyId(k)) === "VERIFIED" &&
+          publicCounts.get(k.offering_pk) === 1 &&
           claims.find((c) => keyId(c.target) === keyId(k))?.rowFingerprint !== null
         ),
       );
@@ -722,17 +767,27 @@ function createGuideSearchPageAdapter(
       }
       if (seenExclusions.size !== exclusions.length) return fail();
       const items = Object.freeze(
-        selected.filter((r) => !confirmed.has(keyId(r.offering.key))).map((r) => r.offering),
+        selected.filter((r) =>
+          !confirmed.has(keyId(r.offering.key)) && !deferred.has(keyId(r.offering.key))
+        ).map((r) =>
+          catalogFactory
+            ? Object.freeze({
+              ...r.offering,
+              campus: verifiedCampuses.get(keyId(r.offering.key)) ?? null,
+            })
+            : r.offering
+        ),
       );
-      const incomplete = selected.some((r) =>
-        membership.get(keyId(r.offering.key)) === "HOLD" ||
-        duplicatePositions.has(JSON.stringify(r.key)) ||
-        catalogFactory && (r.scopeConflict || scopedExclusions.has(keyId(r.offering.key))) &&
-          decisions.get(keyId(r.offering.key)) === "INCLUDE" ||
-        publicCounts.get(r.offering.key.offering_pk)! > 1 ||
-        unresolved.has(keyId(r.offering.key)) ||
-        decisions.get(keyId(r.offering.key)) === "HOLD"
-      );
+      const incomplete = deferred.size > 0 ||
+        selected.some((r) =>
+          membership.get(keyId(r.offering.key)) === "HOLD" ||
+          duplicatePositions.has(JSON.stringify(r.key)) ||
+          catalogFactory && (r.scopeConflict || scopedExclusions.has(keyId(r.offering.key))) &&
+            decisions.get(keyId(r.offering.key)) === "INCLUDE" ||
+          publicCounts.get(r.offering.key.offering_pk)! > 1 ||
+          unresolved.has(keyId(r.offering.key)) ||
+          decisions.get(keyId(r.offering.key)) === "HOLD"
+        );
       const continuation = rows.length > safeQuery.limit
         ? scannedSelection.at(-1)?.key ?? null
         : suppliedNext;

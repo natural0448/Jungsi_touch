@@ -35,7 +35,11 @@ function key(pk: string, release = "synthetic-release"): PhysicalKey {
   };
 }
 function claim(target: PhysicalKey, fingerprint: string | null = H("f")): GuideProjectionClaim {
-  return { target, rowFingerprint: fingerprint } as unknown as GuideProjectionClaim;
+  return {
+    target,
+    rowFingerprint: fingerprint,
+    offering: { campus: null, admission_track: "SYN-TRACK", group: "A" },
+  } as unknown as GuideProjectionClaim;
 }
 async function makeIndex(keys: PhysicalKey[], holds = new Set<string>()) {
   const rows: Record<string, unknown> = {};

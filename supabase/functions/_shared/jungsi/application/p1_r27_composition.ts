@@ -24,6 +24,7 @@ import {
   buildStandaloneR27,
   type ReviewedR27Links,
   type ReviewedR27Scope,
+  reviewR27AbsentCampusScope,
 } from "./r27_standalone.ts";
 
 const HASH = /^[a-f0-9]{64}$/;
@@ -1344,4 +1345,456 @@ export async function buildCandidateR27ScopeIndex(
   freezeTree(index);
   candidateIndexSeals.set(index, { candidate, evidence, partial: false });
   return index;
+}
+
+/** Aggregate-only input preflight. It emits no part bytes and issues no publication seal. */
+export interface P1MultipartInputPreflight {
+  readonly status: "HOLD_UNPUBLISHED";
+  readonly publication_ready: false;
+  readonly baseline_parts: number;
+  readonly baseline_rows: number;
+  readonly baseline_mapped_rows: number;
+  readonly baseline_pending_rows: number;
+  readonly baseline_qualified_rows: number;
+  readonly baseline_gzip_bytes: number;
+  readonly baseline_decoded_bytes: number;
+  readonly source_pages: number;
+  readonly source_rows: number;
+  readonly source_bytes: number;
+  readonly source_scope_only_candidates: number;
+  readonly source_scope_only_held: number;
+  readonly source_scope_only_unreviewed: number;
+  readonly source_scope_reconciliation: "NOT_VERIFIED";
+  readonly source_campus_absent: readonly P1AbsentCampusProof[];
+  readonly prior_decisions: "NOT_VERIFIED";
+  readonly schools_observations: "NOT_VERIFIED";
+  readonly output_parts: "NOT_BUILT";
+  readonly new_qualification_publication_binding: "NOT_RUN";
+}
+
+/** The owner must supply an already-authorized source byte budget; no default grants one. */
+export interface P1MultipartInputLimits extends P1R27Limits {
+  readonly max_source_total_bytes: number;
+}
+
+/** Location in an already hash-verified original page; never changes the source row. */
+export interface P1AbsentCampusProof {
+  readonly field: "campus";
+  readonly presence: "ABSENT";
+  readonly page_index: number;
+  readonly row_index: number;
+  readonly page_sha256: string;
+  readonly grant_campus: "NULL" | "PRESENT" | "UNKNOWN";
+  readonly scope_result: "SCOPE_CANDIDATE" | "SCOPE_EXCLUDED" | "SCOPE_HELD" | "SCOPE_UNREVIEWED";
+}
+
+/** Read a data property without running an injected getter. */
+function multipartData(raw: unknown, name: string, optional = false): unknown {
+  need(
+    raw !== null && typeof raw === "object" && !Array.isArray(raw),
+    "baseline_publication_invalid",
+  );
+  const d = Object.getOwnPropertyDescriptor(raw, name);
+  if (!d && optional) return undefined;
+  need(d && d.enumerable && "value" in d, "baseline_publication_invalid");
+  return d.value;
+}
+
+/** Reject sparse arrays, extra keys and accessors without invoking element getters. */
+function multipartDenseArray(raw: unknown, max: number): readonly unknown[] {
+  need(Array.isArray(raw), "baseline_array_invalid");
+  const length = Object.getOwnPropertyDescriptor(raw, "length");
+  need(
+    length && "value" in length && Number.isSafeInteger(length.value) && length.value >= 0 &&
+      length.value <= max,
+    "baseline_array_invalid",
+  );
+  const keys = Reflect.ownKeys(raw);
+  need(keys.length === length.value + 1 && keys.includes("length"), "baseline_array_invalid");
+  const out: unknown[] = [];
+  for (let i = 0; i < length.value; i++) {
+    const d = Object.getOwnPropertyDescriptor(raw, String(i));
+    need(d && d.enumerable && "value" in d, "baseline_array_invalid");
+    out.push(d.value);
+  }
+  return Object.freeze(out);
+}
+
+/**
+ * Validate pinned v1 parts one at a time and verify sealed R27 source pages with
+ * the existing projector. This is NOT an assembler, writer, issuer, prior-decision
+ * verifier or seal. Missing admission fields are never inferred as null. Decoded
+ * rows are discarded after each part, and all limits are copied before I/O.
+ */
+export async function preflightP1MultipartInputs(
+  previous: P1BaselineBatchPort,
+  source: P1R27ByteSource,
+  evidence: BoundP1R27Evidence,
+  scope: ReviewedR27Scope,
+  links: ReviewedR27Links | undefined,
+  limits: P1MultipartInputLimits,
+): Promise<P1MultipartInputPreflight> {
+  const e = bindings.get(evidence);
+  need(e, "evidence_not_bound");
+  assertReviewedR27LinkBinding(links, e);
+  const limit = object(limits, [
+    "max_baseline_parts",
+    "max_combined_rows",
+    "max_body_bytes",
+    "max_baseline_gzip_bytes",
+    "max_baseline_decoded_bytes",
+    "max_part_gzip_bytes",
+    "max_part_decoded_bytes",
+    "max_depth",
+    "max_source_total_bytes",
+  ]);
+  const maxParts = count(limit.max_baseline_parts, 512),
+    maxRows = count(limit.max_combined_rows, 40_000);
+  const maxBody = count(limit.max_body_bytes, 67_108_864),
+    maxGzip = count(limit.max_baseline_gzip_bytes, 134_217_728);
+  const maxDecoded = count(limit.max_baseline_decoded_bytes, 268_435_456),
+    maxPartGzip = count(limit.max_part_gzip_bytes, 16_777_216);
+  const maxPartDecoded = count(limit.max_part_decoded_bytes, 67_108_864),
+    maxDepth = count(limit.max_depth, 128),
+    maxSource = count(limit.max_source_total_bytes, Number.MAX_SAFE_INTEGER);
+  need(
+    [
+      maxParts,
+      maxRows,
+      maxBody,
+      maxGzip,
+      maxDecoded,
+      maxPartGzip,
+      maxPartDecoded,
+      maxDepth,
+      maxSource,
+    ].every((
+      x,
+    ) => x > 0),
+    "invalid_build_limits",
+  );
+  need(
+    previous && typeof previous.readPinnedBatch === "function" &&
+      typeof previous.assertCurrent === "function" && source &&
+      typeof source.readPage === "function" && typeof source.assertSourceHead === "function",
+    "source_port_unavailable",
+  );
+  const readBatch = previous.readPinnedBatch.bind(previous),
+    assertPrevious = previous.assertCurrent.bind(previous);
+  const readPage = source.readPage.bind(source),
+    assertSource = source.assertSourceHead.bind(source);
+  const expected = Object.freeze({
+    previous_publication_sha256: e.previous_publication_sha256,
+    previous_source_head_sha256: e.previous_source_head_sha256,
+    scope_sha256: e.scope_sha256,
+  });
+  const assertPreviousVoid = async () => {
+    const value: unknown = await assertPrevious(expected);
+    need(value === undefined, "previous_assert_invalid");
+  };
+  const assertSourceVoid = async () => {
+    const value: unknown = await assertSource(e.source_head_sha256);
+    need(value === undefined, "source_assert_invalid");
+  };
+  await assertPreviousVoid();
+  const fetched = await readBatch(
+    Object.freeze({
+      ...expected,
+      max_parts: maxParts,
+      max_total_gzip_bytes: maxGzip,
+      max_total_decoded_bytes: maxDecoded,
+    }),
+  );
+  const p = multipartData(fetched, "publication") as SnapshotPublication;
+  const pubNames = [
+    "snapshotId",
+    "publicationSha256",
+    "sourceHeadSha256",
+    "scopeSha256",
+    "generatedAt",
+    "sourceAsOf",
+    "schemaVersion",
+    "normalizationRulesVersion",
+    "selectionRulesVersion",
+    "expiresAtUtc",
+  ] as const;
+  const pubBase = Object.fromEntries(pubNames.map((k) => [k, multipartData(p, k)]));
+  need(
+    pubBase.publicationSha256 === e.previous_publication_sha256 &&
+      pubBase.sourceHeadSha256 === e.previous_source_head_sha256 &&
+      pubBase.scopeSha256 === e.scope_sha256 &&
+      pubBase.schemaVersion === "jungsi.history-snapshot/v1",
+    "previous_head_mismatch",
+  );
+  const rawCounts = object(multipartData(p, "counts"), [
+    "rows",
+    "mapped_rows",
+    "mapping_pending_rows",
+    "observations",
+    "schools",
+  ]);
+  const counts = Object.freeze(
+    Object.fromEntries(
+      Object.entries(rawCounts).map((
+        [k, v],
+      ) => [
+        k,
+        count(v, k === "observations" || k === "schools" ? Number.MAX_SAFE_INTEGER : 40_000),
+      ]),
+    ),
+  ) as unknown as SnapshotPublication["counts"];
+  const full = multipartData(p, "full") as SnapshotPart | null,
+    rawParts = multipartDenseArray(multipartData(p, "parts"), maxParts);
+  const originals = full === null ? rawParts : [full];
+  need(
+    originals.length > 0 && originals.length <= maxParts &&
+      (full === null || rawParts.length === 0),
+    "baseline_part_limit",
+  );
+  const partFields = [
+    "partId",
+    "payloadId",
+    "gzipBytes",
+    "gzipSha256",
+    "decodedBytes",
+    "decodedSha256",
+    "rows",
+    "mappedRows",
+    "mappingPendingRows",
+    "objectKey",
+  ] as const;
+  const parts = originals.map((value) =>
+    Object.freeze(object(value, partFields)) as unknown as SnapshotPart
+  );
+  const optionalNames = [
+    "fieldQualification",
+    "historicalReferences",
+    "r27ScopeIndex",
+    "r27Gate",
+  ] as const;
+  const optional = Object.fromEntries(optionalNames.flatMap((name) => {
+    const value = multipartData(p, name, true);
+    return value === undefined ? [] : [[name, value]];
+  }));
+  const pub = Object.freeze({
+    ...pubBase,
+    ...optional,
+    counts,
+    full: full === null ? null : parts[0],
+    parts: Object.freeze(full === null ? parts : []),
+  }) as unknown as SnapshotPublication;
+  const manifestBytes = bytesSnapshot(
+    multipartData(fetched, "manifest_bytes") as Uint8Array,
+    2_097_152,
+  );
+  const rawGzip = multipartDenseArray(multipartData(fetched, "gzip_parts"), maxParts);
+  need(rawGzip.length === parts.length, "baseline_part_limit");
+  const compressed: Uint8Array<ArrayBuffer>[] = [];
+  let gzipBytes = 0, decodedBytes = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i],
+      gz = count(part.gzipBytes, maxPartGzip),
+      dec = count(part.decodedBytes, maxPartDecoded);
+    need(
+      gz > 0 && dec > 0 && HASH.test(part.gzipSha256) && HASH.test(part.decodedSha256),
+      "baseline_part_pin_invalid",
+    );
+    gzipBytes += gz;
+    decodedBytes += dec;
+    need(gzipBytes <= maxGzip && decodedBytes <= maxDecoded, "baseline_byte_limit");
+    const pin = bytesSnapshot(rawGzip[i] as Uint8Array, gz);
+    need(pin.byteLength === gz, "baseline_gzip_length");
+    compressed.push(pin);
+  }
+  need(
+    await sha(manifestBytes) === e.previous_publication_sha256,
+    "baseline_manifest_digest_mismatch",
+  );
+  validateBaselineManifest(parseBounded(manifestBytes, maxDepth), pub, parts);
+  let baselineRows = 0, mapped = 0, pending = 0, qualified = 0;
+  const identities = new Set<string>();
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i], gzip = compressed[i];
+    need(await sha(gzip) === part.gzipSha256, "baseline_gzip_digest_mismatch");
+    const decoded = await inflateBounded(gzip, part.decodedBytes);
+    need(await sha(decoded) === part.decodedSha256, "baseline_decoded_digest_mismatch");
+    const body = await validateQualifiedHistorySnapshotPayload(
+      parseBounded(decoded, maxDepth),
+      part,
+      pub,
+    );
+    for (const row of body.rows as NativeObject[]) {
+      const identity = row.mapping_status === "mapped"
+        ? `${row.academic_year}:${row.original_pk}`
+        : String(row.observation_key);
+      need(!identities.has(identity), "baseline_global_duplicate");
+      identities.add(identity);
+      baselineRows++;
+      if (row.mapping_status === "mapped") mapped++;
+      else pending++;
+      const rank = row.final_additional_admission_rank;
+      if (
+        rank && typeof rank === "object" && !Array.isArray(rank) &&
+        Object.hasOwn(rank, "service_qualification")
+      ) qualified++;
+      need(baselineRows <= maxRows, "baseline_row_limit");
+    }
+  }
+  need(
+    baselineRows === counts.rows && mapped === counts.mapped_rows &&
+      pending === counts.mapping_pending_rows,
+    "baseline_incomplete",
+  );
+  await assertPreviousVoid();
+  await assertSourceVoid();
+  need(baselineRows + e.expectedRows <= maxRows, "combined_row_limit");
+  const sourceBytes = e.pages.reduce((n, pin) => n + pin.bytes, 0);
+  need(Number.isSafeInteger(sourceBytes) && sourceBytes <= maxSource, "source_byte_limit");
+  const presentRows: NativeObject[] = [], absentRows: NativeObject[] = [];
+  const absentCampus: Omit<P1AbsentCampusProof, "grant_campus" | "scope_result">[] = [];
+  let sourceRows = 0;
+  for (let index = 0; index < e.pages.length; index++) {
+    const pin = e.pages[index], data = bytesSnapshot(await readPage(index), pin.bytes);
+    need(data.byteLength === pin.bytes && await sha(data) === pin.sha256, "page_digest_mismatch");
+    const page = object(parseBounded(data, maxDepth), [
+      "format",
+      "source_sha256",
+      "source_head_sha256",
+      "index",
+      "rows",
+    ]);
+    const rows = multipartDenseArray(page.rows, 128);
+    need(
+      page.format === "jungsi.r27-source-page/v1" && page.source_sha256 === e.source_sha256 &&
+        page.source_head_sha256 === e.source_head_sha256 && page.index === index &&
+        rows.length === pin.rows,
+      "page_content_mismatch",
+    );
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const raw = rows[rowIndex];
+      need(
+        raw !== null && typeof raw === "object" && !Array.isArray(raw) &&
+          !(raw instanceof JsonFloat),
+        "invalid_source_row",
+      );
+      // Required track/group are not synthesized. ABSENT campus is kept as a
+      // page-bound UNKNOWN proof and is never passed off as a confirmed null.
+      for (
+        const field of [
+          "academic_year",
+          "school_id",
+          "original_pk",
+          "admission_track",
+          "group",
+          "scope",
+          "source_ref",
+        ]
+      ) {
+        const d = Object.getOwnPropertyDescriptor(raw, field);
+        need(d && d.enumerable && "value" in d, "source_required_field_missing");
+      }
+      if (!Object.hasOwn(raw, "campus")) {
+        absentCampus.push(
+          Object.freeze({
+            field: "campus",
+            presence: "ABSENT",
+            page_index: index,
+            row_index: rowIndex,
+            page_sha256: pin.sha256,
+          }),
+        );
+        absentRows.push(raw as NativeObject);
+      } else presentRows.push(raw as NativeObject);
+      sourceRows++;
+    }
+  }
+  need(sourceRows === e.expectedRows, "source_page_incomplete");
+  // The PK identity is global across pages and across both campus-presence
+  // groups.  A conflicting claim must not become a scope candidate merely
+  // because the two rows were processed by different projectors.
+  const sourceBaseKey = (row: NativeObject): string =>
+    JSON.stringify([row.academic_year, row.school_id, row.original_pk]);
+  const sourceBaseCounts = new Map<string, number>();
+  for (const row of [...presentRows, ...absentRows]) {
+    const key = sourceBaseKey(row);
+    sourceBaseCounts.set(key, (sourceBaseCounts.get(key) ?? 0) + 1);
+  }
+  const sourceBaseConflicts = (row: NativeObject): boolean =>
+    (sourceBaseCounts.get(sourceBaseKey(row)) ?? 0) > 1;
+  // The grant campus is examined independently and never copied into the source row.
+  const absentReviews = absentRows.length
+    ? reviewR27AbsentCampusScope(absentRows, e.source_sha256, scope)
+    : [];
+  const campusProofs: readonly P1AbsentCampusProof[] = Object.freeze(
+    absentCampus.map((proof, index) => {
+      const review = absentReviews[index];
+      need(review && review.source_index === index, "absent_scope_review_mismatch");
+      return Object.freeze({
+        ...proof,
+        grant_campus: review.grant_campus,
+        scope_result: sourceBaseConflicts(absentRows[index]) ? "SCOPE_HELD" : review.scope_result,
+      });
+    }),
+  );
+  let position = 0;
+  const projectionPages = Math.max(1, Math.ceil(presentRows.length / 128));
+  const stage = await buildStandaloneR27(
+    {
+      readPage(request) {
+        need(
+          position < projectionPages &&
+            request.cursor === (position === 0 ? null : String(position)),
+          "page_order",
+        );
+        const index = position++;
+        // This is an in-memory projection of already verified rows, not a new source page or source SHA.
+        return Promise.resolve({
+          source_sha256: e.source_sha256,
+          rows: presentRows.slice(index * 128, (index + 1) * 128),
+          next_cursor: position < projectionPages ? String(position) : null,
+        });
+      },
+    },
+    {
+      source_sha256: e.source_sha256,
+      expected_rows: presentRows.length,
+      page_size: 128,
+      max_pages: projectionPages,
+      max_rows: presentRows.length,
+    },
+    links,
+    scope,
+  );
+  need(position === projectionPages, "source_projection_incomplete");
+  await assertSourceVoid();
+  await assertPreviousVoid();
+  return Object.freeze({
+    status: "HOLD_UNPUBLISHED",
+    publication_ready: false,
+    baseline_parts: parts.length,
+    baseline_rows: baselineRows,
+    baseline_mapped_rows: mapped,
+    baseline_pending_rows: pending,
+    baseline_qualified_rows: qualified,
+    baseline_gzip_bytes: gzipBytes,
+    baseline_decoded_bytes: decodedBytes,
+    source_pages: e.pages.length,
+    source_rows: e.expectedRows,
+    source_bytes: sourceBytes,
+    source_scope_only_candidates: stage.rows.filter((row) => !sourceBaseConflicts(row)).length +
+      campusProofs.filter((r) => r.scope_result === "SCOPE_CANDIDATE").length,
+    source_scope_only_held: stage.held.length +
+      stage.rows.filter(sourceBaseConflicts).length +
+      stage.excluded.filter(sourceBaseConflicts).length +
+      campusProofs.filter((r) => r.scope_result === "SCOPE_HELD").length,
+    source_scope_only_unreviewed: campusProofs.filter((r) =>
+      r.scope_result === "SCOPE_UNREVIEWED"
+    ).length,
+    source_scope_reconciliation: "NOT_VERIFIED",
+    source_campus_absent: campusProofs,
+    prior_decisions: "NOT_VERIFIED",
+    schools_observations: "NOT_VERIFIED",
+    output_parts: "NOT_BUILT",
+    new_qualification_publication_binding: "NOT_RUN",
+  });
 }

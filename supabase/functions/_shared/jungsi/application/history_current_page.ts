@@ -268,6 +268,17 @@ export interface CurrentHistoryBatchPort {
     }>
   >;
 }
+/** Explicit opt-in when historical relationships have not been reviewed yet.
+ * This provider does no I/O and never marks a target complete; it does not grant
+ * access or replace the current-row authority, request admission, or head checks.
+ * A missing provider remains a configuration error instead of silently falling back. */
+export const PENDING_CURRENT_HISTORY: CurrentHistoryBatchPort = Object.freeze({
+  read: () =>
+    Promise.resolve(Object.freeze({
+      claims: Object.freeze([] as HistoryClaim[]),
+      complete_targets: Object.freeze([] as PhysicalKey[]),
+    })),
+});
 export type CursorScope = Readonly<
   { pins: CurrentPagePins; query: CurrentPageQuery }
 >;

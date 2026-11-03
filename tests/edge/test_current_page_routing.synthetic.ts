@@ -29,6 +29,10 @@ import {
   currentPageBudgetScope,
   runtimeCompletionCurrent,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts";
+import {
+  type RequestScopedCurrentPagePortsFactory,
+  resolveCurrentPageRequestPorts,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts";
 import type { PreparedUsageAdmission } from "../../supabase/functions/_shared/jungsi/application/usage_service.ts";
 import type { BudgetRequest } from "../../supabase/functions/_shared/jungsi/application/request_budget.ts";
 import type { UsageBudgetStorePort } from "../../supabase/functions/_shared/jungsi/application/usage_budget.ts";
@@ -689,6 +693,8 @@ function fixture(options: Options = {}) {
   return {
     policies,
     ports,
+    pagePorts,
+    limits,
     request,
     events,
     controller,
@@ -1014,6 +1020,7 @@ function runtimeBudgetFixture(
     | "mutate_measure"
     | "abort_during_settle"
     | "deny_control_after_settle" = "ok",
+  onSettle?: () => void,
 ) {
   let savedRequest: BudgetRequest | undefined;
   let savedAdmission: PreparedUsageAdmission | undefined;
@@ -1083,6 +1090,7 @@ function runtimeBudgetFixture(
         ),
       );
       f.events.push("settling_token_denied");
+      onSettle?.();
       if (mode === "abort_during_settle") f.controller.abort();
       settled = true;
       return mode === "settle_failure"
@@ -1612,4 +1620,248 @@ Deno.test("current page does not reread budget controls after settlement", async
   assert(f.events.lastIndexOf("budget_control_current") < f.events.indexOf("real_settle_success"));
   assert(!f.events.includes("forbidden_control_after_settle"));
   assert(f.events.includes("deliver"));
+});
+
+function withRequestFactory(
+  f: ReturnType<typeof fixture>,
+  b: ReturnType<typeof runtimeBudgetFixture>,
+  factory: RequestScopedCurrentPagePortsFactory,
+): ApiHttpPorts {
+  return {
+    ...b.ports,
+    business: {
+      execute: async (raw, boundary) => {
+        if (raw.operation !== CURRENT_PAGE_OPERATION_ID || !boundary) {
+          throw new AccessError("security_policy_unavailable", 503);
+        }
+        const request = raw as ApiExecution & CurrentPageExecution;
+        const pagePorts = await resolveCurrentPageRequestPorts(
+          factory,
+          request,
+          boundary,
+          b.budget,
+          { nowUtc: () => NOW },
+        );
+        return await new HistoryCurrentPageService(pagePorts, { nowUtc: () => NOW }, f.limits)
+          .execute(request, boundary);
+      },
+    },
+  };
+}
+
+Deno.test("request factory uses real active budget and cannot reuse guard after settlement", async () => {
+  const f = fixture({ enabled: true, realService: true, richHistory: true });
+  const b = runtimeBudgetFixture(f);
+  let context: Parameters<RequestScopedCurrentPagePortsFactory>[0] | undefined;
+  let chunks = 0;
+  const factory: RequestScopedCurrentPagePortsFactory = (arg) => {
+    context = arg;
+    const original = f.pagePorts.offerings!;
+    return Promise.resolve({
+      ...f.pagePorts,
+      offerings: {
+        page: async (ctx, query, after) => {
+          arg.assertActive(ctx);
+          chunks++;
+          const result = await original.page(ctx, query, after);
+          arg.assertActive(ctx);
+          return result;
+        },
+      },
+    });
+  };
+  const response = await createApiHandler(f.policies, withRequestFactory(f, b, factory))(
+    f.request(),
+  );
+  equal(response.status, 200);
+  equal(chunks, 1);
+  assert(context);
+  assert(admissionDenied(() => context!.assertActive(context!)));
+  equal(f.events.filter((e) => e === "provider_page").length, 1);
+});
+
+Deno.test("request factory rejects cross-request, copied boundary and other budget issuer", async () => {
+  const f = fixture({ enabled: true, realService: true });
+  const b = runtimeBudgetFixture(f), other = runtimeBudgetFixture(f);
+  let factoryCalls = 0;
+  const factory: RequestScopedCurrentPagePortsFactory = (arg) => {
+    factoryCalls++;
+    assert(
+      admissionDenied(() =>
+        arg.assertActive({ execution: { ...arg.execution }, boundary: arg.boundary })
+      ),
+    );
+    assert(
+      admissionDenied(() =>
+        arg.assertActive({ execution: arg.execution, boundary: { ...arg.boundary } })
+      ),
+    );
+    return Promise.resolve(f.pagePorts);
+  };
+  const ports: ApiHttpPorts = {
+    ...b.ports,
+    business: {
+      execute: async (raw, boundary) => {
+        assert(boundary && raw.operation === CURRENT_PAGE_OPERATION_ID);
+        const request = raw as ApiExecution & CurrentPageExecution;
+        try {
+          await resolveCurrentPageRequestPorts(
+            factory,
+            request,
+            boundary,
+            other.budget,
+            { nowUtc: () => NOW },
+          );
+          throw new Error("other issuer was accepted");
+        } catch (error) {
+          assert(error instanceof AccessError && error.http === 503);
+        }
+        equal(factoryCalls, 0);
+        const wrapped = await resolveCurrentPageRequestPorts(
+          factory,
+          request,
+          boundary,
+          b.budget,
+          { nowUtc: () => NOW },
+        );
+        return await new HistoryCurrentPageService(wrapped, { nowUtc: () => NOW }, f.limits)
+          .execute(request, boundary);
+      },
+    },
+  };
+  equal((await createApiHandler(f.policies, ports)(f.request())).status, 200);
+  equal(factoryCalls, 1);
+});
+
+Deno.test("aborted request during factory cannot enter first provider", async () => {
+  const f = fixture({ enabled: true, realService: true });
+  const b = runtimeBudgetFixture(f);
+  const factory: RequestScopedCurrentPagePortsFactory = async () => {
+    await Promise.resolve();
+    f.controller.abort();
+    return f.pagePorts;
+  };
+  const response = await createApiHandler(f.policies, withRequestFactory(f, b, factory))(
+    f.request(),
+  );
+  equal(response.status, 503);
+  assert(!f.events.includes("service_authority"));
+  assert(!f.events.includes("provider_page"));
+  assert(!f.events.includes("deliver"));
+});
+
+Deno.test("abort during a provider call is caught before any later provider", async () => {
+  const f = fixture({ enabled: true, realService: true });
+  const b = runtimeBudgetFixture(f);
+  const factory: RequestScopedCurrentPagePortsFactory = (arg) => {
+    const original = f.pagePorts.offerings!;
+    return Promise.resolve({
+      ...f.pagePorts,
+      offerings: {
+        page: async (ctx, query, after) => {
+          arg.assertActive(ctx);
+          const result = await original.page(ctx, query, after);
+          f.controller.abort();
+          return result;
+        },
+      },
+    });
+  };
+  const response = await createApiHandler(f.policies, withRequestFactory(f, b, factory))(
+    f.request(),
+  );
+  equal(response.status, 503);
+  assert(f.events.includes("provider_page"));
+  assert(!f.events.includes("deliver"));
+});
+
+Deno.test("factory guard rejects while settling and after failed settlement", async () => {
+  const f = fixture({ enabled: true, realService: true });
+  let context: Parameters<RequestScopedCurrentPagePortsFactory>[0] | undefined;
+  let settling = 0;
+  const b = runtimeBudgetFixture(f, "settle_failure", () => {
+    assert(context);
+    assert(admissionDenied(() => context!.assertActive(context!)));
+    settling++;
+  });
+  const factory: RequestScopedCurrentPagePortsFactory = (arg) => {
+    context = arg;
+    return Promise.resolve(f.pagePorts);
+  };
+  const response = await createApiHandler(f.policies, withRequestFactory(f, b, factory))(
+    f.request(),
+  );
+  equal(response.status, 503);
+  assert(settling > 0 && context);
+  assert(admissionDenied(() => context!.assertActive(context!)));
+  assert(!f.events.includes("deliver"));
+});
+
+Deno.test("relay, session, scope, expired and denied budget prevent request factory I/O", async () => {
+  for (const mode of ["relay", "bearer", "scope", "quota", "expired"] as const) {
+    const f = fixture({ enabled: true, realService: true, badScope: mode === "scope" });
+    const b = runtimeBudgetFixture(
+      f,
+      mode === "quota" ? "quota" : mode === "expired" ? "expired" : "ok",
+    );
+    let calls = 0;
+    const factory: RequestScopedCurrentPagePortsFactory = () => {
+      calls++;
+      return Promise.resolve(f.pagePorts);
+    };
+    const request = f.request();
+    if (mode === "relay") request.headers.delete("X-Jungsi-Relay-Token");
+    if (mode === "bearer") request.headers.delete("Authorization");
+    const response = await createApiHandler(f.policies, withRequestFactory(f, b, factory))(request);
+    if (mode === "quota") equal(response.status, 429);
+    else if (mode === "scope" || mode === "expired") equal(response.status, 503);
+    else assert(response.status >= 400);
+    equal(calls, 0);
+    assert(!f.events.includes("provider_page"));
+  }
+});
+Deno.test("legacy static ports pass through unchanged without the new factory guard", async () => {
+  const f = fixture({ enabled: true, realService: true });
+  const b = runtimeBudgetFixture(f);
+  const ports: ApiHttpPorts = {
+    ...b.ports,
+    business: {
+      execute: async (raw, boundary) => {
+        assert(boundary && raw.operation === CURRENT_PAGE_OPERATION_ID);
+        const request = raw as ApiExecution & CurrentPageExecution;
+        const same = await resolveCurrentPageRequestPorts(
+          f.pagePorts,
+          request,
+          boundary,
+          undefined,
+          { nowUtc: () => NOW },
+        );
+        assert(same === f.pagePorts);
+        return await new HistoryCurrentPageService(same, { nowUtc: () => NOW }, f.limits)
+          .execute(request, boundary);
+      },
+    },
+  };
+  equal((await createApiHandler(f.policies, ports)(f.request())).status, 200);
+});
+
+Deno.test("factory port accessors are rejected without executing getter I/O", async () => {
+  const f = fixture({ enabled: true, realService: true });
+  const b = runtimeBudgetFixture(f);
+  let getterRuns = 0;
+  const factory: RequestScopedCurrentPagePortsFactory = () =>
+    Promise.resolve({
+      ...f.pagePorts,
+      get offerings() {
+        getterRuns++;
+        return f.pagePorts.offerings;
+      },
+    });
+  const response = await createApiHandler(f.policies, withRequestFactory(f, b, factory))(
+    f.request(),
+  );
+  equal(response.status, 503);
+  equal(getterRuns, 0);
+  assert(!f.events.includes("service_authority"));
+  assert(!f.events.includes("provider_page"));
 });

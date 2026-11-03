@@ -225,8 +225,12 @@ def current_page_projection_registration(spec,before):
     guide=prefix+"current_2027_guide_search_review_only.ts"
     direct=prefix+"current_2027_guide_direct_review_only.ts"
     matcher=prefix+"p1_local_scope_matcher_review_only.ts"
-    guide_tests=[prefix+"current_2027_guide_search_review_only_test.ts",prefix+"current_2027_guide_search_sql_integration_test.ts",prefix+"current_2027_guide_direct_integration_test.ts",prefix+"p1_local_scope_matcher_review_only_test.ts"]
-    required={source,test,guide,direct,matcher,*guide_tests,prefix+"current_public_catalog.ts",prefix+"current_public_catalog_sql.ts"}
+    adapter=prefix+"p1_verified_scope_review_adapter_review_only.ts"
+    issuer=prefix+"jungsi/application/current_guide_scope_issuer.campus.review-only.ts"
+    fixture=prefix+"jungsi/application/scope_adapter_synthetic_fixture.ts"
+    standalone=prefix+"jungsi/application/r27_standalone.ts"
+    guide_tests=[prefix+"current_2027_guide_search_review_only_test.ts",prefix+"current_2027_guide_search_sql_integration_test.ts",prefix+"current_2027_guide_direct_integration_test.ts",prefix+"p1_local_scope_matcher_review_only_test.ts",prefix+"p1_verified_scope_review_adapter_review_only_test.ts"]
+    required={source,test,guide,direct,matcher,adapter,issuer,fixture,standalone,*guide_tests,prefix+"current_public_catalog.ts",prefix+"current_public_catalog_sql.ts"}
     contract=spec.get("current_public_supply_contract",{}).get("current_page_projection_verification")
     if contract is None:
         if source in before or test in before:raise EdgeFailure("current_page_projection_verification_missing")
@@ -234,8 +238,8 @@ def current_page_projection_registration(spec,before):
     bindings=contract.get("source_bindings") if isinstance(contract,dict) else None
     if (not isinstance(contract,dict) or contract.get("format")!="jungsi.current-page-projection-verification/v1" or
         contract.get("status")!="SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
-        contract.get("test_path")!=test or contract.get("test_count")!=47 or
-        contract.get("guide_test_paths")!=guide_tests or contract.get("guide_test_count")!=49 or
+        contract.get("test_path")!=test or contract.get("test_count")!=48 or
+        contract.get("guide_test_paths")!=guide_tests or contract.get("guide_test_count")!=81 or
         contract.get("activation")!="NOT_RUN" or contract.get("production_ready") is not False or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get("path") for b in bindings if isinstance(b,dict)}!=required or
@@ -254,7 +258,7 @@ def current_page_route_registration(spec,before):
         prefix+"application/api_dispatch.ts",prefix+"application/request_budget.ts",
         prefix+"application/member_shortlist_schema.ts",prefix+"application/public_response.ts",
         prefix+"infrastructure/api_http.ts",prefix+"infrastructure/runtime_budget.ts",
-        prefix+"infrastructure/runtime_composition.ts"}
+        prefix+"infrastructure/runtime_composition.ts",prefix+"infrastructure/current_page_request_ports.review-only.ts"}
     contract=spec.get("current_public_supply_contract",{}).get("current_page_route_verification")
     if contract is None:
         if any(path in before for path in tests):raise EdgeFailure("current_page_route_verification_missing")
@@ -262,7 +266,7 @@ def current_page_route_registration(spec,before):
     bindings=contract.get("source_bindings") if isinstance(contract,dict) else None
     if (not isinstance(contract,dict) or contract.get("format")!="jungsi.current-page-route-verification/v1" or
         contract.get("status")!="SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
-        contract.get("test_paths")!=tests or contract.get("test_count")!=32 or
+        contract.get("test_paths")!=tests or contract.get("test_count")!=40 or
         contract.get("schema_path")!=schema or contract.get("activation")!="NOT_RUN" or
         contract.get("production_ready") is not False or not isinstance(bindings,list) or
         len(bindings)!=len(required) or {b.get("path") for b in bindings if isinstance(b,dict)}!=required or
@@ -1681,7 +1685,7 @@ def run_workspace(root,manifest,deno,python,output):
           actual_DB="NOT_RUN",publication="NOT_RUN",deployment="NOT_RUN")
         public_unit["current_page_projection"]=current_page_unit
         public_unit["tests_run"]+=current_page_unit["tests_run"]
-        guide_paths=["supabase/functions/_shared/current_2027_guide_search_review_only.ts","supabase/functions/_shared/current_2027_guide_direct_review_only.ts","supabase/functions/_shared/p1_local_scope_matcher_review_only.ts",*current_page["guide_test_paths"]]
+        guide_paths=["supabase/functions/_shared/current_2027_guide_search_review_only.ts","supabase/functions/_shared/current_2027_guide_direct_review_only.ts","supabase/functions/_shared/p1_local_scope_matcher_review_only.ts","supabase/functions/_shared/p1_verified_scope_review_adapter_review_only.ts","supabase/functions/_shared/jungsi/application/current_guide_scope_issuer.campus.review-only.ts","supabase/functions/_shared/jungsi/application/scope_adapter_synthetic_fixture.ts",*current_page["guide_test_paths"]]
         command([deno,"check",*common,*guide_paths],root=root,output=output,name="current_guide_check")
         command([deno,"lint","--config",cfg["config"],*guide_paths],root=root,output=output,name="current_guide_lint")
         command([deno,"fmt","--check","--config",cfg["config"],*guide_paths],root=root,output=output,name="current_guide_fmt")

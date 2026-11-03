@@ -4,6 +4,7 @@ import { AccessError } from "./jungsi/application/access.ts";
 import type { RequestClockPort } from "./jungsi/application/ports.ts";
 import { sessionDto } from "./jungsi/application/session_service.ts";
 import { parseNativeJson } from "./jungsi/domain/native_json.ts";
+import { hasAsciiControl } from "./jungsi/domain/text.ts";
 import type {
   CurrentPagePortContext,
   PhysicalKey,
@@ -21,12 +22,18 @@ const fail = (): never => {
 };
 type Scope = "CONFIRMED" | "HOLD" | "EXCLUDE";
 type Practice = "NON_PRACTICAL" | "HOLD" | "EXCLUDE";
-type SourceHashes = Readonly<
+type CampusState = "unknown" | "confirmed_null" | "confirmed_value";
+type CampusOrigin = "unknown" | "source" | "separate_grant";
+export type SourceHashes = Readonly<
   { source: string; rowox: string; v20: string; coverage: string; lineage: string }
 >;
-type Candidate = Readonly<{
+export type Candidate = Readonly<{
   target: PhysicalKey;
   rowFingerprint: string;
+  /** Immutable current Guide identity; not a verification or null confirmation. */
+  offering: Readonly<
+    { campus: string | null; admission_track: string | null; group: string | null }
+  >;
   sourceSnapshot: string;
   snapshotLine: number;
   lineage: Readonly<{
@@ -47,7 +54,7 @@ type Candidate = Readonly<{
   >;
 }>;
 type IndexEntry =
-  & Omit<Candidate, "target" | "rowFingerprint" | "sourceSnapshot">
+  & Omit<Candidate, "target" | "rowFingerprint" | "sourceSnapshot" | "offering">
   & Readonly<{ rowFingerprint: string }>;
 /** Implemented by an independently authorized server provider, not by the
  * index itself or the client. Bind the exact index and pre-existing review refs
@@ -64,7 +71,17 @@ export interface LocalScopeReviewTrust {
     sourceHashes: SourceHashes,
   ): Promise<void>;
   review(context: CurrentPagePortContext, candidates: readonly Candidate[]): Promise<
-    readonly Readonly<{ target: PhysicalKey; enrollment: Scope; practical: Practice }>[]
+    readonly Readonly<
+      {
+        target: PhysicalKey;
+        enrollment: Scope;
+        practical: Practice;
+        enrollment_basis?: "unknown" | "rollover_only_pending";
+        campus_state?: CampusState;
+        campus_value?: string | null;
+        campus_origin?: CampusOrigin;
+      }
+    >[]
   >;
 }
 function record(v: unknown): Record<string, unknown> {
@@ -78,6 +95,12 @@ function own(v: unknown, name: string): unknown {
   const d = Object.getOwnPropertyDescriptor(record(v), name);
   if (!d || !("value" in d)) return fail();
   return d.value;
+}
+function optional(v: unknown, name: string): unknown {
+  const descriptor = Object.getOwnPropertyDescriptor(record(v), name);
+  if (!descriptor) return undefined;
+  if (!("value" in descriptor)) return fail();
+  return descriptor.value;
 }
 function exact(v: unknown, names: readonly string[]): Record<string, unknown> {
   const o = record(v), keys = Reflect.ownKeys(o);
@@ -269,13 +292,33 @@ export async function createLocalScopeCandidateMatcher(
         ) return fail();
         sessionDto(session, clock.nowUtc());
       };
-      const targets = claims.map((claim) => {
-        const target = physical(own(claim, "target")), fingerprint = own(claim, "rowFingerprint");
+      // Snapshot every value before the first await. An upstream caller must not
+      // swap identity fields while independent source evidence is being checked.
+      const targets = [];
+      for (let i = 0; i < claims.length; i++) {
+        const descriptor = Object.getOwnPropertyDescriptor(claims, String(i));
+        if (!descriptor || !("value" in descriptor) || !descriptor.enumerable) return fail();
+        const claim = descriptor.value;
+        const target = physical(own(claim, "target")),
+          fingerprint = own(claim, "rowFingerprint"),
+          offering = own(claim, "offering");
+        const campus = own(offering, "campus"),
+          admission_track = own(offering, "admission_track"),
+          group = own(offering, "group");
         if (
-          fingerprint !== null && (typeof fingerprint !== "string" || !HASH.test(fingerprint))
+          fingerprint !== null && (typeof fingerprint !== "string" || !HASH.test(fingerprint)) ||
+          [campus, admission_track, group].some((v) => v !== null && typeof v !== "string")
         ) return fail();
-        return Object.freeze({ target, fingerprint });
-      });
+        targets.push(Object.freeze({
+          target,
+          fingerprint,
+          offering: Object.freeze({
+            campus: campus as string | null,
+            admission_track: admission_track as string | null,
+            group: group as string | null,
+          }),
+        }));
+      }
       if (new Set(targets.map((x) => physicalId(x.target))).size !== targets.length) return fail();
       const permit = () => {
         check();
@@ -301,6 +344,7 @@ export async function createLocalScopeCandidateMatcher(
           Object.freeze({
             target: targets[i].target,
             rowFingerprint: entry.rowFingerprint,
+            offering: targets[i].offering,
             sourceSnapshot: sourceHashes.source,
             snapshotLine: entry.snapshotLine,
             lineage: entry.lineage,
@@ -316,18 +360,51 @@ export async function createLocalScopeCandidateMatcher(
       check();
       if (!Array.isArray(decisions) || decisions.length !== eligible.length) return fail();
       const allowed = new Set(eligible.map((x) => physicalId(x.target))),
-        verdicts = new Map<string, { enrollment: Scope; practical: Practice }>();
+        verdicts = new Map<
+          string,
+          {
+            enrollment: Scope;
+            practical: Practice;
+            enrollment_basis: "unknown" | "rollover_only_pending";
+            campus_state: CampusState;
+            campus_value: string | null;
+            campus_origin: CampusOrigin;
+          }
+        >();
       for (const raw of decisions) {
         const target = physical(own(raw, "target")),
           id = physicalId(target),
           enrollment = own(raw, "enrollment"),
-          practical = own(raw, "practical");
+          practical = own(raw, "practical"),
+          enrollmentBasis = optional(raw, "enrollment_basis") ?? "unknown",
+          campusState = optional(raw, "campus_state") ?? "unknown",
+          campusValue = optional(raw, "campus_value") ?? null,
+          campusOrigin = optional(raw, "campus_origin") ?? "unknown";
         if (
           !allowed.has(id) || verdicts.has(id) || typeof enrollment !== "string" ||
           !["CONFIRMED", "HOLD", "EXCLUDE"].includes(enrollment) ||
-          typeof practical !== "string" || !["NON_PRACTICAL", "HOLD", "EXCLUDE"].includes(practical)
+          typeof practical !== "string" ||
+          !["NON_PRACTICAL", "HOLD", "EXCLUDE"].includes(practical) ||
+          !["unknown", "rollover_only_pending"].includes(enrollmentBasis as string) ||
+          (enrollmentBasis === "rollover_only_pending" &&
+            (enrollment !== "HOLD" || practical !== "HOLD")) ||
+          !["unknown", "confirmed_null", "confirmed_value"].includes(campusState as string) ||
+          !["unknown", "source", "separate_grant"].includes(campusOrigin as string) ||
+          (campusState === "confirmed_value" && (typeof campusValue !== "string" ||
+            campusValue.length === 0 || campusValue.length > 4096 ||
+            hasAsciiControl(campusValue))) ||
+          (campusState !== "confirmed_value" && campusValue !== null) ||
+          (campusState === "unknown" && campusOrigin !== "unknown") ||
+          (campusState !== "unknown" && campusOrigin === "unknown")
         ) return fail();
-        verdicts.set(id, { enrollment: enrollment as Scope, practical: practical as Practice });
+        verdicts.set(id, {
+          enrollment: enrollment as Scope,
+          practical: practical as Practice,
+          enrollment_basis: enrollmentBasis as "unknown" | "rollover_only_pending",
+          campus_state: campusState as CampusState,
+          campus_value: campusValue as string | null,
+          campus_origin: campusOrigin as CampusOrigin,
+        });
       }
       permit();
       if (await trust.assertCurrent(context) !== undefined) return fail();
@@ -336,7 +413,14 @@ export async function createLocalScopeCandidateMatcher(
         Object.freeze({
           target,
           ...(verdicts.get(physicalId(target)) ??
-            { enrollment: "HOLD" as const, practical: "HOLD" as const }),
+            {
+              enrollment: "HOLD" as const,
+              practical: "HOLD" as const,
+              enrollment_basis: "unknown" as const,
+              campus_state: "unknown" as const,
+              campus_value: null,
+              campus_origin: "unknown" as const,
+            }),
         })
       ));
     },
