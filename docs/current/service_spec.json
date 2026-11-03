@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.151",
+  "version": "1.9.152",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -8219,7 +8219,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.151",
+        "contract_version": "1.9.152",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -8393,7 +8393,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.151",
+        "contract_version": "1.9.152",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -8559,7 +8559,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.151",
+        "contract_version": "1.9.152",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -8578,7 +8578,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.151",
+        "contract_version": "1.9.152",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8603,7 +8603,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.151",
+        "contract_version": "1.9.152",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -8628,7 +8628,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.151",
+        "contract_version": "1.9.152",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -24893,6 +24893,18 @@
         "REQ-04"
       ],
       "summary": "사용자 결정: 전국 회원 화면의 기준을 2027 실제 모집행으로 통일한다. 2024~2026만 존재하는 과거 단독 모집행은 노출하지 않고 검증된 2027 행의 참고자료로 연결한다. 이월 미확정과 0은 현재 비노출, 실제 모집 확정 후 추가하며 모집 사실이 확인된 인원 미확인은 0으로 치환하지 않는다. 원본·기존 리포트·관리자 검수와 RLS를 보존하고 set-based/P1 정리본을 사용한다. 구현·DB·배포·실화면 인수는 별도다."
+    },
+    {
+      "date": "2026-11-03",
+      "requirements": [
+        "REQ-01",
+        "REQ-13",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28"
+      ],
+      "summary": "기존 수집·표준화 정본을 release_id·학년도·offering_pk 기본 PK와 검증된 기존 관계로 직접 연결한다. 학교 ID별 재수집·재그룹을 하지 않고 코드 변경 관계는 근거별로 판단하며 입결 관측·누백의 기존 물리키를 보존한다. 2027 직접 조회 및 화면 연결은 후보이며 운영 배포·실화면 검증은 미완료다."
     }
   ],
   "overall_analysis_contract": {
@@ -216806,7 +216818,7 @@
         "REQ-28"
       ],
       "page": "/admissions/results",
-      "source_basis": "verified current 2027 logical view, including all eligible 2027 own recruitment rows regardless of historic linkage; do not filter on a single release_id",
+      "source_basis": "verified current 2027 logical view, including all eligible 2027 own recruitment rows regardless of historic linkage; do not filter on a single release_id Existing canonical Guide PK is (release_id, academic_year, offering_pk); do not collect or regroup by school_id.",
       "grain": [
         "academic_year",
         "school_id",
@@ -216815,7 +216827,7 @@
         "track",
         "admission_group"
       ],
-      "independent_history": "keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row Reviewed links v2 requires separately approved exact source and target scope field states (confirmed_value or confirmed_null) and an evidence-pinned trusted descriptor. A missing or unknown field never becomes confirmed null. Historical matching uses the exact target identity and a unique mapped historical row; cross-school and competing grants remain held. Legacy v1 matching remains unchanged. These assertions do not authenticate the issuer or establish actual evidence. V2 must bind source head, previous publication and source head, scope, and authority digest through a separately trusted descriptor; compose rejects a head or scope mismatch. Hash matches do not authenticate an issuer.",
+      "independent_history": "keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row Reviewed links v2 requires separately approved exact source and target scope field states (confirmed_value or confirmed_null) and an evidence-pinned trusted descriptor. A missing or unknown field never becomes confirmed null. Historical matching uses the exact target identity and a unique mapped historical row; Unverified cross-school and competing grants remain held; verified institutional code transitions may use their existing trusted, identity-specific evidence. Legacy v1 matching remains unchanged. These assertions do not authenticate the issuer or establish actual evidence. V2 must bind source head, previous publication and source head, scope, and authority digest through a separately trusted descriptor; compose rejects a head or scope mismatch. Hash matches do not authenticate an issuer. 2026-11-03 사용자 결정: 이미 수집·표준화·적재한 현재 정본의 기본 PK를 우선 사용한다. Guide 물리 PK는 (release_id, academic_year, offering_pk)이고 같은 유효 자료판의 모집행은 학년도와 기존 offering_pk로 찾는다. 기존 release/head와 중복·충돌을 확인하며 학교 ID별로 자료를 다시 모으거나 새 식별자를 만들지 않는다. 학년도 간에는 기존 정본의 검증된 PK 관계를 사용하고, 학교·캠퍼스·전형·군은 저장된 속성과 관계 근거에 따라 확인한다. 검증된 학교 코드 변경·통합 관계는 코드가 다르다는 이유만으로 일괄 차단하지 않으며, 근거 없는 다른 관측의 병합은 금지한다. 관측 및 누백 테이블의 기존 물리키와 각 관측 ID는 따로 보존한다. 현재 개발 후보이며 실제 라우팅·배포 완료가 아니다.",
       "native_fields": [
         "quota_value",
         "quota_literal_state",
@@ -217064,6 +217076,31 @@
       "DB_or_source_mutation": "NOT_RUN",
       "deployment": "NOT_RUN",
       "live_browser_acceptance": "NOT_RUN"
+    },
+    "existing_primary_key_connection_policy_20261103": {
+      "id": "P1-EXISTING-PK-DIRECT-20261103",
+      "status": "DESIGN_CANDIDATE_IMPLEMENTATION_IN_PROGRESS_NOT_DEPLOYED",
+      "user_decision": "기존 정본의 기본 PK로 바로 연결하여 서비스하고 학교별 ID를 기준으로 자료를 재수집하거나 별도 DB로 모으지 않는다.",
+      "guide_physical_primary_key": [
+        "release_id",
+        "academic_year",
+        "offering_pk"
+      ],
+      "public_offering_id": "academic_year:offering_pk; 공개 식별자는 물리 복합 PK와 구분한다.",
+      "lookup": "현재 승인된 release/head의 학년도와 기존 모집행 PK를 사용한다. 여러 release/overlay 또는 같은 키의 유효 후보가 충돌하면 해당 대상만 확인한다.",
+      "school_id": "이미 저장된 학교 속성 및 충돌 확인에 사용한다. 새 수집·재그룹·동일학교 코드의 무조건적 선행 조건으로 삼지 않는다. 기존 누백 연결 테이블의 물리 PK에 포함된 school_id는 원래 값을 유지한다.",
+      "cross_year": "기존 승인된 PK 관계와 학년도·전형·모집군·캠퍼스·조건을 함께 검토한다. 공식 근거로 검증된 학교 코드 변경·통합 관계는 학교 코드 차이만으로 보류하지 않는다.",
+      "observations": "입결 registry의 물리 source_result_id와 안정 관측 canonical_result_id를 구분해 기존 관측·지표·원문 조건을 보존한다. PK 또는 값이 같다는 이유만으로 서로 다른 관측을 합치지 않는다.",
+      "reuse": "학교별 정리본·기존 검수 O/X와 지문을 현재 정본의 동일 행에 재사용한다. 새 수집·재업로드·전체 재스캔을 기본 경로로 삼지 않는다.",
+      "current_status": "PK 우선 범위로 기존 2027 직접 조회·기존 과거 관계 후보를 개발 중이다. 신규 조회 경로·현재 DB 앱 역할/RLS·Owner 화면 연결·배포는 아직 완료되지 않았다.",
+      "candidate_route": "GET /api/v1/admission-history/current-page; operation history.current-page; 기본 비활성 후보. 기존 snapshot 경로는 유지한다.",
+      "security": "기존 인증·공유 조회 예산·권한과 fail-closed를 유지한다. 기존 검수근거의 현재성은 지문/head로 확인하며 별도 학교별 자료 재수집을 요구하지 않는다.",
+      "not_run": [
+        "최종 Git 커밋과 동일 SHA CI",
+        "실제 app-role/RLS",
+        "신규 경로 운영 배포",
+        "실제 화면 인수"
+      ]
     }
   },
   "administrator_verification_quota_contract": {
