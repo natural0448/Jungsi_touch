@@ -12,7 +12,7 @@ export type SumItem = { k: string; g: string | null; d: string; sub: string; r27
 
 /** 2027 모집 칸(11-02 사용자 확인 문구). 이월 미정은 0 이 아니라 '이월 시 선발', 모르는 상태는 '확인 중' */
 function V({ c }: { c: R27Summary }) {
-  if (c.hold) return <span className="unpub" title="2027학년도 모집인원을 모집요강 원문과 대조하고 있습니다">확인 중</span>;
+  if (c.hold) return <span className="unpub" title="2027학년도 모집인원을 모집요강 원문과 대조하고 있습니다">인원 확인 중</span>;
   if (c.v === null) return <b title={c.note ?? undefined}>이월 시 선발</b>;
   return (
     <span title={c.note ?? undefined}>

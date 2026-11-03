@@ -21,7 +21,10 @@ export async function loadUnitRows(pub: string, schoolId: string, key: string): 
   try {
     const snap = await currentSnapshot(src, caller);
     if (snap.state !== "ready" || snap.ready.pub !== pub) return { ok: false, code: "publication_changed" };
-    return { ok: true, rows: await unitRows(snap.ready, schoolId, key) };
+    // YearTable displays historical results only. The 2027 anchor and its
+    // server-only scope/relationship identifiers must remain on the server.
+    const rows = await unitRows(snap.ready, schoolId, key);
+    return { ok: true, rows: rows.filter((row) => row.y < 2027) };
   } catch (e) {
     if (e instanceof ConnectionError || e instanceof AccessDenied) return { ok: false, code: e.code };
     throw e;

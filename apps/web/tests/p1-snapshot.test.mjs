@@ -421,11 +421,17 @@ test("a v2 partial publication keeps 2027 quotas verbatim and groups only server
   const result = await w.module.searchSnapshot(ready, {}), rows = result.schools[0].rows;
   const { unitKey, r27Summary } = await import("../src/lib/p1-shape.ts");
   const keyOf = pk => unitKey(rows.find(r => r.pk === pk));
-  // Reviewed links join the 2027 row; a past row claimed by two 2027 rows and an unlinked one stay separate.
+  // Reviewed history remains attached; ambiguous and past-only groups are hidden from members.
   assert.match(keyOf("k27a"), /^r27:[0-9]+$/);
   assert.equal(keyOf("p26a"), keyOf("k27a")); assert.equal(keyOf("p25a"), keyOf("k27a"));
-  assert.equal(keyOf("shared"), "pk:shared"); assert.equal(keyOf("alone"), "pk:alone");
-  assert.equal(result.total_units, 5);
+  assert.equal(rows.some(r => r.pk === "shared" || r.pk === "alone"), false);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:shared"), []);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:alone"), []);
+  assert.equal(result.total_units, 3);
+  // Hidden history remains in the immutable school cache, not deleted.
+  const savedIndex = JSON.parse(w.cache.get(ready.index_key));
+  const savedRows = JSON.parse(w.cache.get(savedIndex.school_keys.TEST0));
+  assert.ok(savedRows.some(r => r.pk === "shared")); assert.ok(savedRows.some(r => r.pk === "alone"));
   const a = rows.find(r => r.pk === "k27a");
   assert.deepEqual(a.q27, { v: "12", ls: "conditional_carryover", st: "initial", ct: "수시 미충원 인원 이월", cs: null, rs: "condition_present" });
   assert.deepEqual(a.hl, [2026, 2025].map((year, i) => ({ academic_year: year, school_id: "TEST0", original_pk: ["p26a", "p25a"][i], campus: "가상캠퍼스", admission_track: "가상전형", group: "가" })));
@@ -441,9 +447,10 @@ test("an unreviewed same-PK 2027 row remains separate through cache and search",
     rowsOf: (_i, u) => [r27Row(u, "same", { quota_value: 2, quota_stage: "initial" }), pastRow(u, 2026, "same")] });
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   const { unitKey } = await import("../src/lib/p1-shape.ts");
-  const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027), old = rows.find(r => r.y === 2026);
-  assert.notEqual(unitKey(newest), unitKey(old));
-  assert.equal(result.total_units, 2);
+  const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027);
+  assert.equal(rows.some(r => r.y === 2026), false);
+  assert.equal(result.total_units, 1);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:same"), []);
   assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
 });
 
@@ -453,9 +460,116 @@ test("ambiguous historical identity is not linked through cache and search", asy
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   const { unitKey } = await import("../src/lib/p1-shape.ts");
   const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027), historical = rows.filter(r => r.y === 2026);
-  assert.equal(historical.length, 2);
-  assert.ok(historical.every(r => unitKey(r) !== unitKey(newest)));
+  assert.equal(historical.length, 0);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:duplicate"), []);
+  const savedIndex = JSON.parse(w.cache.get(ready.index_key));
+  const savedRows = JSON.parse(w.cache.get(savedIndex.school_keys.TEST0));
+  assert.equal(savedRows.filter(r => r.y === 2026).length, 2);
   assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
+});
+
+test("v2 keeps current enrollment with missing quota and hides past-only groups without changing raw counts", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => [r27Row(u, "current", { quota_value: null, quota_stage: null }), pastRow(u, 2026, "old"), { ...pastRow(u, 2024, null), observation_key: "past-observation" }] });
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
+  assert.equal(ready.schema_version, "jungsi.history-snapshot/v2");
+  assert.equal(ready.counts.rows, 3); assert.equal(ready.counts.mapping_pending_rows, 1);
+  assert.equal(result.total_units, 1); assert.equal(result.total_pending, 0);
+  assert.equal(result.schools[0].rows.length, 1);
+  assert.equal(result.schools[0].rows[0].q27.v, null);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:old"), []);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "ob:past-observation"), []);
+});
+
+test("v2 with only past rows has no member-facing schools", async t => {
+  const v2 = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage }, rowsOf: (_i, u) => [pastRow(u, 2026, "old")] });
+  const ready = await v2.prepare(), result = await v2.module.searchSnapshot(ready, {});
+  assert.equal(result.total_schools, 0); assert.equal(result.total_units, 0);
+  assert.deepEqual(await v2.module.unitRows(ready, "TEST0", "pk:old"), []);
+});
+
+test("duplicate 2027 scope keys do not surface as separate member offerings", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => {
+      const first = r27Row(u, "duplicate-a", { quota_value: 2 });
+      const second = r27Row(u, "duplicate-b", { quota_value: 3 });
+      second.r27_source.scope_key = first.r27_source.scope_key;
+      return [first, second, r27Row(u, "unique", { quota_value: 4 })];
+    } });
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
+  assert.equal(result.total_units, 1);
+  assert.deepEqual(result.schools[0].rows.map(r => r.pk), ["unique"]);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "r27:0"), []);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "r27:1"), []);
+  const savedIndex = JSON.parse(w.cache.get(ready.index_key));
+  assert.equal(JSON.parse(w.cache.get(savedIndex.school_keys.TEST0)).length, 3);
+});
+
+test("v2 pagination and search count only schools with current anchors", async t => {
+  const w = await world(t, { parts: 22, schools: 22, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (i, u) => i < 21 ? [{ ...r27Row(u, `current-${i}`, { quota_value: i + 1, quota_stage: "initial" }), department: `current-${i}` }] : [{ ...pastRow(u, 2026, "old"), department: "past-only" }] });
+  const ready = await w.prepare();
+  const first = await w.module.searchSnapshot(ready, { page: 1 }), second = await w.module.searchSnapshot(ready, { page: 2 });
+  assert.equal(ready.counts.schools, 22);
+  assert.equal(first.total_schools, 21); assert.equal(first.total_units, 21); assert.equal(first.pages, 2);
+  assert.equal(first.schools.length, 20); assert.equal(second.schools.length, 1);
+  assert.equal(new Set([...first.schools, ...second.schools].map(x => x.school.id)).size, 21);
+  assert.equal((await w.module.searchSnapshot(ready, { unit: "past-only" })).total_units, 0);
+  assert.equal((await w.module.searchSnapshot(ready, { unit: "current-20" })).total_units, 1);
+});
+
+test("v2 search filters and school region use the current offering, while reviewed history remains searchable", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => {
+      const current = r27Row(u, "current", { quota_value: 2 }, [[2026, "old"]]);
+      current.department = "현재전공"; current.region = "현재지역"; current.group = "나";
+      current.r27_source.scope_key = JSON.stringify(["2027", u, "current", "가상캠퍼스", "가상전형", "나"]);
+      const past = { ...pastRow(u, 2026, "old"), department: "옛전공", region: "과거지역", group: "가" };
+      return [current, past];
+    } });
+  const ready = await w.prepare();
+  const current = await w.module.searchSnapshot(ready, { group: "나", region: "현재지역" });
+  assert.equal(current.total_units, 1);
+  assert.equal(current.schools[0].school.region, "현재지역");
+  assert.equal((await w.module.searchSnapshot(ready, { group: "가" })).total_units, 0);
+  assert.equal((await w.module.searchSnapshot(ready, { region: "과거지역" })).total_units, 0);
+  const alias = await w.module.searchSnapshot(ready, { unit: "옛전공" });
+  assert.equal(alias.total_units, 1);
+  assert.deepEqual(alias.schools[0].rows.map(r => r.y).sort(), [2026, 2027]);
+});
+
+test("v2 unknown current region and group do not borrow historical conditions", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => {
+      const current = r27Row(u, "current", { quota_value: null }, [[2026, "old"]]);
+      current.region = null; current.group = null;
+      const past = { ...pastRow(u, 2026, "old"), region: "과거지역", group: "가" };
+      return [current, past];
+    } });
+  const ready = await w.prepare(), all = await w.module.searchSnapshot(ready, {});
+  assert.equal(all.total_units, 1); assert.equal(all.schools[0].school.region, null);
+  assert.equal((await w.module.searchSnapshot(ready, { group: "가" })).total_units, 0);
+  assert.equal((await w.module.searchSnapshot(ready, { region: "과거지역" })).total_units, 0);
+});
+
+test("a previously cached v1 ready without schema remains readable", async t => {
+  const w = await world(t, { parts: 1, rowsOf: (_i, u) => [pastRow(u, 2026, "legacy")] });
+  await w.prepare();
+  const state = w.state(); delete state.ready.value.schema_version;
+  w.db.prepare("UPDATE p1_coordinator_state SET body=? WHERE id=1").run(JSON.stringify(state));
+  const current = await w.module.currentSnapshot(w.source, w.caller);
+  assert.equal(current.state, "ready");
+  const result = await w.module.searchSnapshot(current.ready, {});
+  assert.equal(result.total_units, 1);
+  assert.deepEqual((await w.module.unitRows(current.ready, "TEST0", "pk:legacy")).map(r => r.y), [2026]);
+});
+
+test("a stale v2 ready without a scoped index is rejected", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage }, rowsOf: (_i, u) => [r27Row(u, "current", { quota_value: 2 })] });
+  await w.prepare();
+  const state = w.state(); delete state.ready.value.schema_version;
+  w.db.prepare("UPDATE p1_coordinator_state SET body=? WHERE id=1").run(JSON.stringify(state));
+  await assert.rejects(w.module.currentSnapshot(w.source, w.caller), /p1_ready_binding_invalid/);
 });
 
 test("2027 coverage must match between head and every part, and v2 heads refuse v1 bodies", async t => {

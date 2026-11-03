@@ -13,6 +13,7 @@ export type { Cell, Row, School } from "./p1-shape";
  * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
  */
 const FORMAT = 3;
+const R27_SNAPSHOT_SCHEMA = "jungsi.history-snapshot/v2";
 const PARTS_PER_STEP = 6;
 const SCHOOLS_PER_STEP = 12;
 const INDEX_SCHOOLS_PER_STEP = 20;
@@ -82,8 +83,29 @@ async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Clien
 }
 type Index = { schools: School[]; units: [number, string, string, string, string, string][]; school_keys: Record<string, string> };
 type IndexSegment = { schools: School[]; units: Index["units"]; rows: number; pending: number };
+
+/** Duplicate scope keys are held locally: they cannot identify one current offering. */
+function currentScopeCounts(rows: readonly Row[]): ReadonlyMap<string, number> {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    if (r.y === 2027 && r.pk !== null && typeof r.scope27 === "string" && r.scope27.length > 0)
+      counts.set(r.scope27, (counts.get(r.scope27) ?? 0) + 1);
+  }
+  return counts;
+}
+/** Only a server-verified 2027 recruitment row anchors a v2 member-facing group.
+ * Missing quota is allowed; historical rows remain stored and are shown only when linked. */
+function isCurrentRecruitment(r: Row, scopes: ReadonlyMap<string, number>): boolean {
+  return r.y === 2027 && r.pk !== null && typeof r.scope27 === "string" &&
+    r.scope27.length > 0 && scopes.get(r.scope27) === 1 && r.q27 !== undefined;
+}
+function hasCurrentRecruitment(rows: readonly Row[], scopes: ReadonlyMap<string, number>): boolean {
+  return rows.some(r => isCurrentRecruitment(r, scopes));
+}
 export type Ready = {
   snapshot_id: string; publication_sha256: string; source_head_sha256: string;
+  /** Older v1 cached ready records may omit this field. */
+  schema_version?: string;
   normalization_rules_version: string; selection_rules_version: string;
   generated_at: string; source_as_of: string | null; expires_at: string; counts: SnapshotHeadDto["counts"];
   r27_scope_coverage?: R27Coverage;
@@ -247,7 +269,8 @@ async function cacheValue<T>(store: Kv, key: string | undefined): Promise<T> {
 async function readyOf(view: CoordinationView, mode: Mode): Promise<Ready | null> {
   if (!view.headFresh || !view.head || !view.ready) return null;
   const r = view.ready as unknown as Ready, h = view.head;
-  if (r.snapshot_id !== h.snapshot_id || r.publication_sha256 !== h.publication_sha256 || r.source_head_sha256 !== h.source_head_sha256 ||
+  if ((h.schema_version === R27_SNAPSHOT_SCHEMA && r.schema_version !== h.schema_version) ||
+      r.snapshot_id !== h.snapshot_id || r.publication_sha256 !== h.publication_sha256 || r.source_head_sha256 !== h.source_head_sha256 ||
       r.normalization_rules_version !== h.normalization_rules_version || r.selection_rules_version !== h.selection_rules_version ||
       r.expires_at !== h.expires_at || Date.parse(r.expires_at) <= Date.now() || r.cache_mode !== mode ||
       canonicalCoverage(r.r27_scope_coverage) !== canonicalCoverage(h.r27_scope_coverage) ||
@@ -358,16 +381,29 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
       for (let at = pg.indexDone; at < Math.min(ids.length, pg.indexDone + INDEX_SCHOOLS_PER_STEP); at++) {
         const u = ids[at], rows = await cacheValue<Row[]>(store, pg.school_keys[u]); segment.rows += rows.length;
         const names = [...new Set([...rows].sort((a, b) => b.y - a.y).map(r => r.n))];
-        const regions = [...new Set(rows.map(r => r.rg).filter((x): x is string => !!x))], by = new Map<string, Row[]>();
+        const by = new Map<string, Row[]>();
         for (const r of rows) by.set(unitKey(r), [...(by.get(unitKey(r)) ?? []), r]);
-        let pending = 0;
+        const isR27 = head.schema_version === R27_SNAPSHOT_SCHEMA;
+        const scopes = isR27 ? currentScopeCounts(rows) : new Map<string, number>();
+        const currentRows: Row[] = [];
+        let rawPending = 0, visiblePending = 0, visibleUnits = 0;
         for (const [k, rs] of by) {
-          if (k.startsWith("ob:")) pending++;
-          const uniq = (f: (r: Row) => string | null) => [...new Set(rs.map(f).filter((x): x is string => !!x))].join("\n");
-          segment.units.push([at, k, uniq(r => r.d), uniq(r => r.g), uniq(r => r.rg), uniq(r => r.n)]);
+          if (k.startsWith("ob:")) rawPending++;
+          if (isR27 && !hasCurrentRecruitment(rs, scopes)) continue;
+          if (k.startsWith("ob:")) visiblePending++;
+          visibleUnits++;
+          const conditionRows = isR27 ? rs.filter(r => isCurrentRecruitment(r, scopes)) : rs;
+          if (isR27) currentRows.push(...conditionRows);
+          const uniq = (source: readonly Row[], f: (r: Row) => string | null) => [...new Set(source.map(f).filter((x): x is string => !!x))].join("\n");
+          // Past department and school names are searchable aliases, but current-year
+          // enrollment filters must never inherit a historical group or region.
+          segment.units.push([at, k, uniq(rs, r => r.d), uniq(conditionRows, r => r.g), uniq(conditionRows, r => r.rg), uniq(rs, r => r.n)]);
         }
-        segment.pending += pending;
-        segment.schools.push({ id: u, name: names[0] ?? u, names, region: regions.length === 1 ? regions[0] : regions.join("·") || null, units: by.size - pending, pending });
+        // Head counts cover all original rows, including hidden historical-only groups.
+        segment.pending += rawPending;
+        const regions = [...new Set((isR27 ? currentRows : rows).map(r => r.rg).filter((x): x is string => !!x))];
+        const name = isR27 ? currentRows[0]?.n ?? names[0] ?? u : names[0] ?? u;
+        segment.schools.push({ id: u, name, names, region: regions.length === 1 ? regions[0] : regions.join("·") || null, units: visibleUnits - visiblePending, pending: visiblePending });
       }
       const segmentKey = `${P}:index-segment:${pg.indexDone}`; await write(segmentKey, segment);
       pg.index_segments.push(segmentKey); pg.indexDone += segment.schools.length;
@@ -384,6 +420,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
         const finalView = await checkedHead(src, caller, coordinator, beforeFinalCheck.headRevision);
         if (!finalView?.head || await pubKeyOf(finalView.head) !== pub) throw new SnapshotChanged();
         ready = { snapshot_id: head.snapshot_id, publication_sha256: head.publication_sha256, source_head_sha256: head.source_head_sha256,
+          schema_version: head.schema_version,
           normalization_rules_version: head.normalization_rules_version, selection_rules_version: head.selection_rules_version,
           generated_at: head.generated_at, source_as_of: head.source_as_of, expires_at: head.expires_at, counts: head.counts,
           ...(head.r27_scope_coverage ? { r27_scope_coverage: head.r27_scope_coverage } : {}),
@@ -486,5 +523,7 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
   return { total_schools: order.length, total_units: units, total_pending: pending, page, pages, schools };
 }
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
-  return (await school(ready, schoolId)).filter(r => unitKey(r) === key);
+  const allRows = await school(ready, schoolId);
+  const rows = allRows.filter(r => unitKey(r) === key);
+  return ready.schema_version === R27_SNAPSHOT_SCHEMA && !hasCurrentRecruitment(rows, currentScopeCounts(allRows)) ? [] : rows;
 }

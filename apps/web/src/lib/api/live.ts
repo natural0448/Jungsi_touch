@@ -50,6 +50,10 @@ export function pathTemplate(path: string): string {
   const pathname = path.split(/[?#]/)[0];
   return pathname.split("/").map((s) => (s === "" || STATIC_SEGMENTS.has(s) ? s : ":id")).join("/");
 }
+// REVIEW ONLY: the Owner-agreed variable is server-only; actual Worker binding
+// and the deployed backend header contract require independent verification.
+const R27_REVIEW_HEADER = "X-Jungsi-P1-R27-Consumer-Credential";
+const R27_REVIEW_CREDENTIAL = /^[A-Za-z0-9_-]{43,128}$/;
 const SAFE_CODE = /^[a-z][a-z0-9_]{0,63}$/;
 const SAFE_REQUEST_ID = /^[0-9a-f]{32}$/;
 
@@ -58,7 +62,16 @@ const SAFE_REQUEST_ID = /^[0-9a-f]{32}$/;
  * 서버 기록(wrangler tail)에 남긴다. 코드·request_id 는 형식이 맞을 때만 그대로 쓰고, 본문·토큰·쿼리·개별
  * 식별자는 남기지 않는다. 기록이 실패해도 업무 결과는 바뀌지 않는다.
  */
-async function codeOf(res: Response, path: string) {
+async function codeOf(res: Response, path: string, sensitiveSnapshot = false) {
+  // Snapshot credentials must never be reflected through an upstream error body.
+  // Retain only the status and the fixed path template; no upstream code or id.
+  if (sensitiveSnapshot) {
+    try {
+      const status = Number.isInteger(res.status) ? res.status : 0;
+      console.warn("[jungsi-api] " + pathTemplate(path) + " " + status + " snapshot_error");
+    } catch { /* Do not affect the request. */ }
+    return undefined;
+  }
   const err = (await res.json().catch(() => null)) as ErrBody;
   const raw = err?.error?.code;
   const code = typeof raw === "string" && SAFE_CODE.test(raw) ? raw : undefined;
@@ -156,16 +169,16 @@ function retryAfterAt(header: string | null): Date | null {
 }
 
 /** 401·403·429·503 은 공통으로 올린다. 나머지는 호출한 쪽이 판단한다 */
-async function guard(res: Response, path: string) {
+async function guard(res: Response, path: string, sensitiveSnapshot = false) {
   if (res.status === 401 || res.status === 403) {
-    const code = await codeOf(res, path);
+    const code = await codeOf(res, path, sensitiveSnapshot);
     throw new AccessDenied(res.status, code ?? (res.status === 401 ? "authentication_required" : "paid_required"));
   }
   // 429(요청 제한, SEC-07): 코드와 Retry-After 만 받아 안내한다. 성공으로 숨기지 않는다
   if (res.status === 429) {
-    throw new ConnectionError("rate_limited", (await codeOf(res, path)) ?? "rate_limit_exceeded", retryAfterAt(res.headers.get("Retry-After")));
+    throw new ConnectionError("rate_limited", (await codeOf(res, path, sensitiveSnapshot)) ?? "rate_limit_exceeded", retryAfterAt(res.headers.get("Retry-After")));
   }
-  if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res, path)) ?? "backend_dependency_unavailable");
+  if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res, path, sensitiveSnapshot)) ?? "backend_dependency_unavailable");
 }
 
 function auth(caller: Caller, extra?: Record<string, string>) {
@@ -178,19 +191,36 @@ function auth(caller: Caller, extra?: Record<string, string>) {
   return h;
 }
 
-async function call<T>(caller: Caller, path: string): Promise<T> {
-  const res = await sendOnceMore(path, { headers: auth(caller) });
-  await guard(res, path);
+// This module is server-only. Only the two snapshot operations opt in here.
+// Unset means exact v1 behavior. A present but malformed or reused relay value
+// fails closed, without including either credential in errors or logs.
+function snapshotRequest(caller: Caller): { init: RequestInit; sensitive: boolean } {
+  const headers = auth(caller);
+  const credential = process.env.JUNGSI_P1_R27_CONSUMER_CREDENTIAL;
+  if (credential === undefined) return { init: { headers }, sensitive: false };
+  const relay = process.env.JUNGSI_RELAY_TOKEN;
+  if (!R27_REVIEW_CREDENTIAL.test(credential) || !relay || credential === relay) {
+    throw new ConnectionError("unavailable", "snapshot_auth_unavailable");
+  }
+  headers.set(R27_REVIEW_HEADER, credential);
+  // Never follow a redirect while a custom secret-bearing header is attached.
+  return { init: { headers, redirect: "manual" }, sensitive: true };
+}
+
+async function call<T>(caller: Caller, path: string, snapshot = false): Promise<T> {
+  const request = snapshot ? snapshotRequest(caller) : { init: { headers: auth(caller) }, sensitive: false };
+  const res = await sendOnceMore(path, request.init);
+  await guard(res, path, request.sensitive);
   // 404·409 도 기록만 남기고 뜻은 그대로(없음 / 버전 바뀜). 예외 문장에도 쿼리·식별자 없는 템플릿만 쓴다
   if (res.status === 404) {
-    await codeOf(res, path);
+    await codeOf(res, path, request.sensitive);
     throw new NotFound(pathTemplate(path));
   }
   if (res.status === 409) {
-    await codeOf(res, path);
+    await codeOf(res, path, request.sensitive);
     throw new Stale(pathTemplate(path));
   }
-  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path)) ?? ""}: ${pathTemplate(path)}`);
+  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path, request.sensitive)) ?? ""}: ${pathTemplate(path)}`);
   return (await res.json()) as T;
 }
 
@@ -199,13 +229,14 @@ async function call<T>(caller: Caller, path: string): Promise<T> {
  * 숫자 원문을 잃지 않게 읽는다). 409 는 판 변경, 그 밖의 실패는 조회 실패로 올린다(빈 결과로 바꾸지 않는다)
  */
 async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
-  const res = await sendOnceMore(path, { headers: auth(caller) });
-  await guard(res, path);
+  const request = snapshotRequest(caller);
+  const res = await sendOnceMore(path, request.init);
+  await guard(res, path, request.sensitive);
   if (res.status === 409) {
-    await codeOf(res, path);
+    await codeOf(res, path, request.sensitive);
     throw new SnapshotChanged();
   }
-  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path)) ?? ""}: ${pathTemplate(path)}`);
+  if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path, request.sensitive)) ?? ""}: ${pathTemplate(path)}`);
   return new Uint8Array(await res.arrayBuffer());
 }
 
@@ -252,7 +283,7 @@ export const liveSource: JungsiSource = {
   },
 
   searchHistory: (caller, q: HistorySearchQuery) => call<CatalogSearchDto<HistoryMetricDto>>(caller, `/admission-history${qs({ ...q })}`),
-  readSnapshotHead: (caller) => call<SnapshotHeadDto>(caller, "/admission-history/snapshot/head"),
+  readSnapshotHead: (caller) => call<SnapshotHeadDto>(caller, "/admission-history/snapshot/head", true),
   readSnapshotPart: (caller, snapshotId, partId) => callBytes(caller, `/admission-history/snapshots/${enc(snapshotId)}${qs({ part_id: partId })}`),
   readRecruitment: (caller, id) => orNull(call<RecruitmentDto>(caller, `/offerings/${enc(id)}/recruitment`)),
 
