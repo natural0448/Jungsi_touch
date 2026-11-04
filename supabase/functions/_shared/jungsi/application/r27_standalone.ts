@@ -2,6 +2,10 @@
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { hasAsciiControl } from "../domain/text.ts";
 import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
+import {
+  ADMISSION_GUIDANCE_FIELDS,
+  pendingAdmissionGuidance,
+} from "./p1_admission_guidance.review-only.ts";
 
 const HASH = /^[a-f0-9]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
@@ -420,6 +424,7 @@ export function reviewR27AbsentCampusScope(
     const row = exact(raw, REQUIRED.filter((field) => field !== "campus"), [
       ...QUOTA_FIELDS,
       ...PUBLIC_METADATA,
+      ...ADMISSION_GUIDANCE_FIELDS,
     ]);
     need(
       !Object.hasOwn(row, "campus") && row.academic_year === 2027 &&
@@ -546,7 +551,11 @@ function project(
   scopes: ScopeIndex,
   retainExcluded = false,
 ): StandaloneProjection {
-  const source = exact(raw, REQUIRED, [...QUOTA_FIELDS, ...PUBLIC_METADATA]),
+  const source = exact(raw, REQUIRED, [
+      ...QUOTA_FIELDS,
+      ...PUBLIC_METADATA,
+      ...ADMISSION_GUIDANCE_FIELDS,
+    ]),
     ident = rowIdentity(source);
   const scope = exact(source.scope, ["state", "evidence_sha256"]);
   need(
@@ -609,6 +618,9 @@ function project(
     historical_links: linked,
   };
   for (const field of PUBLIC_METADATA) if (Object.hasOwn(source, field)) out[field] = source[field];
+  for (const field of ADMISSION_GUIDANCE_FIELDS) {
+    if (Object.hasOwn(source, field)) out[field] = pendingAdmissionGuidance();
+  }
   for (const field of QUOTA_FIELDS) {
     if (Object.hasOwn(source, field)) {
       const value = source[field];
@@ -742,7 +754,11 @@ export async function buildStandaloneR27(
       cursors.add(page.next_cursor as string);
     }
     for (const raw of page.rows) {
-      const source = exact(raw, REQUIRED, [...QUOTA_FIELDS, ...PUBLIC_METADATA]);
+      const source = exact(raw, REQUIRED, [
+        ...QUOTA_FIELDS,
+        ...PUBLIC_METADATA,
+        ...ADMISSION_GUIDANCE_FIELDS,
+      ]);
       const key = identityKey(rowIdentity(source));
       counts.set(key, (counts.get(key) ?? 0) + 1);
       seen++;

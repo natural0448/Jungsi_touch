@@ -334,6 +334,7 @@ format: jungsi.history-snapshot/v1
 - 기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.
 - Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.
 - Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.
+- 2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다.
 
 ### own_report_list
 
@@ -436,7 +437,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=f318d00be4fa1b3ba2ffad0c2f3c54452a6b923e1865a5a369f6a8ad17038015 -->
+<!-- jungsi:generated spec_sha256=36674b07325d694365bcb6474f3204ca4f2c8d2cd51de164c2392b0d1c0de8af -->
 
 
 ## 회원별 관심대학 JSON API
@@ -588,6 +589,7 @@ P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURC
 - 별도 발표 통계의 실제 비율은 1~100 정수 또는 null이다. 평균·최저 등 비백분위 통계는 null을 보존하고 원래 통계 라벨로 표시한다. 새 DTO의 닫힌 필드·개별 항목 수·전체 bytes/행 경계는 계속 검증한다.
 - 기존 수집된 예비순위와 최종 발표 범위의 근거를 관측별로 확인한다. 날짜·URL metadata 결측만으로 이미 확인된 숫자를 지우지 않으며, 최종 예비번호 자격 미확정·다른 차수/전형 충돌은 원문 독립 검수 후에만 해소한다. 순위를 인원으로 치환하지 않는다.
 - 2026-11-01 화면 정책: 최종 합격 예비번호 단일 열, 추가합격 인원은 내부에서 보존한다. 같은 뜻으로 검증된 원문 표현만 해당 관측에 연결한다. 기존 발행물 전체에 별칭이 소급 적용됐다고 추정하지 않는다.
+- 2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다.
 
 인수 기준:
 

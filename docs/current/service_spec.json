@@ -8139,6 +8139,30 @@
         "request",
         "fixture"
       ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts",
+      "layer": "application",
+      "status": "review_only_source_candidate_native_activation_NOT_RUN",
+      "requirements": [
+        "REQ-01",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-28",
+        "REQ-29",
+        "REQ-30"
+      ],
+      "symbols": [
+        "ADMISSION_GUIDANCE_FIELDS",
+        "validatePublicAdmissionGuidance",
+        "projectOwnerAdmissionGuidance",
+        "verifyOwnerAdmissionGuidanceRow",
+        "pendingAdmissionGuidance",
+        "candidateOwnerAdmissionGuidance",
+        "guidanceFromExistingOwnerReview",
+        "singleSnapshotPendingGuidance"
+      ]
     }
   ],
   "workflow": {
@@ -11081,7 +11105,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f",
+            "source_sha256": "0b5953e7704004f8500b4b6965544b293b9b247202e1adff4bb076046cf785db",
             "symbols": [
               {
                 "kind": "class",
@@ -11246,7 +11270,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "8e2ce17a3bc0790dc6af436ab595c80dd00ae3f1962d0afbe5cd6b0dfd78e066",
+            "source_sha256": "aca35bea3dce2514a13bc127f9514ab4d015865a1bd200215d8d346873892381",
             "symbols": [
               {
                 "kind": "class",
@@ -19237,7 +19261,7 @@
                 "REQ-29",
                 "REQ-30"
               ],
-              "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
+              "source_sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6",
               "declared_exports": [
                 "HISTORY_PUBLICATION_STATUSES",
                 "HISTORY_SNAPSHOT_SLOTS",
@@ -19441,6 +19465,31 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts",
+              "layer": "application",
+              "status": "review_only_source_candidate_native_activation_NOT_RUN",
+              "requirements": [
+                "REQ-01",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-28",
+                "REQ-29",
+                "REQ-30"
+              ],
+              "source_sha256": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00",
+              "declared_exports": [
+                "ADMISSION_GUIDANCE_FIELDS",
+                "validatePublicAdmissionGuidance",
+                "projectOwnerAdmissionGuidance",
+                "verifyOwnerAdmissionGuidanceRow",
+                "pendingAdmissionGuidance",
+                "candidateOwnerAdmissionGuidance",
+                "guidanceFromExistingOwnerReview",
+                "singleSnapshotPendingGuidance"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/application/p1_quota_fingerprint_adapter.ts",
               "layer": "application",
               "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
@@ -19468,7 +19517,7 @@
                 "REQ-01",
                 "REQ-28"
               ],
-              "source_sha256": "4345d315eea4bd71802ca5962f3dfc77a3c793b695d76d1e113b363625ff0762",
+              "source_sha256": "99ff841806a23d5ad644e81f311debcda61c60f468c3ebb25d704946c4cba913",
               "declared_exports": [
                 "P1R27Pins",
                 "BoundP1R27Evidence",
@@ -19875,7 +19924,7 @@
                 "REQ-01",
                 "REQ-28"
               ],
-              "source_sha256": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f",
+              "source_sha256": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
               "declared_exports": [
                 "ReviewedR27Links",
                 "R27LinkPin",
@@ -27661,7 +27710,8 @@
           "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
           "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.",
           "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.",
-          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required."
+          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.",
+          "2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -28600,15 +28650,15 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "3b8059f26b338f04f76f2767d18a4b72576c1da29d807821a1b143aff1db1b45"
+        "sha256": "80f502c63d98c05cb6ebc085461025be8b88d650665d871d09de5d20cdc9db87"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "e51c6865079653c2c8ce10048f6b86e0d0621ed32a739c8421faefe7ba2c652e"
+        "sha256": "01049421099da1c9aaf1d5123a525b6165f06b3ec6cda48c26e9e7674d5ab764"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "cb09fdfa169eeda374b771306f80ba9cd1a4e98feee63e0b51472cb4bd6b88b4"
+        "sha256": "b52abac8275f89bbdd309884ae6884d8bb5fe48f579360d058d5b9c0b5c5aa62"
       },
       "groups": {
         "p1_review": {
@@ -28616,9 +28666,10 @@
             "tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs",
             "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs",
             "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs",
-            "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs"
+            "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs",
+            "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs"
           ],
-          "test_count": 104
+          "test_count": 108
         },
         "service_end": {
           "roots": [
@@ -28790,7 +28841,7 @@
       "source_bindings": [
         {
           "path": "scripts/check_edge_contract.py",
-          "sha256": "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f"
+          "sha256": "0b5953e7704004f8500b4b6965544b293b9b247202e1adff4bb076046cf785db"
         },
         {
           "path": "scripts/run_edge_tests.py",
@@ -29567,7 +29618,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
+            "sha256": "0448b881a509fa7036ad7841e7e6e831a09491eb0fb1a0c9479d081d866e5129"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -47382,7 +47433,7 @@
       "files": {
         "src/jungsi_touch/application/public_response_schemas.json": {
           "layer": "application",
-          "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
+          "sha256": "0448b881a509fa7036ad7841e7e6e831a09491eb0fb1a0c9479d081d866e5129"
         },
         "supabase/functions/_shared/current_public_catalog.ts": {
           "layer": "application",
@@ -67431,9 +67482,14 @@
               "importedName": "validateHistoricalReferenceList",
               "originalName": "validateHistoricalReferenceList",
               "src": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
+            },
+            {
+              "importedName": "validatePublicAdmissionGuidance",
+              "originalName": "validatePublicAdmissionGuidance",
+              "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
             }
           ],
-          "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
+          "source_sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6",
           "symbols": [
             {
               "declarations": [
@@ -69429,6 +69485,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./p1_admission_guidance.review-only.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
               }
             ]
           },
@@ -77758,6 +77824,11 @@
               "src": "supabase/functions/_shared/jungsi/application/r27_standalone.ts"
             },
             {
+              "importedName": "singleSnapshotPendingGuidance",
+              "originalName": "singleSnapshotPendingGuidance",
+              "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
+            },
+            {
               "importedName": "validateFieldServiceQualification",
               "originalName": "validateFieldServiceQualification",
               "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
@@ -77779,7 +77850,7 @@
               "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
             }
           ],
-          "source_sha256": "4345d315eea4bd71802ca5962f3dfc77a3c793b695d76d1e113b363625ff0762",
+          "source_sha256": "99ff841806a23d5ad644e81f311debcda61c60f468c3ebb25d704946c4cba913",
           "symbols": [
             {
               "declarations": [
@@ -79758,6 +79829,7 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
+                    "isAsync": true,
                     "parameter_source": "(\n  previous: P1BaselineBatchPort,\n  source: P1R27ByteSource,\n  evidence: BoundP1R27Evidence,\n  scope: ReviewedR27Scope,\n  links: ReviewedR27Links | undefined,\n  limits: P1MultipartInputLimits,\n)",
                     "params": [
                       {
@@ -79781,13 +79853,13 @@
                         "optional": false,
                         "tsType": {
                           "kind": "typeRef",
+                          "repr": "P1R27ByteSource",
                           "value": {
                             "resolution": {
                               "kind": "local"
                             },
                             "typeName": "P1R27ByteSource"
-                          },
-                          "repr": "P1R27ByteSource"
+                          }
                         }
                       },
                       {
@@ -79883,8 +79955,7 @@
                           }
                         ]
                       }
-                    },
-                    "isAsync": true
+                    }
                   },
                   "kind": "function"
                 }
@@ -80428,13 +80499,13 @@
                           },
                           {
                             "kind": "typeRef",
+                            "repr": "BoundP1R27Evidence",
                             "value": {
                               "resolution": {
                                 "kind": "local"
                               },
                               "typeName": "BoundP1R27Evidence"
-                            },
-                            "repr": "BoundP1R27Evidence"
+                            }
                           }
                         ]
                       }
@@ -80588,6 +80659,7 @@
                     "kind": "const",
                     "tsType": {
                       "kind": "typeRef",
+                      "repr": "WeakMap",
                       "value": {
                         "typeName": "WeakMap",
                         "typeParams": [
@@ -80648,8 +80720,7 @@
                             }
                           }
                         ]
-                      },
-                      "repr": "WeakMap"
+                      }
                     }
                   },
                   "kind": "variable"
@@ -80847,12 +80918,12 @@
                           "kind": "typeRef",
                           "repr": "NativeObject",
                           "value": {
-                            "typeName": "NativeObject",
                             "resolution": {
                               "kind": "import",
                               "name": "NativeObject",
                               "specifier": "../domain/json_value.ts"
-                            }
+                            },
+                            "typeName": "NativeObject"
                           }
                         }
                       }
@@ -81018,6 +81089,7 @@
                   "declarationKind": "private",
                   "def": {
                     "hasBody": true,
+                    "isAsync": true,
                     "parameter_source": "(\n  raw: Uint8Array<ArrayBuffer>,\n  expected: number,\n)",
                     "params": [
                       {
@@ -81076,8 +81148,7 @@
                           }
                         ]
                       }
-                    },
-                    "isAsync": true
+                    }
                   },
                   "kind": "function"
                 }
@@ -81528,6 +81599,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./p1_admission_guidance.review-only.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
               }
             ]
           },
@@ -99456,6 +99537,11 @@
         "declarations": {
           "imports": [
             {
+              "importedName": "ADMISSION_GUIDANCE_FIELDS",
+              "originalName": "ADMISSION_GUIDANCE_FIELDS",
+              "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
+            },
+            {
               "importedName": "JsonFloat",
               "jsDoc": {
                 "doc": "SYNTHETIC REVIEW CANDIDATE ONLY. No DB, network, publisher or authorization."
@@ -99485,9 +99571,14 @@
               },
               "originalName": "parseNativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "pendingAdmissionGuidance",
+              "originalName": "pendingAdmissionGuidance",
+              "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
             }
           ],
-          "source_sha256": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f",
+          "source_sha256": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
           "symbols": [
             {
               "declarations": [
@@ -99991,11 +100082,11 @@
                         "readonly": true,
                         "tsType": {
                           "kind": "literal",
+                          "repr": "ABSENT",
                           "value": {
                             "kind": "string",
                             "string": "ABSENT"
-                          },
-                          "repr": "ABSENT"
+                          }
                         }
                       },
                       {
@@ -100686,10 +100777,10 @@
                     "kind": "const",
                     "tsType": {
                       "kind": "typeRef",
+                      "repr": "^[a-f0-9]{64}$",
                       "value": {
                         "typeName": "RegExp"
-                      },
-                      "repr": "^[a-f0-9]{64}$"
+                      }
                     }
                   },
                   "kind": "variable"
@@ -100705,10 +100796,10 @@
                     "kind": "const",
                     "tsType": {
                       "kind": "typeRef",
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
                       "value": {
                         "typeName": "RegExp"
-                      },
-                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                      }
                     }
                   },
                   "kind": "variable"
@@ -101787,8 +101878,10 @@
                 {
                   "declarationKind": "private",
                   "def": {
+                    "kind": "const",
                     "tsType": {
                       "kind": "typeRef",
+                      "repr": "WeakMap",
                       "value": {
                         "typeName": "WeakMap",
                         "typeParams": [
@@ -101813,10 +101906,8 @@
                             }
                           }
                         ]
-                      },
-                      "repr": "WeakMap"
-                    },
-                    "kind": "const"
+                      }
+                    }
                   },
                   "kind": "variable"
                 }
@@ -101886,10 +101977,10 @@
                                     "kind": "typeRef",
                                     "repr": "ScopeGrant",
                                     "value": {
-                                      "typeName": "ScopeGrant",
                                       "resolution": {
                                         "kind": "local"
-                                      }
+                                      },
+                                      "typeName": "ScopeGrant"
                                     }
                                   }
                                 ]
@@ -102097,6 +102188,7 @@
                   "def": {
                     "tsType": {
                       "kind": "typeRef",
+                      "repr": "ReturnType",
                       "value": {
                         "typeName": "ReturnType",
                         "typeParams": [
@@ -102106,8 +102198,7 @@
                             "value": "compileLinks"
                           }
                         ]
-                      },
-                      "repr": "ReturnType"
+                      }
                     }
                   },
                   "kind": "typeAlias"
@@ -102289,6 +102380,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/domain/text.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./p1_admission_guidance.review-only.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
               }
             ]
           }
@@ -184202,7 +184303,7 @@
               "src": "tests/edge/synthetic_history_snapshot.ts"
             }
           ],
-          "source_sha256": "251d03982c8e8dd2319091e89394969c341a2b5978fb1c893be0f50ce8c7fa8b",
+          "source_sha256": "06ef1a589b272e1fd402accb2b342dff187caddc9f12f934240848541e769935",
           "symbols": [
             {
               "declarations": [
@@ -235668,6 +235769,626 @@
           "RequestScopedCurrentPagePortsFactory",
           "resolveCurrentPageRequestPorts"
         ]
+      },
+      "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts": {
+        "declarations": {
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "jsDoc": {
+                "doc": "Review candidate: shape and source-text integrity, not issuer authorization.\nOnly the existing server Owner descriptor/page binding and publication gate can\nauthorize delivery. A hash, a status string, or this module alone grants nothing."
+              },
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "calendarDate",
+              "originalName": "calendarDate",
+              "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+            },
+            {
+              "importedName": "hasAsciiControl",
+              "originalName": "hasAsciiControl",
+              "src": "supabase/functions/_shared/jungsi/domain/text.ts"
+            }
+          ],
+          "source_sha256": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "applicant_eligibility",
+                            "value": {
+                              "kind": "string",
+                              "string": "applicant_eligibility"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "selection_method",
+                            "value": {
+                              "kind": "string",
+                              "string": "selection_method"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "ADMISSION_GUIDANCE_FIELDS"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(raw: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "validatePublicAdmissionGuidance"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(raw: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "projectOwnerAdmissionGuidance"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(row: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "row",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "verifyOwnerAdmissionGuidanceRow"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "pendingAdmissionGuidance"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(raw: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "candidateOwnerAdmissionGuidance"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  source: NativeObject,\n  rawReview: unknown,\n  target: Readonly<Record<string, unknown>>,\n  rawPublicUrlReview?: unknown,\n  rawSourceDateReview?: unknown,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "source",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rawReview",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "target",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Record",
+                                "value": {
+                                  "typeName": "Record",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "unknown",
+                                      "value": "unknown"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rawPublicUrlReview",
+                        "optional": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rawSourceDateReview",
+                        "optional": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "guidanceFromExistingOwnerReview"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  projected: NativeObject,\n  previous: NativeObject | undefined,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "projected",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "previous",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "undefined",
+                              "value": "undefined"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "singleSnapshotPendingGuidance"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[a-f0-9]{64}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "HASH"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "never",
+                      "value": "never"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "fail"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(raw: unknown, keys: readonly string[])",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "keys",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "exact"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(raw: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "void",
+                      "value": "void"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "publicUrl"
+            }
+          ]
+        },
+        "dependencies": [
+          {
+            "dynamic": false,
+            "specifier": "../domain/json_value.ts",
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/text.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/text.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/time.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./access.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          }
+        ],
+        "layer": "application",
+        "symbols": [
+          "ADMISSION_GUIDANCE_FIELDS",
+          "validatePublicAdmissionGuidance",
+          "projectOwnerAdmissionGuidance",
+          "verifyOwnerAdmissionGuidanceRow",
+          "pendingAdmissionGuidance",
+          "candidateOwnerAdmissionGuidance",
+          "guidanceFromExistingOwnerReview",
+          "singleSnapshotPendingGuidance"
+        ]
       }
     },
     "format": "jungsi.edge-contract/v1",
@@ -236031,7 +236752,7 @@
       "supabase/functions/_shared/jungsi/application/history_metric_alias.ts": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d",
       "supabase/functions/_shared/jungsi/application/history_r27_scope_index.ts": "3407c415a68422a5f2f62967a0826cf8d1792ed1d0555e02e3d8dd9a570940e9",
       "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts": "a088b91c0d9fb54b890fc64e442cfaa97fe0eeaea9de3ab509366d6dab0ec12c",
-      "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
+      "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6",
       "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
       "supabase/functions/_shared/jungsi/application/member_json_results.ts": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
       "supabase/functions/_shared/jungsi/application/member_shortlist.ts": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",
@@ -236040,7 +236761,7 @@
       "supabase/functions/_shared/jungsi/application/operating_policy.ts": "477b312405d0d3daa24bc546df1f6ef8fec25795536bbbf85d5d21f0f231bf49",
       "supabase/functions/_shared/jungsi/application/overall_analysis.ts": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
       "supabase/functions/_shared/jungsi/application/own_report_list.ts": "ade1d75288df633ef20e1d8e26f602687615ece0e7d4764fd5a05e180d0a2bf2",
-      "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "4345d315eea4bd71802ca5962f3dfc77a3c793b695d76d1e113b363625ff0762",
+      "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts": "99ff841806a23d5ad644e81f311debcda61c60f468c3ebb25d704946c4cba913",
       "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
       "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
       "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
@@ -236058,7 +236779,7 @@
       "supabase/functions/_shared/jungsi/application/professional_usage.ts": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6",
       "supabase/functions/_shared/jungsi/application/profile_reports.ts": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
       "supabase/functions/_shared/jungsi/application/public_response.ts": "f00ace3a8974e6983875ec9532dd424ab0e7dce4e15ca5e1371637a947d69d76",
-      "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f",
+      "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
       "supabase/functions/_shared/jungsi/application/recruitment_stage_review.ts": "ba1cf4303b5a448bd9101288baa44ae60c60a5088b6eb08886fe12eddd590533",
       "supabase/functions/_shared/jungsi/application/report_actions.ts": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
       "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
@@ -236146,7 +236867,7 @@
       "tests/edge/synthetic_exam_pack.ts": "0bab8e592fad298945a787c9af511cc6ce875b2452e4c3e2a4dd064be21a7937",
       "tests/edge/synthetic_forecast.ts": "cd0697ace297afd321210b065f31adffcae40db71f20e3627920bfaeba9f3dfa",
       "tests/edge/synthetic_forecast_repository.ts": "2186f316fed31693f58507845515fe132daf8a24d5fc667898f7266d80f6e37a",
-      "tests/edge/synthetic_history_qualification.ts": "251d03982c8e8dd2319091e89394969c341a2b5978fb1c893be0f50ce8c7fa8b",
+      "tests/edge/synthetic_history_qualification.ts": "06ef1a589b272e1fd402accb2b342dff187caddc9f12f934240848541e769935",
       "tests/edge/synthetic_history_snapshot.ts": "6c99a28934d88962f0e2c849d94f45e48e89d313bbd30c0d95d3e5d81fdc0ffb",
       "tests/edge/synthetic_offering_analysis.ts": "31b43f868de7b7c544c0a11a0c2ecea13836fcb5bbce6613a65702113835619e",
       "tests/edge/synthetic_platform_repository.ts": "d4692b84c2b91652c0bcd057b955ad0c495e71f1e1ff65dce7a542c7bc93d243",
@@ -236248,7 +236969,8 @@
       "tests/edge/test_current_page_routing.synthetic.ts": "0ab02f0b284d39f7669f571eff100a51d43f4931043307dda8eccd823c793a61",
       "supabase/functions/_shared/jungsi/application/current_guide_scope_issuer.campus.review-only.ts": "7d7f75c110bec348473981cd9d331b1acd41a877e105c4ba527bd3d83daa07b7",
       "supabase/functions/_shared/jungsi/application/scope_adapter_synthetic_fixture.ts": "a555c0c725845ed52ad97f934fb03a94ddb84b87cf591c0237b4f61c2edaae37",
-      "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60"
+      "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
+      "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -237791,7 +238513,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "dfff1495d439e1557799c93cbefe802a0d692458d579f0973c251a083d1434d7",
+      "bridge_sha256": "57abcdb4356cde5bf566b45741b75ffbbb712fc46f201785784aa03d65e777c0",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "a3aedad1e2a7885ef799b7c7c3f72f23ea76e3a9c350551f4516983380e76276",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -237930,7 +238652,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/r27_standalone.ts",
-          "sha256": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f"
+          "sha256": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963"
         }
       ],
       "scope": "2027 현재 모집행을 독립 기준으로 두고 검증된 과거 관계를 묶는다. 인원 원문·null·0과 각 관계의 출처 및 이월 미확정을 구분한다. 이력을 명시적으로 미연결 처리하면 현재 모집 근거가 검증된 숫자는 유지하고 이력은 확인 중으로 남긴다. 인증·현재 head·권한 오류는 보류 결과로 바꾸지 않는다. 원천 campus 필드 부재와 별도 근거를 분리하고, 별도 권한 양쪽이 확인한 이월 단독 미확정만 제외한다. 기존 사용자 HOLD와 미확인 모집인원을 보존한다.",
@@ -238053,7 +238775,8 @@
       "50/70 대표 컷의 기존 동일 점수 기준·최종등록자 자격은 유지한다. 다른 코호트·평균·최저·다른 과목 축은 별도 발표 목록으로만 표시하며 50/70의 결측을 채우지 않는다.",
       "별도 발표 통계의 실제 비율은 1~100 정수 또는 null이다. 평균·최저 등 비백분위 통계는 null을 보존하고 원래 통계 라벨로 표시한다. 새 DTO의 닫힌 필드·개별 항목 수·전체 bytes/행 경계는 계속 검증한다.",
       "기존 수집된 예비순위와 최종 발표 범위의 근거를 관측별로 확인한다. 날짜·URL metadata 결측만으로 이미 확인된 숫자를 지우지 않으며, 최종 예비번호 자격 미확정·다른 차수/전형 충돌은 원문 독립 검수 후에만 해소한다. 순위를 인원으로 치환하지 않는다.",
-      "2026-11-01 화면 정책: 최종 합격 예비번호 단일 열, 추가합격 인원은 내부에서 보존한다. 같은 뜻으로 검증된 원문 표현만 해당 관측에 연결한다. 기존 발행물 전체에 별칭이 소급 적용됐다고 추정하지 않는다."
+      "2026-11-01 화면 정책: 최종 합격 예비번호 단일 열, 추가합격 인원은 내부에서 보존한다. 같은 뜻으로 검증된 원문 표현만 해당 관측에 연결한다. 기존 발행물 전체에 별칭이 소급 적용됐다고 추정하지 않는다.",
+      "2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다."
     ],
     "manifest": "Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result.",
     "read_API": "Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission.",
@@ -239004,12 +239727,12 @@
       "history.snapshot.head": {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "symbol": "HistorySnapshotService.head",
-        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
+        "source_sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6"
       },
       "history.snapshot.read": {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
         "symbol": "HistorySnapshotService.read",
-        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
+        "source_sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6"
       },
       "report.list-own": {
         "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
@@ -239067,7 +239790,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
-          "sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
+          "sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/own_report_list.ts",
@@ -241369,7 +242092,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
+            "sha256": "0448b881a509fa7036ad7841e7e6e831a09491eb0fb1a0c9479d081d866e5129"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -241457,7 +242180,7 @@
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "251d03982c8e8dd2319091e89394969c341a2b5978fb1c893be0f50ce8c7fa8b"
+            "sha256": "06ef1a589b272e1fd402accb2b342dff187caddc9f12f934240848541e769935"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",
@@ -241638,15 +242361,15 @@
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/p1_r27_composition.ts",
-        "sha256": "4345d315eea4bd71802ca5962f3dfc77a3c793b695d76d1e113b363625ff0762"
+        "sha256": "99ff841806a23d5ad644e81f311debcda61c60f468c3ebb25d704946c4cba913"
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/r27_standalone.ts",
-        "sha256": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f"
+        "sha256": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963"
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts",
-        "sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3"
+        "sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6"
       },
       {
         "path": "supabase/functions/_shared/jungsi/domain/json_value.ts",
@@ -241742,7 +242465,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "3b01691ed39427d89f70d9e9c0987bb8e8266fd47276eb3b0cf040a7dfc06f3f",
+    "manifest_sha256": "11569bf287a0effde901f3f151cfb1c5be020e219e5933be4ad5b7e8e32528b7",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -241753,7 +242476,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "9b4938fb2c8fed50c371d8940fb1b78d410e43b97f9eac9bac9bb728bef6aa55",
+    "manifest_sha256": "c8f8b9ba506b827a9f0aba1ac415234ed8f2aaa6ef31809b8da548345b87efce",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

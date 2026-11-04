@@ -19,6 +19,7 @@ import {
   validateFieldServiceQualification,
 } from "./history_field_qualification.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
+import { singleSnapshotPendingGuidance } from "./p1_admission_guidance.review-only.ts";
 import {
   assertReviewedR27LinkBinding,
   buildStandaloneR27,
@@ -459,6 +460,7 @@ function r27Row(
     history_link_pending_years: years,
     historical_links: links,
   };
+  Object.assign(row.r27_source as NativeObject, singleSnapshotPendingGuidance(projected, previous));
   return row;
 }
 

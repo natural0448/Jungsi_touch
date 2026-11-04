@@ -511,7 +511,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f",
+      "source_sha256": "0b5953e7704004f8500b4b6965544b293b9b247202e1adff4bb076046cf785db",
       "symbols": [
         {
           "kind": "class",
@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "8e2ce17a3bc0790dc6af436ab595c80dd00ae3f1962d0afbe5cd6b0dfd78e066",
+      "source_sha256": "aca35bea3dce2514a13bc127f9514ab4d015865a1bd200215d8d346873892381",
       "symbols": [
         {
           "kind": "class",
@@ -8667,7 +8667,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
+        "source_sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6",
         "declared_exports": [
           "HISTORY_PUBLICATION_STATUSES",
           "HISTORY_SNAPSHOT_SLOTS",
@@ -8871,6 +8871,31 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts",
+        "layer": "application",
+        "status": "review_only_source_candidate_native_activation_NOT_RUN",
+        "requirements": [
+          "REQ-01",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-28",
+          "REQ-29",
+          "REQ-30"
+        ],
+        "source_sha256": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00",
+        "declared_exports": [
+          "ADMISSION_GUIDANCE_FIELDS",
+          "validatePublicAdmissionGuidance",
+          "projectOwnerAdmissionGuidance",
+          "verifyOwnerAdmissionGuidanceRow",
+          "pendingAdmissionGuidance",
+          "candidateOwnerAdmissionGuidance",
+          "guidanceFromExistingOwnerReview",
+          "singleSnapshotPendingGuidance"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/p1_quota_fingerprint_adapter.ts",
         "layer": "application",
         "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
@@ -8898,7 +8923,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "4345d315eea4bd71802ca5962f3dfc77a3c793b695d76d1e113b363625ff0762",
+        "source_sha256": "99ff841806a23d5ad644e81f311debcda61c60f468c3ebb25d704946c4cba913",
         "declared_exports": [
           "P1R27Pins",
           "BoundP1R27Evidence",
@@ -9305,7 +9330,7 @@
           "REQ-01",
           "REQ-28"
         ],
-        "source_sha256": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f",
+        "source_sha256": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
         "declared_exports": [
           "ReviewedR27Links",
           "R27LinkPin",

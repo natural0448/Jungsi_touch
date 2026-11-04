@@ -4,7 +4,7 @@
     "files": {
       "src/jungsi_touch/application/public_response_schemas.json": {
         "layer": "application",
-        "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
+        "sha256": "0448b881a509fa7036ad7841e7e6e831a09491eb0fb1a0c9479d081d866e5129"
       },
       "supabase/functions/_shared/current_public_catalog.ts": {
         "layer": "application",
@@ -25622,9 +25622,14 @@
             "importedName": "validateHistoricalReferenceList",
             "originalName": "validateHistoricalReferenceList",
             "src": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
+          },
+          {
+            "importedName": "validatePublicAdmissionGuidance",
+            "originalName": "validatePublicAdmissionGuidance",
+            "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
           }
         ],
-        "source_sha256": "90ce0ca2957f2d83e6033166b996b8b227601a5042ecd3bf182931543ac954c3",
+        "source_sha256": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6",
         "symbols": [
           {
             "declarations": [
@@ -27620,6 +27625,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/history_reference_estimates.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./p1_admission_guidance.review-only.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
             }
           ]
         },
@@ -35848,6 +35863,626 @@
         "OwnReportPosition"
       ]
     },
+    "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Review candidate: shape and source-text integrity, not issuer authorization.\nOnly the existing server Owner descriptor/page binding and publication gate can\nauthorize delivery. A hash, a status string, or this module alone grants nothing."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "calendarDate",
+            "originalName": "calendarDate",
+            "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+          },
+          {
+            "importedName": "hasAsciiControl",
+            "originalName": "hasAsciiControl",
+            "src": "supabase/functions/_shared/jungsi/domain/text.ts"
+          }
+        ],
+        "source_sha256": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "applicant_eligibility",
+                          "value": {
+                            "kind": "string",
+                            "string": "applicant_eligibility"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "selection_method",
+                          "value": {
+                            "kind": "string",
+                            "string": "selection_method"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ADMISSION_GUIDANCE_FIELDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "validatePublicAdmissionGuidance"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "projectOwnerAdmissionGuidance"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(row: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "row",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "verifyOwnerAdmissionGuidanceRow"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "pendingAdmissionGuidance"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "candidateOwnerAdmissionGuidance"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  source: NativeObject,\n  rawReview: unknown,\n  target: Readonly<Record<string, unknown>>,\n  rawPublicUrlReview?: unknown,\n  rawSourceDateReview?: unknown,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "source",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawReview",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "target",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Record",
+                              "value": {
+                                "typeName": "Record",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawPublicUrlReview",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rawSourceDateReview",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "guidanceFromExistingOwnerReview"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  projected: NativeObject,\n  previous: NativeObject | undefined,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "projected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "previous",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "singleSnapshotPendingGuidance"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[a-f0-9]{64}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "HASH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "never",
+                    "value": "never"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "fail"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown, keys: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "keys",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "exact"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "publicUrl"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/text.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/text.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/time.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "ADMISSION_GUIDANCE_FIELDS",
+        "validatePublicAdmissionGuidance",
+        "projectOwnerAdmissionGuidance",
+        "verifyOwnerAdmissionGuidanceRow",
+        "pendingAdmissionGuidance",
+        "candidateOwnerAdmissionGuidance",
+        "guidanceFromExistingOwnerReview",
+        "singleSnapshotPendingGuidance"
+      ]
+    },
     "supabase/functions/_shared/jungsi/application/p1_quota_fingerprint_adapter.ts": {
       "declarations": {
         "imports": [
@@ -38240,6 +38875,11 @@
             "src": "supabase/functions/_shared/jungsi/application/r27_standalone.ts"
           },
           {
+            "importedName": "singleSnapshotPendingGuidance",
+            "originalName": "singleSnapshotPendingGuidance",
+            "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
+          },
+          {
             "importedName": "validateFieldServiceQualification",
             "originalName": "validateFieldServiceQualification",
             "src": "supabase/functions/_shared/jungsi/application/history_field_qualification.ts"
@@ -38261,7 +38901,7 @@
             "src": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
           }
         ],
-        "source_sha256": "4345d315eea4bd71802ca5962f3dfc77a3c793b695d76d1e113b363625ff0762",
+        "source_sha256": "99ff841806a23d5ad644e81f311debcda61c60f468c3ebb25d704946c4cba913",
         "symbols": [
           {
             "declarations": [
@@ -42010,6 +42650,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/history_snapshot.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./p1_admission_guidance.review-only.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
             }
           ]
         },
@@ -59938,6 +60588,11 @@
       "declarations": {
         "imports": [
           {
+            "importedName": "ADMISSION_GUIDANCE_FIELDS",
+            "originalName": "ADMISSION_GUIDANCE_FIELDS",
+            "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
+          },
+          {
             "importedName": "JsonFloat",
             "jsDoc": {
               "doc": "SYNTHETIC REVIEW CANDIDATE ONLY. No DB, network, publisher or authorization."
@@ -59967,9 +60622,14 @@
             },
             "originalName": "parseNativeJson",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "pendingAdmissionGuidance",
+            "originalName": "pendingAdmissionGuidance",
+            "src": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
           }
         ],
-        "source_sha256": "9d15f688d12e9020b83b01a35ad8e7cb73c53c5bd06c28727130e7717ab5b16f",
+        "source_sha256": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
         "symbols": [
           {
             "declarations": [
@@ -62771,6 +63431,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/domain/text.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./p1_admission_guidance.review-only.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts"
             }
           ]
         }
@@ -148811,7 +149481,7 @@
             "src": "tests/edge/synthetic_history_snapshot.ts"
           }
         ],
-        "source_sha256": "251d03982c8e8dd2319091e89394969c341a2b5978fb1c893be0f50ce8c7fa8b",
+        "source_sha256": "06ef1a589b272e1fd402accb2b342dff187caddc9f12f934240848541e769935",
         "symbols": [
           {
             "declarations": [

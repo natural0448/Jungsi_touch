@@ -6843,6 +6843,14 @@
             "ref": "history_snapshot_r27_history_link",
             "nullable": false
           }
+        },
+        "applicant_eligibility": {
+          "ref": "history_snapshot_admission_guidance",
+          "nullable": false
+        },
+        "selection_method": {
+          "ref": "history_snapshot_admission_guidance",
+          "nullable": false
         }
       },
       "required": [
@@ -6854,7 +6862,10 @@
         "history_link_pending_years",
         "historical_links"
       ],
-      "optional": []
+      "optional": [
+        "applicant_eligibility",
+        "selection_method"
+      ]
     },
     "history_snapshot_r27_partial_coverage": {
       "type": "object",
@@ -6890,6 +6901,39 @@
         "included_rows",
         "excluded_rows",
         "review_pending_rows"
+      ],
+      "optional": []
+    },
+    "history_snapshot_admission_guidance": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "pending",
+            "verified_official"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "status",
+        "text",
+        "source_url",
+        "source_as_of"
       ],
       "optional": []
     }

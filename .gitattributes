@@ -134,3 +134,6 @@
 /tests/p1_contract_review/test_p1_r27_selection_bridge.synthetic.js text eol=lf
 /tests/p1_contract_review/test_recruitment_final_qualification.js text eol=lf
 /tests/p1_contract_review/test_score_010_cutoff.synthetic.js text eol=lf
+
+# Preserve exact-byte single guidance test on every checkout.
+/tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs text eol=lf

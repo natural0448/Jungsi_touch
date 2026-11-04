@@ -5205,7 +5205,7 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
 SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
 
 SERVICE_CANDIDATE_GROUPS = {
-    "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs", "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs"], 104, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs", "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs", "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs"], 108, ["node:assert/strict", "node:fs", "node:zlib"]),
     "service_end": (["tests/service_end/" + name for name in (
         "test_service_end_current_review.synthetic.ts", "test_service_end_entrypoints.synthetic.ts",
         "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",

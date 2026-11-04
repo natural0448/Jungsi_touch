@@ -35,7 +35,7 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
 
     def test_exact_four_suites_are_registered(self):
         self.assertEqual(self.errors(), [])
-        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [104, 125, 48, 81])
+        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [108, 125, 48, 81])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
 
     def test_new_builtin_is_limited_to_score_null_root(self):
@@ -216,13 +216,19 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         outputs=[{"cases":37,"status":"PASS_SYNTHETIC_ONLY","v1_and_v2_service":True},
                  {"cases":19,"status":"PASS_SYNTHETIC_ONLY","v2_source_gate":True,"synthetic_http":True,"actual_data":False},
                  {"cases":24,"status":"PASS_SYNTHETIC_ONLY","v2_source_gate":True,"synthetic_http":True,"actual_data":False},
-                 {"status":"PASS_SYNTHETIC_PRELIGHT_ONLY","tests":24,"cases":self.m.P1_MULTIPART_CASES,"db_calls":0,"storage_calls":0,"output_parts":"NOT_BUILT","publication":"NOT_RUN"}]
+                 {"status":"PASS_SYNTHETIC_PRELIGHT_ONLY","tests":24,"cases":self.m.P1_MULTIPART_CASES,"db_calls":0,"storage_calls":0,"output_parts":"NOT_BUILT","publication":"NOT_RUN"},
+                 {"status":"PASS_SYNTHETIC_SINGLE_REVIEW_ONLY","cases":4,
+                  "case_names":["single_source_without_field_review_stays_pending_through_existing_gate",
+                                "invalid_field_pending_without_blocking_other_rows",
+                                "source_page_or_head_change_rejected",
+                                "previous_snapshot_preserved_and_new_guidance_pending"],
+                  "owner":"NOT_CONNECTED","publication":"NOT_RUN"}]
         with patch.object(self.m,"load_manifest",return_value=self.data), \
              patch.object(self.m,"verify_suite",return_value=suite), \
              patch.object(self.m,"DENO",Path(sys.executable)), \
              patch.object(self.m,"invoke",side_effect=[json.dumps(x) for x in outputs]) as call:
             self.m.ReviewSuites("test_p1_deno_80").test_p1_deno_80()
-        self.assertEqual(call.call_count,4)
+        self.assertEqual(call.call_count,5)
         for invocation in call.call_args_list:
             args=invocation.args[0]
             self.assertEqual(args[1],"run")
