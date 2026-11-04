@@ -200,15 +200,22 @@ function compact(r: Obj): Row {
   };
 }
 /** 2027 모집행의 r27_source 만 옮긴다. 모집인원·조건 원문은 그대로, 과거 연결은 서버가 검토 확인한 것만 */
-function r27Of(r: Obj): Pick<Row, "q27" | "hl" | "scope27"> {
+function r27Of(r: Obj): Pick<Row, "q27" | "hl" | "scope27" | "ae27"> {
   const s = r.r27_source as Obj | undefined;
   if (int(r.academic_year) !== 2027 || !s || typeof s !== "object") return {};
   const q = (s.quota ?? {}) as Obj, qc = (q.quota_cell ?? null) as Obj | null;
   const links = Array.isArray(s.historical_links) ? (s.historical_links as Obj[]) : [];
+  const rawEligibility = s.applicant_eligibility;
+  const eligibility = rawEligibility && typeof rawEligibility === "object" && !Array.isArray(rawEligibility)
+    ? rawEligibility as Obj : undefined;
   return {
     q27: { v: str(q.quota_value), ls: str(q.quota_literal_state), st: str(q.quota_stage), ct: str(q.quota_condition_text),
       cs: qc ? str(qc.status) : null, rs: String(s.quota_review_status ?? "") },
     scope27: str(s.scope_key) ?? undefined,
+    ...(eligibility ? { ae27: {
+      status: eligibility.status === "verified_official" ? "verified_official" as const : "pending" as const,
+      text: typeof eligibility.text === "string" ? eligibility.text : null,
+    } } : {}),
     hl: links.map(l => ({ academic_year: int(l.academic_year), school_id: str(l.school_id),
       original_pk: str(l.original_pk), campus: str(l.campus), admission_track: str(l.admission_track), group: str(l.group) })),
   };

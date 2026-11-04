@@ -46,6 +46,8 @@ export type Row = {
   alt: { s: string; r: string | null; om: number; e: Cell[] };
   /** 2027 모집행만: 서버 r27_source.quota 원문(담당자 1.9.141). 없으면 2024~2026 발표 행 */
   q27?: Quota27;
+  /** 2027 지원자격은 모집인원·이월 조건과 별도로 표시한다. */
+  ae27?: ApplicantEligibility27;
   /** 2027 모집행: 서버가 검토한 과거 행의 전체 식별자와 2027 scope */
   hl?: HistoryLink[];
   scope27?: string;
@@ -74,6 +76,13 @@ export type School = { id: string; name: string; names: string[]; region: string
 /** 2027 모집인원 원문. v 는 quota_value 원문 표기, ls·st·ct 는 quota_literal_state·quota_stage·quota_condition_text,
  * cs 는 quota_cell.status, rs 는 서버 quota_review_status */
 export type Quota27 = { v: string | null; ls: string | null; st: string | null; ct: string | null; cs: string | null; rs: string };
+export type ApplicantEligibility27 = { status: "verified_official" | "pending"; text: string | null };
+/** 확인된 문구만 표시하고, 검토 중인 문구는 자격이 없다는 뜻으로 바꾸지 않는다. */
+export function applicantEligibilityLabel(eligibility: ApplicantEligibility27 | undefined): string | null {
+  if (!eligibility) return null;
+  const value = eligibility.text?.trim();
+  return eligibility.status === "verified_official" && value ? value : "확인 중";
+}
 /** 2027 부분 발행 표시(서버 r27_scope_coverage). head 와 모든 분할이 같은 값이다 */
 export type R27Coverage = { status: "partial"; source_rows: number; included_rows: number; excluded_rows: number; review_pending_rows: number };
 

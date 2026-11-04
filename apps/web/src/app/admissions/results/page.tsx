@@ -14,7 +14,7 @@ import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
 import { groupUnits, latestOf } from "./snapshot-table";
 import { UnitList, type SumItem } from "./unit-row";
-import { r27Summary, unitKey } from "@/lib/p1-shape";
+import { applicantEligibilityLabel, r27Summary, unitKey } from "@/lib/p1-shape";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -171,6 +171,7 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
     r27: r27 ? r27Summary(r27.q27) : null,
+    eligibility27: applicantEligibilityLabel(r27?.ae27),
     ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
   };
 }

@@ -442,6 +442,31 @@ test("a v2 partial publication keeps 2027 quotas verbatim and groups only server
   assert.equal(r27Summary(rows.find(r => r.pk === "k27c").q27).v, "0");
 });
 
+test("2027 applicant eligibility uses the server's four-key shape and is shown apart from the quota", async t => {
+  // 서버 DTO(부담당자 11-04): {status, text, source_url, source_as_of} 4키, status 는 verified_official | pending
+  const elig = (status, text) => ({ status, text, source_url: null, source_as_of: null });
+  const withElig = (row, e) => ({ ...row, r27_source: { ...row.r27_source, applicant_eligibility: e, selection_method: elig("verified_official", "가상 전형방법") } });
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => [
+      withElig(r27Row(u, "e1", { quota_value: 4, quota_stage: null }), elig("verified_official", "가상 추천 / 가상 동의")),
+      withElig(r27Row(u, "e2", { quota_value: 3, quota_stage: "initial" }), elig("pending", null)),
+      r27Row(u, "e3", { quota_value: null, quota_stage: null }),
+    ] });
+  const ready = await w.prepare();
+  const rows = (await w.module.searchSnapshot(ready, {})).schools[0].rows, by = pk => rows.find(r => r.pk === pk);
+  const { applicantEligibilityLabel, r27Summary } = await import("../src/lib/p1-shape.ts");
+  assert.deepEqual(by("e1").ae27, { status: "verified_official", text: "가상 추천 / 가상 동의" });
+  assert.equal(applicantEligibilityLabel(by("e1").ae27), "가상 추천 / 가상 동의");
+  assert.equal(applicantEligibilityLabel(by("e2").ae27), "확인 중");
+  // 필드가 없는 행(대부분)은 줄을 그리지 않는다
+  assert.equal(by("e3").ae27, undefined); assert.equal(applicantEligibilityLabel(by("e3").ae27), null);
+  // 자격은 모집인원과 별개: 인원 표시는 그대로
+  assert.equal(r27Summary(by("e1").q27).v, "4");
+  // 공식 확인이 아닌데 문구가 있어도, 빈 공식 문구여도 '확인 중'
+  assert.equal(applicantEligibilityLabel({ status: "pending", text: "검토 중 문구" }), "확인 중");
+  assert.equal(applicantEligibilityLabel({ status: "verified_official", text: "  " }), "확인 중");
+});
+
 test("an unreviewed same-PK 2027 row remains separate through cache and search", async t => {
   const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
     rowsOf: (_i, u) => [r27Row(u, "same", { quota_value: 2, quota_stage: "initial" }), pastRow(u, 2026, "same")] });

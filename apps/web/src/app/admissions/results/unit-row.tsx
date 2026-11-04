@@ -7,7 +7,7 @@ import { YearTable } from "./snapshot-table";
 import { loadUnitRows, type UnitRows } from "./unit-actions";
 
 /** 접힌 줄에는 2027학년도 모집인원만 보인다(2026-10-24 사용자 결정). 2027 모집행이 없으면 r27 = null → '준비 중' */
-export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: R27Summary | null; ratio27: string | null };
+export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: R27Summary | null; ratio27: string | null; eligibility27?: string | null };
 /* ratio27: 2027 수능 영역별 반영비율 한 줄(예: "국 30 · 수 40 · 영 20 · 탐 10"). 담당자 자료 연결 전에는 null 이라 칸을 그리지 않는다 */
 
 /** 2027 모집 칸(11-02 사용자 확인 문구). 이월 미정은 0 이 아니라 '이월 시 선발', 모르는 상태는 '확인 중' */
@@ -65,6 +65,7 @@ function Item({ pub, schoolId, schoolName, it }: { pub: string; schoolId: string
         <span className="unit">
           <b>{it.d}</b>
           {it.sub && <small>{it.sub}</small>}
+          {it.eligibility27 && <small>지원 자격: {it.eligibility27}</small>}
         </span>
         {it.ratio27 && <span className="rs-ratio" title="2027학년도 수능 영역별 반영비율">{it.ratio27}</span>}
         <span className="rs-sum">
