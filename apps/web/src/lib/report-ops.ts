@@ -1,7 +1,7 @@
 import "server-only";
 import type { Caller, JungsiSource } from "@/lib/api";
 import type { AssessmentDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
-import { getReportId } from "@/lib/report-ref";
+import { currentReportId } from "@/lib/report-ref";
 
 /*
   3·4페이지(와 2페이지 유료 부분)가 리포트에 묶인 분석을 쓰는 방법.
@@ -31,9 +31,9 @@ export type ReportState =
   | { kind: "score_required"; report: ReportDto | null }
   | { kind: "failed"; report: ReportDto; code: string };
 
-/** 내 리포트(이 브라우저가 기억한 번호). 없으면 성적 입력이 먼저다 */
+/** 내 리포트 = 계정의 현재 리포트(서버 입력 상태, 2026-11-04 사용자 결정). 없으면 성적 입력이 먼저다 */
 export async function loadMine(src: JungsiSource, caller: Caller): Promise<ReportDto | null> {
-  const id = await getReportId();
+  const id = await currentReportId(src, caller);
   return id ? src.readReport(caller, id) : null;
 }
 

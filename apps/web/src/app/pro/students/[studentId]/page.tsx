@@ -5,7 +5,7 @@ import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
-import { EXAM } from "@/lib/exam";
+import { EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDate, seoulDateTime } from "@/lib/format";
 import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess } from "@/lib/pro-access";
@@ -69,11 +69,11 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   const self = `/pro/students/${encodeURIComponent(student.student_id)}?org=${encodeURIComponent(svc.org_id)}`;
   const canInput = svc.role === "teacher" && !student.archived && status !== null && status.initial_remaining > 0;
   const a = shown?.published_result.overall ?? null;
-  // 판 번호 대신 '현재 성적'·'정정 입력' 표시(2026-10-28 사용자 결정, 개인용 2페이지와 같은 규칙).
-  // 서버 입력 상태의 current_report_id 리포트 중 가장 최근 판이 현재 성적이다. 판 번호는 열기·인쇄 주소에만 쓴다
+  // 판 번호 대신 꼬리표(2026-10-28, 2026-11-04 사용자 결정): 서버 입력 상태의 current_report_id 리포트 중 가장 최근 판이 현재 성적이다.
+  // 정정을 모두 썼으면 개인용 2페이지와 같은 '정정 입력 횟수 소진', 아니면 '현재 성적'(교사는 학생의 예전 판도 고르므로 남긴다). 판 번호는 열기·인쇄 주소에만 쓴다
   const curRev = Math.max(0, ...reports.filter((r) => r.report_id === status?.current_report_id).map((r) => r.revision_id));
   const tagOf = (r: { report_id: string; revision_id: number }) =>
-    status && r.report_id === status.current_report_id && r.revision_id === curRev ? (status.correction_used > 0 ? "정정 입력 · 현재 성적" : "현재 성적") : null;
+    status && r.report_id === status.current_report_id && r.revision_id === curRev ? (status.correction_used > 0 && status.correction_used >= status.correction_granted ? "정정 입력 횟수 소진" : "현재 성적") : null;
   // 담은 학교의 이름은 같은 판의 후보 목록에서 찾는다(별도 조회 없음)
   const names = new Map(
     [...(shown?.published_result.candidates?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(shown?.published_result.candidates?.wildcards ?? [])].map((it) => [it.offering.offering_id, it.offering]),
@@ -132,7 +132,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           <section className="pro-sec" aria-labelledby="report-h">
             <div className="pro-sechd">
               <h2 id="report-h">
-                리포트 <small className="pro-note">{seoulDateTime(shown.created_at_utc)} 저장</small>
+                리포트 <small className="pro-note">{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준 {seoulDateTime(shown.created_at_utc)} 저장</small>
                 {tagOf(shown) && <span className="rp-tag">{tagOf(shown)}</span>}
               </h2>
             </div>

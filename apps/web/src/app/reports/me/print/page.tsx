@@ -7,9 +7,7 @@ import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
-import { getReportId } from "@/lib/report-ref";
 import { EXAM } from "@/lib/exam";
-import { onlyReportAfterCorrection } from "@/lib/superseded";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
 import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
@@ -39,13 +37,12 @@ export default async function Page() {
   const { session, down } = await sessionOrDown(src, caller);
   if (down) return <ConnectionNotice e={down} />;
   if (session && session.member_tier !== "paid") return paidOnly;
-  // 정정 입력 뒤에는 정정 전 리포트를 인쇄하지 않는다(2026-10-28 사용자 결정)
-  const only = onlyReportAfterCorrection(await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null));
-  const saved = await getReportId();
-  const reportId = only ?? saved;
+  // 인쇄할 리포트는 계정의 현재 리포트(2026-11-04 사용자 결정). 정정 입력 뒤에는 정정한 리포트다(2026-10-28 사용자 결정)
   let snap: SnapshotDto | null = null;
   let shortlist: PickedItem[] = [];
   try {
+    const status = await src.readScoreInputStatus(caller, EXAM.exam_id);
+    const reportId = status.current_report_id;
     snap = reportId ? await src.exportReport(caller, reportId) : null;
     // 고정된 revision 의 shortlist·analyses 를 그대로 쓴다. 이름만 offering.read 로 붙인다
     if (snap) shortlist = await readPicks(src, caller, snap.report);

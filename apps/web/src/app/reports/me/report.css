@@ -96,7 +96,8 @@
 /* ── 리포트 ── */
 .et .rp-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
 .et .rp-meta .btn{margin-left:auto}
-.et .rp-overall{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;padding:22px 24px;border:1px solid var(--line);border-top:3px solid var(--deep);border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
+/* 왼쪽 총점 칸은 내용 폭만, 오른쪽 누백 설명을 넓게. 가운데 여백은 예전(약 310px)의 30%만 남긴다(2026-11-04 사용자 결정) */
+.et .rp-overall{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:16px 94px;padding:22px 24px;border:1px solid var(--line);border-top:3px solid var(--deep);border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .rp-overall .n{min-width:0}
 .et .rp-overall small{display:block;font-size:12px;font-weight:700;color:var(--brand);margin-bottom:4px}
 .et .rp-overall .big{font-size:36px;font-weight:900;letter-spacing:-1px;color:var(--deep);font-variant-numeric:tabular-nums}
@@ -144,7 +145,7 @@
   .et .sf-acts,.et .sf-acts .btn{width:100%}
   .et .sf-sheet table{min-width:900px}
   .et .sf-sheet td.in{padding:7px 5px}
-  .et .rp-overall{grid-template-columns:1fr}
+  .et .rp-overall{grid-template-columns:1fr;column-gap:0}
   .et .pr-sheet{padding:18px 16px}
 }
 @media print{
@@ -218,12 +219,6 @@
   .et .rs-wait,.et .rp-combo-wait{color:#555}
 }
 
-/* 전체 위치 다시 계산: 자료 연결 전 저장된 리포트에만 보인다 */
-.et .rp-refresh{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:10px 0 0;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--accent, #1d4ed8);border-radius:var(--r-card, 10px);background:var(--sub)}
-.et .rp-refresh > div{flex:1 1 280px;min-width:0}
-.et .rp-refresh b{font-size:13px;color:var(--ink)}
-.et .rp-refresh p{margin:4px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6}
-.et .rp-refresh p.err{color:var(--reach);font-weight:700}
 
 /* 입력권 상태·예시 리포트·내 리포트 목록(1.9.95) */
 .et .rp-rights{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--sub);font-size:13px;color:var(--ink-2)}

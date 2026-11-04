@@ -8,8 +8,6 @@ import type { ScoresInput } from "@/lib/dto";
 import { csatReleaseOn } from "@/lib/correction";
 import { correctionInputClosed } from "@/lib/csat-release";
 import { EXAM } from "@/lib/exam";
-import { onlyReportAfterCorrection } from "@/lib/superseded";
-import { getReportId, setReportId } from "@/lib/report-ref";
 
 import type { ScoreDefaults } from "./score-form";
 
@@ -114,8 +112,8 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     }
     step = "전체 분석";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);
+    // 새 리포트는 서버 입력 상태의 현재 리포트가 되므로 따로 기억하지 않는다(계정 기준, 2026-11-04 사용자 결정)
     if (!report.ok) return fail(partial(report.code));
-    await setReportId(report.value.report_id);
   } catch (e) {
     // 성적은 저장됐고 분석만 못 한 경우: 어떤 실패든 같은 부분 성공 안내. 성적을 다시 저장하라고 하지 않는다
     // (다시 저장하면 새 성적 기록이 생기고 하루 한도를 쓴다). 자동 재시도·새 키도 만들지 않는다
@@ -132,75 +130,6 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     throw e;
   }
   // 자바스크립트 없이 보낸 양식은 basePath 가 붙지 않은 주소로 돌아가므로 직접 붙인다
-  const viaJs = (await headers()).has("next-action");
-  redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
-}
-
-export type RefreshState = { error: string } | null;
-
-/**
- * 전체 위치 다시 계산: 저장된 리포트의 profile_id·report_id·현재 report_version 으로 overall.analyze 만 부른다.
- * score-profile.create(submitScores)를 부르지 않으므로 성적을 다시 저장하지 않고 입력권·정정권도 쓰지 않는다
- * (담당자 후속 요청 v3 §3). 리포트 번호는 이 브라우저의 httpOnly 쿠키에서만 읽고, 소유권은 서버가 report.read 로 확인한다.
- * 요청 키는 화면을 그릴 때 새로 만든 값 — 예전 키를 다시 쓰면 보류 응답이 재생될 수 있다. 버전 충돌(409)은 재시도하지 않는다
- */
-export async function refreshOverall(_prev: RefreshState, fd: FormData): Promise<RefreshState> {
-  const key = String(fd.get("idem") ?? "");
-  if (!/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
-  const reportId = await getReportId();
-  if (!reportId) return { error: MESSAGE.report_not_found };
-  const caller = await getCaller();
-  const src = source();
-  try {
-    const report = await src.readReport(caller, reportId);
-    if (!report) return { error: MESSAGE.report_not_found };
-    const r = await src.analyzeOverall(caller, { profile_id: report.profile_id, report_id: report.report_id, expected_version: report.report_version }, `${key}:refresh`);
-    if (!r.ok)
-      return {
-        error:
-          r.status === 409 || r.code === "revision_conflict"
-            ? "다른 화면에서 리포트가 먼저 바뀌었습니다. 화면을 새로 고쳐 최신 리포트를 확인해 주세요."
-            : `전체 위치를 다시 계산하지 못했습니다. 저장한 성적과 리포트는 그대로입니다. (사유 코드 ${r.code})`,
-      };
-  } catch (e) {
-    if (e instanceof AccessDenied) return { error: "로그인이 필요합니다. 다시 로그인한 뒤 눌러 주세요." };
-    if (e instanceof ConnectionError)
-      return {
-        error:
-          e.kind === "rate_limited"
-            ? `요청이 많아 잠시 제한되었습니다. 저장한 성적과 리포트는 그대로입니다.${e.retryAt ? ` ${seoulTime(e.retryAt.toISOString())} 이후 다시 눌러 주세요.` : " 잠시 뒤 다시 눌러 주세요."}`
-            : `정시터치 서버에 연결할 수 없어 계산하지 못했습니다. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${e.code})`,
-      };
-    throw e;
-  }
-  const viaJs = (await headers()).has("next-action");
-  redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
-}
-
-export type PickState = { error: string } | null;
-
-/**
- * 본인 리포트 목록에서 고른 리포트를 이 브라우저에서 열기(다른 기기에서 저장한 리포트). 서버 report.read 로 본인
- * 것인지 다시 확인한 뒤에만 HttpOnly 쿠키에 담는다. 성적 저장·분석은 부르지 않는다(입력권을 쓰지 않음).
- * 서버 동작은 Next 의 같은 출처 확인(CSRF)을 거친다
- */
-export async function pickReport(_prev: PickState, fd: FormData): Promise<PickState> {
-  const id = String(fd.get("report_id") ?? "");
-  if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(id)) return { error: "고른 리포트를 확인할 수 없습니다. 화면을 새로 고쳐 주세요." };
-  try {
-    const src = source();
-    const caller = await getCaller();
-    // 정정 입력 뒤에는 정정 전 리포트를 열지 않는다(2026-10-28 사용자 결정)
-    const only = onlyReportAfterCorrection(await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null));
-    if (only && id !== only) return { error: "성적을 정정한 뒤에는 정정한 리포트만 볼 수 있습니다." };
-    const report = await src.readReport(caller, id);
-    if (!report) return { error: "이 계정의 리포트가 아니거나 찾을 수 없습니다." };
-    await setReportId(report.report_id);
-  } catch (e) {
-    if (e instanceof AccessDenied) return { error: "로그인이 필요합니다. 다시 로그인한 뒤 골라 주세요." };
-    if (e instanceof ConnectionError) return { error: `정시터치 서버에 연결할 수 없어 열지 못했습니다. 잠시 뒤 다시 골라 주세요. (사유 코드 ${e.code})` };
-    throw e;
-  }
   const viaJs = (await headers()).has("next-action");
   redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
 }

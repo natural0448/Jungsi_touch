@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 // 정정 입력 뒤에는 현재 리포트 하나만 보인다(2026-10-28 사용자 결정). 실제 TypeScript 모듈을 그대로 실행한다.
-const { onlyReportAfterCorrection } = await import("../src/lib/superseded.ts");
+const { onlyReportAfterCorrection, correctionExhausted } = await import("../src/lib/superseded.ts");
 
 test("after a correction only the current report stays; otherwise nothing is hidden", () => {
   assert.equal(onlyReportAfterCorrection({ correction_used: 1, current_report_id: "r-new" }), "r-new");
@@ -29,4 +29,13 @@ test("own list follows server is_current per stage when given, otherwise the sta
   assert.equal(allNull.byServer, true);
   // 빈 목록
   assert.deepEqual(visibleOwnItems([], "b").items, []);
+});
+
+test("the '정정 입력 횟수 소진' tag appears only after every granted correction is used", () => {
+  assert.equal(correctionExhausted({ correction_used: 1, correction_granted: 1, correction_request_remaining: 0 }), true);
+  assert.equal(correctionExhausted({ correction_used: 0, correction_granted: 0, correction_request_remaining: 1 }), false);
+  assert.equal(correctionExhausted({ correction_used: 0, correction_granted: 1, correction_request_remaining: 0 }), false);
+  assert.equal(correctionExhausted({ correction_used: 1, correction_granted: 2, correction_request_remaining: 0 }), false);
+  assert.equal(correctionExhausted({ correction_used: 1, correction_granted: 1, correction_request_remaining: 1 }), false);
+  assert.equal(correctionExhausted(null), false);
 });

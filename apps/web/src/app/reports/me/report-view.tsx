@@ -8,7 +8,7 @@ import type { PickedItem } from "@/lib/shortlist";
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
 
 const PENDING: Record<string, string> = {
-  total_model_missing: "이 리포트를 저장할 때는 전체 누백 분포 자료가 서비스에 연결되어 있지 않았습니다. 계산이 진행 중인 것이 아니며, 자료가 연결된 뒤 '전체 위치 다시 계산'을 누르면 이 자리에 표시됩니다. 같은 성적을 다시 저장할 필요는 없습니다.",
+  total_model_missing: "이 리포트를 저장할 때는 전체 누백 분포 자료가 서비스에 연결되어 있지 않았습니다. 계산이 진행 중인 것이 아닙니다. 같은 성적을 다시 저장할 필요는 없으며, 고객센터에 알려 주시면 확인해 드립니다.",
   total_model_not_approved: "전체 누적 곡선을 검수하고 있습니다.",
   score_outside_domain: "입력한 총점이 곡선의 검증 범위 밖이라 위치를 계산하지 않았습니다.",
 };

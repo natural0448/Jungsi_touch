@@ -21,3 +21,8 @@ export function visibleOwnItems(items: OwnReportListDto["items"], only: string |
 export function onlyReportAfterCorrection(st: Pick<ScoreInputStatusDto, "correction_used" | "current_report_id"> | null): string | null {
   return st && st.correction_used > 0 && st.current_report_id ? st.current_report_id : null;
 }
+
+/** 이 단계의 정정 입력을 다 썼나(승인받은 정정을 모두 쓰고 더 요청할 수도 없음). 상태를 모르면 붙이지 않는다(2026-11-04 사용자 결정) */
+export function correctionExhausted(st: Pick<ScoreInputStatusDto, "correction_used" | "correction_granted" | "correction_request_remaining"> | null): boolean {
+  return !!st && st.correction_used > 0 && st.correction_used >= st.correction_granted && st.correction_request_remaining <= 0;
+}
