@@ -99,7 +99,9 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
                 <b className="num">{res.total_schools}</b>개 대학 · <b className="num">{res.total_units}</b>개 모집단위
                 {res.total_pending > 0 && <> · 모집행 연결 확인 중 <b className="num">{res.total_pending}</b>건</>}
                 <small>
-                  {" "}· 정리본 갱신 {seoulDate(snap.ready.generated_at)} · 공식 발표 기준일 {asOfDate(snap.ready.source_as_of) ?? "확인 중"}
+                  {" "}· 정리본 갱신 {seoulDate(snap.ready.generated_at)}
+                  {/* 기준일이 없으면 '확인 중'을 쓰지 않고 항목을 뺀다(2026-11-05 사용자 결정: 안내문의 '확인 중'도 제거) */}
+                  {asOfDate(snap.ready.source_as_of) && <> · 공식 발표 기준일 {asOfDate(snap.ready.source_as_of)}</>}
                 </small>
               </span>
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
