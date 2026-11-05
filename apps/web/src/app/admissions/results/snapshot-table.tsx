@@ -12,7 +12,7 @@ import { ScrollHint } from "./scroll-hint";
   값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
   발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
   고르는 규칙은 lib/p1-published-stats.ts). ① 은 50%컷 자리, ② 는 70%컷 자리로 통계마다 칸이 고정된다(같은 날 정정). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
-  값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번'.
+  '확인 중' 꼬리표·확인 사유는 보이지 않는다(2026-11-04 사용자 결정, 자료의 status·reason 은 보존). 예비번호는 '번'.
   추정 2열만 계산하고 발표 칸을 덮지 않는다: 추정 총 지원자 = 모집인원×경쟁률(반올림),
   추정 탈락자 = 추정 총 지원자 − (모집인원 + 최종 합격 예비번호)(2026-11-02 사용자 결정, 이전 산식의 충원인원 대신).
   추정 탈락자는 표에 보이는 예비번호(정수, '번')가 있을 때만 계산한다.
@@ -39,27 +39,19 @@ const REASON: Record<string, string> = {
 };
 export const reasonText = (code: string | null) => (code ? (REASON[code] ?? code) : null);
 
-/** 확인 중 표시(값 옆 작은 꼬리표). 사유는 title 과 화면 읽기 프로그램용 글자로 함께 */
-function Hold({ code }: { code: string | null }) {
-  const t = reasonText(code) ?? "확인 중";
-  return (
-    <span className="rs-hold" title={t}>
-      확인 중<span className="sr">: {t}</span>
-    </span>
-  );
-}
-
+/**
+ * 값 칸. '확인 중' 꼬리표와 확인 사유는 보이지 않는다(2026-11-04 사용자 결정: 1페이지 '확인 중' 꼬리표 전부 제거).
+ * 값은 발표 그대로, 값이 없으면 상태와 상관없이 '─'(null 은 0 이 아니다). 자료의 status·reason 은 그대로 보존된다.
+ * 숫자가 아닌 원문 값(pending_value_type)은 값 옆에 '원문'만 적는다.
+ */
 function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
-  if (c.v === null) {
-    const t = reasonText(c.r);
-    return c.s === "pending_metadata" ? <Hold code={c.r} /> : <span className="unpub" title={t ?? undefined}>─</span>;
-  }
+  if (c.v === null) return <span className="unpub">─</span>;
   const unit = unitOverride ?? c.u;
   return (
     <>
       <b className="num">{c.v}</b>
       {unit && <small> {unit}</small>}
-      {c.s === "pending_value_type" ? <span className="rs-hold" title={reasonText(c.r) ?? undefined}>원문</span> : c.s.startsWith("pending") && <Hold code={c.r} />}
+      {c.s === "pending_value_type" && <span className="rs-hold">원문</span>}
     </>
   );
 }
@@ -69,7 +61,6 @@ function RankValue({ c }: { c: Cell }) {
   return <>
     <Value c={view.cell} />
     {view.qualified && <small className="rs-bs">이 필드의 서비스 자격 확인</small>}
-    {view.qualified && view.rawPending && <small className="rs-bs" title={reasonText(c.r) ?? undefined}>원자료 메타 상태: 확인 중</small>}
   </>;
 }
 
@@ -142,11 +133,11 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     <td className="r"><Value c={r.rc} /></td>
                     <td className="r"><Value c={r.cr.v === null ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
                     <td className="r derived">
-                      {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.heldA && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
+                      {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
                     <td className="r"><RankValue c={r.rk} /></td>
                     <td className="r derived">
-                      {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
+                      {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>
                     <td className="r"><Stat s={ps[0]} closed={publishedScoreNullLabel(r.c50)} /></td>
                     <td className="r"><Stat s={ps[1]} closed={publishedScoreNullLabel(r.c70)} /></td>

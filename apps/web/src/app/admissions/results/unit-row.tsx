@@ -10,7 +10,11 @@ import { loadUnitRows, type UnitRows } from "./unit-actions";
 export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: R27Summary | null; ratio27: string | null; eligibility27?: string | null };
 /* ratio27: 2027 수능 영역별 반영비율 한 줄(예: "국 30 · 수 40 · 영 20 · 탐 10"). 담당자 자료 연결 전에는 null 이라 칸을 그리지 않는다 */
 
-/** 2027 모집 칸(11-02 사용자 확인 문구). 이월 미정은 0 이 아니라 '이월 시 선발', 모르는 상태는 '확인 중' */
+/**
+ * 2027 모집 칸(11-02 사용자 확인 문구). 이월 미정은 0 이 아니라 '이월 시 선발', 모르는 상태는 '인원 확인 중'.
+ * 값 옆 꼬리표('최초'·'단계 확인 중'·'확인')는 붙이지 않는다(2026-11-04 사용자 결정: 1페이지 '확인 중' 꼬리표 전부 제거).
+ * 단계·출처 상태(initial·stageUnknown·check)는 자료에 그대로 있고 화면만 그리지 않는다.
+ */
 function V({ c }: { c: R27Summary }) {
   if (c.hold) return <span className="unpub" title="2027학년도 모집인원을 모집요강 원문과 대조하고 있습니다">인원 확인 중</span>;
   if (c.v === null) return <b title={c.note ?? undefined}>이월 시 선발</b>;
@@ -19,9 +23,6 @@ function V({ c }: { c: R27Summary }) {
       <b className="num">{c.v}</b>
       <small>명</small>
       {c.carry && <b> + 이월</b>}
-      {c.initial && <small> 최초</small>}
-      {c.stageUnknown && <small> 단계 확인 중</small>}
-      {c.check && <i className="q" title="값은 모집요강 그대로이고 단위·기준일 확인이 남았습니다">확인</i>}
     </span>
   );
 }
