@@ -45,6 +45,7 @@ export class P1CoordinationError extends Error {
 }
 const HASH = /^[a-f0-9]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+export const MAX_MIN_FRESH_MS = 300000;
 const forbidden = new Set(["authorization", "accesstoken", "refreshtoken", "cookie", "caller", "scores", "reportid", "cursor", "subjectid", "session", "jwt", "secret", "userid", "ownerid", "role", "roles", "permission", "permissions", "capabilities", "entitlement", "entitlements", "claims", "aal", "paidpassid", "paiduntil", "__proto__", "prototype", "constructor"]);
 export function coordinationError(code: string): never { throw new P1CoordinationError(code); }
 function integer(v: unknown, low = 0): v is number { return Number.isSafeInteger(v) && Number(v) >= low; }
@@ -153,8 +154,9 @@ export class P1CoordinationCore {
     this.store = store; this.clock = clock; this.nonce = nonce;
   }
   private now(): number { const now = this.clock(); if (!integer(now)) coordinationError("p1_coordinator_clock_invalid"); return now; }
-  private fresh(s: CoordinatorState, now: number): boolean {
-    return s.head !== null && s.checkedAt !== null && now >= s.checkedAt && now - s.checkedAt < 600000 && Date.parse(s.head.expires_at) > now;
+  /** margin: a cached check must stay fresh this much longer. Warm steps pass one so a step started near the 10-minute edge does not lapse mid-step (11-06 seq18). */
+  private fresh(s: CoordinatorState, now: number, margin = 0): boolean {
+    return s.head !== null && s.checkedAt !== null && now >= s.checkedAt && now - s.checkedAt < 600000 - margin && Date.parse(s.head.expires_at) > now + margin;
   }
   private view(s: CoordinatorState, now: number): CoordinationView {
     const fresh = this.fresh(s, now), headLease = s.headLease && s.headLease.expiresAt > now, warmLease = s.warm?.lease && s.warm.lease.expiresAt > now;
@@ -172,12 +174,13 @@ export class P1CoordinationCore {
       writePrefix: kind === "warm" ? `p1c:v1:${generation}:f${s.fence}:${nonce}` : null };
   }
   inspect(): CoordinationView { return this.view(coordinatorState(this.store.read()), this.now()); }
-  claimHead(afterRevision?: number): HeadClaim {
+  claimHead(afterRevision?: number, minFreshMs = 0): HeadClaim {
     const now = this.now();
     return this.store.atomic<HeadClaim>(raw => {
       const s = coordinatorState(raw);
       if (afterRevision !== undefined && (!integer(afterRevision) || afterRevision > s.headRevision)) coordinationError("p1_coordinator_revision_invalid");
-      if (this.fresh(s, now) && (afterRevision === undefined || s.headRevision > afterRevision)) return { state: s, result: { state: "cached", view: this.view(s, now) } };
+      if (!integer(minFreshMs) || minFreshMs > MAX_MIN_FRESH_MS) coordinationError("p1_coordinator_request_invalid");
+      if (this.fresh(s, now, minFreshMs) && (afterRevision === undefined || s.headRevision > afterRevision)) return { state: s, result: { state: "cached", view: this.view(s, now) } };
       if (s.headLease && s.headLease.expiresAt > now) return { state: s, result: { state: "busy", view: this.view(s, now) } };
       s.headLease = this.token(s, "head", now, null, s.headRevision);
       return { state: s, result: { state: "claimed", token: s.headLease, view: this.view(s, now) } };
@@ -261,7 +264,7 @@ export class P1CoordinationCore {
 
 export type CoordinatorCommand =
   | { op: "inspect" }
-  | { op: "claimHead"; afterRevision?: number }
+  | { op: "claimHead"; afterRevision?: number; minFreshMs?: number }
   | { op: "commitHead"; token: CoordinationToken; head: SnapshotHeadDto }
   | { op: "failHead"; token: CoordinationToken }
   | { op: "claimWarm"; publication: string }
@@ -297,11 +300,11 @@ function commandToken(value: unknown): CoordinationToken {
 export async function dispatchP1Command(core: P1CoordinationCore, command: unknown): Promise<unknown> {
   if (!command || typeof command !== "object" || Array.isArray(command)) coordinationError("p1_coordinator_request_invalid");
   const b = command as Record<string, unknown>, op = b.op;
-  const fields: Record<string, string[]> = { inspect: ["op"], claimHead: ["op", "afterRevision"], commitHead: ["op", "token", "head"], failHead: ["op", "token"], claimWarm: ["op", "publication"], commitWarm: ["op", "token", "progress", "ready"], failWarm: ["op", "token"] };
-  if (typeof op !== "string" || !Object.hasOwn(fields, op) || Object.keys(b).some(k => !fields[op].includes(k)) || fields[op].some(k => k !== "afterRevision" && !(k in b))) coordinationError("p1_coordinator_request_invalid");
+  const fields: Record<string, string[]> = { inspect: ["op"], claimHead: ["op", "afterRevision", "minFreshMs"], commitHead: ["op", "token", "head"], failHead: ["op", "token"], claimWarm: ["op", "publication"], commitWarm: ["op", "token", "progress", "ready"], failWarm: ["op", "token"] };
+  if (typeof op !== "string" || !Object.hasOwn(fields, op) || Object.keys(b).some(k => !fields[op].includes(k)) || fields[op].some(k => k !== "afterRevision" && k !== "minFreshMs" && !(k in b))) coordinationError("p1_coordinator_request_invalid");
   switch (op) {
     case "inspect": return core.inspect();
-    case "claimHead": return core.claimHead(b.afterRevision as number | undefined);
+    case "claimHead": return core.claimHead(b.afterRevision as number | undefined, (b.minFreshMs ?? 0) as number);
     case "commitHead": return core.commitHead(commandToken(b.token), b.head, await digest(b.head));
     case "failHead": return core.failHead(commandToken(b.token));
     case "claimWarm": return core.claimWarm(b.publication as string);
@@ -329,7 +332,7 @@ export function p1CoordinatorClient(stub: { fetch(request: Request): Promise<Res
   }
   return {
     inspect: () => invoke<CoordinationView>({ op: "inspect" }),
-    claimHead: (afterRevision?: number) => invoke<HeadClaim>({ op: "claimHead", ...(afterRevision === undefined ? {} : { afterRevision }) }),
+    claimHead: (afterRevision?: number, minFreshMs?: number) => invoke<HeadClaim>({ op: "claimHead", ...(afterRevision === undefined ? {} : { afterRevision }), ...(minFreshMs === undefined ? {} : { minFreshMs }) }),
     commitHead: (token: CoordinationToken, head: SnapshotHeadDto) => invoke<CommitResult>({ op: "commitHead", token, head }),
     failHead: (token: CoordinationToken) => invoke<CoordinationView>({ op: "failHead", token }),
     claimWarm: (publication: string) => invoke<WarmClaim>({ op: "claimWarm", publication }),

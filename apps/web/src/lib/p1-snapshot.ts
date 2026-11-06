@@ -15,6 +15,8 @@ export type { Cell, Row, School } from "./p1-shape";
 const FORMAT = 3;
 const R27_SNAPSHOT_SCHEMA = "jungsi.history-snapshot/v2";
 const PARTS_PER_STEP = 6;
+/** Equals the warm lease (120s): no step can outlive it, so a check this fresh cannot lapse before the step commits. */
+const WARM_HEAD_MARGIN_MS = 120000;
 const SCHOOLS_PER_STEP = 12;
 const INDEX_SCHOOLS_PER_STEP = 20;
 const MAX_FRAGMENT_READS = 20;
@@ -65,11 +67,11 @@ const pause = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, m
  * Polling never holds another request's I/O promise. A busy boundary stays pending, never stale-ready.
  * (10-24 QA: 700ms was shorter than a cold head read, so overlapping visitors saw "checking"; the page also retries itself.)
  */
-async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Client, afterRevision?: number): Promise<CoordinationView | null> {
-  let claim = await coordinator.claimHead(afterRevision);
+async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Client, afterRevision?: number, minFreshMs?: number): Promise<CoordinationView | null> {
+  let claim = await coordinator.claimHead(afterRevision, minFreshMs);
   for (const ms of [100, 200, 400, 800, 1000, 1000]) {
     if (claim.state !== "busy") break;
-    await pause(ms); claim = await coordinator.claimHead(afterRevision);
+    await pause(ms); claim = await coordinator.claimHead(afterRevision, minFreshMs);
   }
   if (claim.state === "busy") return null;
   if (claim.state === "cached") return claim.view;
@@ -291,7 +293,8 @@ export async function warmStep(src: JungsiSource, caller: Caller): Promise<WarmS
 }
 async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<WarmStatus> {
   const mode = src.kind, { kv: store, coordinator } = await services(mode);
-  const view = await checkedHead(src, caller, coordinator);
+  // A step reads up to PARTS_PER_STEP parts and must commit before the 10-minute head check lapses (11-06 seq18 p1_head_check_required).
+  const view = await checkedHead(src, caller, coordinator, undefined, WARM_HEAD_MARGIN_MS);
   if (!view?.head) return running(initialProgress({ snapshot_id: "checking", publication_sha256: "" } as SnapshotHeadDto), 0, 1000);
   const head = view.head, pub = await pubKeyOf(head), claim = await coordinator.claimWarm(head.publication_sha256);
   if (claim.state === "ready") {

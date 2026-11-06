@@ -138,6 +138,25 @@ test("expired head cannot serve ready or start warm", async () => fixture(async 
   f.advance(600001); assert.equal((await f.client.inspect()).ready, null);
   await denied(f.client.claimWarm(H), "p1_head_check_required");
 }));
+test("warm margin renews a check near the 10-minute edge so a step cannot lapse mid-commit (11-06 seq18)", async () => fixture(async f => {
+  await seed(f.client); f.advance(600000 - 110000);
+  // Plain visitors still reuse the check; a warm step asking for 120s left gets one renewal permit.
+  assert.equal((await f.client.claimHead()).state, "cached");
+  const results = await Promise.all(Array.from({ length: 5 }, () => f.client.claimHead(undefined, 120000)));
+  assert.equal(results.filter(x => x.state === "claimed").length, 1); assert.equal(results.filter(x => x.state === "busy").length, 4);
+  await f.client.commitHead(results.find(x => x.state === "claimed").token, head());
+  assert.equal((await f.client.claimHead(undefined, 120000)).state, "cached");
+  // The renewed check survives a full step: claim, then commit 119s later.
+  const w = await f.client.claimWarm(H); f.advance(119000);
+  await f.client.commitWarm(w.token, { phase: "parts" });
+  // Without the margin the same timing fails, as seen in production.
+  await f.client.claimHead(); f.advance(600000 - 119000 - 1000);
+  const late = await f.client.claimWarm(H); assert.equal(late.state, "claimed"); f.advance(20000);
+  await denied(f.client.commitWarm(late.token, { phase: "parts" }), "p1_head_check_required");
+}));
+test("minFreshMs must be a bounded integer", async () => fixture(async f => {
+  for (const bad of [-1, 300001, 1.5, "120000"]) await denied(f.client.claimHead(undefined, bad), "p1_coordinator_request_invalid");
+}));
 test("private values and unexpected RPC keys cannot enter shared storage", async () => fixture(async f => {
   await seed(f.client); const c = await f.client.claimWarm(H), before = f.raw();
   for (const progress of [{ accessToken: "SYNTHETIC-user-token" }, { scores: { korean: 99 } }, { nested: { owner_id: "SYNTHETIC-owner" } }, { roles: ["admin"] }, { nested: { permissions: ["SYNTHETIC-permission"] } }, { claims: { aal: "aal2" } }]) await denied(f.client.commitWarm(c.token, progress), "p1_coordinator_private_value");
