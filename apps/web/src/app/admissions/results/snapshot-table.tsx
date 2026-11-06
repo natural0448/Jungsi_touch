@@ -56,12 +56,9 @@ function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
   );
 }
 
+/** 예비번호 한 칸: 서비스 자격이 확인된 값은 숫자('번')로만 보인다. 자격 확인 문구는 그리지 않는다(2026-11-05 사용자 결정) */
 function RankValue({ c }: { c: Cell }) {
-  const view = rankDisplayModel(c);
-  return <>
-    <Value c={view.cell} />
-    {view.qualified && <small className="rs-bs">이 필드의 서비스 자격 확인</small>}
-  </>;
+  return <Value c={rankDisplayModel(c).cell} />;
 }
 
 /** 발표 성적 한 칸: 통계 이름 + 값. 대상 집단은 쓰지 않고, 학생부 등급일 때만 기준을 붙인다(2026-10-28 사용자 결정) */
