@@ -45,15 +45,22 @@ export function WarmRunner() {
   const run = async () => {
     setBusy(true);
     setNote(null);
+    // 멈춘 뒤 다시 누르면 첫 결과가 올 때까지 '시작하는 중…'을 보인다
+    setLast((p) => (p && !p.ok && p.code === "stopped" ? null : p));
     stop.current = false;
     let tries = 0;
+    // 사람이 멈추면 마지막 진행 표시 대신 '멈췄습니다' 안내를 남긴다
+    const stopped = () => {
+      setNote(null);
+      setLast({ ok: false, code: "stopped", retryable: false });
+    };
     for (;;) {
-      if (stop.current) break;
+      if (stop.current) { stopped(); break; }
       const ctl = new AbortController();
       live.current = ctl;
       const r = await step(ctl);
       live.current = null;
-      if (stop.current) break;
+      if (stop.current) { stopped(); break; }
       if (!r.ok) {
         if (r.retryable && tries < MAX_RETRIES) {
           tries++;

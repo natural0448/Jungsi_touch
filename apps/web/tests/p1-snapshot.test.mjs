@@ -325,6 +325,23 @@ test("warm step route checks origin and fetch header before running the admin-ga
   assert.match(runner, /signal: ctl\.signal/);
   assert.match(runner, /live\.current\?\.abort\(\)/);
   assert.ok(!/import \{ runWarmStep/.test(runner), "runner must not call the queued server action");
+  // 멈추면 마지막 진행 표시 대신 '멈췄습니다' 안내가 남는다(seq23 확인 뒤 보완)
+  assert.equal((runner.match(/if \(stop\.current\) \{ stopped\(\); break; \}/g) ?? []).length, 2);
+  assert.match(runner, /setLast\(\{ ok: false, code: "stopped", retryable: false \}\)/);
+});
+
+test("p1 value cell shows no tag for pending_value_type; reference conversion is labelled as reference", () => {
+  const table = readFileSync(new URL("../src/app/admissions/results/snapshot-table.tsx", import.meta.url), "utf8");
+  assert.ok(!table.includes("rs-hold"), "1페이지 값 옆 꼬리표('확인 중'·'원문')는 보이지 않는다(2026-11-08)");
+  assert.ok(!/>원문</.test(table));
+  const parts = readFileSync(new URL("../src/app/admissions/possibilities/parts.tsx", import.meta.url), "utf8");
+  assert.match(parts, /내 참고 환산점수/);
+  const reasons = readFileSync(new URL("../src/components/offering-parts.tsx", import.meta.url), "utf8");
+  for (const code of ["reference_conversion_not_production_approved", "reference_conversion_unavailable", "reference_conversion_missing",
+    "reference_exam_context_mismatch", "reference_offering_context_mismatch", "reference_rule_context_mismatch", "reference_rule_unsupported",
+    "reference_required_input_missing", "reference_inquiry_category_unsupported", "reference_score_outside_domain"]) {
+    assert.match(reasons, new RegExp(`\\b${code}: "`), code);
+  }
 });
 
 

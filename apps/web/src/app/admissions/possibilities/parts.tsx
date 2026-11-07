@@ -89,9 +89,11 @@ function StatusStrip({ a }: { a: AssessmentDto }) {
 function ConversionCard({ a }: { a: AssessmentDto }) {
   const c = a.conversion;
   const score = c?.converted_score ?? a.converted_score;
+  const reference = c?.reason_code === "reference_conversion_not_production_approved"
+    || a.reason_code === "reference_conversion_not_production_approved";
   return (
-    <section className="card" aria-label="내 환산점수">
-      <h3>내 환산점수</h3>
+    <section className="card" aria-label={reference ? "내 참고 환산점수" : "내 환산점수"}>
+      <h3>{reference ? "내 참고 환산점수" : "내 환산점수"}</h3>
       {score ? (
         <>
           <div className="big num">
@@ -101,7 +103,9 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
           <p>
             {c?.score_scope && <>반영 {c.score_scope} · </>}
             {c?.score_basis && <span className="tag">{scoreBasisLabel(c.score_basis)}</span>}
+            {reference && <span className="tag">학교 수능 반영분 · 참고</span>}
           </p>
+          {reference && <p>{reasonText("reference_conversion_not_production_approved")}</p>}
         </>
       ) : (
         <>

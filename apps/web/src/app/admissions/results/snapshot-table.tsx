@@ -42,7 +42,7 @@ export const reasonText = (code: string | null) => (code ? (REASON[code] ?? code
 /**
  * 값 칸. '확인 중' 꼬리표와 확인 사유는 보이지 않는다(2026-11-04 사용자 결정: 1페이지 '확인 중' 꼬리표 전부 제거).
  * 값은 발표 그대로, 값이 없으면 상태와 상관없이 '─'(null 은 0 이 아니다). 자료의 status·reason 은 그대로 보존된다.
- * 숫자가 아닌 원문 값(pending_value_type)은 값 옆에 '원문'만 적는다.
+ * 숫자가 아닌 원문 값(pending_value_type)도 값만 보인다. '원문' 꼬리표는 붙이지 않는다(2026-11-08 사용자 결정: 꼬리표는 화면에 보이지 않음).
  */
 function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
   if (c.v === null) return <span className="unpub">─</span>;
@@ -51,7 +51,6 @@ function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
     <>
       <b className="num">{c.v}</b>
       {unit && <small> {unit}</small>}
-      {c.s === "pending_value_type" && <span className="rs-hold">원문</span>}
     </>
   );
 }
