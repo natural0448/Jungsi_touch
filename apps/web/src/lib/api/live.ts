@@ -236,6 +236,11 @@ async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
     await codeOf(res, path, request.sensitive);
     throw new SnapshotChanged();
   }
+  // 546(함수 자원 한도로 실행 인스턴스가 내려감): 같은 인스턴스의 다른 요청 때문에 함께 끊길 수 있다(11-08 seq24 01:06).
+  // 분할 자체의 문제가 아니므로 일시 장애로 올려 재-warm 이 같은 단계부터 다시 받게 한다
+  if (res.status === 546) {
+    throw new ConnectionError("unavailable", (await codeOf(res, path, request.sensitive)) ?? "backend_worker_limit");
+  }
   if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path, request.sensitive)) ?? ""}: ${pathTemplate(path)}`);
   return new Uint8Array(await res.arrayBuffer());
 }

@@ -309,6 +309,18 @@ test("bad pins and interrupted publication preserve fail-closed state", async t 
   w.source.readSnapshotPart = async () => { throw new SnapshotChanged(); };
   assert.equal((await w.module.warmStep(w.source, w.caller)).state, "changed");
 });
+test("a worker-limit (546) part read surfaces as a retryable outage and the next step resumes", async t => {
+  const { ConnectionError } = await import("../src/lib/api/source.ts");
+  const w = await world(t), read = w.source.readSnapshotPart; let fail = true;
+  w.source.readSnapshotPart = async (...args) => { if (fail) { fail = false; throw new ConnectionError("unavailable", "backend_worker_limit"); } return read(...args); };
+  await assert.rejects(w.module.warmStep(w.source, w.caller), e => e instanceof ConnectionError && e.kind === "unavailable");
+  assert.equal(w.state().ready, null);
+  assert.equal((await w.prepare()).snapshot_id, w.head.snapshot_id);
+  const live = readFileSync(new URL("../src/lib/api/live.ts", import.meta.url), "utf8");
+  assert.match(live, /res\.status === 546\) \{\s*throw new ConnectionError\("unavailable"/);
+  const actions = readFileSync(new URL("../src/app/management/p1-snapshot/actions.ts", import.meta.url), "utf8");
+  assert.match(actions, /retryable: e\.kind === "rate_limited" \|\| e\.kind === "unavailable"/);
+});
 test("source still authorizes each admin action before claiming a warm lease", () => {
   const actions = readFileSync(new URL("../src/app/management/p1-snapshot/actions.ts", import.meta.url), "utf8");
   assert.ok(actions.indexOf("await isEdutouchAdmin()") < actions.indexOf("await warmStep("));
