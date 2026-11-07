@@ -647,3 +647,20 @@ test("the 2027 quota summary shows source wording and never turns carryover or u
   assert.equal(r27Summary(q({ v: "12", cs: "pending_metadata" })).check, true);
   assert.match(r27Summary(q({ v: "3", ct: "수시 미충원 시 이월" })).note, /모집요강: 수시 미충원 시 이월/);
 });
+
+test("schoolUnitRows answers many units in one read with the same rule as unitRows", async t => {
+  const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
+    rowsOf: (_i, u) => [
+      r27Row(u, "k27a", { quota_value: 12, quota_literal_state: "conditional_carryover", quota_stage: "initial" }, [[2026, "p26a"], [2025, "p25a"]]),
+      r27Row(u, "k27b", { quota_value: 3, quota_stage: "initial" }),
+      pastRow(u, 2026, "p26a"), pastRow(u, 2025, "p25a"), pastRow(u, 2024, "alone"),
+    ] });
+  const ready = await w.prepare(), rows = (await w.module.searchSnapshot(ready, {})).schools[0].rows;
+  const { unitKey } = await import("../src/lib/p1-shape.ts");
+  const keys = [...new Set(rows.map(unitKey)), "pk:alone", "pk:missing"];
+  const all = await w.module.schoolUnitRows(ready, "TEST0", keys);
+  assert.deepEqual(Object.keys(all).sort(), [...keys].sort());
+  for (const k of keys) assert.deepEqual(all[k], await w.module.unitRows(ready, "TEST0", k));
+  assert.deepEqual(all["pk:alone"], []); assert.deepEqual(all["pk:missing"], []);
+  assert.deepEqual(all[unitKey(rows.find(r => r.pk === "k27a"))].map(r => r.y).sort(), [2025, 2026, 2027]);
+});

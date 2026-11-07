@@ -533,7 +533,15 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
   return { total_schools: order.length, total_units: units, total_pending: pending, page, pages, schools };
 }
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
+  return (await schoolUnitRows(ready, schoolId, [key]))[key] ?? [];
+}
+/** 한 학교의 여러 모집단위를 한 번에. 키마다 unitRows 와 같은 규칙(현재 모집 연결이 없으면 빈 배열)을 쓴다 */
+export async function schoolUnitRows(ready: Ready, schoolId: string, keys: readonly string[]): Promise<Record<string, Row[]>> {
   const allRows = await school(ready, schoolId);
-  const rows = allRows.filter(r => unitKey(r) === key);
-  return ready.schema_version === R27_SNAPSHOT_SCHEMA && !hasCurrentRecruitment(rows, currentScopeCounts(allRows)) ? [] : rows;
+  const isR27 = ready.schema_version === R27_SNAPSHOT_SCHEMA, scopes = isR27 ? currentScopeCounts(allRows) : new Map<string, number>();
+  const wanted = new Set(keys), by = new Map<string, Row[]>();
+  for (const r of allRows) { const k = unitKey(r); if (wanted.has(k)) by.set(k, [...(by.get(k) ?? []), r]); }
+  const out: Record<string, Row[]> = {};
+  for (const k of wanted) { const rows = by.get(k) ?? []; out[k] = isR27 && !hasCurrentRecruitment(rows, scopes) ? [] : rows; }
+  return out;
 }
