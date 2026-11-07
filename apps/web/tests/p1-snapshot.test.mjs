@@ -315,6 +315,17 @@ test("source still authorizes each admin action before claiming a warm lease", (
   const entry = readFileSync(new URL("../worker.mjs", import.meta.url), "utf8");
   assert.match(entry, /export \{ default \} from "\.\/.open-next\/worker.js"/);
 });
+test("warm step route checks origin and fetch header before running the admin-gated step; runner times out and retries", () => {
+  const route = readFileSync(new URL("../src/app/management/p1-snapshot/step/route.ts", import.meta.url), "utf8");
+  const run = route.indexOf("await runWarmStep()");
+  assert.ok(run > 0 && route.indexOf("SAME_SITE.has(host)") < run && route.indexOf('"x-p1-warm"') < run);
+  assert.ok(!/export async function GET/.test(route));
+  const runner = readFileSync(new URL("../src/app/management/p1-snapshot/runner.tsx", import.meta.url), "utf8");
+  assert.match(runner, /STEP_TIMEOUT_MS = 90_000/);
+  assert.match(runner, /signal: ctl\.signal/);
+  assert.match(runner, /live\.current\?\.abort\(\)/);
+  assert.ok(!/import \{ runWarmStep/.test(runner), "runner must not call the queued server action");
+});
 
 
 test("final assembly rechecks after a peer refresh instead of reusing a pre-assembly revision", async t => {
