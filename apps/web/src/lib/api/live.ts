@@ -123,7 +123,7 @@ async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
 */
 const CONTENTION_WAITS_MS = [3000, 3000, 4000];
 const CONTENTION_HINT_MAX_MS = 5000;
-async function sendOnceMore(path: string, init: RequestInit): Promise<Response> {
+async function sendContended(path: string, init: RequestInit): Promise<Response> {
   let res = await send(path, init);
   for (const fallback of CONTENTION_WAITS_MS) {
     if (res.status !== 429) return res;
@@ -136,6 +136,23 @@ async function sendOnceMore(path: string, init: RequestInit): Promise<Response> 
     res = await send(path, init);
   }
   return res;
+}
+
+/*
+  503 backend_dependency_unavailable(사유 코드 없는 503 포함)은 내려가는 중인 함수 인스턴스에 걸린 일시 장애일 수 있다
+  (11-08 v117 15:00:12 GET /me 503, 0.6초 뒤 그 인스턴스 종료 · 로그 사유 EarlyDrop. 부담당자 회신). 1.5초 뒤 한 번만 다시 보낸다.
+  다시 보내도 되는 요청만: 읽기(GET)와, 같은 리포트·판·의도에서 만든 Idempotency-Key 로 다시 계산만 하는 분석·후보 요청.
+  성적 저장·정정 부여·담기·예측 작성처럼 두 번 실행되면 안 되거나 결과가 바뀌는 쓰기는 다시 보내지 않는다.
+  다른 503 코드(security_policy_unavailable·operation_scope_not_approved 등)는 설정·승인 문제라 다시 보내지 않는다.
+*/
+const DEPENDENCY_RETRY_MS = 1500;
+async function sendOnceMore(path: string, init: RequestInit, replayable: boolean): Promise<Response> {
+  const res = await sendContended(path, init);
+  if (!replayable || res.status !== 503) return res;
+  const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
+  if (code !== undefined && code !== "backend_dependency_unavailable") return res;
+  await new Promise((r) => setTimeout(r, DEPENDENCY_RETRY_MS));
+  return sendContended(path, init);
 }
 
 async function send(path: string, init: RequestInit): Promise<Response> {
@@ -209,7 +226,7 @@ function snapshotRequest(caller: Caller): { init: RequestInit; sensitive: boolea
 
 async function call<T>(caller: Caller, path: string, snapshot = false): Promise<T> {
   const request = snapshot ? snapshotRequest(caller) : { init: { headers: auth(caller) }, sensitive: false };
-  const res = await sendOnceMore(path, request.init);
+  const res = await sendOnceMore(path, request.init, true);
   await guard(res, path, request.sensitive);
   // 404·409 도 기록만 남기고 뜻은 그대로(없음 / 버전 바뀜). 예외 문장에도 쿼리·식별자 없는 템플릿만 쓴다
   if (res.status === 404) {
@@ -230,7 +247,7 @@ async function call<T>(caller: Caller, path: string, snapshot = false): Promise<
  */
 async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
   const request = snapshotRequest(caller);
-  const res = await sendOnceMore(path, request.init);
+  const res = await sendOnceMore(path, request.init, true);
   await guard(res, path, request.sensitive);
   if (res.status === 409) {
     await codeOf(res, path, request.sensitive);
@@ -246,8 +263,8 @@ async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
 }
 
 /** POST/PUT 은 Idempotency-Key 가 필수. 같은 키의 재시도는 처음 결과를 돌려받는다 */
-async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
-  const res = await sendOnceMore(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) });
+async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string, replayable = false): Promise<Result<T>> {
+  const res = await sendOnceMore(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) }, replayable);
   await guard(res, path);
   if (!res.ok) return { ok: false, code: (await codeOf(res, path)) ?? "request_failed", status: res.status };
   return { ok: true, value: (await res.json()) as T };
@@ -271,15 +288,23 @@ function qs(q: Record<string, string | number | undefined>) {
   return s ? `?${s}` : "";
 }
 
+/*
+  한 화면 요청 안에서 /me 는 한 번만 부른다. 레이아웃과 페이지가 따로 getSession 을 불러도 같은 결과를 함께 쓴다
+  (11-08 부담당자 회신: 4페이지 한 번에 함수 호출이 차례로 나가 첫 화면이 길어짐). 토큰별로 그 요청 안에서만 기억한다
+*/
+const sessionOf = cache(async (accessToken: string): Promise<Session | null> => {
+  const s = await call<Session>({ accessToken }, "/me");
+  // 이 요청의 동시 호출 상한을 회원 등급에 맞춘다
+  requestLanes().limit = s?.member_tier === "paid" ? LIMIT_BY_TIER.paid : LIMIT_BY_TIER.standard;
+  return s;
+});
+
 export const liveSource: JungsiSource = {
   kind: "live",
   async getSession(caller) {
     if (!caller.accessToken) return null;
     try {
-      const s = await call<Session>(caller, "/me");
-      // 이 요청의 동시 호출 상한을 회원 등급에 맞춘다
-      requestLanes().limit = s?.member_tier === "paid" ? LIMIT_BY_TIER.paid : LIMIT_BY_TIER.standard;
-      return s;
+      return await sessionOf(caller.accessToken);
     } catch (e) {
       // 인증 거부·만료는 비로그인으로 본다. 503 은 일반 회원으로 낮추지 않고 그대로 올린다
       if (e instanceof AccessDenied && e.status === 401) return null;
@@ -304,8 +329,8 @@ export const liveSource: JungsiSource = {
   searchOfferings: (caller, q) => call<CatalogSearchDto<OfferingDto>>(caller, `/offerings/search${qs({ ...q })}`),
   readOffering: (caller, id) => orNull(call<OfferingDetailDto>(caller, `/offerings/${enc(id)}`)),
   analyzeUniversities: (caller, reportId, expected, ids, key) =>
-    write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/university-results`, { expected_version: expected, offering_ids: ids }, key),
-  buildCandidates: (caller, reportId, expected, key) => write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/candidates`, { expected_version: expected }, key),
+    write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/university-results`, { expected_version: expected, offering_ids: ids }, key, true),
+  buildCandidates: (caller, reportId, expected, key) => write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/candidates`, { expected_version: expected }, key, true),
   updateShortlist: (caller, reportId, id, selected, expected, key) =>
     write<ReportDto>(caller, "PUT", `/reports/${enc(reportId)}/shortlist/${enc(id)}`, { selected, expected_version: expected }, key),
   readStatistics: (caller, reportId, id) => orNull(call<StatisticsDto>(caller, `/reports/${enc(reportId)}/offerings/${enc(id)}/live-statistics`)),
