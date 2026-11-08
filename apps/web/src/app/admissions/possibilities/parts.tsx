@@ -1,5 +1,5 @@
 import Link from "@/components/link";
-import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, reasonText, type Cell } from "@/components/offering-parts";
+import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto } from "@/lib/dto";
@@ -68,17 +68,18 @@ export function Detail({ o, a, extras, picked }: { o: OfferingDto; a: Cell; extr
 /** 세 계산의 준비 상태를 따로 보인다 */
 function StatusStrip({ a }: { a: AssessmentDto }) {
   const conv = a.conversion?.status ?? (a.converted_score ? "ready" : "pending");
+  const ref = isReferenceScore(a) && !!scoreOf(a);
   const pct = a.percentile?.status ?? (a.converted_percentile ? "ready" : "pending");
   const items = [
-    { k: "점수 변환", ok: conv === "ready", why: a.conversion?.reason_code },
+    { k: "점수 변환", ok: conv === "ready" || ref, label: ref ? "참고 계산" : undefined, why: a.conversion?.reason_code },
     { k: "대학 안 내 위치", ok: pct === "ready", why: a.percentile?.reason_code },
-    { k: "지원 판단", ok: a.status === "ready", why: a.status === "ineligible" ? "eligibility_not_met" : a.reason_code },
+    { k: "지원 판단", ok: a.status === "ready", why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
   ];
   return (
     <ul className="strip" aria-label="계산 준비 상태">
       {items.map((i) => (
         <li key={i.k} className={i.ok ? "ok" : "hold"}>
-          <b>{i.k}</b> {i.ok ? "준비됨" : "보류"}
+          <b>{i.k}</b> {i.ok ? i.label ?? "준비됨" : "보류"}
           {!i.ok && i.why && <small> · {reasonText(i.why)}</small>}
         </li>
       ))}
@@ -86,11 +87,13 @@ function StatusStrip({ a }: { a: AssessmentDto }) {
   );
 }
 
+/** conversion.score_scope 를 사람이 읽는 말로. 모르는 값은 내부 코드라 보이지 않는다 */
+const SCOPE: Record<string, string> = { csat_component: "수능 반영분" };
+
 function ConversionCard({ a }: { a: AssessmentDto }) {
   const c = a.conversion;
-  const score = c?.converted_score ?? a.converted_score;
-  const reference = c?.reason_code === "reference_conversion_not_production_approved"
-    || a.reason_code === "reference_conversion_not_production_approved";
+  const score = scoreOf(a);
+  const reference = isReferenceScore(a);
   return (
     <section className="card" aria-label={reference ? "내 참고 환산점수" : "내 환산점수"}>
       <h3>{reference ? "내 참고 환산점수" : "내 환산점수"}</h3>
@@ -101,7 +104,7 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
             {c?.official_max_score && <small>/ {c.official_max_score}</small>}
           </div>
           <p>
-            {c?.score_scope && <>반영 {c.score_scope} · </>}
+            {c?.score_scope && SCOPE[c.score_scope] && <>반영 {SCOPE[c.score_scope]} · </>}
             {c?.score_basis && <span className="tag">{scoreBasisLabel(c.score_basis)}</span>}
             {reference && <span className="tag">학교 수능 반영분 · 참고</span>}
           </p>
@@ -159,7 +162,7 @@ function DecisionCard({ a }: { a: AssessmentDto }) {
         <CategoryBadge a={a} />
       </div>
       {a.status !== "ready" ? (
-        <p>{reasonText(a.reason_code)}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
+        <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
       ) : (
         <>
           <p>{CATEGORY[a.category].desc}</p>
@@ -188,7 +191,7 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
             ? "지원 자격을 충족하지 않아 유불리를 계산하지 않았습니다."
             : otherPop
               ? "이 대학 위치는 반영 성적을 모두 가진 응시자 기준이라 전체 응시자 위치와 분모가 다릅니다. 두 위치의 차이를 유불리로 보이지 않습니다."
-              : reasonText(a.reason_code) || "비교할 수 있는 분포와 환산 자료를 확인하고 있습니다."}
+              : reasonText(decisionReasonCode(a)) || "비교할 수 있는 분포와 환산 자료를 확인하고 있습니다."}
         </p>
       </section>
     );

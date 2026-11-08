@@ -219733,6 +219733,16 @@
         "REQ-04"
       ],
       "summary": "화면팀 변경(11-08 부담당자 회신: v124 함수 로그상 18:46:13 POST university-results 가 앞선 요청으로 CPU 합계가 쌓인 인스턴스에서 546 CPU Time exceeded, 3페이지 재확인이 request_failed. 18:47:35 새 인스턴스에서 같은 요청 200): lib/api/live.ts 의 한 번 다시 보내기 대상에 546 을 더한다. 503 backend_dependency_unavailable 과 같은 규칙으로 1.5초 뒤 한 번만, 대상은 읽기(GET)와 같은 Idempotency-Key 로 다시 계산만 하는 모집단위 분석·후보 만들기뿐이다. 성적 저장·정정 부여·담기·예측 작성 등 다른 쓰기는 다시 보내지 않는다. 두 번째도 실패하면 지금 문구 그대로. 서버·자료·판정 변경 없음."
+    },
+    {
+      "date": "2026-11-09",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04"
+      ],
+      "summary": "화면팀 변경(11-09 v147 재측정: 참고 환산 444 응답에서 conversion.status=pending·reason_code=reference_conversion_not_production_approved, assessment 도 같은 코드로 보류, 맨 위 converted_score 에 참고 점수): 참고 점수를 그리는 규칙을 한곳(offering-parts isReferenceScore·scoreOf·decisionReasonCode)에 모은다. 목록 점수 옆 '참고' 배지, 3페이지 상태 띠 '점수 변환 참고 계산', 지원 판단·지원가능성·유불리 칸은 참고 코드 대신 '참고 점수만 계산했습니다. 이 모집단위의 지원 판단 기준은 아직 확인 중입니다.', score_scope csat_component 는 '수능 반영분'(모르는 값은 숨김), 와일드카드 카드도 같은 규칙. 보류 문구 reference_inquiry_incomplete·conversion_release_missing 추가, reference_inquiry_category_unsupported·reference_required_input_missing·reference_conversion_unavailable 문구 변경(부담당자 확정). ConversionDto.status 에 reference_calculated 허용. official_max_score 가 null 이면 만점 없이 표시. 서버·자료·판정 변경 없음."
     }
   ]
 }

@@ -246,7 +246,7 @@ export interface AssessmentDto {
 
 /** assessment.conversion — 대학 공식 반영식 환산. 판단이 보류여도 성공한 환산은 남는다 */
 export interface ConversionDto {
-  status: "ready" | "pending";
+  status: "ready" | "pending" | "reference_calculated"; // reference_calculated: 참고 점수(운영 확정본 아님)
   reason_code: string | null;
   score_basis: ScoreBasis | null;
   score_scope: string | null;

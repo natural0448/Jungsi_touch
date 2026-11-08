@@ -1,4 +1,4 @@
-import { CategoryBadge, enrichedReasonTexts, PickButton, StatsLine } from "@/components/offering-parts";
+import { CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, scoreOf, StatsLine } from "@/components/offering-parts";
 import { pctText } from "@/lib/format";
 import type { CandidateItemDto, OfferingDto, StatisticsDto } from "@/lib/dto";
 
@@ -94,7 +94,7 @@ function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; 
       </p>
 
       <div className="wc-score">
-        {a.converted_score ? <b className="num">{a.converted_score}</b> : <b>계산 보류</b>}
+        {scoreOf(a) ? <b className="num">{scoreOf(a)}{isReferenceScore(a) && <small> 참고</small>}</b> : <b>계산 보류</b>}
         {a.converted_percentile && <i className="num">이 대학 환산 상위 {pctText(a.converted_percentile)}%</i>}
       </div>
 

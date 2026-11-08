@@ -32,14 +32,18 @@ const REASON: Record<string, string> = {
   total_model_missing: "전체 누백 분포 자료가 아직 연결되지 않았습니다(계산 진행 중이 아님).",
   year_bridge_required: "과거 학년도 모집행과 올해 성적을 잇는 연도 연계 자료가 아직 없습니다.",
   reference_conversion_not_production_approved: "학교별 수능 반영분으로 계산한 참고 점수입니다. 최종 전형 총점과 지원 가능성은 확인 중입니다.",
-  reference_conversion_unavailable: "이 모집단위의 참고 점수를 계산하지 않았습니다. 학교 반영 조건(과목·최저기준 등)에 맞지 않거나 자료 연결을 확인하는 중일 수 있습니다.",
+  reference_conversion_unavailable: "이 모집단위의 참고 환산 자료를 확인하고 있습니다.",
   reference_conversion_missing: "이 모집단위의 참고 환산 자료를 연결하고 있습니다.",
   reference_exam_context_mismatch: "입력한 시험과 학교 참고 환산 자료가 일치하지 않습니다.",
   reference_offering_context_mismatch: "모집단위와 학교 환산식의 연결을 확인하고 있습니다.",
   reference_rule_context_mismatch: "모집단위와 학교 환산식의 연결을 확인하고 있습니다.",
   reference_rule_unsupported: "이 학교 환산식을 연결하고 있습니다.",
-  reference_required_input_missing: "이 환산식에 필요한 과목 성적이나 선택 과목을 확인해 주세요.",
-  reference_inquiry_category_unsupported: "이 환산식에 허용된 탐구 조합인지 확인해 주세요.",
+  reference_required_input_missing: "참고 점수 계산에 필요한 성적 항목이 없습니다.",
+  reference_inquiry_category_unsupported: "이 모집단위는 선택한 탐구 과목을 반영하지 않아 참고 점수를 계산하지 않았습니다.",
+  reference_inquiry_incomplete: "탐구 성적 자료를 연결하고 있습니다.",
+  conversion_release_missing: "이 모집단위의 참고 환산 자료를 연결하고 있습니다.",
+  // 화면 전용: 참고 점수만 계산되고 지원 판단 기준은 아직 없을 때(assessment.reason_code 가 참고 코드로 올 때)
+  reference_decision_pending: "참고 점수만 계산했습니다. 이 모집단위의 지원 판단 기준은 아직 확인 중입니다.",
   reference_score_outside_domain: "이 환산식의 확인된 계산 범위를 벗어나 참고 점수를 표시하지 않았습니다.",
   conversion_not_ready: "환산 결과가 준비되지 않아 이 대학 위치를 계산하지 않았습니다.",
   offering_analysis_pending: "올해 모집행과 대학 분석 자료가 결속되기 전이라 후보 산출을 보류했습니다.",
@@ -52,6 +56,15 @@ const REASON: Record<string, string> = {
   forecast_not_published: "학과별 예상 기준이 아직 발행되지 않았습니다.",
 };
 export const reasonText = (code: string | null | undefined) => (code ? REASON[code] ?? "자료를 확인하고 있습니다." : "");
+
+const REFERENCE_CODE = "reference_conversion_not_production_approved";
+/** 참고 점수(학교 수능 반영분, 운영 확정본 아님)인지. 서버는 conversion.status 를 pending 이나 reference_calculated 로 보낸다 */
+export const isReferenceScore = (a: AssessmentDto) =>
+  a.conversion?.status === "reference_calculated" || a.conversion?.reason_code === REFERENCE_CODE || a.reason_code === REFERENCE_CODE;
+/** 화면에 보일 내 환산점수. 참고 점수도 포함한다 */
+export const scoreOf = (a: AssessmentDto) => a.conversion?.converted_score ?? a.converted_score;
+/** 지원 판단 칸의 보류 이유. 참고 코드가 판단 이유로 오면 '판단 기준 확인 중'으로 바꿔 보인다 */
+export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFERENCE_CODE ? "reference_decision_pending" : a.reason_code);
 
 export function CategoryBadge({ a }: { a: AssessmentDto }) {
   if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check">자격 확인 필요</span>;
@@ -74,10 +87,12 @@ export type Cell = AssessmentDto | null | "need";
 export function ScoreCell({ a }: { a: Cell }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (!a) return <span className="need">분석 대기</span>;
-  if (!a.converted_score) return <span className="need">계산 보류</span>;
+  const score = scoreOf(a);
+  if (!score) return <span className="need">계산 보류</span>;
   return (
     <span className="score">
-      <b className="num">{a.converted_score}</b>
+      <b className="num">{score}</b>
+      {isReferenceScore(a) && <small className="ref">참고</small>}
       {a.converted_percentile && <small>상위 {pctText(a.converted_percentile)}%</small>}
     </span>
   );
