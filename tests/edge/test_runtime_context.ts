@@ -12,7 +12,7 @@ import { VerifiedArtifactCache } from "../../supabase/functions/_shared/jungsi/i
 import { NativeRuntimeRequest } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts";
 import { readBasicRuntimeSettings } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts";
 import { SupabaseSqlTransport } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
-import { assert, equal } from "./fixture.ts";
+import { agedChecks, assert, equal } from "./fixture.ts";
 import { SyntheticUniversityData } from "./synthetic_university.ts";
 import {
   SYNTHETIC_RUNTIME_NOW,
@@ -230,17 +230,18 @@ async function denied(work: () => Promise<unknown>, code?: string) {
   equal(thrown.http, 503);
   if (code) equal(thrown.code, code);
 }
-Deno.test("runtime context composes the pinned catalog and policy with no SQL before a budget reservation", async () => {
-  const f = await fixture(), data = await f.context.data(), catalog = await data.getCatalog();
-  assert(catalog);
-  equal(catalog.version, "SYNTHETIC-catalog");
-  equal(f.calls.filter((url) => url.endsWith("/catalog.json")).length, 1);
-  equal((await f.context.budget()).policy.version, "SYNTHETIC-policy");
-  equal(f.sqlCalls(), 0);
-  const calls = f.calls.length;
-  await f.context.assertCurrent();
-  assert(f.calls.length > calls);
-});
+Deno.test("runtime context composes the pinned catalog and policy with no SQL before a budget reservation", () =>
+  agedChecks(async () => {
+    const f = await fixture(), data = await f.context.data(), catalog = await data.getCatalog();
+    assert(catalog);
+    equal(catalog.version, "SYNTHETIC-catalog");
+    equal(f.calls.filter((url) => url.endsWith("/catalog.json")).length, 1);
+    equal((await f.context.budget()).policy.version, "SYNTHETIC-policy");
+    equal(f.sqlCalls(), 0);
+    const calls = f.calls.length;
+    await f.context.assertCurrent();
+    assert(f.calls.length > calls);
+  }));
 Deno.test("runtime context rejects a selected source outside the binding before any artifact GET", async () => {
   const f = await fixture({ extraSelection: true });
   await denied(() => f.context.data(), "security_policy_unavailable");
@@ -257,14 +258,15 @@ Deno.test("runtime context shares the read cap across controls and artifacts", a
   equal(f.calls.length, 2);
   equal(f.calls.filter((url) => url.endsWith("/catalog.json")).length, 0);
 });
-Deno.test("runtime context rejects changed current head after a warm provider", async () => {
-  const f = await fixture();
-  const data = await f.context.data();
-  assert(await data.getCatalog());
-  f.f.body.head = f.f.body.head.replace('"status":"approved"', '"status":"prepared"');
-  await denied(() => f.context.assertCurrent(), "security_policy_unavailable");
-  await denied(() => data.getCatalog(), "security_policy_unavailable");
-});
+Deno.test("runtime context rejects changed current head after a warm provider", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    const data = await f.context.data();
+    assert(await data.getCatalog());
+    f.f.body.head = f.f.body.head.replace('"status":"approved"', '"status":"prepared"');
+    await denied(() => f.context.assertCurrent(), "security_policy_unavailable");
+    await denied(() => data.getCatalog(), "security_policy_unavailable");
+  }));
 Deno.test("runtime context rejects policy expiry before releasing an already built result", async () => {
   const f = await fixture();
   await f.context.data();
@@ -309,16 +311,17 @@ Deno.test("runtime context retains policy failure when an approved operation has
   equal(f.sqlCalls(), 0);
 });
 
-Deno.test("warm artifact request still reads fresh head and rejects its revocation", async () => {
-  const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
-  await first.context.data();
-  const second = await fixture({ artifactCache: cache });
-  await second.context.data();
-  equal(second.calls.filter((url) => url.endsWith("/catalog.json")).length, 0);
-  second.f.body.head = second.f.body.head.replace('"approved"', '"revoked"');
-  await denied(() => second.context.assertCurrent());
-  equal(second.sqlCalls(), 0);
-});
+Deno.test("warm artifact request still reads fresh head and rejects its revocation", () =>
+  agedChecks(async () => {
+    const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
+    await first.context.data();
+    const second = await fixture({ artifactCache: cache });
+    await second.context.data();
+    equal(second.calls.filter((url) => url.endsWith("/catalog.json")).length, 0);
+    second.f.body.head = second.f.body.head.replace('"approved"', '"revoked"');
+    await denied(() => second.context.assertCurrent());
+    equal(second.sqlCalls(), 0);
+  }));
 Deno.test("warm artifact cannot bypass a fresh binding operation scope or expiry", async () => {
   const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
   await first.context.data();
@@ -378,27 +381,28 @@ Deno.test("catalog projection warm body still consumes the same logical read bud
   await denied(() => limited.context.data());
   equal(limited.sqlCalls(), 0);
 });
-Deno.test("all other operation contexts and full readiness retain noncatalog body integrity checks", async () => {
-  const catalog = ["history.search", "recruitment.read", "offerings.search", "offering.read"];
-  for (
-    const operation of [
-      ...API_OPERATION_IDS.filter((op) => !catalog.includes(op)),
-      "health.ready",
-    ] as const
-  ) {
-    const f = await fixture({
-      deferredExam: true,
-      operation,
-      approvedOperations: operation === "health.ready" ? ["history.search"] : [operation],
-      costsForApproved: true,
-    });
-    await denied(() => f.context.data(), "storage_hash_mismatch");
-    assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
-    equal(f.sqlCalls(), 0);
-  }
-  await verifyAdditionalOverallScopeCases();
-  await verifyAdditionalUniversityScopeCases();
-});
+Deno.test("all other operation contexts and full readiness retain noncatalog body integrity checks", () =>
+  agedChecks(async () => {
+    const catalog = ["history.search", "recruitment.read", "offerings.search", "offering.read"];
+    for (
+      const operation of [
+        ...API_OPERATION_IDS.filter((op) => !catalog.includes(op)),
+        "health.ready",
+      ] as const
+    ) {
+      const f = await fixture({
+        deferredExam: true,
+        operation,
+        approvedOperations: operation === "health.ready" ? ["history.search"] : [operation],
+        costsForApproved: true,
+      });
+      await denied(() => f.context.data(), "storage_hash_mismatch");
+      assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
+      equal(f.sqlCalls(), 0);
+    }
+    await verifyAdditionalOverallScopeCases();
+    await verifyAdditionalUniversityScopeCases();
+  }));
 
 /** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
 async function verifyAdditionalOverallScopeCases(): Promise<void> {

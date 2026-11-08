@@ -13,7 +13,7 @@ import {
   type NativeObject,
 } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
 import { JsonFloat } from "../../supabase/functions/_shared/jungsi/domain/native_json.ts";
-import { assert, equal } from "./fixture.ts";
+import { agedChecks, assert, equal } from "./fixture.ts";
 async function pinned(text: string): Promise<PinnedSourceBytes> {
   const bytes = new TextEncoder().encode(text);
   const hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((v) =>
@@ -222,17 +222,18 @@ function deferred(f: Awaited<ReturnType<typeof fixture>>, patch: NativeObject = 
   (f.selection.required as NativeObject[]).push({ kind: entry.kind, key: entry.key });
   return entry;
 }
-Deno.test("catalog projection validates all reference metadata but reads only catalog body", async () => {
-  const f = await fixture();
-  deferred(f);
-  const snapshot = await f.prepare("catalog_only"), receipt = snapshot.privateReceipt();
-  equal(receipt.selected_metadata_count, 2);
-  equal(receipt.loaded_payload_count, 1);
-  equal(receipt.deferred_payload_count, 1);
-  equal(snapshot.identities().length, 1);
-  assert(!f.calls.some((url) => url.endsWith("unused.json")));
-  equal(f.calls.length, 3);
-});
+Deno.test("catalog projection validates all reference metadata but reads only catalog body", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    deferred(f);
+    const snapshot = await f.prepare("catalog_only"), receipt = snapshot.privateReceipt();
+    equal(receipt.selected_metadata_count, 2);
+    equal(receipt.loaded_payload_count, 1);
+    equal(receipt.deferred_payload_count, 1);
+    equal(snapshot.identities().length, 1);
+    assert(!f.calls.some((url) => url.endsWith("unused.json")));
+    equal(f.calls.length, 3);
+  }));
 Deno.test("catalog projection rejects every invalid deferred approval and reference before artifact IO", async () => {
   for (
     const [patch, code] of [
@@ -304,17 +305,18 @@ Deno.test("unknown payload selection mode is rejected without network reads", as
   await denied(() => f.prepare("unsafe" as NativePayloadMode), "storage_configuration_invalid");
   equal(f.calls.length, 0);
 });
-Deno.test("default full selection still reads and rejects an invalid noncatalog body", async () => {
-  const f = await fixture();
-  deferred(f);
-  await denied(() => f.prepare(), "storage_hash_mismatch");
-  equal(f.calls.length, 4);
-  await verifyAdditionalOverallScopeCases();
-  await verifyAdditionalUniversityScopeCases();
-  // Folded registration keeps the reviewed edge unit count fixed.
-  await rebindReusesVerifiedBodies();
-  await preparedCacheSharesAndBounds();
-});
+Deno.test("default full selection still reads and rejects an invalid noncatalog body", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    deferred(f);
+    await denied(() => f.prepare(), "storage_hash_mismatch");
+    equal(f.calls.length, 4);
+    await verifyAdditionalOverallScopeCases();
+    await verifyAdditionalUniversityScopeCases();
+    // Folded registration keeps the reviewed edge unit count fixed.
+    await rebindReusesVerifiedBodies();
+    await preparedCacheSharesAndBounds();
+  }));
 
 /** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
 async function verifyAdditionalOverallScopeCases(): Promise<void> {

@@ -5701,7 +5701,7 @@
         "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
         "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
         "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "5b3cac593782fd6ca55da78cc14f0e3b1b0919875f01659f11eaa39a76ca25a1",
-        "tests/edge/fixture.ts": "267c4377d3852de1a289cdc87fbcb38c99929967e584c89a62b6db8c8c3a53af",
+        "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
         "tests/edge/synthetic_exam_pack.ts": "0bab8e592fad298945a787c9af511cc6ce875b2452e4c3e2a4dd064be21a7937",
         "tests/edge/synthetic_score_input_policy.ts": "d233bc24fd51dcb843ee0eec1941027e98b6d5371f3374c94b04da1d3caa062c",
         "tests/p1_contract_review/test_score_010_cutoff.synthetic.js": "ba355e37c24fd87857d1cd4562282b7b0c05f96ad1e66ac58908ec6762ea5441"

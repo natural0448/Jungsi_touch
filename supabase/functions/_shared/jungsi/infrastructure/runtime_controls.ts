@@ -5,7 +5,7 @@ import { type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { utcInstant } from "../domain/time.ts";
 import type { NativeSelectionHeadPort } from "./native_data_provider.ts";
-import { SupabaseArtifactClient } from "./supabase_artifacts.ts";
+import { STORAGE_CHECK_REUSE_MS, SupabaseArtifactClient } from "./supabase_artifacts.ts";
 import type {
   ApprovedRuntimeBinding,
   ControlSourceName,
@@ -225,7 +225,29 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
     this.assertLive();
     return content;
   }
+  private recentHead?: {
+    readonly startedMs: number;
+    readonly result: ReturnType<NativeSelectionHeadPort["current"]>;
+  };
+  /** Request-local reuse: one verified head/bucket answer serves this request for STORAGE_CHECK_REUSE_MS. */
   async current(): ReturnType<NativeSelectionHeadPort["current"]> {
+    this.assertLive();
+    const now = performance.now(), recent = this.recentHead;
+    if (recent && now >= recent.startedMs && now - recent.startedMs < STORAGE_CHECK_REUSE_MS) {
+      const head = await recent.result;
+      this.assertLive();
+      return head;
+    }
+    const result = this.freshCurrent();
+    this.recentHead = { startedMs: now, result };
+    try {
+      return await result;
+    } catch (error) {
+      if (this.recentHead?.result === result) this.recentHead = undefined;
+      throw error;
+    }
+  }
+  private async freshCurrent(): ReturnType<NativeSelectionHeadPort["current"]> {
     let raw: NativeObject, expiresAtUtc: bigint;
     try {
       raw = object(

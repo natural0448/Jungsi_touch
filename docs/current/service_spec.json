@@ -9674,7 +9674,7 @@
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-              "sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
+              "sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8"
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
@@ -9682,7 +9682,7 @@
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
-              "sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0"
+              "sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d"
             },
             {
               "path": "tests/edge/public_api_contract_fixture.ts",
@@ -9702,7 +9702,7 @@
             },
             {
               "path": "tests/edge/test_school_reference_provider.ts",
-              "sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001"
+              "sha256": "06a9e6c3b0569c5c88343faeb8a694aa07e67e521088acd6f6f5db7c01cbcf70"
             },
             {
               "path": "tests/edge/test_school_reference_scoring.ts",
@@ -10185,7 +10185,7 @@
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-              "sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
+              "sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8"
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
@@ -10193,7 +10193,7 @@
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
-              "sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0"
+              "sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d"
             },
             {
               "path": "tests/edge/public_api_contract_fixture.ts",
@@ -10213,7 +10213,7 @@
             },
             {
               "path": "tests/edge/test_school_reference_provider.ts",
-              "sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001"
+              "sha256": "06a9e6c3b0569c5c88343faeb8a694aa07e67e521088acd6f6f5db7c01cbcf70"
             },
             {
               "path": "tests/edge/test_school_reference_scoring.ts",
@@ -21677,7 +21677,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
+              "source_sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8",
               "declared_exports": [
                 "RuntimeReadBudget",
                 "SupabaseRuntimeControls"
@@ -21907,7 +21907,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0",
+              "source_sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d",
               "declared_exports": [
                 "StorageArtifactLimits",
                 "StorageArtifactSettings",
@@ -28679,11 +28679,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "4d3807e0df97c9623f3eb2264ed9bb99da1ca3f103427ebe581f6bf0f03dd5e2"
+        "sha256": "e7e056a335a476c0b30148660f6c83cf12e5c3c9b86fc7ae16235abf9b3eac4a"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "e888e2f4314271a5496bde2dc768fb5956dbf5cd30cc3de2d4e4e776a93c1b5f"
+        "sha256": "7db5c0dfd1f28591df2d0d547141ee089072bda021ad7f84d841bfca548803b4"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29703,7 +29703,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-            "sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
+            "sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
@@ -29711,7 +29711,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
-            "sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0"
+            "sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d"
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
@@ -29731,7 +29731,7 @@
           },
           {
             "path": "tests/edge/test_school_reference_provider.ts",
-            "sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001"
+            "sha256": "06a9e6c3b0569c5c88343faeb8a694aa07e67e521088acd6f6f5db7c01cbcf70"
           },
           {
             "path": "tests/edge/test_school_reference_scoring.ts",
@@ -169558,6 +169558,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
             },
             {
+              "importedName": "STORAGE_CHECK_REUSE_MS",
+              "originalName": "STORAGE_CHECK_REUSE_MS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "SupabaseArtifactClient",
               "originalName": "SupabaseArtifactClient",
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
@@ -169573,7 +169578,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
+          "source_sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8",
           "symbols": [
             {
               "declarations": [
@@ -170098,6 +170103,50 @@
                         },
                         "kind": "method",
                         "name": "current"
+                      },
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "ReturnType",
+                            "value": {
+                              "typeName": "ReturnType",
+                              "typeParams": [
+                                {
+                                  "kind": "indexedAccess",
+                                  "value": {
+                                    "indexType": {
+                                      "kind": "literal",
+                                      "repr": "current",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "current"
+                                      }
+                                    },
+                                    "objType": {
+                                      "kind": "typeRef",
+                                      "repr": "NativeSelectionHeadPort",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeSelectionHeadPort",
+                                          "specifier": "./native_data_provider.ts"
+                                        },
+                                        "typeName": "NativeSelectionHeadPort"
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "freshCurrent"
                       }
                     ],
                     "properties": [
@@ -170108,6 +170157,65 @@
                           "kind": "typeQuery",
                           "repr": "fetch",
                           "value": "fetch"
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "recentHead",
+                        "optional": true,
+                        "tsType": {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "startedMs",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "result",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "ReturnType",
+                                  "value": {
+                                    "typeName": "ReturnType",
+                                    "typeParams": [
+                                      {
+                                        "kind": "indexedAccess",
+                                        "value": {
+                                          "indexType": {
+                                            "kind": "literal",
+                                            "repr": "current",
+                                            "value": {
+                                              "kind": "string",
+                                              "string": "current"
+                                            }
+                                          },
+                                          "objType": {
+                                            "kind": "typeRef",
+                                            "repr": "NativeSelectionHeadPort",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "NativeSelectionHeadPort",
+                                                "specifier": "./native_data_provider.ts"
+                                              },
+                                              "typeName": "NativeSelectionHeadPort"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
                         }
                       }
                     ]
@@ -177054,7 +177162,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0",
+          "source_sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d",
           "symbols": [
             {
               "declarations": [
@@ -177214,6 +177322,26 @@
                 }
               ],
               "name": "VerifiedStorageArtifact"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "1500",
+                      "value": {
+                        "kind": "number",
+                        "number": 1500.0
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "STORAGE_CHECK_REUSE_MS"
             },
             {
               "declarations": [
@@ -177880,6 +178008,31 @@
                         "accessibility": "private",
                         "functionDef": {
                           "hasBody": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Uint8Array",
+                                  "value": {
+                                    "typeName": "Uint8Array"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "bucketMetadata"
+                      },
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
                           "isAsync": true,
                           "params": [
                             {
@@ -178167,6 +178320,47 @@
                                     "kind": "local"
                                   },
                                   "typeName": "StorageArtifactSettings"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "recentBucket",
+                        "optional": true,
+                        "tsType": {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "startedMs",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "raw",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "Uint8Array",
+                                        "value": {
+                                          "typeName": "Uint8Array"
+                                        }
+                                      }
+                                    ]
+                                  }
                                 }
                               }
                             ]
@@ -182574,8 +182768,136 @@
       "tests/edge/fixture.ts": {
         "declarations": {
           "imports": [],
-          "source_sha256": "267c4377d3852de1a289cdc87fbcb38c99929967e584c89a62b6db8c8c3a53af",
+          "source_sha256": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
           "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(now: () => number, run: () => Promise<void>)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "now",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "run",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "void",
+                                    "value": "void"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "withMonotonic"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(run: () => Promise<void>)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "run",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "void",
+                                    "value": "void"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "agedChecks"
+            },
             {
               "declarations": [
                 {
@@ -201071,6 +201393,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
             },
             {
+              "importedName": "agedChecks",
+              "originalName": "agedChecks",
+              "src": "tests/edge/fixture.ts"
+            },
+            {
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
@@ -201091,7 +201418,7 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "9a8816e371ef7662a948eb5b7a4e2276e707c0cf083981300c3116607f930fdd",
+          "source_sha256": "555a1814a190e146048ef1e2741d6bad3f41691d0d8c093a63d11533ceb77470",
           "symbols": [
             {
               "declarations": [
@@ -210489,6 +210816,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
             },
             {
+              "importedName": "agedChecks",
+              "originalName": "agedChecks",
+              "src": "tests/edge/fixture.ts"
+            },
+            {
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
@@ -210519,7 +210851,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "cd290fc91801cde50a886406804ac8c0cacf657f1ad6880df051e2057afce502",
+          "source_sha256": "bca71e2a48c83360eb131f30f71c1f0d33af6fb9e707f9a060f2c2716c092166",
           "symbols": [
             {
               "declarations": [
@@ -210966,6 +211298,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
             },
             {
+              "importedName": "STORAGE_CHECK_REUSE_MS",
+              "originalName": "STORAGE_CHECK_REUSE_MS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "SYNTHETIC_RUNTIME_NOW",
               "originalName": "SYNTHETIC_RUNTIME_NOW",
               "src": "tests/edge/synthetic_runtime_binding.ts"
@@ -210974,6 +211311,11 @@
               "importedName": "SupabaseRuntimeControls",
               "originalName": "SupabaseRuntimeControls",
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+            },
+            {
+              "importedName": "agedChecks",
+              "originalName": "agedChecks",
+              "src": "tests/edge/fixture.ts"
             },
             {
               "importedName": "assert",
@@ -210989,9 +211331,14 @@
               "importedName": "syntheticRuntimeBinding",
               "originalName": "syntheticRuntimeBinding",
               "src": "tests/edge/synthetic_runtime_binding.ts"
+            },
+            {
+              "importedName": "withMonotonic",
+              "originalName": "withMonotonic",
+              "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "19826d20cfce311dd5d77d1689769f4eb8aaf8185ce88d76d4a5adc1a55de8d4",
+          "source_sha256": "f01b1fe2c0cc118120942b01917120928a186f7a44d097f8f381d2e3c2e8b62a",
           "symbols": [
             {
               "declarations": [
@@ -211117,6 +211464,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
               }
             ]
           },
@@ -211591,6 +211948,11 @@
               "src": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
             },
             {
+              "importedName": "agedChecks",
+              "originalName": "agedChecks",
+              "src": "tests/edge/fixture.ts"
+            },
+            {
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
@@ -211626,7 +211988,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001",
+          "source_sha256": "06a9e6c3b0569c5c88343faeb8a694aa07e67e521088acd6f6f5db7c01cbcf70",
           "symbols": [
             {
               "declarations": [
@@ -214858,6 +215220,14 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             },
             {
+              "importedName": "STORAGE_CHECK_REUSE_MS",
+              "jsDoc": {
+                "doc": "Invented Storage responses and limits only; no network, private source or runtime approval."
+              },
+              "originalName": "STORAGE_CHECK_REUSE_MS",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            },
+            {
               "importedName": "StorageArtifactSettings",
               "jsDoc": {
                 "doc": "Invented Storage responses and limits only; no network, private source or runtime approval."
@@ -214882,6 +215252,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
             },
             {
+              "importedName": "agedChecks",
+              "originalName": "agedChecks",
+              "src": "tests/edge/fixture.ts"
+            },
+            {
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
@@ -214895,9 +215270,14 @@
               "importedName": "syncPromise",
               "originalName": "syncPromise",
               "src": "tests/edge/fixture.ts"
+            },
+            {
+              "importedName": "withMonotonic",
+              "originalName": "withMonotonic",
+              "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "696a544287932c18a62c867d297165fc3d93145ad223b8811de820311d8dab67",
+          "source_sha256": "40ec1f7b7de0821ff85ee6f5abe96ddb451d48c36d265810ebfe8e9c99a93b7c",
           "symbols": [
             {
               "declarations": [
@@ -237837,7 +238217,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
       "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "c52e402a66b2034f4d2a08d2033226e11d4cedb33597e1d91f9bd7a8ed60aade",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
@@ -237845,12 +238225,12 @@
       "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": "70cf3f60478a9a200dc4e8d6c772a04e98ed360e1dc03e0c4d0e296e9420f3d3",
       "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts": "ea79c8bf29653cb16b6bfc57b10ec3b6ad2d29c2c9ccd182cb478116c2182b4d",
-      "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0",
+      "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
       "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "5b3cac593782fd6ca55da78cc14f0e3b1b0919875f01659f11eaa39a76ca25a1",
       "supabase/functions/_shared/jungsi/infrastructure/usage_postgres.ts": "6f18fff45c14e97d02379cc8ef13c13ee414a605ff287f1807be9c0f980cdd9a",
       "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts": "8f08df5c2f455b363d27fb07ea2ea5ec69c623424d328672eb587d61d539ce30",
-      "tests/edge/fixture.ts": "267c4377d3852de1a289cdc87fbcb38c99929967e584c89a62b6db8c8c3a53af",
+      "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
       "tests/edge/member_shortlist_fixture.ts": "2bab484557612a697916f287b89ce08603bd5b2b3e8a34378ddea4d7f420af35",
       "tests/edge/parity_driver.ts": "8121d1f2d181b4efe5f4c826d5ac2e8b348522ddd5e89fe272517ac7c03ecb9a",
       "tests/edge/public_api_contract_fixture.ts": "227dc89330ea7bae939134dbf0b165365201831c9327b6476d166e8c6abf6973",
@@ -237899,7 +238279,7 @@
       "tests/edge/test_member_shortlist_http.ts": "693d14dace3af400eb6e9aab6ab48a277c71cfcfa65a185e33de9768f8a14250",
       "tests/edge/test_native_auth.ts": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
       "tests/edge/test_native_data_provider.ts": "864f79ee0574e7376c4137a9a4f0d580e240224c6b60d2119a93c81b092fa91e",
-      "tests/edge/test_native_source_selection.ts": "9a8816e371ef7662a948eb5b7a4e2276e707c0cf083981300c3116607f930fdd",
+      "tests/edge/test_native_source_selection.ts": "555a1814a190e146048ef1e2741d6bad3f41691d0d8c093a63d11533ceb77470",
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
       "tests/edge/test_offering_analysis.ts": "6b725fb51e791c36c614d4c79d7739c2c3f8610c7f168f4d6d74aa0397bc32c0",
       "tests/edge/test_official_subject_runtime.ts": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51",
@@ -237923,11 +238303,11 @@
       "tests/edge/test_report_actions.ts": "5aa914b0a1e338a38828aeccaeb0bc522ccf7c31200ad27ad40cec44e01399d0",
       "tests/edge/test_runtime_budget.ts": "4e87eb4cb6779edfd03be5d4a6b236227f3f7ae0d9d504cc413080faec43492e",
       "tests/edge/test_runtime_composition.ts": "256479d822937cf7d183e759a2bb03f158dc00c55ae8f3e6368dcbacccc0fb98",
-      "tests/edge/test_runtime_context.ts": "cd290fc91801cde50a886406804ac8c0cacf657f1ad6880df051e2057afce502",
-      "tests/edge/test_runtime_controls.ts": "19826d20cfce311dd5d77d1689769f4eb8aaf8185ce88d76d4a5adc1a55de8d4",
+      "tests/edge/test_runtime_context.ts": "bca71e2a48c83360eb131f30f71c1f0d33af6fb9e707f9a060f2c2716c092166",
+      "tests/edge/test_runtime_controls.ts": "f01b1fe2c0cc118120942b01917120928a186f7a44d097f8f381d2e3c2e8b62a",
       "tests/edge/test_runtime_settings.ts": "d708a0205b1a9aeedef4130e130aefc0f85515e0d12dd3297cd365f82bd7e005",
       "tests/edge/test_saved_reference_projection.ts": "3598b2c3bdd087fdc603b7734c41be170d7751600c7ff4e0a3ff0601fa87c888",
-      "tests/edge/test_school_reference_provider.ts": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001",
+      "tests/edge/test_school_reference_provider.ts": "06a9e6c3b0569c5c88343faeb8a694aa07e67e521088acd6f6f5db7c01cbcf70",
       "tests/edge/test_school_reference_scoring.ts": "23dcf09ff4f6474b0327d986213562b28b607393e022084cf158f6bd99c38424",
       "tests/edge/test_score_input_policy.ts": "c7f588ab811dc61a822966e92f31840d944f36d853d5a64f22fe1e9634744a21",
       "tests/edge/test_score_input_stage_projection.ts": "3b21336df00c4a68c6fc8bcb818b85121fab175586cfaac28443d39c591a5e2a",
@@ -237935,7 +238315,7 @@
       "tests/edge/test_session_candidate.ts": "8f05110f32d7285671e33b7f2f04500ef1b227be319c792ea99fde1b99c1b3d5",
       "tests/edge/test_sql_values.ts": "85c8f851e0389572ddf658c42d488c6c2a9d81d675df5f4f7e8949bf583080bd",
       "tests/edge/test_supabase_api_ingress.ts": "94e3f05ffa572daa35519dc722a22199e73441df5da3524fa7de19e4979e7fb7",
-      "tests/edge/test_supabase_artifacts.ts": "696a544287932c18a62c867d297165fc3d93145ad223b8811de820311d8dab67",
+      "tests/edge/test_supabase_artifacts.ts": "40ec1f7b7de0821ff85ee6f5abe96ddb451d48c36d265810ebfe8e9c99a93b7c",
       "tests/edge/test_university_analysis.ts": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff",
       "tests/edge/test_university_distribution.ts": "c7eae343237e52e4233dcf95a89eb09d7e86e9a8d1ffd91ea39e6e4ed389b917",
       "tests/edge/test_university_percentile.ts": "ae18a54fa515c95eb6f4d23ccb3404f053e7571d1ef1238aa5be514a5960e13f",
@@ -238231,7 +238611,22 @@
       "concurrent_misses": "independent_bounded_request_loads",
       "payload_isolation": "frozen_private_native_tree_and_per_read_structural_copy_preserving_JsonFloat_bigint",
       "clock": "monotonic_TTL_rollback_invalidates_memory_only",
-      "retention": "wire_source_bytes_and_entry_bounds; native tree heap overhead is additional and bounded by source shape; no files"
+      "retention": "wire_source_bytes_and_entry_bounds; native tree heap overhead is additional and bounded by source shape; no files",
+      "request_local_check_reuse": {
+        "symbol": "STORAGE_CHECK_REUSE_MS",
+        "max_age_ms": 1500,
+        "clock": "monotonic_performance_now; rollback_forces_fresh_read",
+        "scope": "one_request; SupabaseRuntimeControls.current() head answer and SupabaseArtifactClient bucket metadata only; never shared across requests",
+        "still_every_call": [
+          "binding",
+          "expiry",
+          "bucket_privacy_and_cap_evaluation_against_requested_bytes",
+          "object_SHA256_and_size"
+        ],
+        "failure_reuse": "rejected_reads_are_never_reused",
+        "reason": "cold reference-conversion university request re-read head/bucket about 40 times (150-190 ms each in production) and exceeded the 10000 ms stage deadline",
+        "approved_by": "final_admin_2026-11-08"
+      }
     },
     "verification": {
       "baseline_edge_tests": 624,
@@ -239505,7 +239900,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "8f0c7fddd16f06e3f4bf5f9b4ee45fa9cb0a54465c38208fcb9be2a20a8098c1",
+      "bridge_sha256": "cf39324362ccd0bb14fd52413d85087cd9e0f24c45ee2da034ca7d2b50daac93",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "749f4adbd8f1278bbc7b7bc1b8f09b84fc522a8757d591aff49a0bccf3ddb0c7",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -243436,7 +243831,7 @@
       },
       {
         "path": "tests/edge/fixture.ts",
-        "sha256": "267c4377d3852de1a289cdc87fbcb38c99929967e584c89a62b6db8c8c3a53af"
+        "sha256": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0"
       }
     ],
     "test_path": "tests/p1_contract_review/test_score_010_cutoff.synthetic.js",
@@ -243457,7 +243852,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "0358d4d3305170d822a1315e4b6b1f9ed5b82649b392a11cef80f10f39aa8af3",
+    "manifest_sha256": "92dbe605982ff395f6f2ab76e102260061fbbb66a77db8b57f25c04821ee42d0",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -243468,7 +243863,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "0ed7af08186902a1928b27752c314e21ff6dd0c735f6215759af830093a0bc59",
+    "manifest_sha256": "bea0df554f0f9d5cec8e06f850726ae11bffd8f5bd7d7ec38b377bc75ed24d50",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

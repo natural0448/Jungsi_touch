@@ -4,7 +4,8 @@ import {
 } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts";
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
 import { SYNTHETIC_RUNTIME_NOW, syntheticRuntimeBinding } from "./synthetic_runtime_binding.ts";
-import { assert, equal } from "./fixture.ts";
+import { agedChecks, assert, equal, withMonotonic } from "./fixture.ts";
+import { STORAGE_CHECK_REUSE_MS } from "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts";
 async function fixture(changeHead?: Parameters<typeof syntheticRuntimeBinding>[1]) {
   const f = await syntheticRuntimeBinding(undefined, changeHead), binding = await f.load();
   const calls: { url: string; init: RequestInit }[] = [];
@@ -51,17 +52,40 @@ async function denied(run: () => Promise<unknown>) {
   assert(error instanceof AccessError);
   equal(error.http, 503);
 }
-Deno.test("runtime concrete head rereads pinned private Storage with no cache before every return", async () => {
-  const f = await fixture();
-  await f.controls.current();
-  await f.controls.current();
-  equal(f.calls.length, 4);
-  for (const c of f.calls) {
-    equal(c.init.method, "GET");
-    equal(c.init.cache, "no-store");
-    equal(c.init.redirect, "error");
-  }
-});
+Deno.test("runtime concrete head rereads pinned private Storage with no cache before every return", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    await f.controls.current();
+    await f.controls.current();
+    equal(f.calls.length, 4);
+    for (const c of f.calls) {
+      equal(c.init.method, "GET");
+      equal(c.init.cache, "no-store");
+      equal(c.init.redirect, "error");
+    }
+  }).then(() => {
+    let clock = 1000;
+    return withMonotonic(() => clock, async () => {
+      // Inside one request a verified head/bucket answer is reused for under 1.5 s.
+      const g = await fixture();
+      await g.controls.current();
+      clock += STORAGE_CHECK_REUSE_MS - 1;
+      await g.controls.current();
+      equal(g.calls.length, 2);
+      g.changeResponse((body, url) =>
+        url.includes("head.json") ? body.replace('"approved"', '"revoked"') : body
+      );
+      clock += 1;
+      await denied(() => g.controls.current());
+      equal(g.calls.length, 4);
+      // Approval expiry is still checked on every reused answer.
+      const h = await fixture();
+      await h.controls.current();
+      h.setTime(h.binding.expiresAtUtc);
+      await denied(() => h.controls.current());
+      equal(h.calls.length, 2);
+    });
+  }));
 Deno.test("runtime concrete head rejects purpose status scope approval and source pin mismatches", async () => {
   for (
     const [key, value] of [
@@ -79,19 +103,20 @@ Deno.test("runtime concrete head rejects purpose status scope approval and sourc
     await denied(() => f.controls.current());
   }
 });
-Deno.test("runtime concrete head invalidates an old warm result after source changes or approval expiry", async () => {
-  const f = await fixture();
-  await f.controls.current();
-  f.changeResponse((body, url) =>
-    url.includes("head.json") ? body.replace('"approved"', '"revoked"') : body
-  );
-  await denied(() => f.controls.current());
-  const g = await fixture();
-  await g.controls.current();
-  g.setTime(g.binding.expiresAtUtc);
-  await denied(() => g.controls.current());
-  equal(g.calls.length, 2);
-});
+Deno.test("runtime concrete head invalidates an old warm result after source changes or approval expiry", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    await f.controls.current();
+    f.changeResponse((body, url) =>
+      url.includes("head.json") ? body.replace('"approved"', '"revoked"') : body
+    );
+    await denied(() => f.controls.current());
+    const g = await fixture();
+    await g.controls.current();
+    g.setTime(g.binding.expiresAtUtc);
+    await denied(() => g.controls.current());
+    equal(g.calls.length, 2);
+  }));
 Deno.test("runtime control bucket must stay private and limits are native integers", async () => {
   for (
     const body of [

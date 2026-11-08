@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "d6582d4696fe56aa6ba4b41c06d28e4e57dcc39612b3ef2b5f89fa017849c303",
+  "source_sha256": "16e483aa8a83759a143d1ee766a31a1dd8115e350def734f23c51359e271aa67",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3900,11 +3900,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "4d3807e0df97c9623f3eb2264ed9bb99da1ca3f103427ebe581f6bf0f03dd5e2"
+        "sha256": "e7e056a335a476c0b30148660f6c83cf12e5c3c9b86fc7ae16235abf9b3eac4a"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "e888e2f4314271a5496bde2dc768fb5956dbf5cd30cc3de2d4e4e776a93c1b5f"
+        "sha256": "7db5c0dfd1f28591df2d0d547141ee089072bda021ad7f84d841bfca548803b4"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4575,7 +4575,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-            "sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
+            "sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
@@ -4583,7 +4583,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
-            "sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0"
+            "sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d"
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
@@ -4603,7 +4603,7 @@
           },
           {
             "path": "tests/edge/test_school_reference_provider.ts",
-            "sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001"
+            "sha256": "06a9e6c3b0569c5c88343faeb8a694aa07e67e521088acd6f6f5db7c01cbcf70"
           },
           {
             "path": "tests/edge/test_school_reference_scoring.ts",

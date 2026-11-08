@@ -1,4 +1,4 @@
-import { assert, equal } from "./fixture.ts";
+import { agedChecks, assert, equal } from "./fixture.ts";
 import { SyntheticReferenceBytes } from "./synthetic_school_reference.ts";
 import { SupabaseArtifactClient } from "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts";
 import { NativeSourceSelection } from "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts";
@@ -227,19 +227,20 @@ async function denied(work: Promise<unknown>, expected: string) {
   }
   throw new Error("Expected failure");
 }
-Deno.test("selected reference registry reaches real NativeDataProvider and existing scoring service", async () => {
-  const { f, data, getCount } = await fixture();
-  const p = f.profile();
-  (p.scores.inquiry as NativeObject[])[0].percentile = 31;
-  (p.scores.inquiry as NativeObject[])[1].percentile = 17;
-  const before = getCount(), pre = await data.preflight();
-  equal(pre.production_ready, false);
-  const r = await new UniversityScoringService(data).calculate(f.offering, p);
-  equal(r.dto().converted_score, "31.00");
-  equal(r.dto().reason_code, "reference_conversion_not_production_approved");
-  assert(!r.ready);
-  equal(getCount(), before + 2);
-});
+Deno.test("selected reference registry reaches real NativeDataProvider and existing scoring service", () =>
+  agedChecks(async () => {
+    const { f, data, getCount } = await fixture();
+    const p = f.profile();
+    (p.scores.inquiry as NativeObject[])[0].percentile = 31;
+    (p.scores.inquiry as NativeObject[])[1].percentile = 17;
+    const before = getCount(), pre = await data.preflight();
+    equal(pre.production_ready, false);
+    const r = await new UniversityScoringService(data).calculate(f.offering, p);
+    equal(r.dto().converted_score, "31.00");
+    equal(r.dto().reason_code, "reference_conversion_not_production_approved");
+    assert(!r.ready);
+    equal(getCount(), before + 2);
+  }));
 Deno.test("reference registry wrong scope rejected before any Storage fetch", async () => {
   let gets = 0;
   await denied(
@@ -319,65 +320,67 @@ Deno.test("an unrequested reference with invalid approval still fails before fir
   );
   equal(gets, 0);
 });
-Deno.test("concrete runtime controls and shared physical budget keep one and 100 same-rule PK calculations bounded", async () => {
-  const counts = [];
-  for (const size of [1, 100]) {
-    const f = await fixture(() => {}, () => {}, 0, "university_only", true, size);
-    await f.data.preflight();
-    equal(f.referenceCount(), 0);
-    let packs = 0;
-    const get = f.data.getExamPack.bind(f.data);
-    f.data.getExamPack = (key) => {
-      packs++;
-      return get(key);
-    };
-    const p = f.f.profile();
-    (p.scores.inquiry as NativeObject[])[0].percentile = 31;
-    (p.scores.inquiry as NativeObject[])[1].percentile = 17;
-    const runtimeData = runtimeAnalysisDataPort(
-      { data: () => Promise.resolve(f.data) },
-      (_stage, work) => work(),
-    );
-    const before = f.budget!.snapshot(),
-      heads = f.headCount(),
-      scorer = new UniversityScoringService(runtimeData);
-    await scorer.batch(async () => {
-      for (const offering of f.offerings) {
-        equal((await scorer.calculate(offering, p)).dto().converted_score, "31.00");
-      }
-    });
-    equal(packs, 1);
-    equal(f.referenceCount(), 1);
-    equal(f.headCount() - heads, 2);
-    const after = f.budget!.snapshot();
-    equal(after.physicalRequests - before.physicalRequests, 6);
-    counts.push(after.physicalRequests - before.physicalRequests);
-    // Runtime finish must still reread the concrete pinned head; the batch never caches controls.current().
-    await f.data.assertCurrentSelection(true);
-    equal(f.headCount() - heads, 3);
-    assert(f.budget!.snapshot().requests <= 64);
-  }
-  equal(counts, [6, 6]);
-});
-Deno.test("concrete head revocation or expiry during a calculation batch prevents the subsequent report write", async () => {
-  for (const mutate of ["revoke", "expire"] as const) {
-    const f = await fixture(() => {}, () => {}, 0, "university_only", true),
-      scorer = new UniversityScoringService(f.data);
-    let writes = 0;
-    const work = async () => {
+Deno.test("concrete runtime controls and shared physical budget keep one and 100 same-rule PK calculations bounded", () =>
+  agedChecks(async () => {
+    const counts = [];
+    for (const size of [1, 100]) {
+      const f = await fixture(() => {}, () => {}, 0, "university_only", true, size);
+      await f.data.preflight();
+      equal(f.referenceCount(), 0);
+      let packs = 0;
+      const get = f.data.getExamPack.bind(f.data);
+      f.data.getExamPack = (key) => {
+        packs++;
+        return get(key);
+      };
+      const p = f.f.profile();
+      (p.scores.inquiry as NativeObject[])[0].percentile = 31;
+      (p.scores.inquiry as NativeObject[])[1].percentile = 17;
+      const runtimeData = runtimeAnalysisDataPort(
+        { data: () => Promise.resolve(f.data) },
+        (_stage, work) => work(),
+      );
+      const before = f.budget!.snapshot(),
+        heads = f.headCount(),
+        scorer = new UniversityScoringService(runtimeData);
       await scorer.batch(async () => {
-        await scorer.calculate(f.f.offering, f.f.profile());
-        f[mutate]();
+        for (const offering of f.offerings) {
+          equal((await scorer.calculate(offering, p)).dto().converted_score, "31.00");
+        }
       });
-      writes++;
-    };
-    await denied(
-      work(),
-      mutate === "revoke" ? "security_policy_unavailable" : "security_policy_unavailable",
-    );
-    equal(writes, 0);
-  }
-});
+      equal(packs, 1);
+      equal(f.referenceCount(), 1);
+      equal(f.headCount() - heads, 2);
+      const after = f.budget!.snapshot();
+      equal(after.physicalRequests - before.physicalRequests, 6);
+      counts.push(after.physicalRequests - before.physicalRequests);
+      // Runtime finish must still reread the concrete pinned head; the batch never caches controls.current().
+      await f.data.assertCurrentSelection(true);
+      equal(f.headCount() - heads, 3);
+      assert(f.budget!.snapshot().requests <= 64);
+    }
+    equal(counts, [6, 6]);
+  }));
+Deno.test("concrete head revocation or expiry during a calculation batch prevents the subsequent report write", () =>
+  agedChecks(async () => {
+    for (const mutate of ["revoke", "expire"] as const) {
+      const f = await fixture(() => {}, () => {}, 0, "university_only", true),
+        scorer = new UniversityScoringService(f.data);
+      let writes = 0;
+      const work = async () => {
+        await scorer.batch(async () => {
+          await scorer.calculate(f.f.offering, f.f.profile());
+          f[mutate]();
+        });
+        writes++;
+      };
+      await denied(
+        work(),
+        mutate === "revoke" ? "security_policy_unavailable" : "security_policy_unavailable",
+      );
+      equal(writes, 0);
+    }
+  }));
 Deno.test("a second calculation batch cannot enter while its initial current-head check is pending", async () => {
   const f = await fixture(), original = f.data.assertCurrentSelection.bind(f.data);
   let release!: () => void, entered = 0;

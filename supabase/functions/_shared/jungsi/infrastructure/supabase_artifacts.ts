@@ -53,6 +53,8 @@ function objectKey(value: unknown): string {
   }
   return value;
 }
+/** Max age of a reused head/bucket verification inside one request (monotonic clock). */
+export const STORAGE_CHECK_REUSE_MS = 1500;
 function parsed(content: Uint8Array): NativeObject {
   try {
     return object(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(content)));
@@ -349,13 +351,26 @@ export class SupabaseArtifactClient {
       clearTimeout(timer);
     }
   }
-  private async assertBucket(bytes: number): Promise<void> {
-    const bucket = parsed(
-      await this.get(
-        "bucket/" + encodeURIComponent(this.settings.bucket),
-        this.settings.limits.maxMetadataBytes,
-      ),
+  private recentBucket?: { readonly startedMs: number; readonly raw: Promise<Uint8Array> };
+  /** Bucket metadata is re-read when older than STORAGE_CHECK_REUSE_MS; the checks below run on every call. */
+  private bucketMetadata(): Promise<Uint8Array> {
+    const now = performance.now(), recent = this.recentBucket;
+    if (recent && now >= recent.startedMs && now - recent.startedMs < STORAGE_CHECK_REUSE_MS) {
+      return recent.raw;
+    }
+    const raw = this.get(
+      "bucket/" + encodeURIComponent(this.settings.bucket),
+      this.settings.limits.maxMetadataBytes,
     );
+    const entry = { startedMs: now, raw };
+    this.recentBucket = entry;
+    raw.catch(() => {
+      if (this.recentBucket === entry) this.recentBucket = undefined;
+    });
+    return raw;
+  }
+  private async assertBucket(bytes: number): Promise<void> {
+    const bucket = parsed(await this.bucketMetadata());
     if (bucket.id !== this.settings.bucket || bucket.public !== false) {
       fail("storage_bucket_not_private");
     }

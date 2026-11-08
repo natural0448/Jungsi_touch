@@ -11072,7 +11072,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
+        "source_sha256": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8",
         "declared_exports": [
           "RuntimeReadBudget",
           "SupabaseRuntimeControls"
@@ -11302,7 +11302,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0",
+        "source_sha256": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d",
         "declared_exports": [
           "StorageArtifactLimits",
           "StorageArtifactSettings",

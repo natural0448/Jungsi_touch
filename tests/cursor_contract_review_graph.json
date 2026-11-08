@@ -3738,7 +3738,7 @@
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
         "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
-        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0",
+        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d",
         "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "5b3cac593782fd6ca55da78cc14f0e3b1b0919875f01659f11eaa39a76ca25a1",
         "supabase/functions/_shared/search_failure_diagnostic.ts": "c19df933f6106db252bb99acb9625ea38f7e7a15bc10e3286cc455a4a619ece4",
         "tests/cursor_contract_review/combined_policy_catalog_runtime.original.ts": "6d412ee5c14376ec436a420cfed5cbb0bb50dd9d44144668d5c9331ca5489b26",
@@ -6819,7 +6819,7 @@
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
         "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
-        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0",
+        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "94a294f566f7ab79124f2ee4813834b1b154b18399e90e59747601f00004053d",
         "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "5b3cac593782fd6ca55da78cc14f0e3b1b0919875f01659f11eaa39a76ca25a1",
         "tests/cursor_contract_review/current_public_bound_cursor.test.ts": "3e99046987366f3dd7f91e35078604430d8338d1d27be8dd862ba790cacfacfa"
       }
