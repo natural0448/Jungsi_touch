@@ -28,7 +28,26 @@ import { JsonFloat, type NativeJson } from "../domain/native_json.ts";
 import { personalAssessment, personalResultComponents } from "./paid_result_components.ts";
 export const UNIVERSITY_ANALYSIS_OPERATIONS = ["university.analyze", "candidates.build"] as const;
 export interface UniversityAnalysisDataPort
-  extends UniversityScoringDataPort, UniversityPercentileDataPort, OfferingAnalysisDataPort {}
+  extends UniversityScoringDataPort, UniversityPercentileDataPort, OfferingAnalysisDataPort {
+  /**
+   * Optional: whether a production conversion release is selected for the offering. Candidate
+   * generation only ranks production results; reference-only offerings always stay pending and
+   * would otherwise turn a candidates request into a full-catalog reference calculation.
+   */
+  hasProductionConversion?(offeringId: string): Promise<boolean>;
+}
+/** Candidate universe: rows that can produce a production (non-pending) conversion result. */
+export async function productionCandidateRows(
+  data: Pick<UniversityAnalysisDataPort, "hasProductionConversion">,
+  rows: readonly NativeObject[],
+): Promise<readonly NativeObject[]> {
+  if (!data.hasProductionConversion) return rows;
+  const kept: NativeObject[] = [];
+  for (const row of rows) {
+    if (await data.hasProductionConversion(String(row.offering_id))) kept.push(row);
+  }
+  return kept;
+}
 /** Concrete forecast implementation verifies a complete, bound batch before evaluation. */
 export interface PublishedForecastPort {
   validatedReleases(
@@ -216,8 +235,11 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       } else {
         const overall = updated.overall;
         if (!object(overall) || !object(overall.exam)) fail();
-        rows = this.catalog.serviceRows(release).filter((r) =>
-          r.academic_year === (overall.exam as NativeObject).academic_year
+        rows = await productionCandidateRows(
+          this.data,
+          this.catalog.serviceRows(release).filter((r) =>
+            r.academic_year === (overall.exam as NativeObject).academic_year
+          ),
         );
       }
       let batch: ReadonlyMap<string, NativeObject | AccessError | null> = new Map(),

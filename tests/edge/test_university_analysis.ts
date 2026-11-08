@@ -1,6 +1,7 @@
 import { syncPromise } from "./fixture.ts";
 import {
   candidateGroups,
+  productionCandidateRows,
   type PublishedForecastPort,
   UniversityAnalysisService,
 } from "../../supabase/functions/_shared/jungsi/application/university_analysis.ts";
@@ -519,6 +520,8 @@ Deno.test("analysis rechecks expiration before saving after dependency work", as
     401,
   );
   equal(f.repo.reports.get(RID)!.revision, 1);
+  // Folded registration keeps the reviewed edge unit count fixed.
+  await productionCandidateUniverse();
 });
 Deno.test("candidate categories retain outside and ineligible distinctions without pretending pending is zero", () => {
   const rows = [{
@@ -542,3 +545,17 @@ Deno.test("candidate categories retain outside and ineligible distinctions witho
   equal((result.outside_offerings as NativeObject[]).length, 1);
   equal((result.ineligible_offerings as NativeObject[]).length, 1);
 });
+async function productionCandidateUniverse() {
+  const rows = [{ offering_id: "2027:1" }, { offering_id: "2027:2" }, {
+    offering_id: "2027:3",
+  }];
+  const kept = await productionCandidateRows(
+    {
+      hasProductionConversion: (id: string) => Promise.resolve(id !== "2027:2"),
+    },
+    rows,
+  );
+  equal(kept.map((r) => r.offering_id), ["2027:1", "2027:3"]);
+  // Ports without the capability keep the previous full universe.
+  equal((await productionCandidateRows({}, rows)).length, 3);
+}

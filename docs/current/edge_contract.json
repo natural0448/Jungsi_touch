@@ -47604,12 +47604,17 @@
             "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
           },
           {
+            "importedName": "productionCandidateRows",
+            "originalName": "productionCandidateRows",
+            "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+          },
+          {
             "importedName": "requestWildcardGrant",
             "originalName": "requestWildcardGrant",
             "src": "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts"
           }
         ],
-        "source_sha256": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531",
+        "source_sha256": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870",
         "symbols": [
           {
             "declarations": [
@@ -75619,7 +75624,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5",
+        "source_sha256": "efcb310016bf52df0e5a62176a9f0cbe1b3d293124de327a2bba9f874be02480",
         "symbols": [
           {
             "declarations": [
@@ -75699,12 +75704,150 @@
                         "typeName": "OfferingAnalysisDataPort"
                       }
                     }
+                  ],
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "hasProductionConversion",
+                      "optional": true,
+                      "parameter_source": "(offeringId: string)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "offeringId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "boolean",
+                              "value": "boolean"
+                            }
+                          ]
+                        }
+                      }
+                    }
                   ]
                 },
                 "kind": "interface"
               }
             ],
             "name": "UniversityAnalysisDataPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  data: Pick<UniversityAnalysisDataPort, \"hasProductionConversion\">,\n  rows: readonly NativeObject[],\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "data",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Pick",
+                        "value": {
+                          "typeName": "Pick",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "UniversityAnalysisDataPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "UniversityAnalysisDataPort"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "hasProductionConversion",
+                              "value": {
+                                "kind": "string",
+                                "string": "hasProductionConversion"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rows",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "productionCandidateRows"
           },
           {
             "declarations": [
@@ -108511,7 +108654,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
+        "source_sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff",
         "symbols": [
           {
             "declarations": [
@@ -108663,7 +108806,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly selection: NativeSourceSelection,\n    freshness?: NativeSelectionFreshness,\n  )",
+                      "parameter_source": "(\n    private readonly selection: NativeSourceSelection,\n    freshness?: NativeSelectionFreshness,\n    sharedDecoded?: Map<string, unknown>,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -108696,6 +108839,30 @@
                                 "kind": "local"
                               },
                               "typeName": "NativeSelectionFreshness"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "sharedDecoded",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Map",
+                            "value": {
+                              "typeName": "Map",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              ]
                             }
                           }
                         }
@@ -108953,6 +109120,39 @@
                       },
                       "kind": "method",
                       "name": "load"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "offeringId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "hasProductionConversion"
                     },
                     {
                       "accessibility": "private",
@@ -110525,7 +110725,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523",
+        "source_sha256": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8",
         "symbols": [
           {
             "declarations": [
@@ -110801,12 +111001,284 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "properties": [
+                    {
+                      "name": "selection",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeSourceSelection",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "NativeSourceSelection"
+                        }
+                      }
+                    },
+                    {
+                      "name": "decoded",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Map",
+                        "value": {
+                          "typeName": "Map",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "unknown",
+                              "value": "unknown"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "PreparedSelectionEntry"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(private readonly maxEntries = 4)",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "maxEntries",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          "readonly": true,
+                          "right": "4"
+                        }
+                      ]
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "PreparedSelectionEntry",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "PreparedSelectionEntry"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "undefined",
+                              "value": "undefined"
+                            }
+                          ]
+                        }
+                      },
+                      "kind": "method",
+                      "name": "get"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "row",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "PreparedSelectionEntry",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "PreparedSelectionEntry"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "set"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "row",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "PreparedSelectionEntry",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "PreparedSelectionEntry"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "remove"
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "accessibility": "private",
+                      "name": "rows",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Map",
+                        "value": {
+                          "typeName": "Map",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "PreparedSelectionEntry",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "PreparedSelectionEntry"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "PreparedSelectionCache"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "constructors": [
                     {
                       "accessibility": "private",
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n    selected: ReadonlyMap<string, NativeObject>,\n    readonly payloadMode: NativePayloadMode,\n    private readonly client: SupabaseArtifactClient,\n  )",
+                      "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n    selected: ReadonlyMap<string, NativeObject>,\n    readonly payloadMode: NativePayloadMode,\n    private readonly client: SupabaseArtifactClient,\n    shared = false,\n  )",
                       "params": [
                         {
                           "kind": "identifier",
@@ -110924,6 +111396,20 @@
                               "typeName": "SupabaseArtifactClient"
                             }
                           }
+                        },
+                        {
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "shared",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "boolean",
+                              "value": "boolean"
+                            }
+                          },
+                          "right": "false"
                         }
                       ]
                     }
@@ -111024,6 +111510,159 @@
                       "isStatic": true,
                       "kind": "method",
                       "name": "prepare"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "client",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "SupabaseArtifactClient",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "SupabaseArtifactClient",
+                                  "specifier": "./supabase_artifacts.ts"
+                                },
+                                "typeName": "SupabaseArtifactClient"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "NativeSourceSelection",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "NativeSourceSelection"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "rebind"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "referenceCount"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "kind",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeRuntimeKind",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "NativeRuntimeKind"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "has"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "kind",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeRuntimeKind",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "NativeRuntimeKind"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "NativeObject",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "NativeObject",
+                                        "specifier": "../domain/json_value.ts"
+                                      },
+                                      "typeName": "NativeObject"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "kind": "method",
+                      "name": "peekPayload"
                     },
                     {
                       "functionDef": {
@@ -129334,6 +129973,11 @@
             "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
           },
           {
+            "importedName": "PreparedSelectionCache",
+            "originalName": "PreparedSelectionCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+          },
+          {
             "importedName": "PreparedUsageAdmission",
             "originalName": "PreparedUsageAdmission",
             "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -129542,7 +130186,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7",
+        "source_sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
         "symbols": [
           {
             "declarations": [
@@ -131039,6 +131683,23 @@
                       }
                     },
                     {
+                      "accessibility": "private",
+                      "name": "preparedSelections",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "PreparedSelectionCache",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "PreparedSelectionCache",
+                            "specifier": "./native_source_selection.ts"
+                          },
+                          "typeName": "PreparedSelectionCache"
+                        }
+                      }
+                    },
+                    {
                       "name": "fetch",
                       "readonly": true,
                       "tsType": {
@@ -131859,6 +132520,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "./native_source_selection.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./public_passes.ts",
           "targets": [
             {
@@ -132092,6 +132763,16 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts"
           },
           {
+            "importedName": "PreparedSelectionCache",
+            "originalName": "PreparedSelectionCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+          },
+          {
+            "importedName": "PreparedSelectionEntry",
+            "originalName": "PreparedSelectionEntry",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+          },
+          {
             "importedName": "RepositoryUsageReplays",
             "originalName": "RepositoryUsageReplays",
             "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -132207,7 +132888,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f",
+        "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
         "symbols": [
           {
             "declarations": [
@@ -132218,7 +132899,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly artifactCache?: VerifiedArtifactCache,\n    private readonly ifNoneMatch: string | null = null,\n  )",
+                      "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly artifactCache?: VerifiedArtifactCache,\n    private readonly ifNoneMatch: string | null = null,\n    private readonly preparedSelections?: PreparedSelectionCache,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -132407,6 +133088,25 @@
                           },
                           "readonly": true,
                           "right": "null"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "preparedSelections",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "PreparedSelectionCache",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "PreparedSelectionCache",
+                                "specifier": "./native_source_selection.ts"
+                              },
+                              "typeName": "PreparedSelectionCache"
+                            }
+                          }
                         }
                       ]
                     }
@@ -166932,6 +167632,14 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
           },
           {
+            "importedName": "PreparedSelectionCache",
+            "jsDoc": {
+              "doc": "Invented private registry pins only. Source-byte acceptance is never engine or live acceptance."
+            },
+            "originalName": "PreparedSelectionCache",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+          },
+          {
             "importedName": "SupabaseArtifactClient",
             "originalName": "SupabaseArtifactClient",
             "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
@@ -166957,7 +167665,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
+        "source_sha256": "9a8816e371ef7662a948eb5b7a4e2276e707c0cf083981300c3116607f930fdd",
         "symbols": [
           {
             "declarations": [
@@ -167233,6 +167941,64 @@
               }
             ],
             "name": "verifyAdditionalUniversityScopeCases"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "rebindReusesVerifiedBodies"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "preparedCacheSharesAndBounds"
           }
         ]
       },
@@ -181112,6 +181878,11 @@
             "src": "tests/edge/fixture.ts"
           },
           {
+            "importedName": "productionCandidateRows",
+            "originalName": "productionCandidateRows",
+            "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+          },
+          {
             "importedName": "syncPromise",
             "originalName": "syncPromise",
             "src": "tests/edge/fixture.ts"
@@ -181122,7 +181893,7 @@
             "src": "tests/edge/synthetic_offering_analysis.ts"
           }
         ],
-        "source_sha256": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36",
+        "source_sha256": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff",
         "symbols": [
           {
             "declarations": [
@@ -181550,6 +182321,35 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "productionCandidateUniverse"
           }
         ]
       },

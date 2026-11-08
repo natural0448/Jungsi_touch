@@ -109,7 +109,7 @@ export class NativeDataProvider
     UniversityScoringDataPort,
     UniversityPercentileDataPort,
     OfferingAnalysisDataPort {
-  private readonly cache = new Map<string, unknown>();
+  private readonly cache: Map<string, unknown>;
   private readonly freshness?: NativeSelectionFreshness;
   private referenceKeys?: ReadonlyMap<string, string | null>;
   private scoringBatchActive = false;
@@ -117,8 +117,14 @@ export class NativeDataProvider
   constructor(
     private readonly selection: NativeSourceSelection,
     freshness?: NativeSelectionFreshness,
+    sharedDecoded?: Map<string, unknown>,
   ) {
     if (!(selection instanceof NativeSourceSelection)) fail("storage_configuration_invalid");
+    if (sharedDecoded !== undefined && !(sharedDecoded instanceof Map)) {
+      fail("storage_configuration_invalid");
+    }
+    // Decoded releases are frozen and keyed by registry/selection hash, so an isolate may share them.
+    this.cache = sharedDecoded ?? new Map();
     if (freshness !== undefined) {
       if (
         !freshness || typeof freshness.heads?.current !== "function" ||
@@ -182,6 +188,10 @@ export class NativeDataProvider
   }
   load(kind: NativeRuntimeKind, key: string): NativeObject | null {
     return this.selection.load(kind, key)?.payload ?? null;
+  }
+  /** True only when a production conversion release is selected for this offering (no body load). */
+  hasProductionConversion(offeringId: string): Promise<boolean> {
+    return Promise.resolve(this.selection.has("conversion", offeringId));
   }
   private async decode<T>(
     kind: NativeRuntimeKind,
@@ -703,6 +713,18 @@ export class NativeDataProvider
   }
   private async referenceGroup(key: string) {
     await this.assertDecodeSelection();
+    // Same request-scoped decode cache as decode(): skip the per-call rule-body copy once decoded.
+    const decodedId = JSON.stringify([
+      this.selection.registryHash,
+      this.selection.selectionHash,
+      "reference_conversion",
+      key,
+    ]);
+    if (this.cache.has(decodedId)) {
+      const cached = this.cache.get(decodedId) as ReturnType<typeof decodeSchoolReferencePayload>;
+      await this.assertDecodeSelection();
+      return cached;
+    }
     const selected = await this.selection.loadReference(key);
     if (!selected) {
       await this.assertDecodeSelection();

@@ -8357,6 +8357,17 @@
           "remote_ref_state": "deleted_2026-10-04_user_authorized_remote_ref_only",
           "scope": "develop 조상 및 진행 PR 없음 확인 후 사용자 허용 범위의 원격 참조만 삭제 완료. 새 작업 금지. 로컬 브랜치와 작업 파일은 보존.",
           "deletion_scope": "사용자가 정확히 허용한 GitHub 원격 refs/heads/feature/planning-layer-ownership만 삭제했다. develop의 커밋과 로컬 브랜치·파일·worktree·원격 추적 캐시는 보존한다."
+        },
+        {
+          "name": "feature/system-task/p3p4-cpu-budget",
+          "kind": "system_task",
+          "owner": "시스템·콘텐츠 개발 담당 / 정시터치 부담당자 대행",
+          "parent": "feature/application-pre-data-platform",
+          "pr_target": "feature/application-pre-data-platform",
+          "status": "active",
+          "temporary": true,
+          "purpose": "3·4페이지 Edge CPU 한도 초과(546) 수정: 4페이지 후보를 운영 환산 보유 모집행으로 먼저 거르고, 참고 환산 decode 재사용, 준비된 선택본 단일 실행 캐시(최대 4). 운영 배포·참고 환산 재연결은 최종 관리자 확인 뒤.",
+          "base_commit": "738fc383ec320460221ab23661aa698f82f730cd"
         }
       ],
       "planning_team_declaration": "JUNGSI_TEAM=planning (해당 셸 세션에만 설정; 신원 인증이나 GitHub 권한 분리는 아님)",
@@ -9651,11 +9662,11 @@
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-              "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
+              "sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff"
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
-              "sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523"
+              "sha256": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8"
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
@@ -9699,7 +9710,7 @@
             },
             {
               "path": "tests/edge/test_university_analysis.ts",
-              "sha256": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36"
+              "sha256": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff"
             }
           ],
           "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
@@ -10162,11 +10173,11 @@
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-              "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
+              "sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff"
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
-              "sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523"
+              "sha256": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8"
             },
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
@@ -10210,7 +10221,7 @@
             },
             {
               "path": "tests/edge/test_university_analysis.ts",
-              "sha256": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36"
+              "sha256": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff"
             }
           ],
           "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
@@ -19714,7 +19725,7 @@
                 "REQ-26",
                 "REQ-31"
               ],
-              "source_sha256": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531",
+              "source_sha256": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870",
               "declared_exports": [
                 "ProfessionalAnalysisDataPort",
                 "ProfessionalApprovedAnalysis",
@@ -20247,7 +20258,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5",
+              "source_sha256": "efcb310016bf52df0e5a62176a9f0cbe1b3d293124de327a2bba9f874be02480",
               "declared_exports": [
                 "PublishedForecastPort",
                 "UNIVERSITY_ANALYSIS_OPERATIONS",
@@ -21182,7 +21193,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
+              "source_sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff",
               "declared_exports": [
                 "NativeDataProvider",
                 "NativeForecastInputs",
@@ -21217,7 +21228,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523",
+              "source_sha256": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8",
               "declared_exports": [
                 "NATIVE_RUNTIME_KINDS",
                 "NativeRuntimeKind",
@@ -21585,7 +21596,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7",
+              "source_sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
               "declared_exports": [
                 "NativeRuntimeApi",
                 "RuntimeComposition",
@@ -21630,7 +21641,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f",
+              "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -26427,6 +26438,15 @@
         "REQ-28"
       ],
       "summary": "기존 카탈로그 SQL을 재사용하는 2027 Guide 어댑터와 합성 20건을 등록한다. 실제 issuer·coverage·RLS·배포는 미검증이다."
+    },
+    {
+      "date": "2026-11-08",
+      "requirements": [
+        "REQ-03",
+        "REQ-04",
+        "REQ-26"
+      ],
+      "summary": "3·4페이지 요청당 CPU를 줄인다. 후보 생성은 운영 환산이 선택된 모집단위만 계산하고(참고 환산만 있는 모집단위는 항상 보류라 제외), 검증한 선택본과 디코드 결과는 같은 registry·selection·승인·만료 핀에서 isolate 안에 최대 2개 재사용한다(요청마다 승인 head 재확인). 선택본 생성자와 후보 건수 확인의 중복 깊은 복사, 참고 규칙 호출마다의 본문 복사를 없앤다. 운영 배포는 미검증이다."
     }
   ],
   "overall_analysis_contract": {
@@ -26670,7 +26690,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
+            "sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
@@ -28513,7 +28533,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-          "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
+          "sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -28650,11 +28670,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "80f502c63d98c05cb6ebc085461025be8b88d650665d871d09de5d20cdc9db87"
+        "sha256": "283f61939be77a818b87767538dfa3fdcd191dc01a470aa92fe375b12e8e7ee3"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "01049421099da1c9aaf1d5123a525b6165f06b3ec6cda48c26e9e7674d5ab764"
+        "sha256": "13252db17db5ff8fedf26cd8232cd997cd4769e9697c00ae196f67d701ceb14f"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29646,7 +29666,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5"
+            "sha256": "efcb310016bf52df0e5a62176a9f0cbe1b3d293124de327a2bba9f874be02480"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
@@ -29662,15 +29682,15 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
+            "sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
-            "sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523"
+            "sha256": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
+            "sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
@@ -29710,7 +29730,7 @@
           },
           {
             "path": "tests/edge/test_university_analysis.ts",
-            "sha256": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36"
+            "sha256": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff"
           }
         ],
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
@@ -39742,7 +39762,7 @@
           },
           "composition": {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "source_sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
+            "source_sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b"
           }
         },
         "operation_ids": [
@@ -86553,12 +86573,17 @@
               "src": "supabase/functions/_shared/jungsi/application/professional_policy.ts"
             },
             {
+              "importedName": "productionCandidateRows",
+              "originalName": "productionCandidateRows",
+              "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+            },
+            {
               "importedName": "requestWildcardGrant",
               "originalName": "requestWildcardGrant",
               "src": "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts"
             }
           ],
-          "source_sha256": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531",
+          "source_sha256": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870",
           "symbols": [
             {
               "declarations": [
@@ -110953,7 +110978,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5",
+          "source_sha256": "efcb310016bf52df0e5a62176a9f0cbe1b3d293124de327a2bba9f874be02480",
           "symbols": [
             {
               "declarations": [
@@ -111033,12 +111058,150 @@
                           "typeName": "OfferingAnalysisDataPort"
                         }
                       }
+                    ],
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "hasProductionConversion",
+                        "optional": true,
+                        "parameter_source": "(offeringId: string)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "offeringId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            ]
+                          }
+                        }
+                      }
                     ]
                   },
                   "kind": "interface"
                 }
               ],
               "name": "UniversityAnalysisDataPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  data: Pick<UniversityAnalysisDataPort, \"hasProductionConversion\">,\n  rows: readonly NativeObject[],\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "data",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Pick",
+                          "value": {
+                            "typeName": "Pick",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "UniversityAnalysisDataPort",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "UniversityAnalysisDataPort"
+                                }
+                              },
+                              {
+                                "kind": "literal",
+                                "repr": "hasProductionConversion",
+                                "value": {
+                                  "kind": "string",
+                                  "string": "hasProductionConversion"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rows",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "NativeObject",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "NativeObject",
+                                      "specifier": "../domain/json_value.ts"
+                                    },
+                                    "typeName": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "productionCandidateRows"
             },
             {
               "declarations": [
@@ -143333,7 +143496,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
+          "source_sha256": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff",
           "symbols": [
             {
               "declarations": [
@@ -143485,7 +143648,7 @@
                       {
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    private readonly selection: NativeSourceSelection,\n    freshness?: NativeSelectionFreshness,\n  )",
+                        "parameter_source": "(\n    private readonly selection: NativeSourceSelection,\n    freshness?: NativeSelectionFreshness,\n    sharedDecoded?: Map<string, unknown>,\n  )",
                         "params": [
                           {
                             "accessibility": "private",
@@ -143518,6 +143681,30 @@
                                   "kind": "local"
                                 },
                                 "typeName": "NativeSelectionFreshness"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "sharedDecoded",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Map",
+                              "value": {
+                                "typeName": "Map",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                ]
                               }
                             }
                           }
@@ -143775,6 +143962,39 @@
                         },
                         "kind": "method",
                         "name": "load"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "offeringId",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "hasProductionConversion"
                       },
                       {
                         "accessibility": "private",
@@ -145347,7 +145567,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523",
+          "source_sha256": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8",
           "symbols": [
             {
               "declarations": [
@@ -145623,12 +145843,284 @@
                 {
                   "declarationKind": "export",
                   "def": {
+                    "properties": [
+                      {
+                        "name": "selection",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeSourceSelection",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "NativeSourceSelection"
+                          }
+                        }
+                      },
+                      {
+                        "name": "decoded",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Map",
+                          "value": {
+                            "typeName": "Map",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "unknown",
+                                "value": "unknown"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "PreparedSelectionEntry"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(private readonly maxEntries = 4)",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "maxEntries",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            },
+                            "readonly": true,
+                            "right": "4"
+                          }
+                        ]
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "PreparedSelectionEntry",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "PreparedSelectionEntry"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "undefined",
+                                "value": "undefined"
+                              }
+                            ]
+                          }
+                        },
+                        "kind": "method",
+                        "name": "get"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "row",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "PreparedSelectionEntry",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "PreparedSelectionEntry"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "set"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "row",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "PreparedSelectionEntry",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "PreparedSelectionEntry"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "remove"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "accessibility": "private",
+                        "name": "rows",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Map",
+                          "value": {
+                            "typeName": "Map",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "PreparedSelectionEntry",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "PreparedSelectionEntry"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "PreparedSelectionCache"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
                     "constructors": [
                       {
                         "accessibility": "private",
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n    selected: ReadonlyMap<string, NativeObject>,\n    readonly payloadMode: NativePayloadMode,\n    private readonly client: SupabaseArtifactClient,\n  )",
+                        "parameter_source": "(\n    artifacts: ReadonlyMap<string, SelectedNativeArtifact>,\n    readonly registryHash: string,\n    readonly selectionHash: string,\n    selected: ReadonlyMap<string, NativeObject>,\n    readonly payloadMode: NativePayloadMode,\n    private readonly client: SupabaseArtifactClient,\n    shared = false,\n  )",
                         "params": [
                           {
                             "kind": "identifier",
@@ -145746,6 +146238,20 @@
                                 "typeName": "SupabaseArtifactClient"
                               }
                             }
+                          },
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "shared",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            },
+                            "right": "false"
                           }
                         ]
                       }
@@ -145846,6 +146352,159 @@
                         "isStatic": true,
                         "kind": "method",
                         "name": "prepare"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "client",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SupabaseArtifactClient",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "SupabaseArtifactClient",
+                                    "specifier": "./supabase_artifacts.ts"
+                                  },
+                                  "typeName": "SupabaseArtifactClient"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "NativeSourceSelection",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "NativeSourceSelection"
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "rebind"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "referenceCount"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "kind",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "NativeRuntimeKind",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "NativeRuntimeKind"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "boolean",
+                            "value": "boolean"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "has"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "kind",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "NativeRuntimeKind",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "NativeRuntimeKind"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "key",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "NativeObject",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeObject",
+                                          "specifier": "../domain/json_value.ts"
+                                        },
+                                        "typeName": "NativeObject"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "kind": "method",
+                        "name": "peekPayload"
                       },
                       {
                         "functionDef": {
@@ -164156,6 +164815,11 @@
               "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
             },
             {
+              "importedName": "PreparedSelectionCache",
+              "originalName": "PreparedSelectionCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+            },
+            {
               "importedName": "PreparedUsageAdmission",
               "originalName": "PreparedUsageAdmission",
               "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -164252,11 +164916,11 @@
             },
             {
               "importedName": "SearchFailureCorrelation",
-              "originalName": "SearchFailureCorrelation",
-              "src": "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts",
               "jsDoc": {
                 "doc": "Concrete service graph with an injected native pool and transport. No server starts on import."
-              }
+              },
+              "originalName": "SearchFailureCorrelation",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts"
             },
             {
               "importedName": "SupabaseForecastAuthorities",
@@ -164364,7 +165028,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7",
+          "source_sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
           "symbols": [
             {
               "declarations": [
@@ -165861,6 +166525,23 @@
                         }
                       },
                       {
+                        "accessibility": "private",
+                        "name": "preparedSelections",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "PreparedSelectionCache",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "PreparedSelectionCache",
+                              "specifier": "./native_source_selection.ts"
+                            },
+                            "typeName": "PreparedSelectionCache"
+                          }
+                        }
+                      },
+                      {
                         "name": "fetch",
                         "readonly": true,
                         "tsType": {
@@ -166681,6 +167362,16 @@
           },
           {
             "dynamic": false,
+            "specifier": "./native_source_selection.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
             "specifier": "./public_passes.ts",
             "targets": [
               {
@@ -166914,6 +167605,16 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts"
             },
             {
+              "importedName": "PreparedSelectionCache",
+              "originalName": "PreparedSelectionCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+            },
+            {
+              "importedName": "PreparedSelectionEntry",
+              "originalName": "PreparedSelectionEntry",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+            },
+            {
               "importedName": "RepositoryUsageReplays",
               "originalName": "RepositoryUsageReplays",
               "src": "supabase/functions/_shared/jungsi/application/usage_service.ts"
@@ -167029,7 +167730,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
             }
           ],
-          "source_sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f",
+          "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
           "symbols": [
             {
               "declarations": [
@@ -167040,7 +167741,7 @@
                       {
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly artifactCache?: VerifiedArtifactCache,\n    private readonly ifNoneMatch: string | null = null,\n  )",
+                        "parameter_source": "(\n    private readonly env: RuntimeEnvironment,\n    private readonly basic: () => BasicRuntimeSettings,\n    private readonly sql: () => SupabaseSqlTransport,\n    private readonly clock: RequestClockPort,\n    private readonly operation: ApiOperationId | \"health.ready\" | null,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly artifactCache?: VerifiedArtifactCache,\n    private readonly ifNoneMatch: string | null = null,\n    private readonly preparedSelections?: PreparedSelectionCache,\n  )",
                         "params": [
                           {
                             "accessibility": "private",
@@ -167229,6 +167930,25 @@
                             },
                             "readonly": true,
                             "right": "null"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "preparedSelections",
+                            "optional": true,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "PreparedSelectionCache",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "PreparedSelectionCache",
+                                  "specifier": "./native_source_selection.ts"
+                                },
+                                "typeName": "PreparedSelectionCache"
+                              }
+                            }
                           }
                         ]
                       }
@@ -200166,6 +200886,14 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
             },
             {
+              "importedName": "PreparedSelectionCache",
+              "jsDoc": {
+                "doc": "Invented private registry pins only. Source-byte acceptance is never engine or live acceptance."
+              },
+              "originalName": "PreparedSelectionCache",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+            },
+            {
               "importedName": "SupabaseArtifactClient",
               "originalName": "SupabaseArtifactClient",
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
@@ -200191,7 +200919,7 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
+          "source_sha256": "9a8816e371ef7662a948eb5b7a4e2276e707c0cf083981300c3116607f930fdd",
           "symbols": [
             {
               "declarations": [
@@ -200467,6 +201195,64 @@
                 }
               ],
               "name": "verifyAdditionalUniversityScopeCases"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "rebindReusesVerifiedBodies"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "preparedCacheSharesAndBounds"
             }
           ]
         },
@@ -214346,6 +215132,11 @@
               "src": "tests/edge/fixture.ts"
             },
             {
+              "importedName": "productionCandidateRows",
+              "originalName": "productionCandidateRows",
+              "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+            },
+            {
               "importedName": "syncPromise",
               "originalName": "syncPromise",
               "src": "tests/edge/fixture.ts"
@@ -214356,7 +215147,7 @@
               "src": "tests/edge/synthetic_offering_analysis.ts"
             }
           ],
-          "source_sha256": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36",
+          "source_sha256": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff",
           "symbols": [
             {
               "declarations": [
@@ -214784,6 +215575,35 @@
                 }
               ],
               "name": "denied"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "productionCandidateUniverse"
             }
           ]
         },
@@ -236770,7 +237590,7 @@
       "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "cfd650bce6d497a2ff50ef5cb080d678f471d261235159e1691a7d8355e2e2ee",
       "supabase/functions/_shared/jungsi/application/platform_repository.ts": "839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744",
       "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-      "supabase/functions/_shared/jungsi/application/professional_analysis.ts": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531",
+      "supabase/functions/_shared/jungsi/application/professional_analysis.ts": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870",
       "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4",
       "supabase/functions/_shared/jungsi/application/professional_policy.ts": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af",
       "supabase/functions/_shared/jungsi/application/professional_ports.ts": "e2a561f303f9ee39fe8afedbc7932fcd2e8d1d4a47e867a91c40fca97977c492",
@@ -236791,7 +237611,7 @@
       "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
       "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
       "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5",
+      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "efcb310016bf52df0e5a62176a9f0cbe1b3d293124de327a2bba9f874be02480",
       "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
       "supabase/functions/_shared/jungsi/application/university_scoring.ts": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -236826,8 +237646,8 @@
       "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts": "a80ccb35c33703d76a765b530a2d9e02d3cd86d9ba72d15cd3db51c481435032",
       "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
       "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c",
-      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f",
-      "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523",
+      "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "37ce2f9bada75a323a1f2ff6e6c89845a382d4b26c819e15e5a854175fb12fff",
+      "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "edf3cd9b17b21c47c92f749420dd83c2fadc62331101633d1a17b1a57ab5c8e8",
       "supabase/functions/_shared/jungsi/infrastructure/own_report_cursor.ts": "b2273effe7558e9f27abc5e92c21c2f8d89653e67e30f450a96b12db8219c538",
       "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts": "f650c33832d1896cee3f60f950d4fb334fa4d541e52746b75d3664c1b68fa2d2",
       "supabase/functions/_shared/jungsi/infrastructure/p1_r27_request_admission.ts": "2642661bbf6779c502f4692038378c68828937e2f7d9bb2102e158e0911ce632",
@@ -236843,8 +237663,8 @@
       "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
       "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "c52e402a66b2034f4d2a08d2033226e11d4cedb33597e1d91f9bd7a8ed60aade",
@@ -236907,7 +237727,7 @@
       "tests/edge/test_member_shortlist_http.ts": "693d14dace3af400eb6e9aab6ab48a277c71cfcfa65a185e33de9768f8a14250",
       "tests/edge/test_native_auth.ts": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
       "tests/edge/test_native_data_provider.ts": "864f79ee0574e7376c4137a9a4f0d580e240224c6b60d2119a93c81b092fa91e",
-      "tests/edge/test_native_source_selection.ts": "58d06b56856ea32c959a152eabc5ad30fb33cef235e735c97877e13ea7e6ff34",
+      "tests/edge/test_native_source_selection.ts": "9a8816e371ef7662a948eb5b7a4e2276e707c0cf083981300c3116607f930fdd",
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
       "tests/edge/test_offering_analysis.ts": "6b725fb51e791c36c614d4c79d7739c2c3f8610c7f168f4d6d74aa0397bc32c0",
       "tests/edge/test_official_subject_runtime.ts": "979a33749052649f63fda1c755b3ec06c20459ccf56420a7e62b352771817b51",
@@ -236944,7 +237764,7 @@
       "tests/edge/test_sql_values.ts": "85c8f851e0389572ddf658c42d488c6c2a9d81d675df5f4f7e8949bf583080bd",
       "tests/edge/test_supabase_api_ingress.ts": "94e3f05ffa572daa35519dc722a22199e73441df5da3524fa7de19e4979e7fb7",
       "tests/edge/test_supabase_artifacts.ts": "696a544287932c18a62c867d297165fc3d93145ad223b8811de820311d8dab67",
-      "tests/edge/test_university_analysis.ts": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36",
+      "tests/edge/test_university_analysis.ts": "b3abe94371c7274c7c22c0cc694371565f585696f2c77fd97a0439a2b3c574ff",
       "tests/edge/test_university_distribution.ts": "c7eae343237e52e4233dcf95a89eb09d7e86e9a8d1ffd91ea39e6e4ed389b917",
       "tests/edge/test_university_percentile.ts": "ae18a54fa515c95eb6f4d23ccb3404f053e7571d1ef1238aa5be514a5960e13f",
       "tests/edge/test_university_scoring.ts": "b33300e33ec78aaaa6ee3babc1486eca3d78bdc7bfd42fbeebd596069b860068",
@@ -237065,7 +237885,7 @@
     "extension_runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "f91e064d1e46ab1db6a1701cf6a145daf1ef8fea0f5889d8b3c284c81ff1826b",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
       "tests/edge/public_api_contract_fixture.ts": "227dc89330ea7bae939134dbf0b165365201831c9327b6476d166e8c6abf6973",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d",
       "tests/edge/test_score_input_policy.ts": "c7f588ab811dc61a822966e92f31840d944f36d853d5a64f22fe1e9634744a21"
@@ -238513,9 +239333,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "57abcdb4356cde5bf566b45741b75ffbbb712fc46f201785784aa03d65e777c0",
+      "bridge_sha256": "1205104c4f71d540a72c8490b1cf30aed80d8223a89815c42e7c13a96eec588a",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "a3aedad1e2a7885ef799b7c7c3f72f23ea76e3a9c350551f4516983380e76276",
+      "graph_manifest_sha256": "cff4b716f0861d11649a4b07f2066325be7e9962772ed7475dbd7d52e413a633",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -238706,7 +239526,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-          "sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
+          "sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts",
@@ -239743,7 +240563,7 @@
     "runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "f91e064d1e46ab1db6a1701cf6a145daf1ef8fea0f5889d8b3c284c81ff1826b",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b",
       "tests/edge/test_administrator_usage.ts": "858ff65182a8c55df6571e3dc34394a3670f6c1f35309655a331bb1f25828178",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
       "tests/edge/test_history_field_qualification.ts": "19ac3bdbd4c5beed7239dbef7b426d9a4787169a0bbdc1cdd806bf8260cdeefb",
@@ -239802,7 +240622,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-          "sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
+          "sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b"
         },
         {
           "path": "tests/edge/test_administrator_usage.ts",
@@ -241427,7 +242247,7 @@
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
-          "sha256": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531"
+          "sha256": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",
@@ -242156,11 +242976,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "45740178878866f3945e6039ea4a28a43eaa0d1c9c4cb54d02643a2973a37df7"
+            "sha256": "09c7117e032ba7a063931788862e420c93d767862643f57d71ceb7fc16c77f1b"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
+            "sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -242465,7 +243285,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "11569bf287a0effde901f3f151cfb1c5be020e219e5933be4ad5b7e8e32528b7",
+    "manifest_sha256": "267af905e360345cceee4a8152edd94871ffb923667e14e125f528d9f63e0428",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -242476,7 +243296,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "c8f8b9ba506b827a9f0aba1ac415234ed8f2aaa6ef31809b8da548345b87efce",
+    "manifest_sha256": "b143697049c2355ef11c8ddaf81f30e2c75468782d217994027cc11916bfe4c0",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

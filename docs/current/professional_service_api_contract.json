@@ -1477,7 +1477,7 @@
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_analysis.ts",
-          "sha256": "b9e22d6bc8c3853ff9dcb372ac7a573dc11ad2b4c8a486e5eaf9f4fb10eb7531"
+          "sha256": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts",

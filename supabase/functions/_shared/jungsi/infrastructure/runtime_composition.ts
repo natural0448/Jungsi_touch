@@ -70,6 +70,7 @@ import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./mana
 import { NativeForecastInputs } from "./native_data_provider.ts";
 import { PublicJeongsiPassesReader } from "./public_passes.ts";
 import { VerifiedArtifactCache } from "./supabase_artifacts.ts";
+import { PreparedSelectionCache } from "./native_source_selection.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
 import {
   type BasicRuntimeSettings,
@@ -257,6 +258,14 @@ export function runtimeAnalysisDataPort(
       await phase("conversion_provider", async () => (await context.data()).getConversion(...a)),
     getReference: async (...a) =>
       await phase("conversion_provider", async () => (await context.data()).getReference(...a)),
+    hasProductionConversion: async (...a) =>
+      await phase("conversion_provider", async () => {
+        // Providers without the capability keep the previous full candidate universe.
+        const data = (await context.data()) as {
+          hasProductionConversion?: (offeringId: string) => Promise<boolean>;
+        };
+        return data.hasProductionConversion ? await data.hasProductionConversion(...a) : true;
+      }),
     withScoringBatch: async <T>(work: () => Promise<T>) =>
       await phase("analysis_provider", async () => (await context.data()).withScoringBatch(work)),
     getPercentile: async (...a) =>
@@ -357,6 +366,7 @@ export class NativeRuntimeApi {
   private readonly projection: PublicResponseProjection;
   private readonly pools = new Map<string, SupabaseSqlTransport>();
   private readonly artifactCache = new VerifiedArtifactCache();
+  private readonly preparedSelections = new PreparedSelectionCache();
   constructor(private readonly config: RuntimeComposition) {
     if (
       !config || typeof config.environment?.get !== "function" ||
@@ -470,6 +480,7 @@ export class NativeRuntimeApi {
         this.fetcher,
         this.artifactCache,
         request.headers.get("If-None-Match"),
+        this.preparedSelections,
       );
       closeP1R27 = () => context.closeP1R27();
       if (pathname === "/health/ready" && request.method === "GET") {
