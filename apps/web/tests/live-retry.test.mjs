@@ -61,6 +61,31 @@ test("candidate rebuild (same idempotency key) is replayed; score save is never 
   assert.equal(seen.length, 3);
 });
 
+const cpu = () => json(546, { error: { code: "WORKER_LIMIT", message: "CPU Time exceeded" } });
+
+test("546 on a read is sent once more and succeeds", async (t) => {
+  const seen = fake(t, [cpu, () => json(200, { current_report_id: "r2" })]);
+  const st = await liveSource.readScoreInputStatus(caller(6), "exam");
+  assert.equal(st.current_report_id, "r2");
+  assert.equal(seen.length, 2);
+});
+
+test("546 on university analysis is replayed once; a second 546 is not retried again", async (t) => {
+  const seen = fake(t, [cpu, () => json(200, { report_id: "r1" }), cpu, cpu]);
+  const ok = await liveSource.analyzeUniversities(caller(7), "r1", 3, ["o1"], "ua-key");
+  assert.equal(ok.ok, true);
+  const failed = await liveSource.analyzeUniversities(caller(7), "r1", 3, ["o1"], "ua-key2");
+  assert.equal(failed.ok, false);
+  assert.equal(seen.length, 4);
+});
+
+test("546 on a score save is never replayed", async (t) => {
+  const seen = fake(t, [cpu]);
+  const r = await liveSource.createScoreProfile(caller(8), [], true, "sp-key2").catch((e) => e);
+  assert.ok(r instanceof Error || r?.ok === false);
+  assert.equal(seen.length, 1);
+});
+
 test("layout and page share one /me call per request", async (t) => {
   const seen = fake(t, [() => json(200, { member_tier: "paid" })]);
   const c = caller(5);

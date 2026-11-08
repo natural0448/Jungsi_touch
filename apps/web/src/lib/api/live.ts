@@ -144,13 +144,18 @@ async function sendContended(path: string, init: RequestInit): Promise<Response>
   다시 보내도 되는 요청만: 읽기(GET)와, 같은 리포트·판·의도에서 만든 Idempotency-Key 로 다시 계산만 하는 분석·후보 요청.
   성적 저장·정정 부여·담기·예측 작성처럼 두 번 실행되면 안 되거나 결과가 바뀌는 쓰기는 다시 보내지 않는다.
   다른 503 코드(security_policy_unavailable·operation_scope_not_approved 등)는 설정·승인 문제라 다시 보내지 않는다.
+  546(CPU Time exceeded)도 같은 요청들에 한해 한 번만 다시 보낸다. Supabase 의 CPU 2초 한도는 인스턴스가 사는 동안의 합계로
+  걸려, 앞선 요청으로 CPU 가 쌓인 인스턴스에서 마지막 요청이 끊긴다(11-08 v124 18:46:13 POST university-results 546,
+  18:47:35 새 인스턴스에서 같은 요청 200. 부담당자 회신). 다시 보내면 대개 새 인스턴스로 간다.
 */
 const DEPENDENCY_RETRY_MS = 1500;
 async function sendOnceMore(path: string, init: RequestInit, replayable: boolean): Promise<Response> {
   const res = await sendContended(path, init);
-  if (!replayable || res.status !== 503) return res;
-  const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
-  if (code !== undefined && code !== "backend_dependency_unavailable") return res;
+  if (!replayable || (res.status !== 503 && res.status !== 546)) return res;
+  if (res.status === 503) {
+    const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
+    if (code !== undefined && code !== "backend_dependency_unavailable") return res;
+  }
   await new Promise((r) => setTimeout(r, DEPENDENCY_RETRY_MS));
   return sendContended(path, init);
 }

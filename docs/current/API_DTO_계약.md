@@ -436,7 +436,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=0a9ab57e3ae3fb25493dec5b3a63e05424acd855c0cac3f64d50dc450d80ffd4 -->
+<!-- jungsi:generated spec_sha256=e1a3b7993d6ac2217c41a61daa3888309eb789dfa2c82543b37f9fa06f423e53 -->
 
 
 ## 회원별 관심대학 JSON API
