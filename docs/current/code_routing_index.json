@@ -10013,7 +10013,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a",
+        "source_sha256": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
         "declared_exports": [
           "NativeObject",
           "cloneNativeJson",
@@ -10031,7 +10031,7 @@
           "REQ-17",
           "REQ-24"
         ],
-        "source_sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+        "source_sha256": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
         "declared_exports": [
           "JsonFloat",
           "NativeJson",

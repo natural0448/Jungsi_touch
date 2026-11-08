@@ -89943,11 +89943,6 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           },
           {
-            "importedName": "parseNativeJson",
-            "originalName": "parseNativeJson",
-            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
-          },
-          {
             "importedName": "requireContract",
             "jsDoc": {
               "doc": "Exact private JSON serialization, separate from role-based public projection."
@@ -89956,7 +89951,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
           }
         ],
-        "source_sha256": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a",
+        "source_sha256": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
         "symbols": [
           {
             "declarations": [
@@ -90187,6 +90182,99 @@
               }
             ],
             "name": "keyOrder"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(a: string, b: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "a",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "b",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "codePointOrder"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "FLOAT_LEXEME"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "keyword",
+                    "repr": "BigInt",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SAFE_MIN"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "keyword",
+                    "repr": "BigInt",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SAFE_MAX"
           }
         ]
       },
@@ -90240,7 +90328,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
           }
         ],
-        "source_sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+        "source_sha256": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
         "symbols": [
           {
             "declarations": [
@@ -90509,6 +90597,81 @@
               }
             ],
             "name": "parseNativeObject"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "NUMBER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "array",
+                          "value": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "kind": "array",
+                          "value": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "LITERALS"
           }
         ]
       },

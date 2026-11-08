@@ -20618,7 +20618,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a",
+              "source_sha256": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
               "declared_exports": [
                 "NativeObject",
                 "cloneNativeJson",
@@ -20636,7 +20636,7 @@
                 "REQ-17",
                 "REQ-24"
               ],
-              "source_sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+              "source_sha256": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
               "declared_exports": [
                 "JsonFloat",
                 "NativeJson",
@@ -26447,6 +26447,15 @@
         "REQ-26"
       ],
       "summary": "3·4페이지 요청당 CPU를 줄인다. 후보 생성은 운영 환산이 선택된 모집단위만 계산하고(참고 환산만 있는 모집단위는 항상 보류라 제외), 검증한 선택본과 디코드 결과는 같은 registry·selection·승인·만료 핀에서 isolate 안에 최대 2개 재사용한다(요청마다 승인 head 재확인). 선택본 생성자와 후보 건수 확인의 중복 깊은 복사, 참고 규칙 호출마다의 본문 복사를 없앤다. 운영 배포는 미검증이다."
+    },
+    {
+      "date": "2026-11-08",
+      "requirements": [
+        "REQ-15",
+        "REQ-24",
+        "REQ-26"
+      ],
+      "summary": "새 인스턴스 첫 요청의 CPU를 줄인다(운영 로그상 CPU 2초 한도가 인스턴스 합계로 걸림). native JSON 판독은 같은 문법을 유지하면서 숫자마다 남은 본문을 복사하지 않고, 공백·이스케이프 없는 문자열을 정규식·JSON.parse 없이 읽는다. 정규 키 정렬은 서로게이트가 없으면 코드 단위로 비교한다. cloneNativeJson은 텍스트 왕복 없이 같은 결과·오류를 내는 구조 복사로 바꾼다. 실제 artifact 810개·무작위 110만 건에서 옛 구현과 결과 차이 0, 로컬 첫 3페이지 요청 CPU 약 531→330ms. 운영 배포는 미검증이다."
     }
   ],
   "overall_analysis_contract": {
@@ -28670,11 +28679,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "283f61939be77a818b87767538dfa3fdcd191dc01a470aa92fe375b12e8e7ee3"
+        "sha256": "4d3807e0df97c9623f3eb2264ed9bb99da1ca3f103427ebe581f6bf0f03dd5e2"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "13252db17db5ff8fedf26cd8232cd997cd4769e9697c00ae196f67d701ceb14f"
+        "sha256": "e888e2f4314271a5496bde2dc768fb5956dbf5cd30cc3de2d4e4e776a93c1b5f"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -125297,11 +125306,6 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             },
             {
-              "importedName": "parseNativeJson",
-              "originalName": "parseNativeJson",
-              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
-            },
-            {
               "importedName": "requireContract",
               "jsDoc": {
                 "doc": "Exact private JSON serialization, separate from role-based public projection."
@@ -125310,7 +125314,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
             }
           ],
-          "source_sha256": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a",
+          "source_sha256": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
           "symbols": [
             {
               "declarations": [
@@ -125541,6 +125545,99 @@
                 }
               ],
               "name": "keyOrder"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(a: string, b: string)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "a",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "b",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "number",
+                      "value": "number"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "codePointOrder"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "FLOAT_LEXEME"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "keyword",
+                      "repr": "BigInt",
+                      "value": "bigint"
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SAFE_MIN"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "keyword",
+                      "repr": "BigInt",
+                      "value": "bigint"
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SAFE_MAX"
             }
           ]
         },
@@ -125594,7 +125691,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
             }
           ],
-          "source_sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+          "source_sha256": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
           "symbols": [
             {
               "declarations": [
@@ -125863,6 +125960,81 @@
                 }
               ],
               "name": "parseNativeObject"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "NUMBER"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "array",
+                            "value": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "kind": "array",
+                            "value": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "LITERALS"
             }
           ]
         },
@@ -237625,8 +237797,8 @@
       "supabase/functions/_shared/jungsi/domain/conversion_release.ts": "9d7e0ff22c42deb6abaf90c72582f3bf4c2cf9ad63760ccb8ae8692c6274ad98",
       "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
       "supabase/functions/_shared/jungsi/domain/exam_pack.ts": "0df832cb190512a5db35fd85275d51cae321770c6bcdc7a7f14b7e8ee512d8da",
-      "supabase/functions/_shared/jungsi/domain/json_value.ts": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a",
-      "supabase/functions/_shared/jungsi/domain/native_json.ts": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a",
+      "supabase/functions/_shared/jungsi/domain/json_value.ts": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
+      "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
       "supabase/functions/_shared/jungsi/domain/percentile.ts": "18e7abec5e173758d78d89d70fdc0d5052aa098a04cba99845f4ec4aeedb7a02",
       "supabase/functions/_shared/jungsi/domain/python_json_digest.ts": "c6f4a96dc3dfeacf4a6bcc27a08c520b1cc8bc969fd2f2240f8389e9256b3a3e",
       "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "96841feb03db3a3ee5a88de6ceb759910d5f024654809e77b2172b3256169466",
@@ -239333,9 +239505,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "1205104c4f71d540a72c8490b1cf30aed80d8223a89815c42e7c13a96eec588a",
+      "bridge_sha256": "8f0c7fddd16f06e3f4bf5f9b4ee45fa9cb0a54465c38208fcb9be2a20a8098c1",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "cff4b716f0861d11649a4b07f2066325be7e9962772ed7475dbd7d52e413a633",
+      "graph_manifest_sha256": "749f4adbd8f1278bbc7b7bc1b8f09b84fc522a8757d591aff49a0bccf3ddb0c7",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -243193,11 +243365,11 @@
       },
       {
         "path": "supabase/functions/_shared/jungsi/domain/json_value.ts",
-        "sha256": "ba38aeac3fff9d1f73d96e1bcaad06431f9e2e28179a3a7477700d9a359cd98a"
+        "sha256": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a"
       },
       {
         "path": "supabase/functions/_shared/jungsi/domain/native_json.ts",
-        "sha256": "9e9798ef34ebe81e4857e4d34470a22ae7dc94eb607228b6b297cbd52b24de4a"
+        "sha256": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0"
       }
     ],
     "test_path": "tests/p1_contract_review/test_p1_r27_selection_bridge.synthetic.js",
@@ -243285,7 +243457,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "267af905e360345cceee4a8152edd94871ffb923667e14e125f528d9f63e0428",
+    "manifest_sha256": "0358d4d3305170d822a1315e4b6b1f9ed5b82649b392a11cef80f10f39aa8af3",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -243296,7 +243468,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "b143697049c2355ef11c8ddaf81f30e2c75468782d217994027cc11916bfe4c0",
+    "manifest_sha256": "0ed7af08186902a1928b27752c314e21ff6dd0c735f6215759af830093a0bc59",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

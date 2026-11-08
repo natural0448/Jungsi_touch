@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "9867f6fbf06c47cd5c3ae79aa66dfe9e3d86fe8011bfddb44b9fbb2981718d36",
+  "source_sha256": "d6582d4696fe56aa6ba4b41c06d28e4e57dcc39612b3ef2b5f89fa017849c303",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3900,11 +3900,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "283f61939be77a818b87767538dfa3fdcd191dc01a470aa92fe375b12e8e7ee3"
+        "sha256": "4d3807e0df97c9623f3eb2264ed9bb99da1ca3f103427ebe581f6bf0f03dd5e2"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "13252db17db5ff8fedf26cd8232cd997cd4769e9697c00ae196f67d701ceb14f"
+        "sha256": "e888e2f4314271a5496bde2dc768fb5956dbf5cd30cc3de2d4e4e776a93c1b5f"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
