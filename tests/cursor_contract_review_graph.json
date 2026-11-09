@@ -53,7 +53,7 @@
         "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "1fb90d2771b5b0f2b32d54b96b1d998700470da62432b79e4573da92bcf251b2",
         "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "4f95a22edbdc24b5174094144bc49332582c47178f54c678ade74e1318bd56de",
         "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c",
-        "supabase/functions/_shared/jungsi/application/score_map.ts": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+        "supabase/functions/_shared/jungsi/application/score_map.ts": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239",
         "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
         "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
         "supabase/functions/_shared/jungsi/application/university_analysis.ts": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668",

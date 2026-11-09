@@ -1233,6 +1233,17 @@ Deno.test("score map never fails a search: no profile, storage failure and budge
   equal(b.state, "unavailable");
   equal(b.items.map((item) => item.offering_id), ["SYNTHETIC-A-2027", "SYNTHETIC-B-2027"]);
   assert(b.items.every((item) => item.my_score === null));
+  // Runtime loading failures (catalog-only payloads) stay 계산 중 and are never stored.
+  const loading = scoreMapFixture();
+  loading.data.getExamPack = () =>
+    Promise.reject(new AccessError("runtime_dependency_not_loaded", 503));
+  const d = await new ScoreMapService(loading.store, loading.data, loading.pin, clock).attach(
+    SCORE_OWNER,
+    loading.items,
+  );
+  equal(d.state, "partial");
+  equal(d.items[0].my_score, null);
+  equal(loading.inserts, []);
   const limited = scoreMapFixture();
   const c = await new ScoreMapService(limited.store, limited.data, limited.pin, clock, {
     maxComputePerRequest: 0,

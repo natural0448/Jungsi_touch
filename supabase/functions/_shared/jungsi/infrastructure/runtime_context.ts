@@ -350,10 +350,13 @@ export class NativeRuntimeRequest {
         controls.read("selection"),
       ]);
       this.assertArtifactScope(selection, binding);
-      const catalogOnly = CATALOG_OPERATIONS.some((id) => id === this.operation);
-      const universityOnly = ["university.analyze", "candidates.build"].some((id) =>
-        id === this.operation
-      );
+      // offerings.search also scores the 3P score map (only when a stored score is missing),
+      // so it loads the same exam/conversion/reference payloads as university.analyze.
+      const universityOnly = ["university.analyze", "candidates.build", "offerings.search"].some((
+        id,
+      ) => id === this.operation);
+      const catalogOnly = !universityOnly &&
+        CATALOG_OPERATIONS.some((id) => id === this.operation);
       const mode = catalogOnly
         ? "catalog_only"
         : universityOnly

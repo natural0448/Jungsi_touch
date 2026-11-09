@@ -75228,7 +75228,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+        "source_sha256": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239",
         "symbols": [
           {
             "declarations": [
@@ -76000,6 +76000,46 @@
               }
             ],
             "name": "myScoreOf"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(reason: string | null)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "reason",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "transientReason"
           },
           {
             "declarations": [
@@ -137921,7 +137961,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
+        "source_sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8",
         "symbols": [
           {
             "declarations": [
@@ -184979,7 +185019,7 @@
             "src": "tests/edge/synthetic_runtime_binding.ts"
           }
         ],
-        "source_sha256": "bca71e2a48c83360eb131f30f71c1f0d33af6fb9e707f9a060f2c2716c092166",
+        "source_sha256": "fdd8a15c7e58e67964c60d2055b71dc637e983f0dd8c91d1caa323d4eeda4406",
         "symbols": [
           {
             "declarations": [

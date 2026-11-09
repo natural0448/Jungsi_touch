@@ -7728,7 +7728,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb",
+        "source_sha256": "9e0f61d2dc6f28667be765574535153121252480a187b4c7125112b5fe79b77f",
         "declared_exports": []
       },
       {
@@ -9664,7 +9664,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+        "source_sha256": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239",
         "declared_exports": [
           "AttachedScores",
           "MyScore",
@@ -11173,7 +11173,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
+        "source_sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]

@@ -134,6 +134,12 @@ export function myScoreOf(result: ScoringResult): MyScore {
     reason_code: reason ?? "conversion_release_missing",
   });
 }
+/** Engine reasons caused by the runtime (loading, storage, security), not by the data or scores. */
+export function transientReason(reason: string | null): boolean {
+  return reason !== null &&
+    (/^(runtime|storage|security|backend|entitlement|artifact)_/.test(reason) ||
+      /_(unavailable|timeout|not_loaded)$/.test(reason));
+}
 /** Pin of the approved data that produced a score: registry + selection of the live binding. */
 export async function scoreMapPin(
   references: Readonly<Record<string, { readonly sha256: string }>>,
@@ -142,7 +148,8 @@ export async function scoreMapPin(
   if (!SCORE_MAP_PIN.test(String(registry)) || !SCORE_MAP_PIN.test(String(selection))) {
     scoreMapInvalid();
   }
-  return await nativeJsonSha256(["jungsi.score-map/v1", registry, selection]);
+  // v2: v1 rows from the first rollout were stored while search loaded catalog payloads only.
+  return await nativeJsonSha256(["jungsi.score-map/v2", registry, selection]);
 }
 
 export interface AttachedScores {
@@ -232,6 +239,8 @@ export class ScoreMapService {
         ) continue;
         try {
           const score = myScoreOf(await scoring.calculate(row, profile));
+          // A runtime/storage failure is not a data answer: leave it null (계산 중), never store it.
+          if (score.status === "pending" && transientReason(score.reason_code)) continue;
           found.set(id, score);
           computed.push({ offering_id: id, ...score });
         } catch {

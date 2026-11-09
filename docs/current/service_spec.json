@@ -10270,7 +10270,7 @@
             },
             {
               "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-              "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
+              "sha256": "9e0f61d2dc6f28667be765574535153121252480a187b4c7125112b5fe79b77f"
             },
             {
               "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -10437,7 +10437,7 @@
             },
             {
               "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-              "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
+              "sha256": "9e0f61d2dc6f28667be765574535153121252480a187b4c7125112b5fe79b77f"
             },
             {
               "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -18510,7 +18510,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb",
+              "source_sha256": "9e0f61d2dc6f28667be765574535153121252480a187b4c7125112b5fe79b77f",
               "declared_exports": []
             },
             {
@@ -20446,7 +20446,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+              "source_sha256": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239",
               "declared_exports": [
                 "AttachedScores",
                 "MyScore",
@@ -21955,7 +21955,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
+              "source_sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -28903,7 +28903,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-          "sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24"
+          "sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -29040,11 +29040,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "04089916b857f680c1be0c4be8290279e93ae80c7629216db13d5e7b9936551f"
+        "sha256": "dd5767b0eec2bb010c4e5bdbf6d0ae90958807985a49ef3cbd47580f6032917b"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "b04e0ca2dbff8edf6542045b0063f7315863e0307a150ef9dc547a6df8aeec41"
+        "sha256": "e9849d5b371e797ea01dedca79192b5eb63e298a970cb383048b69a7b6845b27"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29455,7 +29455,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
-          "sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62"
+          "sha256": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
@@ -30044,7 +30044,7 @@
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-            "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
+            "sha256": "9e0f61d2dc6f28667be765574535153121252480a187b4c7125112b5fe79b77f"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
@@ -169465,7 +169465,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
             }
           ],
-          "source_sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
+          "source_sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8",
           "symbols": [
             {
               "declarations": [
@@ -212577,7 +212577,7 @@
               "src": "tests/edge/synthetic_runtime_binding.ts"
             }
           ],
-          "source_sha256": "bca71e2a48c83360eb131f30f71c1f0d33af6fb9e707f9a060f2c2716c092166",
+          "source_sha256": "fdd8a15c7e58e67964c60d2055b71dc637e983f0dd8c91d1caa323d4eeda4406",
           "symbols": [
             {
               "declarations": [
@@ -243847,7 +243847,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+          "source_sha256": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239",
           "symbols": [
             {
               "declarations": [
@@ -244619,6 +244619,46 @@
                 }
               ],
               "name": "myScoreOf"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(reason: string | null)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "reason",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "boolean",
+                      "value": "boolean"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "transientReason"
             },
             {
               "declarations": [
@@ -246550,7 +246590,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
       "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "2d2253ca6a02aacdf0ea60ef62bf0f487be7abaf7b6d53c788b68ae6d5485370",
@@ -246637,7 +246677,7 @@
       "tests/edge/test_report_actions.ts": "5aa914b0a1e338a38828aeccaeb0bc522ccf7c31200ad27ad40cec44e01399d0",
       "tests/edge/test_runtime_budget.ts": "4e87eb4cb6779edfd03be5d4a6b236227f3f7ae0d9d504cc413080faec43492e",
       "tests/edge/test_runtime_composition.ts": "256479d822937cf7d183e759a2bb03f158dc00c55ae8f3e6368dcbacccc0fb98",
-      "tests/edge/test_runtime_context.ts": "bca71e2a48c83360eb131f30f71c1f0d33af6fb9e707f9a060f2c2716c092166",
+      "tests/edge/test_runtime_context.ts": "fdd8a15c7e58e67964c60d2055b71dc637e983f0dd8c91d1caa323d4eeda4406",
       "tests/edge/test_runtime_controls.ts": "f01b1fe2c0cc118120942b01917120928a186f7a44d097f8f381d2e3c2e8b62a",
       "tests/edge/test_runtime_settings.ts": "d708a0205b1a9aeedef4130e130aefc0f85515e0d12dd3297cd365f82bd7e005",
       "tests/edge/test_saved_reference_projection.ts": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19",
@@ -246686,7 +246726,7 @@
       "tests/edge/reference_candidates_cases.ts": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8",
       "tests/edge/reference_percentile_cases.ts": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
       "tests/edge/saved_reference_tail_source_cases.ts": "67c11ccb8ea943af7450caf7eb404365ae0feae9508f43db58f0c8998ca46fb6",
-      "supabase/functions/_shared/jungsi/application/score_map.ts": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+      "supabase/functions/_shared/jungsi/application/score_map.ts": "97a38bf0ee2af2b42e6bfcfd558bb908307084e4537c2d28008093a2cb40f239",
       "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f"
     },
     "migration_evidence": {
@@ -247028,7 +247068,9 @@
         "max_compute_per_request": 100,
         "compute_budget_ms": 3000,
         "same_engine_as": "university.analyze UniversityScoringService.calculate",
-        "approved_by": "final_admin_2026-11-10"
+        "approved_by": "final_admin_2026-11-10",
+        "payload_mode": "offerings.search loads university_only payloads (same as university.analyze) since 2026-11-10; data() is reached only when a stored score is missing. catalog_payload_scope_contract stays as the original 2026-10-18 record.",
+        "first_rollout_fix": "v1 rows stored runtime_dependency_not_loaded under catalog_only; pin moved to jungsi.score-map/v2 and runtime/storage reasons are never stored"
       }
     },
     "verification": {
@@ -248241,7 +248283,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-          "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
+          "sha256": "9e0f61d2dc6f28667be765574535153121252480a187b4c7125112b5fe79b77f"
         },
         {
           "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -248303,7 +248345,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "2712ea2832cbfc267079371ab9af488098866f5ab6646d7710756088c3542dfb",
+      "bridge_sha256": "5d0c9ed5c67041a214a23b53d1ffc31a35aea3f72f17e2ce79f4c256c53123c7",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "df3c60e7e5616e94696aed3510bc4d05537c6b73079ff2ed1c57605e5d3bd8e4",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -251950,7 +251992,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24"
+            "sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -252266,7 +252308,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "0558f5c87401762438192c074593e1c9513153957635fbb32507256553434c39",
+    "manifest_sha256": "6fadf01b1eb36769edbf4754ba68bd3311646ba7fdbf1156d7ca05d3bad87161",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

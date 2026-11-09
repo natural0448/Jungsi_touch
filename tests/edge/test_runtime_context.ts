@@ -159,11 +159,15 @@ async function fixture(
           ).map((operation) => ({
             operation,
             reserved_result_bytes: 512,
-            base_units:
-              ["score-profile.create", "overall.analyze", "university.analyze", "candidates.build"]
-                  .includes(operation)
-                ? 1
-                : 0,
+            base_units: [
+                "score-profile.create",
+                "overall.analyze",
+                "university.analyze",
+                "candidates.build",
+              ]
+                .includes(operation)
+              ? 1
+              : 0,
             per_offering_units: 0,
           })),
       });
@@ -232,7 +236,9 @@ async function denied(work: () => Promise<unknown>, code?: string) {
 }
 Deno.test("runtime context composes the pinned catalog and policy with no SQL before a budget reservation", () =>
   agedChecks(async () => {
-    const f = await fixture(), data = await f.context.data(), catalog = await data.getCatalog();
+    const f = await fixture(),
+      data = await f.context.data(),
+      catalog = await data.getCatalog();
     assert(catalog);
     equal(catalog.version, "SYNTHETIC-catalog");
     equal(f.calls.filter((url) => url.endsWith("/catalog.json")).length, 1);
@@ -263,8 +269,14 @@ Deno.test("runtime context rejects changed current head after a warm provider", 
     const f = await fixture();
     const data = await f.context.data();
     assert(await data.getCatalog());
-    f.f.body.head = f.f.body.head.replace('"status":"approved"', '"status":"prepared"');
-    await denied(() => f.context.assertCurrent(), "security_policy_unavailable");
+    f.f.body.head = f.f.body.head.replace(
+      '"status":"approved"',
+      '"status":"prepared"',
+    );
+    await denied(
+      () => f.context.assertCurrent(),
+      "security_policy_unavailable",
+    );
     await denied(() => data.getCatalog(), "security_policy_unavailable");
   }));
 Deno.test("runtime context rejects policy expiry before releasing an already built result", async () => {
@@ -293,7 +305,9 @@ Deno.test("runtime context distinguishes a valid binding excluding search withou
 });
 Deno.test("runtime context never labels an invalid, expired or unknown binding as merely unselected", async () => {
   for (const mode of ["invalid", "expired", "unknown"] as const) {
-    const f = await fixture({ operation: mode === "unknown" ? null : "offerings.search" });
+    const f = await fixture({
+      operation: mode === "unknown" ? null : "offerings.search",
+    });
     if (mode === "invalid") f.f.values.JUNGSI_API_BINDING_JSON = "{}";
     if (mode === "expired") f.now(SYNTHETIC_RUNTIME_NOW + 86400000000n);
     await denied(() => f.context.budget(), "security_policy_unavailable");
@@ -313,21 +327,32 @@ Deno.test("runtime context retains policy failure when an approved operation has
 
 Deno.test("warm artifact request still reads fresh head and rejects its revocation", () =>
   agedChecks(async () => {
-    const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
+    const cache = new VerifiedArtifactCache(),
+      first = await fixture({ artifactCache: cache });
     await first.context.data();
     const second = await fixture({ artifactCache: cache });
     await second.context.data();
-    equal(second.calls.filter((url) => url.endsWith("/catalog.json")).length, 0);
+    equal(
+      second.calls.filter((url) => url.endsWith("/catalog.json")).length,
+      0,
+    );
     second.f.body.head = second.f.body.head.replace('"approved"', '"revoked"');
     await denied(() => second.context.assertCurrent());
     equal(second.sqlCalls(), 0);
   }));
 Deno.test("warm artifact cannot bypass a fresh binding operation scope or expiry", async () => {
-  const cache = new VerifiedArtifactCache(), first = await fixture({ artifactCache: cache });
+  const cache = new VerifiedArtifactCache(),
+    first = await fixture({ artifactCache: cache });
   await first.context.data();
-  const limited = await fixture({ artifactCache: cache, maxReads: first.calls.length - 1 });
+  const limited = await fixture({
+    artifactCache: cache,
+    maxReads: first.calls.length - 1,
+  });
   await denied(() => limited.context.data());
-  const wrong = await fixture({ artifactCache: cache, operation: "offering.read" });
+  const wrong = await fixture({
+    artifactCache: cache,
+    operation: "offering.read",
+  });
   await denied(() => wrong.context.data(), "operation_scope_not_approved");
   equal(wrong.calls.length, 0);
   const expired = await fixture({ artifactCache: cache });
@@ -336,12 +361,12 @@ Deno.test("warm artifact cannot bypass a fresh binding operation scope or expiry
   equal(expired.calls.length, 0);
 });
 
-Deno.test("only the four catalog reads omit unused payloads under approved metadata", async () => {
+// offerings.search left this set on 2026-11-10: it also scores the 3P score map (university payloads).
+Deno.test("only the three catalog reads omit unused payloads under approved metadata", async () => {
   for (
     const operation of [
       "history.search",
       "recruitment.read",
-      "offerings.search",
       "offering.read",
     ] as const
   ) {
@@ -354,18 +379,28 @@ Deno.test("only the four catalog reads omit unused payloads under approved metad
     const data = await f.context.data();
     assert(await data.getCatalog());
     const receipt = await data.preflight();
-    equal(receipt.verification_scope, "catalog_payload_and_all_selected_reference_metadata");
+    equal(
+      receipt.verification_scope,
+      "catalog_payload_and_all_selected_reference_metadata",
+    );
     assert(!f.calls.some((url) => url.endsWith("unused-exam.json")));
     equal(f.sqlCalls(), 0);
   }
 });
 Deno.test("catalog graph cannot silently supply deferred scoring data as missing", async () => {
-  const f = await fixture({ deferredExam: true }), data = await f.context.data();
-  await denied(() => data.getExamPack("SYNTHETIC-exam"), "runtime_dependency_not_loaded");
+  const f = await fixture({ deferredExam: true }),
+    data = await f.context.data();
+  await denied(
+    () => data.getExamPack("SYNTHETIC-exam"),
+    "runtime_dependency_not_loaded",
+  );
   assert(!f.calls.some((url) => url.endsWith("unused-exam.json")));
 });
 Deno.test("catalog graph rejects usage exam metadata version conflicts without reading unused body", async () => {
-  const f = await fixture({ deferredExam: true, deferredVersion: "SYNTHETIC-wrong" });
+  const f = await fixture({
+    deferredExam: true,
+    deferredVersion: "SYNTHETIC-wrong",
+  });
   await denied(() => f.context.data(), "security_policy_unavailable");
   assert(!f.calls.some((url) => url.endsWith("unused-exam.json")));
 });
@@ -383,7 +418,7 @@ Deno.test("catalog projection warm body still consumes the same logical read bud
 });
 Deno.test("all other operation contexts and full readiness retain noncatalog body integrity checks", () =>
   agedChecks(async () => {
-    const catalog = ["history.search", "recruitment.read", "offerings.search", "offering.read"];
+    const catalog = ["history.search", "recruitment.read", "offering.read"];
     for (
       const operation of [
         ...API_OPERATION_IDS.filter((op) => !catalog.includes(op)),
@@ -435,22 +470,27 @@ async function verifyAdditionalOverallScopeCases(): Promise<void> {
 /** Real operation-to-scope mapping with unchanged policy and final-current guards. */
 async function verifyAdditionalUniversityScopeCases(): Promise<void> {
   const cases: readonly [string, () => Promise<void>][] = [
-    ["score creation explicitly selects overall scope before a malformed exam body", async () => {
-      const f = await fixture({
-        deferredExam: true,
-        operation: "score-profile.create",
-        approvedOperations: ["score-profile.create"],
-        costsForApproved: true,
-      });
-      await denied(() => f.context.data(), "storage_hash_mismatch");
-      assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
-      assert(!f.calls.some((url) => url.endsWith("catalog.json")));
-      equal(f.sqlCalls(), 0);
-    }],
+    [
+      "score creation explicitly selects overall scope before a malformed exam body",
+      async () => {
+        const f = await fixture({
+          deferredExam: true,
+          operation: "score-profile.create",
+          approvedOperations: ["score-profile.create"],
+          costsForApproved: true,
+        });
+        await denied(() => f.context.data(), "storage_hash_mismatch");
+        assert(f.calls.some((url) => url.endsWith("unused-exam.json")));
+        assert(!f.calls.some((url) => url.endsWith("catalog.json")));
+        equal(f.sqlCalls(), 0);
+      },
+    ],
     [
       "university operations defer total-model body but keep getter and final-current rejection",
       async () => {
-        for (const operation of ["university.analyze", "candidates.build"] as const) {
+        for (
+          const operation of ["university.analyze", "candidates.build"] as const
+        ) {
           const f = await fixture({
             deferredModel: true,
             deferredExam: true,
@@ -469,27 +509,39 @@ async function verifyAdditionalUniversityScopeCases(): Promise<void> {
             () => data.getTotalModel("SYNTHETIC-exam", "SYNTHETIC-pack"),
             "runtime_dependency_not_loaded",
           );
-          f.f.body.head = f.f.body.head.replace('"status":"approved"', '"status":"revoked"');
-          await denied(() => f.context.assertCurrent(), "security_policy_unavailable");
+          f.f.body.head = f.f.body.head.replace(
+            '"status":"approved"',
+            '"status":"revoked"',
+          );
+          await denied(
+            () => f.context.assertCurrent(),
+            "security_policy_unavailable",
+          );
           equal(f.sqlCalls(), 0);
         }
       },
     ],
-    ["score creation still accepts a valid exam without any selected total model", async () => {
-      const f = await fixture({
-        deferredExam: true,
-        validExam: true,
-        operation: "score-profile.create",
-        approvedOperations: ["score-profile.create"],
-        costsForApproved: true,
-      });
-      const data = await f.context.data();
-      equal((await data.preflight()).status, "verified_overall_payloads");
-      equal(await data.getTotalModel("SYNTHETIC-exam", "SYNTHETIC-pack"), null);
-      assert(!f.calls.some((url) => url.endsWith("catalog.json")));
-      await f.context.assertCurrent();
-      equal(f.sqlCalls(), 0);
-    }],
+    [
+      "score creation still accepts a valid exam without any selected total model",
+      async () => {
+        const f = await fixture({
+          deferredExam: true,
+          validExam: true,
+          operation: "score-profile.create",
+          approvedOperations: ["score-profile.create"],
+          costsForApproved: true,
+        });
+        const data = await f.context.data();
+        equal((await data.preflight()).status, "verified_overall_payloads");
+        equal(
+          await data.getTotalModel("SYNTHETIC-exam", "SYNTHETIC-pack"),
+          null,
+        );
+        assert(!f.calls.some((url) => url.endsWith("catalog.json")));
+        await f.context.assertCurrent();
+        equal(f.sqlCalls(), 0);
+      },
+    ],
     [
       "university policy retains pack version academic year and exact candidates count",
       async () => {
@@ -516,7 +568,9 @@ async function verifyAdditionalUniversityScopeCases(): Promise<void> {
     [
       "score creation and default read contexts still require selected model integrity",
       async () => {
-        for (const operation of ["score-profile.create", "report.read"] as const) {
+        for (
+          const operation of ["score-profile.create", "report.read"] as const
+        ) {
           const f = await fixture({
             deferredModel: true,
             operation,
