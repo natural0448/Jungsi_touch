@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { CATEGORY } from "@/components/offering-parts";
+import { wildcardReasonText } from "@/lib/wildcard-layout";
 import type { CandidateItemDto, CandidatesDto, ShortlistEntryDto } from "@/lib/dto";
 import type { ProReason } from "@/lib/pro-dto";
 import { tipsByOffering } from "@/lib/pro-tips";
@@ -8,7 +9,7 @@ import { addStudentBookmark } from "./actions";
 import { ActionButton } from "./action-button";
 
 /*
-  전문가용 유리한 대학 찾기 결과(개인용 candidates 와 같은 모양). 대학별 묶음과 간호·보건·교육 와일드카드를 나눠 보이고,
+  전문가용 유리한 대학 찾기 결과(개인용 candidates 와 같은 모양). 대학별 묶음과 와일드카드를 나눠 보이고,
   모집단위마다 학생에게 담기 버튼을 둔다(줄마다 다른 요청 키). 분류·환산·유불리 숫자는 서버가 준 값 그대로다(화면이 계산하지 않는다).
   줄 아래에 '왜 이 분류인가' 상담 tip(서버 근거)을 접어 둔다.
 */
@@ -68,7 +69,7 @@ export function CandidatesView({ c, shortlist, fields, reasons }: { c: Candidate
       ))}
       {c.wildcards.length > 0 && (
         <div className="tblwrap">
-          <h3>와일드카드 <small className="pro-note">간호·보건·교육 계열(해마다 지원 쏠림 변동이 큰 계열)</small></h3>
+          <h3>와일드카드 <small className="pro-note">{c.wildcard_selection ? "간호·보건·교육·계약학과·해양·철도 계열, 서버가 고른 최대 4곳(여유 → 핵심 → 도전 순)" : "간호·보건·교육 계열(해마다 지원 쏠림 변동이 큰 계열)"}{c.wildcard_selection && c.wildcard_selection.status !== "ready" ? ` · ${wildcardReasonText(c.wildcard_selection.reason_code)}` : ""}</small></h3>
           <table className="tb">
             {head}
             <tbody>{c.wildcards.map((it) => <Row key={it.offering.offering_id} it={it} picked={picked(it.offering.offering_id)} fields={fields} tips={tips.get(it.offering.offering_id)} />)}</tbody>

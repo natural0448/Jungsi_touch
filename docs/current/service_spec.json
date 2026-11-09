@@ -219743,6 +219743,16 @@
         "REQ-04"
       ],
       "summary": "화면팀 변경(11-09 v147 재측정: 참고 환산 444 응답에서 conversion.status=pending·reason_code=reference_conversion_not_production_approved, assessment 도 같은 코드로 보류, 맨 위 converted_score 에 참고 점수): 참고 점수를 그리는 규칙을 한곳(offering-parts isReferenceScore·scoreOf·decisionReasonCode)에 모은다. 목록 점수 옆 '참고' 배지, 3페이지 상태 띠 '점수 변환 참고 계산', 지원 판단·지원가능성·유불리 칸은 참고 코드 대신 '참고 점수만 계산했습니다. 이 모집단위의 지원 판단 기준은 아직 확인 중입니다.', score_scope csat_component 는 '수능 반영분'(모르는 값은 숨김), 와일드카드 카드도 같은 규칙. 보류 문구 reference_inquiry_incomplete·conversion_release_missing 추가, reference_inquiry_category_unsupported·reference_required_input_missing·reference_conversion_unavailable 문구 변경(부담당자 확정). ConversionDto.status 에 reference_calculated 허용. official_max_score 가 null 이면 만점 없이 표시. 서버·자료·판정 변경 없음."
+    },
+    {
+      "date": "2026-11-09",
+      "requirements": [
+        "REQ-01",
+        "REQ-02",
+        "REQ-03",
+        "REQ-04"
+      ],
+      "summary": "화면팀 변경(11-09 부담당자 와일드카드 W1~W6 회신·문구 확정): 4페이지 와일드카드 표시 규칙을 lib/wildcard-layout.ts 하나로 모은다. candidates.wildcard_selection(ready·partial·pending, card_stability)이 있으면 서버 순서 그대로 최대 4장, 앞 3장 펼침 + 4번째는 '한 장 더 보기', partial 은 이유 한 줄과 카드별 '순서 확인 중' 배지, pending 은 이유 문구와 '후보가 없다는 뜻이 아닙니다.'. 없거나 null(지금 운영)이면 옛 방식(환산 유불리 큰 순, 앞 3장, 나머지 펼치기) 그대로. 계열 값 contract·maritime·railway(모서리 계약 C·해양 M·철도 R)와 안내 문구 6계열 기준. W5 임시안 offering.non_csat_conditions(코드 배열) 카드 안내 seafarer_health_exam·railway_driver_aptitude·csat_minimum, 모르는 코드·빈 배열은 숨김(담당자 R18 승인 대기). 전문가용 와일드카드 설명도 같은 기준. 3페이지 참고 점수 카드에서 반영 범위 '수능 반영분' 중복 줄을 뺀다. 서버·자료·판정 변경 없음."
     }
   ]
 }

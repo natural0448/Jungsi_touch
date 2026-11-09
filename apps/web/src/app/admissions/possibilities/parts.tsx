@@ -104,7 +104,7 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
             {c?.official_max_score && <small>/ {c.official_max_score}</small>}
           </div>
           <p>
-            {c?.score_scope && SCOPE[c.score_scope] && <>반영 {SCOPE[c.score_scope]} · </>}
+            {!reference && c?.score_scope && SCOPE[c.score_scope] && <>반영 {SCOPE[c.score_scope]} · </>}
             {c?.score_basis && <span className="tag">{scoreBasisLabel(c.score_basis)}</span>}
             {reference && <span className="tag">학교 수능 반영분 · 참고</span>}
           </p>

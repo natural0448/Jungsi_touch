@@ -1,53 +1,66 @@
 import { CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, scoreOf, StatsLine } from "@/components/offering-parts";
 import { pctText } from "@/lib/format";
-import type { CandidateItemDto, OfferingDto, StatisticsDto } from "@/lib/dto";
+import type { CandidateItemDto, StatisticsDto, WildcardGroup, WildcardSelectionDto } from "@/lib/dto";
+import { FEATURED, MAX_SELECTED, nonCsatConditionTexts, wildcardLayout, wildcardReasonText } from "@/lib/wildcard-layout";
 
 /*
   와일드카드 — '비장의 한 수' (에듀터치 정시터치 시안에서 사용자가 승인한 모양).
   기본 목록의 흰 카드와 일부러 다른 결로 만든다: 짙은 남색 판 위의 상아색 카드 패.
   카드 모서리에 계열(offering.wildcard_group)을 카드 숫자처럼 새긴다.
   숫자·판단은 기본 목록과 같은 assessment 다. 모양만 특별하다.
+  몇 장·어떤 순서로 보일지는 lib/wildcard-layout.ts(서버 선택이 있으면 서버 순서, 최대 4장).
 */
 
-const SUIT: Record<NonNullable<OfferingDto["wildcard_group"]>, { label: string; mark: string }> = {
+const SUIT: Record<WildcardGroup, { label: string; mark: string }> = {
   nursing: { label: "간호", mark: "N" },
   health: { label: "보건", mark: "H" },
   education: { label: "교육", mark: "E" },
+  contract: { label: "계약", mark: "C" },
+  maritime: { label: "해양", mark: "M" },
+  railway: { label: "철도", mark: "R" },
 };
-/** 크게 펼쳐 보이는 장 수. 환산 유불리가 큰 순서의 앞에서부터 */
-const FEATURED = 3;
 
-const delta = (w: CandidateItemDto) => (w.assessment.advantage ? Number(w.assessment.advantage.delta_pp) : -Infinity);
-
-export function WildcardDeck({ picks, picked, stats, canPick, analysisPending }: { picks: CandidateItemDto[]; picked: Set<string>; stats: Map<string, StatisticsDto | null>; canPick: boolean; analysisPending?: boolean }) {
-  const sorted = [...picks].sort((a, b) => delta(b) - delta(a));
+export function WildcardDeck({ picks, selection, picked, stats, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; stats: Map<string, StatisticsDto | null>; canPick: boolean; analysisPending?: boolean }) {
+  const lay = wildcardLayout(picks, selection);
+  const shown = lay.featured.length + lay.rest.length;
+  const groups = lay.groupLabels.join("·");
   const card = (w: CandidateItemDto, i: number) => (
     <li key={w.offering.offering_id} style={{ "--i": i } as React.CSSProperties}>
-      <WildCard w={w} on={picked.has(w.offering.offering_id)} stat={stats.get(w.offering.offering_id)} canPick={canPick} />
+      <WildCard w={w} on={picked.has(w.offering.offering_id)} stat={stats.get(w.offering.offering_id)} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
     </li>
   );
+  const empty = lay.status === "pending"
+    ? `${wildcardReasonText(lay.reasonCode)} 후보가 없다는 뜻이 아닙니다.`
+    : analysisPending
+      ? "대학 분석 자료가 결속되기 전이라 와일드카드도 보류 상태입니다 — 후보가 없다는 뜻이 아닙니다."
+      : `이번 성적으로 찾은 ${groups} 계열 후보가 없습니다.`;
   return (
     <section className="wd" id="wildcard" aria-labelledby="wd-t">
       <div className="wd-hd">
         <span className="wd-kicker">WILD CARD</span>
         <h2 id="wd-t">
-          비장의 한 수 <span className="num">{picks.length}</span>
+          비장의 한 수 <span className="num">{shown}</span>
           <small>장</small>
         </h2>
-        <p>간호·보건·교육 계열 중 내 성적으로 지원 검토 범위에 드는 곳을 따로 모았습니다.</p>
+        <p>
+          {lay.mode === "selected"
+            ? `${groups} 계열 중 내 성적으로 지원 검토 범위에 드는 곳을 최대 ${MAX_SELECTED}장 골랐습니다. 여유 → 핵심 → 도전 순서이고, 앞 3장은 되도록 서로 다른 계열입니다.`
+            : `${groups} 계열 중 내 성적으로 지원 검토 범위에 드는 곳을 따로 모았습니다.`}
+        </p>
+        {lay.status === "partial" && <p className="wd-note">{wildcardReasonText(lay.reasonCode)} '순서 확인 중' 표시가 있는 카드는 순서가 바뀔 수 있습니다.</p>}
       </div>
 
-      {picks.length === 0 ? (
-        <p className="wd-empty">{analysisPending ? "대학 분석 자료가 결속되기 전이라 와일드카드도 보류 상태입니다 — 후보가 없다는 뜻이 아닙니다." : "이번 성적으로 찾은 간호·보건·교육 계열 후보가 없습니다."}</p>
+      {shown === 0 ? (
+        <p className="wd-empty">{empty}</p>
       ) : (
         <>
-          <ol className="wd-deck">{sorted.slice(0, FEATURED).map(card)}</ol>
-          {sorted.length > FEATURED && (
+          <ol className="wd-deck">{lay.featured.map(card)}</ol>
+          {lay.rest.length > 0 && (
             <details className="wd-rest">
               <summary>
-                나머지 <b className="num">{sorted.length - FEATURED}장</b> 더 펼치기
+                {lay.mode === "selected" ? "한 장 더 보기" : <>나머지 <b className="num">{lay.rest.length}장</b> 더 펼치기</>}
               </summary>
-              <ol className="wd-deck">{sorted.slice(FEATURED).map(card)}</ol>
+              <ol className="wd-deck">{lay.rest.map((w, i) => card(w, i + FEATURED))}</ol>
             </details>
           )}
         </>
@@ -60,7 +73,7 @@ export function WildcardDeck({ picks, picked, stats, canPick, analysisPending }:
   );
 }
 
-function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; stat: StatisticsDto | null | undefined; canPick: boolean }) {
+function WildCard({ w, on, stat, canPick, orderPending }: { w: CandidateItemDto; on: boolean; stat: StatisticsDto | null | undefined; canPick: boolean; orderPending?: boolean }) {
   const o = w.offering;
   const a = w.assessment;
   const suit = SUIT[o.wildcard_group ?? "health"];
@@ -79,6 +92,7 @@ function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; 
 
       <div className="wc-top">
         <span className="wc-grp">{o.group}군 · {o.track ?? "일반전형"}</span>
+        {orderPending && <span className="wc-order">순서 확인 중</span>}
       </div>
 
       <p className="wc-univ">{o.university_name}</p>
@@ -110,6 +124,9 @@ function WildCard({ w, on, stat, canPick }: { w: CandidateItemDto; on: boolean; 
       </div>
 
       {a.eligibility_status === "needs_confirmation" && <p className="wc-warn">지원 자격을 확인해야 합니다. 모집요강에서 함께 확인하세요.</p>}
+      {nonCsatConditionTexts(o.non_csat_conditions).map((t) => (
+        <p key={t} className="wc-warn">{t}. 모집요강에서 함께 확인하세요.</p>
+      ))}
 
       <div className="wc-stats">
         <StatsLine s={stat} />

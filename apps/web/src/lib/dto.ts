@@ -32,7 +32,9 @@ export interface OfferingDto {
   track: string | null;
   group: string; // 가·나·다
   region: string | null;
-  wildcard_group: "nursing" | "health" | "education" | null;
+  wildcard_group: WildcardGroup | null;
+  // W5 임시안(담당자 R18 승인 대기): 수능 외 조건 코드 배열. 없거나 빈 배열이면 안내를 숨긴다
+  non_csat_conditions?: string[] | null;
 }
 
 /** history_metric — offering 필드 + 대학이 발표한 지표 하나 */
@@ -333,12 +335,23 @@ export interface CandidateItemDto {
   assessment: AssessmentDto;
 }
 
-/** candidates — candidates.build. 대학별 묶음과 간호·보건·교육 와일드카드, 판단 보류 목록 */
+/** 와일드카드 계열. contract·maritime·railway 는 서버 선택(wildcard_selection) 운영 연결 뒤에 나온다 */
+export type WildcardGroup = "nursing" | "health" | "education" | "contract" | "maritime" | "railway";
+
+/** candidates.wildcard_selection — 서버가 고른 와일드카드(최대 4장)의 순서 확정 상태. 없거나 null 이면 옛 방식 */
+export interface WildcardSelectionDto {
+  status: "ready" | "partial" | "pending";
+  reason_code: "wildcard_evidence_unavailable" | "wildcard_assessment_pending" | "wildcard_comparison_unverified" | null;
+  card_stability: { offering_id: string; status: "verified" | "pending" }[]; // wildcards 와 같은 순서·같은 길이
+}
+
+/** candidates — candidates.build. 대학별 묶음과 와일드카드, 판단 보류 목록 */
 export interface CandidatesDto {
   status: "ready" | "pending";
   reason_code: string | null;
   basic_university_groups: { university_id: string; university_name: string; offerings: CandidateItemDto[] }[];
-  wildcards: CandidateItemDto[];
+  wildcards: CandidateItemDto[]; // wildcard_selection 이 있으면 서버 순서 그대로, 최대 4장
+  wildcard_selection?: WildcardSelectionDto | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
   ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)
