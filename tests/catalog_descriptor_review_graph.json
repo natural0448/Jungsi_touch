@@ -1580,7 +1580,7 @@
         ]
       ],
       "files": {
-        "supabase/functions/_shared/current_public_catalog.ts": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc",
+        "supabase/functions/_shared/current_public_catalog.ts": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
         "supabase/functions/_shared/current_public_catalog_descriptor_review.ts": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
         "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
@@ -3424,7 +3424,7 @@
         ]
       ],
       "files": {
-        "supabase/functions/_shared/current_public_catalog.ts": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc",
+        "supabase/functions/_shared/current_public_catalog.ts": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
         "supabase/functions/_shared/current_public_catalog_descriptor_review.ts": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
         "supabase/functions/_shared/current_public_catalog_descriptor_review_test.ts": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
         "supabase/functions/_shared/current_public_catalog_sql.ts": "b32cb672332eb4559260cbcd9d43b8434a694fd0d3c0e5ca2583befe0c6fd735",

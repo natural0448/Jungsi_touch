@@ -8,6 +8,18 @@ import { utcInstant } from "./jungsi/domain/time.ts";
 import { publicJsonText, PublicResponseProjection } from "./jungsi/application/public_response.ts";
 import { SyntheticUniversityData } from "../../../tests/edge/synthetic_university.ts";
 import { UniversityScoringService } from "./jungsi/application/university_scoring.ts";
+import {
+  type MyScore,
+  myScore,
+  scoreMapPin,
+  ScoreMapService,
+  type ScoreMapStore,
+} from "./jungsi/application/score_map.ts";
+import {
+  SCORE_MAP_INSERT_SQL,
+  SCORE_MAP_PROFILE_SQL,
+  SCORE_MAP_READ_SQL,
+} from "./jungsi/infrastructure/score_map_postgres.ts";
 import routeCatalog from "../../../src/jungsi_touch/application/route_catalog.json" with {
   type: "json",
 };
@@ -559,7 +571,7 @@ Deno.test("current public separate history and recruitment schemas preserve orig
     extended = currentPublicResponseSchemas(schemas) as typeof schemas;
   equal(JSON.stringify(schemas), before);
   for (const op of schemas.operations) {
-    if (!["history.search", "recruitment.read"].includes(op.id)) {
+    if (!["history.search", "recruitment.read", "offerings.search"].includes(op.id)) {
       equal(extended.operations.find((x) => x.id === op.id), op);
     }
   }
@@ -1131,3 +1143,191 @@ import {
     });
   });
 }
+
+const SCORE_OWNER = "00000000-0000-4000-8000-000000000001";
+function scoreMapFixture(options: { profile?: boolean; fail?: boolean } = {}) {
+  const synthetic = new SyntheticUniversityData();
+  const saved = new Map<string, MyScore>(), inserts: number[] = [];
+  const store: ScoreMapStore = {
+    latestProfile: (owner) => {
+      if (options.fail) return Promise.reject(new Error("synthetic storage failure"));
+      equal(owner, SCORE_OWNER);
+      return Promise.resolve(options.profile === false ? null : synthetic.profile());
+    },
+    read: (_owner, profileId, pin, ids) => {
+      equal(profileId, "SYNTHETIC-profile");
+      assert(/^[a-f0-9]{64}$/.test(pin));
+      return Promise.resolve(
+        new Map(ids.filter((id) => saved.has(id)).map((id) => [id, saved.get(id)!])),
+      );
+    },
+    insert: (_owner, _profileId, _pin, rows) => {
+      inserts.push(rows.length);
+      for (const row of rows) saved.set(row.offering_id, myScore(row));
+      return Promise.resolve();
+    },
+  };
+  const data = Object.assign(synthetic, {
+    getCatalog: () =>
+      Promise.resolve({
+        version: "synthetic",
+        status: "approved",
+        asOfUtc: 0n,
+        offerings: [synthetic.offering],
+        history: [],
+      } as CatalogRelease),
+  });
+  const pin = () =>
+    scoreMapPin({ registry: { sha256: "a".repeat(64) }, selection: { sha256: "b".repeat(64) } });
+  const items = [
+    { offering_id: "SYNTHETIC-A-2027", department: "가상분석" },
+    { offering_id: "SYNTHETIC-B-2027", department: "가상검색전용" },
+  ];
+  return { synthetic, saved, inserts, store, data, pin, items };
+}
+Deno.test("score map attaches the same score as analysis, stores it once and reuses it", async () => {
+  const f = scoreMapFixture();
+  const clock = { nowUtc: () => utcInstant("2026-11-10T00:00:00Z") };
+  const first = await new ScoreMapService(f.store, f.data, f.pin, clock).attach(
+    SCORE_OWNER,
+    f.items,
+  );
+  equal(first.state, "complete");
+  const expected = (await new UniversityScoringService(new SyntheticUniversityData()).calculate(
+    f.synthetic.offering,
+    f.synthetic.profile(),
+  )).state.converted_score;
+  assert(expected !== null);
+  const a = first.items[0].my_score as NativeObject, b = first.items[1].my_score as NativeObject;
+  equal(a.status, "ready");
+  equal(a.converted_score, expected);
+  equal(a.reason_code, null);
+  equal(b.status, "pending");
+  equal(b.reason_code, "analysis_catalog_missing");
+  equal(first.items[1].department, "가상검색전용");
+  equal(f.inserts, [1]);
+  const conversions = f.synthetic.calls.filter((c) => c === "conversion").length;
+  const second = await new ScoreMapService(f.store, f.data, f.pin, clock).attach(
+    SCORE_OWNER,
+    f.items,
+  );
+  equal(second.state, "complete");
+  equal((second.items[0].my_score as NativeObject).converted_score, expected);
+  equal(f.synthetic.calls.filter((c) => c === "conversion").length, conversions);
+  equal(f.inserts, [1]);
+});
+Deno.test("score map never fails a search: no profile, storage failure and budget stay explicit", async () => {
+  const clock = { nowUtc: () => utcInstant("2026-11-10T00:00:00Z") };
+  const none = scoreMapFixture({ profile: false });
+  const a = await new ScoreMapService(none.store, none.data, none.pin, clock).attach(
+    SCORE_OWNER,
+    none.items,
+  );
+  equal(a.state, "no_profile");
+  assert(a.items.every((item) => item.my_score === null));
+  const broken = scoreMapFixture({ fail: true });
+  const b = await new ScoreMapService(broken.store, broken.data, broken.pin, clock).attach(
+    SCORE_OWNER,
+    broken.items,
+  );
+  equal(b.state, "unavailable");
+  equal(b.items.map((item) => item.offering_id), ["SYNTHETIC-A-2027", "SYNTHETIC-B-2027"]);
+  assert(b.items.every((item) => item.my_score === null));
+  const limited = scoreMapFixture();
+  const c = await new ScoreMapService(limited.store, limited.data, limited.pin, clock, {
+    maxComputePerRequest: 0,
+    computeBudgetMs: 3000,
+  }).attach(SCORE_OWNER, limited.items);
+  equal(c.state, "partial");
+  equal(c.items[0].my_score, null);
+  equal(limited.inserts, []);
+});
+Deno.test("score map rows are closed, owner-scoped and pinned to registry plus selection", async () => {
+  for (const sql of [SCORE_MAP_PROFILE_SQL, SCORE_MAP_READ_SQL]) {
+    assert(sql.includes("owner_id=$1"));
+  }
+  assert(SCORE_MAP_INSERT_SQL.includes("ON CONFLICT DO NOTHING"));
+  assert(!/UPDATE|DELETE/.test(SCORE_MAP_INSERT_SQL));
+  const pin = await scoreMapPin({
+    registry: { sha256: "a".repeat(64) },
+    selection: { sha256: "b".repeat(64) },
+  });
+  equal(
+    pin,
+    await scoreMapPin({
+      registry: { sha256: "a".repeat(64) },
+      selection: { sha256: "b".repeat(64) },
+    }),
+  );
+  assert(
+    pin !==
+      await scoreMapPin({
+        registry: { sha256: "a".repeat(64) },
+        selection: { sha256: "c".repeat(64) },
+      }),
+  );
+  let rejected = 0;
+  for (
+    const bad of [
+      { status: "ready", converted_score: "1.5", official_max_score: null, reason_code: "x" },
+      { status: "pending", converted_score: "1.5", official_max_score: null, reason_code: null },
+      { status: "reference", converted_score: "1e3", official_max_score: null, reason_code: null },
+      { status: "admit", converted_score: "1", official_max_score: null, reason_code: null },
+    ]
+  ) {
+    try {
+      myScore(bad);
+    } catch {
+      rejected++;
+    }
+  }
+  equal(rejected, 4);
+});
+Deno.test("offerings.search projection carries my_score only through the current public schema", () => {
+  const extended = new PublicResponseProjection(
+    currentPublicResponseSchemas(schemas) as typeof schemas,
+    routeCatalog.operations,
+  );
+  const offering = {
+    offering_id: "2027:SYNTHETIC-PK",
+    academic_year: 2027,
+    university_id: "999",
+    university_name: "가상대학교",
+    campus: null,
+    department: "가상학과",
+    track: null,
+    group: "가",
+    region: null,
+    wildcard_group: null,
+  };
+  const page = {
+    status: "ready",
+    reason_code: null,
+    matching_offering_count: null,
+    matching_school_count: null,
+    catalog_version: "synthetic",
+    as_of: "2026-11-10T00:00:00.000000Z",
+    next_cursor: null,
+  };
+  const scored = {
+    ...page,
+    items: [{
+      ...offering,
+      my_score: {
+        status: "reference",
+        converted_score: "641.5",
+        official_max_score: "950",
+        reason_code: "reference_conversion_not_production_approved",
+      },
+    }, { ...offering, offering_id: "2027:SYNTHETIC-PK2", my_score: null }],
+    my_score_state: "complete",
+  };
+  const out = extended.project("offerings.search", "paid", scored) as NativeObject;
+  equal(out.my_score_state, "complete");
+  equal(((out.items as NativeObject[])[0].my_score as NativeObject).converted_score, "641.5");
+  const plain = extended.project("offerings.search", "paid", {
+    ...page,
+    items: [offering],
+  }) as NativeObject;
+  equal((plain.items as NativeObject[])[0].offering_id, "2027:SYNTHETIC-PK");
+});

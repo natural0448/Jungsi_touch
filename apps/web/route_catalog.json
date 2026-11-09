@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "6ad0542ad1e800782048f83de8e1f0f41d6b0e671b0a3f6bbcef6fd7ef6bd43f",
+  "source_sha256": "5b96df68497d8f67a40778e120e389cce75a944cb3f06e76557e8ea9b7d4332e",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2813,11 +2813,11 @@
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-            "sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53"
+            "sha256": "03bfdf25c5f013175da159d699d4d297f646e511fc7226bea7d630361d4accb0"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",

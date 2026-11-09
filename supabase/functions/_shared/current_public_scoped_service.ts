@@ -14,6 +14,7 @@ import {
   CurrentPublicBoundCursor,
   type ExistingCatalogTrust,
 } from "./current_public_bound_cursor.ts";
+import type { ScoreMapService } from "./jungsi/application/score_map.ts";
 import {
   observeCurrentCatalog,
   ObservedCurrentPublicCatalogService,
@@ -35,6 +36,8 @@ export class CurrentPublicSearchScopedService extends ObservedCurrentPublicCatal
     private readonly scopedTrace: SearchDiagnostic,
     private readonly secret: () => Uint8Array,
     private readonly existing: () => Promise<ExistingCatalogTrust>,
+    /** 3P score map: attaches `my_score` to offerings.search items (best-effort, never fails). */
+    private readonly scoreMap?: () => ScoreMapService,
   ) {
     super(scopedData, scopedCurrent, scopedClock, legacyCursor, scopedTrace);
   }
@@ -80,6 +83,15 @@ export class CurrentPublicSearchScopedService extends ObservedCurrentPublicCatal
       );
       const result = await service.execute(request);
       cursor?.assertUnexpired();
+      if (
+        request.operation === "offerings.search" && this.scoreMap && Array.isArray(result.items)
+      ) {
+        const attached = await this.scoreMap().attach(
+          request.session.user.subjectId,
+          result.items as NativeObject[],
+        );
+        return { ...result, items: attached.items, my_score_state: attached.state };
+      }
       return result;
     });
   }

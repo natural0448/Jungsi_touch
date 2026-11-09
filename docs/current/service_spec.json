@@ -8269,6 +8269,55 @@
       ]
     },
     {
+      "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
+      "layer": "application",
+      "status": "score_map_source_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+      "requirements": [
+        "REQ-03",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "AttachedScores",
+        "MyScore",
+        "MyScoreState",
+        "MyScoreStatus",
+        "SCORE_MAP_ID",
+        "SCORE_MAP_LIMITS",
+        "SCORE_MAP_OWNER",
+        "SCORE_MAP_PIN",
+        "ScoreMapDataPort",
+        "ScoreMapLimits",
+        "ScoreMapProfile",
+        "ScoreMapService",
+        "ScoreMapStore",
+        "myScore",
+        "myScoreOf",
+        "scoreMapInvalid",
+        "scoreMapPin"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
+      "layer": "data_infrastructure",
+      "status": "score_map_store_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+      "requirements": [
+        "REQ-03",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "SCORE_MAP_INSERT_SQL",
+        "SCORE_MAP_PROFILE_SQL",
+        "SCORE_MAP_READ_SQL",
+        "SupabaseScoreMapStore"
+      ]
+    },
+    {
       "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
       "layer": "data_infrastructure",
       "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
@@ -10221,7 +10270,7 @@
             },
             {
               "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-              "sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0"
+              "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
             },
             {
               "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -10388,7 +10437,7 @@
             },
             {
               "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-              "sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0"
+              "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
             },
             {
               "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -12693,7 +12742,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "deebb4b0294f88d7790b5d43128cc7b543d7dcf5d7953c399a4dc9ee8c3ec19c",
+            "source_sha256": "87ea44af49fbcce3275f70cc7c92dc38aaf43881a3e1ddb1a2d11e5bce007364",
             "symbols": [
               {
                 "kind": "function",
@@ -17934,7 +17983,7 @@
                 "REQ-11",
                 "REQ-12"
               ],
-              "source_sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
+              "source_sha256": "03bfdf25c5f013175da159d699d4d297f646e511fc7226bea7d630361d4accb0",
               "declared_exports": [
                 "createCombinedPolicyCatalogService",
                 "createMemberShortlistCatalogService"
@@ -18282,7 +18331,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc",
+              "source_sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
               "declared_exports": [
                 "CURRENT_PUBLIC_OPERATIONS",
                 "CurrentPublicCatalogCursor",
@@ -18461,7 +18510,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0",
+              "source_sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb",
               "declared_exports": []
             },
             {
@@ -18693,7 +18742,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "698a257920b70648323b996f6b208264d0325000c89729ef8c0f9581a5c641b9",
+              "source_sha256": "7f00315d5136fa83bc3f21426dca4fd82e20cb01724efcab0626ce17168d834a",
               "declared_exports": [
                 "CurrentPublicSearchScopedService"
               ]
@@ -20387,6 +20436,38 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
+              "layer": "application",
+              "status": "score_map_source_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+              "requirements": [
+                "REQ-03",
+                "REQ-14",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+              "declared_exports": [
+                "AttachedScores",
+                "MyScore",
+                "MyScoreState",
+                "MyScoreStatus",
+                "SCORE_MAP_ID",
+                "SCORE_MAP_LIMITS",
+                "SCORE_MAP_OWNER",
+                "SCORE_MAP_PIN",
+                "ScoreMapDataPort",
+                "ScoreMapLimits",
+                "ScoreMapProfile",
+                "ScoreMapService",
+                "ScoreMapStore",
+                "myScore",
+                "myScoreOf",
+                "scoreMapInvalid",
+                "scoreMapPin"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts",
               "layer": "application",
               "status": "INTERNAL_REVIEW_ONLY_AUTHORITY_AND_PUBLIC_DTO_NOT_BOUND",
@@ -22028,6 +22109,25 @@
                 "approvedProfileStages",
                 "SCORE_INPUT_UNMAPPED_PROFILE_SQL",
                 "SCORE_INPUT_ROLLOUT_VALID_SQL"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
+              "layer": "data_infrastructure",
+              "status": "score_map_store_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+              "requirements": [
+                "REQ-03",
+                "REQ-14",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f",
+              "declared_exports": [
+                "SCORE_MAP_INSERT_SQL",
+                "SCORE_MAP_PROFILE_SQL",
+                "SCORE_MAP_READ_SQL",
+                "SupabaseScoreMapStore"
               ]
             },
             {
@@ -28940,11 +29040,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "f651713c701514029fd24442fd317589a4378fb97c263fb45a0fad1c9cc8fb5d"
+        "sha256": "04089916b857f680c1be0c4be8290279e93ae80c7629216db13d5e7b9936551f"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "4387e4c714d7a5b68a0600207f07c62dc9101f1757edb2b676138ff0dccef4bf"
+        "sha256": "b04e0ca2dbff8edf6542045b0063f7315863e0307a150ef9dc547a6df8aeec41"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29135,7 +29235,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "deebb4b0294f88d7790b5d43128cc7b543d7dcf5d7953c399a4dc9ee8c3ec19c"
+          "sha256": "87ea44af49fbcce3275f70cc7c92dc38aaf43881a3e1ddb1a2d11e5bce007364"
         }
       ],
       "tests": [
@@ -29334,6 +29434,34 @@
         "path": "tests/test_professional_fixture_graph.py",
         "sha256": "533c74359590144b8258f49fb2ec1bc115f5d70951abb22e6bf68bc5f8c8a7fa"
       }
+    },
+    "score_map_source_extension": {
+      "format": "jungsi.score-map-source-extension/v1",
+      "status": "SOURCE_PREPARED_NOT_ACTIVATED",
+      "schema_source": "database/migrations/011_score_maps.prepared.sql",
+      "schema_version": "score_maps_2026",
+      "legacy_ledgers_modified": false,
+      "new_role_or_account_rights": false,
+      "runtime_privileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "operating_DB_writes": 0,
+      "test_path": "supabase/functions/_shared/current_public_catalog_test.ts",
+      "source_bindings": [
+        {
+          "path": "database/migrations/011_score_maps.prepared.sql",
+          "sha256": "dfc800c660310f896a1c9f2d244c9ef25dde17c15ca2747e61e6821393916080"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
+          "sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
+          "sha256": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f"
+        }
+      ]
     }
   },
   "repository_layout": {
@@ -29912,11 +30040,11 @@
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-            "sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0"
+            "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
@@ -47727,7 +47855,7 @@
         },
         "supabase/functions/_shared/current_public_catalog.ts": {
           "layer": "application",
-          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+          "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
         }
       },
       "format": "jungsi.edge-graph-extension/v1",
@@ -243666,6 +243794,2307 @@
         ],
         "layer": "verification",
         "symbols": []
+      },
+      "supabase/functions/_shared/jungsi/application/score_map.ts": {
+        "declarations": {
+          "imports": [
+            {
+              "importedName": "CatalogRelease",
+              "jsDoc": {
+                "doc": "3P '내 환산점수' score map. offerings.search attaches `my_score` per item from a\nper-student table keyed by (owner, immutable confirmed profile, approved data pin, offering).\nMissing rows are computed with the very same UniversityScoringService as university.analyze\nand inserted (insert-only). The SQL store lives in infrastructure/score_map_postgres.ts. Everything here is best-effort: a failure never fails the search."
+              },
+              "originalName": "CatalogRelease",
+              "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "RequestClockPort",
+              "originalName": "RequestClockPort",
+              "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+            },
+            {
+              "importedName": "ScoringResult",
+              "originalName": "ScoringResult",
+              "src": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+            },
+            {
+              "importedName": "UniversityScoringDataPort",
+              "originalName": "UniversityScoringDataPort",
+              "src": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+            },
+            {
+              "importedName": "UniversityScoringService",
+              "originalName": "UniversityScoringService",
+              "src": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "utcText",
+              "originalName": "utcText",
+              "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+            }
+          ],
+          "source_sha256": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "ready",
+                          "value": {
+                            "kind": "string",
+                            "string": "ready"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "reference",
+                          "value": {
+                            "kind": "string",
+                            "string": "reference"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "pending",
+                          "value": {
+                            "kind": "string",
+                            "string": "pending"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "MyScoreStatus"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "status",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "MyScoreStatus",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "MyScoreStatus"
+                          }
+                        }
+                      },
+                      {
+                        "name": "converted_score",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "official_max_score",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "reason_code",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "MyScore"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "no_profile",
+                          "value": {
+                            "kind": "string",
+                            "string": "no_profile"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "complete",
+                          "value": {
+                            "kind": "string",
+                            "string": "complete"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "partial",
+                          "value": {
+                            "kind": "string",
+                            "string": "partial"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "unavailable",
+                          "value": {
+                            "kind": "string",
+                            "string": "unavailable"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "MyScoreState"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "profile_id",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "scores",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreMapProfile"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "latestProfile",
+                        "parameter_source": "(owner: string)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ScoreMapProfile",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "ScoreMapProfile"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "method",
+                        "name": "read",
+                        "parameter_source": "(\n    owner: string,\n    profileId: string,\n    pin: string,\n    offeringIds: readonly string[],\n  )",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "profileId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "pin",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "offeringIds",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "ReadonlyMap",
+                                "value": {
+                                  "typeName": "ReadonlyMap",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "MyScore",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "MyScore"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "method",
+                        "name": "insert",
+                        "parameter_source": "(\n    owner: string,\n    profileId: string,\n    pin: string,\n    rows: readonly (MyScore & { readonly offering_id: string })[],\n    nowUtc: string,\n  )",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "profileId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "pin",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "rows",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "parenthesized",
+                                    "value": {
+                                      "kind": "intersection",
+                                      "value": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "MyScore",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "local"
+                                            },
+                                            "typeName": "MyScore"
+                                          }
+                                        },
+                                        {
+                                          "kind": "typeLiteral",
+                                          "value": {
+                                            "properties": [
+                                              {
+                                                "name": "offering_id",
+                                                "readonly": true,
+                                                "tsType": {
+                                                  "kind": "keyword",
+                                                  "repr": "string",
+                                                  "value": "string"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "nowUtc",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreMapStore"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "extends": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "UniversityScoringDataPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "UniversityScoringDataPort",
+                            "specifier": "./university_scoring.ts"
+                          },
+                          "typeName": "UniversityScoringDataPort"
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "getCatalog",
+                        "parameter_source": "()",
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "CatalogRelease",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "CatalogRelease",
+                                        "specifier": "./catalog.ts"
+                                      },
+                                      "typeName": "CatalogRelease"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreMapDataPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "maxComputePerRequest",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "computeBudgetMs",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ScoreMapLimits"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "ScoreMapLimits",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "ScoreMapLimits"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_LIMITS"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_ID"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_OWNER"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[a-f0-9]{64}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_PIN"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "never",
+                      "value": "never"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "scoreMapInvalid"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: {\n  status: unknown;\n  converted_score: unknown;\n  official_max_score: unknown;\n  reason_code: unknown;\n})",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "status",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              },
+                              {
+                                "name": "converted_score",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              },
+                              {
+                                "name": "official_max_score",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              },
+                              {
+                                "name": "reason_code",
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "unknown",
+                                  "value": "unknown"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "MyScore",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "MyScore"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "myScore"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(result: ScoringResult)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "result",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoringResult",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "ScoringResult",
+                              "specifier": "./university_scoring.ts"
+                            },
+                            "typeName": "ScoringResult"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "MyScore",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "MyScore"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "myScoreOf"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  references: Readonly<Record<string, { readonly sha256: string }>>,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "references",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Record",
+                                "value": {
+                                  "typeName": "Record",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeLiteral",
+                                      "value": {
+                                        "properties": [
+                                          {
+                                            "name": "sha256",
+                                            "readonly": true,
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "scoreMapPin"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "items",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "array",
+                          "value": {
+                            "kind": "typeRef",
+                            "repr": "NativeObject",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "NativeObject",
+                                "specifier": "../domain/json_value.ts"
+                              },
+                              "typeName": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "name": "state",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "MyScoreState",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "MyScoreState"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "AttachedScores"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    private readonly store: ScoreMapStore,\n    private readonly data: ScoreMapDataPort,\n    private readonly pin: () => Promise<string>,\n    private readonly clock: RequestClockPort,\n    private readonly limits: ScoreMapLimits = SCORE_MAP_LIMITS,\n    private readonly now: () => number = () => performance.now(),\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "store",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ScoreMapStore",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ScoreMapStore"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "data",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ScoreMapDataPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ScoreMapDataPort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "pin",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "clock",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "RequestClockPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "RequestClockPort",
+                                  "specifier": "./ports.ts"
+                                },
+                                "typeName": "RequestClockPort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "limits",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "ScoreMapLimits",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ScoreMapLimits"
+                                }
+                              }
+                            },
+                            "readonly": true,
+                            "right": "SCORE_MAP_LIMITS"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "now",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [],
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "number",
+                                    "value": "number"
+                                  }
+                                }
+                              }
+                            },
+                            "readonly": true,
+                            "right": "[UNSUPPORTED]"
+                          }
+                        ]
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "subject",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "items",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "typeRef",
+                                      "repr": "NativeObject",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeObject",
+                                          "specifier": "../domain/json_value.ts"
+                                        },
+                                        "typeName": "NativeObject"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "AttachedScores",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "AttachedScores"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "attach"
+                      },
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "subject",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profile",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "ScoreMapProfile",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ScoreMapProfile"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "pin",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "missing",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "found",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Map",
+                                "value": {
+                                  "typeName": "Map",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "MyScore",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "MyScore"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "compute"
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "ScoreMapService"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^-?[0-9]{1,12}(\\.[0-9]{1,30})?$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "DECIMAL"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[a-z0-9_]{1,80}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "REASON"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeOperator",
+                      "value": {
+                        "operator": "readonly",
+                        "tsType": {
+                          "kind": "array",
+                          "value": {
+                            "kind": "typeRef",
+                            "repr": "MyScoreStatus",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "MyScoreStatus"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "STATUSES"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "text"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "decimal"
+            }
+          ]
+        },
+        "dependencies": [
+          {
+            "dynamic": false,
+            "specifier": "../domain/json_value.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/native_json.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/time.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/time.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./catalog.ts",
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/catalog.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./ports.ts",
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./university_scoring.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+              }
+            ]
+          }
+        ],
+        "layer": "application",
+        "symbols": [
+          "AttachedScores",
+          "MyScore",
+          "MyScoreState",
+          "MyScoreStatus",
+          "SCORE_MAP_ID",
+          "SCORE_MAP_LIMITS",
+          "SCORE_MAP_OWNER",
+          "SCORE_MAP_PIN",
+          "ScoreMapDataPort",
+          "ScoreMapLimits",
+          "ScoreMapProfile",
+          "ScoreMapService",
+          "ScoreMapStore",
+          "myScore",
+          "myScoreOf",
+          "scoreMapInvalid",
+          "scoreMapPin"
+        ]
+      },
+      "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": {
+        "declarations": {
+          "imports": [
+            {
+              "importedName": "MyScore",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "MyScore",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "NativeSqlTransaction",
+              "originalName": "NativeSqlTransaction",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_ID",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "SCORE_MAP_ID",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_OWNER",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "SCORE_MAP_OWNER",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_PIN",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "SCORE_MAP_PIN",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "ScoreMapProfile",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "ScoreMapProfile",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "ScoreMapStore",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "ScoreMapStore",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "myScore",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "myScore",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "scoreMapInvalid",
+              "jsDoc": {
+                "doc": "Owner-scoped, insert-only Postgres store for the 3P score map (migration 011 score_maps)."
+              },
+              "originalName": "scoreMapInvalid",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "sqlObjectText",
+              "originalName": "sqlObjectText",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
+            }
+          ],
+          "source_sha256": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "SELECT profile_id,scores::text FROM jungsi_backend.profiles\n WHERE owner_id=$1 AND confirmed ORDER BY created_at DESC,profile_id DESC LIMIT 1",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "kind": "literal",
+                            "repr": "SELECT profile_id,scores::text FROM jungsi_backend.profiles\n WHERE owner_id=$1 AND confirmed ORDER BY created_at DESC,profile_id DESC LIMIT 1",
+                            "value": {
+                              "kind": "string",
+                              "string": "SELECT profile_id,scores::text FROM jungsi_backend.profiles\n WHERE owner_id=$1 AND confirmed ORDER BY created_at DESC,profile_id DESC LIMIT 1"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_PROFILE_SQL"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "SELECT offering_id,status,converted_score,official_max_score,reason_code\n FROM jungsi_backend.score_maps WHERE owner_id=$1 AND profile_id=$2 AND data_pin=$3\n AND offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "kind": "literal",
+                            "repr": "SELECT offering_id,status,converted_score,official_max_score,reason_code\n FROM jungsi_backend.score_maps WHERE owner_id=$1 AND profile_id=$2 AND data_pin=$3\n AND offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))",
+                            "value": {
+                              "kind": "string",
+                              "string": "SELECT offering_id,status,converted_score,official_max_score,reason_code\n FROM jungsi_backend.score_maps WHERE owner_id=$1 AND profile_id=$2 AND data_pin=$3\n AND offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_READ_SQL"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "INSERT INTO jungsi_backend.score_maps\n (owner_id,profile_id,data_pin,offering_id,status,converted_score,official_max_score,reason_code,computed_at)\n SELECT $1,$2,$3,x.offering_id,x.status,x.converted_score,x.official_max_score,x.reason_code,$5::timestamptz\n FROM jsonb_to_recordset($4::jsonb) AS x(offering_id text,status text,converted_score text,\n official_max_score text,reason_code text) ON CONFLICT DO NOTHING",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "kind": "literal",
+                            "repr": "INSERT INTO jungsi_backend.score_maps\n (owner_id,profile_id,data_pin,offering_id,status,converted_score,official_max_score,reason_code,computed_at)\n SELECT $1,$2,$3,x.offering_id,x.status,x.converted_score,x.official_max_score,x.reason_code,$5::timestamptz\n FROM jsonb_to_recordset($4::jsonb) AS x(offering_id text,status text,converted_score text,\n official_max_score text,reason_code text) ON CONFLICT DO NOTHING",
+                            "value": {
+                              "kind": "string",
+                              "string": "INSERT INTO jungsi_backend.score_maps\n (owner_id,profile_id,data_pin,offering_id,status,converted_score,official_max_score,reason_code,computed_at)\n SELECT $1,$2,$3,x.offering_id,x.status,x.converted_score,x.official_max_score,x.reason_code,$5::timestamptz\n FROM jsonb_to_recordset($4::jsonb) AS x(offering_id text,status text,converted_score text,\n official_max_score text,reason_code text) ON CONFLICT DO NOTHING"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCORE_MAP_INSERT_SQL"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    private readonly sql: () => SqlTransport,\n    private readonly maxRecordBytes: () => Promise<number>,\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "sql",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "SqlTransport",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "SqlTransport"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "maxRecordBytes",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "implements": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "ScoreMapStore",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ScoreMapStore",
+                            "specifier": "../application/score_map.ts"
+                          },
+                          "typeName": "ScoreMapStore"
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "owner",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "ScoreMapProfile",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "ScoreMapProfile",
+                                          "specifier": "../application/score_map.ts"
+                                        },
+                                        "typeName": "ScoreMapProfile"
+                                      }
+                                    },
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "null",
+                                      "value": "null"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "latestProfile"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "owner",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profileId",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "pin",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "offeringIds",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ReadonlyMap",
+                                  "value": {
+                                    "typeName": "ReadonlyMap",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      },
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "MyScore",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "MyScore",
+                                            "specifier": "../application/score_map.ts"
+                                          },
+                                          "typeName": "MyScore"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "read"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "owner",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profileId",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "pin",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "rows",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "parenthesized",
+                                      "value": {
+                                        "kind": "intersection",
+                                        "value": [
+                                          {
+                                            "kind": "typeRef",
+                                            "repr": "MyScore",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "MyScore",
+                                                "specifier": "../application/score_map.ts"
+                                              },
+                                              "typeName": "MyScore"
+                                            }
+                                          },
+                                          {
+                                            "kind": "typeLiteral",
+                                            "value": {
+                                              "properties": [
+                                                {
+                                                  "name": "offering_id",
+                                                  "readonly": true,
+                                                  "tsType": {
+                                                    "kind": "keyword",
+                                                    "repr": "string",
+                                                    "value": "string"
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "nowUtc",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "insert"
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "SupabaseScoreMapStore"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "read",
+                        "parameter_source": "(subject: string, work: (tx: NativeSqlTransaction) => Promise<T>)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "subject",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "work",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "tx",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "NativeSqlTransaction",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeSqlTransaction",
+                                          "specifier": "./transaction_sql.ts"
+                                        },
+                                        "typeName": "NativeSqlTransaction"
+                                      }
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "T",
+                                        "value": {
+                                          "resolution": {
+                                            "declaringKind": "method",
+                                            "declaringName": "read",
+                                            "kind": "typeParam"
+                                          },
+                                          "typeName": "T"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "T",
+                                "value": {
+                                  "resolution": {
+                                    "declaringKind": "method",
+                                    "declaringName": "read",
+                                    "kind": "typeParam"
+                                  },
+                                  "typeName": "T"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "typeParams": [
+                          {
+                            "name": "T"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "method",
+                        "name": "write",
+                        "parameter_source": "(subject: string, work: (tx: NativeSqlTransaction) => Promise<T>)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "subject",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "work",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "tx",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "NativeSqlTransaction",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeSqlTransaction",
+                                          "specifier": "./transaction_sql.ts"
+                                        },
+                                        "typeName": "NativeSqlTransaction"
+                                      }
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "T",
+                                        "value": {
+                                          "resolution": {
+                                            "declaringKind": "method",
+                                            "declaringName": "write",
+                                            "kind": "typeParam"
+                                          },
+                                          "typeName": "T"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "T",
+                                "value": {
+                                  "resolution": {
+                                    "declaringKind": "method",
+                                    "declaringName": "write",
+                                    "kind": "typeParam"
+                                  },
+                                  "typeName": "T"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "typeParams": [
+                          {
+                            "name": "T"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "SqlTransport"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: string)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "string",
+                      "value": "string"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "utcInstantText"
+            }
+          ]
+        },
+        "dependencies": [
+          {
+            "dynamic": false,
+            "specifier": "../application/score_map.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/json_value.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./sql_values.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./transaction_sql.ts",
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+              }
+            ]
+          }
+        ],
+        "layer": "data_infrastructure",
+        "symbols": [
+          "SCORE_MAP_INSERT_SQL",
+          "SCORE_MAP_PROFILE_SQL",
+          "SCORE_MAP_READ_SQL",
+          "SupabaseScoreMapStore"
+        ]
       }
     },
     "format": "jungsi.edge-contract/v1",
@@ -244256,7 +246685,9 @@
       "tests/edge/reference_candidate_scope_cases.ts": "2d26c10d4c3914a0327c998d5241ccd325b81215089925b63be1e970cbfb21c8",
       "tests/edge/reference_candidates_cases.ts": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8",
       "tests/edge/reference_percentile_cases.ts": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
-      "tests/edge/saved_reference_tail_source_cases.ts": "67c11ccb8ea943af7450caf7eb404365ae0feae9508f43db58f0c8998ca46fb6"
+      "tests/edge/saved_reference_tail_source_cases.ts": "67c11ccb8ea943af7450caf7eb404365ae0feae9508f43db58f0c8998ca46fb6",
+      "supabase/functions/_shared/jungsi/application/score_map.ts": "72ebbbc6406a7edfb2aa59d0b74a82c39a63eb09635877f3f9d8920b8488fe62",
+      "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -244585,6 +247016,19 @@
           "object_SHA256_and_size",
           "exam_pack_version"
         ]
+      },
+      "score_map_precompute": {
+        "symbols": [
+          "ScoreMapService",
+          "SupabaseScoreMapStore",
+          "SCORE_MAP_LIMITS"
+        ],
+        "scope": "per student: immutable confirmed profile x approved registry/selection pin x offering; insert-only rows; recomputed only when the profile or the approved data pin changes",
+        "consumer": "offerings.search attaches optional my_score per item and my_score_state; best-effort, a score-map failure never fails the search",
+        "max_compute_per_request": 100,
+        "compute_budget_ms": 3000,
+        "same_engine_as": "university.analyze UniversityScoringService.calculate",
+        "approved_by": "final_admin_2026-11-10"
       }
     },
     "verification": {
@@ -245773,11 +248217,11 @@
         "supabase/functions/_shared/current_public_key_index_test.ts",
         "supabase/functions/_shared/current_public_key_storage_test.ts"
       ],
-      "test_count": 70,
+      "test_count": 74,
       "source_bindings": [
         {
           "path": "supabase/functions/_shared/current_public_catalog.ts",
-          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+          "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
@@ -245797,7 +248241,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-          "sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0"
+          "sha256": "44bfb608c16ba78eb3bbd92bd77050fdbfa50af0321c7e169e83a667ba77c5bb"
         },
         {
           "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -245859,9 +248303,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "32018258c59ad19714319387dfdd73f6073d6d814b97c45e1129771c033c558d",
+      "bridge_sha256": "2712ea2832cbfc267079371ab9af488098866f5ab6646d7710756088c3542dfb",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "96c1c2076e4494d194a0f0c03e65fc9a83b59fbd30c9bcef86725a4e388daf76",
+      "graph_manifest_sha256": "df3c60e7e5616e94696aed3510bc4d05537c6b73079ff2ed1c57605e5d3bd8e4",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -245884,7 +248328,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog.ts",
-          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+          "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
         },
         {
           "path": "supabase/functions/_shared/current_public_r27_bounded.ts",
@@ -245918,7 +248362,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog.ts",
-          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+          "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
         },
         {
           "path": "supabase/functions/_shared/current_public_key_index.ts",
@@ -245974,7 +248418,7 @@
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog.ts",
-          "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+          "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
         },
         {
           "path": "supabase/functions/_shared/current_public_catalog_sql.ts",
@@ -249442,11 +251886,11 @@
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-            "sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53"
+            "sha256": "03bfdf25c5f013175da159d699d4d297f646e511fc7226bea7d630361d4accb0"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
@@ -249699,7 +252143,7 @@
       },
       {
         "path": "supabase/functions/_shared/current_public_catalog.ts",
-        "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+        "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
       },
       {
         "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
@@ -249811,7 +252255,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "9849e30d781b0a840f0b9dad0443aa01a80629a0736c82da0f3c8f9dfffae8c7",
+    "manifest_sha256": "8cd78d616fae35e157365e5948756fc311d5658af3f4b141d3c9bf6ec2c493ad",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -249822,7 +252266,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "612f42733b3bbf1b626de06cce9061cddd816291fc016963a028d83a6c34cd64",
+    "manifest_sha256": "0558f5c87401762438192c074593e1c9513153957635fbb32507256553434c39",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

@@ -164,7 +164,7 @@ def current_public_registration(spec,before):
     tests=[prefix+n+'.ts'for n in names if n.endswith('_test')]
     bindings=c.get('source_bindings')
     if (c.get('format')!='jungsi.current-public-provider-verification/v1' or
-        c.get('test_paths')!=tests or c.get('test_count')!=70 or
+        c.get('test_paths')!=tests or c.get('test_count')!=74 or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get('path')for b in bindings}!=required or
         any(not isinstance(b.get('sha256'),str)or before.get(b['path'])!=b['sha256']for b in bindings)):

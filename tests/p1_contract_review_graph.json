@@ -1625,7 +1625,7 @@
     },
     "tests/p1_contract_review/test_p1_r27_selection_bridge.synthetic.js": {
       "files": {
-        "supabase/functions/_shared/current_public_catalog.ts": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc",
+        "supabase/functions/_shared/current_public_catalog.ts": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
         "supabase/functions/_shared/current_public_r27_bounded.ts": "b80a4297687fb97bea8cd45a8963687b02ed613d0f8d7523e2e2322296daeecc",
         "supabase/functions/_shared/current_public_r27_selection.ts": "7e7b272f45bc7b6bf3b7440b9422bb0acb1d78883d03243cd9f4414b391e6c8f",
         "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
