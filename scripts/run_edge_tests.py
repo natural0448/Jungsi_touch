@@ -329,7 +329,7 @@ def school_reference_registration(spec,before):
       'tests/edge/public_api_contract_fixture.ts'}
     bindings=v.get('source_bindings')
     if (v.get('format')!='jungsi.school-reference-synthetic-verification/v1' or
-        v.get('baseline_foundation_count')!=656 or v.get('test_count')!=46 or
+        v.get('baseline_foundation_count')!=656 or v.get('test_count')!=83 or
         v.get('test_paths')!=list(SCHOOL_REFERENCE_TESTS) or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get('path')for b in bindings}!=required or

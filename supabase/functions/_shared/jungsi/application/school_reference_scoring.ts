@@ -6,7 +6,7 @@ import { JsonFloat } from "../domain/native_json.ts";
 import type { SchoolScoreInputs } from "./school_score_inputs.ts";
 export interface ReferenceDerivation {
   readonly field: string;
-  readonly operation: "observed_max" | "observed_sum" | "observed_average";
+  readonly operation: "observed_max" | "observed_sum" | "observed_average" | "observed_max_science";
   readonly inputs: readonly string[];
   readonly minimumPresent: number;
 }
@@ -169,19 +169,25 @@ export function projectReferenceInputs(
       d.inputs.length === 2 && d.inputs.every((v, i) => v === expected[i]),
       "reference_derivation_invalid",
     );
+    const expectedOperation = d.field === "inquiry_sum_percentile"
+      ? "observed_sum"
+      : d.field === "inquiry_average_percentile"
+      ? "observed_average"
+      : "observed_max";
     check(
-      d.operation ===
-        (d.field === "inquiry_sum_percentile"
-          ? "observed_sum"
-          : d.field === "inquiry_average_percentile"
-          ? "observed_average"
-          : "observed_max"),
+      d.operation === expectedOperation ||
+        (d.field === "inquiry_best_percentile" && d.operation === "observed_max_science"),
       "reference_derivation_invalid",
     );
-    const operands = expected.filter((k) => values[k] != null).map((k) => percentile(values[k]));
+    const operands = expected
+      .filter((k, i) =>
+        values[k] != null &&
+        (d.operation !== "observed_max_science" || input.inquiryCategories[i] === "science")
+      )
+      .map((k) => percentile(values[k]));
     check(operands.length >= d.minimumPresent, "reference_required_input_missing");
     let result: Rational;
-    if (d.operation === "observed_max") {
+    if (d.operation === "observed_max" || d.operation === "observed_max_science") {
       result = operands.reduce((a, b) => a.compare(b) >= 0 ? a : b);
     } else {
       check(

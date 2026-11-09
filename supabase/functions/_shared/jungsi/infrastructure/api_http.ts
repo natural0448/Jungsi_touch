@@ -35,6 +35,7 @@ import type {
 import {
   publicJsonText,
   PublicResponseProjection,
+  type ReferenceProjectionAuthority,
   type WildcardProjectionAuthority,
 } from "../application/public_response.ts";
 import { BUDGET_OPERATIONS, type RequestBudgetPort } from "../application/request_budget.ts";
@@ -128,6 +129,15 @@ export interface ApiHttpPorts {
       signal: AbortSignal,
     ): Promise<WildcardProjectionAuthority | null>;
   };
+  /** Optional independent exact-revision reference proof; not installed by default. */
+  readonly referenceProjectionAuthority?: {
+    resolve(
+      request: ApiExecution,
+      result: unknown,
+      admission: unknown,
+      signal: AbortSignal,
+    ): Promise<ReferenceProjectionAuthority | null>;
+  };
   readonly budget: RequestBudgetPort;
   readonly business: ApiBusinessPort;
   readonly completion?: {
@@ -159,6 +169,21 @@ function hasPrivateWildcardReport(value: unknown, operation: string): boolean {
     ? report.read_only_snapshot.candidates
     : null;
   return !!selected && Object.hasOwn(selected, "_wildcard_selection_view");
+}
+function hasPrivateReferenceReport(value: unknown, operation: string): boolean {
+  const object = (x: unknown): x is Record<string, unknown> =>
+    !!x && typeof x === "object" && !Array.isArray(x);
+  let report = value;
+  if (operation === "report.export" && object(report)) report = report.report;
+  if (!object(report)) return false;
+  const views = [report, ...(object(report.read_only_snapshot) ? [report.read_only_snapshot] : [])];
+  return views.some((view) =>
+    object(view.candidates) && Object.hasOwn(view.candidates, "reference_university_groups") ||
+    object(view.analyses) &&
+      Object.values(view.analyses).some((a) =>
+        object(a) && Object.hasOwn(a, "reference_percentile")
+      )
+  );
 }
 function routes(
   policies: readonly ApiRoutePolicy[],
@@ -500,6 +525,7 @@ export function createApiHandler(
         Object.freeze(selected);
       }
       let authority: WildcardProjectionAuthority | null = null;
+      let referenceAuthority: ReferenceProjectionAuthority | null = null;
       let pageContext: {
         boundary: ApiExecutionBoundary;
         schema: Readonly<{
@@ -602,6 +628,31 @@ export function createApiHandler(
           }
           if (request.signal.aborted) configuration();
         }
+        if (
+          ports.referenceProjectionAuthority &&
+          [
+            "overall.analyze",
+            "university.analyze",
+            "candidates.build",
+            "report.read",
+            "report.export",
+            "shortlist.update",
+          ].includes(policy.id) && hasPrivateReferenceReport(result, policy.id) &&
+          admission !== null && admission !== undefined
+        ) {
+          try {
+            referenceAuthority = await ports.referenceProjectionAuthority.resolve(
+              selected,
+              result,
+              admission,
+              request.signal,
+            );
+            if (referenceAuthority) await referenceAuthority.assertCurrent(request.signal);
+          } catch {
+            referenceAuthority = null;
+          }
+          if (request.signal.aborted) configuration();
+        }
         const projection = policy.id === CURRENT_PAGE_OPERATION_ID
           ? currentPageProjection!
           : ports.projection;
@@ -610,6 +661,7 @@ export function createApiHandler(
           session.tier,
           result,
           authority ?? undefined,
+          referenceAuthority ?? undefined,
         );
         if (policy.id === CURRENT_PAGE_OPERATION_ID) {
           requirePageCountNull(projected);
@@ -625,7 +677,7 @@ export function createApiHandler(
           sessionDto(session, ports.clock.nowUtc());
           pageCurrentVerified = true;
         }
-        if (authority) {
+        if (authority || referenceAuthority) {
           trustedRaw = result;
           firstProjection = publicJsonText(projected);
         }
@@ -644,11 +696,20 @@ export function createApiHandler(
         sessionDto(session, ports.clock.nowUtc());
         stage("final_projection");
         if (authority && firstProjection !== null) await authority.assertCurrent(request.signal);
+        if (referenceAuthority && firstProjection !== null) {
+          await referenceAuthority.assertCurrent(request.signal);
+        }
         const projection = policy.id === CURRENT_PAGE_OPERATION_ID
           ? currentPageProjection!
           : ports.projection;
-        const approved = authority && firstProjection !== null
-          ? projection.project(policy.id, session.tier, trustedRaw, authority)
+        const approved = (authority || referenceAuthority) && firstProjection !== null
+          ? projection.project(
+            policy.id,
+            session.tier,
+            trustedRaw,
+            authority ?? undefined,
+            referenceAuthority ?? undefined,
+          )
           : projection.project(policy.id, session.tier, result);
         if (policy.id === CURRENT_PAGE_OPERATION_ID) {
           requirePageCountNull(result);
@@ -661,7 +722,7 @@ export function createApiHandler(
         // Identity or a request-local cache is only transport: the independent authority
         // must approve both passes and the settled representation must match byte-for-byte.
         if (
-          authority && firstProjection !== null &&
+          (authority || referenceAuthority) && firstProjection !== null &&
           (request.signal.aborted || publicJsonText(result) !== firstProjection ||
             publicJsonText(approved) !== firstProjection)
         ) configuration();
@@ -720,12 +781,19 @@ export function createApiHandler(
         }
         // This check is before any delivery receipt. It narrows one race only;
         // the later receipt and actual transport are not atomic with revocation.
-        if (authority && firstProjection !== null) {
-          await authority.assertCurrent(request.signal);
+        if ((authority || referenceAuthority) && firstProjection !== null) {
+          if (authority) await authority.assertCurrent(request.signal);
+          if (referenceAuthority) await referenceAuthority.assertCurrent(request.signal);
           if (
             request.signal.aborted ||
             publicJsonText(
-                ports.projection.project(policy.id, session.tier, trustedRaw, authority),
+                ports.projection.project(
+                  policy.id,
+                  session.tier,
+                  trustedRaw,
+                  authority ?? undefined,
+                  referenceAuthority ?? undefined,
+                ),
               ) !==
               firstProjection
           ) configuration();

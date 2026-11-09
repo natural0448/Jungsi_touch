@@ -178,7 +178,9 @@ export function decodeSchoolReferencePayload(
     const d = closed(v, ["field", "operation", "inputs", "minimum_present"]);
     text(d.field);
     check(
-      ["observed_max", "observed_sum", "observed_average"].includes(String(d.operation)) &&
+      ["observed_max", "observed_sum", "observed_average", "observed_max_science"].includes(
+        String(d.operation),
+      ) &&
         typeof d.minimum_present === "number" && Number.isSafeInteger(d.minimum_present),
       "reference_package_invalid",
     );

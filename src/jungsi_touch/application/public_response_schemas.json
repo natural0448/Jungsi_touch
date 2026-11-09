@@ -2849,6 +2849,10 @@
             "ref": "recommendation_reason",
             "nullable": false
           }
+        },
+        "reference_percentile": {
+          "ref": "reference_percentile",
+          "nullable": true
         }
       },
       "required": [
@@ -2868,7 +2872,8 @@
         "decision_evidence",
         "conversion",
         "percentile",
-        "recommendation_reasons"
+        "recommendation_reasons",
+        "reference_percentile"
       ]
     },
     "candidate_item": {
@@ -3058,6 +3063,14 @@
             "card_stability"
           ],
           "optional": []
+        },
+        "reference_university_groups": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "reference_university_group",
+            "nullable": false
+          }
         }
       },
       "required": [
@@ -3071,7 +3084,8 @@
         "ineligible_offerings"
       ],
       "optional": [
-        "wildcard_selection"
+        "wildcard_selection",
+        "reference_university_groups"
       ]
     },
     "shortlist": {
@@ -6934,6 +6948,131 @@
         "text",
         "source_url",
         "source_as_of"
+      ],
+      "optional": []
+    },
+    "reference_percentile": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "pending",
+            "reference_estimated"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "reference_conversion_unavailable",
+            "reference_tail_missing",
+            "reference_tail_context_mismatch",
+            "reference_exam_context_mismatch",
+            "reference_conversion_context_mismatch",
+            "reference_score_outside_saved_support",
+            "reference_tail_unavailable"
+          ]
+        },
+        "estimated_upper_cumulative_percent_all_examinees": {
+          "ref": "decimal_or_integer",
+          "nullable": true
+        },
+        "metric": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "estimated_upper_cumulative_percent_all_examinees"
+          ]
+        },
+        "denominator_kind": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "same_year_original_model_whole_exact_mass"
+          ]
+        },
+        "calculation_review_scope": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "same_exam_mathematical_reference"
+          ]
+        },
+        "production_allowed": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        },
+        "actual_admission_full_total_approved": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "estimated_upper_cumulative_percent_all_examinees",
+        "calculation_review_scope",
+        "production_allowed",
+        "actual_admission_full_total_approved"
+      ],
+      "optional": [
+        "reason_code",
+        "metric",
+        "denominator_kind"
+      ]
+    },
+    "reference_candidate_item": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "offering": {
+          "ref": "offering",
+          "nullable": false
+        },
+        "reference_percentile": {
+          "ref": "reference_percentile",
+          "nullable": false
+        }
+      },
+      "required": [
+        "offering",
+        "reference_percentile"
+      ],
+      "optional": []
+    },
+    "reference_university_group": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "university_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "university_name": {
+          "type": "string",
+          "nullable": true
+        },
+        "offerings": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "reference_candidate_item",
+            "nullable": false
+          }
+        }
+      },
+      "required": [
+        "university_id",
+        "university_name",
+        "offerings"
       ],
       "optional": []
     }

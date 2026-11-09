@@ -67,11 +67,19 @@ import {
 } from "./current_page_request_ports.review-only.ts";
 import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./management_postgres.ts";
-import { NativeForecastInputs } from "./native_data_provider.ts";
+import { type NativeDataProvider, NativeForecastInputs } from "./native_data_provider.ts";
 import { PublicJeongsiPassesReader } from "./public_passes.ts";
 import { VerifiedArtifactCache } from "./supabase_artifacts.ts";
 import { PreparedSelectionCache } from "./native_source_selection.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
+import { PinnedSavedReferenceTailSource } from "./saved_reference_tail_source.ts";
+import {
+  referenceCandidateScopePort,
+  referenceProjectionAuthorityPort,
+} from "./reference_runtime_authority.ts";
+/** Per-request saved-tail objects and raw bytes held at once (inside the existing read budget). */
+export const REFERENCE_TAIL_REQUEST_OBJECTS = 16;
+export const REFERENCE_TAIL_REQUEST_BYTES = 24 * 1024 * 1024;
 import {
   type BasicRuntimeSettings,
   readBasicRuntimeSettings,
@@ -246,8 +254,42 @@ export async function runtimeCompletionCurrent(
 export function runtimeAnalysisDataPort(
   context: Pick<NativeRuntimeRequest, "data">,
   phase: <T>(next: ObservationStage, work: () => Promise<T>) => Promise<T>,
+  signal?: AbortSignal,
 ): UniversityAnalysisDataPort & OverallDataPort & CatalogDataPort {
+  // One request-local adapter over the approved saved-tail authority; never an isolate singleton.
+  // Providers without the saved-tail capability keep the previous behavior (no reference tail).
+  type TailCapable = Partial<
+    Pick<NativeDataProvider, "referenceTailAuthority" | "referenceTailPins">
+  >;
+  let tails: Promise<PinnedSavedReferenceTailSource | null> | undefined;
+  const tailSource = () =>
+    tails ??= (async () => {
+      const data = (await context.data()) as TailCapable;
+      if (typeof data.referenceTailAuthority !== "function") return null;
+      return new PinnedSavedReferenceTailSource(
+        data.referenceTailAuthority(),
+        signal!,
+        REFERENCE_TAIL_REQUEST_OBJECTS,
+        REFERENCE_TAIL_REQUEST_BYTES,
+      );
+    })();
   return {
+    ...(signal
+      ? {
+        getReferenceTail: async (offeringId: string) =>
+          await phase("percentile_provider", async () => {
+            const source = await tailSource();
+            return source ? await source.getReferenceTail(offeringId) : null;
+          }),
+        referenceTailPins: async () =>
+          await phase("percentile_provider", async () => {
+            const data = (await context.data()) as TailCapable;
+            return typeof data.referenceTailPins === "function"
+              ? await data.referenceTailPins()
+              : null;
+          }),
+      }
+      : {}),
     getCatalog: async () =>
       await phase("catalog_provider", async () => (await context.data()).getCatalog()),
     getExamPack: async (...a) =>
@@ -532,7 +574,7 @@ export class NativeRuntimeApi {
         activeReports: async (...a) =>
           await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
       };
-      const data = runtimeAnalysisDataPort(context, phase);
+      const data = runtimeAnalysisDataPort(context, phase, request.signal);
       const catalogContext = {
         binding: () => context.binding(),
         controls: () => context.controls(),
@@ -618,6 +660,8 @@ export class NativeRuntimeApi {
         mode,
         // No approved revision-bound authority or bounded evidence adapter exists yet.
         null,
+        // Saved reference tails: scope only from the approved registry/selection/head chain.
+        () => referenceCandidateScopePort(context),
       );
       let inputAdmission: PreparedUsageAdmission | undefined;
       let currentPageBudget: RuntimeRequestBudget | undefined;
@@ -703,6 +747,7 @@ export class NativeRuntimeApi {
         clock: this.clock,
         projection: this.projection,
         reports: platform,
+        referenceProjectionAuthority: referenceProjectionAuthorityPort(context),
         authorities,
         resources,
         business,

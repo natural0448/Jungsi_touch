@@ -29,12 +29,16 @@ import {
   NativeRankDistribution,
   type RankBundle,
 } from "../domain/year_equating.ts";
-import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
+import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, type NativeJson } from "../domain/native_json.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { type NativeRuntimeKind, NativeSourceSelection } from "./native_source_selection.ts";
 import { decodeSchoolReferencePayload } from "./school_reference_source.ts";
 import type { SchoolReferenceFunction } from "../application/school_reference_scoring.ts";
+import type {
+  AuthorizedSavedTailBytesPort,
+  AuthorizedSavedTailPin,
+} from "./saved_reference_tail_source.ts";
 function fail(code: string, http = 503): never {
   throw new AccessError(code, http);
 }
@@ -783,6 +787,120 @@ export class NativeDataProvider
     const binding = group.bindings.find((b) => b.offering_pk === offeringId);
     if (!binding) fail("reference_offering_context_mismatch");
     return Object.freeze({ ...group, binding });
+  }
+  private referenceTailKeys?: ReadonlyMap<string, NativeObject | null>;
+  private referenceTailIndex(): ReadonlyMap<string, NativeObject | null> {
+    if (!this.referenceTailKeys) {
+      const index = new Map<string, NativeObject | null>();
+      for (const entry of this.selection.referenceTailMetadata()) {
+        for (const value of object(entry.reference_context).offering_ids as unknown[]) {
+          const id = text(value);
+          index.set(id, index.has(id) ? null : Object.freeze(entry));
+        }
+      }
+      this.referenceTailKeys = index;
+    }
+    return this.referenceTailKeys;
+  }
+  hasReferenceTail(offeringId: string): boolean {
+    return !!this.referenceTailIndex().get(offeringId);
+  }
+  /** Exact selected saved-tail universe for one exam; empty when none is approved. */
+  referenceTailOfferings(academicYear: number, examId: string): readonly string[] {
+    const ids: string[] = [];
+    for (const [id, entry] of this.referenceTailIndex()) {
+      if (entry === null) fail("reference_offering_ambiguous");
+      const c = object(entry.reference_context);
+      if (c.academic_year === academicYear && c.exam_id === examId) ids.push(id);
+    }
+    return Object.freeze(ids.sort());
+  }
+  /** Analysis-cache pin: changes whenever the approved saved-tail selection changes. */
+  async referenceTailPins(): Promise<string | null> {
+    const rows = this.selection.referenceTailMetadata();
+    if (!rows.length) return null;
+    return await nativeJsonSha256({
+      registry: this.selection.registryHash,
+      selection: this.selection.selectionHash,
+      tails: rows.map((e) => [e.key, e.sha256]).sort(),
+    } as NativeObject);
+  }
+  /**
+   * Server authority for saved reference tails. Selection comes only from the approved
+   * registry/selection/head chain of this request; every use rechecks the fresh head.
+   */
+  referenceTailAuthority(): AuthorizedSavedTailBytesPort {
+    const contextOf = (entry: NativeObject): NativeObject => {
+      const c = { ...object(entry.reference_context) };
+      delete c.offering_ids;
+      return c;
+    };
+    return Object.freeze({
+      select: async (offeringId: string): Promise<AuthorizedSavedTailPin | null> => {
+        const entry = this.referenceTailIndex().get(offeringId);
+        if (entry === null) fail("reference_offering_ambiguous");
+        if (entry === undefined) return null;
+        const reference = await this.getReference(offeringId);
+        const context = contextOf(entry);
+        if (!reference) return null;
+        if (
+          reference.binding.rule_version !== context.rule_version ||
+          reference.academicYear !== context.academic_year ||
+          reference.examId !== context.exam_id ||
+          reference.packVersion !== context.source_pack_version ||
+          reference.examType !== context.exam_type ||
+          reference.scoreScaleId !== context.score_scale_id
+        ) fail("reference_tail_context_mismatch");
+        const binding: NativeObject = { offering_id: offeringId };
+        for (const k of [...CONVERSION_CONTEXT_FIELDS, "rule_version"]) {
+          binding[k] = (reference.binding[k] ?? null) as NativeJson;
+        }
+        return {
+          key: text(entry.key),
+          sha256: text(entry.sha256),
+          bytes: Number(entry.bytes),
+          maxBytes: Number(entry.bytes),
+          releaseSha256: this.selection.registryHash,
+          compatibilitySha256: this.selection.selectionHash,
+          binding,
+          context,
+          evidence: cloneNativeJson(object(entry.reference_evidence)),
+        };
+      },
+      read: async (key: string, maximumBytes: number, signal: AbortSignal) => {
+        const bytes = await this.selection.referenceTailBytes(key, signal);
+        if (bytes.length > maximumBytes) fail("storage_artifact_too_large");
+        return bytes;
+      },
+      assertCurrent: async (_pin: AuthorizedSavedTailPin, signal: AbortSignal) => {
+        if (signal.aborted) fail("reference_tail_unavailable");
+        await this.assertCurrentSelection(true);
+        if (signal.aborted) fail("reference_tail_unavailable");
+      },
+      assertCompatible: async (
+        pin: AuthorizedSavedTailPin,
+        identity: Readonly<NativeObject>,
+        signal: AbortSignal,
+      ) => {
+        const c = pin.context;
+        if (
+          identity.offering_id !== pin.binding.offering_id ||
+          [
+            "academic_year",
+            "exam_id",
+            "exam_type",
+            "source_pack_version",
+            "rule_version",
+            "score_scale_id",
+          ].some((k) => identity[k] !== c[k])
+        ) fail("reference_tail_context_mismatch");
+        const pack = await this.getExamPack(text(c.exam_id));
+        if (signal.aborted) fail("reference_tail_unavailable");
+        if (!pack || pack.examId !== c.exam_id || pack.packVersion !== c.source_pack_version) {
+          fail("reference_exam_context_mismatch");
+        }
+      },
+    });
   }
   getPercentile(offeringId: string): Promise<UniversityPercentileRelease | null> {
     return new Promise((resolve) =>

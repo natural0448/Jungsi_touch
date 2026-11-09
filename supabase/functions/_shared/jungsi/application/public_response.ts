@@ -23,7 +23,23 @@ export interface WildcardProjectionAuthority {
     },
   ): boolean;
 }
+/** Separate immutable-writer proof for reference fields on the exact owned report revision.
+ * The caller must recheck head, source, consumer, expiry and revision before and after delivery.
+ * Merely creating this object or matching a hash does not establish authority. */
+export interface ReferenceProjectionAuthority {
+  assertCurrent(signal: AbortSignal): Promise<void>;
+  authorizes(
+    input: {
+      readonly operation: string;
+      readonly tier: "standard" | "paid";
+      readonly root: unknown;
+      readonly kind: "assessment" | "candidates";
+      readonly value: unknown;
+    },
+  ): boolean;
+}
 type ProjectionContext = {
+  readonly referenceAuthority?: ReferenceProjectionAuthority;
   readonly operation: string;
   readonly tier: "standard" | "paid";
   readonly root: unknown;
@@ -206,8 +222,40 @@ export class PublicResponseProjection {
     const node = raw as Row;
     if (value === null) return node.nullable === true ? null : unavailable();
     if (Object.hasOwn(node, "ref")) {
+      if (
+        node.ref === "assessment" && record(value) && Object.hasOwn(value, "reference_percentile")
+      ) {
+        const input: Row = { ...value };
+        let trusted = false;
+        try {
+          trusted = context?.referenceAuthority?.authorizes({
+            operation: context.operation,
+            tier: context.tier,
+            root: context.root,
+            kind: "assessment",
+            value,
+          }) === true;
+        } catch {
+          trusted = false;
+        }
+        if (!trusted) delete input.reference_percentile;
+        return this.walk(this.schemas[node.ref as string], input, context);
+      }
       if (node.ref === "candidates" && record(value)) {
         const input: Row = { ...value };
+        let referenceTrusted = false;
+        try {
+          referenceTrusted = context?.referenceAuthority?.authorizes({
+            operation: context.operation,
+            tier: context.tier,
+            root: context.root,
+            kind: "candidates",
+            value,
+          }) === true;
+        } catch {
+          referenceTrusted = false;
+        }
+        if (!referenceTrusted) delete input.reference_university_groups;
         // Old unknown fields never authorize a new result. Keep legacy cards unchanged.
         delete input.wildcard_selection;
         const privateView = value._wildcard_selection_view;
@@ -300,11 +348,18 @@ export class PublicResponseProjection {
     tier: "standard" | "paid",
     value: unknown,
     authority?: WildcardProjectionAuthority,
+    referenceAuthority?: ReferenceProjectionAuthority,
   ): unknown {
     try {
       const roots = this.operations.get(operation);
       if (!roots || !Object.hasOwn(roots, tier)) unavailable();
-      return this.walk(roots[tier], value, { operation, tier, root: value, authority });
+      return this.walk(roots[tier], value, {
+        operation,
+        tier,
+        root: value,
+        authority,
+        referenceAuthority,
+      });
     } catch {
       unavailable();
     }

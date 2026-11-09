@@ -21,6 +21,32 @@ export interface VerifiedStorageArtifact {
   readonly verifiedSha256: string;
   readonly verifiedBytes: number;
 }
+/** Binder context of a saved reference tail plus the public offerings it may serve. */
+export const REFERENCE_TAIL_CONTEXT_KEYS = [
+  "academic_year",
+  "exam_id",
+  "exam_type",
+  "model_version",
+  "offering_ids",
+  "profile_sha256",
+  "reference_curve_id",
+  "resolved_model_scenario",
+  "rule_version",
+  "score_scale_id",
+  "source_pack_version",
+  "source_scenario_field_present",
+  "source_scenario_value",
+  "weight_encoding",
+].sort().join(",");
+export const REFERENCE_TAIL_EVIDENCE_KEYS = [
+  "binder_sha256",
+  "definition_sha256",
+  "independent_sha256",
+  "shared_proof_sha256",
+  "source_cdf_sha256",
+  "source_csv_sha256",
+].sort().join(",");
+export const REFERENCE_TAIL_MAX_BYTES = 8388608;
 function fail(code: string): never {
   throw new AccessError(code, 503);
 }
@@ -297,10 +323,79 @@ export class SupabaseArtifactClient {
     ) fail("storage_artifact_too_large");
     return key;
   }
-  private async get(path: string, limit: number): Promise<Uint8Array<ArrayBuffer>> {
+  /** Saved reference tails: same reference-only scope, exact binder context and evidence pins. */
+  validateReferenceTail(raw: Readonly<NativeObject>): string {
+    const entry = object(raw), key = this.validateReference(entry);
+    if (
+      entry.kind !== "reference_tail" || entry.status !== "approved_reference" ||
+      entry.approval_scope !== "same_exam_mathematical_reference" ||
+      entry.engine_approved !== false || entry.production_allowed !== false ||
+      typeof entry.source_review_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.source_review_sha256) ||
+      typeof entry.independent_review_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.independent_review_sha256)
+    ) {
+      fail("artifact_not_approved");
+    }
+    if (entry.archive_only !== false) fail("storage_archive_only");
+    const context = object(entry.reference_context), evidence = object(entry.reference_evidence);
+    if (
+      Object.keys(context).sort().join(",") !== REFERENCE_TAIL_CONTEXT_KEYS ||
+      typeof context.academic_year !== "number" || !Number.isSafeInteger(context.academic_year) ||
+      context.academic_year < 2024 || context.academic_year > 2027 ||
+      !["csat", "june_mock", "september_mock"].includes(String(context.exam_type)) ||
+      ["exam_id", "source_pack_version", "rule_version", "score_scale_id"].some((k) =>
+        typeof context[k] !== "string" ||
+        !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(context[k] as string)
+      ) ||
+      ["model_version", "reference_curve_id", "weight_encoding", "resolved_model_scenario"].some(
+        (k) =>
+          typeof context[k] !== "string" || !(context[k] as string).length ||
+          (context[k] as string).length > 256 || hasAsciiControl(context[k] as string),
+      ) ||
+      typeof context.profile_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(context.profile_sha256) ||
+      typeof context.source_scenario_field_present !== "boolean" ||
+      !Array.isArray(context.offering_ids) || context.offering_ids.length < 1 ||
+      context.offering_ids.length > 256 ||
+      context.offering_ids.some((v) =>
+        typeof v !== "string" || v.length < 1 || v.length > 128 || hasAsciiControl(v)
+      ) ||
+      new Set(context.offering_ids).size !== context.offering_ids.length ||
+      Object.keys(evidence).sort().join(",") !== REFERENCE_TAIL_EVIDENCE_KEYS ||
+      Object.values(evidence).some((v) => typeof v !== "string" || !/^[a-f0-9]{64}$/.test(v))
+    ) fail("storage_reference_invalid");
+    if (
+      (entry.bytes as number | bigint) > this.settings.limits.maxArtifactBytes ||
+      (entry.bytes as number | bigint) > REFERENCE_TAIL_MAX_BYTES
+    ) fail("storage_artifact_too_large");
+    return key;
+  }
+  /** Raw pinned bytes for request-local projection binding; SHA is verified by the binder. */
+  async referenceTailBytes(raw: Readonly<NativeObject>, signal?: AbortSignal): Promise<Uint8Array> {
+    const entry = cloneNativeJson(object(raw)), key = this.validateReferenceTail(entry);
+    const bytes = Number(entry.bytes);
+    await this.assertBucket(bytes);
+    if (signal?.aborted) fail("storage_unavailable");
+    const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
+      key.split("/").map(encodeURIComponent).join("/");
+    const content = await this.get(path, bytes, signal);
+    if (content.length !== bytes) fail("storage_size_mismatch");
+    return content;
+  }
+  private async get(
+    path: string,
+    limit: number,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array<ArrayBuffer>> {
     const url = this.origin + "/storage/v1/" + path, controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.settings.limits.requestTimeoutMs);
+    const stop = () => controller.abort();
     try {
+      if (signal) {
+        if (signal.aborted) controller.abort();
+        signal.addEventListener("abort", stop, { once: true });
+      }
       const response = await this.fetcher(url, {
         method: "GET",
         headers: { apikey: this.settings.secretKey, Accept: "application/json" },
@@ -346,9 +441,10 @@ export class SupabaseArtifactClient {
       return content;
     } catch (error) {
       if (error instanceof AccessError) throw error;
-      fail("storage_unavailable");
+      throw new AccessError("storage_unavailable", 503);
     } finally {
       clearTimeout(timer);
+      if (signal) signal.removeEventListener("abort", stop);
     }
   }
   private recentBucket?: { readonly startedMs: number; readonly raw: Promise<Uint8Array> };
@@ -385,6 +481,7 @@ export class SupabaseArtifactClient {
     let maximum = 0;
     for (const entry of entries) {
       if (entry.kind === "reference_conversion") this.validateReferenceCalculation(entry);
+      else if (entry.kind === "reference_tail") this.validateReferenceTail(entry);
       else this.validateSelectedReference(entry);
       maximum = Math.max(maximum, Number(entry.bytes));
     }

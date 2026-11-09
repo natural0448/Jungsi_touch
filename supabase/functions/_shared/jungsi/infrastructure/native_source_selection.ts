@@ -11,6 +11,7 @@ export const NATIVE_RUNTIME_KINDS = [
   "catalog",
   "conversion",
   "reference_conversion",
+  "reference_tail",
   "percentile",
   "estimate_receipt",
   "analysis",
@@ -165,6 +166,7 @@ export class NativeSourceSelection {
       const entry = entries.get(id);
       if (!entry) fail("runtime_dependency_missing");
       if (entry.kind === "reference_conversion") client.validateReferenceCalculation(entry);
+      else if (entry.kind === "reference_tail") client.validateReferenceTail(entry);
       else client.validateSelectedReference(entry);
       if (entry.source_timezone != null && typeof entry.source_timezone !== "string") {
         fail("artifact_time_invalid");
@@ -172,7 +174,9 @@ export class NativeSourceSelection {
       chosen.set(id, entry);
     }
     if (
-      [...chosen.values()].some((e) => e.kind === "reference_conversion") ||
+      [...chosen.values()].some((e) =>
+        e.kind === "reference_conversion" || e.kind === "reference_tail"
+      ) ||
       payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog") ||
       payloadMode === "overall_only" &&
         [...chosen.values()].some((e) =>
@@ -186,7 +190,7 @@ export class NativeSourceSelection {
     const artifacts = new Map<string, SelectedNativeArtifact>();
     for (const [id, entry] of chosen) {
       // Metadata and approval remain complete; reference bodies are selected by trusted PK routing.
-      if (entry.kind === "reference_conversion") continue;
+      if (entry.kind === "reference_conversion" || entry.kind === "reference_tail") continue;
       if (payloadMode === "catalog_only" && entry.kind !== "catalog") continue;
       if (payloadMode === "university_only" && entry.kind === "total_model") continue;
       if (
@@ -257,6 +261,19 @@ export class NativeSourceSelection {
   referenceMetadata(): readonly { key: string; entry: NativeObject }[] {
     return [...this.references.values()].filter((e) => e.kind === "reference_conversion")
       .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
+  }
+  /** Selected saved-tail metadata copies; bodies are read per request by the tail adapter. */
+  referenceTailMetadata(): readonly NativeObject[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_tail")
+      .map((e) => cloneNativeJson(e));
+  }
+  async referenceTailBytes(key: string, signal: AbortSignal): Promise<Uint8Array> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const selected = this.references.get(identity("reference_tail", key));
+    if (!selected) fail("runtime_dependency_missing");
+    return await this.client.referenceTailBytes(selected, signal);
   }
   async loadReference(key: string): Promise<SelectedNativeArtifact | null> {
     if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {

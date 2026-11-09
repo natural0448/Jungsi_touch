@@ -1,5 +1,12 @@
 /** Paid owned-report university and full-catalog candidate workflows. No in-place profile edits. */
 import { AccessError, authorizeReport } from "./access.ts";
+import { referenceCandidateGroups } from "./reference_candidates.ts";
+import {
+  acquireReferenceCandidateScope,
+  type ReferenceCandidateScope,
+  type ReferenceCandidateScopePort,
+} from "./reference_candidate_scope.ts";
+import { ReferencePercentileService, type ReferenceTailPort } from "./reference_percentile.ts";
 import type { ApiBusinessPort, ApiExecution, ApiExecutionBoundary } from "./api_dispatch.ts";
 import { buildWildcardCandidateReview } from "./wildcard_candidate_review.ts";
 import {
@@ -28,7 +35,11 @@ import { JsonFloat, type NativeJson } from "../domain/native_json.ts";
 import { personalAssessment, personalResultComponents } from "./paid_result_components.ts";
 export const UNIVERSITY_ANALYSIS_OPERATIONS = ["university.analyze", "candidates.build"] as const;
 export interface UniversityAnalysisDataPort
-  extends UniversityScoringDataPort, UniversityPercentileDataPort, OfferingAnalysisDataPort {
+  extends
+    UniversityScoringDataPort,
+    UniversityPercentileDataPort,
+    OfferingAnalysisDataPort,
+    ReferenceTailPort {
   /**
    * Optional: whether a production conversion release is selected for the offering. Candidate
    * generation only ranks production results; reference-only offerings always stay pending and
@@ -157,6 +168,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     private readonly forecasts: PublishedForecastPort | null,
     private readonly policyMode: ScoreWorkflowMode = { mode: "rights", workflow: null },
     private readonly wildcardGate: WildcardRuntimeGate | null = null,
+    private readonly referenceCandidateScope:
+      | ReferenceCandidateScopePort
+      | (() => Promise<ReferenceCandidateScopePort | null>)
+      | null = null,
   ) {
     this.scoring = new UniversityScoringService(data);
     this.percentile = new UniversityPercentileService(data);
@@ -221,10 +236,13 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     ) fail();
     if (workflow) await workflow.assertProfile(session, profile);
     const originKeys: string[] = [];
+    let referenceGrant: ReferenceCandidateScope | null = null;
     if (!release) {
       updated.analysis_status = { status: "pending", reason_code: "catalog_release_missing" };
     } else {
       let rows: readonly NativeObject[];
+      let productionRows: readonly NativeObject[] = [];
+      let referenceRows: readonly NativeObject[] = [];
       if (op === "university.analyze") {
         const ids = input.offering_ids;
         if (
@@ -235,19 +253,54 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       } else {
         const overall = updated.overall;
         if (!object(overall) || !object(overall.exam)) fail();
-        rows = await productionCandidateRows(
-          this.data,
-          this.catalog.serviceRows(release).filter((r) =>
-            r.academic_year === (overall.exam as NativeObject).academic_year
-          ),
+        const catalogRows = this.catalog.serviceRows(release).filter((r) =>
+          r.academic_year === (overall.exam as NativeObject).academic_year
         );
+        productionRows = await productionCandidateRows(this.data, catalogRows);
+        rows = productionRows;
+        const scopePort = typeof this.referenceCandidateScope === "function"
+          ? await this.referenceCandidateScope()
+          : this.referenceCandidateScope;
+        if (scopePort) {
+          if (
+            !this.data.getReferenceTail || typeof overall.exam.academic_year !== "number" ||
+            typeof overall.exam.exam_id !== "string" || typeof overall.score_basis !== "string"
+          ) {
+            fail("security_policy_unavailable", 503);
+          }
+          referenceGrant = await acquireReferenceCandidateScope(
+            {
+              subjectId: session.user.subjectId,
+              reportId: record.report_id,
+              reportRevision: record.revision,
+              profileId: profile.profile_id,
+              academicYear: overall.exam.academic_year,
+              examId: overall.exam.exam_id,
+              scoreBasis: overall.score_basis,
+              catalogVersion: release.version,
+            },
+            scopePort,
+            boundary,
+          );
+          const byId = new Map(catalogRows.map((r) => [r.offering_id as string, r]));
+          if (
+            byId.size !== catalogRows.length || !referenceGrant ||
+            referenceGrant.offeringIds.some((id) => !byId.has(id))
+          ) fail("security_policy_unavailable", 503);
+          referenceRows = referenceGrant.offeringIds.map((id) => byId.get(id)!);
+          const included = new Set(productionRows.map((r) => r.offering_id as string));
+          rows = [
+            ...productionRows,
+            ...referenceRows.filter((r) => !included.has(r.offering_id as string)),
+          ];
+        }
       }
       let batch: ReadonlyMap<string, NativeObject | AccessError | null> = new Map(),
         batchError: AccessError | null = null;
       if (this.forecasts) {
         try {
           batch = await this.forecasts.validatedReleases(
-            rows.map((r) => r.offering_id as string),
+            (op === "candidates.build" ? productionRows : rows).map((r) => r.offering_id as string),
             session.user.subjectId,
           );
         } catch (e) {
@@ -256,6 +309,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             : new AccessError("forecast_release_invalid", 503);
         }
       }
+      // The approved saved-tail selection is part of the reusable analysis context.
+      const referenceTailPins = this.data.referenceTailPins
+        ? await this.data.referenceTailPins()
+        : null;
       const context = workflow
         ? await nativeJsonSha256({
           base: await workflow.analysisContext(profile.profile_id),
@@ -264,6 +321,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             [id, value],
           ) => [id, value instanceof AccessError ? { error: value.code } : value]),
           forecast_error: batchError?.code ?? null,
+          ...(referenceTailPins ? { reference_tails: referenceTailPins } : {}),
         })
         : null;
       let wildcardGrant = null;
@@ -311,7 +369,9 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         : context;
       if (!object(updated.operation_contexts)) updated.operation_contexts = {};
       const contexts = updated.operation_contexts as NativeObject;
-      const cached = context !== null && batchError === null &&
+      // Saved-tail selection is pinned in the context above. A reference candidate scope is
+      // request-bound, so its 4-page result is always rebuilt.
+      const cached = !referenceGrant && context !== null && batchError === null &&
         (op === "candidates.build"
           ? contexts.candidates === candidateContext && object(updated.candidates)
           : object(updated.analyses) &&
@@ -341,90 +401,110 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         return reportDto(session, result);
       }
       const results: NativeObject = {};
-      await this.scoring.batch(async () => {
-        for (const offering of rows) {
-          this.fresh(session);
-          const conversion = await this.scoring.calculate(offering, profile),
-            percentile = await this.percentile.calculate(offering, conversion);
-          let assessment: NativeObject;
-          try {
-            const bundle = await this.data.getAnalysis(offering.offering_id as string);
-            assessment = evaluateOffering(
-              offering,
-              profile,
-              updated.overall as NativeObject,
-              bundle,
-              conversion,
-              percentile,
-            );
-          } catch (e) {
-            assessment = evaluateOffering(
-              offering,
-              profile,
-              updated.overall as NativeObject,
-              null,
-              conversion,
-              percentile,
-            );
-            assessment.reason_code = e instanceof AccessError ? e.code : "analysis_release_invalid";
-          }
-          if (this.forecasts) {
+      const referencePercentile = new ReferencePercentileService(this.data);
+      const runScoring = () =>
+        this.scoring.batch(async () => {
+          for (const offering of rows) {
+            this.fresh(session);
+            if (referenceGrant?.signal.aborted) fail("security_policy_unavailable", 503);
+            const conversion = await this.scoring.calculate(offering, profile),
+              percentile = await this.percentile.calculate(offering, conversion);
+            let assessment: NativeObject;
             try {
-              if (batchError) throw batchError;
-              if (!batch.has(offering.offering_id as string)) fail("forecast_release_invalid");
-              const published = batch.get(offering.offering_id as string)!;
-              if (published instanceof AccessError) throw published;
-              if (published !== null) {
-                const evidence = assessment.decision_evidence,
-                  historical = object(evidence) && Array.isArray(evidence.historical_metrics)
-                    ? evidence.historical_metrics
-                    : [];
-                const newer = await this.forecasts.evaluateRelease(
-                  offering,
-                  profile,
-                  conversion,
-                  percentile,
-                  published,
-                  historical,
-                );
-                newer.years = assessment.years;
-                newer.advantage = percentile.state.population_scope === "whole_complete"
-                  ? assessment.advantage ?? null
-                  : null;
-                if (newer.advantage !== null) {
-                  const old = Array.isArray(assessment.recommendation_reasons)
-                    ? assessment.recommendation_reasons
-                    : [];
-                  if (!Array.isArray(newer.recommendation_reasons)) fail();
-                  newer.recommendation_reasons.push(
-                    ...old.filter((r) =>
-                      object(r) &&
-                      [
-                        "converted_score_position_gain",
-                        "converted_score_position_loss",
-                        "converted_score_position_equal",
-                      ].includes(r.code as string)
-                    ),
-                  );
-                }
-                assessment = newer;
-              }
+              const bundle = await this.data.getAnalysis(offering.offering_id as string);
+              assessment = evaluateOffering(
+                offering,
+                profile,
+                updated.overall as NativeObject,
+                bundle,
+                conversion,
+                percentile,
+              );
             } catch (e) {
-              Object.assign(assessment, {
-                status: "pending",
-                category: "pending",
-                reason_code: e instanceof AccessError ? e.code : "forecast_release_invalid",
-              });
+              assessment = evaluateOffering(
+                offering,
+                profile,
+                updated.overall as NativeObject,
+                null,
+                conversion,
+                percentile,
+              );
+              assessment.reason_code = e instanceof AccessError
+                ? e.code
+                : "analysis_release_invalid";
+            }
+            if (
+              this.forecasts && (op !== "candidates.build" || productionRows.includes(offering))
+            ) {
+              try {
+                if (batchError) throw batchError;
+                if (!batch.has(offering.offering_id as string)) fail("forecast_release_invalid");
+                const published = batch.get(offering.offering_id as string)!;
+                if (published instanceof AccessError) throw published;
+                if (published !== null) {
+                  const evidence = assessment.decision_evidence,
+                    historical = object(evidence) && Array.isArray(evidence.historical_metrics)
+                      ? evidence.historical_metrics
+                      : [];
+                  const newer = await this.forecasts.evaluateRelease(
+                    offering,
+                    profile,
+                    conversion,
+                    percentile,
+                    published,
+                    historical,
+                  );
+                  newer.years = assessment.years;
+                  newer.advantage = percentile.state.population_scope === "whole_complete"
+                    ? assessment.advantage ?? null
+                    : null;
+                  if (newer.advantage !== null) {
+                    const old = Array.isArray(assessment.recommendation_reasons)
+                      ? assessment.recommendation_reasons
+                      : [];
+                    if (!Array.isArray(newer.recommendation_reasons)) fail();
+                    newer.recommendation_reasons.push(
+                      ...old.filter((r) =>
+                        object(r) &&
+                        [
+                          "converted_score_position_gain",
+                          "converted_score_position_loss",
+                          "converted_score_position_equal",
+                        ].includes(r.code as string)
+                      ),
+                    );
+                  }
+                  assessment = newer;
+                }
+              } catch (e) {
+                Object.assign(assessment, {
+                  status: "pending",
+                  category: "pending",
+                  reason_code: e instanceof AccessError ? e.code : "forecast_release_invalid",
+                });
+              }
+            }
+            if (
+              this.data.getReferenceTail &&
+              conversion.state.context.reference_status === "reference_calculated"
+            ) {
+              assessment.reference_percentile = await referencePercentile.calculate(
+                offering,
+                conversion,
+                profile,
+                referenceGrant?.signal ?? boundary?.signal,
+              );
+            }
+            const oid = offering.offering_id as string;
+            results[oid] = assessment;
+            if (context !== null) contexts["analysis:" + oid] = context;
+            if (op === "university.analyze" && personalAssessment(assessment)) {
+              originKeys.push("analysis:" + oid);
             }
           }
-          const oid = offering.offering_id as string;
-          results[oid] = assessment;
-          if (context !== null) contexts["analysis:" + oid] = context;
-          if (op === "university.analyze" && personalAssessment(assessment)) {
-            originKeys.push("analysis:" + oid);
-          }
-        }
-      });
+        });
+      if (referenceGrant) await referenceGrant.run(runScoring());
+      else await runScoring();
       if (!object(updated.analyses) || !object(updated.shortlist)) fail();
       Object.assign(updated.analyses, results);
       updated.catalog_version = release.version;
@@ -436,7 +516,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       if (op === "candidates.build") {
         if (wildcardGrant) {
           const review = await buildWildcardCandidateReview(
-            rows,
+            productionRows,
             results,
             release.version,
             wildcardGrant.context,
@@ -456,6 +536,12 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           updated.candidates = candidateGroups(rows, results, release.version);
           if (context !== null) contexts.candidates = context;
         }
+        if (referenceGrant && object(updated.candidates)) {
+          await referenceGrant.assertCurrent();
+          if (referenceGrant.signal.aborted) fail("security_policy_unavailable", 503);
+          updated.candidates.reference_university_groups =
+            referenceCandidateGroups(referenceRows, results).university_groups;
+        }
         if (personalResultComponents({ candidates: updated.candidates }).includes("candidates")) {
           originKeys.push("candidates");
         }
@@ -465,6 +551,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         const assessment = updated.analyses[oid];
         value.assessment_status = object(assessment) ? assessment.status : "pending";
       }
+    }
+    if (referenceGrant) {
+      await referenceGrant.assertCurrent();
+      if (referenceGrant.signal.aborted) fail("security_policy_unavailable", 503);
     }
     const written = await this.repository.writeReport({
       owner: session.user.subjectId,
@@ -486,6 +576,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       key,
       digest,
     });
+    if (referenceGrant) {
+      await referenceGrant.assertCurrent();
+      if (referenceGrant.signal.aborted) fail("security_policy_unavailable", 503);
+    }
     if (
       written.owner_id !== session.user.subjectId || written.report_id !== record.report_id ||
       written.profile_id !== record.profile_id
