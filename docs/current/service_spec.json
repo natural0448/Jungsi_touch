@@ -20899,7 +20899,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "96841feb03db3a3ee5a88de6ceb759910d5f024654809e77b2172b3256169466",
+              "source_sha256": "ff66a6cc211f6e2fbbd7caf5127b3a4baa62166b47ea7a299c4f3ab8bda20163",
               "declared_exports": [
                 "SavedReferenceProjectionPin",
                 "SavedReferenceTailProjection"
@@ -28940,11 +28940,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "e08c24e36134a330c8f65954c1a3e4becbc2ece1484aea2e33ee9ec30c147ef5"
+        "sha256": "3124abfde3ec153606e4d7b1a362eb75c68ab4776b686c641034fa83bbf12b3e"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "8d7e7ea5254c4b9bb912cf9e25ddae3bd3e1fb9161eeceec1f6a9af164c6a3f1"
+        "sha256": "c8428d395a6ac5ebce1971b041b8e0f1d369e89da8225b5214dd907578171de0"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29948,7 +29948,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
-            "sha256": "96841feb03db3a3ee5a88de6ceb759910d5f024654809e77b2172b3256169466"
+            "sha256": "ff66a6cc211f6e2fbbd7caf5127b3a4baa62166b47ea7a299c4f3ab8bda20163"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
@@ -29988,7 +29988,7 @@
           },
           {
             "path": "tests/edge/test_saved_reference_projection.ts",
-            "sha256": "3598b2c3bdd087fdc603b7734c41be170d7751600c7ff4e0a3ff0601fa87c888"
+            "sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19"
           },
           {
             "path": "tests/edge/test_school_reference_provider.ts",
@@ -127166,14 +127166,9 @@
               "importedName": "nativeJsonText",
               "originalName": "nativeJsonText",
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
-            },
-            {
-              "importedName": "parseNativeJson",
-              "originalName": "parseNativeJson",
-              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "96841feb03db3a3ee5a88de6ceb759910d5f024654809e77b2172b3256169466",
+          "source_sha256": "ff66a6cc211f6e2fbbd7caf5127b3a4baa62166b47ea7a299c4f3ab8bda20163",
           "symbols": [
             {
               "declarations": [
@@ -127651,18 +127646,19 @@
                       "value": {
                         "properties": [
                           {
-                            "name": "score",
+                            "name": "num",
                             "tsType": {
-                              "kind": "typeRef",
-                              "repr": "Rational",
-                              "value": {
-                                "resolution": {
-                                  "kind": "import",
-                                  "name": "Rational",
-                                  "specifier": "./exact.ts"
-                                },
-                                "typeName": "Rational"
-                              }
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            }
+                          },
+                          {
+                            "name": "den",
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
                             }
                           },
                           {
@@ -127697,6 +127693,98 @@
                 }
               ],
               "name": "Tail"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(t: Tail)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "t",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Tail",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Tail"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Rational",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "Rational",
+                          "specifier": "./exact.ts"
+                        },
+                        "typeName": "Rational"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "scoreOf"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(a: Tail, b: Tail)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "a",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Tail",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Tail"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "b",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Tail",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "Tail"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "boolean",
+                      "value": "boolean"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "before"
             }
           ]
         },
@@ -213051,7 +213139,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ],
-          "source_sha256": "3598b2c3bdd087fdc603b7734c41be170d7751600c7ff4e0a3ff0601fa87c888",
+          "source_sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19",
           "symbols": [
             {
               "declarations": [
@@ -243748,7 +243836,7 @@
       "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
       "supabase/functions/_shared/jungsi/domain/percentile.ts": "18e7abec5e173758d78d89d70fdc0d5052aa098a04cba99845f4ec4aeedb7a02",
       "supabase/functions/_shared/jungsi/domain/python_json_digest.ts": "c6f4a96dc3dfeacf4a6bcc27a08c520b1cc8bc969fd2f2240f8389e9256b3a3e",
-      "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "96841feb03db3a3ee5a88de6ceb759910d5f024654809e77b2172b3256169466",
+      "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "ff66a6cc211f6e2fbbd7caf5127b3a4baa62166b47ea7a299c4f3ab8bda20163",
       "supabase/functions/_shared/jungsi/domain/score_input_rights.ts": "5ed4cebc7212ad60925b9ab892e3a65fbe88e731fdc977bcc42754cdb8d0aadf",
       "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
       "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
@@ -243873,7 +243961,7 @@
       "tests/edge/test_runtime_context.ts": "bca71e2a48c83360eb131f30f71c1f0d33af6fb9e707f9a060f2c2716c092166",
       "tests/edge/test_runtime_controls.ts": "f01b1fe2c0cc118120942b01917120928a186f7a44d097f8f381d2e3c2e8b62a",
       "tests/edge/test_runtime_settings.ts": "d708a0205b1a9aeedef4130e130aefc0f85515e0d12dd3297cd365f82bd7e005",
-      "tests/edge/test_saved_reference_projection.ts": "3598b2c3bdd087fdc603b7734c41be170d7751600c7ff4e0a3ff0601fa87c888",
+      "tests/edge/test_saved_reference_projection.ts": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19",
       "tests/edge/test_school_reference_provider.ts": "33c0c332c07a52dfa8670caa3d9033956f909487e8fd5697e4fc88a5cdabb6dd",
       "tests/edge/test_school_reference_scoring.ts": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d",
       "tests/edge/test_score_input_policy.ts": "c7f588ab811dc61a822966e92f31840d944f36d853d5a64f22fe1e9634744a21",
@@ -245521,9 +245609,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "845e98d2b738087194efb0441d54f295da09c2303a105db8b552be3339ba3a1f",
+      "bridge_sha256": "3999aa0be6853f7b66afc2b1bc75da9b9a2d6a7db29d76ebd48e6c9dd4fe2df6",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "0293d2770e5a5d122349fbdf985a7dff10c7f28abbeaca4834ebeaa1a12d4090",
+      "graph_manifest_sha256": "ea95ad10a2e93b98e87f4406925dc73e0651ea73f06b14ba1117b8cca951de38",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -249473,7 +249561,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "6e7ef78326f09b49b54730ca6ca4e30a23512a372a5cead997d16e8a921243b9",
+    "manifest_sha256": "55266e1bd44507dc48d1777a4fe625cd29b4aa7e57fd70a8b99e4b0192ac3525",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -249484,7 +249572,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "13f881b71b8f1d39712895be357583b6626d6426a22aefd254d3b6f0f1d1fd4a",
+    "manifest_sha256": "8419eff5880e296a47d9bcfb476176911f6b4e0b6c7d7c8bc6558a3e0355d8ee",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
