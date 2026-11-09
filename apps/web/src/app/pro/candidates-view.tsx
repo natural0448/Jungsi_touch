@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { CATEGORY } from "@/components/offering-parts";
 import { wildcardReasonText } from "@/lib/wildcard-layout";
+import { REFERENCE_GROUPS_TITLE, REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referenceGroups, referencePercentText } from "@/lib/reference-percentile";
 import type { CandidateItemDto, CandidatesDto, ShortlistEntryDto } from "@/lib/dto";
 import type { ProReason } from "@/lib/pro-dto";
 import { tipsByOffering } from "@/lib/pro-tips";
@@ -43,8 +44,14 @@ function Row({ it, picked, fields, tips }: { it: CandidateItemDto; picked: boole
 export function CandidatesView({ c, shortlist, fields, reasons }: { c: CandidatesDto; shortlist: Record<string, ShortlistEntryDto>; fields: Record<string, string> | null; reasons: ProReason[] }) {
   const tips = tipsByOffering(reasons);
   const picked = (id: string) => Boolean(shortlist[id]?.selected);
+  const refs = <ReferenceTables c={c} />;
   if (c.status === "pending" && c.basic_university_groups.length === 0 && c.wildcards.length === 0)
-    return <p className="pro-note">대학 판단 자료가 아직 연결되지 않아 후보를 고르지 못했습니다(사유 코드 {c.reason_code ?? "pending"}). 숫자를 지어내지 않습니다.</p>;
+    return (
+      <>
+        <p className="pro-note">대학 판단 자료가 아직 연결되지 않아 후보를 고르지 못했습니다(사유 코드 {c.reason_code ?? "pending"}). 숫자를 지어내지 않습니다.</p>
+        {refs}
+      </>
+    );
   const head = (
     <thead>
       <tr>
@@ -76,8 +83,45 @@ export function CandidatesView({ c, shortlist, fields, reasons }: { c: Candidate
           </table>
         </div>
       )}
+      {refs}
       {c.pending_offerings.length > 0 && <p className="pro-note">판단 보류 {c.pending_offerings.length}곳 — 자료가 갖춰지면 다시 찾을 때 보입니다.</p>}
       <p className="pro-note">환산점수는 대학마다 만점·반영 방식이 달라 대학끼리 크기를 비교하지 않습니다. 분류는 합격 확률이 아닙니다.</p>
+    </div>
+  );
+}
+
+/** 참고 누백(추정) 묶음 — 순위·판정 아님. 분류·담기 없이 서버 순서 그대로 따로 보인다 */
+function ReferenceTables({ c }: { c: CandidatesDto }) {
+  const groups = referenceGroups(c);
+  if (groups.length === 0) return null;
+  return (
+    <div className="pro-cands">
+      <h3>{REFERENCE_GROUPS_TITLE}</h3>
+      <p className="pro-note">{REFERENCE_PERCENTILE_NOTE}</p>
+      {groups.map((g) => (
+        <div key={g.university_id} className="tblwrap">
+          <h3>{g.university_name}</h3>
+          <table className="tb">
+            <thead>
+              <tr>
+                <th scope="col">모집단위</th>
+                <th scope="col" className="r">{REFERENCE_PERCENTILE_TITLE}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {g.offerings.map(({ offering: o, reference_percentile: p }) => (
+                <tr key={o.offering_id}>
+                  <th scope="row">
+                    {o.department}
+                    <small>{[o.group ? `${o.group}군` : null, o.track, o.campus].filter(Boolean).join(" · ")}</small>
+                  </th>
+                  <td className="r num">상위 {referencePercentText(p)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 }

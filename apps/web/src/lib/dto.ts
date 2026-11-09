@@ -244,6 +244,26 @@ export interface AssessmentDto {
   conversion?: ConversionDto | null;
   percentile?: PercentileDto | null;
   recommendation_reasons?: ReasonDto[] | null;
+  // 참고 누백(추정). 서버는 승인된 곡선의 값만 보내고, 계산이 안 되면 칸을 뺀다
+  reference_percentile?: ReferencePercentileDto | null;
+}
+
+/** 참고 누백(추정) — 9월 모의평가 응시자 전체 기준 추정 위치. 합격 가능성·지원 판정이 아니다 */
+export interface ReferencePercentileDto {
+  status: "reference_estimated";
+  estimated_upper_cumulative_percent_all_examinees: string; // 정확한 소수 문자열, 화면은 소수 첫째 자리
+  metric: string;
+  denominator_kind: string;
+  calculation_review_scope: string;
+  production_allowed: boolean;
+  actual_admission_full_total_approved: boolean;
+}
+
+/** candidates.reference_university_groups — 순위 없는 참고 묶음. basic_university_groups 와 섞지 않는다 */
+export interface ReferenceUniversityGroupDto {
+  university_id: string;
+  university_name: string;
+  offerings: { offering: OfferingDto; reference_percentile: ReferencePercentileDto | null }[];
 }
 
 /** assessment.conversion — 대학 공식 반영식 환산. 판단이 보류여도 성공한 환산은 남는다 */
@@ -352,6 +372,7 @@ export interface CandidatesDto {
   basic_university_groups: { university_id: string; university_name: string; offerings: CandidateItemDto[] }[];
   wildcards: CandidateItemDto[]; // wildcard_selection 이 있으면 서버 순서 그대로, 최대 4장
   wildcard_selection?: WildcardSelectionDto | null;
+  reference_university_groups?: ReferenceUniversityGroupDto[] | null; // 없거나 비면 영역을 숨긴다
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
   ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)

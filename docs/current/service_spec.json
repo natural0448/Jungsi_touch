@@ -219753,6 +219753,14 @@
         "REQ-04"
       ],
       "summary": "화면팀 변경(11-09 부담당자 와일드카드 W1~W6 회신·문구 확정): 4페이지 와일드카드 표시 규칙을 lib/wildcard-layout.ts 하나로 모은다. candidates.wildcard_selection(ready·partial·pending, card_stability)이 있으면 서버 순서 그대로 최대 4장, 앞 3장 펼침 + 4번째는 '한 장 더 보기', partial 은 이유 한 줄과 카드별 '순서 확인 중' 배지, pending 은 이유 문구와 '후보가 없다는 뜻이 아닙니다.'. 없거나 null(지금 운영)이면 옛 방식(환산 유불리 큰 순, 앞 3장, 나머지 펼치기) 그대로. 계열 값 contract·maritime·railway(모서리 계약 C·해양 M·철도 R)와 안내 문구 6계열 기준. W5 임시안 offering.non_csat_conditions(코드 배열) 카드 안내 seafarer_health_exam·railway_driver_aptitude·csat_minimum, 모르는 코드·빈 배열은 숨김(담당자 R18 승인 대기). 전문가용 와일드카드 설명도 같은 기준. 3페이지 참고 점수 카드에서 반영 범위 '수능 반영분' 중복 줄을 뺀다. 서버·자료·판정 변경 없음."
+    },
+    {
+      "date": "2026-11-09",
+      "requirements": [
+        "REQ-03",
+        "REQ-04"
+      ],
+      "summary": "화면팀 변경(11-09 부담당자 참고 누백 36곳 표시 요청, jungsi-api v155): 참고 누백(추정)을 화면에 보인다. 규칙은 lib/reference-percentile.ts 하나 — 문구는 부담당자 확정본('참고 누백(추정)', '상위 16.7%', 꼬리말 '9월 모의평가 기준 대학별 환산점수의 추정 위치입니다. 합격 가능성이나 실제 지원자 중 순위가 아닙니다.', 4페이지 영역 '참고 누백으로 본 대학 (순위·판정 아님)'), 정확한 소수 문자열을 소수 첫째 자리로 문자열 반올림, 칸 없음·reference_estimated 아님·숫자 아님이면 숨김. 3페이지 펼친 카드: 학교 누백이 없을 때만 그 자리에 참고 누백 카드, 상태 줄 '참고 추정'. 4페이지: candidates.reference_university_groups 를 기본 학교 목록과 섞지 않고 아래 별도 영역으로, 서버 순서 그대로·색 신호·분류·담기 없음, 비면 숨김. 전문가용 후보 화면 참고 묶음 표, 인쇄본 담은 학교에 참고 누백 칸(있을 때만)과 꼬리말. 서버·자료·판정 변경 없음."
     }
   ]
 }

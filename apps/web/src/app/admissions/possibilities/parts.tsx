@@ -3,6 +3,7 @@ import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, decisionReason
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto } from "@/lib/dto";
+import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
 import { IssueItem } from "./recruit-parts";
 
@@ -70,9 +71,10 @@ function StatusStrip({ a }: { a: AssessmentDto }) {
   const conv = a.conversion?.status ?? (a.converted_score ? "ready" : "pending");
   const ref = isReferenceScore(a) && !!scoreOf(a);
   const pct = a.percentile?.status ?? (a.converted_percentile ? "ready" : "pending");
+  const refPct = pct !== "ready" && !!referencePercentText(a.reference_percentile);
   const items = [
     { k: "점수 변환", ok: conv === "ready" || ref, label: ref ? "참고 계산" : undefined, why: a.conversion?.reason_code },
-    { k: "대학 안 내 위치", ok: pct === "ready", why: a.percentile?.reason_code },
+    { k: "대학 안 내 위치", ok: pct === "ready" || refPct, label: refPct ? "참고 추정" : undefined, why: a.percentile?.reason_code },
     { k: "지원 판단", ok: a.status === "ready", why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
   ];
   return (
@@ -123,6 +125,20 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
 function PercentileCard({ a }: { a: AssessmentDto }) {
   const p = a.percentile;
   const top = p?.inclusive_top_percent ?? p?.top_percent ?? a.converted_percentile;
+  // 학교 누백이 없을 때만 참고 누백(추정)을 이 자리에 보인다. 신호등·판정 표시는 붙이지 않는다
+  const ref = referencePercentText(a.reference_percentile);
+  if (!(top && p?.status !== "pending") && ref) {
+    return (
+      <section className="card" aria-label={REFERENCE_PERCENTILE_TITLE}>
+        <h3>{REFERENCE_PERCENTILE_TITLE}</h3>
+        <div className="big num">
+          상위 {ref}
+          <small>%</small>
+        </div>
+        <p className="ref-note">{REFERENCE_PERCENTILE_NOTE}</p>
+      </section>
+    );
+  }
   const kind = p?.data_kind ? DATA_KIND[p.data_kind] : null;
   const pop = p?.population_scope ? POPULATION[p.population_scope] : null;
   return (

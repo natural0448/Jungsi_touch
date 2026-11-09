@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { CATEGORY } from "@/components/offering-parts";
+import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { GRADE_RUMOR_NOTE, tipLine, tipsByOffering, tipTitle } from "@/lib/pro-tips";
 import { OverallCard, PositionChart, SubjectsSheet } from "../../../../reports/me/report-view";
 import { PrintButton } from "../../../../reports/me/print/print-button";
@@ -27,7 +28,10 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
   const shortlist = Object.entries(snapshot.report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
   const cands = snapshot.report.candidates;
   const tips = tipsByOffering(state.data.counseling_reasons ?? []);
-  const names = new Map([...(cands?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(cands?.wildcards ?? [])].map((it) => [it.offering.offering_id, it.offering]));
+  const names = new Map([...(cands?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(cands?.wildcards ?? []), ...(cands?.reference_university_groups?.flatMap((g) => g.offerings) ?? [])].map((it) => [it.offering.offering_id, it.offering]));
+  // 담은 학교 중 참고 누백(추정)이 하나라도 있을 때만 칸을 더한다(저장 뒤 승인이 바뀌면 서버가 칸을 뺀다)
+  const refOf = (id: string) => referencePercentText(snapshot.report.analyses?.[id]?.reference_percentile);
+  const showRef = shortlist.some((id) => refOf(id));
   return (
     <>
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 2147483000, pointerEvents: "none", backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" }} />
@@ -53,7 +57,7 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
           <p className="rp-foot">담은 학교가 없습니다.</p>
         ) : (
           <table className="tb">
-            <thead><tr><th scope="col">분류</th><th scope="col">대학·모집단위</th><th scope="col" className="r">환산점수</th><th scope="col" className="r">환산 유불리</th></tr></thead>
+            <thead><tr><th scope="col">분류</th><th scope="col">대학·모집단위</th><th scope="col" className="r">환산점수</th><th scope="col" className="r">환산 유불리</th>{showRef && <th scope="col" className="r">{REFERENCE_PERCENTILE_TITLE}</th>}</tr></thead>
             <tbody>
               {shortlist.map((id) => {
                 const o = names.get(id), x = snapshot.report.analyses?.[id];
@@ -63,12 +67,14 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
                     <th scope="row">{o ? `${o.university_name} ${o.department}` : id}</th>
                     <td className="r num">{x?.converted_score ?? "─"}</td>
                     <td className="r num">{x?.advantage ? `${x.advantage.delta_pp}%p` : "─"}</td>
+                    {showRef && <td className="r num">{refOf(id) ? `상위 ${refOf(id)}%` : "─"}</td>}
                   </tr>
                 );
               })}
             </tbody>
           </table>
         )}
+        {showRef && <p className="rp-foot">{REFERENCE_PERCENTILE_TITLE}: {REFERENCE_PERCENTILE_NOTE}</p>}
         {shortlist.some((id) => tips.has(id)) && (
           <>
             <h2>학교별 상담 메모</h2>

@@ -17,6 +17,8 @@ import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
 import { bestDelta, SchoolCard } from "./school-card";
 import { WildcardDeck } from "./wildcard";
+import { ReferenceGroups } from "./reference-groups";
+import { referenceGroups } from "@/lib/reference-percentile";
 import "./favorable.css";
 
 const route = page("PAGE-04");
@@ -106,6 +108,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   }
   const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
   const wildcards = c?.wildcards ?? [];
+  const refGroups = referenceGroups(c);
   const pendingCount = c?.pending_offerings.length ?? 0;
   const outsideCount = c?.outside_offerings?.length ?? 0;
   const ineligibleCount = c?.ineligible_offerings?.length ?? 0;
@@ -184,6 +187,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
                 ))}
               </div>
             )}
+            {/* 참고 누백 묶음은 순위·판정이 아니라 기본 목록과 섞지 않고 따로 둔다(필터와 무관) */}
+            <ReferenceGroups groups={refGroups} />
             {(outsideCount > 0 || ineligibleCount > 0) && (
               <p className="fv-note">
                 판단이 끝난 모집단위 중 추천 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.

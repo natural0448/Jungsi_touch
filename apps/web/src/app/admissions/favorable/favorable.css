@@ -165,6 +165,21 @@
 /* 좁은 화면에서 와일드카드로 내려가는 띠 */
 .et .wd-teaser{display:none}
 
+/* 참고 누백(추정) 묶음 — 순위·판정 아님, 색 신호 없음 */
+.et .fv-ref{display:grid;gap:10px;margin-top:22px}
+.et .fv-ref-note{margin:0 2px;font-size:13px;color:var(--ink-2);line-height:1.6}
+.et .fv-ref-list{display:grid;gap:12px}
+.et .rf{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 18px}
+.et .rf h3{font-size:16px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
+.et .rf ul{list-style:none;margin:8px 0 0;padding:0}
+.et .rf li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.et .rf li:first-child{border-top:0}
+.et .rf .u{min-width:0;display:flex;flex-direction:column}
+.et .rf .u b{font-size:15px;font-weight:800;color:var(--ink)}
+.et .rf .u small,.et .rf .v small{font-size:12px;color:var(--muted)}
+.et .rf .v{flex:none;display:flex;flex-direction:column;align-items:flex-end}
+.et .rf .v b{font-size:15px;font-weight:900;color:var(--deep);font-variant-numeric:tabular-nums}
+
 @media (max-width:1100px){
   .et .sc-row .adv .bar{display:none}
   .et .sc-row .adv .v{min-width:0}
