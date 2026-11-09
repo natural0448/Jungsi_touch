@@ -17,7 +17,7 @@ import type { ApprovedRuntimeBinding } from "./runtime_settings.ts";
 
 export const REFERENCE_CANDIDATE_MAXIMUM_ROWS = 256;
 export const REFERENCE_CANDIDATE_MAXIMUM_EVIDENCE_BYTES = 65536;
-export const REFERENCE_CANDIDATE_MAXIMUM_RUNTIME_MS = 8000;
+export const REFERENCE_CANDIDATE_MAXIMUM_RUNTIME_MS = 6000;
 
 export interface ReferenceRuntimeContext {
   binding(): Promise<ApprovedRuntimeBinding>;

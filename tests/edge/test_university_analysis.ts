@@ -911,16 +911,19 @@ async function referencePercentileSurvivesOwnedReport() {
     null,
     badScope,
   );
-  await denied(
-    () =>
-      badService.execute(
-        request("candidates.build", { expected_version: 3 }, "SYNTHETIC-bad-scope"),
-        { signal: new AbortController().signal, admission: {} },
-      ),
-    "security_policy_unavailable",
-    503,
+  // A scope outside the catalog never fails 4-page: the official result is kept and the
+  // reference bundle is simply not delivered.
+  await badService.execute(
+    request("candidates.build", { expected_version: 3 }, "SYNTHETIC-bad-scope"),
+    { signal: new AbortController().signal, admission: {} },
   );
-  equal(f.repo.reports.get(RID)!.revision, 3);
+  equal(f.repo.reports.get(RID)!.revision, 4);
+  assert(
+    !Object.hasOwn(
+      f.repo.reports.get(RID)!.body.candidates as NativeObject,
+      "reference_university_groups",
+    ),
+  );
   let verifyCount = 0;
   const revokedScope = {
     ...referenceScope,
@@ -939,16 +942,18 @@ async function referencePercentileSurvivesOwnedReport() {
     null,
     revokedScope,
   );
-  await denied(
-    () =>
-      revokedService.execute(
-        request("candidates.build", { expected_version: 3 }, "SYNTHETIC-revoked-scope"),
-        { signal: new AbortController().signal, admission: {} },
-      ),
-    "security_policy_unavailable",
-    503,
+  // Revoked after scoring: same, the official result is written without the reference bundle.
+  await revokedService.execute(
+    request("candidates.build", { expected_version: 4 }, "SYNTHETIC-revoked-scope"),
+    { signal: new AbortController().signal, admission: {} },
   );
-  equal(f.repo.reports.get(RID)!.revision, 3);
+  equal(f.repo.reports.get(RID)!.revision, 5);
+  assert(
+    !Object.hasOwn(
+      f.repo.reports.get(RID)!.body.candidates as NativeObject,
+      "reference_university_groups",
+    ),
+  );
   (assessment.reference_percentile as NativeObject).production_allowed = true;
   let rejected = false;
   try {

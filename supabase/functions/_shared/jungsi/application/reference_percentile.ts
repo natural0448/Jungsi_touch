@@ -5,6 +5,7 @@ import { type SchoolScoreInputs, schoolScoreInputs } from "./school_score_inputs
 import { SchoolReferenceScoringService } from "./school_reference_scoring.ts";
 import {
   CONVERSION_CONTEXT_FIELDS,
+  referenceCalculationOf,
   ScoringResult,
   type UniversityScoringDataPort,
 } from "./university_scoring.ts";
@@ -82,7 +83,11 @@ export class ReferencePercentileService {
       ) return pending("reference_tail_context_mismatch");
       await selected.assertCurrent(signal);
       const inputKey = nativeJsonText([profile.profile_id, profile.scores], true);
-      let input = this.inputs.get(inputKey);
+      // Reuse the exact reference calculation of this same conversion object when it was
+      // made from these exact scores; otherwise recompute and cross-check as before.
+      const prior = referenceCalculationOf(conversion);
+      const reused = prior !== null && prior.scoresKey === inputKey ? prior : null;
+      let input = reused?.input ?? this.inputs.get(inputKey);
       if (!input) {
         const pack = await this.source.getExamPack(s.exam_id);
         if (
@@ -102,9 +107,10 @@ export class ReferencePercentileService {
         }
         this.inputs.set(inputKey, input);
       }
-      const reference = await new SchoolReferenceScoringService({
-        getReference: (id) => this.source.getReference!(id),
-      }).calculate(offering, input);
+      const reference = reused?.reference ??
+        await new SchoolReferenceScoringService({
+          getReference: (id) => this.source.getReference!(id),
+        }).calculate(offering, input);
       if (
         reference.status !== "reference_calculated" ||
         !(reference.exactScore instanceof Rational) ||

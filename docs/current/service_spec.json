@@ -20187,7 +20187,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
+              "source_sha256": "f4e2e605e9a7ffc89a482c0f68b40021ec81a372444a8cdc17c6dc37fa00a100",
               "declared_exports": [
                 "ReferencePercentileService",
                 "ReferenceTailPort",
@@ -20461,7 +20461,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
+              "source_sha256": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668",
               "declared_exports": [
                 "PublishedForecastPort",
                 "UNIVERSITY_ANALYSIS_OPERATIONS",
@@ -20514,7 +20514,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
+              "source_sha256": "a1b8852d41a4333ef9f7e655419ab2fd6e15fbb6fdaf143a81380cf8a081cb6a",
               "declared_exports": [
                 "CONVERSION_CONTEXT_FIELDS",
                 "ScoringResult",
@@ -21741,7 +21741,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "7e5a8723673b3eae87d6bec9f55c9364f18e1bd3ebe4c4f0f16b737963d0d644",
+              "source_sha256": "e4839227d2f613ded58d5443f344ccd81083e8b4b06c48dccd4a64122bbe03ba",
               "declared_exports": [
                 "REFERENCE_CANDIDATE_MAXIMUM_EVIDENCE_BYTES",
                 "REFERENCE_CANDIDATE_MAXIMUM_ROWS",
@@ -28940,11 +28940,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "2ccd7e24cee9525a6b06df96e050579ebd2de7415083cc6f6f5581e032e1fc02"
+        "sha256": "f651713c701514029fd24442fd317589a4378fb97c263fb45a0fad1c9cc8fb5d"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "6a5ddf1424636aef2be9476fe7d11e6855004dafc6323dc708092550e61a639a"
+        "sha256": "4387e4c714d7a5b68a0600207f07c62dc9101f1757edb2b676138ff0dccef4bf"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29936,11 +29936,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9"
+            "sha256": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
-            "sha256": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249"
+            "sha256": "a1b8852d41a4333ef9f7e655419ab2fd6e15fbb6fdaf143a81380cf8a081cb6a"
           },
           {
             "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
@@ -30000,7 +30000,7 @@
           },
           {
             "path": "tests/edge/test_university_analysis.ts",
-            "sha256": "ca0da2c20760c8a37caea8f11f636b89c8380f44a3d9cb6c87218516e7ca23f1"
+            "sha256": "e2827af28cd9c6e364a7b5d878615a001932377f284dc05abddb032dc0464fe5"
           }
         ],
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
@@ -111463,7 +111463,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
+          "source_sha256": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668",
           "symbols": [
             {
               "declarations": [
@@ -114338,6 +114338,11 @@
               "src": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts"
             },
             {
+              "importedName": "SchoolReferenceResult",
+              "originalName": "SchoolReferenceResult",
+              "src": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts"
+            },
+            {
               "importedName": "SchoolReferenceScoringPort",
               "originalName": "SchoolReferenceScoringPort",
               "src": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts"
@@ -114393,7 +114398,7 @@
               "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
             }
           ],
-          "source_sha256": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
+          "source_sha256": "a1b8852d41a4333ef9f7e655419ab2fd6e15fbb6fdaf143a81380cf8a081cb6a",
           "symbols": [
             {
               "declarations": [
@@ -115212,6 +115217,100 @@
                 {
                   "declarationKind": "export",
                   "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  result: ScoringResult,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "result",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ScoringResult",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoringResult"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "properties": [
+                                    {
+                                      "name": "reference",
+                                      "tsType": {
+                                        "kind": "typeRef",
+                                        "repr": "SchoolReferenceResult",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "SchoolReferenceResult",
+                                            "specifier": "./school_reference_scoring.ts"
+                                          },
+                                          "typeName": "SchoolReferenceResult"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "name": "input",
+                                      "tsType": {
+                                        "kind": "typeRef",
+                                        "repr": "SchoolScoreInputs",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "SchoolScoreInputs",
+                                            "specifier": "./school_score_inputs.ts"
+                                          },
+                                          "typeName": "SchoolScoreInputs"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "name": "scoresKey",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "referenceCalculationOf"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
                     "constructors": [
                       {
                         "hasBody": true,
@@ -115871,6 +115970,91 @@
                 }
               ],
               "name": "freeze"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "WeakMap",
+                      "value": {
+                        "typeName": "WeakMap",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "ScoringResult",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ScoringResult"
+                            }
+                          },
+                          {
+                            "kind": "typeRef",
+                            "repr": "Readonly",
+                            "value": {
+                              "typeName": "Readonly",
+                              "typeParams": [
+                                {
+                                  "kind": "typeLiteral",
+                                  "value": {
+                                    "properties": [
+                                      {
+                                        "name": "reference",
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "SchoolReferenceResult",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "SchoolReferenceResult",
+                                              "specifier": "./school_reference_scoring.ts"
+                                            },
+                                            "typeName": "SchoolReferenceResult"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "name": "input",
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "SchoolScoreInputs",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "SchoolScoreInputs",
+                                              "specifier": "./school_score_inputs.ts"
+                                            },
+                                            "typeName": "SchoolScoreInputs"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "name": "scoresKey",
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "REFERENCE_CALCULATIONS"
             }
           ]
         },
@@ -217604,7 +217788,7 @@
               "src": "tests/edge/synthetic_offering_analysis.ts"
             }
           ],
-          "source_sha256": "ca0da2c20760c8a37caea8f11f636b89c8380f44a3d9cb6c87218516e7ca23f1",
+          "source_sha256": "e2827af28cd9c6e364a7b5d878615a001932377f284dc05abddb032dc0464fe5",
           "symbols": [
             {
               "declarations": [
@@ -240838,6 +241022,11 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             },
             {
+              "importedName": "referenceCalculationOf",
+              "originalName": "referenceCalculationOf",
+              "src": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+            },
+            {
               "importedName": "schoolScoreInputs",
               "originalName": "schoolScoreInputs",
               "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
@@ -240851,7 +241040,7 @@
               "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
             }
           ],
-          "source_sha256": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
+          "source_sha256": "f4e2e605e9a7ffc89a482c0f68b40021ec81a372444a8cdc17c6dc37fa00a100",
           "symbols": [
             {
               "declarations": [
@@ -241515,7 +241704,7 @@
               "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
             }
           ],
-          "source_sha256": "7e5a8723673b3eae87d6bec9f55c9364f18e1bd3ebe4c4f0f16b737963d0d644",
+          "source_sha256": "e4839227d2f613ded58d5443f344ccd81083e8b4b06c48dccd4a64122bbe03ba",
           "symbols": [
             {
               "declarations": [
@@ -241565,10 +241754,10 @@
                     "kind": "const",
                     "tsType": {
                       "kind": "literal",
-                      "repr": "8000",
+                      "repr": "6000",
                       "value": {
                         "kind": "number",
-                        "number": 8000.0
+                        "number": 6000.0
                       }
                     }
                   },
@@ -243144,7 +243333,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ],
-          "source_sha256": "ca409af83be2d12828b85a0384e06d98b8fe168b65cd6eb0b2d74c32951a2a49",
+          "source_sha256": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
           "symbols": [
             {
               "declarations": [
@@ -243879,9 +244068,9 @@
       "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
       "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
       "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
+      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668",
       "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
-      "supabase/functions/_shared/jungsi/application/university_scoring.ts": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
+      "supabase/functions/_shared/jungsi/application/university_scoring.ts": "a1b8852d41a4333ef9f7e655419ab2fd6e15fbb6fdaf143a81380cf8a081cb6a",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
       "supabase/functions/_shared/jungsi/application/usage_service.ts": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
       "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts": "5cc27e4ef6310cb1d36c74c6c8cb286aa4ec69944d511717acb5a287deaf8d6e",
@@ -244032,7 +244221,7 @@
       "tests/edge/test_sql_values.ts": "85c8f851e0389572ddf658c42d488c6c2a9d81d675df5f4f7e8949bf583080bd",
       "tests/edge/test_supabase_api_ingress.ts": "94e3f05ffa572daa35519dc722a22199e73441df5da3524fa7de19e4979e7fb7",
       "tests/edge/test_supabase_artifacts.ts": "40ec1f7b7de0821ff85ee6f5abe96ddb451d48c36d265810ebfe8e9c99a93b7c",
-      "tests/edge/test_university_analysis.ts": "ca0da2c20760c8a37caea8f11f636b89c8380f44a3d9cb6c87218516e7ca23f1",
+      "tests/edge/test_university_analysis.ts": "e2827af28cd9c6e364a7b5d878615a001932377f284dc05abddb032dc0464fe5",
       "tests/edge/test_university_distribution.ts": "c7eae343237e52e4233dcf95a89eb09d7e86e9a8d1ffd91ea39e6e4ed389b917",
       "tests/edge/test_university_percentile.ts": "ae18a54fa515c95eb6f4d23ccb3404f053e7571d1ef1238aa5be514a5960e13f",
       "tests/edge/test_university_scoring.ts": "b33300e33ec78aaaa6ee3babc1486eca3d78bdc7bfd42fbeebd596069b860068",
@@ -244061,12 +244250,12 @@
       "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00",
       "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts": "5efcdbcd9cf825b51b41dc74ae84703b9061383d141e09d0ee1ca45940d37586",
       "supabase/functions/_shared/jungsi/application/reference_candidates.ts": "b033073a8cf4b9adf440ba575724854226daddd6c40d64d5dae371bf2ce90702",
-      "supabase/functions/_shared/jungsi/application/reference_percentile.ts": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
-      "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "7e5a8723673b3eae87d6bec9f55c9364f18e1bd3ebe4c4f0f16b737963d0d644",
+      "supabase/functions/_shared/jungsi/application/reference_percentile.ts": "f4e2e605e9a7ffc89a482c0f68b40021ec81a372444a8cdc17c6dc37fa00a100",
+      "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "e4839227d2f613ded58d5443f344ccd81083e8b4b06c48dccd4a64122bbe03ba",
       "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "e4cd0765083c1e64aba95a81e7a78e6b0c9af9394170a9e53fd03fbb6901f183",
       "tests/edge/reference_candidate_scope_cases.ts": "2d26c10d4c3914a0327c998d5241ccd325b81215089925b63be1e970cbfb21c8",
       "tests/edge/reference_candidates_cases.ts": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8",
-      "tests/edge/reference_percentile_cases.ts": "ca409af83be2d12828b85a0384e06d98b8fe168b65cd6eb0b2d74c32951a2a49",
+      "tests/edge/reference_percentile_cases.ts": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
       "tests/edge/saved_reference_tail_source_cases.ts": "67c11ccb8ea943af7450caf7eb404365ae0feae9508f43db58f0c8998ca46fb6"
     },
     "migration_evidence": {
@@ -245670,9 +245859,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "b9bf2f61c48dae745f9c23cfcedd51d0c3f9e0b606ba563352e7665de9971564",
+      "bridge_sha256": "32018258c59ad19714319387dfdd73f6073d6d814b97c45e1129771c033c558d",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "efc6c2de644e2476d096a794c4255a9337a1bc4d3d0519fa7602c504d387ccba",
+      "graph_manifest_sha256": "96c1c2076e4494d194a0f0c03e65fc9a83b59fbd30c9bcef86725a4e388daf76",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -249622,7 +249811,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "ee4cf02c61525750bd6600d30043fd6eb2ffa3116c4f1692073d19d02775b95e",
+    "manifest_sha256": "9849e30d781b0a840f0b9dad0443aa01a80629a0736c82da0f3c8f9dfffae8c7",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -249633,7 +249822,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "9efaa070149a207e5d33df9160d66222ae603bca1ba798232783eb22c88e2e56",
+    "manifest_sha256": "612f42733b3bbf1b626de06cce9061cddd816291fc016963a028d83a6c34cd64",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

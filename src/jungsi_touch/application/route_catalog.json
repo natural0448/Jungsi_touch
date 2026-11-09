@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "1a4f637e633f300ac9062bcdac0beaf723ce311918146eb102933e005dea2baa",
+  "source_sha256": "6ad0542ad1e800782048f83de8e1f0f41d6b0e671b0a3f6bbcef6fd7ef6bd43f",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3900,11 +3900,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "2ccd7e24cee9525a6b06df96e050579ebd2de7415083cc6f6f5581e032e1fc02"
+        "sha256": "f651713c701514029fd24442fd317589a4378fb97c263fb45a0fad1c9cc8fb5d"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "6a5ddf1424636aef2be9476fe7d11e6855004dafc6323dc708092550e61a639a"
+        "sha256": "4387e4c714d7a5b68a0600207f07c62dc9101f1757edb2b676138ff0dccef4bf"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4547,11 +4547,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9"
+            "sha256": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
-            "sha256": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249"
+            "sha256": "a1b8852d41a4333ef9f7e655419ab2fd6e15fbb6fdaf143a81380cf8a081cb6a"
           },
           {
             "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
@@ -4611,7 +4611,7 @@
           },
           {
             "path": "tests/edge/test_university_analysis.ts",
-            "sha256": "ca0da2c20760c8a37caea8f11f636b89c8380f44a3d9cb6c87218516e7ca23f1"
+            "sha256": "e2827af28cd9c6e364a7b5d878615a001932377f284dc05abddb032dc0464fe5"
           }
         ],
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",

@@ -7,6 +7,7 @@ import { type NativeExamAnalysis, NativeExamPack } from "../domain/exam_pack.ts"
 import { type SchoolScoreInputs, schoolScoreInputs } from "./school_score_inputs.ts";
 import {
   type SchoolReferenceFunction,
+  type SchoolReferenceResult,
   type SchoolReferenceScoringPort,
   SchoolReferenceScoringService,
 } from "./school_reference_scoring.ts";
@@ -86,6 +87,18 @@ export interface ScoringState {
   readonly context: Readonly<NativeObject>;
   readonly required_input_fields: readonly string[];
   readonly explanations: readonly NativeObject[];
+}
+const REFERENCE_CALCULATIONS = new WeakMap<
+  ScoringResult,
+  Readonly<{ reference: SchoolReferenceResult; input: SchoolScoreInputs; scoresKey: string }>
+>();
+/** The exact reference calculation that produced this result object, if any. */
+export function referenceCalculationOf(
+  result: ScoringResult,
+):
+  | Readonly<{ reference: SchoolReferenceResult; input: SchoolScoreInputs; scoresKey: string }>
+  | null {
+  return REFERENCE_CALCULATIONS.get(result) ?? null;
 }
 export class ScoringResult {
   readonly state: Readonly<ScoringState>;
@@ -234,7 +247,7 @@ export class UniversityScoringService {
         const input = facts.input;
         const reference = await this.reference.calculate(offering, input);
         if (reference.reasonCode === "reference_conversion_missing") return result;
-        return result.with({
+        const referenced = result.with({
           reason_code: reference.reasonCode,
           converted_score: reference.convertedScore,
           // A reference calculation never becomes a production-ready ScoringResult.
@@ -252,6 +265,17 @@ export class UniversityScoringService {
             calculation_review_scope: "same_exam_mathematical_reference",
           },
         });
+        // Same request: the reference-percentile step reuses this exact result instead of
+        // recomputing it (identity-keyed, never serialized or shared across requests).
+        REFERENCE_CALCULATIONS.set(
+          referenced,
+          Object.freeze({
+            reference,
+            input,
+            scoresKey: nativeJsonText([profile.profile_id, scores], true),
+          }),
+        );
+        return referenced;
       }
       check(loaded !== null && typeof loaded === "object", "conversion_release_missing");
       const bundle = {

@@ -67222,6 +67222,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "referenceCalculationOf",
+            "originalName": "referenceCalculationOf",
+            "src": "supabase/functions/_shared/jungsi/application/university_scoring.ts"
+          },
+          {
             "importedName": "schoolScoreInputs",
             "originalName": "schoolScoreInputs",
             "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
@@ -67235,7 +67240,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
+        "source_sha256": "f4e2e605e9a7ffc89a482c0f68b40021ec81a372444a8cdc17c6dc37fa00a100",
         "symbols": [
           {
             "declarations": [
@@ -77577,7 +77582,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
+        "source_sha256": "91309976df9a218f5fe837760fe8596ea643169cff3c612833caf4000fc02668",
         "symbols": [
           {
             "declarations": [
@@ -80452,6 +80457,11 @@
             "src": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts"
           },
           {
+            "importedName": "SchoolReferenceResult",
+            "originalName": "SchoolReferenceResult",
+            "src": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts"
+          },
+          {
             "importedName": "SchoolReferenceScoringPort",
             "originalName": "SchoolReferenceScoringPort",
             "src": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts"
@@ -80507,7 +80517,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
+        "source_sha256": "a1b8852d41a4333ef9f7e655419ab2fd6e15fbb6fdaf143a81380cf8a081cb6a",
         "symbols": [
           {
             "declarations": [
@@ -81326,6 +81336,100 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  result: ScoringResult,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "result",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ScoringResult",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "ScoringResult"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "reference",
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "SchoolReferenceResult",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "SchoolReferenceResult",
+                                          "specifier": "./school_reference_scoring.ts"
+                                        },
+                                        "typeName": "SchoolReferenceResult"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "input",
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "SchoolScoreInputs",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "SchoolScoreInputs",
+                                          "specifier": "./school_score_inputs.ts"
+                                        },
+                                        "typeName": "SchoolScoreInputs"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "scoresKey",
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "referenceCalculationOf"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "constructors": [
                     {
                       "hasBody": true,
@@ -81985,6 +82089,91 @@
               }
             ],
             "name": "freeze"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "WeakMap",
+                    "value": {
+                      "typeName": "WeakMap",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "ScoringResult",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ScoringResult"
+                          }
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "properties": [
+                                    {
+                                      "name": "reference",
+                                      "tsType": {
+                                        "kind": "typeRef",
+                                        "repr": "SchoolReferenceResult",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "SchoolReferenceResult",
+                                            "specifier": "./school_reference_scoring.ts"
+                                          },
+                                          "typeName": "SchoolReferenceResult"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "name": "input",
+                                      "tsType": {
+                                        "kind": "typeRef",
+                                        "repr": "SchoolScoreInputs",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "SchoolScoreInputs",
+                                            "specifier": "./school_score_inputs.ts"
+                                          },
+                                          "typeName": "SchoolScoreInputs"
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "name": "scoresKey",
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "REFERENCE_CALCULATIONS"
           }
         ]
       },
@@ -130437,7 +130626,7 @@
             "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
           }
         ],
-        "source_sha256": "7e5a8723673b3eae87d6bec9f55c9364f18e1bd3ebe4c4f0f16b737963d0d644",
+        "source_sha256": "e4839227d2f613ded58d5443f344ccd81083e8b4b06c48dccd4a64122bbe03ba",
         "symbols": [
           {
             "declarations": [
@@ -130487,10 +130676,10 @@
                   "kind": "const",
                   "tsType": {
                     "kind": "literal",
-                    "repr": "8000",
+                    "repr": "6000",
                     "value": {
                       "kind": "number",
-                      "number": 8000.0
+                      "number": 6000.0
                     }
                   }
                 },
@@ -153953,7 +154142,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "ca409af83be2d12828b85a0384e06d98b8fe168b65cd6eb0b2d74c32951a2a49",
+        "source_sha256": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
         "symbols": [
           {
             "declarations": [
@@ -187828,7 +188017,7 @@
             "src": "tests/edge/synthetic_offering_analysis.ts"
           }
         ],
-        "source_sha256": "ca0da2c20760c8a37caea8f11f636b89c8380f44a3d9cb6c87218516e7ca23f1",
+        "source_sha256": "e2827af28cd9c6e364a7b5d878615a001932377f284dc05abddb032dc0464fe5",
         "symbols": [
           {
             "declarations": [

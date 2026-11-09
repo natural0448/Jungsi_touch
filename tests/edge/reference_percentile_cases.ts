@@ -306,7 +306,8 @@ Deno.test("reference inputs are prepared once within a request and selections ar
       "reference_estimated",
     );
   }
-  equal(reads, 1);
+  // The scoring step's exact reference result is reused, so the pack is read at most once.
+  assert(reads <= 1);
   equal(checks, 4);
 });
 Deno.test("public offering ID does not assume the physical source PK has the same representation", async () => {

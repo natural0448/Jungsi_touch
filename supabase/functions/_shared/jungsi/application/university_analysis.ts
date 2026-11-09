@@ -268,6 +268,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           ) {
             fail("security_policy_unavailable", 503);
           }
+          // The reference bundle is best effort: an unavailable scope never fails 4-page.
           referenceGrant = await acquireReferenceCandidateScope(
             {
               subjectId: session.user.subjectId,
@@ -281,18 +282,22 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             },
             scopePort,
             boundary,
-          );
+          ).catch(() => null);
           const byId = new Map(catalogRows.map((r) => [r.offering_id as string, r]));
           if (
-            byId.size !== catalogRows.length || !referenceGrant ||
+            !referenceGrant || byId.size !== catalogRows.length ||
             referenceGrant.offeringIds.some((id) => !byId.has(id))
-          ) fail("security_policy_unavailable", 503);
-          referenceRows = referenceGrant.offeringIds.map((id) => byId.get(id)!);
-          const included = new Set(productionRows.map((r) => r.offering_id as string));
-          rows = [
-            ...productionRows,
-            ...referenceRows.filter((r) => !included.has(r.offering_id as string)),
-          ];
+          ) {
+            referenceGrant = null;
+          } else {
+            referenceRows = referenceGrant.offeringIds.map((id) => byId.get(id)!);
+            const included = new Set(productionRows.map((r) => r.offering_id as string));
+            // Official candidates first; reference-only rows after them.
+            rows = [
+              ...productionRows,
+              ...referenceRows.filter((r) => !included.has(r.offering_id as string)),
+            ];
+          }
         }
       }
       let batch: ReadonlyMap<string, NativeObject | AccessError | null> = new Map(),
@@ -401,6 +406,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         return reportDto(session, result);
       }
       const results: NativeObject = {};
+      let referenceStopped = false;
       const referencePercentile = new ReferencePercentileService(this.data);
       const runScoring = () =>
         this.scoring.batch(async () => {
@@ -411,7 +417,15 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           }
           for (const offering of rows) {
             this.fresh(session);
-            if (referenceGrant?.signal.aborted) fail("security_policy_unavailable", 503);
+            // Out of reference time or revoked: stop starting reference-only rows and keep
+            // the official result. Official rows are always processed first.
+            if (
+              referenceGrant?.signal.aborted && op === "candidates.build" &&
+              !productionRows.includes(offering)
+            ) {
+              referenceStopped = true;
+              break;
+            }
             const conversion = await this.scoring.calculate(offering, profile),
               percentile = await this.percentile.calculate(offering, conversion);
             let assessment: NativeObject;
@@ -508,8 +522,19 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             }
           }
         });
-      if (referenceGrant) await referenceGrant.run(runScoring());
-      else await runScoring();
+      await runScoring();
+      if (referenceGrant) {
+        // Deliver the reference bundle only when complete, in time and still approved.
+        let usable = !referenceStopped && !referenceGrant.signal.aborted;
+        if (usable) {
+          try {
+            await referenceGrant.assertCurrent();
+          } catch {
+            usable = false;
+          }
+        }
+        if (!usable || referenceGrant.signal.aborted) referenceGrant = null;
+      }
       if (!object(updated.analyses) || !object(updated.shortlist)) fail();
       Object.assign(updated.analyses, results);
       updated.catalog_version = release.version;
@@ -542,8 +567,6 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           if (context !== null) contexts.candidates = context;
         }
         if (referenceGrant && object(updated.candidates)) {
-          await referenceGrant.assertCurrent();
-          if (referenceGrant.signal.aborted) fail("security_policy_unavailable", 503);
           updated.candidates.reference_university_groups =
             referenceCandidateGroups(referenceRows, results).university_groups;
         }
@@ -556,10 +579,6 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         const assessment = updated.analyses[oid];
         value.assessment_status = object(assessment) ? assessment.status : "pending";
       }
-    }
-    if (referenceGrant) {
-      await referenceGrant.assertCurrent();
-      if (referenceGrant.signal.aborted) fail("security_policy_unavailable", 503);
     }
     const written = await this.repository.writeReport({
       owner: session.user.subjectId,
@@ -581,10 +600,6 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       key,
       digest,
     });
-    if (referenceGrant) {
-      await referenceGrant.assertCurrent();
-      if (referenceGrant.signal.aborted) fail("security_policy_unavailable", 503);
-    }
     if (
       written.owner_id !== session.user.subjectId || written.report_id !== record.report_id ||
       written.profile_id !== record.profile_id
