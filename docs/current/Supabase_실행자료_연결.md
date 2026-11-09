@@ -1,6 +1,6 @@
 # Supabase 실행 자료 연결과 운영 준비
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.153이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.158이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 명시 Supabase 보안 앱 구성·공급자별 설정·선택 실행 자료의 사전 검수·최소 readiness 연결과 배포 준비. 원자료·정제 정본과 실행 발행본을 구분한다.
 
@@ -105,4 +105,4 @@ develop 인수 493232832d663d7fea7b0fbb350de15055cd9ccf · 통합 훅 799 · htt
 
 
 
-<!-- jungsi:generated spec_sha256=0301b61b2e2911c5b7556e0bc5db915a3b4337e043290e23c33ae4b251b8820d -->
+<!-- jungsi:generated spec_sha256=12ccaafa344e624a44e2d56afef38db86096f109255d552823ad076497a8a5ac -->

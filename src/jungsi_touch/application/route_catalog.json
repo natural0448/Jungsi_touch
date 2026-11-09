@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.153",
-  "source_sha256": "0301b61b2e2911c5b7556e0bc5db915a3b4337e043290e23c33ae4b251b8820d",
+  "spec_version": "1.9.158",
+  "source_sha256": "12ccaafa344e624a44e2d56afef38db86096f109255d552823ad076497a8a5ac",
   "pages": [
     {
       "id": "PAGE-01",
@@ -5092,7 +5092,8 @@
       "기존 research/reviewed/source_verified/internal_review_only 자료를 구조 검사나 저장 형식 검증만으로 approved로 바꾸지 않는다. 실제 자료 부족과 코드 구현 완료는 별도로 기록한다.",
       "사용자 제공 공식 주변분포·기존 참고곡선/표본을 이용한 자체 추정 공동분포와 환산곡선 제작을 이어간다. 보정·holdout·민감도와 검증 범위를 갖춘 estimated_weights로 발행하며 추정 가중치를 실제 전국 도수라고 표시하지 않는다.",
       "기본 전체 집단 외에는 신규 봉투의 승인된 comparison_population만 허용한다. 실제 규칙 필수 입력·학년도/시험/pack/rule/curve/population/검증 영수증 버전을 결속하고 오류 시 누백만 pending이다. 레거시 보정 성공은 기존 전체 집단 계약을 유지한다.",
-      "기본 전체/레거시는 whole_complete를 유지한다. required_rule_inputs_present는 비교집단 계약·별도 고정 영수증을 함께 검증한 새 독립 릴리스만 허용한다. 모집단이 다른 총점/학교 누백의 advantage는 기존 동일 모집단 검사에 따라 보류한다."
+      "기본 전체/레거시는 whole_complete를 유지한다. required_rule_inputs_present는 비교집단 계약·별도 고정 영수증을 함께 검증한 새 독립 릴리스만 허용한다. 모집단이 다른 총점/학교 누백의 advantage는 기존 동일 모집단 검사에 따라 보류한다.",
+      "참고 환산·참고 누백은 시험/학년도·모형·산식/버전·점수축·모집행 기본 PK·동점·분모 및 자료판을 함께 검증한다. 과거 입결 기준값, 학생별 참고 누백과 정식 지원 판정은 다른 값이다."
     ],
     "provider_contract": {
       "port": "PlatformDataProvider.get_percentile(offering_id) → UniversityPercentileRelease | None; 애플리케이션 소유 포트이며 get_conversion/get_analysis와 독립한다.",
@@ -5139,7 +5140,10 @@
       "scoped_transition_classifier": "이행 계약/구현 미확인: 서버 전용 범위 분류기는 승인된 학년도·시험·자료판·정확 모집행·규칙/조건 버전·현재 release 결속으로 legacy_verified, snu_scoped, conditional_minimum, unknown을 구분한다. 검증된 기존 모집행은 legacy_verified 경로와 성공 결과를 유지한다. 비공개 정확 대상 명부에 결속된 새 조건부 모집행에만 가드를 적용하며 학교명·연도 전체·학과 문자열 유추로 넓히지 않는다. 요청자가 분류·method·검증 flag를 지정하지 못한다.",
       "scoped_transition_fail_closed": "서버 명부/버전·head·범위 근거가 없거나 불일치한 affected 모집행은 unknown/pending으로 보류한다. 알려진 조건부 대상에서 scoped 공급자 부재·잘못된 학생 입력·미모델 조건·오류를 기존 무조건 view/다른 CDF로 fallback하지 않는다. 분류 근거 부재를 비대상으로 간주하지 않으며, 동시에 무관한 검증 완료 모집행을 일괄 보류하지 않는다. 기존 검증 baseline 결속도 확인할 수 없는 행만 해당 결과를 보류한다.",
       "scoped_transition_activation": "분류기/저장소 포트·조건부 함수/CDF 연결·native 분모/분자 및 시험/산식 문맥·실제 앱 역할 실행과 재귀 응답 필터를 같은 소스/정확 SHA에서 검증한 후 affected 모집행별 연결 상태를 갱신한다. 정본 등록, DB 설치/실제 재조회, 서버 이식, 배포는 별도 단계다. 현재 기획 등록은 분류기·새 수치·DB/권한/엔진/운영 배포를 활성화하지 않는다.",
-      "scoped_transition_safe_reasons": "조건부 경로의 공개 pending 사유는 명시 목록 percentile_scope_unavailable, percentile_scope_invalid, percentile_scoped_provider_missing, percentile_scoped_provider_invalid, percentile_scoped_context_mismatch, percentile_scoped_release_mismatch, percentile_scoped_result_invalid, percentile_scope_release_mismatch, percentile_scoped_provider_unavailable, scoped_comparison_pending만 최소 후보로 등록한다. 공개 safe_code 스키마/동일 원본 enum 및 알려지지 않은 코드 거부 회귀를 책임 서비스 브랜치에서 함께 구현한다. 자유 문자열·예외 원문·DB/자료/개인 식별자·수치/비밀을 허용하지 않으며 기존 역할·소유권·relay/예산·필드 projection을 완화하지 않는다. 허용목록 코드의 부재를 임의 503 은폐로 우회하지 않는다. 현재 구현·운영 적용은 NOT_RUN이다."
+      "scoped_transition_safe_reasons": "조건부 경로의 공개 pending 사유는 명시 목록 percentile_scope_unavailable, percentile_scope_invalid, percentile_scoped_provider_missing, percentile_scoped_provider_invalid, percentile_scoped_context_mismatch, percentile_scoped_release_mismatch, percentile_scoped_result_invalid, percentile_scope_release_mismatch, percentile_scoped_provider_unavailable, scoped_comparison_pending만 최소 후보로 등록한다. 공개 safe_code 스키마/동일 원본 enum 및 알려지지 않은 코드 거부 회귀를 책임 서비스 브랜치에서 함께 구현한다. 자유 문자열·예외 원문·DB/자료/개인 식별자·수치/비밀을 허용하지 않으며 기존 역할·소유권·relay/예산·필드 projection을 완화하지 않는다. 허용목록 코드의 부재를 임의 503 은폐로 우회하지 않는다. 현재 구현·운영 적용은 NOT_RUN이다.",
+      "reference_tail_20261109": "진행 중: 같은 학년도·시험·기본 PK·산식·점수축·고정 모형의 기존 참고 곡선을 재사용한다. 서비스 브랜치 10f220ef848d4c945971df24f8c8b2765bd472c8과 화면 브랜치 b33ca5ee2daee1263e08067accf138fd54a959fe의 정확한 GitHub CI는 성공했다. 운영 배포본의 정확한 Git SHA와 선택 범위는 미확인이다. 운영 화면에서 일부 모집단위의 참고 환산·참고 누백과 4페이지 참고 목록이 노출되지만 정식 지원판단·기본 후보와 와일드카드는 보류다. 4페이지 후보 재확인 한 건은 percentile_provider 단계의 HTTP 503으로 종료돼 원인을 조사한다. 이 실측을 전체 범위의 성공·실패로 확대하지 않는다. 현재 발행 head·이용권·본인 리포트와 기존 조회·시간·메모리 예산을 유지한다. 시험팩 지문·기본 PK·원본 분포와 요청 취소·완료 대기를 확인하며, 로컬 DB 통합 후보는 미배포다.",
+      "reference_db_current_20261109": "진행 중: 기존 Supabase의 reference-percentile 현재 head와 같은 학년도·기본 물리 모집단위 PK로 방법과 원본 CDF를 직접 조회한다. 이미 확인된 DB 정본과 검수 근거를 재사용하며 학교 ID로 다시 묶거나 정본 자료를 별도 재수집·중복 적재하지 않는다. 공개 모집단위 ID와 물리 PK를 구별하고 다중 행은 보류한다. 읽기 전용 권한, head·방법·압축 및 원본 SHA, 시험팩·고정 모형·점수축·분모·동점 규칙을 확인한다. 기존 요청 횟수·바이트·시간·메모리와 객체 크기 제한을 유지하고 DB 요청 취소와 완료 대기를 전파한다. 정산 후 head 확인은 원래 실제 조회 시작시각 기준의 짧은 무 I/O 영수증을 사용한다. 로컬 후보, 실 DB 조회, 정확한 커밋 CI, Owner 배포와 실제 화면 검수는 별도 상태로 기록하며 참고 누백을 확정 합격판정으로 취급하지 않는다.",
+      "reference_db_verification_status_20261109": "기존 Supabase 현재 head의 분포를 같은 학년도·물리 기본 PK로 읽는 로컬 후보와 고려대 대용량 분포 경계 검증을 준비했다. 운영 DB 권한 메타데이터와 제한된 정본 조회는 확인했으나 앱 역할의 실제 실행은 미검증이다. 원본 및 선택 시험팩의 지문 일치 또는 기존 근거의 검증된 동등성, 런타임 선택 범위, 실제 요청·부하·취소와 정상 훅·정확한 SHA의 CI를 확인하기 전 운영 적용으로 기록하지 않는다. 기존 운영에서 이미 표시된 참고 결과를 보존하고 신규 수집·4개년 재묶음·전국 전수 재검수·임의 PK 병합·기존 제한 상향 또는 추가 비용을 요구하지 않는다."
     },
     "public_result_contract": {
       "location": "본인 유료 report.analyses[offering_id].percentile",
@@ -5258,7 +5262,8 @@
       "누백 0%를 빈 값으로 숨기지 않고 ready 상태와 함께 표시한다. pending은 사유와 대기를 표시한다. 개인점수·누백의 가상 사례는 실제 대학 자료와 분리한다.",
       "같은 모집단/시험/학년도/동점 처리와 승인 총점 기준이 확보돼야 전체 누백과 대학 누백의 차이로 유불리를 표시한다. 준비되지 않으면 유불리만 대기한다.",
       "로컬 기획 미리보기는 ignored outputs에서 최신 develop의 실제 애플리케이션 가상 응답을 이용한다. 운영 apps/web 구현은 feature/presentation-foundation의 별도 화면 담당 소유다.",
-      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다."
+      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다.",
+      "진행 중인 3페이지 참고 환산/누백과 4페이지 참고 후보는 정식 환산·합격 판단과 분리해 참고 추정으로 표시한다. 근거 없는 합격 확률이나 여유·핵심·도전·와일드카드 판정은 만들지 않는다."
     ],
     "acceptance_gates": [
       "승인된 정확한 환산점수/곡선만으로 conversion.ready + percentile.ready + assessment.pending이 반환된다. 전체 모형/입결/예상선/판단/자격 부재·오류 격리를 API까지 검수한다.",
