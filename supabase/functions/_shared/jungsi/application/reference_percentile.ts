@@ -22,6 +22,8 @@ export interface ReferenceTailPort {
   ): Promise<ReferenceTailSelection | null>;
   /** Digest of the approved saved-tail selection, or null when none is selected. */
   referenceTailPins?(): Promise<string | null>;
+  /** Optional warm-up: load selected tails for these offerings concurrently. Never throws. */
+  prefetchReferenceTails?(offeringIds: readonly string[]): Promise<void>;
 }
 export interface ReferenceTailSelection {
   readonly projection: SavedReferenceTailProjection;

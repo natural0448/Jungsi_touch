@@ -404,6 +404,11 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       const referencePercentile = new ReferencePercentileService(this.data);
       const runScoring = () =>
         this.scoring.batch(async () => {
+          // Load the selected saved tails (and their reference rules) concurrently once;
+          // the per-offering loop below then reuses the same request-local projections.
+          if (this.data.prefetchReferenceTails) {
+            await this.data.prefetchReferenceTails(rows.map((r) => r.offering_id as string));
+          }
           for (const offering of rows) {
             this.fresh(session);
             if (referenceGrant?.signal.aborted) fail("security_policy_unavailable", 503);

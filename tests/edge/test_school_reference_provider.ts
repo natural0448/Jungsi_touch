@@ -527,8 +527,12 @@ Deno.test("saved reference tail reaches reference percentile only through the ap
     equal(x.data.referenceTailOfferings(2027, x.f.pack!.examId).join(), x.f.offering.offering_id);
     assert(x.data.hasReferenceTail(x.f.offering.offering_id as string));
     assert(!x.data.hasReferenceTail("SYNTHETIC-other"));
+    // Concurrent warm-up loads the selected tail once and tolerates unselected offerings.
+    await port.prefetchReferenceTails!([x.f.offering.offering_id as string, "SYNTHETIC-other"]);
+    const afterPrefetch = x.getCount();
     const r = await new ReferencePercentileService(port).calculate(x.f.offering, conversion, p);
     equal(r.status, "reference_estimated");
+    assert(x.getCount() - afterPrefetch <= 1);
     equal(r.production_allowed, false);
     equal(r.actual_admission_full_total_approved, false);
     // Without a request signal no tail provider exists; no tail selection means no pins.

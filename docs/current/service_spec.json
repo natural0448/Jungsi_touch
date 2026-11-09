@@ -20187,7 +20187,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "d1d5033564238dfd9c0564d6f868d7f79ab84c899933707f7f1ea578c31df367",
+              "source_sha256": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
               "declared_exports": [
                 "ReferencePercentileService",
                 "ReferenceTailPort",
@@ -20461,7 +20461,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "c92b61f06f528cb8958a0faabd698b76e5d3a9045f712babe2636125e5507759",
+              "source_sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
               "declared_exports": [
                 "PublishedForecastPort",
                 "UNIVERSITY_ANALYSIS_OPERATIONS",
@@ -21827,7 +21827,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8",
+              "source_sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
               "declared_exports": [
                 "NativeRuntimeApi",
                 "REFERENCE_TAIL_REQUEST_BYTES",
@@ -28940,11 +28940,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "3124abfde3ec153606e4d7b1a362eb75c68ab4776b686c641034fa83bbf12b3e"
+        "sha256": "2ccd7e24cee9525a6b06df96e050579ebd2de7415083cc6f6f5581e032e1fc02"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "c8428d395a6ac5ebce1971b041b8e0f1d369e89da8225b5214dd907578171de0"
+        "sha256": "6a5ddf1424636aef2be9476fe7d11e6855004dafc6323dc708092550e61a639a"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -29936,7 +29936,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "c92b61f06f528cb8958a0faabd698b76e5d3a9045f712babe2636125e5507759"
+            "sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
@@ -29960,7 +29960,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+            "sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
@@ -29992,7 +29992,7 @@
           },
           {
             "path": "tests/edge/test_school_reference_provider.ts",
-            "sha256": "33c0c332c07a52dfa8670caa3d9033956f909487e8fd5697e4fc88a5cdabb6dd"
+            "sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8"
           },
           {
             "path": "tests/edge/test_school_reference_scoring.ts",
@@ -40032,7 +40032,7 @@
           },
           "composition": {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "source_sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+            "source_sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
           }
         },
         "operation_ids": [
@@ -111463,7 +111463,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "c92b61f06f528cb8958a0faabd698b76e5d3a9045f712babe2636125e5507759",
+          "source_sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
           "symbols": [
             {
               "declarations": [
@@ -166360,7 +166360,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8",
+          "source_sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
           "symbols": [
             {
               "declarations": [
@@ -166398,6 +166398,26 @@
                 }
               ],
               "name": "REFERENCE_TAIL_REQUEST_BYTES"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "4",
+                      "value": {
+                        "kind": "number",
+                        "number": 4.0
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "REFERENCE_TAIL_PREFETCH_CONCURRENCY"
             },
             {
               "declarations": [
@@ -213417,7 +213437,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "33c0c332c07a52dfa8670caa3d9033956f909487e8fd5697e4fc88a5cdabb6dd",
+          "source_sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8",
           "symbols": [
             {
               "declarations": [
@@ -240831,7 +240851,7 @@
               "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
             }
           ],
-          "source_sha256": "d1d5033564238dfd9c0564d6f868d7f79ab84c899933707f7f1ea578c31df367",
+          "source_sha256": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
           "symbols": [
             {
               "declarations": [
@@ -240924,6 +240944,47 @@
                                     "value": "null"
                                   }
                                 ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "method",
+                        "name": "prefetchReferenceTails",
+                        "optional": true,
+                        "parameter_source": "(offeringIds: readonly string[])",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "offeringIds",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
                               }
                             ]
                           }
@@ -243818,7 +243879,7 @@
       "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
       "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
       "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "c92b61f06f528cb8958a0faabd698b76e5d3a9045f712babe2636125e5507759",
+      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
       "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
       "supabase/functions/_shared/jungsi/application/university_scoring.ts": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -243870,7 +243931,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "e0c3c7a9190ced13bbeba5e9f46b5e439e99d0536b3d566343e846bc0a652b24",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "7afa624a404ebb3fd894712b6111dc9c56853c654586e139ebc5212f61df08d8",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -243962,7 +244023,7 @@
       "tests/edge/test_runtime_controls.ts": "f01b1fe2c0cc118120942b01917120928a186f7a44d097f8f381d2e3c2e8b62a",
       "tests/edge/test_runtime_settings.ts": "d708a0205b1a9aeedef4130e130aefc0f85515e0d12dd3297cd365f82bd7e005",
       "tests/edge/test_saved_reference_projection.ts": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19",
-      "tests/edge/test_school_reference_provider.ts": "33c0c332c07a52dfa8670caa3d9033956f909487e8fd5697e4fc88a5cdabb6dd",
+      "tests/edge/test_school_reference_provider.ts": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8",
       "tests/edge/test_school_reference_scoring.ts": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d",
       "tests/edge/test_score_input_policy.ts": "c7f588ab811dc61a822966e92f31840d944f36d853d5a64f22fe1e9634744a21",
       "tests/edge/test_score_input_stage_projection.ts": "3b21336df00c4a68c6fc8bcb818b85121fab175586cfaac28443d39c591a5e2a",
@@ -244000,7 +244061,7 @@
       "supabase/functions/_shared/jungsi/application/p1_admission_guidance.review-only.ts": "2db14b21faab45acd48994736df1325bdc8d2dc4c25c4963a949b389b15a7b00",
       "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts": "5efcdbcd9cf825b51b41dc74ae84703b9061383d141e09d0ee1ca45940d37586",
       "supabase/functions/_shared/jungsi/application/reference_candidates.ts": "b033073a8cf4b9adf440ba575724854226daddd6c40d64d5dae371bf2ce90702",
-      "supabase/functions/_shared/jungsi/application/reference_percentile.ts": "d1d5033564238dfd9c0564d6f868d7f79ab84c899933707f7f1ea578c31df367",
+      "supabase/functions/_shared/jungsi/application/reference_percentile.ts": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "7e5a8723673b3eae87d6bec9f55c9364f18e1bd3ebe4c4f0f16b737963d0d644",
       "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "e4cd0765083c1e64aba95a81e7a78e6b0c9af9394170a9e53fd03fbb6901f183",
       "tests/edge/reference_candidate_scope_cases.ts": "2d26c10d4c3914a0327c998d5241ccd325b81215089925b63be1e970cbfb21c8",
@@ -244101,7 +244162,7 @@
     "extension_runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "75718468a646612dde06786c6059cb7b752a1a140706dc739e28b86eb97af4d4",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
       "tests/edge/public_api_contract_fixture.ts": "ca53a202ee9d37cf790c22a9a22de5948cceb35b3fced982a0848af80ba12f5d",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d",
       "tests/edge/test_score_input_policy.ts": "c7f588ab811dc61a822966e92f31840d944f36d853d5a64f22fe1e9634744a21"
@@ -245609,9 +245670,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "3999aa0be6853f7b66afc2b1bc75da9b9a2d6a7db29d76ebd48e6c9dd4fe2df6",
+      "bridge_sha256": "b9bf2f61c48dae745f9c23cfcedd51d0c3f9e0b606ba563352e7665de9971564",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "ea95ad10a2e93b98e87f4406925dc73e0651ea73f06b14ba1117b8cca951de38",
+      "graph_manifest_sha256": "efc6c2de644e2476d096a794c4255a9337a1bc4d3d0519fa7602c504d387ccba",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -245802,7 +245863,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-          "sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+          "sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
         },
         {
           "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts",
@@ -246839,7 +246900,7 @@
     "runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
       "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "75718468a646612dde06786c6059cb7b752a1a140706dc739e28b86eb97af4d4",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
       "tests/edge/test_administrator_usage.ts": "858ff65182a8c55df6571e3dc34394a3670f6c1f35309655a331bb1f25828178",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
       "tests/edge/test_history_field_qualification.ts": "19ac3bdbd4c5beed7239dbef7b426d9a4787169a0bbdc1cdd806bf8260cdeefb",
@@ -246898,7 +246959,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-          "sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+          "sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
         },
         {
           "path": "tests/edge/test_administrator_usage.ts",
@@ -249252,7 +249313,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+            "sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
@@ -249561,7 +249622,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "55266e1bd44507dc48d1777a4fe625cd29b4aa7e57fd70a8b99e4b0192ac3525",
+    "manifest_sha256": "ee4cf02c61525750bd6600d30043fd6eb2ffa3116c4f1692073d19d02775b95e",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -249572,7 +249633,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "8419eff5880e296a47d9bcfb476176911f6b4e0b6c7d7c8bc6558a3e0355d8ee",
+    "manifest_sha256": "9efaa070149a207e5d33df9160d66222ae603bca1ba798232783eb22c88e2e56",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

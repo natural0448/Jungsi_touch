@@ -80,6 +80,8 @@ import {
 /** Per-request saved-tail objects and raw bytes held at once (inside the existing read budget). */
 export const REFERENCE_TAIL_REQUEST_OBJECTS = 16;
 export const REFERENCE_TAIL_REQUEST_BYTES = 24 * 1024 * 1024;
+/** Concurrent saved-tail loads per request (same request budget and signal). */
+export const REFERENCE_TAIL_PREFETCH_CONCURRENCY = 4;
 import {
   type BasicRuntimeSettings,
   readBasicRuntimeSettings,
@@ -280,6 +282,25 @@ export function runtimeAnalysisDataPort(
           await phase("percentile_provider", async () => {
             const source = await tailSource();
             return source ? await source.getReferenceTail(offeringId) : null;
+          }),
+        prefetchReferenceTails: async (offeringIds: readonly string[]) =>
+          await phase("percentile_provider", async () => {
+            const source = await tailSource();
+            if (!source) return;
+            const pending = [...new Set(offeringIds)];
+            const worker = async () => {
+              while (pending.length) {
+                const id = pending.shift()!;
+                // Failures are not hidden: the later per-offering call sees the same
+                // request-local result and stays pending.
+                try {
+                  await source.getReferenceTail(id);
+                } catch { /* reported by the per-offering call */ }
+              }
+            };
+            await Promise.all(
+              Array.from({ length: REFERENCE_TAIL_PREFETCH_CONCURRENCY }, worker),
+            );
           }),
         referenceTailPins: async () =>
           await phase("percentile_provider", async () => {

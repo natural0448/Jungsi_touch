@@ -1839,7 +1839,7 @@
           },
           "composition": {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "source_sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+            "source_sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
           }
         },
         "operation_ids": [

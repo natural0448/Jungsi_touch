@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.9.157",
-  "source_sha256": "13dee74018f4ce68614aab86508e755b7eab30421c4e6c187c6caa3b0b7296cb",
+  "source_sha256": "1a4f637e633f300ac9062bcdac0beaf723ce311918146eb102933e005dea2baa",
   "pages": [
     {
       "id": "PAGE-01",
@@ -2873,7 +2873,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8"
+            "sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",

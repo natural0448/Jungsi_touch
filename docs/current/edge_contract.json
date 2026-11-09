@@ -67235,7 +67235,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "d1d5033564238dfd9c0564d6f868d7f79ab84c899933707f7f1ea578c31df367",
+        "source_sha256": "3c2c5bd465eaab234525b49b8c4c111696e70d7ed50b2125c67353380d91b2f0",
         "symbols": [
           {
             "declarations": [
@@ -67328,6 +67328,47 @@
                                   "value": "null"
                                 }
                               ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "prefetchReferenceTails",
+                      "optional": true,
+                      "parameter_source": "(offeringIds: readonly string[])",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "offeringIds",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "void",
+                              "value": "void"
                             }
                           ]
                         }
@@ -77536,7 +77577,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "c92b61f06f528cb8958a0faabd698b76e5d3a9045f712babe2636125e5507759",
+        "source_sha256": "ab320a2f0c2fce6a94ebc002da6e197f351860dc72d5fefd681730ee8d3130c9",
         "symbols": [
           {
             "declarations": [
@@ -133399,7 +133440,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "93cc745938c0b1b1f14c778b5db4acbcc72c35f6d7ffbf7376f361824a900ba8",
+        "source_sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d",
         "symbols": [
           {
             "declarations": [
@@ -133437,6 +133478,26 @@
               }
             ],
             "name": "REFERENCE_TAIL_REQUEST_BYTES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "4",
+                    "value": {
+                      "kind": "number",
+                      "number": 4.0
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "REFERENCE_TAIL_PREFETCH_CONCURRENCY"
           },
           {
             "declarations": [
@@ -183600,7 +183661,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "33c0c332c07a52dfa8670caa3d9033956f909487e8fd5697e4fc88a5cdabb6dd",
+        "source_sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8",
         "symbols": [
           {
             "declarations": [
