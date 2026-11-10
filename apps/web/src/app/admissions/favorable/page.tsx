@@ -11,7 +11,7 @@ import { StreamTray } from "@/components/shortlist-tray-stream";
 import { LoadingNotice } from "@/components/loading-notice";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
-import { loadMine, pickedIds, type ReportState } from "@/lib/report-ops";
+import { loadMineEager, pickedIds, type ReportState } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
@@ -62,7 +62,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   const cur = parseQuery(sp);
   let state: ReportState;
   try {
-    const mine = await loadMine(src, caller);
+    // 입력 상태와 지난번 현재 리포트를 동시에 읽는다(2026-11-10 임시 단축, report-ops 참고)
+    const mine = await loadMineEager(src, caller);
     // 저장된 후보만 읽는다. 후보가 아직 없으면 회원이 버튼을 눌러야 만든다(담당자 회신 2026-10-25)
     state = mine ? { kind: "ready", report: mine } : { kind: "none" };
   } catch (e) {

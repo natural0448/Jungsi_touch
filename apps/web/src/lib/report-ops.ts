@@ -34,7 +34,80 @@ export type ReportState =
 /** 내 리포트 = 계정의 현재 리포트(서버 입력 상태, 2026-11-04 사용자 결정). 없으면 성적 입력이 먼저다 */
 export async function loadMine(src: JungsiSource, caller: Caller): Promise<ReportDto | null> {
   const id = await currentReportId(src, caller);
+  await rememberCurrentReport(src, caller, id);
   return id ? src.readReport(caller, id) : null;
+}
+
+/*
+  현재 리포트 미리 읽기 — 임시 조치(2026-11-10 부담당자 요청, 최종관리자 결정).
+  서버의 '현재 리포트 한 번에 주는 경로'(속도 요청 D)가 켜지면 이 묶음(아래 hint~loadMineEager)을 걷어내고 한 번 호출로 바꾼다.
+  - 지금은 입력 상태(score-input-status)가 와야 리포트 번호를 알아 리포트 읽기가 이어서 기다린다(약 1초).
+    지난번에 확인한 현재 리포트 번호를 '힌트'로 두고, 입력 상태와 그 번호의 리포트를 동시에 보낸다.
+  - 힌트는 화면 서버(Worker) 메모리에만 둔다. 브라우저·기기에는 리포트 번호를 기억하지 않는다(2026-11-04 결정 그대로).
+  - 열쇠는 access token 의 SHA-256 이다. 같은 로그인 안에서만 쓰이므로 다른 계정이나 다시 로그인한 뒤에는 열쇠가 달라
+    앞 계정의 번호로 요청이 나가지 않는다. 토큰 원문은 두지 않는다. 30분 지나면 버리고 500 로그인까지만 둔다.
+  - 어느 리포트를 여는지는 언제나 입력 상태의 current_report_id 가 정한다. 힌트와 다르면 미리 읽은 것은 버리고 맞는 번호로 읽는다.
+    같을 때만 미리 읽은 결과를 쓰며, 그 결과(404·403·연결 오류 포함)는 힌트 없이 읽었을 때와 같게 처리된다.
+  - 3페이지에는 쓰지 않는다(계정당 동시 2건 — 검색과 겹치면 목록이 늦어진다). 3페이지·버튼 동작은 힌트를 적어 두기만 한다.
+*/
+const HINT_TTL_MS = 30 * 60_000;
+const HINT_MAX = 500;
+const hints = new Map<string, { id: string; at: number }>();
+
+async function hintKey(src: JungsiSource, caller: Caller): Promise<string | null> {
+  if (src.kind === "synthetic") return "synthetic"; // 합성 화면(로컬 확인용)은 로그인이 없다
+  if (!caller.accessToken) return null;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(caller.accessToken));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** 입력 상태로 확인한 현재 리포트 번호를 이 로그인의 힌트로 적는다(없으면 지운다) */
+export async function rememberCurrentReport(src: JungsiSource, caller: Caller, id: string | null | undefined): Promise<void> {
+  const key = await hintKey(src, caller);
+  if (!key) return;
+  hints.delete(key);
+  if (!id) return;
+  hints.set(key, { id, at: Date.now() });
+  while (hints.size > HINT_MAX) hints.delete(hints.keys().next().value as string);
+}
+
+function recallHint(key: string): string | null {
+  const h = hints.get(key);
+  if (!h) return null;
+  if (Date.now() - h.at > HINT_TTL_MS) {
+    hints.delete(key);
+    return null;
+  }
+  return h.id;
+}
+
+export interface EagerReport {
+  hint: string | null;
+  pre: Promise<ReportDto | null> | null;
+}
+
+/** 힌트가 있으면 그 번호의 리포트를 먼저 보낸다. 입력 상태와 함께 부른다. 거절되지 않는다 */
+export async function startEagerReport(src: JungsiSource, caller: Caller): Promise<EagerReport> {
+  const key = await hintKey(src, caller);
+  const hint = key ? recallHint(key) : null;
+  if (!hint) return { hint: null, pre: null };
+  const pre = src.readReport(caller, hint);
+  pre.catch(() => {}); // 힌트가 틀려 버릴 때 처리되지 않은 거절로 남지 않게(같으면 아래에서 그대로 기다린다)
+  return { hint, pre };
+}
+
+/** 입력 상태의 현재 리포트 번호로 리포트를 얻는다. 힌트와 같으면 미리 보낸 요청을, 다르면 새로 읽는다 */
+export function finishEagerReport(src: JungsiSource, caller: Caller, eager: EagerReport, id: string): Promise<ReportDto | null> {
+  return eager.pre && eager.hint === id ? eager.pre : src.readReport(caller, id);
+}
+
+/** loadMine 과 같은 결과. 2·4페이지 전용(입력 상태와 힌트 리포트를 동시에 보낸다) */
+export async function loadMineEager(src: JungsiSource, caller: Caller): Promise<ReportDto | null> {
+  const eagerP = startEagerReport(src, caller);
+  const id = await currentReportId(src, caller);
+  const eager = await eagerP;
+  await rememberCurrentReport(src, caller, id);
+  return id ? finishEagerReport(src, caller, eager, id) : null;
 }
 
 /**

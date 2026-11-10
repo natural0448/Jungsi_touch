@@ -13,7 +13,7 @@ import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
 import { correctionExhausted } from "@/lib/superseded";
 import { readPicks } from "@/lib/shortlist";
-import { pickedIds } from "@/lib/report-ops";
+import { finishEagerReport, pickedIds, rememberCurrentReport, startEagerReport } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
@@ -62,6 +62,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   let report: ReportDto | null = null;
   let releaseP: Promise<string | null> = Promise.resolve(null);
   let corrP: ReturnType<typeof myLatestCorrection> = Promise.resolve(null);
+  // 지난번 현재 리포트를 입력 상태와 동시에 읽어 둔다(2026-11-10 임시 단축, report-ops 참고). 여는 리포트는 아래 입력 상태가 정한다
+  const eagerP = startEagerReport(src, caller);
   try {
     status = await src.readScoreInputStatus(caller, EXAM.exam_id);
     // 입력 상태만 있으면 되는 배부일·정정 요청 조회(에듀터치 DB)는 리포트를 기다리지 않고 함께 보낸다(2026-11-10 나눠 그리기)
@@ -75,7 +77,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     corrP.catch(() => {});
     // 정정 입력 뒤에는 정정한 리포트가 현재 리포트다(2026-10-28 사용자 결정)
     const current = status.current_report_id;
-    report = current ? await src.readReport(caller, current) : null;
+    await rememberCurrentReport(src, caller, current);
+    report = current ? await finishEagerReport(src, caller, await eagerP, current) : null;
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
