@@ -11,6 +11,8 @@ import { EdutouchUtil } from "@/components/edutouch-util";
 import { SyntheticBar } from "@/components/synthetic-bar";
 import { LocalBar } from "@/components/local-bar";
 import { ConnectionNotice } from "@/components/connection-notice";
+import { NavPending } from "@/components/nav-pending";
+import { Suspense } from "react";
 import { ConnectionError, getCaller, source } from "@/lib/api";
 import type { Session } from "@/lib/dto";
 
@@ -53,7 +55,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <LocalBar />
           <EdutouchUtil />
           <SiteHeader session={session} down={Boolean(down)} />
-          <main>{down ? <ConnectionNotice e={down} /> : children}</main>
+          <main>
+            {/* 누르는 순간 바뀌는 안내(서버 응답 전). components/nav-pending.tsx */}
+            <Suspense fallback={null}>
+              <NavPending />
+            </Suspense>
+            {down ? <ConnectionNotice e={down} /> : children}
+          </main>
           <footer className="jt-foot">
             <div className="wrap">
               <p>지원가능성은 합격 확률이 아닙니다. 대학마다 만점과 반영 방식이 달라 다른 대학의 환산점수와 크기를 비교할 수 없습니다.</p>

@@ -137,6 +137,12 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 @keyframes jt-spin{to{transform:rotate(360deg)}}
 @keyframes jt-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @media (prefers-reduced-motion:reduce){.et .jt-spinner,.et .jt-skel i{animation:none}}
+/* 누르는 순간 안내(components/nav-pending.tsx, 2026-11-10): 위 진행 줄 + 다른 화면이면 앞 화면을 가리고 불러오는 중 안내 */
+.et main[data-nav-pending] > :not(.jt-nav-pending):not(.jt-navbar){display:none}
+.et .jt-navbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:1000;overflow:hidden;background:var(--brand-soft)}
+.et .jt-navbar::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:40%;background:var(--brand);animation:jt-navbar 1.1s ease-in-out infinite}
+@keyframes jt-navbar{to{left:100%}}
+@media (prefers-reduced-motion:reduce){.et .jt-navbar::after{animation:none;left:0;width:100%;opacity:.6}}
 
 /* 맨 위 이용 메뉴 줄 — 에듀터치 본체 .util 과 같은 모양(2026-10-28) */
 .et .jt-top{border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2);background:var(--bg)}
