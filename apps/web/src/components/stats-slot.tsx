@@ -9,9 +9,10 @@ async function Slot({ p, id }: { p: StatsPromise; id: string }) {
   return <StatsLine s={(await p).get(id)} />;
 }
 
-export function StatsSlot({ p, id }: { p: StatsPromise; id: string }) {
+/** k: 화면 조건(필터·펼친 학교). 조건이 바뀌는 전환에서 이 줄만 기다리고 학교 목록은 먼저 바뀌게 경계를 새로 만든다 */
+export function StatsSlot({ p, id, k }: { p: StatsPromise; id: string; k: string }) {
   return (
-    <Suspense fallback={<span className="stats wait">추천·선택 집계 불러오는 중</span>}>
+    <Suspense key={k} fallback={<span className="stats wait">추천·선택 집계 불러오는 중</span>}>
       <Slot p={p} id={id} />
     </Suspense>
   );

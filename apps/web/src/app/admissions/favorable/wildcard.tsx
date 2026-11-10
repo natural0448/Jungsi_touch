@@ -21,13 +21,13 @@ const SUIT: Record<WildcardGroup, { label: string; mark: string }> = {
   railway: { label: "철도", mark: "R" },
 };
 
-export function WildcardDeck({ picks, selection, picked, stats, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; stats: StatsPromise; canPick: boolean; analysisPending?: boolean }) {
+export function WildcardDeck({ picks, selection, picked, stats, statsKey, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; stats: StatsPromise; statsKey: string; canPick: boolean; analysisPending?: boolean }) {
   const lay = wildcardLayout(picks, selection);
   const shown = lay.featured.length + lay.rest.length;
   const groups = lay.groupLabels.join("·");
   const card = (w: CandidateItemDto, i: number) => (
     <li key={w.offering.offering_id} style={{ "--i": i } as React.CSSProperties}>
-      <WildCard w={w} on={picked.has(w.offering.offering_id)} stats={stats} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
+      <WildCard w={w} on={picked.has(w.offering.offering_id)} stats={stats} statsKey={statsKey} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
     </li>
   );
   const empty = lay.status === "pending"
@@ -74,7 +74,7 @@ export function WildcardDeck({ picks, selection, picked, stats, canPick, analysi
   );
 }
 
-function WildCard({ w, on, stats, canPick, orderPending }: { w: CandidateItemDto; on: boolean; stats: StatsPromise; canPick: boolean; orderPending?: boolean }) {
+function WildCard({ w, on, stats, statsKey, canPick, orderPending }: { w: CandidateItemDto; on: boolean; stats: StatsPromise; statsKey: string; canPick: boolean; orderPending?: boolean }) {
   const o = w.offering;
   const a = w.assessment;
   const suit = SUIT[o.wildcard_group ?? "health"];
@@ -130,7 +130,7 @@ function WildCard({ w, on, stats, canPick, orderPending }: { w: CandidateItemDto
       ))}
 
       <div className="wc-stats">
-        <StatsSlot p={stats} id={o.offering_id} />
+        <StatsSlot p={stats} id={o.offering_id} k={statsKey} />
       </div>
 
       {canPick && <PickButton id={o.offering_id} on={on} variant="wild" />}

@@ -73,6 +73,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
 
   // 저장된 분석만 보인다. 분석이 없는 칸은 '분석 대기'로 남고 버튼으로 채운다
   const items = res.items ?? [];
+  // 화면 안 검색·칩·다음 쪽은 같은 화면의 전환이다. React 는 전환 중에 이미 보여 준 Suspense 경계가 다시 기다리면
+  // 기다리는 칸으로 바꾸지 않고 옛 화면을 붙잡아, 새 목록까지 내 리포트를 기다렸다(11-10 부담당자 측정: 검색 뒤 목록=내 점수).
+  // 검색 조건을 경계의 key 로 주어 조건이 바뀌면 새 경계가 되게 한다 — 목록은 먼저 바뀌고 내 칸만 '불러오는 중'으로 기다린다.
+  // 같은 조건에서 다시 그릴 때(분석·담기 뒤)는 key 가 같아 옛 내용을 둔 채 새 값으로 바뀐다(깜박임 없음)
+  const qk = hrefWith(cur, { open: undefined });
 
   // 같은 대학끼리 묶는다(받은 순서를 지킨다)
   const groups: { id: string; name: string; rows: OfferingDto[] }[] = [];
@@ -90,7 +95,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
       {head}
       <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />
       <div className="wrap pg-body ps">
-        <Suspense fallback={<BasisWait />}>
+        <Suspense key={qk} fallback={<BasisWait />}>
           <MineBasis p={mine} />
         </Suspense>
 
@@ -133,7 +138,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                 {/* 날짜만(YYYY-MM-DD)이든 시각까지(ISO)든 'YYYY.MM.DD'로 보인다(10-24 QA: 'T14:51:47Z'가 그대로 보였다) */}
                 {asOfDate(res.as_of) && <small> · {asOfDate(res.as_of)} 기준</small>}
               </span>
-              <Suspense fallback={null}>
+              <Suspense key={qk} fallback={null}>
                 <MineLegend p={mine} />
               </Suspense>
             </div>
@@ -154,7 +159,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
               </section>
             ) : (
               <>
-              <Suspense fallback={null}>
+              <Suspense key={qk} fallback={null}>
                 <MineRunBoxes p={mine} items={items} />
               </Suspense>
               <div className="list">
@@ -191,7 +196,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                             cells={
                               <>
                                 <span className="c-grp"><span className="grp">{o.group}</span></span>
-                                <Suspense fallback={<CellsWait />}>
+                                <Suspense key={qk} fallback={<CellsWait />}>
                                   <MineCells p={mine} id={o.offering_id} />
                                 </Suspense>
                               </>
@@ -203,7 +208,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                               </span>
                             }
                             detail={
-                              <Suspense fallback={<DetailWait />}>
+                              <Suspense key={qk} fallback={<DetailWait />}>
                                 <MineDetail p={mine} o={o} />
                               </Suspense>
                             }
@@ -227,7 +232,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
         )}
       </div>
 
-      <Suspense fallback={null}>
+      <Suspense key={qk} fallback={null}>
         <MineTray p={mine} items={items} src={src} caller={caller} />
       </Suspense>
     </>

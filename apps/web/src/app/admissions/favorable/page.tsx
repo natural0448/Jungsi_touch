@@ -7,13 +7,12 @@ import { PageHead } from "@/components/page-head";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
-import { ShortlistTray } from "@/components/shortlist-tray";
+import { StreamTray } from "@/components/shortlist-tray-stream";
 import { LoadingNotice } from "@/components/loading-notice";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
-import type { OfferingDto, ReportDto, StatisticsDto } from "@/lib/dto";
+import type { ReportDto, StatisticsDto } from "@/lib/dto";
 import { loadMine, pickedIds, type ReportState } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
-import { readPicks } from "@/lib/shortlist";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
@@ -118,6 +117,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 막지 않게 뒤이어 받는다 — 집계 줄·담은 학교 띠만 각자 채워진다
   const picked = pickedIds(report);
   const stats = statsFor(src, caller, report, cur.open);
+  // 필터·펼친 학교가 바뀌는 전환에서 집계 줄·띠가 학교 목록을 붙잡지 않게 조건을 경계의 key 로 준다(3페이지와 같은 이유)
+  const qk = hrefWith(cur, {});
   const known = [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering);
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
@@ -188,7 +189,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
             ) : (
               <div className="fv-list">
                 {shown.map((g) => (
-                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} stats={stats} />
+                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} stats={stats} statsKey={qk} />
                 ))}
               </div>
             )}
@@ -211,12 +212,12 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} stats={stats} canPick analysisPending={report.analysis_status?.status === "pending"} />
+            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} stats={stats} statsKey={qk} canPick analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
       </div>
-      <Suspense fallback={null}>
-        <Tray src={src} caller={caller} report={report} known={known} />
+      <Suspense key={qk} fallback={null}>
+        <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />
       </Suspense>
     </>
   );
@@ -240,16 +241,4 @@ function statsFor(src: JungsiSource, caller: Caller, report: ReportDto, open: st
   // 필터로 그 줄이 그려지지 않아 아무도 기다리지 않을 때 처리되지 않은 거절로 남지 않게 한다(기다리는 칸에는 그대로 전해진다)
   p.catch(() => {});
   return p;
-}
-
-/** 핵심 지원 학교 띠. 후보에 없는 담은 곳의 이름은 offering.read 로 받으므로 맨 나중에 그린다. 받지 못하면 띠만 뺀다 */
-async function Tray({ src, caller, report, known }: { src: JungsiSource; caller: Caller; report: ReportDto; known: OfferingDto[] }) {
-  let items;
-  try {
-    items = await readPicks(src, caller, report, known);
-  } catch (e) {
-    if (e instanceof ConnectionError || e instanceof AccessDenied) return null;
-    throw e;
-  }
-  return <ShortlistTray items={items} other="PAGE-03" />;
 }

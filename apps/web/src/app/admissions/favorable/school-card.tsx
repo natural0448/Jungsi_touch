@@ -19,7 +19,7 @@ export function bestDelta(g: Group): number | null {
  * 응답에 학교 분류가 없으므로 학교에 색을 칠하지 않고, 색이 있는 판단은 학과마다 따로 붙인다(REQ-05).
  * '찾은 이유'는 서버가 만든 학과별 이유(recommendation_reasons, 1.7.0)를 그대로 쓰고, 없으면 응답 숫자만으로 적는다.
  */
-export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; picked: Set<string>; stats: StatsPromise }) {
+export function SchoolCard({ g, cur, picked, stats, statsKey }: { g: Group; cur: Query; picked: Set<string>; stats: StatsPromise; statsKey: string }) {
   const open = cur.open === g.university_id;
   const counts = new Map<Category, number>();
   for (const o of g.offerings) counts.set(o.assessment.category, (counts.get(o.assessment.category) ?? 0) + 1);
@@ -107,7 +107,7 @@ export function SchoolCard({ g, cur, picked, stats }: { g: Group; cur: Query; pi
                   <span className="c-pick"><PickButton id={o.offering_id} on={picked.has(o.offering_id)} /></span>
                 </div>
                 {(a.recommendation_reasons?.length ?? 0) > 0 && <EnrichedReasonList a={a} max={2} />}
-                <StatsSlot p={stats} id={o.offering_id} />
+                <StatsSlot p={stats} id={o.offering_id} k={statsKey} />
               </li>
             ))}
           </ul>

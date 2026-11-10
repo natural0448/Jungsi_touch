@@ -2,11 +2,10 @@ import { ConnectionNotice } from "@/components/connection-notice";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
 import { RunAnalysis } from "@/components/run-analysis";
 import { ScoreBasis } from "@/components/score-basis";
-import { ShortlistTray } from "@/components/shortlist-tray";
+import { StreamTray } from "@/components/shortlist-tray-stream";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
 import type { OfferingDto } from "@/lib/dto";
 import { mineReport, pickedIds, type MineResult } from "@/lib/report-ops";
-import { readPicks } from "@/lib/shortlist";
 import { Detail } from "./parts";
 
 /*
@@ -125,19 +124,9 @@ export function DetailWait() {
   return <p className="wait" aria-busy="true">내 분석을 불러오는 중…</p>;
 }
 
-/**
- * 핵심 지원 학교 띠. 이 목록에 없는 담은 곳은 이름을 offering.read 로 따로 받으므로 맨 나중에 그린다.
- * 이름을 받지 못하면 띠만 빼고(담기 표시는 각 줄에 그대로) 화면은 그대로 둔다.
- */
+/** 핵심 지원 학교 띠. 개수와 이 목록에 있는 이름은 바로, 목록에 없는 곳의 이름만 뒤이어(shortlist-tray-stream.tsx) */
 export async function MineTray({ p, items, src, caller }: { p: P; items: OfferingDto[]; src: JungsiSource; caller: Caller }) {
   const report = mineReport(await p);
   if (!report) return null;
-  let picks;
-  try {
-    picks = await readPicks(src, caller, report, items);
-  } catch (e) {
-    if (e instanceof ConnectionError || e instanceof AccessDenied) return null;
-    throw e;
-  }
-  return <ShortlistTray items={picks} other="PAGE-04" />;
+  return <StreamTray report={report} known={items} src={src} caller={caller} other="PAGE-04" />;
 }
