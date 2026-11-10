@@ -6,7 +6,7 @@
   ],
   "test_files": {
     "tests/cursor_contract_review/combined_policy_catalog_runtime.original.ts": "6d412ee5c14376ec436a420cfed5cbb0bb50dd9d44144668d5c9331ca5489b26",
-    "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts": "ced762691af079c120d849c368263b3b2e7e7fac87573da3328dbadb943063bc",
+    "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts": "edfadf80816c010fcd1d25a31758b2a6a26ba4bda3a953246c5d283a5ac0c4f1",
     "tests/cursor_contract_review/current_public_bound_cursor.test.ts": "3e99046987366f3dd7f91e35078604430d8338d1d27be8dd862ba790cacfacfa"
   },
   "config": {
@@ -16,7 +16,7 @@
   "graphs": {
     "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts": {
       "files": {
-        "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "03bfdf25c5f013175da159d699d4d297f646e511fc7226bea7d630361d4accb0",
+        "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
         "supabase/functions/_shared/current_public_bound_cursor.ts": "36bf1a4d8307e38351b335f62330fd3bba6a900888b4a47d87ecab233ddeb14c",
         "supabase/functions/_shared/current_public_catalog.ts": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
         "supabase/functions/_shared/current_public_catalog_sql.ts": "85d4ff60680434f2202fcbf7748fb7a3e26df2759afbae235e869564eb7e2758",
@@ -92,13 +92,12 @@
         "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
-        "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f",
         "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
         "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed",
         "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "69808bb554eaf03f0b40603725795ab4ca4e0460261fae8ff9fb1dec4312a8e5",
         "supabase/functions/_shared/search_failure_diagnostic.ts": "c19df933f6106db252bb99acb9625ea38f7e7a15bc10e3286cc455a4a619ece4",
         "tests/cursor_contract_review/combined_policy_catalog_runtime.original.ts": "6d412ee5c14376ec436a420cfed5cbb0bb50dd9d44144668d5c9331ca5489b26",
-        "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts": "ced762691af079c120d849c368263b3b2e7e7fac87573da3328dbadb943063bc",
+        "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts": "edfadf80816c010fcd1d25a31758b2a6a26ba4bda3a953246c5d283a5ac0c4f1",
         "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d"
       },
       "edges": [
@@ -194,16 +193,6 @@
         ],
         [
           "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-          "./jungsi/application/score_map.ts",
-          [
-            [
-              "code",
-              "supabase/functions/_shared/jungsi/application/score_map.ts"
-            ]
-          ]
-        ],
-        [
-          "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
           "./jungsi/domain/json_value.ts",
           [
             [
@@ -219,16 +208,6 @@
             [
               "type",
               "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
-            ]
-          ]
-        ],
-        [
-          "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-          "./jungsi/infrastructure/score_map_postgres.ts",
-          [
-            [
-              "code",
-              "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts"
             ]
           ]
         ],
@@ -3887,46 +3866,6 @@
             [
               "type",
               "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
-            ]
-          ]
-        ],
-        [
-          "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
-          "../application/score_map.ts",
-          [
-            [
-              "code",
-              "supabase/functions/_shared/jungsi/application/score_map.ts"
-            ]
-          ]
-        ],
-        [
-          "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
-          "../domain/json_value.ts",
-          [
-            [
-              "code",
-              "supabase/functions/_shared/jungsi/domain/json_value.ts"
-            ]
-          ]
-        ],
-        [
-          "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
-          "./sql_values.ts",
-          [
-            [
-              "code",
-              "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
-            ]
-          ]
-        ],
-        [
-          "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
-          "./transaction_sql.ts",
-          [
-            [
-              "type",
-              "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
             ]
           ]
         ],

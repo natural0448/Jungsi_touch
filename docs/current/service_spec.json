@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.165",
+  "version": "1.9.166",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -9605,7 +9605,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.165",
+        "contract_version": "1.9.166",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -9779,7 +9779,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.165",
+        "contract_version": "1.9.166",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -9945,7 +9945,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.165",
+        "contract_version": "1.9.166",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -9964,7 +9964,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.165",
+        "contract_version": "1.9.166",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -9989,7 +9989,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.165",
+        "contract_version": "1.9.166",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -10014,7 +10014,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.165",
+        "contract_version": "1.9.166",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -18556,7 +18556,7 @@
                 "REQ-11",
                 "REQ-12"
               ],
-              "source_sha256": "03bfdf25c5f013175da159d699d4d297f646e511fc7226bea7d630361d4accb0",
+              "source_sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
               "declared_exports": [
                 "createCombinedPolicyCatalogService",
                 "createMemberShortlistCatalogService"
@@ -28104,6 +28104,18 @@
         "REQ-26"
       ],
       "summary": "리포트 읽기에서 참고 영수증의 만료·교체만 별도로 식별하여 인증·예산을 유지하며 안전한 기본 리포트로 축소한다. 전달 기록 후 유료 구성요소가 달라지는 경우는 보류한다. 참고 범위 미확보 시 동일 환산·근거의 기존 4페이지 참고 묶음을 보존하고 공개 전 독립 근거를 재검증한다. 합성 검수이며 운영 원인과 배포는 미확인이다."
+    },
+    {
+      "date": "2026-11-10",
+      "requirements": [
+        "REQ-03",
+        "REQ-13",
+        "REQ-15",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "503·4페이지 후보에서 미검증 검색 점수표 공급자의 운영 공장 연결을 제거해 기존 검색 응답 형태를 유지한다. 직접 합성 검사는 보존하고 점수 계산·쓰기·새 필드가 시작되지 않음을 검사한다. 실제 운영 소스와 롤백의 독립 검수 및 배포는 미실행이다."
     }
   ],
   "overall_analysis_contract": {
@@ -30331,11 +30343,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "6638a53a80fe4d02486e226ef6fdc8bd43ed988f779fd52d9d8bda770575353c"
+        "sha256": "d6f301205520271710727003df366db7e118212e1c25a7694abda540b160c80d"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "463c3748a67e00adfb0803b2b2d5a1082744b294feef2be39bf7b57e5acf5732"
+        "sha256": "02dc2f0d3454801bdc6c42ac5d510b45e80ad8b0c42de78fcb2f50cdd9e4ff38"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -31227,7 +31239,7 @@
       "preview_admission_guard_20261110": {
         "status": "SEARCH_PREVIEW_HELD_EXISTING_ANALYSIS_UNCHANGED",
         "reason": "catalog_only 선택에서 시험팩·산식이 제공되지 않으며 검색 미리보기의 추가 계산·SQL 취소가 기존 분석 예산에 결속됐는지 미확인이다.",
-        "behavior": "추가 계산·점수표 DB 접근 없이 기존 검색 행은 보존하고 my_score=null, my_score_state=unavailable을 반환한다. 본인 분석 및 4페이지 후보는 변경하지 않는다.",
+        "behavior": "운영 결합 검색 공장은 점수표 공급자를 연결하지 않아 추가 계산·점수표 DB 접근과 새 my_score 필드 없이 기존 검색 응답을 유지한다. 점수표 소스와 직접 합성 검사는 보류 후보로 보존한다. 본인 분석과 4페이지 후보는 변경하지 않는다.",
         "test_path": "supabase/functions/_shared/current_public_catalog_test.ts",
         "test_cases": [
           "HTTP budget or canceled admission failures are not turned into successful searches",
@@ -31235,7 +31247,8 @@
           "an already aborted request never starts optional score work",
           "disabled score map preserves search and does not touch a missing 011 table"
         ],
-        "runtime_and_011_status": "NOT_VERIFIED"
+        "runtime_and_011_status": "NOT_VERIFIED",
+        "factory_regression_test": "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts"
       },
       "owner_v2_reconciliation_20261110": {
         "source_commit": "ab11432efcd61b7290e766e17241d61441554907",
@@ -32248,7 +32261,7 @@
       "reference_tail_20261109": "진행 중: 같은 학년도·시험·기본 PK·산식·점수축의 기존 참고 분포를 재사용한다. 서비스 fc52ae2의 정확한 GitHub CI는 성공했으며, 11월 9일 23:19경 운영 함수에서 선읽기와 참고 범위 분리 코드 일부를 확인했다. 전체 배포 SHA는 미확인이다. 참고 범위 철회 시 부분 행 제거와 공식 계산 우선, 독립 scope 취소 및 기존 결과 보존은 병합 작업본의 합성 회귀에서 확인했으며 실제 DB·운영 검수는 미완료다. 참고 누백을 확정 합격판정으로 취급하지 않는다. develop 기록: 진행 중: 같은 학년도·시험·기본 PK·산식·점수축·고정 모형의 기존 참고 곡선을 재사용한다. 서비스 브랜치 ff124ba022e7b4b6a207334366db4c15001209c3과 화면 브랜치 b33ca5ee2daee1263e08067accf138fd54a959fe의 GitHub CI는 성공했다. 운영 함수 전체 Git SHA와 선택 범위는 미확인이며 운영 코드에서 ff124의 병렬 선읽기는 보이지 않았다. 한 계정의 3·4페이지에 일부 참고 결과가 표시됐지만 4페이지 재계산 1건은 percentile_provider HTTP 503이었다. 지원판단·기본 후보·와일드카드는 보류다. 후보의 취소 신호와 병렬 읽기 검수는 로컬이며 실제 네트워크 강제 종료·예산 임대·저장 후 재시도 및 운영 배포는 NOT_RUN이다. 2026-11-10 추가: 서비스 브랜치 ab11432의 GitHub push CI가 성공했다. 운영 배포 SHA와 선택된 시험팩·산식·CDF는 아직 미확인이다. 새 점수 미리보기의 선택자료·계산비용·취소 결속 검토는 진행 중이며 기획팀 통합 후보는 미배포다.",
       "reference_db_current_20261109": "진행 중: 기존 Supabase의 reference-percentile 현재 head와 같은 학년도·기본 물리 모집단위 PK로 방법과 원본 CDF를 직접 조회한다. 이미 확인된 DB 정본과 검수 근거를 재사용하며 학교 ID로 다시 묶거나 정본 자료를 별도 재수집·중복 적재하지 않는다. 공개 모집단위 ID와 물리 PK를 구별하고 다중 행은 보류한다. 읽기 전용 권한, head·방법·압축 및 원본 SHA, 시험팩·고정 모형·점수축·분모·동점 규칙을 확인한다. 기존 요청 횟수·바이트·시간·메모리와 객체 크기 제한을 유지하고 DB 요청 취소와 완료 대기를 전파한다. 정산 후 head 확인은 원래 실제 조회 시작시각 기준의 짧은 무 I/O 영수증을 사용한다. 로컬 후보, 실 DB 조회, 정확한 커밋 CI, Owner 배포와 실제 화면 검수는 별도 상태로 기록하며 참고 누백을 확정 합격판정으로 취급하지 않는다.",
       "reference_db_verification_status_20261109": "고려대 2027 가정교육과 R01·R02 각각의 기본 PK·방법·CDF 원본을 앱 DB 역할로 읽고 보관 원본 해시와 일치함을 확인했다. 입력 시험팩 보강 전후 기존 내용과 백분위 표의 관계도 로컬 대조했다. 이는 읽기·자료 검수이며 선택된 운영 시험팩과 계산기·CDF·호환 영수증 결속, 실제 Edge 요청과 운영 적용 증거는 아니다. 기존 결과·권한·예산을 유지하고 자료 재수집·CDF 중복 업로드·임의 PK 병합·추가 비용 없이 진행한다. develop 기록: 고려대 2027 교과우수 모집단위의 기본 PK·방법·CDF 원본을 앱 DB 역할로 읽고 로컬 원본 해시와 일치함을 확인했다. 이는 해당 범위의 읽기 전용 DB 검수이며 실제 Edge의 선택된 계산기·시험팩·실제 API와 운영 적용 증거는 아니다. 선택된 계산기의 원산식 ID와 참고 계산기 버전을 각각 검증하는 로컬 후보는 기존 선택 evidence 형식에 새 필드를 넣지 않는다. R13 관련 Deno 161건과 기존 R01 CDF의 모의 선택·모의 DB 어댑터 검산 9건을 통과했으며 2026년 대체 변환표와 9월 모의평가 모형의 참고값이다. 기존 결과·권한·예산을 유지하고 원본 재수집·CDF 중복 업로드·임의 PK 병합·추가 비용 없이 진행한다. 고려대 가정교육과 R01·R02 기본 PK의 기존 CDF를 앱 DB 역할 읽기와 원본 해시로 한정 확인했다. 이는 실제 운영 선택 증거가 아니다.",
-      "search_preview_review_20261110": "Owner ab11432는 검색에서 대학 분석 자료를 선택하고 점수표 v2 지문 및 일시 오류 재시도를 준비했다. 검색 추가 계산·SQL 취소와 기존 물리 예산 결속은 미확인이다. 기획팀의 별도 검토 후보는 확인 전 검색 미리보기만 unavailable로 보류하고 기존 검색과 3·4페이지 분석은 유지한다. 해당 후보는 미커밋·미배포이며 Owner와 기능 영향을 검토한다."
+      "search_preview_review_20261110": "검색 점수표는 계산 예산·SQL 취소 결속 미확인으로 계속 보류한다. 운영 결합 검색 공장에서 공급자를 연결하지 않아 기존 검색 DTO를 유지하는 소스 후보이며 실제 배포와 화면 검수는 미실행이다."
     },
     "public_result_contract": {
       "location": "본인 유료 report.analyses[offering_id].percentile",
@@ -282357,7 +282370,7 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "a4226cc08f1adae473d87606e204f7f36f6ddfc90e1d10b711044b768da16886",
+      "bridge_sha256": "a37b74fd84ea63ed6dbbd0e037432040827f91e13723cef9140a9af2a50a7071",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
       "graph_manifest_sha256": "503fc7eab07ca67b0daa50323214e116b5378fa8d5564d8bc926948f7467c52f",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
@@ -285940,7 +285953,7 @@
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-            "sha256": "03bfdf25c5f013175da159d699d4d297f646e511fc7226bea7d630361d4accb0"
+            "sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -286320,7 +286333,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "e81ec686d650ce1c3cc87800f7833b76aa11a12ab960614ba14b23efc46da1e6",
+    "manifest_sha256": "9a354bf1f3067947b036a08bd4d92a3e2bd1b6840e7d63cf19cde8789cdeed74",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

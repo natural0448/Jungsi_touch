@@ -331,7 +331,12 @@ async function setup() {
       },
     },
   } as unknown as ApprovedRuntimeBinding;
-  const data = { getCatalog: () => Promise.resolve(null) }, clock = { nowUtc: () => state.now };
+  const data = {
+      getCatalog: () => Promise.resolve(null),
+      getExamPack: () => Promise.reject(new Error("score map must remain disabled")),
+      getConversion: () => Promise.reject(new Error("score map must remain disabled")),
+    },
+    clock = { nowUtc: () => state.now };
   const make = async (d: PublicCatalogDescriptor, original = false) => {
     const raw = nativeJsonText(d, true),
       sha = await publicKeyRawHash(new TextEncoder().encode(raw));
@@ -370,6 +375,8 @@ Deno.test("actual combined factory composes verified descriptor, index and SQL w
     request("offerings.search", { academic_year: "2027", limit: "1" }),
   );
   assert(typeof first.next_cursor === "string");
+  assert(!Object.hasOwn(first, "my_score_state"));
+  for (const item of first.items as NativeObject[]) assert(!Object.hasOwn(item, "my_score"));
   equal(ids(first), ["2027:SYN-PK-1"]);
   const newer = { ...f.descriptor, version: "SYN-V2", issued_at: "2026-10-18T12:00:00Z" };
   const next = await (await f.make(newer)).execute(

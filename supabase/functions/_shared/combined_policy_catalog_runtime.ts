@@ -27,12 +27,6 @@ import { CurrentPublicMetadataKeyIndex } from "./current_public_key_index.ts";
 import { currentPublicKeyObjectReader } from "./current_public_key_storage.ts";
 import { CurrentPublicSearchScopedService } from "./current_public_scoped_service.ts";
 import {
-  type ScoreMapDataPort,
-  scoreMapPin,
-  ScoreMapService,
-} from "./jungsi/application/score_map.ts";
-import { SupabaseScoreMapStore } from "./jungsi/infrastructure/score_map_postgres.ts";
-import {
   observeKeySelection,
   SearchDiagnostic,
   type ServerOnlySink,
@@ -137,21 +131,6 @@ function createBoundCatalogService(
     if (!approvedBinding) throw new AccessError("security_policy_unavailable", 503);
     return { ...verified, runtime: approvedBinding };
   };
-  // Providers without scoring capabilities (fake test providers) keep the plain search.
-  const scoring = data as Partial<ScoreMapDataPort>;
-  const scoreMap = typeof scoring.getExamPack === "function" &&
-      typeof scoring.getConversion === "function"
-    ? () =>
-      new ScoreMapService(
-        new SupabaseScoreMapStore(
-          sql,
-          async () => (await context.binding()).repositoryLimits.maxRecordBytes,
-        ),
-        data as ScoreMapDataPort,
-        async () => await scoreMapPin((await context.binding()).references),
-        clock,
-      )
-    : undefined;
   return new CurrentPublicSearchScopedService(
     data,
     current,
@@ -160,7 +139,6 @@ function createBoundCatalogService(
     trace,
     keyBytes,
     existing,
-    scoreMap,
   );
 }
 

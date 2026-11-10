@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.165이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.166이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=7ffc205a160beda613374686668866eeeee699549b3742253fccd27cdc37e6a6 -->
+<!-- jungsi:generated spec_sha256=ee605eb161be97c890a11da326e928fc79f71cbef1dda817e43a988704d45feb -->
 
 
 ## 기존 운영 조회의 후속 검수
