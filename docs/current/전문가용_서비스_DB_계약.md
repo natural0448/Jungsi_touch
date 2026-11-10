@@ -1255,4 +1255,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=7b0164edbdb96945842656960caf5738d2a143dee925b8d979d6bd2d9252237b -->
+<!-- jungsi:generated spec_sha256=ee1bc6d44a61567b76aec93d924df88aa6b25a625f8ea3ac95d4d122eaf0e5a6 -->

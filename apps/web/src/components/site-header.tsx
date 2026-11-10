@@ -2,7 +2,7 @@ import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
 import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
-import { PAGES, lockFor } from "@/lib/routes";
+import { PAGES, ROOT_REDIRECT, lockFor } from "@/lib/routes";
 import { Tabs } from "./tabs";
 
 /**
@@ -21,7 +21,8 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             <img src="https://edutouch.co.kr/brand/logo-horizontal.png" alt="EduTouch 에듀터치" width={550} height={108} />
           </a>
           <span className="jt-sep" aria-hidden="true" />
-          <Link prefetch={false} href="/" className="jt-name">
+          {/* 루트(/)는 서버가 1페이지로 돌려보낸다. 바로 1페이지로 걸어 한 번 더 오가지 않게 한다(11-11) */}
+          <Link prefetch={false} href={ROOT_REDIRECT} className="jt-name">
             정시<em>터치</em>
           </Link>
           <div className="jt-user">
