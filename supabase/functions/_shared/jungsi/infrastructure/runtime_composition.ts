@@ -141,6 +141,14 @@ export interface SafeRuntimeObservation {
   readonly code: string | null;
   readonly request_id: string;
 }
+export interface RuntimeTimingObservation {
+  readonly kind: "timing";
+  readonly operation: string | null;
+  readonly status: number;
+  readonly request_id: string;
+  readonly total_ms: number;
+  readonly stage_ms: Readonly<Record<string, number>>;
+}
 export interface RuntimeComposition {
   readonly memberShortlistExtensions?: true;
   readonly readViewExtensions?: true;
@@ -177,6 +185,8 @@ export interface RuntimeComposition {
   readonly fetcher?: typeof fetch;
   /** Receives exactly five safe fields; never request data or exception objects. */
   readonly observe?: (event: SafeRuntimeObservation) => void | Promise<void>;
+  /** Durations only (milliseconds per stage); never request data. Sink failures are ignored. */
+  readonly observeTiming?: (event: RuntimeTimingObservation) => void | Promise<void>;
 }
 /** New route only: verify the exact issuer and phase before consulting candidate authorities. */
 export function currentPageBudgetScope(
@@ -500,20 +510,47 @@ export class NativeRuntimeApi {
       console.info(JSON.stringify(event))
     );
     let stage: ObservationStage = "entry";
+    const startedAt = performance.now(), stageMs: Record<string, number> = {};
+    let stageAt = startedAt;
+    const setStage = (next: ObservationStage) => {
+      const now = performance.now();
+      stageMs[stage] = (stageMs[stage] ?? 0) + (now - stageAt);
+      stageAt = now;
+      stage = next;
+    };
+    const reportTiming = (response: Response) => {
+      const sink = this.config.observeTiming;
+      if (!sink) return;
+      try {
+        setStage(stage);
+        const rounded: Record<string, number> = {};
+        for (const [name, ms] of Object.entries(stageMs)) {
+          if (ms >= 1) rounded[name] = Math.round(ms);
+        }
+        void Promise.resolve(sink(Object.freeze({
+          kind: "timing",
+          operation: selectedOperation,
+          status: response.status,
+          request_id: requestId,
+          total_ms: Math.round(performance.now() - startedAt),
+          stage_ms: Object.freeze(rounded),
+        }))).catch(() => {});
+      } catch { /* Timing never changes the response. */ }
+    };
     let selectedOperation: ApiOperationId | "health.ready" | null = null;
     let closeP1R27: (() => void) | undefined;
     const mark = (next: ObservationStage) => {
       const before = stage;
-      stage = next;
+      setStage(next);
       return () => {
-        stage = before;
+        setStage(before);
       };
     };
     const phase = async <T>(next: ObservationStage, work: () => Promise<T>): Promise<T> => {
       const before = stage;
-      stage = next;
+      setStage(next);
       const value = await work();
-      stage = before;
+      setStage(before);
       return value;
     };
     try {
@@ -529,9 +566,9 @@ export class NativeRuntimeApi {
       const basic = () => {
         if (!basicValue) {
           const before = stage;
-          stage = "runtime_settings";
+          setStage("runtime_settings");
           basicValue = readBasicRuntimeSettings(this.config.environment);
-          stage = before;
+          setStage(before);
         }
         return basicValue;
       };
@@ -543,9 +580,9 @@ export class NativeRuntimeApi {
         let transport = this.pools.get(key);
         if (!transport) {
           const before = stage;
-          stage = "runtime_pool";
+          setStage("runtime_pool");
           transport = new SupabaseSqlTransport(this.config.createPool(settings));
-          stage = before;
+          setStage(before);
           this.pools.set(key, transport);
         }
         requestSql = transport.fork();
@@ -560,7 +597,7 @@ export class NativeRuntimeApi {
         : operation(requestPolicies, request);
       let admissionPermit: object | undefined;
       if (selectedOperation !== null && selectedOperation !== "health.ready") {
-        stage = "relay";
+        setStage("relay");
         await relay.verify(request.headers);
         admissionPermit = issueAdmissionPermit(this.clock.nowUtc(), request);
       }
@@ -598,10 +635,10 @@ export class NativeRuntimeApi {
         return referencePorts;
       };
       if (pathname === "/health/ready" && request.method === "GET") {
-        stage = "relay";
+        setStage("relay");
         await relay.verify(request.headers);
         assertAdmissionMicros(this.clock.nowUtc());
-        stage = "readiness_schema";
+        setStage("readiness_schema");
         if (!await sql().probeUsageSchema()) {
           throw new AccessError("security_policy_unavailable", 503);
         }
@@ -610,9 +647,9 @@ export class NativeRuntimeApi {
           "00000000-0000-0000-0000-000000000000",
           this.clock.nowUtc(),
         );
-        stage = "readiness_data";
+        setStage("readiness_data");
         await context.data();
-        stage = "runtime_final_current";
+        setStage("runtime_final_current");
         await context.assertCurrent();
         return Response.json({ status: "ready", server_timezone: "UTC" }, {
           headers: { "Cache-Control": "no-store" },
@@ -626,7 +663,7 @@ export class NativeRuntimeApi {
             "profile_store",
             async () => (await context.platform()).createProfile(...a),
           );
-          stage = "profile_after_store";
+          setStage("profile_after_store");
           return value;
         },
         getProfile: async (...a) =>
@@ -651,7 +688,7 @@ export class NativeRuntimeApi {
             "report_store",
             async () => (await context.platform()).writeReport(...a),
           );
-          stage = "report_after_store";
+          setStage("report_after_store");
           return value;
         },
         activeReports: async (...a) =>
@@ -1016,7 +1053,8 @@ export class NativeRuntimeApi {
       // Successful/redirect-class representations include conditional 304 and must be current.
       if (response.status < 400) context.assertP1R27Current();
       searchCorrelation.finish(response);
-      if (response.ok) stage = "complete";
+      if (response.ok) setStage("complete");
+      reportTiming(response);
       return await observeRuntimeResponse(
         this.config.observe,
         response,
@@ -1027,6 +1065,7 @@ export class NativeRuntimeApi {
     } catch (error) {
       const response = safeFailure(error, requestId);
       searchCorrelation.finish(response);
+      reportTiming(response);
       return await observeRuntimeResponse(
         this.config.observe,
         response,

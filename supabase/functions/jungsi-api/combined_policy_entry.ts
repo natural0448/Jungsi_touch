@@ -23,5 +23,6 @@ const runtime = new NativeRuntimeApi({
   responseSchemas: currentPublicResponseSchemas(responseSchemas),
   createPool: createNativePostgresPool,
   observe: (event) => console.info(JSON.stringify(event)),
+  observeTiming: (event) => console.info(JSON.stringify(event)),
 });
 Deno.serve(createSupabaseApiIngress(runtime.fetch));

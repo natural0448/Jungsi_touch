@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.164",
-  "source_sha256": "aa0c5bd67ae115ba5a5255fc854fdce7e98fb7a1b0086301fc1d8c436363e621",
+  "source_sha256": "0eb848f58c5a16fe769c2bba797b047b02ed4a7f792f75a6980c2e3436d02e4b",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3906,11 +3906,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "91499338950e8ccf26a992b562a05c51116b68cd8d94df61b700c5650c95a5cc"
+        "sha256": "30f0a0a4dc67822a8fa72fec2e925ed39d34684b3cb1796b98f19478a1cb9648"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "5c50a14ccab7216e466d248cc4360ee9d2784e014cacb2505c503e49acf664a2"
+        "sha256": "b2ec52b87855666bb1876fb3032bd7384d4f0c0f7dbeadd83be064e52aba928f"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -5103,7 +5103,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "781f8b2ff26e9cbce8ee517551ba942fb373a5b1e2fa633270745adad2b72a1b"
+            "sha256": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
@@ -5632,7 +5632,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "781f8b2ff26e9cbce8ee517551ba942fb373a5b1e2fa633270745adad2b72a1b"
+            "sha256": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
