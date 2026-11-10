@@ -1,5 +1,6 @@
 /** Saved reference fields are released only after independent server provenance verification. */
 import { AccessError, authorizeReport } from "./access.ts";
+import { ReferenceReceiptExpired } from "./access.ts";
 import type { ApiExecution } from "./api_dispatch.ts";
 import type { PlatformRepositoryPort, StoredReport } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
@@ -232,8 +233,9 @@ export async function resolveReferenceReportProjection(input: {
       if (
         currentSignal !== signal || signal.aborted || !Number.isFinite(now) ||
         !Number.isFinite(verifiedAt) ||
-        now < verifiedAt || now - verifiedAt >= 1500
+        now < verifiedAt
       ) fail();
+      if (now - verifiedAt >= 1500) throw new ReferenceReceiptExpired();
       assertReceipt();
       sessionDto(request.session, clock.nowUtc());
     },

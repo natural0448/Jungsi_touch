@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.164",
+  "contract_version": "1.9.165",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -700,7 +700,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -766,7 +766,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",

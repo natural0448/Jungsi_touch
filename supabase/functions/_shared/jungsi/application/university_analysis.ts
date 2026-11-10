@@ -651,6 +651,37 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         }
         rows = productionRows;
       }
+      // A missing optional scope must not erase a previously saved reference for the
+      // identical conversion. The saved reference still needs independent read-side proof.
+      const retainedPriorReference = new Set<string>();
+      if (
+        op === "candidates.build" && !referenceGrant &&
+        object(record.body.analyses)
+      ) {
+        for (const [id, current] of Object.entries(results)) {
+          const previous = record.body.analyses[id];
+          if (
+            !object(previous) || !object(current) ||
+            previous.offering_id !== id ||
+            current.offering_id !== id || !object(previous.conversion) ||
+            !object(current.conversion) ||
+            !object(previous.reference_percentile) ||
+            previous.reference_percentile.status !== "reference_estimated" ||
+            object(current.reference_percentile) &&
+              current.reference_percentile.status === "reference_estimated"
+          ) continue;
+          if (
+            nativeJsonText(previous.conversion, true) !==
+              nativeJsonText(current.conversion, true)
+          ) continue;
+          current.reference_percentile = cloneNativeJson(
+            previous.reference_percentile,
+          );
+          retainedPriorReference.add(id);
+          delete freshReferenceEvidence[id];
+          delete contexts["analysis:" + id];
+        }
+      }
       if (!object(updated.analyses) || !object(updated.shortlist)) fail();
       Object.assign(updated.analyses, results);
       // Private, immutable-revision writer material. A matching hash is not an issuance
@@ -698,7 +729,9 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           object(previous) && object(current) && Object.hasOwn(previous, "reference_percentile") &&
           nativeJsonText(previous.reference_percentile, true) ===
             nativeJsonText(current.reference_percentile, true);
-        if (preserveOld || attendancePreserved.has(oid)) continue;
+        if (
+          preserveOld || attendancePreserved.has(oid) || retainedPriorReference.has(oid)
+        ) continue;
         delete legacyAssessments[oid];
         delete proofAssessments[oid];
         const item = freshReferenceEvidence[oid];
@@ -742,6 +775,68 @@ export class UniversityAnalysisService implements ApiBusinessPort {
         if (referenceGrant && object(updated.candidates)) {
           updated.candidates.reference_university_groups =
             referenceCandidateGroups(referenceRows, results).university_groups;
+        }
+        // If no new reference scope was issued, carry the exact old group only when
+        // every saved reference and conversion still matches. Read-side authority continues
+        // to verify the original receipt and the current selected source before disclosure.
+        if (
+          !referenceGrant && object(record.body.candidates) &&
+          object(updated.candidates) &&
+          Array.isArray(record.body.candidates.reference_university_groups) &&
+          object(record.body.analyses)
+        ) {
+          const oldGroups = record.body.candidates.reference_university_groups;
+          let unchanged = referenceGroupsContain(oldGroups, oldGroups);
+          for (const group of oldGroups) {
+            if (!object(group) || !Array.isArray(group.offerings)) {
+              unchanged = false;
+              break;
+            }
+            for (const row of group.offerings) {
+              if (
+                !object(row) || !object(row.offering) ||
+                typeof row.offering.offering_id !== "string"
+              ) {
+                unchanged = false;
+                break;
+              }
+              const id = row.offering.offering_id;
+              const previous = record.body.analyses[id],
+                current = updated.analyses[id];
+              if (
+                !object(previous) || !object(current) ||
+                !object(previous.conversion) ||
+                !object(current.conversion) ||
+                !object(previous.reference_percentile) ||
+                !object(current.reference_percentile) ||
+                !object(row.reference_percentile) ||
+                nativeJsonText(previous.conversion, true) !==
+                  nativeJsonText(current.conversion, true) ||
+                nativeJsonText(previous.reference_percentile, true) !==
+                  nativeJsonText(current.reference_percentile, true) ||
+                nativeJsonText(row.reference_percentile, true) !==
+                  nativeJsonText(previous.reference_percentile, true)
+              ) {
+                unchanged = false;
+                break;
+              }
+            }
+            if (!unchanged) break;
+          }
+          if (unchanged) {
+            updated.candidates.reference_university_groups = cloneNativeJson(
+              oldGroups,
+            );
+            const oldProof = record.body._reference_evidence;
+            if (
+              object(oldProof) && oldProof.candidates !== undefined &&
+              object(updated._reference_evidence)
+            ) {
+              updated._reference_evidence.candidates = cloneNativeJson(
+                oldProof.candidates,
+              );
+            }
+          }
         }
         // Retain the existing reference bundle when a newly requested reference row is
         // awaiting attendance; independently recomputed ordinary candidate groups remain current.

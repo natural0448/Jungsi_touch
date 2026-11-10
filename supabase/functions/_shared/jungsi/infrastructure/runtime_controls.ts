@@ -1,5 +1,6 @@
 /** Request-local bounded control reads. No control object is promoted to an engine artifact. */
 import { AccessError } from "../application/access.ts";
+import { ReferenceReceiptExpired, ReferenceReceiptInvalidated } from "../application/access.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import { type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
@@ -295,11 +296,16 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
       this.assertLive();
       const now = performance.now();
       if (
-        !receipt || signal.aborted || this.recentHead !== receipt.entry ||
-        receipt.head.status !== "approved" ||
+        !receipt || signal.aborted || receipt.head.status !== "approved" ||
         !Number.isFinite(now) || !Number.isFinite(receipt.startedMs) ||
-        now < receipt.startedMs || now - receipt.startedMs >= STORAGE_CHECK_REUSE_MS
+        now < receipt.startedMs
       ) fail();
+      if (this.recentHead !== receipt.entry) {
+        throw new ReferenceReceiptInvalidated("security_policy_unavailable");
+      }
+      if (now - receipt.startedMs >= STORAGE_CHECK_REUSE_MS) {
+        throw new ReferenceReceiptExpired();
+      }
     };
     check();
     return Object.freeze({ assertCurrent: check });

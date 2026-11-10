@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.164",
+  "version": "1.9.165",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -9605,7 +9605,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.164",
+        "contract_version": "1.9.165",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -9779,7 +9779,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.164",
+        "contract_version": "1.9.165",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -9945,7 +9945,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.164",
+        "contract_version": "1.9.165",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -9964,7 +9964,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.164",
+        "contract_version": "1.9.165",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -9989,7 +9989,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.164",
+        "contract_version": "1.9.165",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -10014,7 +10014,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.164",
+        "contract_version": "1.9.165",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -12019,7 +12019,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "00a5d9c33ae0929e00857a6aa33dbda176a4cfb107058eccab7533d2be1063d1",
+            "source_sha256": "97a92acbac70577384c2fa29aa8a94945d2332322b15839e40f12cd536d37d80",
             "symbols": [
               {
                 "kind": "class",
@@ -19576,7 +19576,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+              "source_sha256": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
               "declared_exports": [
                 "AccessError",
                 "authorizeUser",
@@ -20929,7 +20929,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "6cedcb7b8b4bf135300a6da847d0935eadd47f9168c370977a74fc031741b941",
+              "source_sha256": "588515fe8e413f3d6e2d19f48d0d704eec18102a11fdf7471fc1204f77677961",
               "declared_exports": [
                 "ReferenceReportEvidenceVerifier",
                 "resolveReferenceReportProjection"
@@ -21235,7 +21235,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+              "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
               "declared_exports": [
                 "PublishedForecastPort",
                 "UNIVERSITY_ANALYSIS_OPERATIONS",
@@ -21913,7 +21913,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+              "source_sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
               "declared_exports": [
                 "API_REQUEST_STAGES",
                 "ApiHttpPorts",
@@ -22759,7 +22759,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+              "source_sha256": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
               "declared_exports": [
                 "ExistingReferenceDbPin",
                 "ExistingReferencePercentileDbReader",
@@ -23014,7 +23014,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
+              "source_sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -23050,7 +23050,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+              "source_sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
               "declared_exports": [
                 "RuntimeReadBudget",
                 "SupabaseRuntimeControls"
@@ -28092,6 +28092,18 @@
         "REQ-26"
       ],
       "summary": "3·4페이지 본인 응시 확인 요청에서 이전 보류 분석 캐시의 no-op을 건너뛰어 명시 확인이 기존 예산 안의 재분석에 반영되도록 한다. 잘못된 프로필은 확인하지 않고 성적 원본을 수정하지 않는다. 합성 검증이며 운영 적용은 미확인이다."
+    },
+    {
+      "date": "2026-11-10",
+      "requirements": [
+        "REQ-03",
+        "REQ-13",
+        "REQ-15",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "리포트 읽기에서 참고 영수증의 만료·교체만 별도로 식별하여 인증·예산을 유지하며 안전한 기본 리포트로 축소한다. 전달 기록 후 유료 구성요소가 달라지는 경우는 보류한다. 참고 범위 미확보 시 동일 환산·근거의 기존 4페이지 참고 묶음을 보존하고 공개 전 독립 근거를 재검증한다. 합성 검수이며 운영 원인과 배포는 미확인이다."
     }
   ],
   "overall_analysis_contract": {
@@ -30182,7 +30194,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-          "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
+          "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -30319,11 +30331,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "30f0a0a4dc67822a8fa72fec2e925ed39d34684b3cb1796b98f19478a1cb9648"
+        "sha256": "6638a53a80fe4d02486e226ef6fdc8bd43ed988f779fd52d9d8bda770575353c"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "b2ec52b87855666bb1876fb3032bd7384d4f0c0f7dbeadd83be064e52aba928f"
+        "sha256": "463c3748a67e00adfb0803b2b2d5a1082744b294feef2be39bf7b57e5acf5732"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -30849,7 +30861,12 @@
           "reference attendance flows through owned analysis and preserves saved prior",
           "reference attendance is accepted through the existing authenticated HTTP request",
           "reference attendance needs appear as owner-only status without overwriting a prior result",
-          "unconfirmed attendance preserves prior 4-page reference groups while ordinary candidates continue"
+          "unconfirmed attendance preserves prior 4-page reference groups while ordinary candidates continue",
+          "v6 carries original reference evidence across unchanged candidate rebuild",
+          "v6 does not carry stale or inconsistent reference groups",
+          "v6 handles actual request lease and control receipt expiry without hiding other failures",
+          "v6 reproduction: reference expiry can fail both report delivery stages",
+          "v6 retains matching saved reference group when a new scope is unavailable"
         ],
         "tests/edge/test_reference_candidate_access.ts": [
           "reference scope denies unconfirmed report, unapproved catalog, lost lease or revoked release",
@@ -30908,7 +30925,8 @@
           "DB reader rejects duplicate PK, unapproved metadata and bad method hash",
           "DB source rejects changed gzip bytes and does not raise existing byte budget",
           "current DB source reads by year and physical PK and verifies original gzip and source SHA",
-          "missing PK stays missing and cancelled request cannot read source"
+          "missing PK stays missing and cancelled request cannot read source",
+          "reference DB receipt separately identifies expiry and a replaced head check"
         ],
         "tests/edge/test_reference_projection_transition.followup.synthetic.ts": [
           "a report changed after routing cannot use the old authority",
@@ -31016,8 +31034,8 @@
           "unfiltered maximum retains existing behavior for a different reference domain"
         ]
       },
-      "case_identity_sha256": "9e28548dfb867b6a0c5de1dac54ad5b3800ba56c0429bcf7f1860ecb132a58af",
-      "test_count": 193,
+      "case_identity_sha256": "e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1",
+      "test_count": 199,
       "baseline_foundation_count": 656,
       "source_bindings": [
         {
@@ -31074,7 +31092,7 @@
         },
         {
           "path": "tests/edge/test_reference_attendance_http.synthetic.ts",
-          "sha256": "e289db646c7f9c49908eca9aad7b194ba437a8fa401d1a6d2272a458e0596808"
+          "sha256": "af7fbc29d33794b13245148e6976ad92523f51314f66582a7ce51d22518b0eb5"
         },
         {
           "path": "tests/edge/test_reference_candidate_access.ts",
@@ -31102,7 +31120,7 @@
         },
         {
           "path": "tests/edge/test_reference_percentile_postgres.ts",
-          "sha256": "4ff2aa4757972420ee60677738217492dfe1b589fa3b9cd6e349ae6790dc89c1"
+          "sha256": "8dfcbaf989bce80f738b0f56ee511bc51251a93f59228e640da415910fef4578"
         },
         {
           "path": "tests/edge/test_reference_projection_transition.followup.synthetic.ts",
@@ -31114,7 +31132,7 @@
         },
         {
           "path": "tests/edge/test_reference_report_projection.ts",
-          "sha256": "ed0723c8a9d2d26891d25f62737aa48df93867eb7a5f1924733c215924158bfb"
+          "sha256": "283804b1db3da8b32a595c60a623a629eb4fdad65dfbff2522c34ad95aef6b53"
         },
         {
           "path": "tests/edge/test_reference_report_revision_read.ts",
@@ -31159,7 +31177,7 @@
       ],
       "regression_test": {
         "path": "tests/test_reference_db_suite_registration.py",
-        "sha256": "cf98ec53af577818ab4249f3d57f9348b4467298cace8c1c1dbb53cef3a0f977"
+        "sha256": "e7fb91e5538ffc6133d023a18dc9d0c231bf9378794ee9244956ed3fc200f468"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -31837,7 +31855,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210"
+            "sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
@@ -31869,11 +31887,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-            "sha256": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630"
+            "sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
@@ -40910,7 +40928,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -40976,7 +40994,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -49793,7 +49811,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+          "source_sha256": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
           "symbols": [
             {
               "declarations": [
@@ -49836,6 +49854,108 @@
                 }
               ],
               "name": "AccessError"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    code: \"security_policy_unavailable\" | \"reference_source_unavailable\" =\n      \"security_policy_unavailable\",\n  )",
+                        "params": [
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "code",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "literal",
+                                    "repr": "security_policy_unavailable",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "security_policy_unavailable"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "reference_source_unavailable",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "reference_source_unavailable"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "right": "security_policy_unavailable"
+                          }
+                        ]
+                      }
+                    ],
+                    "extends": "AccessError"
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "ReferenceReceiptExpired"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    code: \"security_policy_unavailable\" | \"reference_source_unavailable\" =\n      \"reference_source_unavailable\",\n  )",
+                        "params": [
+                          {
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "code",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "literal",
+                                    "repr": "security_policy_unavailable",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "security_policy_unavailable"
+                                    }
+                                  },
+                                  {
+                                    "kind": "literal",
+                                    "repr": "reference_source_unavailable",
+                                    "value": {
+                                      "kind": "string",
+                                      "string": "reference_source_unavailable"
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            "right": "reference_source_unavailable"
+                          }
+                        ]
+                      }
+                    ],
+                    "extends": "AccessError"
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "ReferenceReceiptInvalidated"
             },
             {
               "declarations": [
@@ -120750,6 +120870,11 @@
               "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
             },
             {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "RequestClockPort",
               "originalName": "RequestClockPort",
               "src": "supabase/functions/_shared/jungsi/application/ports.ts"
@@ -120788,7 +120913,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "6cedcb7b8b4bf135300a6da847d0935eadd47f9168c370977a74fc031741b941",
+          "source_sha256": "588515fe8e413f3d6e2d19f48d0d704eec18102a11fdf7471fc1204f77677961",
           "symbols": [
             {
               "declarations": [
@@ -132964,7 +133089,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+          "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
           "symbols": [
             {
               "declarations": [
@@ -157243,6 +157368,16 @@
               "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
             },
             {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "ReferenceReceiptInvalidated",
+              "originalName": "ReferenceReceiptInvalidated",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "RelayBoundary",
               "originalName": "RelayBoundary",
               "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
@@ -157311,6 +157446,11 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             },
             {
+              "importedName": "personalResultComponents",
+              "originalName": "personalResultComponents",
+              "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+            },
+            {
               "importedName": "publicJsonText",
               "originalName": "publicJsonText",
               "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
@@ -157326,6 +157466,11 @@
               "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
             },
             {
+              "importedName": "resultObject",
+              "originalName": "resultObject",
+              "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+            },
+            {
               "importedName": "safeFailure",
               "originalName": "safeFailure",
               "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
@@ -157336,7 +157481,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+          "source_sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
           "symbols": [
             {
               "declarations": [
@@ -159382,6 +159527,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/management_access.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../application/paid_result_components.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
               }
             ]
           },
@@ -197973,12 +198128,22 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
             },
             {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "ReferenceReceiptInvalidated",
+              "originalName": "ReferenceReceiptInvalidated",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "parseNativeJson",
               "originalName": "parseNativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+          "source_sha256": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
           "symbols": [
             {
               "declarations": [
@@ -207725,7 +207890,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
             }
           ],
-          "source_sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
+          "source_sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
           "symbols": [
             {
               "declarations": [
@@ -209507,6 +209672,16 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
             },
             {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "ReferenceReceiptInvalidated",
+              "originalName": "ReferenceReceiptInvalidated",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "RequestClockPort",
               "originalName": "RequestClockPort",
               "src": "supabase/functions/_shared/jungsi/application/ports.ts"
@@ -209537,7 +209712,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+          "source_sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
           "symbols": [
             {
               "declarations": [
@@ -259421,9 +259596,34 @@
               "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
             },
             {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "ReferenceReceiptInvalidated",
+              "originalName": "ReferenceReceiptInvalidated",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "RelayBoundary",
               "originalName": "RelayBoundary",
               "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            },
+            {
+              "importedName": "RequestLimitError",
+              "originalName": "RequestLimitError",
+              "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+            },
+            {
+              "importedName": "RuntimeReadBudget",
+              "originalName": "RuntimeReadBudget",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+            },
+            {
+              "importedName": "RuntimeReferenceFactory",
+              "originalName": "RuntimeReferenceFactory",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
             },
             {
               "importedName": "RuntimeReferenceLease",
@@ -259431,9 +259631,19 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts"
             },
             {
+              "importedName": "SYNTHETIC_RUNTIME_NOW",
+              "originalName": "SYNTHETIC_RUNTIME_NOW",
+              "src": "tests/edge/synthetic_runtime_binding.ts"
+            },
+            {
               "importedName": "SavedReferenceTailProjection",
               "originalName": "SavedReferenceTailProjection",
               "src": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
+            },
+            {
+              "importedName": "SupabaseRuntimeControls",
+              "originalName": "SupabaseRuntimeControls",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
             },
             {
               "importedName": "SyntheticNativeRepository",
@@ -259454,6 +259664,16 @@
               "importedName": "assert",
               "originalName": "assert",
               "src": "tests/edge/fixture.ts"
+            },
+            {
+              "importedName": "assertReferenceEvidenceTransition",
+              "originalName": "assertReferenceEvidenceTransition",
+              "src": "supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts"
+            },
+            {
+              "importedName": "bindRuntimeReferencePorts",
+              "originalName": "bindRuntimeReferencePorts",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
             },
             {
               "importedName": "candidateGroups",
@@ -259484,6 +259704,11 @@
               "importedName": "equal",
               "originalName": "equal",
               "src": "tests/edge/fixture.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             },
             {
               "importedName": "nativeJsonText",
@@ -259529,9 +259754,19 @@
               "importedName": "syntheticOfferingAnalysisFixture",
               "originalName": "syntheticOfferingAnalysisFixture",
               "src": "tests/edge/synthetic_offering_analysis.ts"
+            },
+            {
+              "importedName": "syntheticRuntimeBinding",
+              "originalName": "syntheticRuntimeBinding",
+              "src": "tests/edge/synthetic_runtime_binding.ts"
+            },
+            {
+              "importedName": "withMonotonic",
+              "originalName": "withMonotonic",
+              "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "e289db646c7f9c49908eca9aad7b194ba437a8fa401d1a6d2272a458e0596808",
+          "source_sha256": "af7fbc29d33794b13245148e6976ad92523f51314f66582a7ce51d22518b0eb5",
           "symbols": [
             {
               "declarations": [
@@ -260144,6 +260379,16 @@
           },
           {
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
             "specifier": "../../supabase/functions/_shared/jungsi/application/overall_analysis.ts",
             "targets": [
               {
@@ -260179,6 +260424,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/reference_report_projection.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
               }
             ]
           },
@@ -260278,11 +260533,31 @@
           },
           {
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
             "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts",
             "targets": [
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
               }
             ]
           },
@@ -260343,6 +260618,16 @@
               {
                 "kind": "code",
                 "path": "tests/edge/synthetic_platform_repository.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "./synthetic_runtime_binding.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "tests/edge/synthetic_runtime_binding.ts"
               }
             ]
           },
@@ -261616,12 +261901,30 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts"
             },
             {
+              "importedName": "REFERENCE_DB_HEAD_SQL",
+              "jsDoc": {
+                "doc": "Synthetic current DB rows only; no real credentials, values, uploads or SQL writes."
+              },
+              "originalName": "REFERENCE_DB_HEAD_SQL",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts"
+            },
+            {
               "importedName": "REFERENCE_PK_METADATA_SQL",
               "jsDoc": {
                 "doc": "Synthetic current DB rows only; no real credentials, values, uploads or SQL writes."
               },
               "originalName": "REFERENCE_PK_METADATA_SQL",
               "src": "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts"
+            },
+            {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
+              "importedName": "ReferenceReceiptInvalidated",
+              "originalName": "ReferenceReceiptInvalidated",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
             },
             {
               "importedName": "RuntimeReadBudget",
@@ -261637,9 +261940,14 @@
               "importedName": "equal",
               "originalName": "equal",
               "src": "tests/edge/fixture.ts"
+            },
+            {
+              "importedName": "withMonotonic",
+              "originalName": "withMonotonic",
+              "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "4ff2aa4757972420ee60677738217492dfe1b589fa3b9cd6e349ae6790dc89c1",
+          "source_sha256": "8dfcbaf989bce80f738b0f56ee511bc51251a93f59228e640da415910fef4578",
           "symbols": [
             {
               "declarations": [
@@ -261803,6 +262111,16 @@
           ]
         },
         "dependencies": [
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
           {
             "dynamic": false,
             "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts",
@@ -262079,6 +262397,11 @@
               "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
             },
             {
+              "importedName": "ReferenceReceiptExpired",
+              "originalName": "ReferenceReceiptExpired",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts"
+            },
+            {
               "importedName": "RuntimeReferenceLease",
               "originalName": "RuntimeReferenceLease",
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts"
@@ -262129,7 +262452,7 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "ed0723c8a9d2d26891d25f62737aa48df93867eb7a5f1924733c215924158bfb",
+          "source_sha256": "283804b1db3da8b32a595c60a623a629eb4fdad65dfbff2522c34ad95aef6b53",
           "symbols": [
             {
               "declarations": [
@@ -262169,6 +262492,16 @@
           ]
         },
         "dependencies": [
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
           {
             "dynamic": false,
             "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",
@@ -280096,7 +280429,7 @@
     },
     "prior_source_manifest_sha256": "3eb6dd06220eed171ade8b9bdc24c8059e9aeb62ab00befedb1076c34ef54b47",
     "current_source_bindings": {
-      "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+      "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
       "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
       "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -280154,7 +280487,7 @@
       "supabase/functions/_shared/jungsi/application/reference_candidates.ts": "b033073a8cf4b9adf440ba575724854226daddd6c40d64d5dae371bf2ce90702",
       "supabase/functions/_shared/jungsi/application/reference_group_merge.ts": "f721b24b6987952458531db0d00ae08a42406e9742c4fcba1289f3a23d45fa90",
       "supabase/functions/_shared/jungsi/application/reference_percentile.ts": "f4521eb38d114dd2b60563937b3a6c6fb1ed0d4330565c4a1e6115508624ed23",
-      "supabase/functions/_shared/jungsi/application/reference_report_projection.ts": "6cedcb7b8b4bf135300a6da847d0935eadd47f9168c370977a74fc031741b941",
+      "supabase/functions/_shared/jungsi/application/reference_report_projection.ts": "588515fe8e413f3d6e2d19f48d0d704eec18102a11fdf7471fc1204f77677961",
       "supabase/functions/_shared/jungsi/application/report_actions.ts": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
       "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
       "supabase/functions/_shared/jungsi/application/research_offering.ts": "61bce98d94da99f0dbccb0ab918fcafc8f36bbe553a04f25347d6e6930a30dda",
@@ -280168,7 +280501,7 @@
       "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
       "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
       "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
       "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
       "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -280195,7 +280528,7 @@
       "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
       "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
       "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-      "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+      "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
       "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
       "supabase/functions/_shared/jungsi/infrastructure/cancellable_sql_query.ts": "7666428a4e370d9791752d1a6701122611ac68db146e1af5f12dc998be88f805",
       "supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts": "4ff0e7ad1b01e3e9ec02b5c8a00a22a26cb512ad1f9d3dc47f26336ecbfe8b12",
@@ -280230,7 +280563,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/published_reference_runtime.ts": "53460640186e14596c3237c3ba32ce8c4306ccc8f68bd228876eb963539ee0fd",
       "supabase/functions/_shared/jungsi/infrastructure/published_reference_tail_issuer.ts": "8cc7e588eb3624b43b0f72265cee7ef92dfce7752d85d32e1f6ad30c6882ad99",
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-      "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+      "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
       "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
       "supabase/functions/_shared/jungsi/infrastructure/reference_report_evidence_verifier.ts": "6beb18282650c0e27d40dafbe142a6342fea6abf0d5e602dfb5580d76f845290",
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
@@ -280238,8 +280571,8 @@
       "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -280345,17 +280678,17 @@
       "tests/edge/test_read_view_runtime.ts": "cc968cc9f1c5944a21c467e82e8c9dae6d5f16e8f2b54e459be3349b19bccafe",
       "tests/edge/test_recruitment_stage_review.ts": "495f340433ac4301b36db74ee0e4fda49769ccf3517d1c93bd207a1f2205441f",
       "tests/edge/test_reference_attendance.synthetic.ts": "d886f10da052eced9cb367651cf7c8e4a5912e5ca2381885f616ee77fadc709c",
-      "tests/edge/test_reference_attendance_http.synthetic.ts": "e289db646c7f9c49908eca9aad7b194ba437a8fa401d1a6d2272a458e0596808",
+      "tests/edge/test_reference_attendance_http.synthetic.ts": "af7fbc29d33794b13245148e6976ad92523f51314f66582a7ce51d22518b0eb5",
       "tests/edge/test_reference_candidate_access.ts": "bac03b5afb5a20e8cfe2313a298c6fba808d7cdeefa73aa7c4f199951d2baad8",
       "tests/edge/test_reference_candidate_scope.ts": "b9175213b2ed963e22f000824450a483a86fbdf90259bd2394fd54a3f7be0fd7",
       "tests/edge/test_reference_candidates.ts": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8",
       "tests/edge/test_reference_db_head_latency.synthetic.ts": "7475a4903613ef424377ea9e02d5376155e93c09cd0aca9bff146c921360d27a",
       "tests/edge/test_reference_group_merge.synthetic.ts": "dc1076a49bc7afbdec07c68193988b8458cbf177b6620dd7fc70c5731eb659ef",
       "tests/edge/test_reference_percentile.ts": "5286928e9a28a7550634c2d22345183ab8b6c4c3ebf55e0629c4b1f1b227a418",
-      "tests/edge/test_reference_percentile_postgres.ts": "4ff2aa4757972420ee60677738217492dfe1b589fa3b9cd6e349ae6790dc89c1",
+      "tests/edge/test_reference_percentile_postgres.ts": "8dfcbaf989bce80f738b0f56ee511bc51251a93f59228e640da415910fef4578",
       "tests/edge/test_reference_projection_transition.followup.synthetic.ts": "d9b30112e666a07e619f28e2b517d5a692a593a216a53f5f00b5bc21d69c28a4",
       "tests/edge/test_reference_report_evidence_verifier.ts": "5bf177d01710f275df0063e46088b97a2cef4bd93084f23a5bd7e08b6e1e6c25",
-      "tests/edge/test_reference_report_projection.ts": "ed0723c8a9d2d26891d25f62737aa48df93867eb7a5f1924733c215924158bfb",
+      "tests/edge/test_reference_report_projection.ts": "283804b1db3da8b32a595c60a623a629eb4fdad65dfbff2522c34ad95aef6b53",
       "tests/edge/test_reference_report_revision_read.ts": "177140e53b4635d2be31f67c1308285b452fbc0c7c78556b8123a67ac6ece59f",
       "tests/edge/test_reference_tail_prefetch.followup.synthetic.ts": "909acf1c05d7c937cbd82fcd6e19affd39d91e8f881b6ea29f7a699bfa1600c7",
       "tests/edge/test_reference_tail_selection.ts": "1dd7607650896db3bdc5b1682bd902fb5813cf3daf20d5c1587eaa7ce3609d7b",
@@ -280495,7 +280828,7 @@
     },
     "extension_runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
-      "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+      "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
       "tests/edge/public_api_contract_fixture.ts": "c8f7059879691e4291647bcebf55cd696f7d46b7f24f3f7a40150c132aafc876",
       "tests/edge/synthetic_api_contract.ts": "a856ab6d53a83d44be4698af62145b1dec1a9160569e48ce9943e2e0468b577d",
@@ -282024,9 +282357,9 @@
       "synthetic_test_count": 21,
       "source_sha256": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
       "test_sha256": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-      "bridge_sha256": "7b3ea938f91864879ae5d7708183833e6d6809fce39825c68345a59163a01dff",
+      "bridge_sha256": "a4226cc08f1adae473d87606e204f7f36f6ddfc90e1d10b711044b768da16886",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261102.json",
-      "graph_manifest_sha256": "103466474b877c487093adea91f64898b5741d33778cf22c4d718e8263fd2b9b",
+      "graph_manifest_sha256": "503fc7eab07ca67b0daa50323214e116b5378fa8d5564d8bc926948f7467c52f",
       "scope": "Prepare a review-only descriptor from pinned previous descriptor and a candidate V3 root; verify structural head, metadata, guide and canonical coverage bindings. The function performs no direct I/O; the injected verifier port is supplied and controlled by its caller.",
       "approval_boundary": "All inputs are caller claims; runtime-shaped candidate JSON does not establish independent approval, current time/head/consumer binding, Storage permission/readback, shard contents or nationwide coverage. The actual verifier must be wired by a trusted composition.",
       "expiration": "Previous descriptor validity window is preserved, not extended.",
@@ -282209,7 +282542,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-          "sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0"
+          "sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
@@ -283253,7 +283586,7 @@
     },
     "runtime_test_bindings": {
       "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
-      "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+      "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
       "tests/edge/test_administrator_usage.ts": "858ff65182a8c55df6571e3dc34394a3670f6c1f35309655a331bb1f25828178",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
@@ -283309,7 +283642,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-          "sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0"
+          "sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
@@ -285643,7 +285976,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0"
+            "sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
@@ -285671,7 +286004,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -285976,7 +286309,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.json",
-    "manifest_sha256": "570008631e8f87713b018246153fbc7d0352fdd8c80217d3c6cea1e28e2aa67a",
+    "manifest_sha256": "75d4c7d2d61ae94a6550c548df441bf895723359f3cedddd2656c082759a4644",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -285987,7 +286320,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.json",
-    "manifest_sha256": "31023d647067ea066fddea084fa0c39b5565f672f86ae0bb995db13c3756a95f",
+    "manifest_sha256": "e81ec686d650ce1c3cc87800f7833b76aa11a12ab960614ba14b23efc46da1e6",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"

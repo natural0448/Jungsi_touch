@@ -522,8 +522,9 @@ export class NativeRuntimeRequest {
     const budget = this.budgetValue ? await this.budget() : undefined;
     return Object.freeze({
       assertCurrent: () => {
-        receipt.assertCurrent();
+        // Shared budget policy remains mandatory even if optional reference proof has expired.
         budget?.policy.assertLive();
+        receipt.assertCurrent();
       },
     });
   }

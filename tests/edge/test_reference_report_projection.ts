@@ -12,6 +12,7 @@ import type {
 } from "../../supabase/functions/_shared/jungsi/application/platform_repository.ts";
 import type { ScoreInputWorkflowPort } from "../../supabase/functions/_shared/jungsi/application/score_input_ports.ts";
 import { resolveReferenceReportProjection } from "../../supabase/functions/_shared/jungsi/application/reference_report_projection.ts";
+import { ReferenceReceiptExpired } from "../../supabase/functions/_shared/jungsi/application/access.ts";
 import { RuntimeReferenceLease } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts";
 import { bindRuntimeReferencePorts } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts";
 import { referenceRuntimeFactory } from "../../supabase/functions/_shared/jungsi/infrastructure/reference_runtime_factory.ts";
@@ -450,8 +451,8 @@ Deno.test("after settlement reference receipt uses no external I/O and expires a
     let denied = false;
     try {
       proof.assertSettled!(x.controller.signal);
-    } catch {
-      denied = true;
+    } catch (error) {
+      denied = error instanceof ReferenceReceiptExpired;
     }
     assert(denied);
     equal(reads, prior);

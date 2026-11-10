@@ -1,4 +1,6 @@
 import { assertAdmissionOrConsume } from "../application/service_end_admission.ts";
+import { personalResultComponents, resultObject } from "../application/paid_result_components.ts";
+import { ReferenceReceiptExpired, ReferenceReceiptInvalidated } from "../application/access.ts";
 /** All 25 HTTP routes (legacy 22 plus policy 3). Concrete business/provider/budget wiring is supplied separately. */
 import { AccessError, authorizeReport } from "../application/access.ts";
 import {
@@ -690,7 +692,7 @@ export function createApiHandler(
       };
       const complete = async () => {
         stage("budget");
-        const result = BUDGET_OPERATIONS.includes(
+        let result = BUDGET_OPERATIONS.includes(
             policy.id as typeof BUDGET_OPERATIONS[number],
           )
           ? await ports.budget.run(selected, work)
@@ -700,14 +702,39 @@ export function createApiHandler(
         stage("final_session");
         sessionDto(session, ports.clock.nowUtc());
         stage("final_projection");
-        if (authority && firstProjection !== null) await authority.assertCurrent(request.signal);
-        if (referenceAuthority && firstProjection !== null) {
-          referenceAuthority.assertSettled!(request.signal);
-        }
         const projection = policy.id === CURRENT_PAGE_OPERATION_ID
           ? currentPageProjection!
           : ports.projection;
-        const approved = (authority || referenceAuthority) && firstProjection !== null
+        // An expired/revoked optional reference may be removed only from an owned report read.
+        // Session, cancellation, other authority and shared-budget failures still fail closed.
+        const withoutReference = (error: unknown) => {
+          if (
+            policy.id !== "report.read" || request.signal.aborted ||
+            !(error instanceof ReferenceReceiptExpired ||
+              error instanceof ReferenceReceiptInvalidated)
+          ) throw error;
+          sessionDto(session, ports.clock.nowUtc());
+          const reduced = projection.project(
+            policy.id,
+            session.tier,
+            trustedRaw,
+            authority ?? undefined,
+          );
+          referenceAuthority = null;
+          firstProjection = authority ? publicJsonText(reduced) : null;
+          return reduced;
+        };
+        if (authority && firstProjection !== null) {
+          await authority.assertCurrent(request.signal);
+        }
+        if (referenceAuthority && firstProjection !== null) {
+          try {
+            referenceAuthority.assertSettled!(request.signal);
+          } catch (error) {
+            result = withoutReference(error);
+          }
+        }
+        let approved = (authority || referenceAuthority) && firstProjection !== null
           ? projection.project(
             policy.id,
             session.tier,
@@ -751,7 +778,7 @@ export function createApiHandler(
           policy.id === CURRENT_PAGE_OPERATION_ID &&
           (typeof responseBody !== "string" || responseBody !== firstPageProjection)
         ) configuration();
-        const response = new Response(responseBody, {
+        let response = new Response(responseBody, {
           status: encoded
             ? encoded.status
             : ["score-profile.create", "overall.analyze"].includes(policy.id)
@@ -788,19 +815,31 @@ export function createApiHandler(
         // the later receipt and actual transport are not atomic with revocation.
         if ((authority || referenceAuthority) && firstProjection !== null) {
           if (authority) await authority.assertCurrent(request.signal);
-          if (referenceAuthority) referenceAuthority.assertSettled!(request.signal);
+          if (referenceAuthority) {
+            try {
+              referenceAuthority.assertSettled!(request.signal);
+            } catch (error) {
+              result = withoutReference(error);
+              approved = result;
+              response = new Response(publicJsonText(approved), {
+                status: response.status,
+                headers: response.headers,
+              });
+            }
+          }
           if (
-            request.signal.aborted ||
-            publicJsonText(
-                ports.projection.project(
-                  policy.id,
-                  session.tier,
-                  trustedRaw,
-                  authority ?? undefined,
-                  referenceAuthority ?? undefined,
-                ),
-              ) !==
-              firstProjection
+            (authority || referenceAuthority) && firstProjection !== null &&
+            (request.signal.aborted ||
+              publicJsonText(
+                  ports.projection.project(
+                    policy.id,
+                    session.tier,
+                    trustedRaw,
+                    authority ?? undefined,
+                    referenceAuthority ?? undefined,
+                  ),
+                ) !==
+                firstProjection)
           ) configuration();
           sessionDto(session, ports.clock.nowUtc());
         }
@@ -809,7 +848,24 @@ export function createApiHandler(
         // Delivery bookkeeping may itself take time. Recheck only the local reference
         // receipt immediately before returning; never open a new external read here.
         if (referenceAuthority && firstProjection !== null) {
-          referenceAuthority.assertSettled!(request.signal);
+          try {
+            referenceAuthority.assertSettled!(request.signal);
+          } catch (error) {
+            const reduced = withoutReference(error);
+            // A completed delivery receipt must describe exactly the same paid components.
+            // If removing reference fields changes that set, retain the original failure.
+            if (
+              !resultObject(approved) || !resultObject(reduced) ||
+              JSON.stringify([...personalResultComponents(approved)].sort()) !==
+                JSON.stringify([...personalResultComponents(reduced)].sort())
+            ) throw error;
+            result = reduced;
+            approved = reduced;
+            response = new Response(publicJsonText(approved), {
+              status: response.status,
+              headers: response.headers,
+            });
+          }
         }
         return response;
       };

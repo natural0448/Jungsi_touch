@@ -2104,3 +2104,587 @@ async function attendanceCacheRegression(): Promise<void> {
     );
   }
 }
+
+import { withMonotonic } from "./fixture.ts";
+import {
+  ReferenceReceiptExpired,
+  ReferenceReceiptInvalidated,
+} from "../../supabase/functions/_shared/jungsi/application/access.ts";
+import { RequestLimitError } from "../../supabase/functions/_shared/jungsi/application/request_budget.ts";
+
+Deno.test("v6 reproduction: reference expiry can fail both report delivery stages", async () => {
+  for (
+    const delay of [
+      "fresh",
+      "budget",
+      "delivery",
+      "delivery-mismatch",
+      "auth",
+      "rate",
+      "aborted",
+      "unexpected",
+      "source-expired",
+      "reference-replaced",
+      "security",
+    ] as const
+  ) {
+    let now = 1000;
+    await withMonotonic(() => now, async () => {
+      const f = await referenceAnalysis();
+      const result = await f.service.execute(request());
+      const assessment = (result.analyses as NativeObject)[OID] as NativeObject;
+      assessment.reference_percentile = {
+        status: "reference_estimated",
+        estimated_upper_cumulative_percent_all_examinees: "10.5",
+        metric: "estimated_upper_cumulative_percent_all_examinees",
+        calculation_review_scope: "same_exam_mathematical_reference",
+        production_allowed: false,
+        actual_admission_full_total_approved: false,
+      };
+      const groups = referenceCandidateGroups(f.state.catalog!.offerings, {
+        [OID]: assessment,
+      });
+      result.candidates = {
+        status: "pending",
+        reason_code: "approved_candidates_missing",
+        basic_university_groups: [],
+        wildcards: [],
+        pending_offerings: [],
+        outside_offerings: [],
+        ineligible_offerings: [],
+        catalog_version: "SYNTHETIC-catalog.v1",
+        reference_university_groups: groups.university_groups,
+      };
+      if (delay !== "delivery-mismatch") {
+        delete (result.candidates as NativeObject).reference_university_groups;
+      }
+      const controller = new AbortController();
+      const relay = "SYNTHETIC-V6-RELAY-" + "x".repeat(32);
+      const stages: string[] = [];
+      let lastVerified = now, deliveries = 0;
+      const ports: ApiHttpPorts = {
+        relay: new RelayBoundary(relay),
+        clock: f.clock,
+        sessions: {
+          verifyUserBearer: () =>
+            Promise.resolve({ subjectId: OWNER, expiresAtUtc: NOW + 1000000n }),
+        },
+        passes: {
+          readCurrent: (subjectId, evaluatedAtUtc) =>
+            Promise.resolve({
+              authority: "public.jeongsi_passes",
+              metadataVerified: true,
+              subjectId,
+              evaluatedAtUtc,
+              paidUntilUtc: NOW + 500000n,
+            }),
+        },
+        reports: {
+          lookupAccess: () => Promise.resolve({ ownerId: OWNER, confirmed: true }),
+        },
+        authorities: {
+          readCurrent: () => {
+            throw new Error("unexpected");
+          },
+        },
+        resources: {
+          readScope: () => {
+            throw new Error("unexpected");
+          },
+        },
+        projection: new PublicResponseProjection(
+          canonicalPublicResponseSchemas(),
+          canonicalApiPolicies(),
+        ),
+        budget: {
+          async run(_request, work) {
+            const value = await work({});
+            if (
+              [
+                "budget",
+                "auth",
+                "aborted",
+                "unexpected",
+                "source-expired",
+                "reference-replaced",
+                "security",
+              ].includes(delay)
+            ) now += 1500;
+            if (delay === "aborted") controller.abort();
+            return value;
+          },
+        },
+        business: { execute: () => Promise.resolve(result) },
+        completion: {
+          async accept(_request, work) {
+            return await work();
+          },
+          async current() {},
+          async deliver() {
+            deliveries++;
+            if (delay === "rate") {
+              throw new RequestLimitError("rate_limit_exceeded", 7);
+            }
+            if (delay === "delivery" || delay === "delivery-mismatch") {
+              now += 1500;
+            }
+          },
+        },
+        referenceProjectionAuthority: {
+          async resolve(_request, raw) {
+            return {
+              async assertCurrent() {
+                lastVerified = now;
+              },
+              assertSettled() {
+                if (now - lastVerified >= 1500) {
+                  if (delay === "auth") {
+                    throw new AccessError("authentication_required", 401);
+                  }
+                  if (delay === "unexpected") {
+                    throw new Error("SYNTHETIC-unexpected");
+                  }
+                  if (delay === "security") {
+                    throw new AccessError("security_policy_unavailable", 503);
+                  }
+                  if (
+                    delay === "reference-replaced"
+                  ) {
+                    throw new ReferenceReceiptInvalidated();
+                  }
+                  throw new ReferenceReceiptExpired(
+                    delay === "source-expired"
+                      ? "reference_source_unavailable"
+                      : "security_policy_unavailable",
+                  );
+                }
+              },
+              authorizes(input) {
+                return input.operation === "report.read" && input.root === raw;
+              },
+            };
+          },
+        },
+        onStage(stage) {
+          stages.push(stage);
+        },
+      };
+      const route = canonicalApiPolicies().map(({ contract_ref: _, ...item }) => item);
+      const req = new Request(
+        "https://synthetic.invalid/api/v1/reports/" + RID,
+        {
+          signal: controller.signal,
+          headers: {
+            Authorization: "Bearer SYNTHETIC-token",
+            "X-Jungsi-Relay-Token": relay,
+          },
+        },
+      );
+      const response = await createApiHandler(route, ports)(req);
+      if (
+        ["fresh", "budget", "delivery", "source-expired", "reference-replaced"]
+          .includes(delay)
+      ) {
+        equal(response.status, 200);
+        const body = await response.json();
+        equal(body.analyses[OID].converted_score, "31.00");
+        equal(
+          Object.hasOwn(body.analyses[OID], "reference_percentile"),
+          delay === "fresh",
+        );
+        assert(!Object.hasOwn(body.candidates, "reference_university_groups"));
+        equal(deliveries, 1);
+      } else {
+        assert(response.status !== 200);
+        if (delay === "auth") equal(response.status, 401);
+        if (delay === "rate") equal(response.status, 429);
+        if (delay === "delivery-mismatch") {
+          equal(response.status, 503);
+          equal(deliveries, 1);
+        }
+      }
+    });
+  }
+});
+Deno.test("v6 retains matching saved reference group when a new scope is unavailable", async () => {
+  const f = await referenceAnalysis();
+  await f.service.execute(
+    request(
+      "university.analyze",
+      { expected_version: 1, offering_ids: [OID] },
+      "SYNTHETIC-v6-prior",
+    ),
+  );
+  const stored = f.repo.reports.get(RID)!;
+  const previous = (stored.body.analyses as NativeObject)[OID] as NativeObject;
+  previous.reference_percentile = {
+    status: "reference_estimated",
+    estimated_upper_cumulative_percent_all_examinees: "10.5",
+    metric: "estimated_upper_cumulative_percent_all_examinees",
+    calculation_review_scope: "same_exam_mathematical_reference",
+    production_allowed: false,
+    actual_admission_full_total_approved: false,
+  };
+  const priorGroups = referenceCandidateGroups(f.state.catalog!.offerings, { [OID]: previous })
+    .university_groups;
+  stored.body.candidates = {
+    status: "pending",
+    reason_code: "approved_candidates_missing",
+    basic_university_groups: [],
+    wildcards: [],
+    pending_offerings: [],
+    outside_offerings: [],
+    ineligible_offerings: [],
+    catalog_version: "SYNTHETIC-catalog.v1",
+    reference_university_groups: priorGroups,
+  };
+  const result = await f.service.execute(
+    request(
+      "candidates.build",
+      { expected_version: 2 },
+      "SYNTHETIC-v6-no-scope",
+    ),
+  );
+  equal(
+    nativeJsonText(
+      (result.candidates as NativeObject).reference_university_groups,
+      true,
+    ),
+    nativeJsonText(priorGroups, true),
+  );
+  equal(
+    ((result.analyses as NativeObject)[OID] as NativeObject).converted_score,
+    "31.00",
+  );
+});
+Deno.test("v6 does not carry stale or inconsistent reference groups", async () => {
+  for (const mode of ["different_conversion", "inconsistent_group"] as const) {
+    const f = await referenceAnalysis();
+    await f.service.execute(
+      request("university.analyze", {
+        expected_version: 1,
+        offering_ids: [OID],
+      }, "SYNTHETIC-v6-" + mode),
+    );
+    const stored = f.repo.reports.get(RID)!;
+    const previous = (stored.body.analyses as NativeObject)[OID] as NativeObject;
+    previous.reference_percentile = {
+      status: "reference_estimated",
+      estimated_upper_cumulative_percent_all_examinees: "10.5",
+      metric: "estimated_upper_cumulative_percent_all_examinees",
+      calculation_review_scope: "same_exam_mathematical_reference",
+      production_allowed: false,
+      actual_admission_full_total_approved: false,
+    };
+    const oldGroups = cloneNativeJson(
+      referenceCandidateGroups(f.state.catalog!.offerings, { [OID]: previous })
+        .university_groups,
+    ) as NativeObject[];
+    stored.body.candidates = {
+      status: "pending",
+      reason_code: "approved_candidates_missing",
+      basic_university_groups: [],
+      wildcards: [],
+      pending_offerings: [],
+      outside_offerings: [],
+      ineligible_offerings: [],
+      catalog_version: "SYNTHETIC-catalog.v1",
+      reference_university_groups: oldGroups,
+    };
+    if (mode === "different_conversion") {
+      previous.converted_score = "20.00";
+      (previous.conversion as NativeObject).converted_score = "20.00";
+    } else {
+      const row = (oldGroups[0].offerings as NativeObject[])[0];
+      (row.reference_percentile as NativeObject)
+        .estimated_upper_cumulative_percent_all_examinees = "99";
+    }
+    const result = await f.service.execute(
+      request(
+        "candidates.build",
+        { expected_version: 2 },
+        "SYNTHETIC-v6-result-" + mode,
+      ),
+    );
+    assert(
+      !Object.hasOwn(
+        result.candidates as NativeObject,
+        "reference_university_groups",
+      ),
+    );
+    if (mode === "different_conversion") {
+      const current = (result.analyses as NativeObject)[OID] as NativeObject;
+      equal(current.converted_score, "31.00");
+      assert(!Object.hasOwn(current, "reference_percentile"));
+    }
+  }
+});
+import { nativeJsonSha256 } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
+import { assertReferenceEvidenceTransition } from "../../supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts";
+Deno.test("v6 carries original reference evidence across unchanged candidate rebuild", async () => {
+  const f = await referenceAnalysis();
+  await f.service.execute(
+    request(
+      "university.analyze",
+      { expected_version: 1, offering_ids: [OID] },
+      "SYNTHETIC-v6-proof-first",
+    ),
+  );
+  const stored = f.repo.reports.get(RID)!;
+  const previous = (stored.body.analyses as NativeObject)[OID] as NativeObject;
+  previous.reference_percentile = {
+    status: "reference_estimated",
+    estimated_upper_cumulative_percent_all_examinees: "10.5",
+    metric: "estimated_upper_cumulative_percent_all_examinees",
+    calculation_review_scope: "same_exam_mathematical_reference",
+    production_allowed: false,
+    actual_admission_full_total_approved: false,
+  };
+  const oldGroups = referenceCandidateGroups(f.state.catalog!.offerings, { [OID]: previous })
+    .university_groups;
+  stored.body.candidates = {
+    status: "pending",
+    reason_code: "approved_candidates_missing",
+    basic_university_groups: [],
+    wildcards: [],
+    pending_offerings: [],
+    outside_offerings: [],
+    ineligible_offerings: [],
+    catalog_version: "SYNTHETIC-catalog.v1",
+    reference_university_groups: oldGroups,
+  };
+  const selection = "a".repeat(64);
+  stored.body._reference_evidence = {
+    format: "jungsi.reference-result-provenance/v1",
+    owner_id: OWNER,
+    report_id: RID,
+    profile_id: PID,
+    assessments: {
+      [OID]: {
+        issued_revision: 2,
+        value_sha256: await nativeJsonSha256(previous.reference_percentile),
+        provenance: { selection_sha256: selection },
+      },
+    },
+    candidates: {
+      issued_revision: 2,
+      value_sha256: await nativeJsonSha256(oldGroups),
+      selection_sha256: selection,
+      offering_ids: [OID],
+    },
+  };
+  const before = structuredClone(stored);
+  await f.service.execute(
+    request(
+      "candidates.build",
+      { expected_version: 2 },
+      "SYNTHETIC-v6-proof-second",
+    ),
+  );
+  const after = f.repo.reports.get(RID)!;
+  await assertReferenceEvidenceTransition(
+    before,
+    after.body,
+    OWNER,
+    RID,
+    PID,
+    3,
+  );
+  equal(
+    nativeJsonText(
+      (before.body._reference_evidence as NativeObject).candidates,
+      true,
+    ),
+    nativeJsonText(
+      (after.body._reference_evidence as NativeObject).candidates,
+      true,
+    ),
+  );
+});
+import {
+  RuntimeReadBudget,
+  SupabaseRuntimeControls,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts";
+import {
+  bindRuntimeReferencePorts,
+  type RuntimeReferenceFactory,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts";
+import { SYNTHETIC_RUNTIME_NOW, syntheticRuntimeBinding } from "./synthetic_runtime_binding.ts";
+
+Deno.test("v6 handles actual request lease and control receipt expiry without hiding other failures", async () => {
+  for (
+    const mode of ["budget", "delivery", "replaced", "lease-failed"] as const
+  ) {
+    let now = 1000;
+    await withMonotonic(() => now, async () => {
+      const f = await referenceAnalysis(),
+        conf = await syntheticRuntimeBinding();
+      const binding = await conf.load();
+      const readBudget = new RuntimeReadBudget({
+        maxRequests: 64,
+        maxBytes: 65536,
+      });
+      const fetcher = ((input: RequestInfo | URL) => {
+        const url = String(input);
+        const body = url.includes("/bucket/")
+          ? '{"id":"synthetic-private","public":false,"file_size_limit":65536}'
+          : conf.body.head;
+        const response = new Response(body);
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }) as typeof fetch;
+      const controls = new SupabaseRuntimeControls(
+        binding,
+        { nowUtc: () => SYNTHETIC_RUNTIME_NOW },
+        readBudget,
+        fetcher,
+      );
+      const result = await f.service.execute(request());
+      ((result.analyses as NativeObject)[OID] as NativeObject)
+        .reference_percentile = {
+          status: "reference_estimated",
+          estimated_upper_cumulative_percent_all_examinees: "10.5",
+          metric: "estimated_upper_cumulative_percent_all_examinees",
+          calculation_review_scope: "same_exam_mathematical_reference",
+          production_allowed: false,
+          actual_admission_full_total_approved: false,
+        };
+      const lease = new RuntimeReferenceLease(f.clock, async (signal) => {
+        await controls.current(signal);
+      }, async (signal) => controls.currentReceipt(signal));
+      const factory: RuntimeReferenceFactory = {
+        async create() {
+          return {
+            tail: {
+              async getReferenceTail() {
+                return null;
+              },
+            },
+            candidateScope: null,
+            projectionAuthority: {
+              async resolve(_request, raw) {
+                return {
+                  async assertCurrent() {},
+                  assertSettled() {},
+                  authorizes(input) {
+                    return input.root === raw;
+                  },
+                };
+              },
+            },
+          };
+        },
+      };
+      const relay = "SYNTHETIC-V6-CONTROLS-" + "x".repeat(32);
+      let deliveries = 0;
+      const ports: ApiHttpPorts = {
+        relay: new RelayBoundary(relay),
+        clock: f.clock,
+        sessions: {
+          verifyUserBearer: () =>
+            Promise.resolve({ subjectId: OWNER, expiresAtUtc: NOW + 1000000n }),
+        },
+        passes: {
+          readCurrent: (subjectId, evaluatedAtUtc) =>
+            Promise.resolve({
+              authority: "public.jeongsi_passes",
+              metadataVerified: true,
+              subjectId,
+              evaluatedAtUtc,
+              paidUntilUtc: NOW + 500000n,
+            }),
+        },
+        reports: {
+          lookupAccess: () => Promise.resolve({ ownerId: OWNER, confirmed: true }),
+        },
+        authorities: {
+          readCurrent: () => {
+            throw new Error("unexpected");
+          },
+        },
+        resources: {
+          readScope: () => {
+            throw new Error("unexpected");
+          },
+        },
+        projection: new PublicResponseProjection(
+          canonicalPublicResponseSchemas(),
+          canonicalApiPolicies(),
+        ),
+        budget: {
+          async run(r, work) {
+            const admission = {
+              lease: { owner: OWNER, expiresAtUtc: NOW + 500000n },
+            };
+            const value = await lease.enter(
+              r as ApiExecution,
+              admission,
+              raw.signal,
+              () => work(admission),
+            );
+            lease.markSettled();
+            if (mode === "budget") now += 1500;
+            if (mode === "lease-failed") lease.fail();
+            return value;
+          },
+        },
+        business: { execute: () => Promise.resolve(result) },
+        completion: {
+          async accept(_r, work) {
+            return await work();
+          },
+          async current() {
+            if (mode === "replaced") {
+              now += 1500;
+              await controls.current(new AbortController().signal);
+            }
+          },
+          async deliver() {
+            deliveries++;
+            if (mode === "delivery") now += 1500;
+          },
+        },
+        referenceProjectionAuthority: {
+          async resolve(r, value, admission, signal) {
+            const bound = await bindRuntimeReferencePorts(
+              factory,
+              lease,
+              {} as never,
+              {} as never,
+              r,
+              { signal, admission },
+            );
+            assert(bound);
+            return await bound.projectionAuthority.resolve(
+              r,
+              value,
+              admission,
+              signal,
+            );
+          },
+        },
+      };
+      const route = canonicalApiPolicies().map(({ contract_ref: _, ...item }) => item);
+      const raw = new Request(
+        "https://synthetic.invalid/api/v1/reports/" + RID,
+        {
+          headers: {
+            Authorization: "Bearer SYNTHETIC-token",
+            "X-Jungsi-Relay-Token": relay,
+          },
+        },
+      );
+      const response = await createApiHandler(route, ports)(raw);
+      if (mode === "lease-failed") {
+        equal(response.status, 503);
+        equal(deliveries, 0);
+      } else {
+        equal(response.status, 200);
+        const body = await response.json();
+        equal(body.analyses[OID].converted_score, "31.00");
+        assert(!Object.hasOwn(body.analyses[OID], "reference_percentile"));
+        equal(deliveries, 1);
+      }
+    });
+  }
+});

@@ -19,7 +19,7 @@
       "expected_count": 108,
       "files": {
         "src/jungsi_touch/application/public_response_schemas.json": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc",
-        "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+        "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
         "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -34,6 +34,7 @@
         "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
         "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts": "fd88739c95bc58c9c178d4bd3ac52395e90cbe46445779bd94977c0e2016768e",
         "supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
+        "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
         "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
         "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
@@ -46,7 +47,7 @@
         "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
         "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
         "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
         "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
         "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "e83c4df6858c907a81a2cc3495657f577654f63c663a3dda6a55bc6f586a87ad",
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
@@ -66,7 +67,7 @@
       "graphs": {
         "tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -1305,7 +1306,7 @@
         "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs": {
           "files": {
             "src/jungsi_touch/application/public_response_schemas.json": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -1320,6 +1321,7 @@
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
             "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts": "fd88739c95bc58c9c178d4bd3ac52395e90cbe46445779bd94977c0e2016768e",
             "supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
+            "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
             "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
@@ -1332,7 +1334,7 @@
             "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
             "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
             "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "e83c4df6858c907a81a2cc3495657f577654f63c663a3dda6a55bc6f586a87ad",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
@@ -2140,6 +2142,26 @@
               ]
             ],
             [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/json_value.ts",
+              [
+                [
+                  "type",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
+                ]
+              ]
+            ],
+            [
               "supabase/functions/_shared/jungsi/application/public_response.ts",
               "../domain/json_value.ts",
               [
@@ -2356,6 +2378,16 @@
                 [
                   "code",
                   "supabase/functions/_shared/jungsi/application/management_access.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
                 ]
               ]
             ],
@@ -3058,7 +3090,7 @@
         "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs": {
           "files": {
             "src/jungsi_touch/application/public_response_schemas.json": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -3073,6 +3105,7 @@
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
             "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts": "fd88739c95bc58c9c178d4bd3ac52395e90cbe46445779bd94977c0e2016768e",
             "supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts": "76f54539218534f679cf49d231958526265411bf94f0054f9b2e2c1b670c092f",
+            "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
             "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
@@ -3085,7 +3118,7 @@
             "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
             "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
             "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "e83c4df6858c907a81a2cc3495657f577654f63c663a3dda6a55bc6f586a87ad",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
@@ -3893,6 +3926,26 @@
               ]
             ],
             [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/json_value.ts",
+              [
+                [
+                  "type",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
+                ]
+              ]
+            ],
+            [
               "supabase/functions/_shared/jungsi/application/public_response.ts",
               "../domain/json_value.ts",
               [
@@ -4109,6 +4162,16 @@
                 [
                   "code",
                   "supabase/functions/_shared/jungsi/application/management_access.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
                 ]
               ]
             ],
@@ -4810,7 +4873,7 @@
         },
         "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -5662,7 +5725,7 @@
         },
         "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -6816,6 +6879,7 @@
           "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "application",
           "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts": "application",
           "supabase/functions/_shared/jungsi/application/p1_r27_release_gate.ts": "application",
+          "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "application",
           "supabase/functions/_shared/jungsi/application/ports.ts": "application",
           "supabase/functions/_shared/jungsi/application/public_response.ts": "application",
           "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "application",
@@ -6931,7 +6995,7 @@
         "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
         "supabase/functions/_shared/current_public_key_storage.ts": "b558d6aa3433715ec7b7679ae1a708c999f2679db859b44606c7fa4cdc0f31a8",
         "supabase/functions/_shared/current_public_scoped_service.ts": "60cf086a7e1ca5a30969857492eb0fccc11144a01aa1cf714547aadf1e8ddd91",
-        "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+        "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -6979,7 +7043,7 @@
         "supabase/functions/_shared/jungsi/application/score_map.ts": "10b78c18184a6d89bade692ff7d2f00059a1d41dc2c957be8709db29cba13e40",
         "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
         "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-        "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+        "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
         "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
         "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
         "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -7006,7 +7070,7 @@
         "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
         "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
         "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
         "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
         "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
         "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -7025,14 +7089,14 @@
         "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-        "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+        "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
         "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
         "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
         "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-        "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-        "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -7078,7 +7142,7 @@
             "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
             "supabase/functions/_shared/current_public_key_storage.ts": "b558d6aa3433715ec7b7679ae1a708c999f2679db859b44606c7fa4cdc0f31a8",
             "supabase/functions/_shared/current_public_scoped_service.ts": "60cf086a7e1ca5a30969857492eb0fccc11144a01aa1cf714547aadf1e8ddd91",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -7126,7 +7190,7 @@
             "supabase/functions/_shared/jungsi/application/score_map.ts": "10b78c18184a6d89bade692ff7d2f00059a1d41dc2c957be8709db29cba13e40",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -7153,7 +7217,7 @@
             "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
             "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
             "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
             "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -7172,14 +7236,14 @@
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
             "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
             "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
             "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -11552,6 +11616,16 @@
             ],
             [
               "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
               "../application/ports.ts",
               [
                 [
@@ -15639,7 +15713,7 @@
         "tests/search503/test_search503_final_error.synthetic.v2.mjs": {
           "files": {
             "supabase/functions/_shared/current_public_catalog.ts": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -15664,7 +15738,7 @@
             "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931",
             "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -18206,7 +18280,7 @@
           "files": {
             "supabase/functions/_shared/current_public_catalog.ts": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
             "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_metric_alias.ts": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d",
@@ -18228,7 +18302,7 @@
             "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931",
             "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts": "5cc27e4ef6310cb1d36c74c6c8cb286aa4ec69944d511717acb5a287deaf8d6e",
@@ -20680,7 +20754,7 @@
         "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
         "supabase/functions/_shared/current_public_key_storage.ts": "b558d6aa3433715ec7b7679ae1a708c999f2679db859b44606c7fa4cdc0f31a8",
         "supabase/functions/_shared/current_public_scoped_service.ts": "60cf086a7e1ca5a30969857492eb0fccc11144a01aa1cf714547aadf1e8ddd91",
-        "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+        "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -20735,7 +20809,7 @@
         "supabase/functions/_shared/jungsi/application/score_map.ts": "10b78c18184a6d89bade692ff7d2f00059a1d41dc2c957be8709db29cba13e40",
         "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
         "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-        "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+        "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
         "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
         "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
         "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -20762,7 +20836,7 @@
         "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
         "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
         "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
         "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
         "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
         "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -20788,14 +20862,14 @@
         "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-        "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+        "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
         "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
         "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
         "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-        "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-        "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -20837,7 +20911,7 @@
             "supabase/functions/_shared/current_admission_display.ts": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498",
             "supabase/functions/_shared/current_admission_owner.ts": "7b53bad066b6dfa8759b4aacf3aae25431cea6cc8cb136660247a04d98ba2fec",
             "supabase/functions/_shared/current_admission_review.ts": "b4fe63ed501ef68e8e6a292ccee03c5c75d2e5b03e5b6729b2f678bff370b68b",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
@@ -21052,7 +21126,7 @@
             "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
             "supabase/functions/_shared/current_public_key_storage.ts": "b558d6aa3433715ec7b7679ae1a708c999f2679db859b44606c7fa4cdc0f31a8",
             "supabase/functions/_shared/current_public_scoped_service.ts": "60cf086a7e1ca5a30969857492eb0fccc11144a01aa1cf714547aadf1e8ddd91",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -21107,7 +21181,7 @@
             "supabase/functions/_shared/jungsi/application/score_map.ts": "10b78c18184a6d89bade692ff7d2f00059a1d41dc2c957be8709db29cba13e40",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -21134,7 +21208,7 @@
             "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
             "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
             "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
             "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -21160,14 +21234,14 @@
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
             "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
             "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
             "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -26040,6 +26114,16 @@
             ],
             [
               "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
               "../application/ports.ts",
               [
                 [
@@ -30451,7 +30535,7 @@
         "tests/service_end/test_service_end_error_schema.synthetic.ts": {
           "files": {
             "src/jungsi_touch/application/public_response_schemas.json": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
             "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts": "6cd243ecd7e212500c00eff08357365e2bf5e4cbe25f4a964b0105a70a285b70",
@@ -30607,9 +30691,10 @@
         },
         "tests/service_end/test_service_end_http.synthetic.ts": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
+            "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
             "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
@@ -30620,7 +30705,7 @@
             "supabase/functions/_shared/jungsi/domain/json_value.ts": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
             "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
             "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts": "ea79c8bf29653cb16b6bfc57b10ec3b6ad2d29c2c9ccd182cb478116c2182b4d",
             "tests/service_end/fixture.ts": "267c4377d3852de1a289cdc87fbcb38c99929967e584c89a62b6db8c8c3a53af",
@@ -30706,6 +30791,26 @@
                 [
                   "type",
                   "supabase/functions/_shared/jungsi/application/ports.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/json_value.ts",
+              [
+                [
+                  "type",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
                 ]
               ]
             ],
@@ -30886,6 +30991,16 @@
                 [
                   "code",
                   "supabase/functions/_shared/jungsi/application/management_access.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
                 ]
               ]
             ],
@@ -31123,7 +31238,7 @@
         },
         "tests/service_end/test_service_end_official_display.synthetic.ts": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
@@ -31212,7 +31327,7 @@
         "tests/service_end/test_service_end_professional.synthetic.ts": {
           "files": {
             "src/jungsi_touch/application/public_response_schemas.json": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc",
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -31258,7 +31373,7 @@
             "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -31307,10 +31422,10 @@
             "supabase/functions/_shared/jungsi/infrastructure/professional_usage_postgres.ts": "7f36e6dbd4faffbb3e1050865e10ee42737929d9752b51b463d25b2dba1ceabc",
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
             "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11",
             "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394",
@@ -38197,7 +38312,7 @@
         },
         "tests/service_end/test_service_end_runtime.synthetic.ts": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -38243,7 +38358,7 @@
             "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -38270,7 +38385,7 @@
             "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
             "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
             "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
             "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -38289,14 +38404,14 @@
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
             "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
             "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
             "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -41954,6 +42069,16 @@
             ],
             [
               "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
               "../application/ports.ts",
               [
                 [
@@ -45394,7 +45519,7 @@
         },
         "tests/service_end/test_official_display_final_expiry.synthetic.ts": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
@@ -45754,7 +45879,7 @@
       "expected_count": 81,
       "files": {
         "src/jungsi_touch/application/public_response_schemas.json": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc",
-        "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+        "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -45805,7 +45930,7 @@
         "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
         "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
         "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-        "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+        "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
         "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
         "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
         "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -45832,7 +45957,7 @@
         "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
         "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
         "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
         "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
         "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
         "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -45851,14 +45976,14 @@
         "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-        "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+        "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
         "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
         "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
         "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-        "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-        "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -45890,7 +46015,7 @@
       "graphs": {
         "tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
@@ -47017,7 +47142,7 @@
         },
         "tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -47093,10 +47218,10 @@
             "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts": "ea759428864199a905659576f199024ace3cad7de46596670bfad615c0ade21d",
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
             "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11",
             "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394",
@@ -52160,7 +52285,7 @@
         },
         "tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -52236,10 +52361,10 @@
             "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts": "ea759428864199a905659576f199024ace3cad7de46596670bfad615c0ade21d",
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
             "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11",
             "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394",
@@ -57303,7 +57428,7 @@
         },
         "tests/service_p1/test_p1_r27_request_admission.synthetic.ts": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -57349,7 +57474,7 @@
             "supabase/functions/_shared/jungsi/application/score_input_service.ts": "26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1",
             "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
             "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+            "supabase/functions/_shared/jungsi/application/university_analysis.ts": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
             "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
             "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
             "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -57376,7 +57501,7 @@
             "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
             "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
             "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/current_page_request_ports.review-only.ts": "606d632549bf6670ce317c40aa34eefab0fd28a9130e867a2b4a83730c8a6b60",
             "supabase/functions/_shared/jungsi/infrastructure/forecast_postgres.ts": "40e88ae7691183f88ecaa4e7584bf6fc9139b7fddecd95d1392ff3201c644502",
@@ -57395,14 +57520,14 @@
             "supabase/functions/_shared/jungsi/infrastructure/project_binding.ts": "a56602afe22e4e26ef608c297e83a18a895a374adcb440f83ababb5a568cf490",
             "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
             "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
-            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+            "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
             "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
             "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
             "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
-            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+            "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
             "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
@@ -61061,6 +61186,16 @@
             ],
             [
               "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
               "../application/ports.ts",
               [
                 [
@@ -64551,7 +64686,7 @@
         },
         "tests/service_p1/test_p1_r27_http_order.synthetic.ts": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -64564,6 +64699,7 @@
             "supabase/functions/_shared/jungsi/application/p1_r27_consumer_gate.ts": "7f10d2933828363fcfefdfb1f7ab6e23edcf0dc007b6dedfa928c853f483d0b3",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_digest.ts": "7ddc81d5698fee095795bda37ffabd57221199deb210efc45fbb55a7844b8801",
             "supabase/functions/_shared/jungsi/application/p1_r27_delivery_mode.ts": "b6b13cdafeb29bb89e06d3ef6f94235c322635a24148798046cee871391c7b1d",
+            "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
             "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
@@ -64576,7 +64712,7 @@
             "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
             "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
             "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
-            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+            "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
             "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
             "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "e83c4df6858c907a81a2cc3495657f577654f63c663a3dda6a55bc6f586a87ad",
             "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",
@@ -65237,6 +65373,26 @@
               ]
             ],
             [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/json_value.ts",
+              [
+                [
+                  "type",
+                  "supabase/functions/_shared/jungsi/domain/json_value.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/application/paid_result_components.ts",
+              "../domain/native_json.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/domain/native_json.ts"
+                ]
+              ]
+            ],
+            [
               "supabase/functions/_shared/jungsi/application/public_response.ts",
               "../domain/json_value.ts",
               [
@@ -65423,6 +65579,16 @@
                 [
                   "code",
                   "supabase/functions/_shared/jungsi/application/management_access.ts"
+                ]
+              ]
+            ],
+            [
+              "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
+              "../application/paid_result_components.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
                 ]
               ]
             ],
@@ -66264,7 +66430,7 @@
         },
         "tests/service_p1/test_score_null_reason_review.synthetic.mjs": {
           "files": {
-            "supabase/functions/_shared/jungsi/application/access.ts": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+            "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/history_field_qualification.ts": "789dd3be1a7052533858fd32c12b94c3863a7d124b92a61f3c4f831cde8a159e",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",

@@ -5,7 +5,7 @@ import test_service_candidate_suites as common
 from check_edge_contract import dynamic_imports
 ROOT=Path(__file__).resolve().parents[1]
 MANIFEST='tests/reference_candidate/manifest.json'
-MANIFEST_SHA256='786bd2be16e410578f1eadd8a79d62b385b0f4bdb3281657aac866518424ee15'
+MANIFEST_SHA256='a6fde19f04c279ad43d53d73163253f5f1424457989c493c6c43d51ebd3028a9'
 ROOTS=['tests/reference_candidate/test_p1_reference_method_integrity.synthetic.mjs', 'tests/reference_candidate/test_p1_reference_port.synthetic.mjs']
 ALLOWED=['node:assert/strict', 'node:test']
 class ReferenceCandidateSuite(unittest.TestCase):

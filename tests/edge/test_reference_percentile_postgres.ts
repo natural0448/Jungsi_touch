@@ -4,11 +4,16 @@
 import {
   ExistingReferencePercentileDbReader,
   REFERENCE_CDF_BYTES_SQL,
+  REFERENCE_DB_HEAD_SQL,
   REFERENCE_PK_METADATA_SQL,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts";
 import { RuntimeReadBudget } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts";
 import type { NativeSqlTransaction } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
-import { assert, equal } from "./fixture.ts";
+import { assert, equal, withMonotonic } from "./fixture.ts";
+import {
+  ReferenceReceiptExpired,
+  ReferenceReceiptInvalidated,
+} from "../../supabase/functions/_shared/jungsi/application/access.ts";
 const H = (x: string) => x.repeat(64), owner = "00000000-0000-0000-0000-000000000001";
 async function sha(v: Uint8Array) {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-256", Uint8Array.from(v)))].map((x) =>
@@ -60,6 +65,7 @@ async function fixture(maxBytes = 50000) {
           if (s?.aborted) throw Error("aborted");
           state.reads++;
           if (sql === REFERENCE_PK_METADATA_SQL) return state.rows;
+          if (sql === REFERENCE_DB_HEAD_SQL) return [[row[0], row[1], row[2]]];
           if (sql === REFERENCE_CDF_BYTES_SQL) {
             state.bodyReads++;
             return [[state.encoded]];
@@ -134,4 +140,44 @@ Deno.test("missing PK stays missing and cancelled request cannot read source", a
   ctrl.abort();
   await denied(() => f.reader.select(owner, 2027, "physical-pk", ctrl.signal));
   equal(f.state.reads, 1);
+});
+
+Deno.test("reference DB receipt separately identifies expiry and a replaced head check", async () => {
+  let now = 1000;
+  await withMonotonic(() => now, async () => {
+    const f = await fixture();
+    const first = new AbortController(), second = new AbortController();
+    const pin = await f.reader.select(owner, 2027, "physical-pk", first.signal);
+    assert(pin);
+    await f.reader.assertCurrent(owner, pin, first.signal);
+    const receipt = f.reader.currentReceipt(pin, first.signal);
+    now += 1500;
+    let expired = false;
+    try {
+      receipt.assertCurrent();
+    } catch (error) {
+      expired = error instanceof ReferenceReceiptExpired;
+    }
+    assert(expired);
+    now += 1;
+    await f.reader.assertCurrent(owner, pin, first.signal);
+    const replacedReceipt = f.reader.currentReceipt(pin, first.signal);
+    await f.reader.assertCurrent(owner, pin, second.signal);
+    let replaced = false;
+    try {
+      replacedReceipt.assertCurrent();
+    } catch (error) {
+      replaced = error instanceof ReferenceReceiptInvalidated;
+    }
+    assert(replaced);
+    first.abort();
+    let invalid = false;
+    try {
+      replacedReceipt.assertCurrent();
+    } catch (error) {
+      invalid = !(error instanceof ReferenceReceiptExpired) &&
+        !(error instanceof ReferenceReceiptInvalidated);
+    }
+    assert(invalid);
+  });
 });

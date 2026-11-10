@@ -57,7 +57,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "9ace8634bdfff019ae8260aec4f5482956a99528ef39885051ae6536d3dbc69b",
+        "source_sha256": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "symbols": [
           {
             "declarations": [
@@ -100,6 +100,108 @@
               }
             ],
             "name": "AccessError"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(\n    code: \"security_policy_unavailable\" | \"reference_source_unavailable\" =\n      \"security_policy_unavailable\",\n  )",
+                      "params": [
+                        {
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "code",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "literal",
+                                  "repr": "security_policy_unavailable",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "security_policy_unavailable"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "reference_source_unavailable",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "reference_source_unavailable"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "right": "security_policy_unavailable"
+                        }
+                      ]
+                    }
+                  ],
+                  "extends": "AccessError"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "ReferenceReceiptExpired"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(\n    code: \"security_policy_unavailable\" | \"reference_source_unavailable\" =\n      \"reference_source_unavailable\",\n  )",
+                      "params": [
+                        {
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "code",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "literal",
+                                  "repr": "security_policy_unavailable",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "security_policy_unavailable"
+                                  }
+                                },
+                                {
+                                  "kind": "literal",
+                                  "repr": "reference_source_unavailable",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "reference_source_unavailable"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "right": "reference_source_unavailable"
+                        }
+                      ]
+                    }
+                  ],
+                  "extends": "AccessError"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "ReferenceReceiptInvalidated"
           },
           {
             "declarations": [
@@ -71014,6 +71116,11 @@
             "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
           },
           {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
             "importedName": "RequestClockPort",
             "originalName": "RequestClockPort",
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
@@ -71052,7 +71159,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "6cedcb7b8b4bf135300a6da847d0935eadd47f9168c370977a74fc031741b941",
+        "source_sha256": "588515fe8e413f3d6e2d19f48d0d704eec18102a11fdf7471fc1204f77677961",
         "symbols": [
           {
             "declarations": [
@@ -83228,7 +83335,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
+        "source_sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8",
         "symbols": [
           {
             "declarations": [
@@ -107507,6 +107614,16 @@
             "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
           },
           {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ReferenceReceiptInvalidated",
+            "originalName": "ReferenceReceiptInvalidated",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
             "importedName": "RelayBoundary",
             "originalName": "RelayBoundary",
             "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
@@ -107575,6 +107692,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           },
           {
+            "importedName": "personalResultComponents",
+            "originalName": "personalResultComponents",
+            "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+          },
+          {
             "importedName": "publicJsonText",
             "originalName": "publicJsonText",
             "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
@@ -107590,6 +107712,11 @@
             "src": "supabase/functions/_shared/jungsi/application/management_access.ts"
           },
           {
+            "importedName": "resultObject",
+            "originalName": "resultObject",
+            "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+          },
+          {
             "importedName": "safeFailure",
             "originalName": "safeFailure",
             "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
@@ -107600,7 +107727,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0",
+        "source_sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
         "symbols": [
           {
             "declarations": [
@@ -109646,6 +109773,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/management_access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/paid_result_components.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
             }
           ]
         },
@@ -148237,12 +148374,22 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
           },
           {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ReferenceReceiptInvalidated",
+            "originalName": "ReferenceReceiptInvalidated",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
             "importedName": "parseNativeJson",
             "originalName": "parseNativeJson",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "4e9692c9d9505a31641be3bf3d5054baa8e894775226544ead1b664eb5c06134",
+        "source_sha256": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
         "symbols": [
           {
             "declarations": [
@@ -157989,7 +158136,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2",
+        "source_sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
         "symbols": [
           {
             "declarations": [
@@ -159771,6 +159918,16 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
           },
           {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ReferenceReceiptInvalidated",
+            "originalName": "ReferenceReceiptInvalidated",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
             "importedName": "RequestClockPort",
             "originalName": "RequestClockPort",
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
@@ -159801,7 +159958,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630",
+        "source_sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
         "symbols": [
           {
             "declarations": [
@@ -209685,9 +209842,34 @@
             "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
           },
           {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ReferenceReceiptInvalidated",
+            "originalName": "ReferenceReceiptInvalidated",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
             "importedName": "RelayBoundary",
             "originalName": "RelayBoundary",
             "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+          },
+          {
+            "importedName": "RequestLimitError",
+            "originalName": "RequestLimitError",
+            "src": "supabase/functions/_shared/jungsi/application/request_budget.ts"
+          },
+          {
+            "importedName": "RuntimeReadBudget",
+            "originalName": "RuntimeReadBudget",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+          },
+          {
+            "importedName": "RuntimeReferenceFactory",
+            "originalName": "RuntimeReferenceFactory",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
           },
           {
             "importedName": "RuntimeReferenceLease",
@@ -209695,9 +209877,19 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts"
           },
           {
+            "importedName": "SYNTHETIC_RUNTIME_NOW",
+            "originalName": "SYNTHETIC_RUNTIME_NOW",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
             "importedName": "SavedReferenceTailProjection",
             "originalName": "SavedReferenceTailProjection",
             "src": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
+          },
+          {
+            "importedName": "SupabaseRuntimeControls",
+            "originalName": "SupabaseRuntimeControls",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
           },
           {
             "importedName": "SyntheticNativeRepository",
@@ -209718,6 +209910,16 @@
             "importedName": "assert",
             "originalName": "assert",
             "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "assertReferenceEvidenceTransition",
+            "originalName": "assertReferenceEvidenceTransition",
+            "src": "supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts"
+          },
+          {
+            "importedName": "bindRuntimeReferencePorts",
+            "originalName": "bindRuntimeReferencePorts",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
           },
           {
             "importedName": "candidateGroups",
@@ -209748,6 +209950,11 @@
             "importedName": "equal",
             "originalName": "equal",
             "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "nativeJsonSha256",
+            "originalName": "nativeJsonSha256",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
             "importedName": "nativeJsonText",
@@ -209793,9 +210000,19 @@
             "importedName": "syntheticOfferingAnalysisFixture",
             "originalName": "syntheticOfferingAnalysisFixture",
             "src": "tests/edge/synthetic_offering_analysis.ts"
+          },
+          {
+            "importedName": "syntheticRuntimeBinding",
+            "originalName": "syntheticRuntimeBinding",
+            "src": "tests/edge/synthetic_runtime_binding.ts"
+          },
+          {
+            "importedName": "withMonotonic",
+            "originalName": "withMonotonic",
+            "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "e289db646c7f9c49908eca9aad7b194ba437a8fa401d1a6d2272a458e0596808",
+        "source_sha256": "af7fbc29d33794b13245148e6976ad92523f51314f66582a7ce51d22518b0eb5",
         "symbols": [
           {
             "declarations": [
@@ -210408,6 +210625,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "../../supabase/functions/_shared/jungsi/application/overall_analysis.ts",
           "targets": [
             {
@@ -210443,6 +210670,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/reference_report_projection.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/request_budget.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/request_budget.ts"
             }
           ]
         },
@@ -210542,11 +210779,31 @@
         },
         {
           "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts",
           "targets": [
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
             }
           ]
         },
@@ -210607,6 +210864,16 @@
             {
               "kind": "code",
               "path": "tests/edge/synthetic_platform_repository.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./synthetic_runtime_binding.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "tests/edge/synthetic_runtime_binding.ts"
             }
           ]
         },
@@ -211880,12 +212147,30 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts"
           },
           {
+            "importedName": "REFERENCE_DB_HEAD_SQL",
+            "jsDoc": {
+              "doc": "Synthetic current DB rows only; no real credentials, values, uploads or SQL writes."
+            },
+            "originalName": "REFERENCE_DB_HEAD_SQL",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts"
+          },
+          {
             "importedName": "REFERENCE_PK_METADATA_SQL",
             "jsDoc": {
               "doc": "Synthetic current DB rows only; no real credentials, values, uploads or SQL writes."
             },
             "originalName": "REFERENCE_PK_METADATA_SQL",
             "src": "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts"
+          },
+          {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "ReferenceReceiptInvalidated",
+            "originalName": "ReferenceReceiptInvalidated",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
           },
           {
             "importedName": "RuntimeReadBudget",
@@ -211901,9 +212186,14 @@
             "importedName": "equal",
             "originalName": "equal",
             "src": "tests/edge/fixture.ts"
+          },
+          {
+            "importedName": "withMonotonic",
+            "originalName": "withMonotonic",
+            "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "4ff2aa4757972420ee60677738217492dfe1b589fa3b9cd6e349ae6790dc89c1",
+        "source_sha256": "8dfcbaf989bce80f738b0f56ee511bc51251a93f59228e640da415910fef4578",
         "symbols": [
           {
             "declarations": [
@@ -212067,6 +212357,16 @@
         ]
       },
       "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
         {
           "dynamic": false,
           "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts",
@@ -212343,6 +212643,11 @@
             "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
           },
           {
+            "importedName": "ReferenceReceiptExpired",
+            "originalName": "ReferenceReceiptExpired",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
             "importedName": "RuntimeReferenceLease",
             "originalName": "RuntimeReferenceLease",
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts"
@@ -212393,7 +212698,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "ed0723c8a9d2d26891d25f62737aa48df93867eb7a5f1924733c215924158bfb",
+        "source_sha256": "283804b1db3da8b32a595c60a623a629eb4fdad65dfbff2522c34ad95aef6b53",
         "symbols": [
           {
             "declarations": [
@@ -212433,6 +212738,16 @@
         ]
       },
       "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
         {
           "dynamic": false,
           "specifier": "../../supabase/functions/_shared/jungsi/application/api_dispatch.ts",

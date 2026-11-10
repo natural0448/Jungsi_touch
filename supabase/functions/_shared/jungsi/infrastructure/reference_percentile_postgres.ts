@@ -1,6 +1,7 @@
 /** Read an existing private reference-percentile head by year and physical offering PK.
  * This reader does not approve the model, grant report access, or write any data. */
 import { AccessError } from "../application/access.ts";
+import { ReferenceReceiptExpired, ReferenceReceiptInvalidated } from "../application/access.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import type { NativeObject } from "../domain/json_value.ts";
 import type { NativeSqlTransaction } from "./transaction_sql.ts";
@@ -257,9 +258,12 @@ export class ExistingReferencePercentileDbReader {
       live(signal);
       const now = performance.now();
       if (
-        this.recentHead !== row || !Number.isFinite(now) || now < row.startedMs ||
-        now - row.startedMs >= HEAD_REUSE_MS
+        !Number.isFinite(now) || now < row.startedMs
       ) fail();
+      if (this.recentHead !== row) throw new ReferenceReceiptInvalidated();
+      if (now - row.startedMs >= HEAD_REUSE_MS) {
+        throw new ReferenceReceiptExpired("reference_source_unavailable");
+      }
     };
     check();
     return Object.freeze({ assertCurrent: check });

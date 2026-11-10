@@ -1501,7 +1501,7 @@ REFERENCE_DB_TEST_PATHS = (
     'tests/edge/test_saved_tail_version_cache.repro.synthetic.ts',
     'tests/edge/test_school_reference_science_filtered.synthetic.ts',
 )
-REFERENCE_DB_CASE_IDENTITY_SHA256 = '9e28548dfb867b6a0c5de1dac54ad5b3800ba56c0429bcf7f1860ecb132a58af'
+REFERENCE_DB_CASE_IDENTITY_SHA256 = 'e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1'
 REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256 = '5a61fd9f6265ced0b3e598a4d79a6a24b1d2c8620cf89871b6b122a3fd03fb4e'
 
 
@@ -1520,7 +1520,7 @@ def reference_db_registration(spec, source_hashes=None):
         fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count", "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
         if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.reference-db-tests/v1" or
             ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(REFERENCE_DB_TEST_PATHS) or
-            type(ext["test_count"]) is not int or ext["test_count"] != 193 or
+            type(ext["test_count"]) is not int or ext["test_count"] != 199 or
             type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
             ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
             type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
@@ -1536,10 +1536,11 @@ def reference_db_registration(spec, source_hashes=None):
         added_paths = ('tests/edge/test_reference_attendance.synthetic.ts', 'tests/edge/test_reference_attendance_http.synthetic.ts', 'tests/edge/test_reference_group_merge.synthetic.ts', 'tests/edge/test_reference_db_head_latency.synthetic.ts')
         previous = {p:list(v) for p,v in cases.items() if p not in added_paths}
         previous['tests/edge/test_reference_percentile.ts'] = [v for v in previous['tests/edge/test_reference_percentile.ts'] if v != 'attendance remains required for reused and direct reference percentile paths']
+        previous['tests/edge/test_reference_percentile_postgres.ts'] = [v for v in previous['tests/edge/test_reference_percentile_postgres.ts'] if v != 'reference DB receipt separately identifies expiry and a replaced head check']
         old_digest = hashlib.sha256(json.dumps(previous,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
         if sum(map(len,previous.values())) != 178 or old_digest != REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256: raise ValueError("previous case identity")
         digest=hashlib.sha256(json.dumps(cases,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
-        if len(pairs)!=193 or len(set(pairs))!=193 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
+        if len(pairs)!=199 or len(set(pairs))!=199 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
         guard=ext["regression_test"]
         if (not isinstance(guard,dict) or set(guard)!={"path","sha256"} or guard["path"]!="tests/test_reference_db_suite_registration.py" or
             not re.fullmatch(r"[0-9a-f]{64}",str(guard["sha256"])) or source_hashes is not None and source_hashes.get(guard["path"])!=guard["sha256"]): raise ValueError("guard")

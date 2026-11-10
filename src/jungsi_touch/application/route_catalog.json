@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.164",
-  "source_sha256": "0eb848f58c5a16fe769c2bba797b047b02ed4a7f792f75a6980c2e3436d02e4b",
+  "spec_version": "1.9.165",
+  "source_sha256": "7ffc205a160beda613374686668866eeeee699549b3742253fccd27cdc37e6a6",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3769,7 +3769,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-          "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
+          "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -3906,11 +3906,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "30f0a0a4dc67822a8fa72fec2e925ed39d34684b3cb1796b98f19478a1cb9648"
+        "sha256": "6638a53a80fe4d02486e226ef6fdc8bd43ed988f779fd52d9d8bda770575353c"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "b2ec52b87855666bb1876fb3032bd7384d4f0c0f7dbeadd83be064e52aba928f"
+        "sha256": "463c3748a67e00adfb0803b2b2d5a1082744b294feef2be39bf7b57e5acf5732"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4436,7 +4436,12 @@
           "reference attendance flows through owned analysis and preserves saved prior",
           "reference attendance is accepted through the existing authenticated HTTP request",
           "reference attendance needs appear as owner-only status without overwriting a prior result",
-          "unconfirmed attendance preserves prior 4-page reference groups while ordinary candidates continue"
+          "unconfirmed attendance preserves prior 4-page reference groups while ordinary candidates continue",
+          "v6 carries original reference evidence across unchanged candidate rebuild",
+          "v6 does not carry stale or inconsistent reference groups",
+          "v6 handles actual request lease and control receipt expiry without hiding other failures",
+          "v6 reproduction: reference expiry can fail both report delivery stages",
+          "v6 retains matching saved reference group when a new scope is unavailable"
         ],
         "tests/edge/test_reference_candidate_access.ts": [
           "reference scope denies unconfirmed report, unapproved catalog, lost lease or revoked release",
@@ -4495,7 +4500,8 @@
           "DB reader rejects duplicate PK, unapproved metadata and bad method hash",
           "DB source rejects changed gzip bytes and does not raise existing byte budget",
           "current DB source reads by year and physical PK and verifies original gzip and source SHA",
-          "missing PK stays missing and cancelled request cannot read source"
+          "missing PK stays missing and cancelled request cannot read source",
+          "reference DB receipt separately identifies expiry and a replaced head check"
         ],
         "tests/edge/test_reference_projection_transition.followup.synthetic.ts": [
           "a report changed after routing cannot use the old authority",
@@ -4603,8 +4609,8 @@
           "unfiltered maximum retains existing behavior for a different reference domain"
         ]
       },
-      "case_identity_sha256": "9e28548dfb867b6a0c5de1dac54ad5b3800ba56c0429bcf7f1860ecb132a58af",
-      "test_count": 193,
+      "case_identity_sha256": "e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1",
+      "test_count": 199,
       "baseline_foundation_count": 656,
       "source_bindings": [
         {
@@ -4661,7 +4667,7 @@
         },
         {
           "path": "tests/edge/test_reference_attendance_http.synthetic.ts",
-          "sha256": "e289db646c7f9c49908eca9aad7b194ba437a8fa401d1a6d2272a458e0596808"
+          "sha256": "af7fbc29d33794b13245148e6976ad92523f51314f66582a7ce51d22518b0eb5"
         },
         {
           "path": "tests/edge/test_reference_candidate_access.ts",
@@ -4689,7 +4695,7 @@
         },
         {
           "path": "tests/edge/test_reference_percentile_postgres.ts",
-          "sha256": "4ff2aa4757972420ee60677738217492dfe1b589fa3b9cd6e349ae6790dc89c1"
+          "sha256": "8dfcbaf989bce80f738b0f56ee511bc51251a93f59228e640da415910fef4578"
         },
         {
           "path": "tests/edge/test_reference_projection_transition.followup.synthetic.ts",
@@ -4701,7 +4707,7 @@
         },
         {
           "path": "tests/edge/test_reference_report_projection.ts",
-          "sha256": "ed0723c8a9d2d26891d25f62737aa48df93867eb7a5f1924733c215924158bfb"
+          "sha256": "283804b1db3da8b32a595c60a623a629eb4fdad65dfbff2522c34ad95aef6b53"
         },
         {
           "path": "tests/edge/test_reference_report_revision_read.ts",
@@ -4746,7 +4752,7 @@
       ],
       "regression_test": {
         "path": "tests/test_reference_db_suite_registration.py",
-        "sha256": "cf98ec53af577818ab4249f3d57f9348b4467298cace8c1c1dbb53cef3a0f977"
+        "sha256": "e7fb91e5538ffc6133d023a18dc9d0c231bf9378794ee9244956ed3fc200f468"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -5075,7 +5081,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210"
+            "sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
@@ -5107,11 +5113,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-            "sha256": "632f31c8c0d47481024b75e4d1a14e5e93f399b190b6d76663ae31c0f1700630"
+            "sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
@@ -5608,7 +5614,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0"
+            "sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
@@ -5636,7 +5642,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
