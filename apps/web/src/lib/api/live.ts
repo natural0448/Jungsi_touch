@@ -270,6 +270,8 @@ async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
 /** POST/PUT 은 Idempotency-Key 가 필수. 같은 키의 재시도는 처음 결과를 돌려받는다 */
 async function write<T>(caller: Caller, method: "POST" | "PUT", path: string, body: unknown, key: string, replayable = false): Promise<Result<T>> {
   const res = await sendOnceMore(path, { method, headers: auth(caller, { "Content-Type": "application/json", "Idempotency-Key": key }), body: JSON.stringify(body) }, replayable);
+  // 쓰기를 보냈으면(성공·실패·응답 오류 모두) 이 뒤에 읽는 리포트·입력 상태는 새로 받는다
+  writeGeneration++;
   await guard(res, path);
   if (!res.ok) return { ok: false, code: (await codeOf(res, path)) ?? "request_failed", status: res.status };
   return { ok: true, value: (await res.json()) as T };
@@ -304,6 +306,23 @@ const sessionOf = cache(async (accessToken: string): Promise<Session | null> => 
   return s;
 });
 
+/*
+  현재 리포트 찾기(score-input-status)와 리포트 읽기(report.read)도 한 화면 요청 안에서는 한 번만 부른다(2026-11-10
+  부담당자 요청 3: 한 화면에 /reports/{id} 2~3번). 화면을 나눠 그리면서 여러 칸이 같은 리포트를 기다려도 서버에는 한 번만 간다.
+  React cache 는 화면 그리기 안에서만 기억하므로, 서버 액션(분석·담기)은 늘 새로 읽어 최신 판으로 쓰기를 보낸다.
+  쓰기가 성공할 때마다 writeGeneration 이 올라 기억 열쇠가 바뀐다 — 혹시 액션과 액션 뒤 다시 그리기가 같은 기억을 쓰더라도
+  쓰기 전에 읽은 리포트를 쓰기 뒤 화면에 다시 쓰지 않는다(다른 요청에는 기억을 한 번 덜 쓰는 것뿐이다).
+*/
+let writeGeneration = 0;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- _gen 은 기억 열쇠에만 쓴다
+const statusOfCached = cache((accessToken: string, examId: string, stage: string | undefined, _gen: number) =>
+  call<ScoreInputStatusDto>({ accessToken }, `/me/score-input-status${qs({ exam_id: examId, stage })}`),
+);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- _gen 은 기억 열쇠에만 쓴다
+const reportOfCached = cache((accessToken: string, reportId: string, _gen: number) => orNull(call<ReportDto>({ accessToken }, `/reports/${enc(reportId)}`)));
+const statusOf = (accessToken: string, examId: string, stage: string | undefined) => statusOfCached(accessToken, examId, stage, writeGeneration);
+const reportOf = (accessToken: string, reportId: string) => reportOfCached(accessToken, reportId, writeGeneration);
+
 export const liveSource: JungsiSource = {
   kind: "live",
   async getSession(caller) {
@@ -324,9 +343,10 @@ export const liveSource: JungsiSource = {
 
   createScoreProfile: (caller, scores, confirmed, key) => write<ProfileDto>(caller, "POST", "/score-profiles", { scores, confirmed }, key),
   analyzeOverall: (caller, body, key) => write<ReportDto>(caller, "POST", "/overall-reports", body, key),
-  readReport: (caller, reportId) => orNull(call<ReportDto>(caller, `/reports/${enc(reportId)}`)),
+  readReport: (caller, reportId) => (caller.accessToken ? reportOf(caller.accessToken, reportId) : orNull(call<ReportDto>(caller, `/reports/${enc(reportId)}`))),
   listOwnReports: (caller, q) => call<OwnReportListDto>(caller, `/me/reports${qs({ ...q })}`),
-  readScoreInputStatus: (caller, examId, stage) => call<ScoreInputStatusDto>(caller, `/me/score-input-status${qs({ exam_id: examId, stage })}`),
+  readScoreInputStatus: (caller, examId, stage) =>
+    caller.accessToken ? statusOf(caller.accessToken, examId, stage) : call<ScoreInputStatusDto>(caller, `/me/score-input-status${qs({ exam_id: examId, stage })}`),
   readReportSample: (caller) => call<SampleReportDto>(caller, "/report-sample"),
   grantScoreCorrection: (caller, body, key) => write<ScoreInputStatusDto>(caller, "POST", "/management/score-input-corrections", { ...body, reason_code: "score_correction" }, key),
   exportReport: (caller, reportId) => orNull(call<SnapshotDto>(caller, `/reports/${enc(reportId)}/print`)),

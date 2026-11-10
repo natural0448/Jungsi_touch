@@ -1,5 +1,5 @@
 import "server-only";
-import type { Caller, JungsiSource } from "@/lib/api";
+import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
 import type { AssessmentDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId } from "@/lib/report-ref";
 
@@ -35,6 +35,35 @@ export type ReportState =
 export async function loadMine(src: JungsiSource, caller: Caller): Promise<ReportDto | null> {
   const id = await currentReportId(src, caller);
   return id ? src.readReport(caller, id) : null;
+}
+
+/**
+ * 화면을 나눠 그릴 때(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기) 내 리포트를 기다리지 않고 받기 시작만 한다.
+ * 실패해도 거절되지 않는 약속으로 바꿔, 리포트가 필요한 칸만 그 결과를 기다리며 각자 안내를 그린다.
+ * 연결 문제(ConnectionError)·권한(AccessDenied)이 아닌 오류는 fatal 로 넘겨 받은 칸에서 다시 던진다(화면 오류).
+ */
+export type MineResult =
+  | { ok: true; report: ReportDto | null }
+  | { ok: false; error: ConnectionError | AccessDenied }
+  | { ok: false; fatal: unknown };
+
+export function startMine(src: JungsiSource, caller: Caller): Promise<MineResult> {
+  return loadMine(src, caller).then(
+    (report): MineResult => ({ ok: true, report }),
+    (e): MineResult => (e instanceof ConnectionError || e instanceof AccessDenied ? { ok: false, error: e } : { ok: false, fatal: e }),
+  );
+}
+
+/** 받은 결과에서 리포트를 꺼낸다. fatal 은 그 자리에서 다시 던진다 */
+export function mineReport(m: MineResult): ReportDto | null {
+  if (m.ok) return m.report;
+  if ("fatal" in m) throw m.fatal;
+  return null;
+}
+
+/** 담은 모집단위 번호(report.shortlist 의 selected). 이름(offering.read)이 없어도 담기 표시는 이것으로 그린다 */
+export function pickedIds(report: ReportDto | null): Set<string> {
+  return new Set(Object.entries(report?.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id));
 }
 
 async function retryOnConflict(src: JungsiSource, caller: Caller, report: ReportDto, run: (r: ReportDto, attempt: number) => ReturnType<JungsiSource["analyzeUniversities"]>): Promise<ReportState> {

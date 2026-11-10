@@ -1,5 +1,6 @@
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "@/components/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
@@ -7,11 +8,13 @@ import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { ShortlistTray } from "@/components/shortlist-tray";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { StatisticsDto } from "@/lib/dto";
-import { loadMine, type ReportState } from "@/lib/report-ops";
+import { LoadingNotice } from "@/components/loading-notice";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
+import type { OfferingDto, ReportDto, StatisticsDto } from "@/lib/dto";
+import { loadMine, pickedIds, type ReportState } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
-import { readPicks, type PickedItem } from "@/lib/shortlist";
+import { readPicks } from "@/lib/shortlist";
+import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
@@ -43,35 +46,35 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   const lock = lockFor(session, route);
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
 
-  const cur = parseQuery(await searchParams);
+  // 머리글은 바로 보이고, 내 리포트가 필요한 본문만 기다린다(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기)
+  const sp = await searchParams;
+  return (
+    <>
+      {head}
+      <Suspense fallback={<LoadingNotice title="유리한 대학을 불러오고 있습니다" desc="저장된 후보 목록과 와일드카드를 확인하는 중입니다." />}>
+        <Body src={src} caller={caller} sp={sp} />
+      </Suspense>
+    </>
+  );
+}
+
+async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp: Awaited<PageProps<"/admissions/favorable">["searchParams"]> }) {
+  const p3 = page("PAGE-03");
+  const cur = parseQuery(sp);
   let state: ReportState;
-  let picks: PickedItem[] = [];
-  let stats = new Map<string, StatisticsDto | null>();
   try {
     const mine = await loadMine(src, caller);
     // 저장된 후보만 읽는다. 후보가 아직 없으면 회원이 버튼을 눌러야 만든다(담당자 회신 2026-10-25)
     state = mine ? { kind: "ready", report: mine } : { kind: "none" };
-    if (state.kind === "ready") {
-      const report = state.report;
-      const c = report.candidates;
-      // 집계는 모집단위마다 따로 부른다. 펼친 학교와 와일드카드만
-      const openGroup = c?.basic_university_groups.find((g) => g.university_id === cur.open);
-      const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
-      const known = c ? [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering) : [];
-      const [p, s] = await Promise.all([readPicks(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
-      picks = p;
-      stats = new Map(s);
-    }
   } catch (e) {
-    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
-    if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
+    if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
+    if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
     throw e;
   }
 
   if (state.kind !== "ready") {
     return (
       <>
-        {head}
         <div className="wrap pg-body fv">
           <ScoreBasis overall={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
           <section className="gate flat">
@@ -92,7 +95,6 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   if (!c) {
     return (
       <>
-        {head}
         <div className="wrap pg-body fv">
           <ScoreBasis overall={report.overall} emptyText="" />
           <RunAnalysis
@@ -112,15 +114,18 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   const pendingCount = c?.pending_offerings.length ?? 0;
   const outsideCount = c?.outside_offerings?.length ?? 0;
   const ineligibleCount = c?.ineligible_offerings?.length ?? 0;
-  const picked = new Set(picks.map((p) => p.offering_id));
+  // 담기 표시는 리포트의 shortlist 로 바로 그린다. 집계(live-statistics)와 담은 학교 이름(offering.read)은 학교 목록을
+  // 막지 않게 뒤이어 받는다 — 집계 줄·담은 학교 띠만 각자 채워진다
+  const picked = pickedIds(report);
+  const stats = statsFor(src, caller, report, cur.open);
+  const known = [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering);
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
   // 유료 데이터(유리한 학교 목록)를 그린 화면: 회원 식별 표시 + 조회 기록
-  const view = viewPath(route.path, await searchParams);
+  const view = viewPath(route.path, sp);
 
   return (
     <>
-      {head}
       <MemberMark kind="recommend" path={view} />
       <div className="wrap pg-body fv">
         <ScoreBasis overall={report.overall} emptyText="" />
@@ -210,7 +215,41 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
           </aside>
         </div>
       </div>
-      <ShortlistTray items={picks} other="PAGE-03" />
+      <Suspense fallback={null}>
+        <Tray src={src} caller={caller} report={report} known={known} />
+      </Suspense>
     </>
   );
+}
+
+/** 집계는 모집단위마다 따로 부른다. 펼친 학교와 와일드카드만. 받지 못한 곳은 '집계 준비 중'으로 둔다(목록은 그대로) */
+function statsFor(src: JungsiSource, caller: Caller, report: ReportDto, open: string | undefined): StatsPromise {
+  const c = report.candidates;
+  const openGroup = c?.basic_university_groups.find((g) => g.university_id === open);
+  const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
+  const p = Promise.all(
+    ids.map(async (id) => {
+      try {
+        return [id, await src.readStatistics(caller, report.report_id, id)] as const;
+      } catch (e) {
+        if (e instanceof ConnectionError || e instanceof AccessDenied) return [id, null] as const;
+        throw e;
+      }
+    }),
+  ).then((rows) => new Map<string, StatisticsDto | null>(rows));
+  // 필터로 그 줄이 그려지지 않아 아무도 기다리지 않을 때 처리되지 않은 거절로 남지 않게 한다(기다리는 칸에는 그대로 전해진다)
+  p.catch(() => {});
+  return p;
+}
+
+/** 핵심 지원 학교 띠. 후보에 없는 담은 곳의 이름은 offering.read 로 받으므로 맨 나중에 그린다. 받지 못하면 띠만 뺀다 */
+async function Tray({ src, caller, report, known }: { src: JungsiSource; caller: Caller; report: ReportDto; known: OfferingDto[] }) {
+  let items;
+  try {
+    items = await readPicks(src, caller, report, known);
+  } catch (e) {
+    if (e instanceof ConnectionError || e instanceof AccessDenied) return null;
+    throw e;
+  }
+  return <ShortlistTray items={items} other="PAGE-03" />;
 }

@@ -1,17 +1,19 @@
 import { ConnectionNotice } from "@/components/connection-notice";
 import { MemberMark } from "@/components/member-mark";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "@/components/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, ScoreInputStatusDto } from "@/lib/dto";
 import { EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
 import { correctionExhausted } from "@/lib/superseded";
-import { readPicks, type PickedItem } from "@/lib/shortlist";
+import { readPicks } from "@/lib/shortlist";
+import { pickedIds } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
@@ -58,8 +60,19 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 입력 상태를 읽지 못하면 어느 리포트가 내 것인지 모르므로 성적 입력 칸을 열지 않고 연결 안내를 보인다(횟수를 추정하지 않는다)
   let status: ScoreInputStatusDto;
   let report: ReportDto | null = null;
+  let releaseP: Promise<string | null> = Promise.resolve(null);
+  let corrP: ReturnType<typeof myLatestCorrection> = Promise.resolve(null);
   try {
     status = await src.readScoreInputStatus(caller, EXAM.exam_id);
+    // 입력 상태만 있으면 되는 배부일·정정 요청 조회(에듀터치 DB)는 리포트를 기다리지 않고 함께 보낸다(2026-11-10 나눠 그리기)
+    // 수능 성적표 배부일(본체 관리자 설정). 가채점 정정은 배부일 전날까지만 요청·입력한다(2026-10-29 사용자 결정)
+    const st = status;
+    releaseP = st.stage === "provisional" ? csatReleaseOn(st.academic_year) : Promise.resolve(null);
+    // 성적 정정 요청(2026-10-28 사용자 결정): 이 단계의 내 마지막 요청. 표를 읽지 못하면 요청 길을 열지 않는다
+    corrP = myLatestCorrection(EXAM.exam_id, st.stage);
+    // 아래에서 연결 안내로 먼저 끝나도 처리되지 않은 거절로 남지 않게 한다(기다리는 곳에는 그대로 전해진다)
+    releaseP.catch(() => {});
+    corrP.catch(() => {});
     // 정정 입력 뒤에는 정정한 리포트가 현재 리포트다(2026-10-28 사용자 결정)
     const current = status.current_report_id;
     report = current ? await src.readReport(caller, current) : null;
@@ -68,11 +81,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
     throw e;
   }
-  // 수능 성적표 배부일(본체 관리자 설정). 가채점 정정은 배부일 전날까지만 요청·입력한다(2026-10-29 사용자 결정)
-  const releaseOn = status?.stage === "provisional" ? await csatReleaseOn(status.academic_year) : null;
+  const releaseOn = await releaseP;
   const inputOpen = canInput(status) && !correctionInputClosed(status, releaseOn);
-  // 성적 정정 요청(2026-10-28 사용자 결정): 이 단계의 내 마지막 요청. 표를 읽지 못하면 요청 길을 열지 않는다
-  const corr = status ? await myLatestCorrection(EXAM.exam_id, status.stage) : null;
+  const corr = await corrP;
   const latestCorr = corr?.row ?? null;
   const canCorrect = !!corr && canRequestCorrection(status, latestCorr, releaseOn);
   const correctHref = canCorrect || latestCorr?.status === "pending" || latestCorr?.status === "returned" ? `${route.path}?correct=1` : null;
@@ -119,17 +130,12 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     );
   }
 
-  let shortlist: PickedItem[] = [];
-  try {
-    // 리포트 열람에서는 저장된 판정만 읽는다. 분석이 없는 곳은 아래 버튼을 눌러야 계산한다(담당자 회신 2026-10-25)
-    shortlist = await readPicks(src, caller, report);
-  } catch (e) {
-    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
-    if (!(e instanceof AccessDenied)) throw e;
-  }
+  // 리포트 열람에서는 저장된 판정만 읽는다. 분석이 없는 곳은 아래 버튼을 눌러야 계산한다(담당자 회신 2026-10-25)
+  // 담은 곳의 수·분석 여부는 리포트로 바로 알고, 이름(offering.read)이 필요한 표만 뒤이어 그린다(2026-11-10 나눠 그리기)
+  const pickedList = [...pickedIds(report)];
   const a = report.overall;
   // 담은 곳 중 지금 리포트에 분석이 없는 곳(성적을 새로 넣은 뒤 등)
-  const unanalyzed = shortlist.filter((s) => !s.assessment).map((s) => s.offering_id);
+  const unanalyzed = pickedList.filter((id) => !report.analyses?.[id]);
 
   return (
     <>
@@ -158,11 +164,11 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <section aria-labelledby="sl-h" className="rp-sec">
           <div className="rp-sechd">
             <h2 id="sl-h">
-              핵심 지원 학교 <span className="num">{shortlist.length}</span>
+              핵심 지원 학교 <span className="num">{pickedList.length}</span>
             </h2>
             <Link className="btn p" href={`${route.path}/print`}>상담 리포트 인쇄용 보기</Link>
           </div>
-          {shortlist.length === 0 ? (
+          {pickedList.length === 0 ? (
             <div className="rp-empty">
               <p>아직 담은 학교가 없습니다. 아래 화면에서 마음에 드는 모집단위를 담으면 여기에 모입니다.</p>
               <div className="acts">
@@ -181,7 +187,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                   busy="분석하는 중…"
                 />
               )}
-              <PickedTable items={shortlist} />
+              <Suspense fallback={<p className="rp-note" aria-busy="true">담은 학교를 불러오는 중…</p>}>
+                <Picked src={src} caller={caller} report={report} />
+              </Suspense>
             </>
           )}
           <p className="rp-foot">모의지원 서비스에서 각 모집단위의 모집군·지원 조건·모집인원 변경을 다시 확인하세요. 정시터치는 외부 서비스에 성적을 보내거나 자동으로 등록하지 않습니다.</p>
@@ -189,6 +197,21 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
       </div>
     </>
   );
+}
+
+/** 담은 학교 표. 이름은 offering.read 로 받는다. 받지 못하면 이 자리에만 연결 안내를 보인다(위 리포트는 그대로) */
+async function Picked({ src, caller, report }: { src: JungsiSource; caller: Caller; report: ReportDto }) {
+  let items;
+  let failed: ConnectionError | AccessDenied | null = null;
+  try {
+    items = await readPicks(src, caller, report);
+  } catch (e) {
+    if (!(e instanceof ConnectionError || e instanceof AccessDenied)) throw e;
+    failed = e;
+  }
+  if (failed instanceof ConnectionError) return <ConnectionNotice e={failed} />;
+  if (failed || !items) return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요.{failed ? ` (사유 코드 ${failed.code})` : ""}</p>;
+  return <PickedTable items={items} />;
 }
 
 /** 고치기 화면은 지난 리포트의 입력값으로 채운다(서버는 기존 성적을 수정하지 않고 새 프로필을 만든다) */

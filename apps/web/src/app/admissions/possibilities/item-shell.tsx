@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, use, useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronIcon } from "@/components/icons";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
@@ -11,10 +11,12 @@ import { Published, Recruit, sameRelease } from "./recruit-parts";
  * 모집단위 한 줄. 펼치기·접기는 화면에서 바로 한다(서버 왕복 없음) — 환산·누백·판단 카드(detail)는
  * 목록을 받을 때 이미 그려 두었다. 2027 모집 정보·발행 기준만 처음 펼칠 때 그 모집단위만 받아 채운다.
  * 주소의 ?open= 은 화면 이동 없이 바꿔(공유·새로 고침 때 같은 줄이 열림) 둔다.
+ * 내 분석(a)은 목록보다 늦게 올 수 있어 약속(aP)으로 받는다. 줄·카드 틀은 먼저 보이고(2026-11-10 나눠 그리기),
+ * 내 칸(cells)·판단 카드(detail)는 서버에서 각자 Suspense 경계로 채워 온다.
  */
 export function ItemShell({
   o,
-  a,
+  aP,
   initialOpen,
   unit,
   cells,
@@ -22,7 +24,7 @@ export function ItemShell({
   detail,
 }: {
   o: OfferingDto;
-  a: Cell;
+  aP: Promise<Cell>;
   initialOpen: boolean;
   unit: ReactNode;
   cells: ReactNode;
@@ -82,7 +84,10 @@ export function ItemShell({
           ) : extras.ok ? (
             <>
               <Recruit o={o} rec={extras.rec} />
-              <Published f={extras.pub} same={sameRelease(a, extras.pub)} />
+              {/* 발행 기준이 내 판단과 같은 판인지는 내 분석이 온 뒤에 적는다(오기 전에는 비워 둔다) */}
+              <Suspense fallback={null}>
+                <PublishedFor aP={aP} f={extras.pub} />
+              </Suspense>
             </>
           ) : (
             <div className="recruit">
@@ -95,4 +100,9 @@ export function ItemShell({
       )}
     </li>
   );
+}
+
+function PublishedFor({ aP, f }: { aP: Promise<Cell>; f: Parameters<typeof Published>[0]["f"] }) {
+  const a = use(aP);
+  return <Published f={f} same={sameRelease(a, f)} />;
 }

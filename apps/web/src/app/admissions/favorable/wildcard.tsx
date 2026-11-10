@@ -1,6 +1,7 @@
-import { CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, scoreOf, StatsLine } from "@/components/offering-parts";
+import { CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, scoreOf } from "@/components/offering-parts";
+import { StatsSlot, type StatsPromise } from "@/components/stats-slot";
 import { pctText } from "@/lib/format";
-import type { CandidateItemDto, StatisticsDto, WildcardGroup, WildcardSelectionDto } from "@/lib/dto";
+import type { CandidateItemDto, WildcardGroup, WildcardSelectionDto } from "@/lib/dto";
 import { FEATURED, MAX_SELECTED, nonCsatConditionTexts, wildcardLayout, wildcardReasonText } from "@/lib/wildcard-layout";
 
 /*
@@ -20,13 +21,13 @@ const SUIT: Record<WildcardGroup, { label: string; mark: string }> = {
   railway: { label: "철도", mark: "R" },
 };
 
-export function WildcardDeck({ picks, selection, picked, stats, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; stats: Map<string, StatisticsDto | null>; canPick: boolean; analysisPending?: boolean }) {
+export function WildcardDeck({ picks, selection, picked, stats, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; stats: StatsPromise; canPick: boolean; analysisPending?: boolean }) {
   const lay = wildcardLayout(picks, selection);
   const shown = lay.featured.length + lay.rest.length;
   const groups = lay.groupLabels.join("·");
   const card = (w: CandidateItemDto, i: number) => (
     <li key={w.offering.offering_id} style={{ "--i": i } as React.CSSProperties}>
-      <WildCard w={w} on={picked.has(w.offering.offering_id)} stat={stats.get(w.offering.offering_id)} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
+      <WildCard w={w} on={picked.has(w.offering.offering_id)} stats={stats} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
     </li>
   );
   const empty = lay.status === "pending"
@@ -73,7 +74,7 @@ export function WildcardDeck({ picks, selection, picked, stats, canPick, analysi
   );
 }
 
-function WildCard({ w, on, stat, canPick, orderPending }: { w: CandidateItemDto; on: boolean; stat: StatisticsDto | null | undefined; canPick: boolean; orderPending?: boolean }) {
+function WildCard({ w, on, stats, canPick, orderPending }: { w: CandidateItemDto; on: boolean; stats: StatsPromise; canPick: boolean; orderPending?: boolean }) {
   const o = w.offering;
   const a = w.assessment;
   const suit = SUIT[o.wildcard_group ?? "health"];
@@ -129,7 +130,7 @@ function WildCard({ w, on, stat, canPick, orderPending }: { w: CandidateItemDto;
       ))}
 
       <div className="wc-stats">
-        <StatsLine s={stat} />
+        <StatsSlot p={stats} id={o.offering_id} />
       </div>
 
       {canPick && <PickButton id={o.offering_id} on={on} variant="wild" />}
