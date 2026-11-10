@@ -1,3 +1,8 @@
+// deno-lint-ignore-file require-await
+// 합성 포트 대역의 기존 비동기 반환과 실행 순서를 보존한다.
+import { RuntimeReferenceLease } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts";
+import { savedReportProjectionAuthority } from "../../supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts";
+import { referenceProjectionAuthorityPort } from "../../supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts";
 import { referenceCandidateGroups } from "../../supabase/functions/_shared/jungsi/application/reference_candidates.ts";
 import { NativeExamPack } from "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts";
 import {
@@ -24,6 +29,7 @@ import { syntheticOfferingAnalysisFixture } from "./synthetic_offering_analysis.
 import { assert, equal } from "./fixture.ts";
 import { SyntheticReferenceBytes } from "./synthetic_school_reference.ts";
 import { PinnedSchoolReferenceSource } from "../../supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts";
+import { resolveReferenceTransition } from "../../supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts";
 import {
   type ApiHttpPorts,
   createApiHandler,
@@ -846,6 +852,7 @@ async function referencePercentileSurvivesOwnedReport() {
   let dto = await response.json();
   assert(!Object.hasOwn(dto.analyses[OID], "reference_percentile"));
   assert(!Object.hasOwn(dto.candidates, "reference_university_groups"));
+  let settledChecks = 0;
   const withProof: ApiHttpPorts = {
     ...ports,
     referenceProjectionAuthority: {
@@ -854,6 +861,9 @@ async function referencePercentileSurvivesOwnedReport() {
         equal(request.session.user.subjectId, OWNER);
         assert(result === scoped && admission !== undefined && !signal.aborted);
         return {
+          assertSettled() {
+            settledChecks++;
+          },
           async assertCurrent() {
             await Promise.resolve();
             outputChecks++;
@@ -870,7 +880,215 @@ async function referencePercentileSurvivesOwnedReport() {
   dto = await response.json();
   equal(dto.analyses[OID].reference_percentile.status, "reference_estimated");
   equal(dto.candidates.reference_university_groups.length, 1);
-  assert(outputChecks >= 3);
+  assert(outputChecks >= 1 && settledChecks >= 1);
+  for (const kind of ["legacy", "valid", "invalid"] as const) {
+    let legacyCalls = 0, provenCalls = 0;
+    const body: NativeObject = kind === "legacy"
+      ? {}
+      : { _reference_evidence: kind === "valid" ? { format: "synthetic" } : null };
+    const routed: ApiHttpPorts = {
+      ...ports,
+      referenceProjectionAuthority: {
+        async resolve(_request, _result, _admission, signal) {
+          const authority = {
+            async assertCurrent() {},
+            assertSettled() {},
+            authorizes(input: { root: unknown }) {
+              return input.root === scoped;
+            },
+          };
+          return await resolveReferenceTransition({
+            signal,
+            async readOwnedCurrent() {
+              return { body };
+            },
+            async resolveLegacy() {
+              legacyCalls++;
+              return authority;
+            },
+            async resolveProven() {
+              provenCalls++;
+              return kind === "valid" ? authority : null;
+            },
+            async captureReceipt() {
+              return { assertCurrent() {} };
+            },
+            assertSettledRequest() {},
+          });
+        },
+      },
+    };
+    const rendered = await createApiHandler(route, routed)(readRequest());
+    equal(rendered.status, 200);
+    const parsed = await rendered.json();
+    equal(Object.hasOwn(parsed.analyses[OID], "reference_percentile"), kind !== "invalid");
+    equal(legacyCalls, kind === "legacy" ? 1 : 0);
+    equal(provenCalls, kind === "legacy" ? 0 : 1);
+  }
+  // Exercise the actual HTTP handler and runtime authority helper with distinct factory modes.
+  for (const mode of ["not_configured", "unselected", "failed", "selected"] as const) {
+    const raw = readRequest();
+    let legacyCalls = 0, factoryCalls = 0, receiptChecks = 0;
+    const head = {
+      async referenceTailPins() {
+        return true;
+      },
+      async assertCurrentSelection(_strict: boolean, s?: AbortSignal) {
+        if (s?.aborted) throw Error("aborted");
+      },
+      hasReferenceTail(id: string) {
+        return id === OID;
+      },
+    };
+    const ctx = {
+      async data() {
+        return head;
+      },
+      async assertCurrent(signal?: AbortSignal) {
+        if (signal?.aborted) throw Error("aborted");
+      },
+    };
+    const receipt = async () => ({
+      assertCurrent() {
+        receiptChecks++;
+      },
+    });
+    const lease = new RuntimeReferenceLease(f.clock, (s) => ctx.assertCurrent(s), receipt);
+    const authority = savedReportProjectionAuthority({
+      repository: f.repo,
+      lease,
+      factoryConfigured: mode !== "not_configured",
+      reference: async () => {
+        factoryCalls++;
+        if (mode === "failed") throw Error("synthetic factory failure");
+        return mode === "selected"
+          ? {
+            projectionAuthority: {
+              async resolve() {
+                return null;
+              },
+            },
+          } as never
+          : null;
+      },
+      legacy: async (r, result, admission, signal) => {
+        legacyCalls++;
+        return await referenceProjectionAuthorityPort(ctx as never).resolve(
+          r,
+          result,
+          admission,
+          signal,
+        );
+      },
+      receipt,
+    });
+    const withLease: ApiHttpPorts = {
+      ...ports,
+      referenceProjectionAuthority: authority,
+      budget: {
+        async run(r, work) {
+          const admission = { lease: { owner: OWNER, expiresAtUtc: NOW + 500000n } };
+          const value = await lease.enter(
+            r as ApiExecution,
+            admission,
+            raw.signal,
+            () => work(admission),
+          );
+          lease.markSettled();
+          return value;
+        },
+      },
+    };
+    const rendered = await createApiHandler(route, withLease)(raw);
+    equal(rendered.status, 200);
+    const parsed = await rendered.json(),
+      shown = Object.hasOwn(parsed.analyses[OID], "reference_percentile");
+    equal(shown, mode === "not_configured" || mode === "selected");
+    equal(legacyCalls, mode === "not_configured" || mode === "selected" ? 1 : 0);
+    if (shown) assert(receiptChecks > 0);
+    if (mode === "not_configured") equal(factoryCalls, 0);
+    else assert(factoryCalls > 0);
+  }
+  for (const kind of ["evidence_present", "evidence_deleted", "wrong_owner"] as const) {
+    const raw = readRequest(), original = await f.repo.getReport(OWNER, RID);
+    assert(original);
+    const marked = {
+      ...original,
+      body: { ...structuredClone(original.body), _reference_evidence: { format: "synthetic" } },
+    };
+    const current = kind === "evidence_present"
+      ? marked
+      : kind === "wrong_owner"
+      ? { ...original, owner_id: "other" }
+      : original;
+    const repository = {
+      lookupAccess: f.repo.lookupAccess.bind(f.repo),
+      async getReport() {
+        return current;
+      },
+      async getReportRevision(_owner: string, _id: string, n: number) {
+        return n === current.revision
+          ? (kind === "evidence_deleted" ? marked : current)
+          : await f.repo.getReportRevision(OWNER, RID, n);
+      },
+    };
+    const head = {
+      async referenceTailPins() {
+        return true;
+      },
+      async assertCurrentSelection() {},
+      hasReferenceTail(id: string) {
+        return id === OID;
+      },
+    };
+    const ctx = {
+      async data() {
+        return head;
+      },
+      async assertCurrent() {},
+    };
+    const receipt = async () => ({ assertCurrent() {} }),
+      lease = new RuntimeReferenceLease(f.clock, () => ctx.assertCurrent(), receipt);
+    let legacyCalls = 0;
+    const authority = savedReportProjectionAuthority({
+      repository,
+      lease,
+      factoryConfigured: false,
+      reference: async () => null,
+      legacy: async (r, result, admission, signal) => {
+        legacyCalls++;
+        return await referenceProjectionAuthorityPort(ctx as never).resolve(
+          r,
+          result,
+          admission,
+          signal,
+        );
+      },
+      receipt,
+    });
+    const guarded: ApiHttpPorts = {
+      ...ports,
+      referenceProjectionAuthority: authority,
+      budget: {
+        async run(r, work) {
+          const admission = { lease: { owner: OWNER, expiresAtUtc: NOW + 500000n } };
+          const value = await lease.enter(
+            r as ApiExecution,
+            admission,
+            raw.signal,
+            () => work(admission),
+          );
+          lease.markSettled();
+          return value;
+        },
+      },
+    };
+    const rendered = await createApiHandler(route, guarded)(raw);
+    equal(rendered.status, 200);
+    const parsed = await rendered.json();
+    assert(!Object.hasOwn(parsed.analyses[OID], "reference_percentile"));
+    equal(legacyCalls, 0);
+  }
   const beforeDeliveries = deliveries;
   outputChecks = 0;
   const revokedProof: ApiHttpPorts = {
@@ -881,7 +1099,10 @@ async function referencePercentileSurvivesOwnedReport() {
         return {
           async assertCurrent() {
             await Promise.resolve();
-            if (++outputChecks === 2) throw new Error("revoked");
+            outputChecks++;
+          },
+          assertSettled() {
+            throw new Error("revoked");
           },
           authorizes() {
             return true;
@@ -943,11 +1164,48 @@ async function referencePercentileSurvivesOwnedReport() {
     revokedScope,
   );
   // Revoked after scoring: same, the official result is written without the reference bundle.
-  await revokedService.execute(
+  const earlierAssessment = cloneNativeJson(
+    (f.repo.reports.get(RID)!.body.analyses as NativeObject)[OID],
+  );
+  delete (f.repo.reports.get(RID)!.body.analyses as NativeObject)[OID];
+  const revokedResult = await revokedService.execute(
     request("candidates.build", { expected_version: 4 }, "SYNTHETIC-revoked-scope"),
     { signal: new AbortController().signal, admission: {} },
   );
   equal(f.repo.reports.get(RID)!.revision, 5);
+  const visibleRevoked = projectionFilter.project(
+    "candidates.build",
+    "paid",
+    revokedResult,
+  ) as NativeObject;
+  console.log(
+    "SYNTHETIC_REVOKED_SCOPE",
+    JSON.stringify({
+      stored_reference_only_row: Object.hasOwn(
+        f.repo.reports.get(RID)!.body.analyses as NativeObject,
+        OID,
+      ),
+      dto_reference_only_row: Object.hasOwn(revokedResult.analyses as NativeObject, OID),
+      public_reference_only_row: Object.hasOwn(visibleRevoked.analyses as NativeObject, OID),
+      public_reference_percentile: Object.hasOwn(
+        ((visibleRevoked.analyses as NativeObject)[OID] ?? {}) as NativeObject,
+        "reference_percentile",
+      ),
+      public_converted_score: Object.hasOwn(
+        ((visibleRevoked.analyses as NativeObject)[OID] ?? {}) as NativeObject,
+        "converted_score",
+      ),
+      public_converted_score_non_null:
+        (((visibleRevoked.analyses as NativeObject)[OID] ?? {}) as NativeObject).converted_score !=
+          null,
+      saved_reference_groups: Object.hasOwn(
+        f.repo.reports.get(RID)!.body.candidates as NativeObject,
+        "reference_university_groups",
+      ),
+    }),
+  );
+  assert(!Object.hasOwn(f.repo.reports.get(RID)!.body.analyses as NativeObject, OID));
+  assert(!Object.hasOwn(visibleRevoked.analyses as NativeObject, OID));
   assert(
     !Object.hasOwn(
       f.repo.reports.get(RID)!.body.candidates as NativeObject,
@@ -962,4 +1220,74 @@ async function referencePercentileSurvivesOwnedReport() {
     rejected = true;
   }
   assert(rejected);
+  (f.repo.reports.get(RID)!.body.analyses as NativeObject)[OID] = earlierAssessment;
+  verifyCount = 0;
+  await revokedService.execute(
+    request("candidates.build", { expected_version: 5 }, "SYNTHETIC-retain-prior"),
+    { signal: new AbortController().signal, admission: {} },
+  );
+  equal(
+    nativeJsonText((f.repo.reports.get(RID)!.body.analyses as NativeObject)[OID], true),
+    nativeJsonText(earlierAssessment, true),
+  );
+  const events: string[] = [];
+  let prefetchStarted!: () => void, releasePrefetch!: () => void;
+  const began = new Promise<void>((resolve) => {
+    prefetchStarted = resolve;
+  });
+  const gate = new Promise<void>((resolve) => {
+    releasePrefetch = resolve;
+  });
+  const delayData = {
+    ...data,
+    hasProductionConversion: (id: string) => Promise.resolve(id === "SYNTHETIC-B-2027"),
+    async getConversion(id: string) {
+      events.push("conversion:" + id);
+      return await f.data.getConversion(id);
+    },
+    async withScoringBatch<T>(work: () => Promise<T>, signal?: AbortSignal) {
+      events.push(signal ? "batch:reference" : "batch:official");
+      return await work();
+    },
+    async prefetchReferenceTails(_ids: readonly string[], signal?: AbortSignal) {
+      assert(signal && !signal.aborted);
+      events.push("prefetch");
+      prefetchStarted();
+      await gate;
+    },
+  };
+  const mixedScope = {
+    ...referenceScope,
+    async verifyAdmission() {},
+    async readOfferingIds() {
+      return [OID];
+    },
+  };
+  const delayService = new UniversityAnalysisService(
+    f.repo,
+    f.catalog,
+    delayData,
+    f.clock,
+    null,
+    { mode: "legacy_synthetic" },
+    null,
+    mixedScope,
+  );
+  const pending = delayService.execute(
+    request("candidates.build", { expected_version: 6 }, "SYNTHETIC-prefetch-delay"),
+    { signal: new AbortController().signal, admission: {} },
+  );
+  await began;
+  console.log(
+    "SYNTHETIC_PREFETCH_ORDER",
+    JSON.stringify({
+      official_conversion_started_while_prefetch_waits: events.includes(
+        "conversion:SYNTHETIC-B-2027",
+      ),
+    }),
+  );
+  assert(events.includes("conversion:SYNTHETIC-B-2027"));
+  assert(events.includes("batch:official") && events.includes("batch:reference"));
+  releasePrefetch();
+  await pending;
 }

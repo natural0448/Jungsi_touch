@@ -53,6 +53,13 @@ export interface PlatformRepositoryPort {
   createProfile(input: ProfileWrite): Promise<StoredProfile>;
   getProfile(owner: string, profileId: string): Promise<StoredProfile | null>;
   getReport(owner: string, reportId: string): Promise<StoredReport | null>;
+  /** Optional private, owner-scoped immutable revision read for saved reference verification. */
+  getReportRevision?(
+    owner: string,
+    reportId: string,
+    revision: number,
+    signal?: AbortSignal,
+  ): Promise<StoredReport | null>;
   lookupAccess(owner: string, reportId: string): Promise<ReportAccess | null>;
   writeReport(input: ReportWrite): Promise<StoredReport>;
   /** Internal aggregation only; report records are never a public statistics DTO. */

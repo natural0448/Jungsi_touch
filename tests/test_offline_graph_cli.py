@@ -33,4 +33,22 @@ class OfflineGraphCliTests(unittest.TestCase):
   with patch.object(edge,'runtime') as runtime,self.assertRaisesRegex(edge.EdgeFailure,'flags_required'):
    edge.parse_contract(ROOT,{},'synthetic-deno',ROOT,no_remote=False,no_npm=True)
   runtime.assert_not_called()
+class DeclarationSnapshotPathTests(unittest.TestCase):
+ def test_reference_origin_is_relative_and_independent_of_snapshot_root(self):
+  path='supabase/functions/_shared/jungsi/infrastructure/example.ts'
+  origin='supabase/functions/_shared/jungsi/domain/other.ts'
+  def model(root):
+   module={'symbols':[{'name':'Item','declarations':[{'def':{'target':{'filename':(root/origin).as_uri(),'line':3}}}]}],'imports':[]}
+   with patch.object(Path,'read_bytes',return_value=b'export const sample = 1;'):
+    return edge.declaration_model(module,root,path,{path,origin})
+  first=model(ROOT);second=model(ROOT.parent/'different-snapshot')
+  self.assertEqual(first,second)
+  self.assertEqual(first['symbols'][0]['declarations'][0]['def']['target']['filename'],origin)
+ def test_reference_origin_rejects_external_and_unregistered_paths(self):
+  path='supabase/functions/_shared/jungsi/infrastructure/example.ts'
+  for value,registered in [('https://outside.example/rule.ts',{path}),((ROOT/'secret.txt').as_uri(),{path})]:
+   module={'symbols':[{'name':'Item','declarations':[{'def':{'target':{'filename':value}}}]}],'imports':[]}
+   with self.subTest(value=value),patch.object(Path,'read_bytes',return_value=b'export const sample = 1;'),self.assertRaises(edge.EdgeFailure):
+    edge.declaration_model(module,ROOT,path,registered)
+
 if __name__=='__main__':unittest.main()

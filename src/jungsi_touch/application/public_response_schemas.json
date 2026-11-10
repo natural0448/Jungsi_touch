@@ -1071,7 +1071,9 @@
         "wildcard_assessment_pending",
         "wildcard_comparison_unverified",
         "wildcard_evidence_unavailable",
-        "year_bridge_required"
+        "year_bridge_required",
+        "reference_attendance_confirmation_required",
+        "reference_attendance_policy_invalid"
       ]
     },
     "identifier": {
@@ -3255,6 +3257,10 @@
         "analysis_status": {
           "ref": "analysis_status",
           "nullable": false
+        },
+        "reference_attendance_requirements": {
+          "ref": "reference_attendance_status",
+          "nullable": false
         }
       },
       "required": [
@@ -3269,7 +3275,9 @@
         "shortlist",
         "analysis_status"
       ],
-      "optional": []
+      "optional": [
+        "reference_attendance_requirements"
+      ]
     },
     "snapshot_standard": {
       "type": "object",
@@ -7072,6 +7080,71 @@
       "required": [
         "university_id",
         "university_name",
+        "offerings"
+      ],
+      "optional": []
+    },
+    "reference_attendance_status": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "confirmation_required"
+          ]
+        },
+        "confirmation_kind": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "self_reported"
+          ]
+        },
+        "profile_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "exam_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "pack_version": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "offerings": {
+          "type": "map",
+          "nullable": false,
+          "keys": {
+            "ref": "identifier",
+            "nullable": false
+          },
+          "values": {
+            "type": "array",
+            "nullable": false,
+            "items": {
+              "type": "string",
+              "nullable": false,
+              "enum": [
+                "korean",
+                "math",
+                "english",
+                "korean_history",
+                "inquiry_1",
+                "inquiry_2"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "status",
+        "profile_id",
+        "exam_id",
+        "pack_version",
+        "confirmation_kind",
         "offerings"
       ],
       "optional": []

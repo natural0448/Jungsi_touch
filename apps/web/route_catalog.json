@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.157",
-  "source_sha256": "650d6e6c1ef44df8a247631bb77b3b7e7c8741a526d8c90bf8d1b7c4eddce007",
+  "spec_version": "1.9.164",
+  "source_sha256": "aa0c5bd67ae115ba5a5255fc854fdce7e98fb7a1b0086301fc1d8c436363e621",
   "pages": [
     {
       "id": "PAGE-01",
@@ -531,13 +531,14 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [
           "expected_version: positive integer",
-          "offering_ids: 서로 다른 등록 ID 1~100개"
+          "offering_ids: 서로 다른 등록 ID 1~100개",
+          "attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null"
         ],
         "query": [],
         "response": "report (analyses 갱신)",
@@ -579,12 +580,13 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다.",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "contract_ref": "backend_platform_contract.dto_schemas.report",
       "http_contract": {
         "body": [
-          "expected_version: positive integer"
+          "expected_version: positive integer",
+          "attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null"
         ],
         "query": [],
         "response": "report (analyses/candidates 갱신)",
@@ -1577,11 +1579,15 @@
           "overall은 저장된 본인의 기존 학생 DTO다.",
           "유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.",
           "미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.",
-          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다."
+          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.",
+          "유료 소유자 리포트의 선택적 reference_attendance_requirements는 승인된 참고 산식의 자기 확인 필요 영역과 프로필·시험·팩 버전만 전달하며 실제 응시 증빙이나 전형 자격 판정이 아니다."
         ],
         "optional_role_fields": {
           "standard": [
             "read_only_snapshot"
+          ],
+          "paid": [
+            "reference_attendance_requirements"
           ]
         }
       },
@@ -2809,7 +2815,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "950e4f25262281e205e516b8152563264768c5ad5051d4f4fca56cc003d28162"
+            "sha256": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -2841,7 +2847,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
-            "sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d"
+            "sha256": "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/request_budget.ts",
@@ -2849,7 +2855,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "75718468a646612dde06786c6059cb7b752a1a140706dc739e28b86eb97af4d4"
+            "sha256": "e828eebdf4a8671b7b2c00a87b15332a9037259d1f2e83ebf0d39ade0a6313e0"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
@@ -2865,7 +2871,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts",
-            "sha256": "4dc06e6f32096ac07705a97d0444d05a90d930062597e495d2975ae121774fda"
+            "sha256": "ea759428864199a905659576f199024ace3cad7de46596670bfad615c0ade21d"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
@@ -2873,11 +2879,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
+            "sha256": "781f8b2ff26e9cbce8ee517551ba942fb373a5b1e2fa633270745adad2b72a1b"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "e770396d87509a5d8ab0a76e148243027b067be50c4d956fe50aeec6081d99a8"
+            "sha256": "bff521cc567fa0bd372b0ffa7618cce6d7077261508c0408912b006353954ae2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -2885,7 +2891,7 @@
           },
           {
             "path": "supabase/functions/jungsi-api/member_shortlist_entry.ts",
-            "sha256": "34f896869bd107bd5c49bf16235fa9df193cc226be0c8f3b4c74964c6052630f"
+            "sha256": "df81933938c61921ed570828b87efb4cd7bef08d0f5ee0169de2b51048099f82"
           },
           {
             "path": "tests/edge/member_shortlist_fixture.ts",
@@ -2893,7 +2899,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "ca53a202ee9d37cf790c22a9a22de5948cceb35b3fced982a0848af80ba12f5d"
+            "sha256": "c8f7059879691e4291647bcebf55cd696f7d46b7f24f3f7a40150c132aafc876"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
@@ -3045,7 +3051,8 @@
       "누백 0%를 빈 값으로 숨기지 않고 ready 상태와 함께 표시한다. pending은 사유와 대기를 표시한다. 개인점수·누백의 가상 사례는 실제 대학 자료와 분리한다.",
       "같은 모집단/시험/학년도/동점 처리와 승인 총점 기준이 확보돼야 전체 누백과 대학 누백의 차이로 유불리를 표시한다. 준비되지 않으면 유불리만 대기한다.",
       "로컬 기획 미리보기는 ignored outputs에서 최신 develop의 실제 애플리케이션 가상 응답을 이용한다. 운영 apps/web 구현은 feature/presentation-foundation의 별도 화면 담당 소유다.",
-      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다."
+      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다.",
+      "진행 중인 3페이지 참고 환산/누백과 4페이지 참고 후보는 정식 환산·합격 판단과 분리해 참고 추정으로 표시한다. 근거 없는 합격 확률이나 여유·핵심·도전·와일드카드 판정은 만들지 않는다."
     ]
   },
   "estimated_population_contract": {

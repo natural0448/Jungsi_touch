@@ -1,3 +1,8 @@
+import {
+  ATTENDANCE_AREAS,
+  attendanceAllowed,
+  type AttendanceArea,
+} from "./reference_attendance.ts";
 /** Scoped mathematical references. Never manufacture a production conversion approval. */
 import { ContractError, exact, Rational, requireContract as check } from "../domain/exact.ts";
 import { type NativeConversionRule } from "../domain/conversion_release.ts";
@@ -20,6 +25,7 @@ export interface SchoolReferenceFunction {
   readonly sourceSha256: string;
   readonly independentSha256: string;
   readonly scoreScaleId: string;
+  readonly requiredAttendance?: readonly AttendanceArea[];
   readonly requiredFields: readonly string[];
   readonly inquiryCategories: readonly string[];
   readonly minimumInquiry: number;
@@ -36,6 +42,7 @@ export interface SchoolReferenceDataPort {
 }
 export interface SchoolReferenceResult {
   readonly status: "reference_calculated" | "pending";
+  readonly requiredAttendance?: readonly AttendanceArea[];
   readonly reasonCode: string;
   readonly convertedScore: string | null;
   readonly exactScore: Rational | null;
@@ -247,6 +254,28 @@ export class SchoolReferenceScoringService implements SchoolReferenceScoringPort
           f.binding.rule_version === f.rule.data.rule_version,
         "reference_rule_context_mismatch",
       );
+      const required = f.requiredAttendance ?? [];
+      check(
+        Array.isArray(required) && required.length <= ATTENDANCE_AREAS.length &&
+          new Set(required).size === required.length && required.every((k) =>
+            ATTENDANCE_AREAS.includes(k)
+          ),
+        "reference_attendance_policy_invalid",
+      );
+      if (
+        !attendanceAllowed(
+          required,
+          input.attendanceConfirmation,
+          input.profileVersion,
+          input.examId,
+          input.packVersion,
+        )
+      ) {
+        return {
+          ...pending("reference_attendance_confirmation_required"),
+          requiredAttendance: [...required],
+        };
+      }
       const values = projectReferenceInputs(f, input),
         fields = Object.keys(f.rule.data.inputs as NativeObject);
       check(fields.every((v) => BASE.has(v) || DERIVED.has(v)), "reference_rule_input_unsupported");

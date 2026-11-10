@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.157",
+  "contract_version": "1.9.164",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -700,7 +700,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -766,7 +766,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "source_sha256": "3efc036cfe7fc70c4833b1a4b04c4726270996f34d622911779f61591de2a210",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -1835,11 +1835,11 @@
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
-            "source_sha256": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2"
+            "source_sha256": "9b258d5800adf1615293cf715f89a6d71de331881065664a5d330241575e289b"
           },
           "composition": {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "source_sha256": "f7cbc4ade20561ffa97c3910c8b0085f03459e406327feeba72912a72e6b848d"
+            "source_sha256": "781f8b2ff26e9cbce8ee517551ba942fb373a5b1e2fa633270745adad2b72a1b"
           }
         },
         "operation_ids": [

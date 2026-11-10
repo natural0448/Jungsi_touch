@@ -54,21 +54,24 @@ EDGE_UNIT_KEYS = frozenset({
     "read_view_extension_unit", "professional_unit", "school_reference_unit",
     "member_shortlist_unit", "incident_recovery_unit", "service_candidate_aux_unit", "service_staged_aux_unit", "service_wildcard_unit",
     "p1_recruitment_score_review_unit", "p1_selection_bridge_review_unit", "service_end_score_cutoff_unit",
-    "cursor_contract_review_unit",
+    "cursor_contract_review_unit", "reference_db_unit",
 })
 
 def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False,
-                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False):
+                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None):
     """Count all executed, separately registered Edge suites; keep oracle cases separate."""
     if (not isinstance(edge,dict) or type(expected_foundation)is not int or expected_foundation<1 or
         any(type(flag) is not bool for flag in (recovery_required,auxiliary_required,staged_required,wildcard_required,
             p1_review_required,p1_selection_required,service_end_required,cursor_required))):raise ValueError("edge_count_input_invalid")
+    if reference_db_count is not None and (type(reference_db_count) is not int or reference_db_count < 1):
+        raise ValueError("reference_db_count_invalid")
     keys={name for name in edge if name=="unit" or name.endswith("_unit")}
     if "unit" not in keys or keys-EDGE_UNIT_KEYS:raise ValueError("edge_unit_coverage_invalid")
     if ("incident_recovery_unit" in keys)!=recovery_required:raise ValueError("edge_recovery_unit_missing_or_unregistered")
     if ("service_candidate_aux_unit" in keys)!=auxiliary_required:raise ValueError("edge_aux_unit_missing_or_unregistered")
     if ("service_staged_aux_unit" in keys)!=staged_required:raise ValueError("edge_staged_aux_unit_missing_or_unregistered")
     if ("service_wildcard_unit" in keys)!=wildcard_required:raise ValueError("edge_wildcard_unit_missing_or_unregistered")
+    if ("reference_db_unit" in keys)!=(reference_db_count is not None):raise ValueError("edge_reference_db_unit_missing_or_unregistered")
     additional=(("p1_recruitment_score_review_unit",p1_review_required,72),
         ("p1_selection_bridge_review_unit",p1_selection_required,17),
         ("service_end_score_cutoff_unit",service_end_required,3),
@@ -87,6 +90,7 @@ def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary
     if auxiliary_required and counts["service_candidate_aux_unit"]!=14:raise ValueError("edge_aux_count_invalid")
     if staged_required and counts["service_staged_aux_unit"]!=76:raise ValueError("edge_staged_aux_count_invalid")
     if wildcard_required and counts["service_wildcard_unit"]!=97:raise ValueError("edge_wildcard_count_invalid")
+    if reference_db_count is not None and counts["reference_db_unit"]!=reference_db_count:raise ValueError("edge_reference_db_count_invalid")
     for name,required,expected in additional:
         if required and counts[name]!=expected:raise ValueError("edge_additional_count_invalid:"+name)
     return {"total_tests":sum(counts.values()),"by_suite":counts}
@@ -102,6 +106,16 @@ def cursor_unit_required(spec):
     """Require the cursor suite whenever its snapshot registration is present."""
     if not isinstance(spec,dict):raise ValueError("edge_count_spec_invalid")
     return "cursor_contract_offline_graph_verification" in spec
+
+def reference_db_unit_count(spec):
+    """Require the exact additive reference suite only when registered in this snapshot."""
+    if not isinstance(spec,dict):raise ValueError("reference_db_spec_invalid")
+    ext=spec.get("backend_platform_contract",{}).get("reference_db_test_extension")
+    if ext is None:return None
+    if not isinstance(ext,dict) or type(ext.get("test_count")) is not int or ext["test_count"]<1:
+        raise ValueError("reference_db_registration_invalid")
+    return ext["test_count"]
+
 
 def suite_python_environment(base,deno,scratch):
     if not deno or not Path(deno).is_absolute() or not Path(scratch).is_absolute():
@@ -169,7 +183,7 @@ def run_retained(workspace,manifest,destination,deno=None):
                         staged_required=selected_spec.get("backend_platform_contract",{}).get("service_staged_test_extension") is not None
                         wildcard_required=selected_spec.get("backend_platform_contract",{}).get("service_wildcard_test_extension") is not None
                         counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required,wildcard_required,
-                            cursor_required=cursor_unit_required(selected_spec),**additional_p1_unit_flags(selected_spec))
+                            cursor_required=cursor_unit_required(selected_spec),reference_db_count=reference_db_unit_count(selected_spec),**additional_p1_unit_flags(selected_spec))
                         edge["total_tests"]=counts["total_tests"]
                         edge["unit_counts"]=counts["by_suite"]
                     except (KeyError,TypeError,ValueError) as error:

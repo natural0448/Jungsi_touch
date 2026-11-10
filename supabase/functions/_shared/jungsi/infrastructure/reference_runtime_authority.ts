@@ -22,7 +22,7 @@ export const REFERENCE_CANDIDATE_MAXIMUM_RUNTIME_MS = 6000;
 export interface ReferenceRuntimeContext {
   binding(): Promise<ApprovedRuntimeBinding>;
   data(): Promise<NativeDataProvider>;
-  assertCurrent(): Promise<void>;
+  assertCurrent(signal?: AbortSignal): Promise<void>;
 }
 function unavailable(): never {
   throw new AccessError("security_policy_unavailable", 503);
@@ -51,8 +51,8 @@ export async function referenceCandidateScopePort(
   if (!Object.values(pins).every((v) => typeof v === "string" && HEX.test(v))) unavailable();
   const check = async (signal: AbortSignal) => {
     if (signal.aborted) unavailable();
-    await data.assertCurrentSelection(true);
-    await context.assertCurrent();
+    await data.assertCurrentSelection(true, signal);
+    await context.assertCurrent(signal);
     if (signal.aborted) unavailable();
   };
   return Object.freeze({
@@ -143,8 +143,8 @@ export function referenceProjectionAuthorityPort(context: ReferenceRuntimeContex
       return Object.freeze({
         assertCurrent: async (s: AbortSignal) => {
           if (s.aborted) unavailable();
-          await data.assertCurrentSelection(true);
-          await context.assertCurrent();
+          await data.assertCurrentSelection(true, s);
+          await context.assertCurrent(s);
           if (s.aborted) unavailable();
         },
         authorizes: (input: { readonly value: unknown }) =>

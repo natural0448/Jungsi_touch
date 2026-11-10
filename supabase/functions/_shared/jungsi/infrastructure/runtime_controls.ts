@@ -27,6 +27,8 @@ export class RuntimeReadBudget {
   private physicalRequests = 0;
   private physicalBytes = 0;
   private reusedArtifacts = 0;
+  private externalReadOperations = 0;
+  private externalPayloadBytes = 0;
   constructor(private readonly limits: RuntimeReadLimits) {
     if (
       !limits ||
@@ -43,6 +45,31 @@ export class RuntimeReadBudget {
       fail();
     }
     this.bytes += bytes;
+  }
+  /** Separate SQL payload accounting; not a count of individual PostgreSQL wire messages. */
+  externalReadSnapshot(): Readonly<{ operations: number; payloadBytes: number }> {
+    return Object.freeze({
+      operations: this.externalReadOperations,
+      payloadBytes: this.externalPayloadBytes,
+    });
+  }
+  /** Reserve the bounded worst-case DB response before starting SQL. No quota increase or refund. */
+  reserveExternal(bytes: number): (actualBytes: number) => void {
+    if (
+      !Number.isSafeInteger(bytes) || bytes < 1 || this.requests >= this.limits.maxRequests ||
+      bytes > this.limits.maxBytes - this.bytes
+    ) fail();
+    this.requests++;
+    this.bytes += bytes;
+    this.externalReadOperations++;
+    let settled = false;
+    return (actualBytes: number) => {
+      if (settled || !Number.isSafeInteger(actualBytes) || actualBytes < 0 || actualBytes > bytes) {
+        fail();
+      }
+      settled = true;
+      this.externalPayloadBytes += actualBytes;
+    };
   }
   reuseArtifact(bytes: number): void {
     if (
@@ -132,6 +159,10 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
     this.fetcher = readBudget.fetch(fetcher);
     this.assertLive();
   }
+  reserveExternalRead(maximumBytes: number): (actualBytes: number) => void {
+    this.assertLive();
+    return this.readBudget.reserveExternal(maximumBytes);
+  }
   reuseArtifact(bytes: number): void {
     this.assertLive();
     this.readBudget.reuseArtifact(bytes);
@@ -140,11 +171,19 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
     const now = this.clock.nowUtc();
     if (typeof now !== "bigint" || now >= this.binding.expiresAtUtc) fail();
   }
-  private async get(path: string, limit: number): Promise<Uint8Array<ArrayBuffer>> {
+  private async get(
+    path: string,
+    limit: number,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array<ArrayBuffer>> {
     this.assertLive();
+    if (signal?.aborted) fail();
     const url = this.binding.projectUrl + "/storage/v1/" + path, abort = new AbortController();
     const timer = setTimeout(() => abort.abort(), this.binding.storage.limits.requestTimeoutMs);
+    const stop = () => abort.abort();
+    signal?.addEventListener("abort", stop, { once: true });
     try {
+      if (signal?.aborted) fail();
       const response = await this.fetcher(url, {
         method: "GET",
         headers: { apikey: this.binding.storage.secretKey, Accept: "application/json" },
@@ -152,6 +191,10 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
         redirect: "error",
         signal: abort.signal,
       });
+      if (signal?.aborted) {
+        await response.body?.cancel();
+        fail();
+      }
       if (
         response.status !== 200 || response.redirected || response.url !== url || !response.body
       ) {
@@ -171,6 +214,10 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
       try {
         while (true) {
           const chunk = await reader.read();
+          if (signal?.aborted) {
+            await reader.cancel();
+            fail();
+          }
           if (chunk.done) break;
           if (chunk.value.byteLength > limit - total) {
             await reader.cancel();
@@ -188,15 +235,17 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
         result.set(chunk, offset);
         offset += chunk.length;
       }
+      if (signal?.aborted) fail();
       this.assertLive();
       return result;
     } catch {
-      fail();
+      return fail();
     } finally {
       clearTimeout(timer);
+      signal?.removeEventListener("abort", stop);
     }
   }
-  async read(name: ControlSourceName): Promise<Uint8Array<ArrayBuffer>> {
+  async read(name: ControlSourceName, signal?: AbortSignal): Promise<Uint8Array<ArrayBuffer>> {
     const reference = this.binding.references[name];
     if (!reference) fail();
     const bucket = this.binding.storage.bucket;
@@ -204,6 +253,7 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
       await this.get(
         "bucket/" + encodeURIComponent(bucket),
         this.binding.storage.limits.maxMetadataBytes,
+        signal,
       ),
     )));
     const cap = metadata.file_size_limit;
@@ -216,8 +266,9 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
       "object/authenticated/" + encodeURIComponent(bucket) + "/" +
         reference.objectKey.split("/").map(encodeURIComponent).join("/"),
       reference.bytes,
+      signal,
     );
-    if (content.length !== reference.bytes) fail();
+    if (content.length !== reference.bytes || signal?.aborted) fail();
     const sha = [...new Uint8Array(await crypto.subtle.digest("SHA-256", content))].map((b) =>
       b.toString(16).padStart(2, "0")
     ).join("");
@@ -227,31 +278,72 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
   }
   private recentHead?: {
     readonly startedMs: number;
+    readonly signal?: AbortSignal;
     readonly result: ReturnType<NativeSelectionHeadPort["current"]>;
+    complete: boolean;
   };
-  /** Request-local reuse: one verified head/bucket answer serves this request for STORAGE_CHECK_REUSE_MS. */
-  async current(): ReturnType<NativeSelectionHeadPort["current"]> {
+  private readonly receiptHeads = new WeakMap<AbortSignal, {
+    readonly entry: object;
+    readonly startedMs: number;
+    readonly head: Awaited<ReturnType<NativeSelectionHeadPort["current"]>>;
+  }>();
+  /** A local receipt is valid only for the captured request signal and original head read start. */
+  currentReceipt(signal: AbortSignal): Readonly<{ assertCurrent(): void }> {
     this.assertLive();
-    const now = performance.now(), recent = this.recentHead;
-    if (recent && now >= recent.startedMs && now - recent.startedMs < STORAGE_CHECK_REUSE_MS) {
-      const head = await recent.result;
+    const receipt = this.receiptHeads.get(signal);
+    const check = () => {
       this.assertLive();
+      const now = performance.now();
+      if (
+        !receipt || signal.aborted || this.recentHead !== receipt.entry ||
+        receipt.head.status !== "approved" ||
+        !Number.isFinite(now) || !Number.isFinite(receipt.startedMs) ||
+        now < receipt.startedMs || now - receipt.startedMs >= STORAGE_CHECK_REUSE_MS
+      ) fail();
+    };
+    check();
+    return Object.freeze({ assertCurrent: check });
+  }
+  /** Completed checks retain their original freshness; in-flight work is shared only by its signal. */
+  async current(signal?: AbortSignal): ReturnType<NativeSelectionHeadPort["current"]> {
+    this.assertLive();
+    if (signal?.aborted) fail();
+    const now = performance.now(), recent = this.recentHead;
+    if (
+      recent && now >= recent.startedMs && now - recent.startedMs < STORAGE_CHECK_REUSE_MS &&
+      (recent.complete || recent.signal === signal)
+    ) {
+      const head = await recent.result;
+      if (signal?.aborted) fail();
+      this.assertLive();
+      if (signal && this.recentHead === recent) {
+        this.receiptHeads.set(signal, { entry: recent, startedMs: recent.startedMs, head });
+      }
       return head;
     }
-    const result = this.freshCurrent();
-    this.recentHead = { startedMs: now, result };
+    const result = this.freshCurrent(signal);
+    const entry = { startedMs: now, signal, result, complete: false };
+    this.recentHead = entry;
     try {
-      return await result;
+      const head = await result;
+      if (signal?.aborted) fail();
+      entry.complete = true;
+      if (signal && this.recentHead === entry) {
+        this.receiptHeads.set(signal, { entry, startedMs: entry.startedMs, head });
+      }
+      return head;
     } catch (error) {
-      if (this.recentHead?.result === result) this.recentHead = undefined;
+      if (this.recentHead === entry) this.recentHead = undefined;
       throw error;
     }
   }
-  private async freshCurrent(): ReturnType<NativeSelectionHeadPort["current"]> {
+  private async freshCurrent(signal?: AbortSignal): ReturnType<NativeSelectionHeadPort["current"]> {
     let raw: NativeObject, expiresAtUtc: bigint;
     try {
       raw = object(
-        parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(await this.read("head"))),
+        parseNativeJson(
+          new TextDecoder("utf-8", { fatal: true }).decode(await this.read("head", signal)),
+        ),
       );
       if (typeof raw.expires_at !== "string") fail();
       expiresAtUtc = utcInstant(raw.expires_at);

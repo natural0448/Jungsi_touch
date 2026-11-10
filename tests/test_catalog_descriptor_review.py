@@ -13,12 +13,12 @@ SOURCE_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_revi
 BRIDGE_PATH = "tests/test_catalog_descriptor_review.py"
 EXPECTED_CASES = 21
 GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261102.json"
-GRAPH_MANIFEST_SHA256 = "df3c60e7e5616e94696aed3510bc4d05537c6b73079ff2ed1c57605e5d3bd8e4"
+GRAPH_MANIFEST_SHA256 = "103466474b877c487093adea91f64898b5741d33778cf22c4d718e8263fd2b9b"
 BASE_COMMIT = "42b7ac28bae3c2c5c0041d16bcf505c2014bf404"
 SCANNER_PATH = "scripts/check_edge_contract.py"
-SCANNER_SHA256 = "5d7860dc9b676fef469bc4972f2d2531473579409e31bf86595b099442c139e5"
+SCANNER_SHA256 = "7685df999f5b53b2bd3006ab712b38aa627c20dd58a24a0fa6c8c7d1c398cfb1"
 SUPPORT_PATH = "tests/test_service_candidate_suites.py"
-SUPPORT_SHA256 = "e9849d5b371e797ea01dedca79192b5eb63e298a970cb383048b69a7b6845b27"
+SUPPORT_SHA256 = "5c50a14ccab7216e466d248cc4360ee9d2784e014cacb2505c503e49acf664a2"
 
 
 def snapshot_file(name):

@@ -333,7 +333,12 @@ def candidate(current=None):
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
     spec = retained_legacy28_fixture(current)
     from check_project_consistency import (service_aux_registration, service_staged_registration,
-        service_wildcard_registration, current_page_route_test_registration)
+        service_wildcard_registration, current_page_route_test_registration, reference_db_registration)
+    # Retain the complete new DB suite only after validating its exact registration.
+    reference_suite, reference_errors = reference_db_registration(spec)
+    if reference_errors:
+        raise ValueError("Synthetic fixture cannot ignore invalid reference DB registration")
+    reference_tests = set(reference_suite["test_paths"]) if reference_suite is not None else set()
     # Validate the real additive suite before projecting it out of this invented legacy fixture.
     _, page_errors = current_page_route_test_registration(spec)
     if page_errors:
@@ -366,7 +371,7 @@ def candidate(current=None):
         raise ValueError('Synthetic fixture cannot ignore invalid Guide registration')
     for p in list(files):
         if (p.startswith('tests/edge/test_') and p not in spec['edge_harness']['tests']
-                and p not in guide_tests and p not in wildcard_tests):
+                and p not in guide_tests and p not in wildcard_tests and p not in reference_tests):
             files.pop(p)
     service = 'supabase/functions/_shared/jungsi/application/synthetic_read_view.ts'
     test = 'tests/edge/test_synthetic_read_view_extension.ts'
@@ -398,6 +403,38 @@ def candidate(current=None):
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_read_fixture_preserves_valid_reference_db_registration(self):
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        original = deepcopy(current)
+        fixture = candidate(current)
+        suite = current['backend_platform_contract']['reference_db_test_extension']
+        self.assertEqual(fixture['backend_platform_contract']['reference_db_test_extension'], suite)
+        for path in suite['test_paths']:
+            self.assertEqual(fixture['edge_harness']['files'][path], current['edge_harness']['files'][path])
+        self.assertEqual(validate_read_view_extension(fixture), [])
+        self.assertEqual(current, original)
+
+    def test_legacy_read_fixture_rejects_tampered_reference_db_registration(self):
+        for mutation in ('missing', 'count', 'case', 'source', 'guard', 'test_path'):
+            with self.subTest(mutation=mutation):
+                current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+                backend = current['backend_platform_contract']
+                suite = backend['reference_db_test_extension']
+                if mutation == 'missing':
+                    del backend['reference_db_test_extension']
+                elif mutation == 'count':
+                    suite['test_count'] = True
+                elif mutation == 'case':
+                    suite['case_names_by_path'][suite['test_paths'][0]][0] += ' tampered'
+                elif mutation == 'source':
+                    suite['source_bindings'][0]['sha256'] = '0' * 64
+                elif mutation == 'guard':
+                    suite['regression_test']['path'] = 'tests/other.py'
+                else:
+                    current['edge_harness']['files'].pop(suite['test_paths'][0])
+                with self.assertRaisesRegex(ValueError, 'invalid reference DB registration'):
+                    candidate(current)
+
     def test_legacy_read_fixture_isolates_valid_current_page_registration(self):
         current=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
         original=deepcopy(current);fixture=candidate(current)

@@ -184,7 +184,11 @@ export class ScoreMapService {
       if (!items.length) return { items: [], state: "complete" };
       const pin = await this.pin();
       const saved = await this.store.read(subject, profile.profile_id, pin, ids as string[]);
-      const found = new Map<string, MyScore>(saved);
+      // Reference and pending entries cannot prove the current request's attendance or
+      // availability. Keep historical rows untouched and recalculate those entries.
+      const found = new Map<string, MyScore>(
+        [...saved].filter(([, score]) => score.status === "ready"),
+      );
       const missing = (ids as string[]).filter((id) => !found.has(id));
       if (missing.length) await this.compute(subject, profile, pin, missing, found);
       const out = items.map((item) => ({
@@ -217,6 +221,7 @@ export class ScoreMapService {
     }
     const scoring = new UniversityScoringService(this.data), start = this.now();
     const computed: (MyScore & { offering_id: string })[] = [];
+    let completed = 0;
     await scoring.batch(async () => {
       for (const id of missing) {
         const row = rows.get(id);
@@ -234,7 +239,7 @@ export class ScoreMapService {
           continue;
         }
         if (
-          computed.length >= this.limits.maxComputePerRequest ||
+          completed >= this.limits.maxComputePerRequest ||
           this.now() - start >= this.limits.computeBudgetMs
         ) continue;
         try {
@@ -242,7 +247,9 @@ export class ScoreMapService {
           // A runtime/storage failure is not a data answer: leave it null (계산 중), never store it.
           if (score.status === "pending" && transientReason(score.reason_code)) continue;
           found.set(id, score);
-          computed.push({ offering_id: id, ...score });
+          completed++;
+          // Pending can be transient; reference values require fresh request context.
+          if (score.status === "ready") computed.push({ offering_id: id, ...score });
         } catch {
           // Left null (계산 중); the next request retries it.
         }

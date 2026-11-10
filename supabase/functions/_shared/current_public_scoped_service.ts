@@ -86,11 +86,14 @@ export class CurrentPublicSearchScopedService extends ObservedCurrentPublicCatal
       if (
         request.operation === "offerings.search" && this.scoreMap && Array.isArray(result.items)
       ) {
-        const attached = await this.scoreMap().attach(
-          request.session.user.subjectId,
-          result.items as NativeObject[],
-        );
-        return { ...result, items: attached.items, my_score_state: attached.state };
+        // The current search admission does not bind scoring work or SQL to its
+        // physical budget and cancellation. Preserve search without starting them.
+        // Re-enable only with an independently approved, request-bound capability.
+        return {
+          ...result,
+          items: (result.items as NativeObject[]).map((item) => ({ ...item, my_score: null })),
+          my_score_state: "unavailable",
+        };
       }
       return result;
     });

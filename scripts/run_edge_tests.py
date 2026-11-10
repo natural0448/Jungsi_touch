@@ -155,7 +155,7 @@ def current_public_registration(spec,before):
     names=['current_public_catalog','current_public_catalog_compat','current_public_catalog_runtime',
       'current_public_catalog_sql','current_public_catalog_sql_test','current_public_catalog_test',
       'current_public_key_index','current_public_key_index_test','current_public_key_storage',
-      'current_public_key_storage_test']
+      'current_public_key_storage_test','score_map_attendance_test']
     required={prefix+n+'.ts' for n in names}
     c=spec.get('current_public_supply_contract',{}).get('verification')
     if c is None:
@@ -164,7 +164,7 @@ def current_public_registration(spec,before):
     tests=[prefix+n+'.ts'for n in names if n.endswith('_test')]
     bindings=c.get('source_bindings')
     if (c.get('format')!='jungsi.current-public-provider-verification/v1' or
-        c.get('test_paths')!=tests or c.get('test_count')!=74 or
+        c.get('test_paths')!=tests or c.get('test_count')!=84 or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get('path')for b in bindings}!=required or
         any(not isinstance(b.get('sha256'),str)or before.get(b['path'])!=b['sha256']for b in bindings)):
@@ -309,13 +309,15 @@ def read_view_registration(spec,before):
 
 
 SCHOOL_REFERENCE_TESTS=tuple('tests/edge/'+name+'.ts'for name in (
-    'test_school_reference_scoring','test_school_reference_provider','test_history_metric_alias','test_saved_reference_projection'))
+    'test_school_reference_scoring','test_school_reference_provider','test_history_metric_alias','test_saved_reference_projection',
+    'test_scope_signal_followup.synthetic','test_saved_tail_scope_cache.followup.synthetic'))
 SCHOOL_REFERENCE_SOURCES=tuple('supabase/functions/_shared/jungsi/'+name+'.ts'for name in (
     'application/school_score_inputs','application/school_reference_scoring','application/history_metric_alias',
     'domain/saved_reference_projection','infrastructure/school_reference_source','application/university_scoring',
     'application/university_analysis','application/offering_analysis','domain/exam_pack','infrastructure/native_data_provider',
     'infrastructure/native_source_selection','infrastructure/supabase_artifacts','infrastructure/runtime_controls',
-    'infrastructure/runtime_composition'))
+    'infrastructure/runtime_composition','application/reference_candidate_scope','application/reference_percentile',
+    'infrastructure/reference_runtime_authority','infrastructure/runtime_context','infrastructure/saved_reference_tail_source'))
 
 def school_reference_registration(spec,before):
     """Keep the original 656 cases and bind the additive reference suite to exact snapshot bytes."""
@@ -324,12 +326,14 @@ def school_reference_registration(spec,before):
         if set(SCHOOL_REFERENCE_TESTS).intersection(before):raise EdgeFailure('school_reference_verification_missing')
         return None
     required={*SCHOOL_REFERENCE_SOURCES,*SCHOOL_REFERENCE_TESTS,'tests/edge/synthetic_school_reference.ts',
+      'tests/edge/reference_candidate_scope_cases.ts','tests/edge/saved_reference_tail_source_cases.ts',
+      'tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts',
       'tests/edge/test_university_analysis.ts','supabase/functions/_shared/current_public_catalog.ts',
       'supabase/functions/_shared/current_public_catalog_test.ts','src/jungsi_touch/application/public_response_schemas.json',
       'tests/edge/public_api_contract_fixture.ts'}
     bindings=v.get('source_bindings')
     if (v.get('format')!='jungsi.school-reference-synthetic-verification/v1' or
-        v.get('baseline_foundation_count')!=656 or v.get('test_count')!=83 or
+        v.get('baseline_foundation_count')!=656 or v.get('test_count')!=97 or
         v.get('test_paths')!=list(SCHOOL_REFERENCE_TESTS) or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
         {b.get('path')for b in bindings}!=required or
@@ -874,9 +878,9 @@ P1CG_NODE_BY_ROOT = {p: frozenset() for p in P1CG_ROOTS}
 P1CG_NODE_BY_ROOT[P1CG_ROOTS[4]] = frozenset(("node:assert/strict", "node:zlib"))
 P1CG_PINNED_TYPE_IMPORTS = {
     "supabase/functions/_shared/jungsi/application/platform_repository.ts": (
-        "839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744", ["./score_input_ports.ts"]),
+        "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639", ["./score_input_ports.ts"]),
     "supabase/functions/_shared/jungsi/application/profile_reports.ts": (
-        "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d",
+        "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c",
         ["./score_input_ports.ts", "./score_input_ports.ts"]),
     "supabase/functions/_shared/jungsi/application/score_input_ports.ts": (
         "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c", ["./session_service.ts"] * 6),
@@ -1633,6 +1637,19 @@ def run_workspace(root,manifest,deno,python,output):
         public_junit=output.resolve()/'current_public.junit.xml'
         command([deno,'test',*common,'--reporter=dot','--junit-path',str(public_junit),
           *public_registration['test_paths']],root=root,output=output,name='current_public_unit')
+        attendance_path = "supabase/functions/_shared/score_map_attendance_test.ts"
+        attendance_expected = set(['approved cached score stays available to its owner only', 'cached reference cannot bypass required self reported attendance', 'historical pending never masks newly ready score and is not modified', 'reference results count toward unchanged per request calculation limit', 'reference without attendance requirement remains visible after verification', 'transient pending is not inserted and can become approved ready'])
+        attendance_actual = [case.get("name") for case in ET.fromstring(public_junit.read_bytes()).iter("testcase")
+            if (case.get("classname") or "").replace(chr(92), "/").removeprefix("./") == attendance_path]
+        if len(attendance_actual) != 6 or len(set(attendance_actual)) != 6 or set(attendance_actual) != attendance_expected:
+            raise EdgeFailure("score_map_attendance_junit_identity_invalid")
+        preview_path = "supabase/functions/_shared/current_public_catalog_test.ts"
+        preview_expected = set(['HTTP budget or canceled admission failures are not turned into successful searches', 'HTTP search returns existing rows with score unavailable without any score map access', 'an already aborted request never starts optional score work', 'disabled score map preserves search and does not touch a missing 011 table'])
+        preview_actual = [case.get("name") for case in ET.fromstring(public_junit.read_bytes()).iter("testcase")
+            if (case.get("classname") or "").replace(chr(92), "/").removeprefix("./") == preview_path
+            and case.get("name") in preview_expected]
+        if len(preview_actual) != 4 or len(set(preview_actual)) != 4 or set(preview_actual) != preview_expected:
+            raise EdgeFailure("score_map_preview_junit_identity_invalid")
         public_unit=dict(**parse_junit(public_junit,public_registration['test_count']),
           coverage='CURRENT_PUBLIC_PROVIDER_CANDIDATE_SYNTHETIC',
           source_bindings=public_registration['source_bindings'],
@@ -1773,6 +1790,19 @@ def run_workspace(root,manifest,deno,python,output):
         service_wildcard_unit = dict(**counted, coverage="WILDCARD_AND_REPORT_SAFETY_SYNTHETIC",
             source_bindings=wildcard["source_bindings"], baseline_foundation_count=656,
             native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN", operating_writes=0)
+    from check_project_consistency import reference_db_registration
+    reference_db, reference_db_errors = reference_db_registration(spec, before)
+    if reference_db_errors: raise EdgeFailure("reference_db_registration_invalid")
+    reference_db_unit = None
+    if reference_db is not None:
+        reference_db_junit = output.resolve() / "reference_db.junit.xml"
+        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(reference_db_junit),
+                 *reference_db["test_paths"]], root=root, output=output, name="reference_db_unit")
+        counted = parse_junit(reference_db_junit, reference_db["test_count"])
+        require_auxiliary_junit_identities(reference_db_junit, reference_db["case_names_by_path"])
+        reference_db_unit = dict(**counted, coverage="REFERENCE_DB_REPORT_SYNTHETIC",
+            source_bindings=reference_db["source_bindings"], baseline_foundation_count=656,
+            native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN", operating_writes=0)
     member_shortlist_unit=None
     member=member_shortlist_suite_registration(spec,before)
     if member is not None:
@@ -1841,6 +1871,7 @@ def run_workspace(root,manifest,deno,python,output):
     if read_view_unit is not None:result['read_view_extension_unit']=read_view_unit
     if professional_unit is not None:result['professional_unit']=professional_unit
     if school_reference_unit is not None:result['school_reference_unit']=school_reference_unit
+    if reference_db_unit is not None:result['reference_db_unit']=reference_db_unit
     if member_shortlist_unit is not None:result['member_shortlist_unit']=member_shortlist_unit
     if service_candidate_aux_unit is not None:result['service_candidate_aux_unit']=service_candidate_aux_unit
     if service_staged_aux_unit is not None:result['service_staged_aux_unit']=service_staged_aux_unit

@@ -24,6 +24,7 @@ import {
   type RuntimeEnvironment,
 } from "./runtime_settings.ts";
 import { SupabaseSqlTransport } from "./transaction_sql.ts";
+import { ExistingReferencePercentileDbReader } from "./reference_percentile_postgres.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { NativeExamPack } from "../domain/exam_pack.ts";
 import type { NativeObject } from "../domain/json_value.ts";
@@ -58,6 +59,7 @@ export class NativeRuntimeRequest {
   private forecastsValue?: Promise<SupabaseForecastRepository>;
   private budgetValue?: Promise<RuntimeRequestBudget>;
   private dataValue?: Promise<NativeDataProvider>;
+  private referenceDbValue?: Promise<ExistingReferencePercentileDbReader>;
   private scoresValue?: Promise<SupabaseScoreInputRepository>;
   private snapshotValue?: Promise<HistorySnapshotSource>;
   private snapshotOwner?: string;
@@ -95,6 +97,20 @@ export class NativeRuntimeRequest {
       );
     })();
     return this.controlsValue;
+  }
+  /** Uses the same SQL transport and read budget as the enclosing request. */
+  referencePercentileDbReader(): Promise<ExistingReferencePercentileDbReader> {
+    this.referenceDbValue ??= (async () => {
+      const [binding, controls] = await Promise.all([this.binding(), this.controls()]);
+      return new ExistingReferencePercentileDbReader(
+        this.sql(),
+        controls,
+        Math.min(65536, binding.repositoryLimits.maxRecordBytes, binding.readLimits.maxBytes),
+        Math.min(8388608, binding.storage.limits.maxArtifactBytes),
+        binding.readLimits.maxBytes,
+      );
+    })();
+    return this.referenceDbValue;
   }
   platform(): Promise<SupabasePlatformRepository> {
     this.platformValue ??= (async () => {
@@ -350,13 +366,10 @@ export class NativeRuntimeRequest {
         controls.read("selection"),
       ]);
       this.assertArtifactScope(selection, binding);
-      // offerings.search also scores the 3P score map (only when a stored score is missing),
-      // so it loads the same exam/conversion/reference payloads as university.analyze.
-      const universityOnly = ["university.analyze", "candidates.build", "offerings.search"].some((
-        id,
-      ) => id === this.operation);
-      const catalogOnly = !universityOnly &&
-        CATALOG_OPERATIONS.some((id) => id === this.operation);
+      const catalogOnly = CATALOG_OPERATIONS.some((id) => id === this.operation);
+      const universityOnly = ["university.analyze", "candidates.build"].some((id) =>
+        id === this.operation
+      );
       const mode = catalogOnly
         ? "catalog_only"
         : universityOnly
@@ -502,15 +515,33 @@ export class NativeRuntimeRequest {
     })();
     return this.dataValue;
   }
-  async assertCurrent(): Promise<void> {
+  /** Capture the original request-bound control read; delivery must never refresh it. */
+  async referenceCurrentReceipt(signal: AbortSignal): Promise<Readonly<{ assertCurrent(): void }>> {
+    if (!this.controlsValue || signal.aborted) fail();
+    const controls = await this.controls(), receipt = controls.currentReceipt(signal);
+    const budget = this.budgetValue ? await this.budget() : undefined;
+    return Object.freeze({
+      assertCurrent: () => {
+        receipt.assertCurrent();
+        budget?.policy.assertLive();
+      },
+    });
+  }
+  async assertCurrent(signal?: AbortSignal): Promise<void> {
+    if (signal?.aborted) fail();
     if (this.bindingValue) {
       const controls = await this.controls();
-      await controls.current();
+      // The request or narrower candidate scope abort reaches the bounded head fetch.
+      await controls.current(signal);
+      if (signal?.aborted) fail();
     }
+    if (signal?.aborted) fail();
     if (this.budgetValue) (await this.budget()).policy.assertLive();
+    if (signal?.aborted) fail();
     if (this.snapshotValue) {
       const source = await this.snapshotValue;
       await source.assertCurrent(await source.current());
+      if (signal?.aborted) fail();
     }
   }
 }

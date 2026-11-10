@@ -1465,6 +1465,100 @@ def current_page_route_test_registration(spec):
     except (EdgeFailure,KeyError,TypeError,ValueError):return set(),[error]
 
 
+REFERENCE_DB_TEST_PATHS = (
+    'tests/edge/test_cancellable_db_read.ts',
+    'tests/edge/test_chunked_reference_integration.synthetic.ts',
+    'tests/edge/test_chunked_reference_projection.synthetic.ts',
+    'tests/edge/test_chunked_runtime_wiring.synthetic.ts',
+    'tests/edge/test_existing_reference_candidate_scope.ts',
+    'tests/edge/test_legacy_mixed_followup.ts',
+    'tests/edge/test_native_reference_cdf_projection.ts',
+    'tests/edge/test_native_reference_db_tail.ts',
+    'tests/edge/test_native_tail_fail_closed.followup.synthetic.ts',
+    'tests/edge/test_published_reference_candidate_scope.ts',
+    'tests/edge/test_published_reference_runtime.ts',
+    'tests/edge/test_published_reference_tail_issuer.ts',
+    'tests/edge/test_reference_attendance.synthetic.ts',
+    'tests/edge/test_reference_attendance_http.synthetic.ts',
+    'tests/edge/test_reference_candidate_access.ts',
+    'tests/edge/test_reference_candidate_scope.ts',
+    'tests/edge/test_reference_candidates.ts',
+    'tests/edge/test_reference_db_head_latency.synthetic.ts',
+    'tests/edge/test_reference_group_merge.synthetic.ts',
+    'tests/edge/test_reference_percentile.ts',
+    'tests/edge/test_reference_percentile_postgres.ts',
+    'tests/edge/test_reference_projection_transition.followup.synthetic.ts',
+    'tests/edge/test_reference_report_evidence_verifier.ts',
+    'tests/edge/test_reference_report_projection.ts',
+    'tests/edge/test_reference_report_revision_read.ts',
+    'tests/edge/test_reference_tail_prefetch.followup.synthetic.ts',
+    'tests/edge/test_reference_tail_selection.ts',
+    'tests/edge/test_reference_tail_storage.ts',
+    'tests/edge/test_runtime_controls_abort.ts',
+    'tests/edge/test_runtime_head_receipt.ts',
+    'tests/edge/test_runtime_reference_wiring.ts',
+    'tests/edge/test_saved_reference_tail_source.ts',
+    'tests/edge/test_saved_tail_version_cache.repro.synthetic.ts',
+    'tests/edge/test_school_reference_science_filtered.synthetic.ts',
+)
+REFERENCE_DB_CASE_IDENTITY_SHA256 = '9e28548dfb867b6a0c5de1dac54ad5b3800ba56c0429bcf7f1860ecb132a58af'
+REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256 = '5a61fd9f6265ced0b3e598a4d79a6a24b1d2c8620cf89871b6b122a3fd03fb4e'
+
+
+def reference_db_registration(spec, source_hashes=None):
+    """Exact additive reference DB/report suite; never asserts runtime activation."""
+    error = "Reference DB exact source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("reference_db_test_extension") if isinstance(backend, dict) else None
+    files = spec.get("edge_harness", {}).get("files", {})
+    if ext is None:
+        present = any(p in files for p in REFERENCE_DB_TEST_PATHS) if isinstance(files, dict) else False
+        if source_hashes is not None:
+            present = present or any(p in source_hashes for p in (*REFERENCE_DB_TEST_PATHS, "tests/test_reference_db_suite_registration.py"))
+        return None, [error] if present else []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count", "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.reference-db-tests/v1" or
+            ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(REFERENCE_DB_TEST_PATHS) or
+            type(ext["test_count"]) is not int or ext["test_count"] != 193 or
+            type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+            ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+            type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(REFERENCE_DB_TEST_PATHS): raise ValueError("case paths")
+        pairs=[]
+        for path in REFERENCE_DB_TEST_PATHS:
+            values=cases[path]
+            if not isinstance(values,list) or not values or values!=sorted(values) or len(set(values))!=len(values) or any(not isinstance(v,str) or not v for v in values): raise ValueError("case names")
+            pairs.extend((path,v) for v in values)
+        # Keep the former 178 case identities independently verifiable.
+        added_paths = ('tests/edge/test_reference_attendance.synthetic.ts', 'tests/edge/test_reference_attendance_http.synthetic.ts', 'tests/edge/test_reference_group_merge.synthetic.ts', 'tests/edge/test_reference_db_head_latency.synthetic.ts')
+        previous = {p:list(v) for p,v in cases.items() if p not in added_paths}
+        previous['tests/edge/test_reference_percentile.ts'] = [v for v in previous['tests/edge/test_reference_percentile.ts'] if v != 'attendance remains required for reused and direct reference percentile paths']
+        old_digest = hashlib.sha256(json.dumps(previous,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+        if sum(map(len,previous.values())) != 178 or old_digest != REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256: raise ValueError("previous case identity")
+        digest=hashlib.sha256(json.dumps(cases,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+        if len(pairs)!=193 or len(set(pairs))!=193 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
+        guard=ext["regression_test"]
+        if (not isinstance(guard,dict) or set(guard)!={"path","sha256"} or guard["path"]!="tests/test_reference_db_suite_registration.py" or
+            not re.fullmatch(r"[0-9a-f]{64}",str(guard["sha256"])) or source_hashes is not None and source_hashes.get(guard["path"])!=guard["sha256"]): raise ValueError("guard")
+        rows=ext["source_bindings"]
+        if (not isinstance(rows,list) or len(rows)!=len(REFERENCE_DB_TEST_PATHS) or
+            any(not isinstance(row,dict) or set(row)!={"path","sha256"} for row in rows) or
+            [row["path"] for row in rows]!=list(REFERENCE_DB_TEST_PATHS)): raise ValueError("bindings")
+        cfg=spec["edge_harness"]
+        for row in rows:
+            path,h=row["path"],row["sha256"];item=cfg["files"].get(path,{})
+            if (item.get("layer")!="verification" or path in cfg.get("tests",[]) or not re.fullmatch(r"[0-9a-f]{64}",str(h)) or
+                item.get("declarations",{}).get("source_sha256")!=h or source_hashes is not None and source_hashes.get(path)!=h): raise ValueError("source hash")
+        school=spec.get("university_scoring_contract",{}).get("scoped_reference_contract",{}).get("verification",{}).get("test_paths",[])
+        if set(REFERENCE_DB_TEST_PATHS) & (set(school) | set(RECOVERY_TEST_PATHS) | set(SERVICE_AUX_TEST_PATHS) | set(SERVICE_STAGED_TEST_PATHS) | set(SERVICE_WILDCARD_TEST_PATHS)): raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return None, [error]
+
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1497,6 +1591,9 @@ def validate_read_view_extension(spec):
     wildcard, wildcard_errors=service_wildcard_registration(spec)
     if wildcard is not None:separate_tests-=set(wildcard["test_paths"])
     professional_errors+=wildcard_errors
+    reference_db, reference_db_errors = reference_db_registration(spec)
+    if reference_db is not None: separate_tests -= set(reference_db["test_paths"])
+    professional_errors += reference_db_errors
     page_tests,page_errors=current_page_route_test_registration(spec)
     separate_tests-=page_tests
     professional_errors+=page_errors
@@ -1617,7 +1714,14 @@ def policy_baseline_source_matches(spec,path,digest,indexed):
     if not isinstance(c,dict) or c.get("baseline_commit")!="63337281332fcfb441f7b6c9638035061cee0636":return False
     prior=c.get("prior_source_bindings",{})
     if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
-    return prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path)
+    if prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path): return True
+    # The previous editor entrypoint is a fixed historical source, not a new deployment.
+    history=spec.get("workflow",{}).get("development_harness",{}).get("reference_db_entrypoint_history_20261110",{})
+    return (path=="supabase/functions/jungsi-api/index.ts" and digest=="ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2" and
+        isinstance(history,dict) and history.get("format")=="jungsi.reference-db-entrypoint-history/v1" and
+        history.get("base_commit")=="fc52ae2559d488db78a929b33d46f01fdad592d6" and history.get("path")==path and
+        history.get("previous_source_sha256")==digest and history.get("candidate_source_sha256")==indexed.get(path) and
+        history.get("status")=="SOURCE_CANDIDATE_NOT_DEPLOYMENT_EVIDENCE")
 NATIVE_GUARD_HISTORY_SHA256="93236619b0293ac768c2968542bdc4e515bd5155417da728b765db9179e58b42"
 NATIVE_GUARD_SOURCE_PATH="supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
 
@@ -4772,6 +4876,12 @@ def generated_files(spec,read=None):
             encoded=json.dumps(payload,ensure_ascii=False,separators=(',',':'))
             literal=chr(39)+encoded.replace(chr(92),chr(92)*2).replace(chr(39),chr(92)+chr(39)).replace(chr(0x2028),chr(92)+'u2028').replace(chr(0x2029),chr(92)+'u2029')+chr(39)
             files[PROFESSIONAL_GENERATED]=professional_typescript_contract(literal)
+    attendance=spec.get("university_scoring_contract",{}).get("scoped_reference_contract",{}).get("attendance_confirmation_contract")
+    if attendance:
+        section="\n\n## 참고 산식 응시 자기 확인\n\n"+attendance["documentation"]+"\n"
+        for key in ("planning","routing","architecture","workflow","development_sync","university_scoring","university_percentile","api_dto","presentation_handoff"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -5379,6 +5489,10 @@ def validate_content(paths,read,spec):
     if fixture_guard in names: wildcard_hashes[fixture_guard] = hashlib.sha256(read(fixture_guard)).hexdigest()
     _, wildcard_errors = service_wildcard_registration(spec, wildcard_hashes)
     errors.extend(wildcard_errors)
+    reference_db_names = (*REFERENCE_DB_TEST_PATHS, "tests/test_reference_db_suite_registration.py")
+    reference_db_hashes = {p:hashlib.sha256(read(p)).hexdigest() for p in reference_db_names if p in names}
+    _, reference_db_errors = reference_db_registration(spec, reference_db_hashes)
+    errors.extend(reference_db_errors)
     errors.extend(service_candidate_suite_errors(paths,read,spec))
     errors.extend(native_seed_candidate_errors(paths,read,spec))
     errors.extend(service_history_report_preservation_errors(paths,read,spec))

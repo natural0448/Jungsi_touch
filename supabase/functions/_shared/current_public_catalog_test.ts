@@ -1,3 +1,9 @@
+import { CurrentPublicSearchScopedService } from "./current_public_scoped_service.ts";
+import { SearchDiagnostic } from "./search_failure_diagnostic.ts";
+import { type ApiHttpPorts, createApiHandler } from "./jungsi/infrastructure/api_http.ts";
+import { RelayBoundary } from "./jungsi/infrastructure/auth_relay.ts";
+import { RequestLimitError } from "./jungsi/application/request_budget.ts";
+import { canonicalApiPolicies } from "../../../tests/edge/public_api_contract_fixture.ts";
 /** Synthetic only. No network/DB/env permissions or original admission values. */
 import { AccessError } from "./jungsi/application/access.ts";
 import type { ApiExecution } from "./jungsi/application/api_dispatch.ts";
@@ -1341,4 +1347,110 @@ Deno.test("offerings.search projection carries my_score only through the current
     items: [offering],
   }) as NativeObject;
   equal((plain.items as NativeObject[])[0].offering_id, "2027:SYNTHETIC-PK");
+});
+
+function failClosedScoreFixture() {
+  const f = fixture();
+  let scoreFactories = 0;
+  const service = new CurrentPublicSearchScopedService(
+    { getCatalog: () => Promise.resolve(null) },
+    f.current,
+    { nowUtc: () => NOW },
+    new CurrentPublicCatalogCursor(new Uint8Array(32).fill(7)),
+    new SearchDiagnostic(),
+    () => new Uint8Array(32).fill(7),
+    () => Promise.reject(new Error("no cursor expected")),
+    () => {
+      scoreFactories++;
+      throw new Error("score map must not start");
+    },
+  );
+  return { f, service, scoreFactories: () => scoreFactories };
+}
+Deno.test("disabled score map preserves search and does not touch a missing 011 table", async () => {
+  const f = failClosedScoreFixture();
+  const expected = await f.f.service.execute(request("offerings.search"));
+  const actual = await f.service.execute(request("offerings.search"));
+  equal(actual.my_score_state, "unavailable");
+  const rows = actual.items as NativeObject[], original = expected.items as NativeObject[];
+  equal(rows.length, original.length);
+  equal(rows.map(({ my_score: _, ...item }) => item), original);
+  assert(rows.every((item) => item.my_score === null));
+  equal(f.scoreFactories(), 0);
+});
+function failClosedHttp(budgetMode: "allow" | "deny" | "abort") {
+  const f = failClosedScoreFixture(), relay = "SYNTHETIC-RELAY-" + "x".repeat(32);
+  let business = 0;
+  const never = () => Promise.reject(new Error("unexpected port access"));
+  const ports: ApiHttpPorts = {
+    relay: new RelayBoundary(relay),
+    clock: { nowUtc: () => NOW },
+    sessions: {
+      verifyUserBearer: () =>
+        Promise.resolve({
+          subjectId: "00000000-0000-0000-0000-000000000001",
+          expiresAtUtc: NOW + 1_000_000n,
+          accountStatus: "active",
+        }),
+    },
+    passes: {
+      readCurrent: (subjectId, evaluatedAtUtc) =>
+        Promise.resolve({
+          authority: "public.jeongsi_passes",
+          metadataVerified: true,
+          subjectId,
+          evaluatedAtUtc,
+          paidUntilUtc: NOW + 1_000_000n,
+        }),
+    },
+    reports: { lookupAccess: never },
+    authorities: { readCurrent: never },
+    resources: { readScope: never },
+    projection: new PublicResponseProjection(
+      currentPublicResponseSchemas(schemas),
+      routeCatalog.operations,
+    ),
+    budget: {
+      async run(_r, work) {
+        if (budgetMode === "deny") throw new RequestLimitError("rate_limit_exceeded", 7);
+        if (budgetMode === "abort") throw new AccessError("security_policy_unavailable", 503);
+        return await work();
+      },
+    },
+    business: {
+      async execute(r) {
+        business++;
+        return await f.service.execute(r);
+      },
+    },
+  };
+  const handler = createApiHandler(canonicalApiPolicies(), ports);
+  const raw = new Request("https://synthetic.invalid/api/v1/offerings/search?academic_year=2024", {
+    headers: { Authorization: "Bearer SYNTHETIC", "X-Jungsi-Relay-Token": relay },
+  });
+  return { ...f, handler, raw, business: () => business };
+}
+Deno.test("HTTP search returns existing rows with score unavailable without any score map access", async () => {
+  const f = failClosedHttp("allow"), response = await f.handler(f.raw);
+  equal(response.status, 200);
+  const body = await response.json();
+  equal(body.my_score_state, "unavailable");
+  assert(body.items.length > 0 && body.items.every((row: NativeObject) => row.my_score === null));
+  equal(f.scoreFactories(), 0);
+  equal(f.business(), 1);
+});
+Deno.test("HTTP budget or canceled admission failures are not turned into successful searches", async () => {
+  for (const [mode, status] of [["deny", 429], ["abort", 503]] as const) {
+    const f = failClosedHttp(mode), response = await f.handler(f.raw);
+    equal(response.status, status);
+    equal(f.business(), 0);
+    equal(f.scoreFactories(), 0);
+  }
+});
+
+Deno.test("an already aborted request never starts optional score work", async () => {
+  const f = failClosedHttp("allow"), controller = new AbortController();
+  controller.abort();
+  await f.handler(new Request(f.raw, { signal: controller.signal }));
+  equal(f.scoreFactories(), 0);
 });

@@ -145,7 +145,7 @@ def verify_graph_literals(root,graph,paths):
         if not set(literal)<=resolved:raise EdgeFailure("dynamic_graph_incomplete:"+path)
 # Only this public JSON artifact and this indexed coexisting TS are graph exceptions.
 PUBLIC_SCHEMA_PATH="src/jungsi_touch/application/public_response_schemas.json"
-PUBLIC_SCHEMA_SHA256="950e4f25262281e205e516b8152563264768c5ad5051d4f4fca56cc003d28162"
+PUBLIC_SCHEMA_SHA256="43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc"
 CURRENT_CATALOG_PATH="supabase/functions/_shared/current_public_catalog.ts"
 PROFESSIONAL_FIXTURE_PATH="supabase/functions/_shared/professional_support.ts"
 # Independent approved pin: a source, manifest and index changed together must not widen the graph.
@@ -292,6 +292,14 @@ def declaration_model(module,root,path,registered=None):
         loc=value.get("location",location);out={}
         for k,v in value.items():
             if k in {"location","jsDoc"}:continue
+            if k=="filename":
+                # Deno reference targets are file URLs. Keep stable repository-relative
+                # origins and reject any path outside the registered snapshot.
+                if not isinstance(v,str):raise EdgeFailure("declaration_origin_invalid")
+                origin=local_url(v,root)
+                if origin not in (registered or {path}):raise EdgeFailure("declaration_origin_unregistered")
+                out[k]=origin
+                continue
             out[k]=clean(v,loc if k=="def" else None)
         if "params" in value and loc and "byteIndex" in loc:
             out["parameter_source"]=param_slice(loc["byteIndex"],loc.get("filename"))

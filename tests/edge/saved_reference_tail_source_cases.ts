@@ -1,3 +1,5 @@
+import { runtimeAnalysisDataPort } from "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts";
+import type { NativeDataProvider } from "../../supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts";
 import { assert, equal } from "./fixture.ts";
 import {
   nativeJsonText,
@@ -67,6 +69,7 @@ async function fixture() {
     bytes: raw.length,
     maxBytes: 65536,
     releaseSha256: "c".repeat(64),
+    selectionSha256: "e".repeat(64),
     compatibilitySha256: "d".repeat(64),
     context,
     evidence,
@@ -88,9 +91,14 @@ async function fixture() {
       checks++;
       if (!valid) throw new Error("revoked");
     },
-    async assertCompatible(_p: AuthorizedSavedTailPin, identity: Readonly<NativeObject>) {
+    async assertCompatible(
+      _p: AuthorizedSavedTailPin,
+      identity: Readonly<NativeObject>,
+    ) {
       await Promise.resolve();
-      if (!compatible || identity.exam_id !== "SYNTHETIC-mock") throw new Error("incompatible");
+      if (!compatible || identity.exam_id !== "SYNTHETIC-mock") {
+        throw new Error("incompatible");
+      }
     },
   };
   return {
@@ -118,8 +126,14 @@ async function rejects(f: () => Promise<unknown>) {
 }
 Deno.test("saved-tail provider shares immutable bytes only within its admitted request", async () => {
   const x = await fixture(),
-    source = new PinnedSavedReferenceTailSource(x.port, x.controller.signal, 2, 131072);
-  const one = await source.getReferenceTail("one"), two = await source.getReferenceTail("two");
+    source = new PinnedSavedReferenceTailSource(
+      x.port,
+      x.controller.signal,
+      2,
+      131072,
+    );
+  const one = await source.getReferenceTail("one"),
+    two = await source.getReferenceTail("two");
   assert(one && two);
   equal(x.reads(), 1);
   assert(x.checks() >= 4);
@@ -135,7 +149,12 @@ Deno.test("saved-tail provider shares immutable bytes only within its admitted r
 });
 Deno.test("saved-tail provider rechecks revoked head and compatibility", async () => {
   const x = await fixture(),
-    source = new PinnedSavedReferenceTailSource(x.port, x.controller.signal, 2, 131072);
+    source = new PinnedSavedReferenceTailSource(
+      x.port,
+      x.controller.signal,
+      2,
+      131072,
+    );
   const one = await source.getReferenceTail("one");
   assert(one);
   x.incompatible();
@@ -153,9 +172,10 @@ Deno.test("saved-tail provider rejects a wrong hash or wrong offering binding", 
       },
     };
   await rejects(() =>
-    new PinnedSavedReferenceTailSource(badHash, x.controller.signal, 2, 131072).getReferenceTail(
-      "one",
-    )
+    new PinnedSavedReferenceTailSource(badHash, x.controller.signal, 2, 131072)
+      .getReferenceTail(
+        "one",
+      )
   );
   const wrongId = {
     ...x.port,
@@ -165,14 +185,20 @@ Deno.test("saved-tail provider rejects a wrong hash or wrong offering binding", 
     },
   };
   await rejects(() =>
-    new PinnedSavedReferenceTailSource(wrongId, x.controller.signal, 2, 131072).getReferenceTail(
-      "one",
-    )
+    new PinnedSavedReferenceTailSource(wrongId, x.controller.signal, 2, 131072)
+      .getReferenceTail(
+        "one",
+      )
   );
 });
 Deno.test("saved-tail provider does not serve data after abort", async () => {
   const x = await fixture(),
-    source = new PinnedSavedReferenceTailSource(x.port, x.controller.signal, 2, 131072);
+    source = new PinnedSavedReferenceTailSource(
+      x.port,
+      x.controller.signal,
+      2,
+      131072,
+    );
   const one = await source.getReferenceTail("one");
   assert(one);
   x.controller.abort();
@@ -188,7 +214,12 @@ Deno.test("saved-tail provider rejects differing metadata for the same object ke
         return id === "one" ? x.pin(id) : { ...x.pin(id), compatibilitySha256: "e".repeat(64) };
       },
     };
-  const source = new PinnedSavedReferenceTailSource(port, x.controller.signal, 2, 131072);
+  const source = new PinnedSavedReferenceTailSource(
+    port,
+    x.controller.signal,
+    2,
+    131072,
+  );
   assert(await source.getReferenceTail("one"));
   await rejects(() => source.getReferenceTail("two"));
 });
@@ -201,7 +232,12 @@ Deno.test("saved-tail provider enforces request cache object count", async () =>
         return { ...x.pin(id), key: id };
       },
     };
-  const source = new PinnedSavedReferenceTailSource(port, x.controller.signal, 1, 131072);
+  const source = new PinnedSavedReferenceTailSource(
+    port,
+    x.controller.signal,
+    1,
+    131072,
+  );
   assert(await source.getReferenceTail("one"));
   await rejects(() => source.getReferenceTail("two"));
 });
@@ -215,4 +251,84 @@ Deno.test("saved-tail provider enforces request byte budget before reading", asy
   );
   await rejects(() => source.getReferenceTail("one"));
   equal(x.reads(), 0);
+});
+
+Deno.test("saved-tail provider forwards a narrow scope abort to the underlying read", async () => {
+  const x = await fixture();
+  const narrow = new AbortController();
+  let started!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    started = resolve;
+  });
+  let readSignal: AbortSignal | undefined;
+  const port = {
+    ...x.port,
+    async read(_key: string, _max: number, signal: AbortSignal) {
+      readSignal = signal;
+      started();
+      return await new Promise<Uint8Array>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(new Error("cancelled")), {
+          once: true,
+        });
+        if (signal.aborted) reject(new Error("cancelled"));
+      });
+    },
+  };
+  const source = new PinnedSavedReferenceTailSource(
+    port,
+    x.controller.signal,
+    2,
+    131072,
+  );
+  const read = source.getReferenceTail("one", narrow.signal);
+  await ready;
+  narrow.abort();
+  await rejects(() => read);
+  assert(readSignal?.aborted);
+  assert(!x.controller.signal.aborted);
+});
+Deno.test("saved-tail provider rejects an already-aborted narrow scope before selection", async () => {
+  const x = await fixture();
+  let selected = false;
+  const port = {
+    ...x.port,
+    select(id: string) {
+      selected = true;
+      return Promise.resolve(x.pin(id));
+    },
+  };
+  const source = new PinnedSavedReferenceTailSource(
+    port,
+    x.controller.signal,
+    2,
+    131072,
+  );
+  const narrow = new AbortController();
+  narrow.abort();
+  await rejects(() => source.getReferenceTail("one", narrow.signal));
+  assert(!selected);
+});
+
+Deno.test("runtime analysis adapter forwards scope abort before selecting tail", async () => {
+  const x = await fixture();
+  let selected = false;
+  const source = {
+    ...x.port,
+    select(id: string) {
+      selected = true;
+      return Promise.resolve(x.pin(id));
+    },
+  };
+  const provider = {
+    referenceTailAuthority: () => source,
+  } as unknown as NativeDataProvider;
+  const data = runtimeAnalysisDataPort(
+    { data: () => Promise.resolve(provider) },
+    async (_stage, work) => await work(),
+    x.controller.signal,
+  );
+  const narrow = new AbortController();
+  narrow.abort();
+  await rejects(() => data.getReferenceTail!("one", narrow.signal));
+  assert(!selected);
 });

@@ -4,11 +4,40 @@ import { JsonFloat } from "./native_json.ts";
 import { nativeJsonText, type NativeObject } from "./json_value.ts";
 export interface SavedReferenceProjectionPin {
   readonly sha256: string;
+  readonly version?: string;
   readonly bytes: number;
   readonly maxBytes: number;
   /** Independently verified binder output identity, provided by the server selection. */
   readonly context: Readonly<NativeObject>;
   readonly evidence: Readonly<NativeObject>;
+}
+export interface AuthorizedSavedTailPin extends SavedReferenceProjectionPin {
+  readonly key: string;
+  readonly releaseSha256: string;
+  readonly selectionSha256?: string;
+  readonly compatibilitySha256: string;
+  /** Public ID, physical PK and current catalog context are distinct fields. */
+  readonly binding: Readonly<NativeObject>;
+}
+export interface AuthorizedSavedTailBytesPort {
+  /** Selection must be independently authorized, never supplied by a client. */
+  select(offeringId: string, signal: AbortSignal): Promise<AuthorizedSavedTailPin | null>;
+  /** Must enforce the existing private storage byte/read/time budget and stop on abort. */
+  read(key: string, maximumBytes: number, signal: AbortSignal): Promise<Uint8Array>;
+  /** Recheck current selected release, head, expiry, user and request admission. */
+  assertCurrent(pin: AuthorizedSavedTailPin, signal: AbortSignal): Promise<void>;
+  /** Verify exact source/model/exam/score-axis equivalence, not only pack version. */
+  assertCompatible(
+    pin: AuthorizedSavedTailPin,
+    identity: Readonly<NativeObject>,
+    signal: AbortSignal,
+  ): Promise<void>;
+  /** Independent current issuer only; absent means no saved-result disclosure proof. */
+  verifiedProvenance?(
+    pin: AuthorizedSavedTailPin,
+    identity: Readonly<NativeObject>,
+    signal: AbortSignal,
+  ): Promise<Readonly<NativeObject>>;
 }
 const CONTEXT = [
   "academic_year",
@@ -98,7 +127,8 @@ export class SavedReferenceTailProjection {
       "rows",
     ]);
     check(
-      p.format === "jungsi.saved-reference-tail-projection/v1" && typeof p.version === "string",
+      p.format === "jungsi.saved-reference-tail-projection/v1" && typeof p.version === "string" &&
+        (pin.version === undefined || p.version === pin.version),
       "reference_tail_invalid",
     );
     const c = object(p.context, CONTEXT), e = object(p.evidence, EVIDENCE);

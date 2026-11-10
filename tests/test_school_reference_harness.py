@@ -17,7 +17,7 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
     def test_separate_exact_suite_retains_foundation(self):
         spec, before = self.fixture()
         verification = runner.school_reference_registration(spec, before)
-        self.assertEqual(verification['test_count'], 83)
+        self.assertEqual(verification['test_count'], 97)
         self.assertEqual(spec['edge_harness']['unit_count'], 656)
         source = Path(__file__).resolve().parents[1] / 'scripts/check_project_consistency.py'
         functions = [n.name for n in ast.parse(source.read_text(encoding='utf8')).body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]

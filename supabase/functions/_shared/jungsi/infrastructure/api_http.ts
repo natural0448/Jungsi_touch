@@ -647,6 +647,9 @@ export function createApiHandler(
               admission,
               request.signal,
             );
+            if (referenceAuthority && typeof referenceAuthority.assertSettled !== "function") {
+              referenceAuthority = null;
+            }
             if (referenceAuthority) await referenceAuthority.assertCurrent(request.signal);
           } catch {
             referenceAuthority = null;
@@ -681,6 +684,8 @@ export function createApiHandler(
           trustedRaw = result;
           firstProjection = publicJsonText(projected);
         }
+        // Last external reference source/report check happens before the shared lease settles.
+        if (referenceAuthority) await referenceAuthority.assertCurrent(request.signal);
         return projected;
       };
       const complete = async () => {
@@ -697,7 +702,7 @@ export function createApiHandler(
         stage("final_projection");
         if (authority && firstProjection !== null) await authority.assertCurrent(request.signal);
         if (referenceAuthority && firstProjection !== null) {
-          await referenceAuthority.assertCurrent(request.signal);
+          referenceAuthority.assertSettled!(request.signal);
         }
         const projection = policy.id === CURRENT_PAGE_OPERATION_ID
           ? currentPageProjection!
@@ -783,7 +788,7 @@ export function createApiHandler(
         // the later receipt and actual transport are not atomic with revocation.
         if ((authority || referenceAuthority) && firstProjection !== null) {
           if (authority) await authority.assertCurrent(request.signal);
-          if (referenceAuthority) await referenceAuthority.assertCurrent(request.signal);
+          if (referenceAuthority) referenceAuthority.assertSettled!(request.signal);
           if (
             request.signal.aborted ||
             publicJsonText(
@@ -801,6 +806,11 @@ export function createApiHandler(
         }
         stage("response_delivery");
         await ports.completion?.deliver(selected, approved, requestId);
+        // Delivery bookkeeping may itself take time. Recheck only the local reference
+        // receipt immediately before returning; never open a new external read here.
+        if (referenceAuthority && firstProjection !== null) {
+          referenceAuthority.assertSettled!(request.signal);
+        }
         return response;
       };
       stage("response_acceptance");

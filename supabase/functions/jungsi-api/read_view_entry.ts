@@ -10,10 +10,12 @@ import {
   type RuntimeRoutePolicy,
 } from "../_shared/jungsi/infrastructure/runtime_composition.ts";
 import { createSupabaseApiIngress } from "../_shared/jungsi/infrastructure/supabase_api_ingress.ts";
+import { publishedReferenceFactory } from "../_shared/jungsi/infrastructure/published_reference_runtime.ts";
 import { createNativePostgresPool } from "./postgres_pool.ts";
 import { createReadViewCatalogService } from "../_shared/read_view_catalog_runtime.ts";
 import { currentPublicResponseSchemas } from "../_shared/current_public_catalog.ts";
 const runtime = new NativeRuntimeApi({
+  referenceFactory: publishedReferenceFactory,
   readViewExtensions: true,
   candidateCatalog: createReadViewCatalogService,
   environment: { get: (name) => Deno.env.get(name) },

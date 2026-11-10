@@ -28,6 +28,8 @@ export interface WildcardProjectionAuthority {
  * Merely creating this object or matching a hash does not establish authority. */
 export interface ReferenceProjectionAuthority {
   assertCurrent(signal: AbortSignal): Promise<void>;
+  /** Request-local settled receipt only. Must not perform or schedule any I/O. */
+  assertSettled?(signal: AbortSignal): void;
   authorizes(
     input: {
       readonly operation: string;

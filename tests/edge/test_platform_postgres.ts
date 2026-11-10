@@ -318,7 +318,8 @@ Deno.test("SQL new report uses owned immutable profile and appends first revisio
   equal(body.p[5], NOW);
 });
 Deno.test("SQL update uses FOR UPDATE version and explicit owner then appends revision", async () => {
-  const f = fixture(exists), r = await f.repo.writeReport(write());
+  const f = fixture((s) => s === REPORT_READ_SQL ? [rowReport()] : exists(s)),
+    r = await f.repo.writeReport(write());
   equal(r.revision, 3);
   equal(f.calls.find((c) => c.s === REPORT_REVISION_SQL)!.p, ["SYNTHETIC-report", OWNER]);
   equal(f.calls.find((c) => c.s === REPORT_UPDATE_SQL)!.p, [

@@ -5,7 +5,11 @@ import { PASS_STATE_SQL, type ReadonlyPassSqlPort } from "./public_passes.ts";
 import { sqlJsonText } from "./sql_values.ts";
 
 export interface NativeSqlTransaction {
-  query(statement: string, parameters?: readonly unknown[]): Promise<unknown[][]>;
+  query(
+    statement: string,
+    parameters?: readonly unknown[],
+    signal?: AbortSignal,
+  ): Promise<unknown[][]>;
 }
 export interface NativeSqlPool {
   transaction<T>(readOnly: boolean, work: (tx: NativeSqlTransaction) => Promise<T>): Promise<T>;
@@ -33,15 +37,19 @@ ${PASS_STATE_SQL}
 ) SELECT exists_native,columns_native::text,constraints_native::text,
  role_native::text,policies_native::text,expiry_native,pass_id_native
  FROM payload CROSS JOIN runtime_guard WHERE runtime_guard.ok`;
-async function configure(tx: NativeSqlTransaction, subject: string | null): Promise<void> {
-  await tx.query("SET LOCAL TIME ZONE 'UTC'");
-  await tx.query("SET LOCAL row_security='on'");
-  await tx.query("SET LOCAL statement_timeout='5000ms'");
+async function configure(
+  tx: NativeSqlTransaction,
+  subject: string | null,
+  signal?: AbortSignal,
+): Promise<void> {
+  await tx.query("SET LOCAL TIME ZONE 'UTC'", [], signal);
+  await tx.query("SET LOCAL row_security='on'", [], signal);
+  await tx.query("SET LOCAL statement_timeout='5000ms'", [], signal);
   if (subject !== null) {
     await tx.query(SUBJECT_CONTEXT_SQL, [
       subject,
       JSON.stringify({ sub: subject, role: "authenticated" }),
-    ]);
+    ], signal);
   }
 }
 function subjectId(value: string): string {
@@ -122,8 +130,12 @@ export class SupabaseSqlTransport implements ReadonlyPassSqlPort {
       throw new AccessError("entitlement_unavailable", 503);
     }
   }
-  async read<T>(subject: string, work: (tx: NativeSqlTransaction) => Promise<T>): Promise<T> {
-    return await this.run(true, subject, work);
+  async read<T>(
+    subject: string,
+    work: (tx: NativeSqlTransaction) => Promise<T>,
+    signal?: AbortSignal,
+  ): Promise<T> {
+    return await this.run(true, subject, work, signal);
   }
   async write<T>(subject: string, work: (tx: NativeSqlTransaction) => Promise<T>): Promise<T> {
     return await this.run(false, subject, work);
@@ -132,19 +144,27 @@ export class SupabaseSqlTransport implements ReadonlyPassSqlPort {
     readOnly: boolean,
     subject: string,
     work: (tx: NativeSqlTransaction) => Promise<T>,
+    signal?: AbortSignal,
   ): Promise<T> {
     const selected = subjectId(subject);
+    if (signal?.aborted) throw new AccessError("storage_unavailable", 503);
     if (this.frame) {
       if (!this.requestLocal || this.frame.subject !== selected) {
         throw new AccessError("storage_transaction_context_invalid", 503);
       }
-      return await work(this.frame.tx);
+      const result = await work(this.frame.tx);
+      if (signal?.aborted) throw new AccessError("storage_unavailable", 503);
+      return result;
     }
     try {
       return await this.pool.transaction(readOnly, async (tx) => {
-        await configure(tx, selected);
-        verifyRole(await tx.query(RUNTIME_ROLE_SQL), readOnly);
-        return await work(tx);
+        if (signal?.aborted) throw new AccessError("storage_unavailable", 503);
+        await configure(tx, selected, signal);
+        verifyRole(await tx.query(RUNTIME_ROLE_SQL, [], signal), readOnly);
+        if (signal?.aborted) throw new AccessError("storage_unavailable", 503);
+        const result = await work(tx);
+        if (signal?.aborted) throw new AccessError("storage_unavailable", 503);
+        return result;
       });
     } catch (error) {
       if (error instanceof AccessError) throw error;

@@ -12,6 +12,7 @@ export const NATIVE_RUNTIME_KINDS = [
   "conversion",
   "reference_conversion",
   "reference_tail",
+  "reference_compatibility",
   "percentile",
   "estimate_receipt",
   "analysis",
@@ -106,7 +107,10 @@ export class PreparedSelectionCache {
 }
 export class NativeSourceSelection {
   private readonly artifacts: Map<string, SelectedNativeArtifact>;
-  private readonly referenceLoads = new Map<string, Promise<SelectedNativeArtifact | null>>();
+  private readonly referenceLoads = new Map<
+    string,
+    { signal?: AbortSignal; value: Promise<SelectedNativeArtifact | null> }
+  >();
   private readonly references: ReadonlyMap<string, NativeObject>;
   private constructor(
     artifacts: ReadonlyMap<string, SelectedNativeArtifact>,
@@ -167,7 +171,9 @@ export class NativeSourceSelection {
       if (!entry) fail("runtime_dependency_missing");
       if (entry.kind === "reference_conversion") client.validateReferenceCalculation(entry);
       else if (entry.kind === "reference_tail") client.validateReferenceTail(entry);
-      else client.validateSelectedReference(entry);
+      else if (entry.kind === "reference_compatibility") {
+        client.validateReferenceCompatibility(entry);
+      } else client.validateSelectedReference(entry);
       if (entry.source_timezone != null && typeof entry.source_timezone !== "string") {
         fail("artifact_time_invalid");
       }
@@ -175,7 +181,9 @@ export class NativeSourceSelection {
     }
     if (
       [...chosen.values()].some((e) =>
-        e.kind === "reference_conversion" || e.kind === "reference_tail"
+        ["reference_conversion", "reference_tail", "reference_compatibility"].includes(
+          String(e.kind),
+        )
       ) ||
       payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog") ||
       payloadMode === "overall_only" &&
@@ -190,7 +198,11 @@ export class NativeSourceSelection {
     const artifacts = new Map<string, SelectedNativeArtifact>();
     for (const [id, entry] of chosen) {
       // Metadata and approval remain complete; reference bodies are selected by trusted PK routing.
-      if (entry.kind === "reference_conversion" || entry.kind === "reference_tail") continue;
+      if (
+        ["reference_conversion", "reference_tail", "reference_compatibility"].includes(
+          String(entry.kind),
+        )
+      ) continue;
       if (payloadMode === "catalog_only" && entry.kind !== "catalog") continue;
       if (payloadMode === "university_only" && entry.kind === "total_model") continue;
       if (
@@ -275,31 +287,75 @@ export class NativeSourceSelection {
     if (!selected) fail("runtime_dependency_missing");
     return await this.client.referenceTailBytes(selected, signal);
   }
-  async loadReference(key: string): Promise<SelectedNativeArtifact | null> {
+  /** Selected metadata only; current head, identity and owner authority are not implied. */
+  referenceTailEntries(): readonly { key: string; entry: NativeObject }[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_tail")
+      .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
+  }
+  referenceCompatibilityMetadata(): readonly { key: string; entry: NativeObject }[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_compatibility")
+      .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
+  }
+  /** On-demand exact bytes from an approved reference entry; caller verifies current head both sides. */
+  async loadReferenceTail(
+    key: string,
+    signal: AbortSignal,
+  ): Promise<{ entry: NativeObject; bytes: Uint8Array } | null> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const entry = this.references.get(identity("reference_tail", key));
+    if (!entry) return null;
+    const bytes = await this.client.referenceTailBytes(entry, signal);
+    return { entry: cloneNativeJson(entry), bytes };
+  }
+  /** Separate selected evidence bytes; semantic compatibility still belongs to the issuer. */
+  async loadReferenceCompatibility(
+    key: string,
+    signal: AbortSignal,
+  ): Promise<SelectedNativeArtifact | null> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const entry = this.references.get(identity("reference_compatibility", key));
+    if (!entry) return null;
+    const verified = await this.client.referenceCompatibilityArtifact(entry, signal);
+    return { entry: cloneNativeJson(entry), payload: cloneNativeJson(verified.payload) };
+  }
+  async loadReference(key: string, signal?: AbortSignal): Promise<SelectedNativeArtifact | null> {
+    if (signal?.aborted) fail("storage_unavailable");
     if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
       fail("runtime_dependency_not_loaded");
     }
     const id = identity("reference_conversion", key), entry = this.references.get(id);
     if (!entry) return null;
     const loaded = this.artifacts.get(id);
-    if (loaded && !this.referenceLoads.has(id)) {
+    if (loaded) {
       return { entry: cloneNativeJson(loaded.entry), payload: cloneNativeJson(loaded.payload) };
     }
-    if (!this.referenceLoads.has(id)) {
-      this.referenceLoads.set(
-        id,
-        (async () => {
-          const verified = await this.client.referenceCalculationArtifact(entry);
-          const value = {
-            entry: cloneNativeJson(entry),
-            payload: cloneNativeJson(verified.payload),
-          };
-          this.artifacts.set(id, value);
-          return value;
-        })(),
-      );
+    let pending = this.referenceLoads.get(id);
+    if (!pending || pending.signal !== signal) {
+      const value = (async () => {
+        const verified = await this.client.referenceCalculationArtifact(entry, signal);
+        if (signal?.aborted) fail("storage_unavailable");
+        const result = {
+          entry: cloneNativeJson(entry),
+          payload: cloneNativeJson(verified.payload),
+        };
+        this.artifacts.set(id, result);
+        return result;
+      })();
+      pending = { signal, value };
+      this.referenceLoads.set(id, pending);
+      const started = pending;
+      void value.then(() => {
+        if (this.referenceLoads.get(id) === started) this.referenceLoads.delete(id);
+      }, () => {
+        if (this.referenceLoads.get(id) === started) this.referenceLoads.delete(id);
+      });
     }
-    const value = await this.referenceLoads.get(id)!;
+    const value = await pending.value;
+    if (signal?.aborted) fail("storage_unavailable");
     return value
       ? { entry: cloneNativeJson(value.entry), payload: cloneNativeJson(value.payload) }
       : null;

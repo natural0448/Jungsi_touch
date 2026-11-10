@@ -3,6 +3,7 @@ import "../_shared/node_compat_bootstrap.ts";
 import postgres from "npm:postgres@3.4.5";
 import { AccessError } from "../_shared/jungsi/application/access.ts";
 import { databaseProjectRef } from "../_shared/jungsi/infrastructure/project_binding.ts";
+import { cancellableSqlQuery } from "../_shared/jungsi/infrastructure/cancellable_sql_query.ts";
 import { requireSqlTextColumns } from "../_shared/jungsi/infrastructure/sql_values.ts";
 import type {
   NativeSqlPool,
@@ -55,7 +56,7 @@ export function createNativePostgresPool(config: PostgresPoolSettings): NativeSq
         : "isolation level read committed read write";
       const result = await sql.begin(mode, async (tx) => {
         const value = await work({
-          async query(statement, parameters = []) {
+          async query(statement, parameters = [], signal) {
             if (
               typeof statement !== "string" || statement.includes("\0") ||
               parameters.some((v) =>
@@ -64,7 +65,7 @@ export function createNativePostgresPool(config: PostgresPoolSettings): NativeSq
                 typeof v === "number" && !Number.isFinite(v)
               )
             ) throw new AccessError("storage_parameters_invalid", 503);
-            const rows = await tx.unsafe(statement, [...parameters] as never[]).values();
+            const rows = await cancellableSqlQuery(tx.unsafe(statement, [...parameters] as never[]).values(), signal);
             if (rows.length && !Array.isArray(rows.columns)) {
               throw new AccessError("storage_result_invalid", 503);
             }

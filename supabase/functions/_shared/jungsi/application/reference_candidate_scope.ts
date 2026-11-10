@@ -88,13 +88,19 @@ export async function acquireReferenceCandidateScope(
     port.consumerReceiptSha256,
   ];
   if (
-    !boundary?.signal || boundary.signal.aborted || boundary.admission == null ||
+    !boundary?.signal || boundary.signal.aborted ||
+    boundary.admission == null ||
     !hashes.every((v) => typeof v === "string" && /^[a-f0-9]{64}$/.test(v)) ||
-    ![port.maximumRows, port.maximumEvidenceBytes, port.maximumRuntimeMilliseconds].every(
+    ![
+      port.maximumRows,
+      port.maximumEvidenceBytes,
+      port.maximumRuntimeMilliseconds,
+    ].every(
       bounded,
     ) ||
     port.maximumRuntimeMilliseconds > 2147483647 ||
-    typeof port.verifyAdmission !== "function" || typeof port.readOfferingIds !== "function" ||
+    typeof port.verifyAdmission !== "function" ||
+    typeof port.readOfferingIds !== "function" ||
     typeof port.cancelAndWait !== "function"
   ) unavailable();
   const captured = Object.freeze({ ...request });
@@ -111,56 +117,77 @@ export async function acquireReferenceCandidateScope(
   const verify = port.verifyAdmission.bind(port),
     read = port.readOfferingIds.bind(port),
     cancel = port.cancelAndWait.bind(port);
+  const cancelled = new AbortController();
   const signal = AbortSignal.any([
     boundary.signal,
     AbortSignal.timeout(requirements.maximumRuntimeMilliseconds),
+    cancelled.signal,
   ]);
-  let readStarted = false, stopped: Promise<void> | undefined;
+  const outstanding = new Set<Promise<unknown>>();
+  const track = <T>(promise: Promise<T>): Promise<T> => {
+    outstanding.add(promise);
+    void promise.then(
+      () => outstanding.delete(promise),
+      () => outstanding.delete(promise),
+    );
+    return promise;
+  };
+  let stopped: Promise<void> | undefined;
+  const stop = (): Promise<void> => {
+    if (!stopped) {
+      cancelled.abort();
+      stopped = (async () => {
+        try {
+          await cancel();
+        } finally {
+          while (outstanding.size) await Promise.allSettled([...outstanding]);
+        }
+      })();
+    }
+    return stopped;
+  };
   const ensure = async () => {
     try {
       if (signal.aborted) unavailable();
       await within(
-        Promise.resolve().then(() => verify(captured, boundary.admission, requirements, signal)),
+        track(
+          Promise.resolve().then(() => verify(captured, boundary.admission, requirements, signal)),
+        ),
         signal,
       );
       if (signal.aborted) unavailable();
     } catch (e) {
-      if (signal.aborted && readStarted) {
-        stopped ??= Promise.resolve().then(() => cancel());
-        await stopped;
-      }
+      await stop();
       throw e;
     }
   };
   await ensure();
   let ids: readonly string[];
   try {
-    readStarted = true;
     ids = await within(
-      Promise.resolve().then(() => read(captured, signal, requirements.maximumEvidenceBytes)),
+      track(
+        Promise.resolve().then(() => read(captured, signal, requirements.maximumEvidenceBytes)),
+      ),
       signal,
     );
   } catch (e) {
-    if (signal.aborted && readStarted) {
-      stopped ??= Promise.resolve().then(() => cancel());
-      await stopped;
-    }
+    await stop();
     throw e;
   }
   if (
     !Array.isArray(ids) || ids.length > requirements.maximumRows ||
     ids.some((id) => typeof id !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(id)) ||
     new Set(ids).size !== ids.length
-  ) unavailable();
+  ) {
+    await stop();
+    unavailable();
+  }
   await ensure();
   const run = async <T>(work: Promise<T>): Promise<T> => {
     try {
-      return await within(work, signal);
+      return await within(track(work), signal);
     } catch (e) {
-      if (signal.aborted && readStarted) {
-        stopped ??= Promise.resolve().then(() => cancel());
-        await stopped;
-      }
+      await stop();
       throw e;
     }
   };

@@ -50,6 +50,7 @@ import {
   UniversityAnalysisService,
 } from "../application/university_analysis.ts";
 import { utcText } from "../domain/time.ts";
+import { nativeJsonText } from "../domain/json_value.ts";
 import {
   API_REQUEST_STAGES,
   type ApiHttpPorts,
@@ -82,6 +83,14 @@ export const REFERENCE_TAIL_REQUEST_OBJECTS = 16;
 export const REFERENCE_TAIL_REQUEST_BYTES = 24 * 1024 * 1024;
 /** Concurrent saved-tail loads per request (same request budget and signal). */
 export const REFERENCE_TAIL_PREFETCH_CONCURRENCY = 4;
+import { RuntimeReferenceLease } from "./runtime_reference_lease.ts";
+import {
+  bindRuntimeReferencePorts,
+  type RuntimeReferenceFactory,
+  type RuntimeReferencePorts,
+} from "./runtime_reference_ports.ts";
+import { savedReportProjectionAuthority } from "./saved_report_projection_authority.ts";
+import { prefetchSelectedSavedTails, preservePrefetchFailures } from "./reference_tail_prefetch.ts";
 import {
   type BasicRuntimeSettings,
   readBasicRuntimeSettings,
@@ -136,6 +145,8 @@ export interface RuntimeComposition {
   readonly memberShortlistExtensions?: true;
   readonly readViewExtensions?: true;
   readonly candidateCatalog?: ReadViewCatalogFactory;
+  /** Absent by default; a reviewed factory must independently verify published reference authority. */
+  readonly referenceFactory?: RuntimeReferenceFactory;
   /** Separate reviewed configuration only; no authority is installed by default. */
   readonly currentPage?: {
     assert(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
@@ -257,6 +268,7 @@ export function runtimeAnalysisDataPort(
   context: Pick<NativeRuntimeRequest, "data">,
   phase: <T>(next: ObservationStage, work: () => Promise<T>) => Promise<T>,
   signal?: AbortSignal,
+  legacyTail = true,
 ): UniversityAnalysisDataPort & OverallDataPort & CatalogDataPort {
   // One request-local adapter over the approved saved-tail authority; never an isolate singleton.
   // Providers without the saved-tail capability keep the previous behavior (no reference tail).
@@ -278,30 +290,45 @@ export function runtimeAnalysisDataPort(
   return {
     ...(signal
       ? {
-        getReferenceTail: async (offeringId: string) =>
-          await phase("percentile_provider", async () => {
-            const source = await tailSource();
-            return source ? await source.getReferenceTail(offeringId) : null;
-          }),
-        prefetchReferenceTails: async (offeringIds: readonly string[]) =>
-          await phase("percentile_provider", async () => {
-            const source = await tailSource();
-            if (!source) return;
-            const pending = [...new Set(offeringIds)];
-            const worker = async () => {
-              while (pending.length) {
-                const id = pending.shift()!;
-                // Failures are not hidden: the later per-offering call sees the same
-                // request-local result and stays pending.
-                try {
-                  await source.getReferenceTail(id);
-                } catch { /* reported by the per-offering call */ }
-              }
-            };
-            await Promise.all(
-              Array.from({ length: REFERENCE_TAIL_PREFETCH_CONCURRENCY }, worker),
-            );
-          }),
+        ...(legacyTail
+          ? {
+            getReferenceTail: async (offeringId: string, scopeSignal?: AbortSignal) =>
+              await phase("percentile_provider", async () => {
+                const source = await tailSource();
+                return source ? await source.getReferenceTail(offeringId, scopeSignal) : null;
+              }),
+            prefetchReferenceTails: async (
+              offeringIds: readonly string[],
+              scopeSignal?: AbortSignal,
+            ) =>
+              await phase("percentile_provider", async () => {
+                const source = await tailSource();
+                if (!source) return;
+                const pending = [...new Set(offeringIds)];
+                const worker = async () => {
+                  while (pending.length) {
+                    if (signal.aborted || scopeSignal?.aborted) {
+                      throw new AccessError("security_policy_unavailable", 503);
+                    }
+                    const id = pending.shift()!;
+                    try {
+                      await source.getReferenceTail(id, scopeSignal);
+                    } catch (error) {
+                      if (signal.aborted || scopeSignal?.aborted) {
+                        throw error;
+                      }
+                      // The later per-offering call keeps the existing pending behavior.
+                    }
+                  }
+                };
+                const workers = await Promise.allSettled(
+                  Array.from({ length: REFERENCE_TAIL_PREFETCH_CONCURRENCY }, worker),
+                );
+                const failed = workers.find((result) => result.status === "rejected");
+                if (failed?.status === "rejected") throw failed.reason;
+              }),
+          }
+          : {}),
         referenceTailPins: async () =>
           await phase("percentile_provider", async () => {
             const data = (await context.data()) as TailCapable;
@@ -329,8 +356,11 @@ export function runtimeAnalysisDataPort(
         };
         return data.hasProductionConversion ? await data.hasProductionConversion(...a) : true;
       }),
-    withScoringBatch: async <T>(work: () => Promise<T>) =>
-      await phase("analysis_provider", async () => (await context.data()).withScoringBatch(work)),
+    withScoringBatch: async <T>(work: () => Promise<T>, scopeSignal?: AbortSignal) =>
+      await phase(
+        "analysis_provider",
+        async () => (await context.data()).withScoringBatch(work, scopeSignal),
+      ),
     getPercentile: async (...a) =>
       await phase("percentile_provider", async () => (await context.data()).getPercentile(...a)),
     getAnalysis: async (...a) =>
@@ -546,6 +576,27 @@ export class NativeRuntimeApi {
         this.preparedSelections,
       );
       closeP1R27 = () => context.closeP1R27();
+      // Request-local only. The factory cannot run until the existing budget callback is active.
+      // Legacy saved-report delivery needs the same request-local admission and receipt
+      // even when the optional new reference factory has not been configured.
+      const referenceLease = new RuntimeReferenceLease(
+        this.clock,
+        (signal) => context.assertCurrent(signal),
+        (signal) => context.referenceCurrentReceipt(signal),
+      );
+      let referencePorts: Promise<RuntimeReferencePorts | null> | undefined;
+      const reference = (r: ApiExecution, boundary: ApiExecutionBoundary) => {
+        if (!referenceLease || !this.config.referenceFactory) return Promise.resolve(null);
+        referencePorts ??= bindRuntimeReferencePorts(
+          this.config.referenceFactory,
+          referenceLease,
+          context,
+          { repository: platform, catalog, clock: this.clock, workflow },
+          r,
+          boundary,
+        );
+        return referencePorts;
+      };
       if (pathname === "/health/ready" && request.method === "GET") {
         stage = "relay";
         await relay.verify(request.headers);
@@ -582,6 +633,17 @@ export class NativeRuntimeApi {
           await phase("profile_read", async () => (await context.platform()).getProfile(...a)),
         getReport: async (...a) =>
           await phase("report_read", async () => (await context.platform()).getReport(...a)),
+        getReportRevision: async (...a) => {
+          const binding = await context.binding(), controls = await context.controls();
+          const settle = controls.reserveExternalRead(binding.repositoryLimits.maxRecordBytes);
+          const value = await phase(
+            "report_read",
+            async () => (await context.platform()).getReportRevision(...a),
+          );
+          if (a[3]?.aborted) throw new AccessError("security_policy_unavailable", 503);
+          settle(value ? new TextEncoder().encode(nativeJsonText(value.body, true)).byteLength : 0);
+          return value;
+        },
         lookupAccess: async (...a) =>
           await phase("report_access", async () => (await context.platform()).lookupAccess(...a)),
         writeReport: async (...a) => {
@@ -595,7 +657,7 @@ export class NativeRuntimeApi {
         activeReports: async (...a) =>
           await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
       };
-      const data = runtimeAnalysisDataPort(context, phase, request.signal);
+      const data = runtimeAnalysisDataPort(context, phase, request.signal, true);
       const catalogContext = {
         binding: () => context.binding(),
         controls: () => context.controls(),
@@ -681,7 +743,7 @@ export class NativeRuntimeApi {
         mode,
         // No approved revision-bound authority or bounded evidence adapter exists yet.
         null,
-        // Saved reference tails: scope only from the approved registry/selection/head chain.
+        // Existing approved selection remains the fallback only when the new factory is unselected.
         () => referenceCandidateScopePort(context),
       );
       let inputAdmission: PreparedUsageAdmission | undefined;
@@ -734,7 +796,66 @@ export class NativeRuntimeApi {
             UNIVERSITY_ANALYSIS_OPERATIONS.some((id) => id === r.operation)
           ) {
             if (r.operation === "university.analyze") selectedCatalog?.prepareSelection(r);
-            return await universities.execute(r, boundary);
+            let activeReference: RuntimeReferencePorts | null = null;
+            let referenceFailed = false;
+            if (referenceLease && boundary) {
+              try {
+                activeReference = await reference(r, boundary);
+              } catch (error) {
+                if (boundary.signal.aborted) throw error;
+                referenceFailed = true;
+              }
+            }
+            const enabled = activeReference &&
+                (r.operation !== "candidates.build" || activeReference.candidateScope !== null)
+              ? activeReference
+              : null;
+            let selectedUniversities = universities;
+            if (enabled) {
+              // Prefetch the exact request-local source later used by the calculator.
+              const tail = enabled.tail;
+              const failures = new Map<string, unknown>();
+              const guardedTail = preservePrefetchFailures(tail, failures);
+              const prefetchReferenceTails = async (
+                ids: readonly string[],
+                scopeSignal?: AbortSignal,
+              ) => {
+                await phase(
+                  "percentile_provider",
+                  () =>
+                    prefetchSelectedSavedTails(
+                      tail,
+                      ids,
+                      request.signal,
+                      scopeSignal,
+                      r.operation === "university.analyze" ? failures : undefined,
+                    ),
+                );
+              };
+              selectedUniversities = new UniversityAnalysisService(
+                platform,
+                catalog,
+                { ...data, ...guardedTail, prefetchReferenceTails },
+                this.clock,
+                forecasts,
+                mode,
+                null,
+                enabled.candidateScope,
+              );
+            } else if (referenceFailed || activeReference) {
+              // A failed authority or an active factory without candidate scope must never fall back to legacy reference data.
+              selectedUniversities = new UniversityAnalysisService(
+                platform,
+                catalog,
+                { ...data, getReferenceTail: undefined, prefetchReferenceTails: undefined },
+                this.clock,
+                forecasts,
+                mode,
+                null,
+                null,
+              );
+            }
+            return await selectedUniversities.execute(r, boundary);
           }
           if (FORECAST_OPERATIONS.some((id) => id === r.operation)) {
             return await forecasts.execute(r);
@@ -763,12 +884,20 @@ export class NativeRuntimeApi {
             },
           }
           : {}),
+        referenceProjectionAuthority: savedReportProjectionAuthority({
+          repository: platform,
+          lease: referenceLease,
+          factoryConfigured: !!this.config.referenceFactory,
+          reference,
+          legacy: (r, result, admission, signal) =>
+            referenceProjectionAuthorityPort(context).resolve(r, result, admission, signal),
+          receipt: (signal) => context.referenceCurrentReceipt(signal),
+        }),
         relay,
         admissionPermit,
         clock: this.clock,
         projection: this.projection,
         reports: platform,
-        referenceProjectionAuthority: referenceProjectionAuthorityPort(context),
         authorities,
         resources,
         business,
@@ -849,9 +978,36 @@ export class NativeRuntimeApi {
               }
               currentPageBudget = budget;
             }
-            return inputAdmission
-              ? await budget.runAdmitted(inputAdmission, r, work, mark)
-              : await budget.run(r, work, mark);
+            const referenceOperation = (this.config.referenceFactory ||
+              r.operation === "report.read" || r.operation === "report.export") && [
+              "overall.analyze",
+              "university.analyze",
+              "candidates.build",
+              "report.read",
+              "report.export",
+              "shortlist.update",
+            ].includes(r.operation);
+            if (!referenceOperation) {
+              return inputAdmission
+                ? await budget.runAdmitted(inputAdmission, r, work, mark)
+                : await budget.run(r, work, mark);
+            }
+            try {
+              // createApiHandler supplies ApiExecution here; reject any narrower caller.
+              if (!("management" in r)) throw new AccessError("security_policy_unavailable", 503);
+              const execution = r as ApiExecution;
+              const result = await budget.run(
+                r,
+                (admission) =>
+                  referenceLease.enter(execution, admission, request.signal, () => work(admission)),
+                mark,
+              );
+              referenceLease.markSettled();
+              return result;
+            } catch (error) {
+              referenceLease.fail();
+              throw error;
+            }
           },
         },
       });

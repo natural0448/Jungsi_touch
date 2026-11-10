@@ -1,3 +1,4 @@
+import { ATTENDANCE_AREAS, type AttendanceArea } from "../application/reference_attendance.ts";
 /** Request-scoped pinned reference adapter. No Python execution, DB access or approval rewrite. */
 import type {
   ReferenceDerivation,
@@ -143,6 +144,7 @@ export function decodeSchoolReferencePayload(
     "minimum_inquiry",
     "positive_score_required",
     "derivations",
+    ...(Object.hasOwn(rawDomain, "required_attendance") ? ["required_attendance"] : []),
     ...(Object.hasOwn(rawDomain, "mixed_social_science_allowed")
       ? ["mixed_social_science_allowed"]
       : []),
@@ -162,6 +164,14 @@ export function decodeSchoolReferencePayload(
     : undefined;
   check(
     (!mathChoices || mathChoices.length > 0) && (!inquirySubjects || inquirySubjects.length > 0),
+    "reference_package_invalid",
+  );
+  const requiredAttendance = Object.hasOwn(domain, "required_attendance")
+    ? strings(domain.required_attendance)
+    : undefined;
+  check(
+    !requiredAttendance ||
+      requiredAttendance.every((v) => ATTENDANCE_AREAS.includes(v as AttendanceArea)),
     "reference_package_invalid",
   );
   const requiredFields = strings(domain.required_fields),
@@ -240,6 +250,9 @@ export function decodeSchoolReferencePayload(
     scoreScaleId: p.score_scale_id as string,
     sourceSha256: pin.sourceSha256,
     independentSha256: pin.independentSha256,
+    ...(requiredAttendance
+      ? { requiredAttendance: Object.freeze(requiredAttendance as AttendanceArea[]) }
+      : {}),
     requiredFields: Object.freeze(requiredFields),
     inquiryCategories: Object.freeze(categories),
     minimumInquiry: domain.minimum_inquiry as number,

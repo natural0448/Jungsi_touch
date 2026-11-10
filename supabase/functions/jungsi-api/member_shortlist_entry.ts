@@ -10,6 +10,7 @@ import {
   type RuntimeRoutePolicy,
 } from "../_shared/jungsi/infrastructure/runtime_composition.ts";
 import { createSupabaseApiIngress } from "../_shared/jungsi/infrastructure/supabase_api_ingress.ts";
+import { publishedReferenceFactory } from "../_shared/jungsi/infrastructure/published_reference_runtime.ts";
 import { createNativePostgresPool } from "./postgres_pool.ts";
 import { createMemberShortlistCatalogService } from "../_shared/combined_policy_catalog_runtime.ts";
 import { currentPublicResponseSchemas } from "../_shared/current_public_catalog.ts";
@@ -18,6 +19,7 @@ import {
   memberShortlistResponseSchemas,
 } from "../_shared/jungsi/application/member_shortlist_schema.ts";
 const runtime = new NativeRuntimeApi({
+  referenceFactory: publishedReferenceFactory,
   readViewExtensions: true,
   memberShortlistExtensions: true,
   candidateCatalog: createMemberShortlistCatalogService,

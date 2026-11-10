@@ -50,18 +50,26 @@ Deno.test("reference candidate scope requires an existing live admission and sig
   const ctrl = new AbortController();
   ctrl.abort();
   await denied(() =>
-    acquireReferenceCandidateScope(req, gate(), { signal: ctrl.signal, admission: {} })
+    acquireReferenceCandidateScope(req, gate(), {
+      signal: ctrl.signal,
+      admission: {},
+    })
   );
 });
 Deno.test("reference candidate scope rejects duplicates and scope beyond the budgeted cap", async () => {
   const b = { signal: new AbortController().signal, admission: {} };
   await denied(() => acquireReferenceCandidateScope(req, gate(["SYNTHETIC-o", "SYNTHETIC-o"]), b));
   await denied(() =>
-    acquireReferenceCandidateScope(req, gate(["SYNTHETIC-a", "SYNTHETIC-b", "SYNTHETIC-c"]), b)
+    acquireReferenceCandidateScope(
+      req,
+      gate(["SYNTHETIC-a", "SYNTHETIC-b", "SYNTHETIC-c"]),
+      b,
+    )
   );
 });
 Deno.test("reference candidate scope freezes independently selected IDs", async () => {
-  const ids = ["SYNTHETIC-o"], b = { signal: new AbortController().signal, admission: {} };
+  const ids = ["SYNTHETIC-o"],
+    b = { signal: new AbortController().signal, admission: {} };
   const g = await acquireReferenceCandidateScope(req, gate(ids), b);
   assert(g);
   ids.push("SYNTHETIC-new");
@@ -82,20 +90,28 @@ Deno.test("reference candidate scope fails if the verified current selection cha
 Deno.test("reference candidate scope waits for physical cancellation after request abort", async () => {
   const ctrl = new AbortController();
   let cancelled = false, started = false;
+  let release!: (ids: string[]) => void;
+  const pending = new Promise<string[]>((resolve) => {
+    release = resolve;
+  });
   const g = {
     ...gate(),
     async readOfferingIds() {
       started = true;
       ctrl.abort();
-      return await new Promise<string[]>(() => {});
+      return await pending;
     },
     async cancelAndWait() {
       await Promise.resolve();
       cancelled = true;
+      release([]);
     },
   };
   await denied(() =>
-    acquireReferenceCandidateScope(req, g, { signal: ctrl.signal, admission: {} })
+    acquireReferenceCandidateScope(req, g, {
+      signal: ctrl.signal,
+      admission: {},
+    })
   );
   assert(started);
   assert(cancelled);
@@ -103,23 +119,59 @@ Deno.test("reference candidate scope waits for physical cancellation after reque
 Deno.test("reference candidate scope rejects invalid authority pins", async () => {
   const g = { ...gate(), sourceSha256: "invalid" };
   await denied(() =>
-    acquireReferenceCandidateScope(req, g, { signal: new AbortController().signal, admission: {} })
+    acquireReferenceCandidateScope(req, g, {
+      signal: new AbortController().signal,
+      admission: {},
+    })
   );
 });
 
 Deno.test("reference candidate calculation waits for provider cancellation when aborted", async () => {
   const ctrl = new AbortController();
   let cancelled = false;
+  let release!: () => void;
+  const work = new Promise<void>((resolve) => {
+    release = resolve;
+  });
   const scope = await acquireReferenceCandidateScope(req, {
     ...gate(),
     async cancelAndWait() {
       await Promise.resolve();
       cancelled = true;
+      release();
     },
   }, { signal: ctrl.signal, admission: {} });
   assert(scope);
-  const work = new Promise<void>(() => {});
   ctrl.abort();
   await denied(() => scope.run(work));
   assert(cancelled);
+});
+
+Deno.test("scope abort waits until in-flight work actually settles", async () => {
+  const ctrl = new AbortController();
+  let release!: () => void;
+  let workSettled = false;
+  const cleanup = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const scope = await acquireReferenceCandidateScope(req, gate(), {
+    signal: ctrl.signal,
+    admission: {},
+  });
+  assert(scope);
+  const work = cleanup.then(() => {
+    workSettled = true;
+  });
+  let returned = false;
+  const result = scope.run(work).then(() => {
+    returned = true;
+  }, () => {
+    returned = true;
+  });
+  ctrl.abort();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert(!returned && !workSettled);
+  release();
+  await result;
+  assert(returned && workSettled);
 });
