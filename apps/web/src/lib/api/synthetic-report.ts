@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { AssessmentDto, ComboPositionDto, OverallAnalysisDto, ProfileDto, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
-import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
+import { EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, SECOND_LANGUAGE_SUBJECTS } from "@/lib/exam";
 
 /*
   2페이지 합성 응답 — 성적 프로필과 리포트를 이 브라우저 쿠키에만 둔다.
@@ -38,6 +38,8 @@ export function validateScores(s: ScoresInput): string | null {
     if (!std(q.standard_score, 20, 80)) return "engine_input_code";
   }
   for (const g of [s.english_grade, s.korean_history_grade]) if (g !== undefined && !std(g, 1, 9)) return "engine_input_code";
+  const sl = s.second_language;
+  if (sl && (!(SECOND_LANGUAGE_SUBJECTS as readonly string[]).includes(sl.subject) || !std(sl.grade, 1, 9))) return "invalid_second_language";
   return null;
 }
 
@@ -74,6 +76,7 @@ export function computeOverall(s: ScoresInput, pendingTotal = false): OverallAna
       ...(s.english_grade !== undefined ? { 영어: s.english_grade } : {}),
       ...(s.korean_history_grade !== undefined ? { 한국사: s.korean_history_grade } : {}),
     },
+    second_language: s.second_language ? { subject: s.second_language.subject, grade: s.second_language.grade } : null,
     // 반영 조합별 위치(제안 필드 미리보기, 최종 관리자 확정 7조합).
     // 탐구 1과목 = 두 과목 중 상위, 2과목 = 평균. 합성 곡선으로 모양만 보여 준다(실연결은 서버 값만).
     combinations: ((): ComboPositionDto[] => {

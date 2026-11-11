@@ -22,6 +22,7 @@ const MESSAGE: Record<string, string> = {
   invalid_request: "입력 칸을 다시 확인해 주세요.",
   invalid_choice: "선택과목을 목록에서 골라 주세요.",
   invalid_subject: "탐구 과목을 목록에서 골라 주세요.",
+  invalid_second_language: "제2외국어/한문 과목과 등급(1~9)을 목록에서 골라 주세요. 보지 않았으면 과목을 '미응시'로 두세요.",
   duplicate_inquiry: "탐구 두 과목은 서로 달라야 합니다.",
   pack_version_mismatch: "시험 자료가 새로 바뀌었습니다. 화면을 새로 고친 뒤 다시 입력해 주세요.",
   revision_conflict: "다른 화면에서 리포트가 먼저 바뀌었습니다. 새로 고친 뒤 다시 저장해 주세요.",
@@ -64,11 +65,15 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     inq2_score: int(fd, "inq2_score"),
     english: int(fd, "english"),
     history: int(fd, "history"),
+    sl_subject: String(fd.get("sl_subject") ?? "") || undefined,
+    sl_grade: int(fd, "sl_grade"),
   };
   const fail = (error: string, field?: string): ScoreFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
   const ks = int(fd, "korean"), ms = int(fd, "math"), i1 = int(fd, "inq1_score"), i2 = int(fd, "inq2_score");
   const s1 = String(fd.get("inq1") ?? ""), s2 = String(fd.get("inq2") ?? "");
   if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !s1 || !s2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");
+  const slSubject = String(fd.get("sl_subject") ?? ""), slGrade = int(fd, "sl_grade");
+  if (slSubject && (slGrade === undefined || !Number.isInteger(slGrade))) return fail("제2외국어/한문 등급을 골라 주세요. 보지 않았으면 과목을 '미응시'로 두세요.");
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 입력값을 확인하고 '이대로 저장'을 눌러 주세요.", "confirm");
 
   const scores: ScoresInput = {
@@ -82,6 +87,8 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     ],
     ...(int(fd, "english") !== undefined ? { english_grade: int(fd, "english") } : {}),
     ...(int(fd, "history") !== undefined ? { korean_history_grade: int(fd, "history") } : {}),
+    // 제2외국어/한문: 고르지 않으면 미응시(null)로 보낸다(2026-11-12 최종관리자 결정)
+    second_language: slSubject ? { subject: slSubject, grade: slGrade! } : null,
   };
   const key = String(fd.get("idem") ?? "");
   const reportId = String(fd.get("report_id") ?? "") || undefined;

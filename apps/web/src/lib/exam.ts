@@ -25,6 +25,9 @@ export const INQUIRY_SUBJECTS: { group: string; subjects: string[] }[] = [
   { group: "과학탐구", subjects: ["물리학Ⅰ", "화학Ⅰ", "생명과학Ⅰ", "지구과학Ⅰ", "물리학Ⅱ", "화학Ⅱ", "생명과학Ⅱ", "지구과학Ⅱ"] },
 ];
 
+/** 제2외국어/한문 과목(성적표 표기). 서버(overall_analysis)의 허용 목록과 같아야 한다. 절대평가 등급만 받는다(2026-11-12 최종관리자 결정) */
+export const SECOND_LANGUAGE_SUBJECTS = ["독일어Ⅰ", "프랑스어Ⅰ", "스페인어Ⅰ", "중국어Ⅰ", "일본어Ⅰ", "러시아어Ⅰ", "아랍어Ⅰ", "베트남어Ⅰ", "한문Ⅰ"] as const;
+
 export const AREA_LABEL: Record<string, string> = { korean: "국어", math: "수학", inquiry1: "탐구 1", inquiry2: "탐구 2" };
 
 /** 서버의 시험 종류 코드 → 화면 이름. 모르는 코드는 그대로(합성 응답은 이미 한글이다) */

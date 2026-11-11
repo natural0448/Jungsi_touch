@@ -76,10 +76,13 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
 }
 
 /** 가로 성적표: 입력 성적표와 같은 틀(한국사·국어·수학·영어·탐구). 절대평가 등급도 여기에 함께 보인다 */
-export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
+/** second=false: 전문가용(학생 성적 입력에 제2외국어/한문 칸이 아직 없어 열을 숨긴다) */
+export function SubjectsSheet({ a, second = true }: { a: OverallAnalysisDto; second?: boolean }) {
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const k = by.get("korean"), m = by.get("math"), q1 = by.get("inquiry1"), q2 = by.get("inquiry2");
   const g = a.absolute_grades;
+  // 제2외국어/한문: 없거나 null 이면 미응시. 이 칸이 생기기 전(2026-11-12)에 저장한 성적도 미응시로 본다(최종관리자 결정)
+  const sl = a.second_language ?? null;
   const na = <span className="rs-na" aria-label="해당 없음">─</span>;
   const num = (v: number | string | null | undefined, unit = "") => (v === null || v === undefined ? <span className="rs-wait">대기</span> : <b className="num">{v}{unit}</b>);
   const pctv = (v: string | null | undefined) => (v ? <b className="num">{pctText(v)}%</b> : <span className="rs-wait">대기</span>);
@@ -94,6 +97,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
           <col />
           <col className="c-main" />
           <col className="c-main" />
+          {second && <col className="c-main" />}
         </colgroup>
         <thead>
           <tr>
@@ -103,6 +107,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <th scope="col" rowSpan={2}>수학<br />영역</th>
             <th scope="col" rowSpan={2}>영어<br />영역</th>
             <th scope="colgroup" colSpan={2}>탐구 영역</th>
+            {second && <th scope="col" rowSpan={2}>제2외국어<br />/한문 영역</th>}
           </tr>
           <tr>
             {/* 과목명은 다른 영역처럼 '선택과목' 줄에 둔다(10-26 사용자 지적: 머리글에 과목명이 올라가 있었다) */}
@@ -119,6 +124,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td className="na">{na}</td>
             <td>{q1?.subject ?? "─"}</td>
             <td>{q2?.subject ?? "─"}</td>
+            {second && <td>{sl ? sl.subject : <span className="rs-na">미응시</span>}</td>}
           </tr>
           <tr className="key">
             <th scope="row">표준점수</th>
@@ -128,6 +134,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td className="na">{na}</td>
             <td>{num(q1?.standard_score)}</td>
             <td>{num(q2?.standard_score)}</td>
+            {second && <td className="na">{na}</td>}
           </tr>
           <tr>
             <th scope="row">등급</th>
@@ -137,6 +144,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{g.영어 ? <b className="num">{g.영어}</b> : <span className="rs-na">안 넣음</span>}</td>
             <td>{num(q1?.grade)}</td>
             <td>{num(q2?.grade)}</td>
+            {second && <td>{sl ? <b className="num">{sl.grade}</b> : na}</td>}
           </tr>
           <tr>
             <th scope="row">상위 % <small>같은 점수 포함</small></th>
@@ -146,6 +154,7 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td className="na">{na}</td>
             <td>{pctv(q1?.top_percent_inclusive)}</td>
             <td>{pctv(q2?.top_percent_inclusive)}</td>
+            {second && <td className="na">{na}</td>}
           </tr>
           <tr>
             <th scope="row">상위 % <small>같은 점수 제외</small></th>
@@ -155,10 +164,11 @@ export function SubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td className="na">{na}</td>
             <td>{pctv(q1?.top_percent_exclusive)}</td>
             <td>{pctv(q2?.top_percent_exclusive)}</td>
+            {second && <td className="na">{na}</td>}
           </tr>
         </tbody>
       </table>
-      <p className="rp-sheet-note">상위 %는 그 과목을 본 응시자 중에서 내가 위에서 몇 번째쯤인지입니다(과목마다 본 사람이 달라 과목끼리 직접 비교하지 않습니다). 영어·한국사는 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
+      <p className="rp-sheet-note">상위 %는 그 과목을 본 응시자 중에서 내가 위에서 몇 번째쯤인지입니다(과목마다 본 사람이 달라 과목끼리 직접 비교하지 않습니다). 영어·한국사{second && "·제2외국어/한문"}은 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
     </div>
   );
 }

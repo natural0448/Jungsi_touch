@@ -50,7 +50,7 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
         </header>
         <OverallCard a={a} />
         <h2>과목별 결과</h2>
-        <SubjectsSheet a={a} />
+        <SubjectsSheet a={a} second={false} />
         <PositionChart a={a} />
         <h2>담은 학교 <span className="num">{shortlist.length}</span></h2>
         {shortlist.length === 0 ? (

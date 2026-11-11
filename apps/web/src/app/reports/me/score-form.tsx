@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState, type FormEvent } from "react";
-import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "@/lib/exam";
+import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, SECOND_LANGUAGE_SUBJECTS } from "@/lib/exam";
 import { submitScores, type ScoreFormState } from "./actions";
 
 export interface ScoreDefaults {
@@ -15,6 +15,9 @@ export interface ScoreDefaults {
   inq2_score?: number;
   english?: number;
   history?: number;
+  /** 제2외국어/한문 과목. 빈 값은 미응시 */
+  sl_subject?: string;
+  sl_grade?: number;
 }
 
 const GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -33,6 +36,8 @@ const filledOf = (get: (k: (typeof REQUIRED)[number]) => unknown) =>
  * 넣는 칸은 국어·수학·탐구 표준점수와 영어·한국사 등급뿐이다. 국어·수학·탐구의 백분위·등급은
  * 서버 엔진이 시험 자료로 계산하므로 칸만 두고 비워 둔다(화면이 계산하지 않는다).
  * 새로 저장할 때마다 새 성적 프로필이 생기고, 이전 성적은 고치지 않는다.
+ * 제2외국어/한문(2026-11-12 최종관리자 결정)은 성적표처럼 맨 끝 칸에 과목과 등급만 받는다. 고르지 않으면 미응시.
+ * 전문가용(submit 이 있을 때)은 서버 학생 성적 저장이 아직 이 칸을 받지 않아 보이지 않는다.
  */
 export function ScoreForm({
   examLabel,
@@ -67,6 +72,8 @@ export function ScoreForm({
     setFilled(filledOf((k) => (f.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value));
   };
   const done = filled === REQUIRED.length;
+  const second = !submit;
+  const [slSubject, setSlSubject] = useState(d.sl_subject ?? "");
 
   // 저장 전 확인 창. 저장한 성적은 고칠 수 없고 하루에 저장할 수 있는 성적 조합 수가 정해져 있어서,
   // 넣은 값을 한 번 더 보여 주고 '이대로 저장'을 눌러야 서버로 보낸다. 빈 칸·범위 밖 값은 서버에 보내기 전에 막는다
@@ -84,6 +91,7 @@ export function ScoreForm({
     else if (v("inq1") === v("inq2")) problem = "탐구 두 과목은 서로 달라야 합니다.";
     else if (![n("korean"), n("math")].every((x) => Number.isInteger(x) && x >= 40 && x <= 160)) problem = "국어·수학 표준점수는 40~160 사이 정수입니다.";
     else if (![n("inq1_score"), n("inq2_score")].every((x) => Number.isInteger(x) && x >= 20 && x <= 80)) problem = "탐구 표준점수는 20~80 사이 정수입니다.";
+    else if (second && v("sl_subject") && v("sl_grade") === "") problem = "제2외국어/한문 등급을 골라 주세요. 보지 않았으면 과목을 '미응시'로 두세요.";
     const choice = (k: string) => (v(k) ? ` (${v(k)})` : "");
     setReview({
       problem,
@@ -94,6 +102,7 @@ export function ScoreForm({
         [`탐구 2 · ${v("inq2") || "미선택"}`, v("inq2_score")],
         ["영어 등급", v("english") || "입력 안 함"],
         ["한국사 등급", v("history") || "입력 안 함"],
+        ...(second ? [["제2외국어/한문", v("sl_subject") ? `${v("sl_subject")} · ${v("sl_grade")}등급` : "미응시"] as [string, string]] : []),
       ],
     });
     dialogRef.current?.showModal();
@@ -143,6 +152,7 @@ export function ScoreForm({
             <col className="c-grade" />
             <col className="c-main" />
             <col className="c-main" />
+            {second && <col className="c-main" />}
           </colgroup>
           <thead>
             <tr>
@@ -152,6 +162,7 @@ export function ScoreForm({
               <th scope="col" rowSpan={2}>수학<br />영역</th>
               <th scope="col" rowSpan={2}>영어<br />영역</th>
               <th scope="colgroup" colSpan={2}>탐구 영역</th>
+              {second && <th scope="col" rowSpan={2}>제2외국어<br />/한문 영역</th>}
             </tr>
             <tr>
               <th scope="col" className="sub">과목 1</th>
@@ -190,6 +201,14 @@ export function ScoreForm({
                   </td>
                 );
               })}
+              {second && (
+                <td className="in">
+                  <select name="sl_subject" aria-label="제2외국어/한문 과목" defaultValue={d.sl_subject ?? ""} onChange={(e) => setSlSubject(e.currentTarget.value)}>
+                    <option value="">미응시</option>
+                    {SECOND_LANGUAGE_SUBJECTS.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </td>
+              )}
             </tr>
             <tr className="key">
               <th scope="row">
@@ -210,6 +229,7 @@ export function ScoreForm({
               <td className={`in${need(d.inq2_score)}`}>
                 <input name="inq2_score" type="number" inputMode="numeric" min={20} max={80} required aria-label="탐구 과목 2 표준점수" defaultValue={d.inq2_score} placeholder="예: 63" />
               </td>
+              {second && <td className="na">{none}</td>}
             </tr>
             <tr>
               <th scope="row">백분위</th>
@@ -219,6 +239,7 @@ export function ScoreForm({
               <td className="na">{none}</td>
               <td className="calc">{auto}</td>
               <td className="calc">{auto}</td>
+              {second && <td className="na">{none}</td>}
             </tr>
             <tr>
               <th scope="row">등급</th>
@@ -238,15 +259,27 @@ export function ScoreForm({
               </td>
               <td className="calc">{auto}</td>
               <td className="calc">{auto}</td>
+              {second && (
+                <td className={slSubject ? `in${missing && !d.sl_grade ? " bad" : ""}` : "na"}>
+                  {slSubject ? (
+                    <select name="sl_grade" aria-label="제2외국어/한문 등급" defaultValue={d.sl_grade ?? ""}>
+                      <option value="" disabled>등급 고르기</option>
+                      {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  ) : (
+                    none
+                  )}
+                </td>
+              )}
             </tr>
           </tbody>
         </table>
       </div>
 
       <ul className="sf-legend">
-        <li><i className="k in" />넣는 칸 · 국어·수학·탐구 표준점수(필수), 영어·한국사 등급(선택)</li>
+        <li><i className="k in" />넣는 칸 · 국어·수학·탐구 표준점수(필수), 영어·한국사 등급(선택){second && ", 제2외국어/한문 과목·등급(보지 않았으면 미응시)"}</li>
         <li><i className="k calc" />국어·수학·탐구의 백분위와 등급은 저장하면 시험 자료로 계산해 리포트에 보여 드립니다.</li>
-        <li><i className="k na" />영어·한국사는 절대평가라 등급만 넣고, 전체 위치를 내는 총점(국·수·탐2 표준점수 합)에는 넣지 않습니다.</li>
+        <li><i className="k na" />영어·한국사{second && "·제2외국어/한문"}은 절대평가라 등급만 넣고, 전체 위치를 내는 총점(국·수·탐2 표준점수 합)에는 넣지 않습니다.</li>
       </ul>
 
       {state?.error && (

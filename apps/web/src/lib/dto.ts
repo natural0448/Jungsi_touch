@@ -116,6 +116,14 @@ export interface ScoresInput {
   inquiry: { subject: string; standard_score: number }[]; // 서로 다른 두 과목
   english_grade?: number;
   korean_history_grade?: number;
+  /** 제2외국어/한문: 과목과 등급만. null 은 미응시 */
+  second_language?: SecondLanguageDto | null;
+}
+
+/** 제2외국어/한문 결과. 절대평가 등급이라 총점·전체 위치에 넣지 않는다 */
+export interface SecondLanguageDto {
+  subject: string;
+  grade: number;
 }
 
 /** profile — score-profile.create. 새 입력은 새 profile_id, 기존 성적은 고치지 않는다 */
@@ -183,6 +191,8 @@ export interface OverallAnalysisDto {
   total_standard_score: number; // 국·수·탐2 표준점수 합. 영어·한국사 제외
   subjects: SubjectResultDto[];
   absolute_grades: { 영어?: number; 한국사?: number };
+  /** 없거나 null 이면 미응시. 이 필드가 생기기 전(2026-11-12)에 저장된 리포트에는 없다 → 미응시로 본다 */
+  second_language?: SecondLanguageDto | null;
   overall: OverallResultDto;
   combinations?: ComboPositionDto[] | null; // 제안 필드(위 ComboPositionDto 설명). 서버가 줄 때만 존재
 }

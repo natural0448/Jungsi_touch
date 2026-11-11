@@ -137,7 +137,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
               </h2>
             </div>
             <OverallCard a={a} />
-            <SubjectsSheet a={a} />
+            <SubjectsSheet a={a} second={false} />
             <PositionChart a={a} />
                         <div className="pro-sechd">
               <Link className="btn" href={`/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}`}>
