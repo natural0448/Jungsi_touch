@@ -347,23 +347,58 @@ export function PositionChart({ a }: { a: OverallAnalysisDto }) {
   );
 }
 
-/** 반영 조합별 위치(제안 필드). 서버가 combinations 를 주지 않으면 안내만 보인다 */
-export function ComboChart({ a }: { a: OverallAnalysisDto }) {
-  const combos = a.combinations ?? [];
-  const max = scaleMax(combos.flatMap((c) => [c.inclusive_top_percent, c.exclusive_top_percent]));
-  if (combos.length === 0)
-    return <p className="rp-combo-wait">반영 조합별 위치(국+수, 국+탐 등)는 조합별 승인 분포가 발행되면 여기에 표시됩니다.</p>;
+/*
+  반영 조합별 내 표준점수 합(2026-11-12 최종관리자 결정).
+  조합별 상위 %는 여러 과목을 함께 본 응시자의 점수 분포가 있어야 하는데 구할 수 없어 제공하지 않는다.
+  대신 대학이 자주 쓰는 반영 조합별로 서버가 준 과목 표준점수를 더한 값만 보여 준다(위치·백분위는 만들지 않는다).
+  - 탐구 1과목은 두 과목 중 표준점수가 높은 과목. 대학마다 다를 수 있어 안내에 적는다.
+  - 표준점수가 하나라도 없으면 그 조합은 '─'.
+*/
+export function ComboScores({ a }: { a: OverallAnalysisDto }) {
+  const sc = (area: string) => a.subjects.find((s) => s.area === area)?.standard_score ?? null;
+  const k = sc("korean"), m = sc("math"), q1 = sc("inquiry1"), q2 = sc("inquiry2");
+  const q2sum = q1 !== null && q2 !== null ? q1 + q2 : null;
+  const q1best = q1 !== null && q2 !== null ? Math.max(q1, q2) : null;
+  const sum = (...v: (number | null)[]) => (v.some((x) => x === null) ? null : (v as number[]).reduce((x, y) => x + y, 0));
+  const rows: [string, number | null][] = [
+    ["국어 + 수학 + 탐구(2과목)", sum(k, m, q2sum)],
+    ["국어 + 수학 + 탐구(1과목)", sum(k, m, q1best)],
+    ["국어 + 수학", sum(k, m)],
+    ["국어 + 탐구(2과목)", sum(k, q2sum)],
+    ["수학 + 탐구(2과목)", sum(m, q2sum)],
+    ["국어 + 탐구(1과목)", sum(k, q1best)],
+    ["수학 + 탐구(1과목)", sum(m, q1best)],
+  ];
+  const best = q1 !== null && q2 !== null ? (q1 >= q2 ? a.subjects.find((s) => s.area === "inquiry1") : a.subjects.find((s) => s.area === "inquiry2")) : null;
   return (
-    <section className="rp-chart" aria-label="반영 조합별 위치">
+    <section className="rp-chart" aria-label="반영 조합별 내 표준점수 합">
       <header>
-        <h3>반영 조합별 위치</h3>
-        <small>대학마다 반영 과목 조합이 달라, 조합별로 그 조합 응시자 중 내 위치를 보여 줍니다 · 대학별 환산은 「전체 대학·학과 가능성 보기」에서</small>
+        <h3>반영 조합별 내 표준점수 합</h3>
+        <small>대학마다 반영하는 과목 조합이 달라, 자주 쓰는 조합별로 내 표준점수를 더해 보여 줍니다</small>
       </header>
-      <ScaleNote max={max} />
-      <Axis max={max} />
-      {combos.map((c) => (
-        <ChartRow key={c.combo_id} max={max} label={c.label} sub={c.total_standard_score !== null ? `${c.total_standard_score}점` : undefined} incl={c.inclusive_top_percent} excl={c.exclusive_top_percent} waitText={(c.reason_code && COMBO_PENDING[c.reason_code]) ?? "자료 대기"} />
-      ))}
+      <div className="tblwrap">
+        <table className="tb rp-combo">
+          <thead>
+            <tr>
+              <th scope="col">반영 조합</th>
+              <th scope="col" className="r">표준점수 합</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([label, v]) => (
+              <tr key={label}>
+                <th scope="row">{label}</th>
+                <td className="r">{v === null ? "─" : <b className="num">{v}</b>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="pc-note">
+        탐구 1과목은 두 과목 중 표준점수가 높은 과목{best ? `(${best.subject})` : ""}으로 더했습니다(대학마다 다를 수 있습니다).
+        {" "}대학은 표준점수 대신 백분위·변환표준점수를 쓰거나 과목마다 반영 비율을 곱하므로, 이 합은 실제 환산점수와 다릅니다.
+        {" "}이 합만으로는 그 조합에서 내 위치(상위 %)를 알 수 없습니다. 대학별 환산은 「전체 대학·학과 가능성 보기」와 「유리한 대학 찾기」에서 확인하세요.
+      </p>
     </section>
   );
 }

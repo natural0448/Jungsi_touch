@@ -212,6 +212,11 @@
 .et .pc-note{margin:2px 0 0;font-size:11px;color:var(--ink-2);line-height:1.5}
 .et .rp-short-note{margin:8px 0 0;font-size:11px;color:var(--ink-2);line-height:1.6}
 .et .rp-combo-wait{margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:12px;color:var(--muted)}
+.et .rp-chart .tblwrap:has(.rp-combo){max-width:440px}
+.et .rp-combo{width:100%;font-variant-numeric:tabular-nums}
+.et .rp-combo td.r{width:110px}
+.et .rp-combo th[scope=row]{font-weight:700}
+.et .rp-combo td .num{font-weight:800;color:var(--deep)}
 
 @media (max-width:480px){
   .et .pc-row{grid-template-columns:72px 1fr 84px;gap:7px}

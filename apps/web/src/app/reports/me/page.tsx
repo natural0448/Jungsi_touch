@@ -17,7 +17,7 @@ import { finishEagerReport, pickedIds, rememberCurrentReport, startEagerReport }
 import { RunAnalysis } from "@/components/run-analysis";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
-import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
+import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
 import { InputStatus, NoInput, canInput } from "./rights";
 import { CorrectionPanel } from "./correction";
 import { canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/correction";
@@ -161,7 +161,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           <h2 id="sub-h">과목별 결과</h2>
           <SubjectsSheet a={a} />
           <PositionChart a={a} />
-          <ComboChart a={a} />
+          <ComboScores a={a} />
         </section>
 
         <section aria-labelledby="sl-h" className="rp-sec">

@@ -10,7 +10,7 @@ import { seoulDate } from "@/lib/format";
 import { EXAM } from "@/lib/exam";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
-import { ComboChart, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
+import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
 import { PrintButton } from "./print-button";
 import "../report.css";
 
@@ -93,7 +93,7 @@ export default async function Page() {
         <h2>과목별 결과</h2>
         <SubjectsSheet a={a} />
         <PositionChart a={a} />
-        <ComboChart a={a} />
+        <ComboScores a={a} />
 
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
         {shortlist.length === 0 ? (
