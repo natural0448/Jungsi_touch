@@ -146,10 +146,10 @@ export function ScoreForm({
         <table>
           <colgroup>
             <col className="c-head" />
-            <col className="c-grade" />
             <col className="c-main" />
             <col className="c-main" />
-            <col className="c-grade" />
+            <col className="c-main" />
+            <col className="c-main" />
             <col className="c-main" />
             <col className="c-main" />
             {second && <col className="c-main" />}
