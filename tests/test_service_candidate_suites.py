@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "d6f301205520271710727003df366db7e118212e1c25a7694abda540b160c80d"
+MANIFEST_SHA256 = "7b97489ca7666aacb3341ad9f1f48d16ce0e728074e4016dfbd706f8bb33a9f9"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None

@@ -1437,6 +1437,25 @@
         "한국사"
       ]
     },
+    "second_language": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "subject": {
+          "type": "string",
+          "nullable": false
+        },
+        "grade": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "subject",
+        "grade"
+      ],
+      "optional": []
+    },
     "tie_interval": {
       "type": "object",
       "nullable": false,
@@ -1576,6 +1595,10 @@
           "ref": "absolute_grades",
           "nullable": false
         },
+        "second_language": {
+          "ref": "second_language",
+          "nullable": true
+        },
         "overall": {
           "ref": "overall_position",
           "nullable": false
@@ -1591,7 +1614,9 @@
         "absolute_grades",
         "overall"
       ],
-      "optional": []
+      "optional": [
+        "second_language"
+      ]
     },
     "recruitment_change": {
       "type": "object",

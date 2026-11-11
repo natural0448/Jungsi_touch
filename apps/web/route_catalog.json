@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
   "spec_version": "1.9.166",
-  "source_sha256": "ee605eb161be97c890a11da326e928fc79f71cbef1dda817e43a988704d45feb",
+  "source_sha256": "4cfa25071bee0ce4595753d8366031c543fd825f79378ec16fd986d17f49e2fc",
   "pages": [
     {
       "id": "PAGE-01",
@@ -65,7 +65,8 @@
     ],
     "optional_inputs": [
       "english_grade",
-      "korean_history_grade"
+      "korean_history_grade",
+      "second_language"
     ],
     "input_rules": [
       "exam_id·pack_version은 등록 ID 토큰이며 파일 경로가 아니다",
@@ -73,7 +74,8 @@
       "inquiry는 서로 다른 두 과목의 subject·standard_score와 선택적 percentile·grade다.",
       "점수·등급·선택과목 검증은 기존 시험 엔진에 위임",
       "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부",
-      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다."
+      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다.",
+      "second_language는 null(미응시) 또는 subject·grade 두 필드다. subject는 제2외국어/한문 9과목(독일어Ⅰ·프랑스어Ⅰ·스페인어Ⅰ·중국어Ⅰ·일본어Ⅰ·러시아어Ⅰ·아랍어Ⅰ·베트남어Ⅰ·한문Ⅰ) 중 하나, grade는 1~9 정수다. 없거나 null이면 미응시이며 이 필드 전에 저장된 성적도 미응시로 읽는다. 절대평가 등급이라 총점·과목 결과·누적 위치에 넣지 않는다(2026-11-12 최종관리자 결정)."
     ],
     "response_fields": [
       "format",
@@ -83,6 +85,7 @@
       "total_standard_score",
       "subjects",
       "absolute_grades",
+      "second_language",
       "overall"
     ],
     "exam_fields": [
@@ -2815,7 +2818,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc"
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -2899,7 +2902,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "c8f7059879691e4291647bcebf55cd696f7d46b7f24f3f7a40150c132aafc876"
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",

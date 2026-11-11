@@ -4,7 +4,7 @@
     "files": {
       "src/jungsi_touch/application/public_response_schemas.json": {
         "layer": "application",
-        "sha256": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc"
+        "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
       },
       "supabase/functions/_shared/current_public_catalog.ts": {
         "layer": "application",
@@ -35081,7 +35081,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7",
+        "source_sha256": "0c5950512acd3db7f71a5379635137112b9dd4309eda74874929a84771102481",
         "symbols": [
           {
             "declarations": [
@@ -35621,6 +35621,79 @@
               }
             ],
             "name": "IDENTIFIER"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeOperator",
+                    "value": {
+                      "operator": "readonly",
+                      "tsType": {
+                        "kind": "array",
+                        "value": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SECOND_LANGUAGE_SUBJECTS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "ExamRow",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ExamRow",
+                            "specifier": "../domain/exam_pack.ts"
+                          },
+                          "typeName": "ExamRow"
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "secondLanguageResult"
           },
           {
             "declarations": [
@@ -179226,7 +179299,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "c8f7059879691e4291647bcebf55cd696f7d46b7f24f3f7a40150c132aafc876",
+        "source_sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471",
         "symbols": [
           {
             "declarations": [
@@ -204450,7 +204523,7 @@
             "src": "tests/edge/synthetic_exam_pack.ts"
           }
         ],
-        "source_sha256": "cdabd2b78af5e31560f41829d8cf5d4579c64e0e55cfab5cab9a9277832f92f1",
+        "source_sha256": "fe6662e16d3d47f6310cf19c32441440b0c73aa1be72ba3023ea1b6280bb881c",
         "symbols": [
           {
             "declarations": [
@@ -226335,7 +226408,7 @@
             "src": "tests/edge/synthetic_offering_analysis.ts"
           }
         ],
-        "source_sha256": "d726cb87e434e655942b985e3e0695e87918fb25650fb776e3d160d2da9af885",
+        "source_sha256": "45050b28af44a89cc844883abe8c7104f87cafeeab39154253fca9ad719e4e41",
         "symbols": [
           {
             "declarations": [

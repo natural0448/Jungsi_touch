@@ -86,6 +86,19 @@ Deno.test("overall native service matches invented Python same-exam sum and exac
   equal((result.subjects as unknown[]).length, 4);
   equal(f.calls, ["pack", "model"]);
   assert(!Object.hasOwn(result, "university_analysis"));
+  // 제2외국어/한문: 없으면 미응시(null), 있으면 과목·등급만. 총점·과목 결과에는 넣지 않는다
+  equal(result.second_language, null);
+  const taken = await f.service.analyze(actor(), {
+    ...request(),
+    second_language: { subject: "일본어Ⅰ", grade: 2 },
+  });
+  equal(taken.second_language, { subject: "일본어Ⅰ", grade: 2 });
+  equal(taken.total_standard_score, 26);
+  equal((taken.subjects as unknown[]).length, 4);
+  equal(
+    (await f.service.analyze(actor(), { ...request(), second_language: null })).second_language,
+    null,
+  );
 });
 Deno.test("overall native service requires verified actor before input and any data access", async () => {
   const f = provider(), a = actor();
@@ -96,6 +109,24 @@ Deno.test("overall native service requires verified actor before input and any d
 Deno.test("overall native input and pack version failures keep original safe statuses", async () => {
   const f = provider();
   await denied(() => f.service.analyze(actor(), {}), "invalid_request", 422);
+  equal(f.calls, []);
+  for (
+    const bad of [
+      { subject: "일본어Ⅰ", grade: 0 },
+      { subject: "일본어Ⅰ", grade: 10 },
+      { subject: "일본어Ⅰ", grade: true },
+      { subject: "일본어", grade: 2 },
+      { subject: "일본어Ⅰ" },
+      { subject: "일본어Ⅰ", grade: 2, standard_score: 60 },
+      2,
+    ]
+  ) {
+    await denied(
+      () => f.service.analyze(actor(), { ...request(), second_language: bad }),
+      "invalid_second_language",
+      422,
+    );
+  }
   equal(f.calls, []);
   await denied(
     () => f.service.analyze(actor(), { ...request(), pack_version: "SYNTHETIC-old" }),

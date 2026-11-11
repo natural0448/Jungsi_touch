@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.166",
-  "source_sha256": "ee605eb161be97c890a11da326e928fc79f71cbef1dda817e43a988704d45feb",
+  "source_sha256": "4cfa25071bee0ce4595753d8366031c543fd825f79378ec16fd986d17f49e2fc",
   "pages": [
     {
       "id": "PAGE-01",
@@ -1773,7 +1773,8 @@
     ],
     "optional_inputs": [
       "english_grade",
-      "korean_history_grade"
+      "korean_history_grade",
+      "second_language"
     ],
     "input_rules": [
       "exam_id·pack_version은 등록 ID 토큰이며 파일 경로가 아니다",
@@ -1781,7 +1782,8 @@
       "inquiry는 서로 다른 두 과목의 subject·standard_score와 선택적 percentile·grade다.",
       "점수·등급·선택과목 검증은 기존 시험 엔진에 위임",
       "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부",
-      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다."
+      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다.",
+      "second_language는 null(미응시) 또는 subject·grade 두 필드다. subject는 제2외국어/한문 9과목(독일어Ⅰ·프랑스어Ⅰ·스페인어Ⅰ·중국어Ⅰ·일본어Ⅰ·러시아어Ⅰ·아랍어Ⅰ·베트남어Ⅰ·한문Ⅰ) 중 하나, grade는 1~9 정수다. 없거나 null이면 미응시이며 이 필드 전에 저장된 성적도 미응시로 읽는다. 절대평가 등급이라 총점·과목 결과·누적 위치에 넣지 않는다(2026-11-12 최종관리자 결정)."
     ],
     "response_fields": [
       "format",
@@ -1791,6 +1793,7 @@
       "total_standard_score",
       "subjects",
       "absolute_grades",
+      "second_language",
       "overall"
     ],
     "exam_fields": [
@@ -1994,7 +1997,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/overall_analysis.ts",
-            "sha256": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7"
+            "sha256": "0c5950512acd3db7f71a5379635137112b9dd4309eda74874929a84771102481"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
@@ -3906,11 +3909,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "d6f301205520271710727003df366db7e118212e1c25a7694abda540b160c80d"
+        "sha256": "7b97489ca7666aacb3341ad9f1f48d16ce0e728074e4016dfbd706f8bb33a9f9"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "02dc2f0d3454801bdc6c42ac5d510b45e80ad8b0c42de78fcb2f50cdd9e4ff38"
+        "sha256": "29513b7187e21e465b372db6cdfb628e572fdc07e9e10c91f1417044cd86d0a3"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4097,7 +4100,7 @@
       "source_bindings": [
         {
           "path": "scripts/check_edge_contract.py",
-          "sha256": "7685df999f5b53b2bd3006ab712b38aa627c20dd58a24a0fa6c8c7d1c398cfb1"
+          "sha256": "ee123870172124a28f4f0aa3f6ee4517e49e6747d33fdd27580137777a93392e"
         },
         {
           "path": "scripts/run_edge_tests.py",
@@ -4274,7 +4277,7 @@
         },
         {
           "path": "tests/edge/test_wildcard_off_baseline.synthetic.ts",
-          "sha256": "d726cb87e434e655942b985e3e0695e87918fb25650fb776e3d160d2da9af885"
+          "sha256": "45050b28af44a89cc844883abe8c7104f87cafeeab39154253fca9ad719e4e41"
         },
         {
           "path": "tests/edge/test_wildcard_personal_http.synthetic.ts",
@@ -5046,7 +5049,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc"
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
@@ -5134,7 +5137,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "c8f7059879691e4291647bcebf55cd696f7d46b7f24f3f7a40150c132aafc876"
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
           },
           {
             "path": "tests/edge/reference_candidate_scope_cases.ts",
@@ -5575,7 +5578,7 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "43da4ad4194ab1dccb60d7106f9777498ea5f28b1cfd90743dd5224beb01a8fc"
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
@@ -5659,7 +5662,7 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "c8f7059879691e4291647bcebf55cd696f7d46b7f24f3f7a40150c132aafc876"
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
