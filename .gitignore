@@ -121,6 +121,7 @@ Desktop.ini
 
 # Reviewed development checks; no private data embedded.
 !/scripts/check_project_consistency.py
+!/scripts/reference_safety_suite.py
 !/scripts/audit_documentation_sync.py
 !/scripts/merge_branch_generated.py
 !/scripts/run_committed_tests.py

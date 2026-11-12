@@ -223,8 +223,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     }, true);
     shape(query);
     const key = identifier(request.requestKey),
-      digest = await nativeJsonSha256([body, params]),
-      replay = await this.repository.replay(session.user.subjectId, op, key, digest);
+      digest = await nativeJsonSha256([body, params]);
+    if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
+    const replay = await this.repository.replay(session.user.subjectId, op, key, digest);
+    if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
     if (replay !== null) {
       if (!("body" in replay) || replay.owner_id !== session.user.subjectId) fail();
       this.fresh(session);
@@ -420,6 +422,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           await wildcardGrant.assertCurrent();
           this.fresh(session);
         }
+        if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
         const result = await this.repository.writeReport({
           owner: session.user.subjectId,
           reportId: record.report_id,
@@ -433,6 +436,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           noOp: true,
         });
         if (wildcardGrant) await wildcardGrant.assertCurrent();
+        if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
         this.fresh(session);
         return reportDto(session, result);
       }
@@ -441,8 +445,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       let referenceStopped = false;
       let referencePrefetched = false;
       const referencePercentile = new ReferencePercentileService(this.data);
-      const runScoring = (phaseRows: readonly NativeObject[], referencePhase: boolean) =>
-        this.scoring.batch(async () => {
+      const runScoring = (phaseRows: readonly NativeObject[], referencePhase: boolean) => {
+        if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
+        return this.scoring.batch(async () => {
+          if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
           // Load the selected saved tails (and their reference rules) concurrently once;
           // the per-offering loop below then reuses the same request-local projections.
           if (op !== "candidates.build" && this.data.prefetchReferenceTails) {
@@ -452,6 +458,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             );
           }
           for (const offering of phaseRows) {
+            if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
             this.fresh(session);
             if (
               op === "candidates.build" && referenceGrant && !productionRows.includes(offering) &&
@@ -476,8 +483,10 @@ export class UniversityAnalysisService implements ApiBusinessPort {
               referenceStopped = true;
               break;
             }
-            const conversion = await this.scoring.calculate(offering, profile, attendance),
-              percentile = await this.percentile.calculate(offering, conversion);
+            const conversion = await this.scoring.calculate(offering, profile, attendance);
+            if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
+            const percentile = await this.percentile.calculate(offering, conversion);
+            if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
             let assessment: NativeObject;
             try {
               const bundle = await this.data.getAnalysis(offering.offering_id as string);
@@ -502,6 +511,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
                 ? e.code
                 : "analysis_release_invalid";
             }
+            if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
             if (
               this.forecasts && (op !== "candidates.build" || productionRows.includes(offering))
             ) {
@@ -601,6 +611,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
             }
           }
         }, referencePhase ? referenceGrant?.signal : undefined);
+      };
       if (op === "candidates.build") {
         await runScoring(productionRows, false);
         const referenceOnlyRows = referenceRows.filter((r) => !productionRows.includes(r));

@@ -1,6 +1,6 @@
 # 정시터치 전문가용 서비스·DB 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.174이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.176이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 
 
@@ -1255,4 +1255,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=d0623b5597157458677a0ebb9e68bb4237cad0309ffbb3835df2b51206651903 -->
+<!-- jungsi:generated spec_sha256=22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542 -->

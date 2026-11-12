@@ -66,6 +66,10 @@ export const READ_VIEW_ROUTE_PATHS = {
 /** Separate opt-in candidate. Existing route and consumer inventories stay unchanged. */
 export const CURRENT_PAGE_OPERATION_ID = "history.current-page" as const;
 export const CURRENT_PAGE_ROUTE_PATH = "/api/v1/admission-history/current-page" as const;
+/** Isolated opt-in only: not part of the existing operation/binding inventory. */
+export const STUDENT_REFERENCE_OPERATION_ID = "student-reference.compare" as const;
+export const STUDENT_REFERENCE_ROUTE_PATH =
+  "/api/v1/reports/{report_id}/student-reference/compare" as const;
 export const LEGACY_CONSUMER_OPERATION_IDS = [
   "session.read",
   "history.search",
@@ -93,7 +97,8 @@ export const COMBINED_POLICY_CONSUMER_OPERATION_IDS = [
 ] as const;
 export type ApiOperationId =
   | typeof REGISTERED_API_OPERATION_IDS[number]
-  | typeof CURRENT_PAGE_OPERATION_ID;
+  | typeof CURRENT_PAGE_OPERATION_ID
+  | typeof STUDENT_REFERENCE_OPERATION_ID;
 export const MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS = [
   ...COMBINED_POLICY_CONSUMER_OPERATION_IDS,
   ...MEMBER_SHORTLIST_OPERATION_IDS,
@@ -115,6 +120,14 @@ export function isCurrentPagePolicy(policy: ApiRoutePolicy | undefined): boolean
     policy.member_tiers.includes("paid") && policy.report_owner === false &&
     policy.confirmed_score_profile === false && typeof policy.contract_ref === "string" &&
     /^[A-Za-z0-9._-]{1,256}$/.test(policy.contract_ref);
+}
+/** Existing relay, paid session, confirmed owned report and shared budget remain mandatory. */
+export function isStudentReferencePolicy(policy: ApiRoutePolicy | undefined): boolean {
+  return !!policy && policy.id === STUDENT_REFERENCE_OPERATION_ID && policy.method === "POST" &&
+    policy.path === STUDENT_REFERENCE_ROUTE_PATH && Array.isArray(policy.member_tiers) &&
+    policy.member_tiers.length === 1 && policy.member_tiers[0] === "paid" &&
+    policy.report_owner === true && policy.confirmed_score_profile === true &&
+    typeof policy.contract_ref === "string" && /^[A-Za-z0-9._-]{1,256}$/.test(policy.contract_ref);
 }
 export interface ApiExecution {
   readonly operation: ApiOperationId;

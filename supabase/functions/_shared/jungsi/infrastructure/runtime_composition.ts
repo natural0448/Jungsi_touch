@@ -4,7 +4,29 @@ import {
 } from "../application/service_end_admission.ts";
 /** Concrete service graph with an injected native pool and transport. No server starts on import. */
 import { SearchFailureCorrelation } from "./search503_correlation.ts";
+import {
+  handlePersonalOwnerReferenceBatch,
+  type OwnedStudentReferenceBatchPorts as PersonalOwnerReferenceBatchPorts,
+} from "../application/personal_owner_reference_batch_handler_candidate.ts";
+import {
+  PersonalOwnerPublishedCacheEvidence,
+  type PersonalPublishedCacheAuthority,
+} from "./personal_owner_published_cache_evidence_candidate.v3.ts";
+import {
+  PersonalOwnerNamedR2Reader,
+  type PrivateR2Bucket,
+} from "./personal_owner_named_cache_r2_read_candidate.ts";
+import type { BoundTailInputs } from "./current_tail_cache_evidence_candidate.v3.ts";
+import {
+  type BoundHistoricalRuntimeInputs,
+  JoinedHistoricalBatchEvidence,
+} from "./joined_historical_batch_evidence_candidate.v5.ts";
+import {
+  BoundedStudentReferenceBatchProvider,
+  type StudentReferenceProviderInputs,
+} from "./student_reference_batch_provider_candidate.ts";
 import { AccessError } from "../application/access.ts";
+import { REFERENCE_DURABLE_FENCE_IMPLEMENTED } from "../application/reference_quiescence_fence.review-only.ts";
 import type {
   ApiBusinessPort,
   ApiExecution,
@@ -15,6 +37,14 @@ import type {
 import { REGISTERED_API_OPERATION_IDS } from "../application/api_dispatch.ts";
 import { CURRENT_PAGE_OPERATION_ID } from "../application/api_dispatch.ts";
 import { isCurrentPagePolicy } from "../application/api_dispatch.ts";
+import {
+  isStudentReferencePolicy,
+  STUDENT_REFERENCE_OPERATION_ID,
+} from "../application/api_dispatch.ts";
+import {
+  handleOwnedStudentReferenceBatch,
+  type OwnedStudentReferenceBatchPorts,
+} from "../application/owned_student_reference_batch_handler_candidate.ts";
 import {
   type CurrentPageExecution,
   type CurrentPageLimits,
@@ -78,6 +108,22 @@ import {
   referenceCandidateScopePort,
   referenceProjectionAuthorityPort,
 } from "./reference_runtime_authority.ts";
+type RuntimePersonalOwnerCache =
+  | Extract<PersonalOwnerReferenceBatchPorts["cache"], { kind: "owner_code" }>
+  | (
+    & Omit<
+      Extract<PersonalOwnerReferenceBatchPorts["cache"], { kind: "verified_self_student_name" }>,
+      "storageForName"
+    >
+    & Readonly<{ bucket: PrivateR2Bucket; prefix: string }>
+  );
+type RuntimePersonalOwnerPorts =
+  & Omit<
+    PersonalOwnerReferenceBatchPorts,
+    "reports" | "clock" | "projection" | "assertActiveAdmission" | "source" | "cache"
+  >
+  & Readonly<{ cache: RuntimePersonalOwnerCache }>;
+
 /** Per-request saved-tail objects and raw bytes held at once (inside the existing read budget). */
 export const REFERENCE_TAIL_REQUEST_OBJECTS = 16;
 export const REFERENCE_TAIL_REQUEST_BYTES = 24 * 1024 * 1024;
@@ -181,6 +227,53 @@ export interface RuntimeComposition {
   readonly candidateCatalog?: ReadViewCatalogFactory;
   /** Absent by default; a reviewed factory must independently verify published reference authority. */
   readonly referenceFactory?: RuntimeReferenceFactory;
+  /** Separate opt-in route; no storage, issuer, budget, schema or authority is installed here. */
+  readonly studentReference?: {
+    readonly policy: RuntimeRoutePolicy;
+    readonly scope: NonNullable<ApiHttpPorts["studentReferenceScope"]>;
+    /** Synchronous composition only; this factory must not start or schedule I/O. */
+    readonly resolvePorts: (
+      request: ApiExecution,
+      boundary: ApiExecutionBoundary,
+    ) => Omit<
+      OwnedStudentReferenceBatchPorts,
+      "reports" | "clock" | "projection" | "assertActiveAdmission" | "source"
+    >;
+    /** Publisher/authority remain injected; the runtime supplies its actual request read budget. */
+    readonly resolveBatchSource: (
+      request: ApiExecution,
+      boundary: ApiExecutionBoundary,
+    ) => Omit<StudentReferenceProviderInputs, "budget">;
+    /** Synchronous factory; source/authority and optional scenario are independently supplied. */
+    readonly resolveHistoricalSource: (
+      request: ApiExecution,
+      boundary: ApiExecutionBoundary,
+      budget: BoundHistoricalRuntimeInputs["budget"],
+    ) => BoundHistoricalRuntimeInputs;
+    /** Request-scoped 6075+6/CDF resolver and independent cache conversion authority. */
+    readonly resolveCurrentTail: (
+      request: ApiExecution,
+      boundary: ApiExecutionBoundary,
+      budget: BoundHistoricalRuntimeInputs["budget"],
+    ) => BoundTailInputs;
+  };
+  /** Personal-owner file namespace is separate from the legacy student-ID route. */
+  readonly personalOwnerReference?:
+    & Omit<
+      NonNullable<RuntimeComposition["studentReference"]>,
+      "resolvePorts" | "resolveCurrentTail"
+    >
+    & {
+      readonly resolvePorts: (
+        request: ApiExecution,
+        boundary: ApiExecutionBoundary,
+      ) => RuntimePersonalOwnerPorts;
+      /** Trusted server proof for already published immutable rows; never a client hash. */
+      readonly resolvePublishedCacheAuthority: (
+        request: ApiExecution,
+        boundary: ApiExecutionBoundary,
+      ) => PersonalPublishedCacheAuthority;
+    };
   /** Separate reviewed configuration only; no authority is installed by default. */
   readonly currentPage?: {
     assert(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
@@ -496,6 +589,7 @@ export class NativeRuntimeApi {
   private readonly clock: RequestClockPort;
   private readonly fetcher: typeof fetch;
   private readonly currentPageEnabled: boolean;
+  private readonly studentReferenceEnabled: boolean;
   private readonly projection: PublicResponseProjection;
   private readonly pools = new Map<string, SupabaseSqlTransport>();
   private readonly artifactCache = new VerifiedArtifactCache();
@@ -532,6 +626,28 @@ export class NativeRuntimeApi {
       page.projection.supportsOperation(CURRENT_PAGE_OPERATION_ID, page.policy.contract_ref) &&
       !this.config.policies.some((p) =>
         p.method === page.policy.method && p.path === page.policy.path
+      );
+    const student = this.config.personalOwnerReference ?? this.config.studentReference,
+      scope = student?.scope;
+    this.studentReferenceEnabled = REFERENCE_DURABLE_FENCE_IMPLEMENTED &&
+      !!this.config.personalOwnerReference && !this.config.studentReference &&
+      !!student && !!scope && isStudentReferencePolicy(student.policy) &&
+      typeof student.resolvePorts === "function" &&
+      typeof student.resolveBatchSource === "function" &&
+      typeof student.resolveHistoricalSource === "function" &&
+      typeof this.config.personalOwnerReference.resolvePublishedCacheAuthority === "function" &&
+      typeof scope.budget?.run === "function" &&
+      typeof scope.assert === "function" && typeof scope.assertCurrent === "function" &&
+      typeof scope.assertReceipt === "function" &&
+      typeof scope.schemaAuthority?.assert === "function" &&
+      scope.projection instanceof PublicResponseProjection &&
+      scope.projection.hasExactRegistryBytes() &&
+      scope.projection.supportsOperation(
+        STUDENT_REFERENCE_OPERATION_ID,
+        student.policy.contract_ref,
+      ) &&
+      !this.config.policies.some((p) =>
+        p.method === student.policy.method && p.path === student.policy.path
       );
   }
   readonly fetch = async (request: Request): Promise<Response> => {
@@ -619,9 +735,13 @@ export class NativeRuntimeApi {
         return requestSql;
       };
       const relay = new RelayBoundary(this.config.environment.get("JUNGSI_RELAY_TOKEN") ?? null);
-      const requestPolicies = this.currentPageEnabled
-        ? [...this.config.policies, this.config.currentPage!.policy]
-        : this.config.policies;
+      const requestPolicies = [
+        ...this.config.policies,
+        ...(this.currentPageEnabled ? [this.config.currentPage!.policy] : []),
+        ...(this.studentReferenceEnabled
+          ? [(this.config.personalOwnerReference ?? this.config.studentReference)!.policy]
+          : []),
+      ];
       selectedOperation = pathname === "/health/ready"
         ? "health.ready"
         : operation(requestPolicies, request);
@@ -815,8 +935,240 @@ export class NativeRuntimeApi {
       );
       let inputAdmission: PreparedUsageAdmission | undefined;
       let currentPageBudget: RuntimeRequestBudget | undefined;
+      let studentReferenceReceipt:
+        | Readonly<{ request: ApiExecution; boundary: ApiExecutionBoundary }>
+        | null = null;
+      let studentReferenceBudget: RuntimeRequestBudget | undefined;
+      const configuredStudentScope = this.studentReferenceEnabled
+        ? (this.config.personalOwnerReference ?? this.config.studentReference)!.scope
+        : undefined;
+      const assertStudentRun = (
+        r: ApiExecution,
+        boundary: ApiExecutionBoundary,
+        phase: "active" | "settled_success",
+      ) => {
+        if (!studentReferenceBudget || !boundary.admission || boundary.signal.aborted) {
+          throw new AccessError("security_policy_unavailable", 503);
+        }
+        studentReferenceBudget.assertRunAdmission(
+          boundary.admission as PreparedUsageAdmission,
+          r,
+          phase,
+        );
+      };
+      // Bind every gate to the same shared-budget issuer and request-local lifecycle.
+      // No policy, cost, schema or source authority is synthesized here.
+      const studentScope: ApiHttpPorts["studentReferenceScope"] = configuredStudentScope
+        ? {
+          ...configuredStudentScope,
+          budget: {
+            run: async (r, work) => {
+              const budget = await phase("budget_initialize", () => context.budget());
+              if (studentReferenceBudget && studentReferenceBudget !== budget) {
+                throw new AccessError("security_policy_unavailable", 503);
+              }
+              studentReferenceBudget = budget;
+              return await budget.run(r, work, mark);
+            },
+          },
+          assert: async (r, boundary) => {
+            assertStudentRun(r, boundary, "active");
+            await configuredStudentScope.assert(r, boundary);
+            assertStudentRun(r, boundary, "active");
+          },
+          assertCurrent: async (r, boundary) => {
+            assertStudentRun(r, boundary, "active");
+            await configuredStudentScope.assertCurrent(r, boundary);
+            assertStudentRun(r, boundary, "active");
+          },
+          assertReceipt: async (r, boundary) => {
+            assertStudentRun(r, boundary, "settled_success");
+            await configuredStudentScope.assertReceipt(r, boundary);
+            assertStudentRun(r, boundary, "settled_success");
+          },
+          schemaAuthority: {
+            assert: async (r, boundary, binding, stage) => {
+              assertStudentRun(r, boundary, stage);
+              await configuredStudentScope.schemaAuthority.assert(r, boundary, binding, stage);
+              assertStudentRun(r, boundary, stage);
+            },
+          },
+        }
+        : undefined;
       const business: ApiBusinessPort = {
         execute: async (r, boundary) => {
+          if (r.operation === STUDENT_REFERENCE_OPERATION_ID) {
+            const personalConfig = this.config.personalOwnerReference;
+            const config = personalConfig ?? this.config.studentReference;
+            if (
+              !this.studentReferenceEnabled || !config || !studentScope || !boundary?.admission ||
+              boundary.signal.aborted ||
+              !resultObject(r.body)
+            ) throw new AccessError("security_policy_unavailable", 503);
+            const body = r.body;
+            if (
+              Object.keys(body).sort().join(",") !==
+                (personalConfig
+                  ? "expected_version,offering_ids,profile_id"
+                  : "expected_version,offering_ids,profile_id,student_id") ||
+              !personalConfig && typeof body.student_id !== "string" ||
+              typeof body.profile_id !== "string" ||
+              !Array.isArray(body.offering_ids)
+            ) throw new AccessError("invalid_request", 422);
+            const rawRevision = body.expected_version;
+            const revision =
+              typeof rawRevision === "bigint" && rawRevision <= BigInt(Number.MAX_SAFE_INTEGER)
+                ? Number(rawRevision)
+                : rawRevision;
+            if (typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 1) {
+              throw new AccessError("invalid_request", 422);
+            }
+            const assertActive = (req: ApiExecution, b: ApiExecutionBoundary) =>
+              studentScope.assert(req, b);
+            const sourceInputs = config.resolveBatchSource(r, boundary);
+            if (
+              !sourceInputs || typeof sourceInputs !== "object" ||
+              typeof (sourceInputs as { then?: unknown }).then === "function"
+            ) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const controls = await context.controls();
+            await assertActive(r, boundary);
+            const historical = config.resolveHistoricalSource(r, boundary, controls);
+            if (
+              !historical || typeof historical !== "object" ||
+              typeof (historical as { then?: unknown }).then === "function" ||
+              historical.budget !== controls
+            ) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            if (!personalConfig || sourceInputs.sql !== sql()) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const personalSupplied = personalConfig.resolvePorts(r, boundary);
+            if (
+              !personalSupplied || typeof personalSupplied !== "object" ||
+              typeof (personalSupplied as { then?: unknown }).then === "function" ||
+              !personalSupplied.cache || !personalSupplied.cache.scope
+            ) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const owner = personalSupplied.cache;
+            const storage = owner.kind === "owner_code"
+              ? { kind: "owner_code" as const, storage: owner.storage }
+              : {
+                kind: "verified_self_student_name" as const,
+                names: owner.names,
+                bucket: owner.bucket,
+                prefix: owner.prefix,
+              };
+            const scope = {
+              ...owner.scope,
+              repository: platform,
+              workflow,
+              clock: this.clock,
+              assertActiveAdmission: assertActive,
+            };
+            const publication = personalConfig.resolvePublishedCacheAuthority(r, boundary);
+            if (!publication || typeof (publication as { then?: unknown }).then === "function") {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const published = new PersonalOwnerPublishedCacheEvidence(sourceInputs.authority, {
+              scope,
+              storage,
+              cacheAuthority: owner.authority,
+              publication,
+              awaitQuiescence: (signal) => owner.scope.awaitQuiescence(signal),
+            });
+            const authority = new JoinedHistoricalBatchEvidence(published, historical, controls);
+            const source = new BoundedStudentReferenceBatchProvider({
+              ...sourceInputs,
+              authority,
+              budget: controls,
+            });
+            studentReferenceReceipt = Object.freeze({ request: r, boundary });
+            const reports = {
+              find: (id: string) => platform.lookupAccess(r.session.user.subjectId, id),
+            };
+            if (personalConfig) {
+              const supplied = personalSupplied;
+              if (!supplied) throw new AccessError("security_policy_unavailable", 503);
+              const personalScope = {
+                ...supplied.cache.scope,
+                repository: platform,
+                workflow,
+                clock: this.clock,
+                assertActiveAdmission: assertActive,
+              };
+              const incoming = supplied.cache;
+              const cache: PersonalOwnerReferenceBatchPorts["cache"] =
+                incoming.kind === "owner_code" ? { ...incoming, scope: personalScope } : {
+                  kind: "verified_self_student_name",
+                  scope: personalScope,
+                  authority: incoming.authority,
+                  names: incoming.names,
+                  storageForName: (name) =>
+                    new PersonalOwnerNamedR2Reader(incoming.bucket, incoming.prefix, name),
+                };
+              const ports: PersonalOwnerReferenceBatchPorts = {
+                ...supplied,
+                source,
+                cache,
+                reports,
+                clock: this.clock,
+                projection: studentScope.projection,
+                assertActiveAdmission: assertActive,
+              };
+              return await handlePersonalOwnerReferenceBatch(
+                r,
+                boundary,
+                Object.freeze({
+                  profileId: body.profile_id,
+                  reportId: r.params.report_id,
+                  reportRevision: revision,
+                }),
+                config.policy.contract_ref,
+                ports,
+              );
+            }
+            if (!this.config.studentReference || typeof body.student_id !== "string") {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const supplied = this.config.studentReference.resolvePorts(r, boundary);
+            if (
+              !supplied || typeof supplied !== "object" ||
+              typeof (supplied as { then?: unknown }).then === "function" ||
+              !supplied.cache
+            ) throw new AccessError("security_policy_unavailable", 503);
+            const cache = {
+              ...supplied.cache,
+              repository: platform,
+              workflow,
+              clock: this.clock,
+              assertActiveAdmission: assertActive,
+            };
+            const ports: OwnedStudentReferenceBatchPorts = {
+              ...supplied,
+              source,
+              cache,
+              reports,
+              clock: this.clock,
+              projection: studentScope.projection,
+              assertActiveAdmission: assertActive,
+            };
+            return await handleOwnedStudentReferenceBatch(
+              r,
+              boundary,
+              Object.freeze({
+                studentId: body.student_id,
+                profileId: body.profile_id,
+                reportId: r.params.report_id,
+                reportRevision: revision,
+              }),
+              config.policy.contract_ref,
+              ports,
+            );
+          }
           if (r.operation === CURRENT_PAGE_OPERATION_ID) {
             return await invokeCurrentPageService(
               this.config.currentPage,
@@ -931,6 +1283,7 @@ export class NativeRuntimeApi {
         },
       };
       const handler = createApiHandler(requestPolicies, {
+        ...(studentScope ? { studentReferenceScope: studentScope } : {}),
         ...(this.currentPageEnabled
           ? {
             currentPageScope: currentPageBudgetScope(
@@ -994,6 +1347,15 @@ export class NativeRuntimeApi {
             }
           },
           current: async () => {
+            if (selectedOperation === STUDENT_REFERENCE_OPERATION_ID) {
+              if (!studentReferenceReceipt || !studentScope) {
+                throw new AccessError("security_policy_unavailable", 503);
+              }
+              return await studentScope.assertReceipt(
+                studentReferenceReceipt.request,
+                studentReferenceReceipt.boundary,
+              );
+            }
             await runtimeCompletionCurrent(
               selectedOperation,
               currentPageBudget,

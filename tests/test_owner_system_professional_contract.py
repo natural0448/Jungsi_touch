@@ -76,9 +76,14 @@ class ProfessionalSourceRegistrationTests(unittest.TestCase):
         import hashlib
         from check_project_consistency import (PROFESSIONAL_ENTRY, PROFESSIONAL_APP,
             PROFESSIONAL_INFRA, PROFESSIONAL_TEST, PROFESSIONAL_MIGRATION, PROFESSIONAL_SOURCE_STATUS,
-            PROFESSIONAL_GENERATED, professional_source_path)
+            PROFESSIONAL_GENERATED, professional_source_path, validate_professional_source_registration)
         s=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
-        c=s['professional_service_contract'];c.pop('source_registration',None);c.pop('schema_application_evidence',None)
+        c=s['professional_service_contract']
+        # The current candidate is independently registered. Validate it
+        # before replacing the professional family with this synthetic one.
+        self.assertEqual(validate_professional_source_registration(s),[])
+        c.pop('student_cache_scope_review_extension',None)
+        c.pop('source_registration',None);c.pop('schema_application_evidence',None)
         s['implementation']=[r for r in s['implementation']if not professional_source_path(r['path'])]
         edge_index=s['workflow']['documentation_sync']['code_index']['edge_sources']['files']
         edge_index[:]=[r for r in edge_index if not professional_source_path(r['path'])]

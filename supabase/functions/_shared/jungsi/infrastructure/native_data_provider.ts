@@ -848,6 +848,48 @@ export class NativeDataProvider
       signal,
     );
   }
+  /** One current selected conversion artifact per admitted batch, never one physical load
+   * per offering. Callers must independently prove current Guide/source/score-axis authority.
+   * A key absent from this exact selected artifact or ambiguous across selected artifacts is pending. */
+  async getReferenceBatchFromSelectedArtifact(
+    artifactKey: string,
+    offeringIds: readonly string[],
+    signal: AbortSignal,
+  ): Promise<
+    readonly Readonly<{ offeringId: string; reference: SchoolReferenceFunction | null }>[]
+  > {
+    if (
+      signal?.aborted || typeof artifactKey !== "string" ||
+      !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$/.test(artifactKey) ||
+      !Array.isArray(offeringIds) || offeringIds.length < 1 || offeringIds.length > 64 ||
+      offeringIds.some((id) => typeof id !== "string" || !/^2027:[1-9][0-9]{0,18}$/.test(id)) ||
+      new Set(offeringIds).size !== offeringIds.length
+    ) fail("reference_offering_context_mismatch");
+    await this.assertCurrentSelection(false, signal);
+    const index = new Map<string, string | null>();
+    for (const { key, entry } of this.selection.referenceMetadata()) {
+      const context = object(entry.reference_context);
+      if (!Array.isArray(context.offering_ids)) fail("reference_rule_context_mismatch");
+      for (const raw of context.offering_ids) {
+        const id = text(raw);
+        if (offeringIds.includes(id)) index.set(id, index.has(id) ? null : key);
+      }
+    }
+    const selectedIds = offeringIds.filter((id) => index.get(id) === artifactKey);
+    const group = selectedIds.length ? await this.referenceGroup(artifactKey, signal) : null;
+    if (signal.aborted) fail("reference_tail_unavailable");
+    const result = offeringIds.map((offeringId) => {
+      if (index.get(offeringId) !== artifactKey || !group) {
+        return Object.freeze({ offeringId, reference: null });
+      }
+      const bindings = group.bindings.filter((b) => b.offering_pk === offeringId);
+      if (bindings.length !== 1) fail("reference_offering_context_mismatch");
+      const reference: SchoolReferenceFunction = Object.freeze({ ...group, binding: bindings[0] });
+      return Object.freeze({ offeringId, reference });
+    });
+    await this.assertCurrentSelection(false, signal);
+    return Object.freeze(result);
+  }
   async getReference(
     offeringId: string,
     signal?: AbortSignal,

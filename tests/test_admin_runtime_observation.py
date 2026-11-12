@@ -34,7 +34,7 @@ class AdminRuntimeObservationTests(unittest.TestCase):
         self.assertIsNotNone(module_spec.loader)
         tools = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(tools)
-        manifest_raw = (ROOT / "tests/review_suite_manifest.json").read_bytes()
+        manifest_raw = tools.MANIFEST.read_bytes()
         self.assertEqual(hashlib.sha256(manifest_raw).hexdigest(), tools.MANIFEST_SHA256)
         manifest = json.loads(manifest_raw)
         deno, runtime_sha, _ = tools.selected_runtime(manifest)

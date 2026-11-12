@@ -2,7 +2,8 @@
 from copy import deepcopy
 import unittest
 
-from run_committed_tests import reference_db_unit_count, summarize_edge_units
+from run_committed_tests import (reference_db_unit_count, summarize_edge_units,
+                                 university_cancellation_unit_required)
 
 
 def unit(count):
@@ -68,6 +69,54 @@ class EdgeUnitAggregationTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 reference_db_unit_count(
                     {"backend_platform_contract": {"reference_db_test_extension": {"test_count": value}}}
+                )
+
+    def test_registered_university_cancellation_suite_is_counted_separately(self):
+        edge = {"unit": unit(656), "university_cancellation_unit": unit(6)}
+        result = summarize_edge_units(edge, 656, False, university_cancellation_required=True)
+        self.assertEqual(result["total_tests"], 662)
+        self.assertEqual(result["by_suite"]["unit"], 656)
+        self.assertEqual(result["by_suite"]["university_cancellation_unit"], 6)
+        self.assertEqual(summarize_edge_units({"unit": unit(656)}, 656, False)["total_tests"], 656)
+
+    def test_cancellation_result_cannot_be_missing_unregistered_or_incomplete(self):
+        base = {"unit": unit(656)}
+        good = {**base, "university_cancellation_unit": unit(6)}
+        variants = [(base, True), (good, False)]
+        for key, value in (("tests_run", 5), ("tests_run", 7), ("tests_run", True),
+                           ("failures", 1), ("errors", 1), ("skipped", 1)):
+            changed = deepcopy(good)
+            changed["university_cancellation_unit"][key] = value
+            variants.append((changed, True))
+        for edge, required in variants:
+            with self.subTest(edge=edge, required=required), self.assertRaises(ValueError):
+                summarize_edge_units(edge, 656, False, university_cancellation_required=required)
+        with self.assertRaises(ValueError):
+            summarize_edge_units(good, 656, False, university_cancellation_required=1)
+
+    def test_cancellation_requirement_rejects_malformed_registration(self):
+        self.assertFalse(university_cancellation_unit_required({}))
+        ext = {
+            "format": "jungsi.university-cancellation-tests/v1",
+            "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+            "test_count": 6,
+            "test_paths": ["tests/edge/test_university_analysis_cancellation.ts"],
+        }
+        self.assertTrue(university_cancellation_unit_required(
+            {"backend_platform_contract": {"university_cancellation_test_extension": ext}}
+        ))
+        for key, value in (("format", "other"), ("status", "PASS"), ("test_count", 5),
+                           ("test_count", True), ("test_paths", [])):
+            invalid = deepcopy(ext)
+            invalid[key] = value
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                university_cancellation_unit_required(
+                    {"backend_platform_contract": {"university_cancellation_test_extension": invalid}}
+                )
+        for invalid in (None, [], "invalid"):
+            with self.subTest(value=invalid), self.assertRaises(ValueError):
+                university_cancellation_unit_required(
+                    {"backend_platform_contract": {"university_cancellation_test_extension": invalid}}
                 )
 
 

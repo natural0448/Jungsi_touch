@@ -20,15 +20,21 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def compact_spec():
     original = json.loads((ROOT / "docs/current/service_spec.json").read_text(encoding="utf-8"))
+    _, errors = auth_503_runtime_registration(original)
+    if errors:
+        raise AssertionError("invalid original AUTH-503 registration: " + ", ".join(errors))
     followup = deepcopy(original["supabase_deployment_contract"]["live_execution"]["auth_503_cancel_followup_20261112"])
     paths = set(AUTH_503_SOURCE_PATHS) | {AUTH_503_RUNTIME_TEST_PATH}
     edge = original["edge_harness"]
     files = {p: deepcopy(edge["files"][p]) for p in paths}
     index = original["workflow"]["documentation_sync"]["code_index"]["edge_sources"]["files"]
     entries = [deepcopy(item) for item in index if item["path"] in paths]
-    return {"supabase_deployment_contract": {"live_execution": {"auth_503_cancel_followup_20261112": followup}},
-            "edge_harness": {"files": files, "tests": list(edge["tests"]), "unit_count": edge["unit_count"]},
-            "workflow": {"documentation_sync": {"code_index": {"edge_sources": {"files": entries}}}}}
+    result = {"supabase_deployment_contract": {"live_execution": {"auth_503_cancel_followup_20261112": followup}},
+              "edge_harness": {"files": files, "tests": list(edge["tests"]), "unit_count": edge["unit_count"]},
+              "workflow": {"documentation_sync": {"code_index": {"edge_sources": {"files": entries}}}}}
+    if "current_source_rebounds_20261113" in original:
+        result["current_source_rebounds_20261113"] = deepcopy(original["current_source_rebounds_20261113"])
+    return result
 
 
 def runtime_names():
@@ -132,6 +138,32 @@ class Runtime503PartitionTests(unittest.TestCase):
                 result, errors = auth_503_runtime_registration(candidate)
                 self.assertIsNone(result)
                 self.assertTrue(errors)
+
+    def test_current_rebound_projection_preserves_and_validates_original(self):
+        original = json.loads((ROOT / "docs/current/service_spec.json").read_text(encoding="utf-8"))
+        if "current_source_rebounds_20261113" not in original:
+            self.skipTest("historical fixture does not declare the current rebound")
+        untouched = deepcopy(original)
+        compact = compact_spec()
+        self.assertEqual(compact["current_source_rebounds_20261113"], original["current_source_rebounds_20261113"])
+        self.assertIsNot(compact["current_source_rebounds_20261113"], original["current_source_rebounds_20261113"])
+        self.assertEqual(auth_503_runtime_registration(compact)[1], [])
+        self.assertEqual(original, untouched)
+        path = next(iter(original["current_source_rebounds_20261113"]["families"]["auth"]["changed_source_bindings"]))
+        for kind in ("missing_sibling", "missing_family", "forged_sibling", "missing_edge", "missing_index", "forged_index"):
+            damaged = deepcopy(original)
+            marker = damaged["current_source_rebounds_20261113"]
+            if kind == "missing_sibling": damaged.pop("current_source_rebounds_20261113")
+            elif kind == "missing_family": marker["families"].pop("auth")
+            elif kind == "forged_sibling": marker["families"]["auth"]["changed_source_bindings"][path] = "0" * 64
+            elif kind == "missing_edge": damaged["edge_harness"]["files"].pop(path)
+            else:
+                rows = damaged["workflow"]["documentation_sync"]["code_index"]["edge_sources"]["files"]
+                if kind == "missing_index": rows[:] = [row for row in rows if row.get("path") != path]
+                else: next(row for row in rows if row.get("path") == path)["source_sha256"] = "0" * 64
+            with self.subTest(kind=kind), patch.object(Path, "read_text", return_value=json.dumps(damaged)):
+                with self.assertRaisesRegex(AssertionError, "invalid original AUTH-503 registration"):
+                    compact_spec()
 
     def test_historical_27_only_registration_remains_valid_but_unregistered_five_fail(self):
         historical = deepcopy(self.spec)

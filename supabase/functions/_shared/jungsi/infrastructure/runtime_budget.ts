@@ -4,6 +4,7 @@ import {
   COMBINED_POLICY_CONSUMER_OPERATION_IDS,
   CURRENT_PAGE_OPERATION_ID,
   MEMBER_SHORTLIST_CONSUMER_OPERATION_IDS,
+  STUDENT_REFERENCE_OPERATION_ID,
 } from "../application/api_dispatch.ts";
 import { ApprovedAdministratorUsagePolicy } from "../application/administrator_usage_policy.ts";
 import { ApprovedOperatingPolicy } from "../application/operating_policy.ts";
@@ -651,7 +652,10 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
     let issued: PreparedUsageAdmission | undefined;
     try {
       const result = await shared.run(request, async (activeAdmission) => {
-        if (request.operation === CURRENT_PAGE_OPERATION_ID) {
+        if (
+          request.operation === CURRENT_PAGE_OPERATION_ID ||
+          request.operation === STUDENT_REFERENCE_OPERATION_ID
+        ) {
           if (!activeAdmission || typeof activeAdmission !== "object") fail();
           const prepared = activeAdmission as PreparedUsageAdmission;
           if (typeof prepared.lease?.expiresAtUtc !== "bigint") fail();

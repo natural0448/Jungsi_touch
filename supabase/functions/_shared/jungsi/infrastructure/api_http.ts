@@ -12,12 +12,15 @@ import {
   CURRENT_PAGE_OPERATION_ID,
   CURRENT_PAGE_ROUTE_PATH,
   isCurrentPagePolicy,
+  isStudentReferencePolicy,
   MEMBER_SHORTLIST_OPERATION_IDS,
   MEMBER_SHORTLIST_ROUTE_PATHS,
   READ_VIEW_OPERATION_IDS,
   READ_VIEW_REGISTERED_API_OPERATION_IDS,
   READ_VIEW_ROUTE_PATHS,
   REGISTERED_API_OPERATION_IDS,
+  STUDENT_REFERENCE_OPERATION_ID,
+  STUDENT_REFERENCE_ROUTE_PATH,
 } from "../application/api_dispatch.ts";
 import {
   authorizeManagement,
@@ -71,6 +74,30 @@ export const API_REQUEST_STAGES = [
 export type ApiRequestStage = typeof API_REQUEST_STAGES[number];
 export interface ApiHttpPorts {
   readonly admissionPermit?: object;
+  /** Entirely optional route. Budget/schema/issuer are independently provisioned, never defaulted. */
+  readonly studentReferenceScope?: {
+    readonly budget: RequestBudgetPort;
+    readonly projection: PublicResponseProjection;
+    assert(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    assertCurrent(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    /** Settled request-local receipt; MUST NOT initiate I/O. */
+    assertReceipt(request: ApiExecution, boundary: ApiExecutionBoundary): Promise<void>;
+    readonly schemaAuthority: {
+      assert(
+        request: ApiExecution,
+        boundary: ApiExecutionBoundary,
+        binding: Readonly<
+          {
+            operation: string;
+            contract_ref: string;
+            schema_sha256: string;
+            schema_bytes_sha256: string;
+          }
+        >,
+        phase: "active" | "settled_success",
+      ): Promise<void>;
+    };
+  };
   readonly representation?: {
     encode(
       request: ApiExecution,
@@ -192,19 +219,29 @@ function routes(
   extended = false,
   memberShortlist = false,
   currentPage = false,
+  studentReference = false,
 ): Route[] {
   const base = memberShortlist
     ? REGISTERED_API_OPERATION_IDS
     : extended
     ? READ_VIEW_REGISTERED_API_OPERATION_IDS
     : API_OPERATION_IDS;
-  const expected: readonly string[] = currentPage ? [...base, CURRENT_PAGE_OPERATION_ID] : base;
+  const expected: readonly string[] = [
+    ...base,
+    ...(currentPage ? [CURRENT_PAGE_OPERATION_ID] : []),
+    ...(studentReference ? [STUDENT_REFERENCE_OPERATION_ID] : []),
+  ];
   if (
     !Array.isArray(policies) || policies.length !== expected.length ||
     new Set(policies.map((p) => p?.id)).size !== expected.length ||
     expected.some((id) => !policies.some((p) => p?.id === id))
   ) configuration();
   const result = policies.map((policy: ApiRoutePolicy) => {
+    if (
+      policy?.id === STUDENT_REFERENCE_OPERATION_ID &&
+      (!studentReference || !isStudentReferencePolicy(policy) ||
+        policy.path !== STUDENT_REFERENCE_ROUTE_PATH)
+    ) configuration();
     if (policy?.id === CURRENT_PAGE_OPERATION_ID) {
       if (
         !currentPage || !extended || policy.method !== "GET" ||
@@ -233,7 +270,7 @@ function routes(
     }
     if (
       !policy || !(REGISTERED_API_OPERATION_IDS as readonly string[]).includes(policy.id) &&
-        policy.id !== CURRENT_PAGE_OPERATION_ID ||
+        policy.id !== CURRENT_PAGE_OPERATION_ID && policy.id !== STUDENT_REFERENCE_OPERATION_ID ||
       !["GET", "POST", "PUT"].includes(policy.method) ||
       typeof policy.path !== "string" ||
       !/^\/api\/v1\/[A-Za-z0-9_{}./:-]+$/.test(policy.path) ||
@@ -405,6 +442,24 @@ export function createApiHandler(
       p?.id !== CURRENT_PAGE_OPERATION_ID &&
       p?.method === candidates[0].method && p?.path === candidates[0].path
     );
+  const studentCandidates = policies.filter((p) => p?.id === STUDENT_REFERENCE_OPERATION_ID);
+  const studentScope = ports.studentReferenceScope;
+  const studentEnabled = studentCandidates.length === 1 &&
+    isStudentReferencePolicy(studentCandidates[0]) &&
+    !!studentScope && typeof studentScope.budget?.run === "function" &&
+    typeof studentScope.assert === "function" && typeof studentScope.assertCurrent === "function" &&
+    typeof studentScope.assertReceipt === "function" &&
+    typeof studentScope.schemaAuthority?.assert === "function" &&
+    studentScope.projection instanceof PublicResponseProjection &&
+    studentScope.projection.hasExactRegistryBytes() &&
+    studentScope.projection.supportsOperation(
+      STUDENT_REFERENCE_OPERATION_ID,
+      studentCandidates[0].contract_ref!,
+    ) &&
+    !policies.some((p) =>
+      p?.id !== STUDENT_REFERENCE_OPERATION_ID &&
+      p?.method === studentCandidates[0].method && p?.path === studentCandidates[0].path
+    );
   const currentPageAssert = currentPageEnabled
     ? ports.currentPageScope!.assert.bind(ports.currentPageScope)
     : null;
@@ -418,14 +473,16 @@ export function createApiHandler(
   const schemaAssert = currentPageEnabled
     ? ports.currentPageScope!.schemaAuthority.assert.bind(ports.currentPageScope!.schemaAuthority)
     : null;
-  const effectivePolicies = currentPageEnabled
-    ? policies
-    : policies.filter((p) => p?.id !== CURRENT_PAGE_OPERATION_ID);
+  const effectivePolicies = policies.filter((p) =>
+    (currentPageEnabled || p?.id !== CURRENT_PAGE_OPERATION_ID) &&
+    (studentEnabled || p?.id !== STUDENT_REFERENCE_OPERATION_ID)
+  );
   const registered = routes(
     effectivePolicies,
     ports.readViewScope !== undefined,
     ports.memberShortlistScope !== undefined,
     currentPageEnabled,
+    studentEnabled,
   );
   if (
     ports.memberShortlistScope &&
@@ -526,7 +583,7 @@ export function createApiHandler(
         params,
         requestKey: request.headers.get("Idempotency-Key"),
       };
-      if (policy.id === CURRENT_PAGE_OPERATION_ID) {
+      if (policy.id === CURRENT_PAGE_OPERATION_ID || policy.id === STUDENT_REFERENCE_OPERATION_ID) {
         Object.freeze(selectedQuery);
         Object.freeze(params);
         Object.freeze(selected);
@@ -543,6 +600,43 @@ export function createApiHandler(
         }>;
       } | null = null;
       let pageCurrentVerified = false;
+      let studentContext: {
+        boundary: ApiExecutionBoundary;
+        schema: Readonly<{
+          operation: string;
+          contract_ref: string;
+          schema_sha256: string;
+          schema_bytes_sha256: string;
+        }>;
+      } | null = null;
+      let studentCurrentVerified = false;
+      let firstStudentProjection: string | null = null;
+      const checkStudentReceipt = async () => {
+        if (
+          !studentEnabled || !studentScope || !studentContext || !studentCurrentVerified ||
+          studentContext.boundary.signal.aborted
+        ) configuration();
+        if (
+          await studentScope.assertReceipt(selected, studentContext.boundary) !== undefined ||
+          await studentScope.schemaAuthority.assert(
+              selected,
+              studentContext.boundary,
+              studentContext.schema,
+              "settled_success",
+            ) !== undefined
+        ) configuration();
+        const current = await studentScope.projection.schemaBinding(
+          STUDENT_REFERENCE_OPERATION_ID,
+          policy.contract_ref!,
+        );
+        if (
+          current.operation !== studentContext.schema.operation ||
+          current.contract_ref !== studentContext.schema.contract_ref ||
+          current.schema_sha256 !== studentContext.schema.schema_sha256 ||
+          current.schema_bytes_sha256 !== studentContext.schema.schema_bytes_sha256 ||
+          studentContext.boundary.signal.aborted
+        ) configuration();
+      };
       const checkPageReceipt = async () => {
         if (
           !pageContext || !pageCurrentVerified || !currentPageReceipt || !currentPageProjection ||
@@ -573,9 +667,10 @@ export function createApiHandler(
       const work = async (admission?: unknown) => {
         stage("business");
         const rawBoundary = { signal: request.signal, admission };
-        const boundary = policy.id === CURRENT_PAGE_OPERATION_ID
-          ? Object.freeze(rawBoundary)
-          : rawBoundary;
+        const boundary =
+          policy.id === CURRENT_PAGE_OPERATION_ID || policy.id === STUDENT_REFERENCE_OPERATION_ID
+            ? Object.freeze(rawBoundary)
+            : rawBoundary;
         if (policy.id === CURRENT_PAGE_OPERATION_ID) {
           if (
             !currentPageAssert || !currentPageProjection || !schemaAssert || !admission ||
@@ -594,6 +689,22 @@ export function createApiHandler(
           }
           sessionDto(session, ports.clock.nowUtc());
           pageContext = Object.freeze({ boundary, schema });
+        }
+        if (policy.id === STUDENT_REFERENCE_OPERATION_ID) {
+          if (!studentEnabled || !studentScope || !admission || boundary.signal.aborted) {
+            configuration();
+          }
+          const schema = await studentScope.projection.schemaBinding(
+            STUDENT_REFERENCE_OPERATION_ID,
+            policy.contract_ref!,
+          );
+          if (
+            await studentScope.schemaAuthority.assert(selected, boundary, schema, "active") !==
+              undefined ||
+            await studentScope.assert(selected, boundary) !== undefined || boundary.signal.aborted
+          ) configuration();
+          sessionDto(session, ports.clock.nowUtc());
+          studentContext = Object.freeze({ boundary, schema });
         }
         const result = policy.id === "session.read"
           ? sessionDto(session, ports.clock.nowUtc())
@@ -665,6 +776,8 @@ export function createApiHandler(
         }
         const projection = policy.id === CURRENT_PAGE_OPERATION_ID
           ? currentPageProjection!
+          : policy.id === STUDENT_REFERENCE_OPERATION_ID
+          ? studentScope!.projection
           : ports.projection;
         const projected = projection.project(
           policy.id,
@@ -687,6 +800,22 @@ export function createApiHandler(
           sessionDto(session, ports.clock.nowUtc());
           pageCurrentVerified = true;
         }
+        if (policy.id === STUDENT_REFERENCE_OPERATION_ID) {
+          if (!studentScope || !studentContext || boundary.signal.aborted) configuration();
+          firstStudentProjection = publicJsonText(projected);
+          if (
+            await studentScope.assertCurrent(selected, boundary) !== undefined ||
+            await studentScope.schemaAuthority.assert(
+                selected,
+                boundary,
+                studentContext.schema,
+                "active",
+              ) !== undefined ||
+            boundary.signal.aborted
+          ) configuration();
+          sessionDto(session, ports.clock.nowUtc());
+          studentCurrentVerified = true;
+        }
         if (authority || referenceAuthority) {
           trustedRaw = result;
           firstProjection = publicJsonText(projected);
@@ -697,18 +826,23 @@ export function createApiHandler(
       };
       const complete = async () => {
         stage("budget");
-        let result = BUDGET_OPERATIONS.includes(
-            policy.id as typeof BUDGET_OPERATIONS[number],
-          )
+        let result = policy.id === STUDENT_REFERENCE_OPERATION_ID
+          ? await studentScope!.budget.run(selected, work)
+          : BUDGET_OPERATIONS.includes(
+              policy.id as typeof BUDGET_OPERATIONS[number],
+            )
           ? await ports.budget.run(selected, work)
           : await work();
         if (policy.id === CURRENT_PAGE_OPERATION_ID) await checkPageReceipt();
+        if (policy.id === STUDENT_REFERENCE_OPERATION_ID) await checkStudentReceipt();
         // Budget settlement or a future cache hit must still pass the final boundary.
         stage("final_session");
         sessionDto(session, ports.clock.nowUtc());
         stage("final_projection");
         const projection = policy.id === CURRENT_PAGE_OPERATION_ID
           ? currentPageProjection!
+          : policy.id === STUDENT_REFERENCE_OPERATION_ID
+          ? studentScope!.projection
           : ports.projection;
         // An expired/revoked optional reference may be removed only from an owned report read.
         // Session, cancellation, other authority and shared-budget failures still fail closed.
@@ -756,6 +890,11 @@ export function createApiHandler(
             publicJsonText(approved) !== firstPageProjection
           ) configuration();
         }
+        if (
+          policy.id === STUDENT_REFERENCE_OPERATION_ID &&
+          (firstStudentProjection === null || publicJsonText(result) !== firstStudentProjection ||
+            publicJsonText(approved) !== firstStudentProjection)
+        ) configuration();
         // Identity or a request-local cache is only transport: the independent authority
         // must approve both passes and the settled representation must match byte-for-byte.
         if (
@@ -764,9 +903,10 @@ export function createApiHandler(
             publicJsonText(approved) !== firstProjection)
         ) configuration();
         stage("response_serialization");
-        const encoded = policy.id === CURRENT_PAGE_OPERATION_ID
-          ? null
-          : await ports.representation?.encode(selected, approved);
+        const encoded =
+          policy.id === CURRENT_PAGE_OPERATION_ID || policy.id === STUDENT_REFERENCE_OPERATION_ID
+            ? null
+            : await ports.representation?.encode(selected, approved);
         if (
           encoded &&
           (!READ_VIEW_OPERATION_IDS.some((id) => id === policy.id) ||
@@ -806,6 +946,7 @@ export function createApiHandler(
         await ports.completion?.current();
         sessionDto(session, ports.clock.nowUtc());
         if (policy.id === CURRENT_PAGE_OPERATION_ID) await checkPageReceipt();
+        if (policy.id === STUDENT_REFERENCE_OPERATION_ID) await checkStudentReceipt();
         if (policy.id === CURRENT_PAGE_OPERATION_ID) {
           requirePageCountNull(result);
           requirePageCountNull(approved);
@@ -871,6 +1012,14 @@ export function createApiHandler(
               headers: response.headers,
             });
           }
+        }
+        if (policy.id === STUDENT_REFERENCE_OPERATION_ID) {
+          await checkStudentReceipt();
+          if (
+            firstStudentProjection === null || publicJsonText(result) !== firstStudentProjection ||
+            publicJsonText(approved) !== firstStudentProjection || request.signal.aborted
+          ) configuration();
+          sessionDto(session, ports.clock.nowUtc());
         }
         return response;
       };

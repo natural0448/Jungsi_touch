@@ -3,10 +3,11 @@ No runtime install, source fallback, skipped green result, cleanup or live servi
 A separate native shell check may resolve only the existing frozen driver package.
 """
 from __future__ import annotations
-import argparse,base64,binascii,hashlib,io,json,os,re,sys,tarfile,xml.etree.ElementTree as ET
+import argparse,base64,binascii,copy,hashlib,io,json,os,re,sys,tarfile,xml.etree.ElementTree as ET
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 from edge_source_scope import classify_sources
+from reference_safety_suite import registration as reference_safety_registration
 from check_edge_contract import EdgeFailure,check_workspace,command,digest,hashes,json_bytes,verify_manifest,write_new,dynamic_imports,local_url,safe_path,tokens
 
 def deno_test_command(argv, **kwargs):
@@ -309,6 +310,11 @@ def current_page_route_registration(spec,before):
         prefix+"infrastructure/api_http.ts",prefix+"infrastructure/runtime_budget.ts",
         prefix+"infrastructure/runtime_composition.ts",prefix+"infrastructure/current_page_request_ports.review-only.ts"}
     contract=spec.get("current_public_supply_contract",{}).get("current_page_route_verification")
+    try:
+        from check_project_consistency import select_current_source_rebound
+        if contract is not None: contract=select_current_source_rebound(spec,"current_page",contract)
+    except (KeyError,TypeError,ValueError,AttributeError):
+        raise EdgeFailure("current_page_route_current_source_rebound_invalid")
     if contract is None:
         if any(path in before for path in tests):raise EdgeFailure("current_page_route_verification_missing")
         return None
@@ -325,15 +331,72 @@ def current_page_route_registration(spec,before):
     return contract
 
 
+RUNNER_REBOUND_PINS = {
+    'whole_population': ('c3c9eb550c22a2c8fdfa0ad44236e07e5cb4a7db19033b78937845a47403a9ee',
+      'supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts', 'abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e'),
+    'period_renewal': ('2dbd67ed543cd12053d873675485ad36b2812091ffa84861a0911dd914781e2e',
+      'supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts', '8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756'),
+    'p1_selection': ('baae156bbc3786fd45e09730e4c662ee44d99b38c0ce4b8ebc2e44883c325db7',
+      'supabase/functions/_shared/jungsi/application/api_dispatch.ts', '9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901'),
+}
+RUNNER_REBOUND_FAMILIES = {'member','auth','current_page','read_view','req27',
+                           'whole_population','period_renewal','p1_selection'}
+
+def select_runner_current_rebound(spec, family, historical):
+    """Return a verified virtual copy; never rewrite historic evidence."""
+    if 'current_source_rebounds_20261113' not in spec:return historical
+    sibling=spec['current_source_rebounds_20261113']
+    try:
+        fields={'format','status','activation_status','native_acceptance','operating_writes','families'}
+        if (not isinstance(sibling,dict) or set(sibling)!=fields or
+            sibling['format']!='jungsi.current-source-rebounds/v1' or sibling['status']!='SOURCE_REGISTERED_NOT_EXECUTED' or
+            sibling['activation_status']!='NOT_RUN' or sibling['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE' or
+            type(sibling['operating_writes']) is not int or sibling['operating_writes']!=0 or
+            not isinstance(sibling['families'],dict) or set(sibling['families'])!=RUNNER_REBOUND_FAMILIES):
+            raise ValueError('rebound envelope')
+        pin,path,current=RUNNER_REBOUND_PINS[family];entry=sibling['families'][family]
+        actual=hashlib.sha256(json.dumps(historical,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()).hexdigest()
+        if (actual!=pin or not isinstance(entry,dict) or set(entry)!={'historical_sha256','changed_source_bindings'} or
+            entry['historical_sha256']!=pin or entry['changed_source_bindings']!={path:current}):
+            raise ValueError('historical or changed source')
+        selected=copy.deepcopy(historical);rows=selected['source_bindings']
+        matches=[r for r in rows if isinstance(r,dict) and r.get('path')==path]
+        if len(matches)!=1:raise ValueError('exact source occurrence')
+        matches[0]['sha256']=current
+        return selected
+    except (KeyError,TypeError,ValueError,AttributeError):
+        raise EdgeFailure('runner_current_source_rebound_invalid')
+
+
+def period_renewal_registration(spec,before):
+    """Verify source scope only; no renewal execution or operational claim."""
+    historical=spec.get('backend_platform_contract',{}).get('period_renewal_source_extension')
+    if historical is None:
+        if 'current_source_rebounds_20261113' in spec:raise EdgeFailure('period_renewal_source_binding_invalid')
+        return None
+    selected=select_runner_current_rebound(spec,'period_renewal',historical)
+    try:
+        rows=selected['source_bindings'];paths=[r['path'] for r in rows]
+        if (not isinstance(rows,list) or len(paths)!=len(set(paths)) or
+            selected.get('format')!='jungsi.period-renewal-source-extension/v1' or
+            selected.get('status')!='SOURCE_PREPARED_NOT_ACTIVATED' or selected.get('test_count')!=9 or
+            any(not isinstance(r.get('sha256'),str) or not re.fullmatch(r'[a-f0-9]{64}',r['sha256']) or
+                before.get(r['path'])!=r['sha256'] for r in rows)):
+            raise ValueError('period renewal bindings')
+        return selected
+    except (KeyError,TypeError,ValueError,AttributeError):
+        raise EdgeFailure('period_renewal_source_binding_invalid')
+
+
 def whole_population_registration(spec,before):
     """Separate strict v2 regressions; keep the foundation and v1 checks exact."""
     prefix='supabase/functions/_shared/'
     test=prefix+'all_examinees_total_model_test.ts'
     contract=spec.get('overall_analysis_contract',{}).get('whole_population_transition')
     if contract is None:
-        if test in before:raise EdgeFailure('whole_population_contract_missing')
+        if test in before or 'current_source_rebounds_20261113' in spec:raise EdgeFailure('whole_population_contract_missing')
         return None
-    c=contract.get('verification',{})
+    c=select_runner_current_rebound(spec,'whole_population',contract.get('verification',{}))
     required={test,prefix+'current_public_catalog_compat.ts',*[prefix+'jungsi/'+p+'.ts'for p in
       ['domain/all_examinees_total_model','domain/exam_pack','application/overall_analysis','infrastructure/native_data_provider']]}
     bindings=c.get('source_bindings')
@@ -351,6 +414,11 @@ def read_view_registration(spec,before):
     if validate_read_view_extension(spec):raise EdgeFailure('read_view_extension_registration_invalid')
     contract=spec.get('read_view_extension_contract')
     if contract is None:return None
+    try:
+        from check_project_consistency import select_current_source_rebound
+        contract=select_current_source_rebound(spec,"read_view",contract)
+    except (KeyError,TypeError,ValueError,AttributeError):
+        raise EdgeFailure('read_view_current_source_rebound_invalid')
     v=contract['verification']
     if any(before.get(b['path'])!=b['sha256']for b in v['source_bindings']):
         raise EdgeFailure('read_view_extension_snapshot_binding_invalid')
@@ -368,9 +436,50 @@ SCHOOL_REFERENCE_SOURCES=tuple('supabase/functions/_shared/jungsi/'+name+'.ts'fo
     'infrastructure/runtime_composition','application/reference_candidate_scope','application/reference_percentile',
     'infrastructure/reference_runtime_authority','infrastructure/runtime_context','infrastructure/saved_reference_tail_source'))
 
+SCHOOL_REFERENCE_PRE_CANCELLATION_SHA256 = '9e1d9cee2e51a77b3b7142de3ed4980f887fffabae110478ec4795ff7364e296'
+SCHOOL_REFERENCE_CANCELLATION_SOURCE = 'supabase/functions/_shared/jungsi/application/university_analysis.ts'
+SCHOOL_REFERENCE_CANCELLATION_SHA256 = '234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638'
+
 def school_reference_registration(spec,before):
     """Keep the original 656 cases and bind the additive reference suite to exact snapshot bytes."""
-    v=spec.get('university_scoring_contract',{}).get('scoped_reference_contract',{}).get('verification')
+    contract=spec.get('university_scoring_contract',{}).get('scoped_reference_contract',{})
+    v=contract.get('verification')
+    rebound=contract.get('verification_current_source_rebound_20261113')
+    rebound_v2=contract.get('verification_current_source_rebound_20261113_v2')
+    if rebound_v2 is not None and rebound is None:
+        raise EdgeFailure('school_reference_rebound_invalid')
+    if rebound is not None or rebound_v2 is not None:
+        # Preserve and independently authenticate the historic 97-case receipt,
+        # the prior one-source rebound, and the later three-source registration.
+        try:
+            historical=hashlib.sha256(json.dumps(v,sort_keys=True,separators=(',',':'),ensure_ascii=True).encode()).hexdigest()
+            expected={'format','status','historical_verification_sha256','baseline_foundation_count','test_count',
+                      'test_paths','source_bindings','native_acceptance','activation_status','operating_writes'}
+            old={b['path']:b['sha256'] for b in v['source_bindings']}
+            if historical!=SCHOOL_REFERENCE_PRE_CANCELLATION_SHA256 or len(old)!=len(v['source_bindings']):
+                raise ValueError('historic reference binding')
+            permitted_v1={SCHOOL_REFERENCE_CANCELLATION_SOURCE:SCHOOL_REFERENCE_CANCELLATION_SHA256}
+            permitted_v2={**permitted_v1,
+              'supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts':'abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e',
+              'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts':'1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773'}
+            for candidate,fmt,permitted in ((rebound,'jungsi.school-reference-current-source-rebound/v1',permitted_v1),
+                                            (rebound_v2,'jungsi.school-reference-current-source-rebound/v2',permitted_v2)):
+                if candidate is None:continue
+                if not isinstance(candidate,dict) or set(candidate)!=expected:raise ValueError('rebound fields')
+                now={b['path']:b['sha256'] for b in candidate['source_bindings']}
+                if (candidate['format']!=fmt or candidate['status']!='SOURCE_REGISTERED_NOT_EXECUTED' or
+                    candidate['historical_verification_sha256']!=historical or
+                    candidate['baseline_foundation_count']!=656 or candidate['test_count']!=97 or
+                    candidate['test_paths']!=list(SCHOOL_REFERENCE_TESTS) or
+                    candidate['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE' or
+                    candidate['activation_status']!='NOT_RUN' or type(candidate['operating_writes']) is not int or
+                    candidate['operating_writes']!=0 or len(now)!=len(candidate['source_bindings']) or
+                    set(now)!=set(old) or not set(permitted)<=set(old) or
+                    any(now[p]!=permitted.get(p,old[p]) for p in old)):
+                    raise ValueError('historical/current reference binding')
+            v=rebound_v2 if rebound_v2 is not None else rebound
+        except (KeyError,TypeError,ValueError,AttributeError):
+            raise EdgeFailure('school_reference_rebound_invalid')
     if v is None:
         if set(SCHOOL_REFERENCE_TESTS).intersection(before):raise EdgeFailure('school_reference_verification_missing')
         return None
@@ -381,7 +490,7 @@ def school_reference_registration(spec,before):
       'supabase/functions/_shared/current_public_catalog_test.ts','src/jungsi_touch/application/public_response_schemas.json',
       'tests/edge/public_api_contract_fixture.ts'}
     bindings=v.get('source_bindings')
-    if (v.get('format')!='jungsi.school-reference-synthetic-verification/v1' or
+    if (v.get('format')!=('jungsi.school-reference-current-source-rebound/v2' if rebound_v2 is not None else ('jungsi.school-reference-current-source-rebound/v1' if rebound is not None else 'jungsi.school-reference-synthetic-verification/v1')) or
         v.get('baseline_foundation_count')!=656 or v.get('test_count')!=97 or
         v.get('test_paths')!=list(SCHOOL_REFERENCE_TESTS) or
         not isinstance(bindings,list) or len(bindings)!=len(required) or
@@ -831,9 +940,10 @@ P1_SELECTION_BRIDGE_FIXTURE = "tests/p1_contract_review/fixture.bridge.v2.synthe
 def p1_selection_bridge_registration(spec, before):
     """Bind P1 selection source, reused sources and offline test fixture."""
     c = spec.get("p1_selection_bridge_review_verification")
+    if c is not None: c = select_runner_current_rebound(spec,"p1_selection",c)
     required = set(P1_SELECTION_BRIDGE_SOURCES) | {P1_SELECTION_BRIDGE_TEST, P1_SELECTION_BRIDGE_FIXTURE}
     if c is None:
-        if P1_SELECTION_BRIDGE_SOURCES[0] in before: raise EdgeFailure("p1_selection_bridge_registration_missing")
+        if P1_SELECTION_BRIDGE_SOURCES[0] in before or 'current_source_rebounds_20261113' in spec: raise EdgeFailure("p1_selection_bridge_registration_missing")
         return None
     if (not isinstance(c, dict) or c.get("format") != "jungsi.p1-selection-bridge-review/v1" or
         c.get("status") != "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
@@ -912,7 +1022,7 @@ P1CG_ROOTS = tuple(P1CG_PREFIX + n for n in (
     "test_p1_r27_selection_bridge.synthetic.js", "test_score_010_cutoff.synthetic.js"))
 P1CG_FIXTURE = P1CG_PREFIX + "fixture.bridge.v2.synthetic.mjs"
 P1CG_TEST_FILES = frozenset((*P1CG_ROOTS, P1CG_FIXTURE))
-P1CG_GRAPH_MANIFEST = "tests/p1_contract_review_graph.json"
+P1CG_GRAPH_MANIFEST = "tests/p1_contract_review_graph.20261113_fmt.current.json"
 P1CG_GRAPH_FORMAT = "jungsi.p1-contract-offline-closure/v1"
 P1CG_CONFIG_PATH = "supabase/functions/deno.json"
 P1CG_SHARED_FIXTURES = frozenset((
@@ -1312,7 +1422,7 @@ CURCG_ROOTS = (CURCG_PREFIX + "combined_policy_catalog_runtime.test.ts",
 CURCG_FIXTURE = CURCG_PREFIX + "combined_policy_catalog_runtime.original.ts"
 CURCG_SHARED = "tests/edge/synthetic_api_contract.ts"
 CURCG_TEST_FILES = frozenset((*CURCG_ROOTS, CURCG_FIXTURE))
-CURCG_MANIFEST = "tests/cursor_contract_review_graph.json"
+CURCG_MANIFEST = "tests/cursor_contract_review_graph.20261113_fmt.current.json"
 CURCG_FORMAT = "jungsi.cursor-contract-offline-closure/v1"
 CURCG_META = "cursor_contract_offline_graph_verification"
 CURCG_REGRESSION = "tests/test_cursor_contract_graph_guard.py"
@@ -1562,6 +1672,7 @@ def run_workspace(root,manifest,deno,python,output):
     if not active:
         result=dict(successful=True,status="NOT_APPLICABLE_NO_FOUNDATION_SOURCE",edge_execution=False,coexisting_edge_sources=len(scope["coexisting_bound"]),coverage="DEV010_FOUNDATION")
         write_new(output/"edge_run_receipt.json",json_bytes(result));return result
+    period_renewal_registration(spec,before)
     if not python or not Path(python).is_file():raise EdgeFailure("python_runtime_unavailable")
     cfg=spec["edge_harness"]
     parsed=check_workspace(root,manifest,deno,output/"contract")
@@ -1892,6 +2003,36 @@ def run_workspace(root,manifest,deno,python,output):
         school_reference_unit=dict(**parse_junit(reference_junit,school_reference['test_count']),
           coverage='SCOPED_SCHOOL_REFERENCE_SYNTHETIC',source_bindings=school_reference['source_bindings'],
           baseline_foundation_count=656,native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN',operating_writes=0)
+    from check_project_consistency import university_cancellation_test_registration
+    cancellation,cancellation_errors=university_cancellation_test_registration(spec,before)
+    if cancellation_errors:raise EdgeFailure('university_cancellation_source_or_test_binding_invalid')
+    university_cancellation_unit=None
+    if cancellation is not None:
+        cancellation_junit=output.resolve()/'university_cancellation.junit.xml'
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(cancellation_junit),
+          *cancellation['test_paths']],root=root,output=output,name='university_cancellation_unit')
+        counted=parse_junit(cancellation_junit,cancellation['test_count'])
+        require_auxiliary_junit_identities(cancellation_junit,cancellation['case_names_by_path'])
+        university_cancellation_unit=dict(**counted,coverage='UNIVERSITY_CANCELLATION_SYNTHETIC',
+          source_bindings=cancellation['source_bindings'],baseline_foundation_count=656,
+          native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN',operating_writes=0)
+    try:
+        safety = reference_safety_registration(spec,before,lambda path:(root/path).read_bytes())
+    except (ValueError,KeyError,TypeError,OSError) as error:
+        raise EdgeFailure("reference_safety_registration_invalid") from error
+    reference_safety_unit=None
+    if safety is not None:
+        safety_junit=output.resolve()/"reference_safety.junit.xml"
+        deno_test_command([deno,"test",*common,"--deny-read","--deny-write","--deny-net",
+          "--deny-env","--deny-run","--deny-sys","--deny-ffi","--reporter=dot",
+          "--junit-path",str(safety_junit),*safety["test_paths"]],
+          root=root,output=output,name="reference_safety_unit")
+        counted=parse_junit(safety_junit,safety["test_count"])
+        require_auxiliary_junit_identities(safety_junit,safety["case_names_by_path"])
+        reference_safety_unit=dict(**counted,coverage="REFERENCE_SAFETY_SYNTHETIC",
+          source_bindings=safety["source_bindings"],manifest_sha256=safety["manifest_sha256"],
+          baseline_foundation_count=656,native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
+          activation_status="NOT_RUN",operating_writes=0)
     professional=professional_suite_registration(spec,before)
     if professional is not None:
         professional_paths=[binding['path']for binding in professional['source_bindings']]
@@ -1943,6 +2084,8 @@ def run_workspace(root,manifest,deno,python,output):
     if read_view_unit is not None:result['read_view_extension_unit']=read_view_unit
     if professional_unit is not None:result['professional_unit']=professional_unit
     if school_reference_unit is not None:result['school_reference_unit']=school_reference_unit
+    if university_cancellation_unit is not None:result['university_cancellation_unit']=university_cancellation_unit
+    if reference_safety_unit is not None:result['reference_safety_unit']=reference_safety_unit
     if reference_db_unit is not None:result['reference_db_unit']=reference_db_unit
     if member_shortlist_unit is not None:result['member_shortlist_unit']=member_shortlist_unit
     if service_candidate_aux_unit is not None:result['service_candidate_aux_unit']=service_candidate_aux_unit

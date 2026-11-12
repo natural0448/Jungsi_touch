@@ -339,6 +339,12 @@ def candidate(current=None):
     if reference_errors:
         raise ValueError("Synthetic fixture cannot ignore invalid reference DB registration")
     reference_tests = set(reference_suite["test_paths"]) if reference_suite is not None else set()
+    from check_project_consistency import (university_cancellation_test_registration,
+        UNIVERSITY_CANCELLATION_TEST)
+    cancellation, cancellation_errors = university_cancellation_test_registration(spec)
+    if cancellation_errors or (cancellation is None and UNIVERSITY_CANCELLATION_TEST in spec['edge_harness']['files']):
+        raise ValueError("Synthetic fixture cannot ignore invalid university cancellation registration")
+    cancellation_tests = set(cancellation["test_paths"]) if cancellation is not None else set()
     auth_suite, auth_errors = auth_503_registration(spec)
     if auth_errors:
         raise ValueError("Synthetic fixture cannot ignore invalid authentication registration")
@@ -347,6 +353,17 @@ def candidate(current=None):
     _, page_errors = current_page_route_test_registration(spec)
     if page_errors:
         raise ValueError("Synthetic fixture cannot ignore invalid current-page route registration")
+    if 'current_source_rebounds_20261113' in current:
+        # Authenticate the actual complete records before this invented legacy
+        # fixture projects them.  No real receipt is rewritten or promoted.
+        from check_project_consistency import select_current_source_rebound
+        # Pin the real history/index before substituting this synthetic read-view.
+        select_current_source_rebound(current, 'read_view', current['read_view_extension_contract'])
+        real_policy = current['score_input_policy_contract']['extension_runtime_test_bindings']
+        selected_policy = select_current_source_rebound(current, 'req27', real_policy)
+        spec['supabase_deployment_contract']['live_execution']['auth_503_cancel_followup_20261112']['synthetic_suite'] = deepcopy(auth_suite)
+        spec['score_input_policy_contract']['extension_runtime_test_bindings'] = selected_policy
+        spec.pop('current_source_rebounds_20261113')
     spec.get("current_public_supply_contract", {}).pop("current_page_route_verification", None)
     wildcard_tests = set()
     for key, registration in (("service_aux_test_extension", service_aux_registration),
@@ -375,7 +392,8 @@ def candidate(current=None):
         raise ValueError('Synthetic fixture cannot ignore invalid Guide registration')
     for p in list(files):
         if (p.startswith('tests/edge/test_') and p not in spec['edge_harness']['tests']
-                and p not in guide_tests and p not in wildcard_tests and p not in reference_tests and p not in auth_tests):
+                and p not in guide_tests and p not in wildcard_tests and p not in reference_tests
+                and p not in cancellation_tests and p not in auth_tests):
             files.pop(p)
     service = 'supabase/functions/_shared/jungsi/application/synthetic_read_view.ts'
     test = 'tests/edge/test_synthetic_read_view_extension.ts'
@@ -407,6 +425,45 @@ def candidate(current=None):
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_read_fixture_preserves_valid_university_cancellation_registration(self):
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        original = deepcopy(current)
+        fixture = candidate(current)
+        suite = current['backend_platform_contract'].get('university_cancellation_test_extension')
+        if suite is not None:
+            for path in suite['test_paths']:
+                self.assertEqual(fixture['edge_harness']['files'][path], current['edge_harness']['files'][path])
+        self.assertEqual(validate_read_view_extension(fixture), [])
+        self.assertEqual(current, original)
+
+    def test_legacy_read_fixture_rejects_invalid_university_cancellation_registration(self):
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        suite = current['backend_platform_contract'].get('university_cancellation_test_extension')
+        if suite is None:
+            self.assertEqual(validate_read_view_extension(candidate(current)), [])
+            return
+        path = suite['test_paths'][0]
+        for mutation in ('count', 'hash', 'layer', 'declaration', 'missing_path', 'orphan'):
+            with self.subTest(mutation=mutation):
+                damaged = deepcopy(current)
+                extension = damaged['backend_platform_contract']['university_cancellation_test_extension']
+                if mutation == 'count': extension['test_count'] = 0
+                elif mutation == 'hash': extension['source_bindings'][1]['sha256'] = '0' * 64
+                elif mutation == 'layer': damaged['edge_harness']['files'][path]['layer'] = 'application'
+                elif mutation == 'declaration': damaged['edge_harness']['files'][path].pop('declarations')
+                elif mutation == 'missing_path': damaged['edge_harness']['files'].pop(path)
+                else: damaged['backend_platform_contract'].pop('university_cancellation_test_extension')
+                with self.assertRaisesRegex(ValueError, 'invalid university cancellation registration'):
+                    candidate(damaged)
+
+    def test_legacy_read_fixture_accepts_complete_university_cancellation_absence(self):
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        suite = current['backend_platform_contract'].pop('university_cancellation_test_extension', None)
+        if suite is not None:
+            for path in suite['test_paths']:
+                current['edge_harness']['files'].pop(path, None)
+        self.assertEqual(validate_read_view_extension(candidate(current)), [])
+
     def test_legacy_read_fixture_preserves_valid_authentication_registration(self):
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
         original = deepcopy(current)
@@ -422,6 +479,29 @@ class ReadViewExtensionContractTests(unittest.TestCase):
         current['supabase_deployment_contract']['live_execution']['auth_503_cancel_followup_20261112']['synthetic_suite']['test_count'] = 0
         with self.assertRaisesRegex(ValueError, 'invalid authentication registration'):
             candidate(current)
+
+    def test_legacy_read_fixture_rejects_invalid_current_rebound(self):
+        original = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        if 'current_source_rebounds_20261113' not in original:
+            self.skipTest('historical snapshot does not declare a current rebound')
+        for kind in ('auth_pin', 'read_view_history', 'req27_history', 'missing_family', 'index'):
+            current = deepcopy(original)
+            marker = current['current_source_rebounds_20261113']
+            if kind == 'auth_pin':
+                entry = marker['families']['auth']['changed_source_bindings']
+                entry[next(iter(entry))] = '0' * 64
+            elif kind == 'read_view_history':
+                current['read_view_extension_contract']['verification']['test_count'] += 1
+            elif kind == 'req27_history':
+                bindings = current['score_input_policy_contract']['extension_runtime_test_bindings']
+                bindings[next(iter(bindings))] = '0' * 64
+            elif kind == 'missing_family': marker['families'].pop('read_view')
+            else:
+                path = next(iter(marker['families']['auth']['changed_source_bindings']))
+                current['edge_harness']['files'][path]['declarations']['source_sha256'] = '0' * 64
+            with self.subTest(kind=kind), self.assertRaises(ValueError):
+                candidate(current)
+        self.assertEqual(json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8')), original)
 
     def test_legacy_read_fixture_preserves_valid_reference_db_registration(self):
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
@@ -700,7 +780,23 @@ class ReadViewGuideFixtureCompatibilityTests(unittest.TestCase):
             PROFESSIONAL_GUIDE_TEST, PROFESSIONAL_GUIDE_SUITE, professional_source_path,
         )
         source = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        # Validate the actual current pro registration and every selected source
+        # before projecting a separate synthetic legacy-only pro fixture.
+        from check_project_consistency import validate_professional_source_registration
+        roots = (ROOT / 'supabase/functions', ROOT / 'tests/edge')
+        selected = {p.relative_to(ROOT).as_posix() for root in roots if root.is_dir()
+                    for p in root.rglob('*.ts') if professional_source_path(p.relative_to(ROOT).as_posix())}
+        selected.add(PROFESSIONAL_MIGRATION)
+        actual = {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+                  for path in selected if (ROOT / path).is_file()}
+        if validate_professional_source_registration(source, actual):
+            raise ValueError('Synthetic fixture cannot ignore invalid current professional registration')
+        if professional_guide_test_registration(source)[1]:
+            raise ValueError('Synthetic fixture cannot ignore invalid current Guide registration')
         contract = source['professional_service_contract']
+        # This invented fixture omits both the real candidate registration and
+        # its files after verification; the input and real spec stay unchanged.
+        contract.pop('student_cache_scope_review_extension', None)
         contract.pop('source_registration', None)
         contract.pop('schema_application_evidence', None)
         source['implementation'] = [
@@ -782,6 +878,24 @@ class ReadViewGuideFixtureCompatibilityTests(unittest.TestCase):
     def from_source(self, source):
         with patch.object(Path, 'read_text', return_value=json.dumps(source)):
             return candidate()
+
+    def test_projection_rejects_forged_real_professional_scope(self):
+        original = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        if 'student_cache_scope_review_extension' not in original['professional_service_contract']:
+            self.skipTest('historical snapshot has no professional scope candidate')
+        for kind in ('hash', 'status', 'missing_index'):
+            damaged = deepcopy(original)
+            extension = damaged['professional_service_contract']['student_cache_scope_review_extension']
+            path = extension['path']
+            if kind == 'hash': extension['sha256'] = '0' * 64
+            elif kind == 'status': extension['activation_status'] = 'PASS'
+            else:
+                rows = damaged['workflow']['documentation_sync']['code_index']['edge_sources']['files']
+                rows[:] = [row for row in rows if row['path'] != path]
+            with self.subTest(kind=kind), patch.object(Path, 'read_text', return_value=json.dumps(damaged)):
+                with self.assertRaisesRegex(ValueError, 'invalid current professional registration'):
+                    self.source()
+        self.assertEqual(json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8')), original)
 
     def test_valid_registered_guide_is_retained_without_changing_contract(self):
         source = self.source()

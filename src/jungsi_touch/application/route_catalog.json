@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.174",
-  "source_sha256": "d0623b5597157458677a0ebb9e68bb4237cad0309ffbb3835df2b51206651903",
+  "spec_version": "1.9.176",
+  "source_sha256": "22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542",
   "pages": [
     {
       "id": "PAGE-01",
@@ -440,7 +440,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다.",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다. 2026-11-13 취소 전파 소스 후보: replay·noOp 기록 전후, 배치 진입·모집행 반복·환산/누백의 지정 경계에서 취소를 감지하면 security_policy_unavailable 503으로 중단한다. 완료된 쓰기의 롤백이나 진행 중 I/O의 물리 종료는 보장하지 않는다. 정확 후보의 기능 검수·CI·운영 적용은 NOT_RUN이다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -499,7 +499,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다. 2026-11-11 기획 목표(미구현): 기존 정본 입결·누백과 기본 PK를 사용해 학생 성적대의 대학 경계 후보를 먼저 선택한다. 학과별 전수 판단을 선행하지 않으며 동일 시험·모집단에서 학교별 환산 유불리를 비교한다. 와일드카드도 같은 경계를 적용하고 추정·판정보류·확정 상태를 분리한다. 상세 경계 정책·결과 완전성·서버 연결 및 실제 배포는 확인 중이다.",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다. 2026-11-11 기획 목표(미구현): 기존 정본 입결·누백과 기본 PK를 사용해 학생 성적대의 대학 경계 후보를 먼저 선택한다. 학과별 전수 판단을 선행하지 않으며 동일 시험·모집단에서 학교별 환산 유불리를 비교한다. 와일드카드도 같은 경계를 적용하고 추정·판정보류·확정 상태를 분리한다. 상세 경계 정책·결과 완전성·서버 연결 및 실제 배포는 확인 중이다. 2026-11-13 취소 전파 소스 후보: replay·noOp 기록 전후, 배치 진입·모집행 반복·환산/누백의 지정 경계에서 취소를 감지하면 security_policy_unavailable 503으로 중단한다. 완료된 쓰기의 롤백이나 진행 중 I/O의 물리 종료는 보장하지 않는다. 정확 후보의 기능 검수·CI·운영 적용은 NOT_RUN이다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -3908,16 +3908,16 @@
       "format": "jungsi.service-candidate-suites/v1",
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
-        "path": "tests/review_suite_manifest.json",
-        "sha256": "36726bd9de89ba7163541fb99a9ac576a88494d05153774b0dc473578339be80"
+        "path": "tests/review_suite_manifest.20261113_fmt.current.json",
+        "sha256": "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "74ad18bc4a18588a7c2ac9d095efb527eb3f734e9836986a27f3588871031c88"
+        "sha256": "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "b52abac8275f89bbdd309884ae6884d8bb5fe48f579360d058d5b9c0b5c5aa62"
+        "sha256": "3f714f9e9d9d438a84a47afc18c28367eafd9bc6dbca4e2e3b7b2457a153074e"
       },
       "groups": {
         "p1_review": {
@@ -4104,7 +4104,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "3a167ab603c4638cae430df64befa8c3c05571fc544e9dfdc46affa4609eccc4"
+          "sha256": "2991a52964fe544a887c30eb852c708d93474f32e11aefcf91d528dd917979da"
         }
       ],
       "tests": [
@@ -4822,6 +4822,57 @@
         "preserved": "v2 캐시 지문과 일시 런타임 오류 재시도, 기존 참고·대기 캐시 재검증을 함께 보존한다.",
         "scope": "검색 미리보기 추가 계산은 기존 예산·취소 결속 전 unavailable이며, 그동안 검색은 catalog_only 자료 범위를 유지한다. 기존 3·4페이지 분석은 변경하지 않는다."
       }
+    },
+    "university_cancellation_test_extension": {
+      "format": "jungsi.university-cancellation-tests/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "test_paths": [
+        "tests/edge/test_university_analysis_cancellation.ts"
+      ],
+      "case_names_by_path": {
+        "tests/edge/test_university_analysis_cancellation.ts": [
+          "cancelled analysis does not start reference prefetch",
+          "cancelled cached analysis does not start no-op receipt write",
+          "cancelled calculation does not start the next expensive dependency",
+          "cancelled replay does not deliver a saved result or modify its receipt",
+          "cancelled request never enters the scoring batch provider",
+          "cancelled university work does not start a later offering or write a partial report"
+        ]
+      },
+      "case_identity_sha256": "ab86f3311570dd14604d5e82d37e64e4b3cfe9f35333bd745e6462fd011fe11c",
+      "test_count": 6,
+      "baseline_foundation_count": 656,
+      "baseline_test_sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976",
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+          "sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+        },
+        {
+          "path": "tests/edge/test_university_analysis_cancellation.ts",
+          "sha256": "11d35bfd08fd9e4a062aac1dcb1410e711282e4e987a4f40f113ffc13c0defb0"
+        }
+      ],
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "reference_safety_synthetic_test_extension": {
+      "format": "jungsi.reference-safety-synthetic-suite/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "activation_status": "NOT_RUN",
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "operating_writes": 0,
+      "test_count": 18,
+      "test_paths": [
+        "supabase/functions/_shared/jungsi/application/identity_fence.synthetic_test.ts",
+        "supabase/functions/_shared/jungsi/application/reference_quiescence_fence.synthetic_test.ts",
+        "supabase/functions/_shared/jungsi/application/named_owner_port.synthetic_test.ts"
+      ],
+      "manifest": {
+        "path": "tests/reference_safety_suite_manifest.20261113_fmt.current.json",
+        "sha256": "08a8d4689214f5eeb7890b8623f1eab7ff52e2d06eb80d1fafa9c16403e8e018"
+      }
     }
   },
   "university_scoring_contract": {
@@ -5249,6 +5300,310 @@
         ],
         "production_ready": false,
         "documentation": "기존 성적은 변경하지 않고 승인된 참고 산식의 필수 응시 영역에 한해 자기 확인을 요청한다. 요청은 소유 프로필 ID·시험 ID·시험팩 버전에 결속하며 누락·거짓·미확인은 해당 참고 계산만 보류한다. 유료 본인 리포트의 확인 필요 상태는 reference_attendance_requirements로 분리한다. 기존 결과와 다른 대학은 유지하고 실제 선택 자료·프로필 불변성·운영 배포는 확인 전이다."
+      },
+      "verification_current_source_rebound_20261113": {
+        "format": "jungsi.school-reference-current-source-rebound/v1",
+        "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+        "historical_verification_sha256": "9e1d9cee2e51a77b3b7142de3ed4980f887fffabae110478ec4795ff7364e296",
+        "baseline_foundation_count": 656,
+        "test_count": 97,
+        "test_paths": [
+          "tests/edge/test_school_reference_scoring.ts",
+          "tests/edge/test_school_reference_provider.ts",
+          "tests/edge/test_history_metric_alias.ts",
+          "tests/edge/test_saved_reference_projection.ts",
+          "tests/edge/test_scope_signal_followup.synthetic.ts",
+          "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts"
+        ],
+        "source_bindings": [
+          {
+            "path": "src/jungsi_touch/application/public_response_schemas.json",
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog.ts",
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog_test.ts",
+            "sha256": "82f9c94d4c13bd24f3298933551c38a3280ad54ca221c1127c122c0a473f1da7"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
+            "sha256": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/offering_analysis.ts",
+            "sha256": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts",
+            "sha256": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
+            "sha256": "f4521eb38d114dd2b60563937b3a6c6fb1ed0d4330565c4a1e6115508624ed23"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
+            "sha256": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts",
+            "sha256": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
+            "sha256": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+            "sha256": "0df832cb190512a5db35fd85275d51cae321770c6bcdc7a7f14b7e8ee512d8da"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+            "sha256": "e862dba20a9c52f56728fa7e4fcd590a12aac8a5fa6059a098db7fd239a9946a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+            "sha256": "0c5f961dfaf7d07251630b40a6579c04b71c6513808bb0454b879b916ddecec3"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
+            "sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts",
+            "sha256": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+            "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+            "sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
+            "sha256": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
+            "sha256": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+            "sha256": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed"
+          },
+          {
+            "path": "tests/edge/public_api_contract_fixture.ts",
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
+          },
+          {
+            "path": "tests/edge/reference_candidate_scope_cases.ts",
+            "sha256": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c"
+          },
+          {
+            "path": "tests/edge/saved_reference_tail_source_cases.ts",
+            "sha256": "7fed940626b329581c84d8759e78aab303f4881518179d8ac9c7035184ce7682"
+          },
+          {
+            "path": "tests/edge/synthetic_school_reference.ts",
+            "sha256": "9c41048895b253ad6b37d57d6c672ed259e17191304e4a83f0145d7e06d981c7"
+          },
+          {
+            "path": "tests/edge/test_history_metric_alias.ts",
+            "sha256": "de00f450020427da2e484c64aab347a6145d9b63ddb7ffc154bc913d53c412be"
+          },
+          {
+            "path": "tests/edge/test_saved_reference_projection.ts",
+            "sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19"
+          },
+          {
+            "path": "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts",
+            "sha256": "7366d7c14c4d5eb880a8f34e13cf51d8aaa6bd3fefc3653a50f586db12b284c8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_provider.ts",
+            "sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_scoring.ts",
+            "sha256": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d"
+          },
+          {
+            "path": "tests/edge/test_scope_signal_followup.synthetic.ts",
+            "sha256": "bdea6b4ae2914cc16e83da90fc8c5d61617d0d5f42a8e26938967cc5565daa45"
+          },
+          {
+            "path": "tests/edge/test_university_analysis.ts",
+            "sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976"
+          }
+        ],
+        "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+        "activation_status": "NOT_RUN",
+        "operating_writes": 0
+      },
+      "verification_current_source_rebound_20261113_v2": {
+        "format": "jungsi.school-reference-current-source-rebound/v2",
+        "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+        "historical_verification_sha256": "9e1d9cee2e51a77b3b7142de3ed4980f887fffabae110478ec4795ff7364e296",
+        "baseline_foundation_count": 656,
+        "test_count": 97,
+        "test_paths": [
+          "tests/edge/test_school_reference_scoring.ts",
+          "tests/edge/test_school_reference_provider.ts",
+          "tests/edge/test_history_metric_alias.ts",
+          "tests/edge/test_saved_reference_projection.ts",
+          "tests/edge/test_scope_signal_followup.synthetic.ts",
+          "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts"
+        ],
+        "source_bindings": [
+          {
+            "path": "src/jungsi_touch/application/public_response_schemas.json",
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog.ts",
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog_test.ts",
+            "sha256": "82f9c94d4c13bd24f3298933551c38a3280ad54ca221c1127c122c0a473f1da7"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
+            "sha256": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/offering_analysis.ts",
+            "sha256": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts",
+            "sha256": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
+            "sha256": "f4521eb38d114dd2b60563937b3a6c6fb1ed0d4330565c4a1e6115508624ed23"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
+            "sha256": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts",
+            "sha256": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
+            "sha256": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+            "sha256": "0df832cb190512a5db35fd85275d51cae321770c6bcdc7a7f14b7e8ee512d8da"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+            "sha256": "e862dba20a9c52f56728fa7e4fcd590a12aac8a5fa6059a098db7fd239a9946a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+            "sha256": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
+            "sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts",
+            "sha256": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+            "sha256": "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+            "sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
+            "sha256": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
+            "sha256": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+            "sha256": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed"
+          },
+          {
+            "path": "tests/edge/public_api_contract_fixture.ts",
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
+          },
+          {
+            "path": "tests/edge/reference_candidate_scope_cases.ts",
+            "sha256": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c"
+          },
+          {
+            "path": "tests/edge/saved_reference_tail_source_cases.ts",
+            "sha256": "7fed940626b329581c84d8759e78aab303f4881518179d8ac9c7035184ce7682"
+          },
+          {
+            "path": "tests/edge/synthetic_school_reference.ts",
+            "sha256": "9c41048895b253ad6b37d57d6c672ed259e17191304e4a83f0145d7e06d981c7"
+          },
+          {
+            "path": "tests/edge/test_history_metric_alias.ts",
+            "sha256": "de00f450020427da2e484c64aab347a6145d9b63ddb7ffc154bc913d53c412be"
+          },
+          {
+            "path": "tests/edge/test_saved_reference_projection.ts",
+            "sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19"
+          },
+          {
+            "path": "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts",
+            "sha256": "7366d7c14c4d5eb880a8f34e13cf51d8aaa6bd3fefc3653a50f586db12b284c8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_provider.ts",
+            "sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_scoring.ts",
+            "sha256": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d"
+          },
+          {
+            "path": "tests/edge/test_scope_signal_followup.synthetic.ts",
+            "sha256": "bdea6b4ae2914cc16e83da90fc8c5d61617d0d5f42a8e26938967cc5565daa45"
+          },
+          {
+            "path": "tests/edge/test_university_analysis.ts",
+            "sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976"
+          }
+        ],
+        "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+        "activation_status": "NOT_RUN",
+        "operating_writes": 0
       }
     },
     "member_json_storage_contract": {

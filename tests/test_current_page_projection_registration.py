@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import run_edge_tests as runner
+import check_project_consistency as checker
 
 class CurrentPageRegistrationTests(unittest.TestCase):
     def setUp(self):
@@ -42,10 +43,24 @@ class CurrentPageRouteRegistrationTests(unittest.TestCase):
     def setUp(self):
         self.spec = json.loads((ROOT / "docs/current/service_spec.json").read_text(encoding="utf-8"))
         self.contract = self.spec["current_public_supply_contract"]["current_page_route_verification"]
-        self.before = {item["path"]: item["sha256"] for item in self.contract["source_bindings"]}
+        self.current = checker.select_current_source_rebound(self.spec, "current_page", self.contract)
+        self.before = {item["path"]: item["sha256"] for item in self.current["source_bindings"]}
 
     def test_disabled_route_is_exactly_bound(self):
-        self.assertEqual(runner.current_page_route_registration(self.spec, self.before), self.contract)
+        history = copy.deepcopy(self.contract)
+        self.assertEqual(runner.current_page_route_registration(self.spec, self.before), self.current)
+        self.assertEqual(self.contract, history)
+
+    def test_stale_snapshot_and_forged_history_are_rejected(self):
+        if checker.CURRENT_SOURCE_REBOUND_FIELD not in self.spec:
+            self.skipTest("current source rebound is absent from this snapshot")
+        old = {item["path"]: item["sha256"] for item in self.contract["source_bindings"]}
+        with self.assertRaisesRegex(runner.EdgeFailure, "current_page_route_source_or_test_binding_invalid"):
+            runner.current_page_route_registration(self.spec, old)
+        forged = copy.deepcopy(self.spec)
+        forged["current_public_supply_contract"]["current_page_route_verification"]["test_count"] += 1
+        with self.assertRaisesRegex(runner.EdgeFailure, "current_page_route_current_source_rebound_invalid"):
+            runner.current_page_route_registration(forged, self.before)
 
     def test_missing_or_modified_scope_fails_closed(self):
         for mutation in ("missing", "source", "schema", "guard", "test_count", "activation"):

@@ -56,14 +56,16 @@ EDGE_UNIT_KEYS = frozenset({
     "member_shortlist_unit", "incident_recovery_unit", "service_candidate_aux_unit", "service_staged_aux_unit", "service_wildcard_unit",
     "p1_recruitment_score_review_unit", "p1_selection_bridge_review_unit", "service_end_score_cutoff_unit",
     "cursor_contract_review_unit", "reference_db_unit", "auth_503_unit", "auth_503_runtime_unit",
+    "university_cancellation_unit", "reference_safety_unit",
 })
 
 def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False,
-                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None, auth_503_required=False, auth_503_runtime_required=False):
+                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None, auth_503_required=False, auth_503_runtime_required=False, university_cancellation_required=False, reference_safety_required=False):
     """Count all executed, separately registered Edge suites; keep oracle cases separate."""
     if (not isinstance(edge,dict) or type(expected_foundation)is not int or expected_foundation<1 or
         any(type(flag) is not bool for flag in (recovery_required,auxiliary_required,staged_required,wildcard_required,
-            p1_review_required,p1_selection_required,service_end_required,cursor_required,auth_503_required,auth_503_runtime_required))):raise ValueError("edge_count_input_invalid")
+            p1_review_required,p1_selection_required,service_end_required,cursor_required,auth_503_required,auth_503_runtime_required,
+            university_cancellation_required,reference_safety_required))):raise ValueError("edge_count_input_invalid")
     if auth_503_runtime_required and not auth_503_required:raise ValueError("edge_runtime_without_auth_invalid")
     if reference_db_count is not None and (type(reference_db_count) is not int or reference_db_count < 1):
         raise ValueError("reference_db_count_invalid")
@@ -79,7 +81,9 @@ def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary
         ("service_end_score_cutoff_unit",service_end_required,3),
         ("cursor_contract_review_unit",cursor_required,22),
         ("auth_503_unit",auth_503_required,27),
-        ("auth_503_runtime_unit",auth_503_runtime_required,5))
+        ("auth_503_runtime_unit",auth_503_runtime_required,5),
+        ("university_cancellation_unit",university_cancellation_required,6),
+        ("reference_safety_unit",reference_safety_required,18))
     for name,required,_ in additional:
         if (name in keys)!=required:raise ValueError("edge_additional_unit_missing_or_unregistered:"+name)
     counts={}
@@ -139,6 +143,26 @@ def reference_db_unit_count(spec):
     if not isinstance(ext,dict) or type(ext.get("test_count")) is not int or ext["test_count"]<1:
         raise ValueError("reference_db_registration_invalid")
     return ext["test_count"]
+
+
+def reference_safety_required(spec):
+    from reference_safety_suite import required
+    return required(spec)
+
+
+def university_cancellation_unit_required(spec):
+    """Require the six-case suite only for its exact registered candidate contract."""
+    if not isinstance(spec,dict):raise ValueError("university_cancellation_spec_invalid")
+    backend=spec.get("backend_platform_contract",{})
+    if not isinstance(backend,dict):raise ValueError("university_cancellation_spec_invalid")
+    name="university_cancellation_test_extension"
+    if name not in backend:return False
+    ext=backend[name]
+    if (not isinstance(ext,dict) or ext.get("format")!="jungsi.university-cancellation-tests/v1" or
+        ext.get("status")!="SOURCE_REGISTERED_NOT_EXECUTED" or type(ext.get("test_count")) is not int or
+        ext["test_count"]!=6 or ext.get("test_paths")!=["tests/edge/test_university_analysis_cancellation.ts"]):
+        raise ValueError("university_cancellation_registration_invalid")
+    return True
 
 
 def suite_python_environment(base,deno,scratch):
@@ -220,7 +244,9 @@ def run_retained(workspace,manifest,destination,deno=None):
                         counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required,wildcard_required,
                             cursor_required=cursor_unit_required(selected_spec),reference_db_count=reference_db_unit_count(selected_spec),
                             auth_503_required=auth_503_unit_required(selected_spec),
-                            auth_503_runtime_required=auth_503_runtime_unit_required(selected_spec),**additional_p1_unit_flags(selected_spec))
+                            auth_503_runtime_required=auth_503_runtime_unit_required(selected_spec),
+                            university_cancellation_required=university_cancellation_unit_required(selected_spec),
+                            reference_safety_required=reference_safety_required(selected_spec),**additional_p1_unit_flags(selected_spec))
                         edge["total_tests"]=counts["total_tests"]
                         edge["unit_counts"]=counts["by_suite"]
                     except (KeyError,TypeError,ValueError) as error:

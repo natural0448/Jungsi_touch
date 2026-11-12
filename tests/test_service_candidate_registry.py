@@ -176,7 +176,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         path=ROOT/"tests/test_service_candidate_suites.py"
         spec=importlib.util.spec_from_file_location("portable_candidate_suite_test",path)
         self.m=importlib.util.module_from_spec(spec);spec.loader.exec_module(self.m)
-        self.data=json.loads((ROOT/"tests/review_suite_manifest.json").read_bytes())
+        self.data=json.loads(self.m.MANIFEST.read_bytes())
 
     def test_runtime_and_scratch_are_required_without_skip(self):
         with patch.dict(self.m.os.environ,{},clear=True):

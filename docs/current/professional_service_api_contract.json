@@ -1,6 +1,6 @@
 {
   "format": "jungsi.professional-api-contract/v1",
-  "spec_version": "1.9.174",
+  "spec_version": "1.9.176",
   "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
   "contract": {
     "format": "jungsi.professional-service-contract/v1",
@@ -1947,6 +1947,15 @@
           ]
         }
       },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "student_cache_scope_review_extension": {
+      "format": "jungsi.professional-student-cache-review-source/v1",
+      "status": "SOURCE_CANDIDATE_REVIEW_ONLY",
+      "path": "supabase/functions/_shared/jungsi/application/professional_student_cache_scope_candidate.ts",
+      "sha256": "5013ab6124af412aa6d9d817346f4ab5e3cb8f66bda489e200c42ec96757a760",
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
       "operating_writes": 0
