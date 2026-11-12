@@ -360,62 +360,54 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
   const q2sum = q1 !== null && q2 !== null ? q1 + q2 : null;
   const q1best = q1 !== null && q2 !== null ? Math.max(q1, q2) : null;
   const sum = (...v: (number | null)[]) => (v.some((x) => x === null) ? null : (v as number[]).reduce((x, y) => x + y, 0));
-  const rows: [string, number | null][] = [
-    ["국어 + 수학 + 탐구(2과목)", sum(k, m, q2sum)],
-    ["국어 + 수학 + 탐구(1과목)", sum(k, m, q1best)],
-    ["국어 + 수학", sum(k, m)],
-    ["국어 + 탐구(2과목)", sum(k, q2sum)],
-    ["수학 + 탐구(2과목)", sum(m, q2sum)],
-    ["국어 + 탐구(1과목)", sum(k, q1best)],
-    ["수학 + 탐구(1과목)", sum(m, q1best)],
+  // 표 한 개가 오른쪽 절반을 비워 두어(2026-11-12 최종관리자 지적) 두 단으로 나눈다. '읽는 법' 상자는 필요 없다는 결정으로 뺐다.
+  // 왼쪽: 국어·수학이 함께 들어가는 조합, 오른쪽: 국어나 수학 한 과목 + 탐구. 좁은 화면에서는 아래로 쌓인다.
+  const groups: { title: string; rows: [string, number | null][] }[] = [
+    {
+      title: "국어·수학 함께",
+      rows: [
+        ["국어 + 수학 + 탐구(2과목)", sum(k, m, q2sum)],
+        ["국어 + 수학 + 탐구(1과목)", sum(k, m, q1best)],
+        ["국어 + 수학", sum(k, m)],
+      ],
+    },
+    {
+      title: "국어 또는 수학 + 탐구",
+      rows: [
+        ["국어 + 탐구(2과목)", sum(k, q2sum)],
+        ["수학 + 탐구(2과목)", sum(m, q2sum)],
+        ["국어 + 탐구(1과목)", sum(k, q1best)],
+        ["수학 + 탐구(1과목)", sum(m, q1best)],
+      ],
+    },
   ];
-  const best = q1 !== null && q2 !== null ? (q1 >= q2 ? a.subjects.find((s) => s.area === "inquiry1") : a.subjects.find((s) => s.area === "inquiry2")) : null;
-  const tie = q1 !== null && q1 === q2;
   return (
     <section className="rp-chart" aria-label="반영 조합별 내 표준점수 합">
       <header>
         <h3>반영 조합별 내 표준점수 합</h3>
-        <small>대학마다 반영하는 과목 조합이 달라, 자주 쓰는 조합별로 내 표준점수를 더해 보여 줍니다</small>
+        <small>자주 쓰는 반영 조합별로 내 표준점수를 더한 값입니다 · 탐구 1과목은 두 과목 중 높은 과목 · 대학별 실제 환산점수와는 다릅니다</small>
       </header>
-      {/* 표만 두면 오른쪽 절반이 비어 보여(2026-11-12 최종관리자 지적) 읽는 법을 표 옆에 둔다. 좁은 화면에서는 아래로 쌓인다 */}
       <div className="rp-combo-wrap">
-      <div className="tblwrap">
-        <table className="tb rp-combo">
-          <thead>
-            <tr>
-              <th scope="col">반영 조합</th>
-              <th scope="col" className="r">표준점수 합</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(([label, v]) => (
-              <tr key={label}>
-                <th scope="row">{label}</th>
-                <td className="r">{v === null ? "─" : <b className="num">{v}</b>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <aside className="rp-combo-read" aria-label="표 읽는 법">
-        <h4>이 표를 읽는 법</h4>
-        <ul>
-          <li>
-            <b>탐구 1과목</b>은 두 과목 중 표준점수가 높은 과목으로 더했습니다
-            {tie ? " (두 과목 표준점수가 같아 어느 과목이든 같습니다)" : best ? ` (${best.subject})` : ""}. 어느 과목을 쓰는지는 대학마다 다를 수 있습니다.
-          </li>
-          <li>
-            <b>실제 환산점수와 다릅니다.</b> 대학은 표준점수 대신 백분위나 변환표준점수를 쓰기도 하고, 과목마다 반영 비율을 곱하며 영어·한국사를 따로 더하거나 뺍니다.
-          </li>
-          <li>
-            <b>합이 크다고 그 조합에서 위치가 높은 것은 아닙니다.</b> 조합마다 함께 본 응시자가 달라 이 합으로는 위치(상위 %)를 알 수 없습니다.
-          </li>
-        </ul>
-        <div className="rp-combo-go">
-          <Link prefetch={false} href="/admissions/possibilities" className="btn">전체 대학·학과 가능성 보기</Link>
-          <Link prefetch={false} href="/admissions/favorable" className="btn">유리한 대학 찾기</Link>
-        </div>
-      </aside>
+        {groups.map((g) => (
+          <div key={g.title} className="tblwrap">
+            <table className="tb rp-combo">
+              <thead>
+                <tr>
+                  <th scope="col">{g.title}</th>
+                  <th scope="col" className="r">표준점수 합</th>
+                </tr>
+              </thead>
+              <tbody>
+                {g.rows.map(([label, v]) => (
+                  <tr key={label}>
+                    <th scope="row">{label}</th>
+                    <td className="r">{v === null ? "─" : <b className="num">{v}</b>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
       </div>
     </section>
   );
