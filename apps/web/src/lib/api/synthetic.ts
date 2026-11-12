@@ -14,7 +14,7 @@ import { syntheticSnapshotHead, syntheticSnapshotPart } from "./synthetic-snapsh
   보기 상태(일반·유료·성적 없음)와 성적·리포트는 이 브라우저 쿠키에만 남는다. 권한이 아니다.
 */
 
-export const SYN_COOKIE = { state: "jt_syn_state" } as const;
+export const SYN_COOKIE = { state: "jt_syn_state", stage: "jt_syn_stage" } as const;
 export type SyntheticState = "paid" | "noscore" | "standard" | "operator" | "guest";
 export const SYN_STATES: { v: SyntheticState; label: string }[] = [
   { v: "paid", label: "유료 회원" },
@@ -23,6 +23,19 @@ export const SYN_STATES: { v: SyntheticState; label: string }[] = [
   { v: "operator", label: "운영자(일반 회원 + 관리 권한)" },
   { v: "guest", label: "비회원" },
 ];
+
+/** 합성 응답의 성적 입력 단계 미리보기(2026-11-12 수능 가채점·실채점 화면). 기본은 지금 운영과 같은 9월 모의평가 */
+export type SyntheticStage = "mock" | "provisional" | "final_locked" | "final";
+export const SYN_STAGES: { v: SyntheticStage; label: string }[] = [
+  { v: "mock", label: "9월 모의평가" },
+  { v: "provisional", label: "수능 가채점" },
+  { v: "final_locked", label: "실채점 배부 전" },
+  { v: "final", label: "수능 실채점" },
+];
+export async function readSyntheticStage(): Promise<SyntheticStage> {
+  const v = (await cookies()).get(SYN_COOKIE.stage)?.value;
+  return SYN_STAGES.some((s) => s.v === v) ? (v as SyntheticStage) : "mock";
+}
 
 export async function readSyntheticState(): Promise<SyntheticState> {
   const v = (await cookies()).get(SYN_COOKIE.state)?.value;
@@ -119,15 +132,20 @@ export const syntheticSource: JungsiSource = {
     const s = await requireMember();
     const used = await inputUsed();
     const paid = s === "paid" || s === "noscore";
-    const spent = used.profileId ? 1 : 0;
+    const syn = await readSyntheticStage();
+    const locked = !stage && syn === "final_locked";
+    // 입력 횟수와 현재 리포트는 단계마다 따로다(운영 정책과 같음). 합성 저장 성적은 모두 9월 모의평가 단계로 본다
+    const sameStage = syn === "mock";
+    const spent = used.profileId && sameStage ? 1 : 0;
     return {
       format: "jungsi.score-input-status/v1",
       exam_id: examId,
       pack_version: process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC",
       academic_year: 2027,
-      stage: stage ?? "final",
-      stage_state: "open",
-      opens_at: null,
+      stage: stage ?? (syn === "final_locked" ? "final" : syn),
+      stage_state: locked ? "not_open" : "open",
+      // 지어낸 배부일(합성): 실제 배부일은 서버·관리자 설정이 정한다
+      opens_at: locked ? "2026-12-10T23:00:00Z" : null,
       closes_at: null,
       paid_input_allowed: paid,
       input_limit_mode: "stage_rights",
@@ -138,8 +156,8 @@ export const syntheticSource: JungsiSource = {
       correction_request_remaining: 1,
       effective_save_remaining: paid ? 1 - spent : 0,
       entry_version: spent,
-      current_profile_id: used.profileId,
-      current_report_id: used.reportId,
+      current_profile_id: sameStage ? used.profileId : null,
+      current_report_id: sameStage ? used.reportId : null,
       last_attempt_outcome: spent ? "accepted" : null,
       last_rejection_code: null,
       legacy_transition_status: "ready",

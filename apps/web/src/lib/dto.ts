@@ -120,6 +120,21 @@ export interface ScoresInput {
   second_language?: SecondLanguageDto | null;
 }
 
+/**
+  수능 가채점 입력(제안 계약 — 서버 미구현, 수능 뒤 연결 예정). 원점수만 보낸다.
+  표준점수·백분위·상대평가 등급은 서버가 예상 등급컷 자료로 추정하고, 절대평가 등급은 서버가 고정 구간으로 정한다.
+*/
+export interface ProvisionalScoresInput {
+  exam_id: string;
+  pack_version: string;
+  korean: { raw_score: number; choice?: string };
+  math: { raw_score: number; choice?: string };
+  inquiry: { subject: string; raw_score: number }[];
+  english_raw?: number;
+  korean_history_raw?: number;
+  second_language?: { subject: string; raw_score: number } | null;
+}
+
 /** 제2외국어/한문 결과. 절대평가 등급이라 총점·전체 위치에 넣지 않는다 */
 export interface SecondLanguageDto {
   subject: string;

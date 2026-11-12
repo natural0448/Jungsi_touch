@@ -73,6 +73,21 @@
 .et .sf-acts .btn{height:48px;padding:0 26px;font-size:14.5px;font-weight:800;box-shadow:0 4px 12px rgba(30,86,214,.22)}
 .et .sf-acts .btn:disabled{box-shadow:none;opacity:.7}
 .et .sf-note{margin:0;font-size:12px;color:var(--muted)}
+/* 수능 가채점·실채점(2026-11-12 최종관리자 결정) */
+.et .sf-banner{margin:0;padding:10px 12px;border-left:3px solid var(--touch);border-radius:0 4px 4px 0;background:var(--sub);font-size:13px;line-height:1.55;color:var(--ink)}
+.et .sf-max{display:block;margin-top:2px;font-size:10px;color:var(--muted)}
+.et .sf-grade{font-size:18px;font-weight:900;color:var(--deep);font-variant-numeric:tabular-nums}
+.et .sf-grade small{margin-left:2px;font-size:11px;font-weight:700;color:var(--muted)}
+.et .sf-sheet tbody th small.sf-rowsub{display:block;margin-top:3px;padding:0;background:none;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0;line-height:1.3}
+.et .rp-steps{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.et .rp-steps li{flex:1 1 220px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--sub)}
+.et .rp-steps li b{display:block;font-size:13px;color:var(--muted)}
+.et .rp-steps li small{font-size:11px;color:var(--muted)}
+.et .rp-steps li.on{border-color:var(--deep);background:var(--brand-soft)}
+.et .rp-steps li.on b{color:var(--deep)}
+.et .rp-steps li.done b{color:var(--ink-2)}
+.et .rp-steps li.locked{background:var(--bg);border-style:dashed}
+.et .rp-steps li.locked b,.et .rp-steps li.locked small{color:#A3A9B8}
 .et .sf-confirm-note{margin:0;font-size:13px;font-weight:700;color:var(--ink)}
 
 /* 저장 전 확인 창: 넣은 값을 성적표처럼 한 줄씩 다시 보여 준다 */
@@ -212,11 +227,15 @@
 .et .pc-note{margin:2px 0 0;font-size:11px;color:var(--ink-2);line-height:1.5}
 .et .rp-short-note{margin:8px 0 0;font-size:11px;color:var(--ink-2);line-height:1.6}
 .et .rp-combo-wait{margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:12px;color:var(--muted)}
-.et .rp-combo-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;align-items:start}
+/* 두 표의 높이를 같게(2026-11-12 최종관리자): 칸을 늘려 맞추고 줄 높이를 나눠 갖는다. 글자는 가운데 */
+.et .rp-combo-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;align-items:stretch}
+.et .rp-combo-wrap>.tblwrap{display:flex}
+.et .rp-combo-wrap>.tblwrap>table{height:100%}
 .et .rp-combo-wrap>*{min-width:0}
 @media (max-width:760px){.et .rp-combo-wrap{grid-template-columns:minmax(0,1fr)}}
 .et .rp-combo{width:100%;font-variant-numeric:tabular-nums}
 .et .rp-combo td.r{width:110px}
+.et .rp-chart table.tb.rp-combo th,.et .rp-chart table.tb.rp-combo td{text-align:center}
 .et .rp-combo th[scope=row]{font-weight:700}
 .et .rp-combo td .num{font-weight:800;color:var(--deep)}
 

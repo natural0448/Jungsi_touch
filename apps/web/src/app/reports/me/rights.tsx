@@ -44,6 +44,11 @@ export function NoInput({ st, correctHref }: { st: ScoreInputStatusDto | null; c
     <section className="rp-empty">
       {st === null ? (
         <p>지금은 성적 입력 상태를 확인할 수 없어 저장을 열지 않았습니다. 잠시 뒤 다시 열어 주세요. 입력 횟수는 쓰이지 않았습니다.</p>
+      ) : st.stage === "final" && st.stage_state === "not_open" ? (
+        // 수능 실채점은 성적표 배부일부터(2026-11-12 최종관리자 결정). 여는 시각은 서버 입력 상태 그대로
+        <p>
+          <b>수능 성적표 입력은 {st.opens_at ? seoulDateTime(st.opens_at) : "성적표 배부일"}부터 열립니다.</b> 그 전까지는 가채점으로 예상 위치를 확인해 주세요.
+        </p>
       ) : st.stage_state !== "open" ? (
         <p>이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다.</p>
       ) : (

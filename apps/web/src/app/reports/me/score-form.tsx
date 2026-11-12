@@ -47,8 +47,14 @@ export function ScoreForm({
   submit,
   hidden,
   subject,
+  kicker = "성적 입력",
+  banner,
 }: {
   examLabel: string;
+  /** 머리 작은 글씨(예: '성적 입력 · 수능 실채점') */
+  kicker?: string;
+  /** 표 위 안내 한 줄(수능 실채점 등) */
+  banner?: string;
   idem: string;
   defaults: ScoreDefaults;
   update?: { reportId: string; version: number };
@@ -131,7 +137,7 @@ export function ScoreForm({
 
       <header className="sf-hd">
         <div>
-          <p className="sf-kicker">성적 입력</p>
+          <p className="sf-kicker">{kicker}</p>
           <h2>{examLabel} 성적표</h2>
           <p>성적표에 적힌 값을 같은 칸에 그대로 옮겨 주세요. 테두리가 있는 칸만 넣으면 됩니다.</p>
         </div>
@@ -141,6 +147,7 @@ export function ScoreForm({
         </p>
       </header>
 
+      {banner && <p className="sf-banner">{banner}</p>}
       <p className="sf-swipe">표를 옆으로 밀면 수학 · 영어 · 탐구 칸이 이어집니다.</p>
       <div className="sf-sheet" role="group" aria-label={`${examLabel} 성적표 입력`}>
         <table>

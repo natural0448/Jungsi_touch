@@ -7,7 +7,7 @@ import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, ScoreInputStatusDto } from "@/lib/dto";
-import { EXAM, examTypeLabel } from "@/lib/exam";
+import { EXAM, examTitle, examTypeLabel, stageOf } from "@/lib/exam";
 import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
@@ -23,6 +23,8 @@ import { CorrectionPanel } from "./correction";
 import { canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/correction";
 import { correctionInputClosed } from "@/lib/csat-release";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
+import { ProvisionalForm } from "./provisional-form";
+import { StageSteps } from "./stage-steps";
 import "./report.css";
 
 const route = page("PAGE-02");
@@ -108,21 +110,31 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // (리포트는 늘 현재 리포트 하나라 '현재 성적' 꼬리표는 쓰지 않는다). 판 번호는 서버의 겹침 방지에만 쓴다
   const tag = correctionExhausted(status) ? "정정 입력 횟수 소진" : null;
   const idem = crypto.randomUUID();
+  // 입력 단계(2026-11-12 최종관리자 결정): 서버가 정한 단계로 양식을 고른다. 수능 뒤에는 9월 모의평가가 보이지 않는다
+  const stage = stageOf(status.stage);
+  const title = examTitle(stage, status.academic_year);
 
   if (!report || editing) {
     return (
       <>
         {head}
         <div className="wrap pg-body rp">
+          <StageSteps stage={stage} finalOpen={status.stage_state === "open"} />
           {status && <InputStatus st={status} />}
-          {inputOpen ? (
+          {inputOpen && stage === "provisional" ? (
+            <ProvisionalForm examLabel={title} />
+          ) : inputOpen ? (
             <>
               {report && (
                 <p className="rp-note">
                   새 성적을 저장하면 리포트가 새로 계산됩니다. 담아 둔 학교는 남아 있고, 새 성적으로 다시 확인할 때까지 &lsquo;다시 확인 필요&rsquo;로 표시됩니다.
                 </p>
               )}
-              <ScoreForm examLabel={EXAM.label} idem={idem} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
+              <ScoreForm
+                examLabel={title}
+                kicker={stage === "final" ? "성적 입력 · 수능 실채점" : "성적 입력"}
+                banner={stage === "final" ? "가채점 성적이 있으면 실채점 성적을 저장할 때 리포트가 실채점 기준으로 바뀝니다. 가채점 기록은 그대로 남습니다." : undefined}
+                idem={idem} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
             </>
           ) : (
             <NoInput st={status} correctHref={correctHref} />
