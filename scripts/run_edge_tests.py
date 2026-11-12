@@ -8,12 +8,61 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 from edge_source_scope import classify_sources
 from check_edge_contract import EdgeFailure,check_workspace,command,digest,hashes,json_bytes,verify_manifest,write_new,dynamic_imports,local_url,safe_path,tokens
+
+def deno_test_command(argv, **kwargs):
+    """Stop the current Deno suite on first failure; preserve all other arguments."""
+    if len(argv)<2 or argv[1]!="test":
+        raise EdgeFailure("deno_test_command_scope_invalid")
+    if any(isinstance(arg,str) and (arg=="--fail-fast" or arg.startswith("--fail-fast=")) for arg in argv[2:]):
+        raise EdgeFailure("deno_test_fail_fast_conflict")
+    return command([*argv[:2],"--fail-fast",*argv[2:]], **kwargs)
 def parse_junit(path,expected):
     if not Path(path).is_file():raise EdgeFailure("deno_test_result_missing")
     root=ET.fromstring(Path(path).read_bytes());cases=list(root.iter("testcase"))
     if len(cases)!=expected or any(list(c) for c in cases if any(x.tag in {"failure","error","skipped"} for x in c)):
         raise EdgeFailure("deno_test_count_failure_or_skip")
     return dict(tests_run=len(cases),failures=0,errors=0,skipped=0)
+
+def split_auth_runtime_foundation(path, expected_foundation, runtime_suite):
+    """Partition one JUnit run into the retained foundation and five exact new cases."""
+    if runtime_suite is None:
+        return parse_junit(path, expected_foundation), None
+    if type(expected_foundation) is not int or expected_foundation not in (625, 656):
+        raise EdgeFailure("auth_503_runtime_foundation_count_invalid")
+    parse_junit(path, expected_foundation + runtime_suite["test_count"])
+    cases = list(ET.fromstring(Path(path).read_bytes()).iter("testcase"))
+    identities = [((case.get("classname") or "").replace(chr(92), "/").removeprefix("./"),
+                   case.get("name")) for case in cases]
+    if (any(not classname or not isinstance(name, str) or not name for classname, name in identities) or
+        len(set(identities)) != len(identities)):
+        raise EdgeFailure("auth_503_runtime_duplicate_or_invalid_identity")
+    path_name = runtime_suite["test_path"]
+    observed = [name for classname, name in identities if classname == path_name]
+    additional = set(runtime_suite["case_names"])
+    if any([classname for classname, actual_name in identities if actual_name == name] != [path_name]
+           for name in additional):
+        raise EdgeFailure("auth_503_runtime_case_source_or_duplicate_invalid")
+    baseline = [name for name in observed if name not in additional]
+    baseline_hash = hashlib.sha256(json.dumps(sorted(baseline), ensure_ascii=False,
+                                   separators=(",", ":")).encode("utf-8")).hexdigest()
+    if (len(additional) != runtime_suite["test_count"] or len(observed) != 30 or
+        not additional.issubset(observed) or len(baseline) != runtime_suite["baseline_runtime_count"] or
+        baseline_hash != runtime_suite["baseline_runtime_names_sha256"]):
+        raise EdgeFailure("auth_503_runtime_case_partition_invalid")
+    retained = dict(tests_run=expected_foundation, failures=0, errors=0, skipped=0)
+    additive = dict(tests_run=runtime_suite["test_count"], failures=0, errors=0, skipped=0,
+        coverage="AUTH_503_RUNTIME_INTEGRATION_SYNTHETIC", shared_foundation_junit=True,
+        baseline_foundation_count=runtime_suite["baseline_foundation_count"],
+        test_path=path_name, test_source_sha256=runtime_suite["test_source_sha256"],
+        case_names=list(runtime_suite["case_names"]), native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE",
+        activation_status="NOT_RUN", operating_writes=0)
+    return retained, additive
+
+def require_no_auth_runtime_overlap(path, runtime_suite):
+    if runtime_suite is None: return
+    names = {case.get("name") for case in ET.fromstring(Path(path).read_bytes()).iter("testcase")}
+    if names.intersection(runtime_suite["case_names"]):
+        raise EdgeFailure("auth_503_runtime_cross_suite_duplicate")
 def require_oracle(receipt,count,cases_sha):
     if receipt.get("successful") is not True or receipt.get("case_count")!=count or receipt.get("mismatch_count")!=0 or receipt.get("deno_exit_code")!=0 or receipt.get("cases_sha256")!=cases_sha or receipt.get("oracle_references_match_basis") is not True:
         raise EdgeFailure("oracle_receipt_invalid")
@@ -1251,7 +1300,7 @@ def run_p1_contract_suite(deno, common, junit, paths, root, output, name):
     _p1cg_need(common == ["--no-lock", "--no-remote", "--no-npm", "--config", P1CG_CONFIG_PATH]
        and isinstance(paths, (list, tuple)) and paths and set(paths) <= set(P1CG_ROOTS),
        "suite_scope")
-    return command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
+    return deno_test_command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
                     "--junit-path", str(junit), *paths], root=root, output=output, name=name)
 
 
@@ -1523,25 +1572,28 @@ def run_workspace(root,manifest,deno,python,output):
     command([deno,"lint","--config",cfg["config"],*paths],root=root,output=output,name="lint")
     command([deno,"fmt","--check","--config",cfg["config"],*paths],root=root,output=output,name="fmt")
     from check_project_consistency import (recovery_input_registration,verify_recovery_test_partition,
-      RECOVERY_SAMEFILE_NAMES,RECOVERY_STANDALONE_NAMES,RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_PATH)
+      auth_503_runtime_registration, RECOVERY_SAMEFILE_NAMES,RECOVERY_STANDALONE_NAMES,
+      RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_PATH)
     recovery,recovery_errors=recovery_input_registration(spec,before)
     if recovery_errors:raise EdgeFailure("incident_recovery_source_or_test_binding_invalid")
+    auth_runtime,auth_runtime_errors=auth_503_runtime_registration(spec,before)
+    if auth_runtime_errors:raise EdgeFailure("auth_503_runtime_registration_invalid")
     if recovery is not None:verify_recovery_test_partition((root/RECOVERY_SAMEFILE_PATH).read_bytes())
     junit=output.resolve()/"deno.junit.xml"
     if junit.exists():raise EdgeFailure("deno_test_output_exists")
     recovery_unit=None
     if recovery is None:
-        command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*cfg["tests"]],root=root,output=output,name="unit")
-        unit=parse_junit(junit,cfg["unit_count"])
+        deno_test_command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*cfg["tests"]],root=root,output=output,name="unit")
+        unit,auth_503_runtime_unit=split_auth_runtime_foundation(junit,cfg["unit_count"],auth_runtime)
     else:
         # Run every other foundation module without a filter; select the old score cases by exact positive names.
         rest=[path for path in cfg["tests"] if path!=RECOVERY_SAMEFILE_PATH]
-        command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*rest],root=root,output=output,name="unit")
-        other=parse_junit(junit,625)
+        deno_test_command([deno,"test",*common,"--reporter=dot","--junit-path",str(junit),*rest],root=root,output=output,name="unit")
+        other,auth_503_runtime_unit=split_auth_runtime_foundation(junit,625,auth_runtime)
         require_unique_junit_identities(junit)
         require_no_recovery_cases(junit,RECOVERY_SAMEFILE_NAMES)
         base_junit=output.resolve()/"recovery_baseline_score.junit.xml"
-        command([deno,"test",*common,"--filter",recovery_test_filter(RECOVERY_BASELINE_NAMES),
+        deno_test_command([deno,"test",*common,"--filter",recovery_test_filter(RECOVERY_BASELINE_NAMES),
           "--reporter=dot","--junit-path",str(base_junit),RECOVERY_SAMEFILE_PATH],
           root=root,output=output,name="recovery_baseline_score")
         score=parse_recovery_partition_junit(base_junit,RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_NAMES,RECOVERY_SAMEFILE_PATH)
@@ -1550,12 +1602,12 @@ def run_workspace(root,manifest,deno,python,output):
         unit=dict(tests_run=other["tests_run"]+score["tests_run"],failures=0,errors=0,skipped=0)
         if unit["tests_run"]!=cfg["unit_count"]:raise EdgeFailure("foundation_split_count_invalid")
         added_junit=output.resolve()/"recovery_samefile.junit.xml"
-        command([deno,"test",*common,"--filter",recovery_test_filter(RECOVERY_SAMEFILE_NAMES),
+        deno_test_command([deno,"test",*common,"--filter",recovery_test_filter(RECOVERY_SAMEFILE_NAMES),
           "--reporter=dot","--junit-path",str(added_junit),RECOVERY_SAMEFILE_PATH],
           root=root,output=output,name="recovery_samefile")
         same=parse_recovery_partition_junit(added_junit,RECOVERY_SAMEFILE_NAMES,RECOVERY_BASELINE_NAMES,RECOVERY_SAMEFILE_PATH)
         standalone_junit=output.resolve()/"recovery_standalone.junit.xml"
-        command([deno,"test",*common,"--reporter=dot","--junit-path",str(standalone_junit),
+        deno_test_command([deno,"test",*common,"--reporter=dot","--junit-path",str(standalone_junit),
           *recovery["test_paths"]],root=root,output=output,name="recovery_standalone")
         standalone=parse_junit(standalone_junit,33);require_exact_junit_names(standalone_junit,RECOVERY_STANDALONE_NAMES)
         recovery_unit=dict(tests_run=same["tests_run"]+standalone["tests_run"],failures=0,errors=0,skipped=0,
@@ -1568,7 +1620,7 @@ def run_workspace(root,manifest,deno,python,output):
     if cursor_graph_guard is not None:
         cursor_meta = cursor_contract_registration(root, before, spec)
         cursor_junit = output.resolve() / "cursor_contract_review.junit.xml"
-        command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
+        deno_test_command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
                  "--junit-path", str(cursor_junit), *CURCG_ROOTS],
                 root=root, output=output, name="cursor_contract_review_unit")
         counted = parse_junit(cursor_junit, 22)
@@ -1577,6 +1629,24 @@ def run_workspace(root,manifest,deno,python,output):
             graph_manifest_sha256=cursor_meta["manifest_sha256"], baseline_foundation_count=656,
             native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN",
             actual_DB="NOT_RUN", deployment="NOT_RUN", operating_writes=0)
+    # Separate auth cancellation suite: do not change the foundation count or
+    # imply native transport or production acceptance from synthetic results.
+    from check_project_consistency import auth_503_registration
+    auth_503, auth_503_errors = auth_503_registration(spec, before)
+    if auth_503_errors: raise EdgeFailure("auth_503_registration_invalid")
+    auth_503_unit = None
+    if auth_503 is not None:
+        auth_junit = output.resolve() / "auth_503_synthetic.junit.xml"
+        deno_test_command([deno, "test", *common, *P1CG_DENY_FLAGS, "--reporter=dot",
+                 "--junit-path", str(auth_junit), *auth_503["test_paths"]],
+                root=root, output=output, name="auth_503_unit")
+        counted = parse_junit(auth_junit, auth_503["test_count"])
+        require_auxiliary_junit_identities(auth_junit, auth_503["case_names_by_path"])
+        require_no_auth_runtime_overlap(auth_junit,auth_runtime)
+        auth_503_unit = dict(**counted, coverage="AUTH_503_CANCELLATION_SYNTHETIC",
+            source_bindings=auth_503["source_bindings"], baseline_foundation_count=656,
+            native_acceptance="NOT_VERIFIED_BY_SOURCE_SUITE", activation_status="NOT_RUN",
+            operating_writes=0)
     p1_review = p1_review_registration(spec, before)
     p1_review_unit = None
     if p1_review is not None:
@@ -1613,7 +1683,7 @@ def run_workspace(root,manifest,deno,python,output):
     owner_registration=owner_review_registration(spec,before);owner_unit=None
     if owner_registration is not None:
         owner_junit=output.resolve()/"owner_review.junit.xml"
-        command([deno,"test","--no-config","--no-lock","--no-remote","--no-npm",
+        deno_test_command([deno,"test","--no-config","--no-lock","--no-remote","--no-npm",
           "--reporter=dot","--junit-path",str(owner_junit),owner_registration['test_path']],
           root=root,output=output,name="owner_review_unit")
         owner_format=owner_registration.get("format")
@@ -1635,7 +1705,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,'lint','--config',cfg['config'],*public_paths],root=root,output=output,name='current_public_lint')
         command([deno,'fmt','--check','--config',cfg['config'],*public_paths],root=root,output=output,name='current_public_fmt')
         public_junit=output.resolve()/'current_public.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(public_junit),
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(public_junit),
           *public_registration['test_paths']],root=root,output=output,name='current_public_unit')
         attendance_path = "supabase/functions/_shared/score_map_attendance_test.ts"
         attendance_expected = set(['approved cached score stays available to its owner only', 'cached reference cannot bypass required self reported attendance', 'historical pending never masks newly ready score and is not modified', 'reference results count toward unchanged per request calculation limit', 'reference without attendance requirement remains visible after verification', 'transient pending is not inserted and can become approved ready'])
@@ -1663,7 +1733,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,'lint','--config',cfg['config'],*own_paths],root=root,output=output,name='own_2027_batch_lint')
         command([deno,'fmt','--check','--config',cfg['config'],*own_paths],root=root,output=output,name='own_2027_batch_fmt')
         own_junit=output.resolve()/'own_2027_batch.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(own_junit),own_2027['test_path'],own_2027['bounded_test_path']],
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(own_junit),own_2027['test_path'],own_2027['bounded_test_path']],
           root=root,output=output,name='own_2027_batch_unit')
         own_unit=dict(**parse_junit(own_junit,own_2027['test_count']+own_2027['bounded_test_count']),
           coverage='OWN_2027_BATCH_SYNTHETIC',source_bindings=own_2027['source_bindings'],
@@ -1679,7 +1749,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,'lint','--config',cfg['config'],*snapshot_paths],root=root,output=output,name='snapshot_batch_lint')
         command([deno,'fmt','--check','--config',cfg['config'],*snapshot_paths],root=root,output=output,name='snapshot_batch_fmt')
         snapshot_junit=output.resolve()/'snapshot_batch.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(snapshot_junit),snapshot_batch['test_path']],
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(snapshot_junit),snapshot_batch['test_path']],
           root=root,output=output,name='snapshot_batch_unit')
         batch_unit=dict(**parse_junit(snapshot_junit,snapshot_batch['test_count']),
           coverage='SNAPSHOT_BATCH_SYNTHETIC_NOT_ACTIVATED',source_bindings=snapshot_batch['source_bindings'],
@@ -1694,7 +1764,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,"lint","--config",cfg["config"],*current_page_paths],root=root,output=output,name="current_page_lint")
         command([deno,"fmt","--check","--config",cfg["config"],*current_page_paths],root=root,output=output,name="current_page_fmt")
         current_page_junit=output.resolve()/"current_page_projection.junit.xml"
-        command([deno,"test",*common,"--deny-read","--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
+        deno_test_command([deno,"test",*common,"--deny-read","--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
           "--reporter=dot","--junit-path",str(current_page_junit),current_page["test_path"]],
           root=root,output=output,name="current_page_unit")
         current_page_unit=dict(**parse_junit(current_page_junit,current_page["test_count"]),
@@ -1707,7 +1777,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,"lint","--config",cfg["config"],*guide_paths],root=root,output=output,name="current_guide_lint")
         command([deno,"fmt","--check","--config",cfg["config"],*guide_paths],root=root,output=output,name="current_guide_fmt")
         guide_junit=output.resolve()/"current_guide_adapter.junit.xml"
-        command([deno,"test",*common,"--deny-read","--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
+        deno_test_command([deno,"test",*common,"--deny-read","--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
           "--reporter=dot","--junit-path",str(guide_junit),*current_page["guide_test_paths"]],root=root,output=output,name="current_guide_unit")
         guide_unit=dict(**parse_junit(guide_junit,current_page["guide_test_count"]),
           coverage="CURRENT_GUIDE_ADAPTER_SYNTHETIC_NOT_ACTIVATED",actual_DB="NOT_RUN",publication="NOT_RUN",deployment="NOT_RUN")
@@ -1722,7 +1792,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,"fmt","--check","--config",cfg["config"],*route_paths],root=root,output=output,name="current_page_route_fmt")
         route_junit=output.resolve()/"current_page_route.junit.xml"
         schema_path=str((root/current_page_route["schema_path"]).resolve())
-        command([deno,"test",*common,"--allow-read="+schema_path,"--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
+        deno_test_command([deno,"test",*common,"--allow-read="+schema_path,"--deny-write","--deny-net","--deny-env","--deny-run","--deny-sys","--deny-ffi",
           "--reporter=dot","--junit-path",str(route_junit),*route_paths],root=root,output=output,name="current_page_route_unit")
         route_unit=dict(**parse_junit(route_junit,current_page_route["test_count"]),
           coverage="CURRENT_PAGE_ROUTE_SYNTHETIC_NOT_ACTIVATED",source_bindings=current_page_route["source_bindings"],
@@ -1737,7 +1807,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,'lint','--config',cfg['config'],*whole_paths],root=root,output=output,name='whole_population_lint')
         command([deno,'fmt','--check','--config',cfg['config'],*whole_paths],root=root,output=output,name='whole_population_fmt')
         whole_junit=output.resolve()/'whole_population_unit.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(whole_junit),whole_population['test_path']],root=root,output=output,name='whole_population_unit')
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(whole_junit),whole_population['test_path']],root=root,output=output,name='whole_population_unit')
         whole_population_unit=dict(**parse_junit(whole_junit,whole_population['test_count']),
           coverage='STRICT_WHOLE_POPULATION_V2_SYNTHETIC',source_bindings=whole_population['source_bindings'],
           native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',activation_status='NOT_RUN')
@@ -1745,7 +1815,7 @@ def run_workspace(root,manifest,deno,python,output):
     read_view=read_view_registration(spec,before)
     if read_view is not None:
         read_view_junit=output.resolve()/'read_view_extension.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(read_view_junit),
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(read_view_junit),
           *read_view['test_paths']],root=root,output=output,name='read_view_extension_unit')
         read_view_unit=dict(**parse_junit(read_view_junit,read_view['test_count']),
           coverage='READ_VIEW_EXTENSION_SYNTHETIC',source_bindings=read_view['source_bindings'],
@@ -1757,7 +1827,7 @@ def run_workspace(root,manifest,deno,python,output):
     service_candidate_aux_unit = None
     if auxiliary is not None:
         aux_junit = output.resolve() / "service_candidate_aux.junit.xml"
-        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(aux_junit),
+        deno_test_command([deno, "test", *common, "--reporter=dot", "--junit-path", str(aux_junit),
                  *auxiliary["test_paths"]], root=root, output=output, name="service_candidate_aux_unit")
         counted = parse_junit(aux_junit, auxiliary["test_count"])
         require_auxiliary_junit_identities(aux_junit, auxiliary["case_names_by_path"])
@@ -1770,7 +1840,7 @@ def run_workspace(root,manifest,deno,python,output):
     service_staged_aux_unit = None
     if staged is not None:
         staged_junit = output.resolve() / "service_staged_aux.junit.xml"
-        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(staged_junit),
+        deno_test_command([deno, "test", *common, "--reporter=dot", "--junit-path", str(staged_junit),
                  *staged["test_paths"]], root=root, output=output, name="service_staged_aux_unit")
         counted = parse_junit(staged_junit, staged["test_count"])
         require_auxiliary_junit_identities(staged_junit, staged["case_names_by_path"])
@@ -1783,7 +1853,7 @@ def run_workspace(root,manifest,deno,python,output):
     service_wildcard_unit = None
     if wildcard is not None:
         wildcard_junit = output.resolve() / "service_wildcard.junit.xml"
-        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(wildcard_junit),
+        deno_test_command([deno, "test", *common, "--reporter=dot", "--junit-path", str(wildcard_junit),
                  *wildcard["test_paths"]], root=root, output=output, name="service_wildcard_unit")
         counted = parse_junit(wildcard_junit, wildcard["test_count"])
         require_auxiliary_junit_identities(wildcard_junit, wildcard["case_names_by_path"])
@@ -1796,7 +1866,7 @@ def run_workspace(root,manifest,deno,python,output):
     reference_db_unit = None
     if reference_db is not None:
         reference_db_junit = output.resolve() / "reference_db.junit.xml"
-        command([deno, "test", *common, "--reporter=dot", "--junit-path", str(reference_db_junit),
+        deno_test_command([deno, "test", *common, "--reporter=dot", "--junit-path", str(reference_db_junit),
                  *reference_db["test_paths"]], root=root, output=output, name="reference_db_unit")
         counted = parse_junit(reference_db_junit, reference_db["test_count"])
         require_auxiliary_junit_identities(reference_db_junit, reference_db["case_names_by_path"])
@@ -1807,7 +1877,7 @@ def run_workspace(root,manifest,deno,python,output):
     member=member_shortlist_suite_registration(spec,before)
     if member is not None:
         member_junit=output.resolve()/'member_shortlist.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(member_junit),
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(member_junit),
           *member['verification']['test_paths']],root=root,output=output,name='member_shortlist_unit')
         member_shortlist_unit=dict(**parse_junit(member_junit,member['verification']['test_count']),
           coverage='MEMBER_JSON_SHORTLIST_SYNTHETIC',source_bindings=member['verification']['source_bindings'],
@@ -1817,7 +1887,7 @@ def run_workspace(root,manifest,deno,python,output):
     school_reference=school_reference_registration(spec,before)
     if school_reference is not None:
         reference_junit=output.resolve()/'school_reference.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(reference_junit),
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(reference_junit),
           *school_reference['test_paths']],root=root,output=output,name='school_reference_unit')
         school_reference_unit=dict(**parse_junit(reference_junit,school_reference['test_count']),
           coverage='SCOPED_SCHOOL_REFERENCE_SYNTHETIC',source_bindings=school_reference['source_bindings'],
@@ -1832,7 +1902,7 @@ def run_workspace(root,manifest,deno,python,output):
         command([deno,'lint','--config',cfg['config'],*professional_paths],root=root,output=output,name='professional_lint')
         command([deno,'fmt','--check','--config',cfg['config'],*professional_paths],root=root,output=output,name='professional_fmt')
         professional_junit=output.resolve()/'professional.junit.xml'
-        command([deno,'test',*common,'--reporter=dot','--junit-path',str(professional_junit),
+        deno_test_command([deno,'test',*common,'--reporter=dot','--junit-path',str(professional_junit),
             *verification['test_paths']],root=root,output=output,name='professional_unit')
         counted=parse_junit(professional_junit,verification['test_count'])
         require_professional_operation_tests(ET.fromstring(professional_junit.read_bytes()),verification['operation_test_names'])
@@ -1861,6 +1931,8 @@ def run_workspace(root,manifest,deno,python,output):
     if p1_graph_guard is not None:result['p1_contract_offline_graph_guard']=p1_graph_guard
     if cursor_graph_guard is not None:result['cursor_contract_offline_graph_guard']=cursor_graph_guard
     if cursor_unit is not None:result['cursor_contract_review_unit']=cursor_unit
+    if auth_503_unit is not None:result['auth_503_unit']=auth_503_unit
+    if auth_503_runtime_unit is not None:result['auth_503_runtime_unit']=auth_503_runtime_unit
     if p1_review_unit is not None:result['p1_recruitment_score_review_unit']=p1_review_unit
     if p1_selection_unit is not None:result['p1_selection_bridge_review_unit']=p1_selection_unit
     if service_end_unit is not None:result['service_end_score_cutoff_unit']=service_end_unit

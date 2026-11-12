@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.166",
-  "source_sha256": "4cfa25071bee0ce4595753d8366031c543fd825f79378ec16fd986d17f49e2fc",
+  "spec_version": "1.9.173",
+  "source_sha256": "be378311d52ada720591dd27ec4380b423b385ae979e4a97b4f6844c84e5dd65",
   "pages": [
     {
       "id": "PAGE-01",
@@ -499,7 +499,7 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다.",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다. 2026-11-11 기획 목표(미구현): 기존 정본 입결·누백과 기본 PK를 사용해 학생 성적대의 대학 경계 후보를 먼저 선택한다. 학과별 전수 판단을 선행하지 않으며 동일 시험·모집단에서 학교별 환산 유불리를 비교한다. 와일드카드도 같은 경계를 적용하고 추정·판정보류·확정 상태를 분리한다. 상세 경계 정책·결과 완전성·서버 연결 및 실제 배포는 확인 중이다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -692,7 +692,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "response_scope": "본인 현재 활성 회원 상태",
+      "response_scope": "본인 현재 활성 회원 상태; 관리자 예외의 비식별 내부 관측은 미배포 후보이며 외부 DTO·권한 조건은 유지한다. OPS-503-AUTH-CANCEL-20261112: 인증·본인 확인의 취소 전파와 비밀 없는 지연 진단을 서버 후보로 적용하되 기존 401/403·5초·보안 규칙을 유지한다. 실제 503 원인·배포·운영 해결은 미확인이다.",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -3909,11 +3909,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.json",
-        "sha256": "7b97489ca7666aacb3341ad9f1f48d16ce0e728074e4016dfbd706f8bb33a9f9"
+        "sha256": "36726bd9de89ba7163541fb99a9ac576a88494d05153774b0dc473578339be80"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "29513b7187e21e465b372db6cdfb628e572fdc07e9e10c91f1417044cd86d0a3"
+        "sha256": "74ad18bc4a18588a7c2ac9d095efb527eb3f734e9836986a27f3588871031c88"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4104,7 +4104,7 @@
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "7b243275991a44dfc90fd19a0b81421d28e6dc40c263ea344cdf4433e29392c5"
+          "sha256": "3a167ab603c4638cae430df64befa8c3c05571fc544e9dfdc46affa4609eccc4"
         }
       ],
       "tests": [
@@ -5113,7 +5113,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567"
+            "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
@@ -5121,7 +5121,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-            "sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2"
+            "sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
@@ -5618,7 +5618,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09"
+            "sha256": "2253b3e702077d533d9c4352e5e12c78a21a856c046a41808ea2ca2278f30612"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
@@ -5642,7 +5642,7 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567"
+            "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
@@ -6534,6 +6534,18 @@
       "전국 대학 산출 정확도·예측 성능 검증",
       "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
       "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 PR #13 develop 통합. 현재 open/draft이며 운영 배포 완료가 아니다."
+    ],
+    "school_boundary_selection_plan_20261111": [
+      "기획 목표이며 구현·운영 적용 전: 학생 성적대의 입학 경계 대학을 기존 입결과 누백으로 먼저 추린 후 대학별 환산 유불리 순으로 비교한다. 와일드카드에도 같은 대학 경계를 사용한다.",
+      "학과별 전수 판정을 전체 목록의 선행 조건으로 삼지 않는다. 모집단위의 실제 전형·모집군·지원 자격·산식 차이는 경계 근거와 필요한 상세로 구분한다.",
+      "기존 정본 head·학년도·모집행 기본 PK·입결 지표·자료형·출처·검수 근거를 재사용한다. 기존 연결을 위해 신규 수집·4개년 재매칭·원문 전국 전수검사·중복 적재를 하지 않는다.",
+      "대학별 원 환산점수를 서로 직접 비교하지 않는다. 같은 시험·고정 모집단·분모·동점 정책에서 전체 상위누백과 대학 환산 후 상위누백의 차이를 계산한다. 상위누백은 낮을수록 상위다.",
+      "같은 대학의 전형별 산식 차이와 복수 비교축을 보존한다. 학교 대표값과 학생 주변 경계의 수치 폭은 기존 자료·정책을 확인하며 임의로 설정하지 않는다.",
+      "고정 경계 폭이 확인되지 않은 경우에도 기존 승인 범위 안에 비교 가능한 경계 자료가 있으면, 기존 후보 수·조회 예산 내에서 학생 위치에 가까운 대학을 먼저 뽑는 참고 방식을 검토한다. 임의의 점수 폭을 신설하지 않으며 자료 범위와 추정 상태를 함께 표시한다.",
+      "과거 입결 추세와 올해 모집 변화는 기존 공통 척도·검증된 연도 관계와 정책에 따른다. 미확인 영향을 임의 점수로 추가하지 않는다.",
+      "참고 분포·추정 누백과 승인된 실제 지원 판단을 구분하며 미확인 경계나 비교 불가 데이터는 해당 항목만 보류한다. 일부 대학의 결측으로 다른 대학의 성공 결과를 지우지 않고 결과 범위·완전성을 표시한다.",
+      "기존 인증·본인 소유권·이용권·공유 예산·취소·멱등·성공 리포트와 데이터 보호를 유지한다. 사용자 선택과 과거 성공값을 초기화하지 않는다.",
+      "개발팀의 함수 후보와 합성 시험, 자료팀의 정본 확인, GitHub CI, 실제 서버 연결·Owner 배포와 운영 화면 재계산은 각각의 결과로 구분한다."
     ]
   },
   "presentation_connection_contract": {

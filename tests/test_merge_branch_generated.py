@@ -263,4 +263,15 @@ class StageBinding(IsolatedGitEnvironment):
  def test_multiple_or_missing_merge_configuration_not_inferred(self):
   self.assertIn('historical merge invocation not established',self.run_guard()['scope'])
 
+class GitRewriteScoreFormat(unittest.TestCase):
+ def test_zero_padded_git_scores_are_accepted(self):
+  self.assertEqual(m.parse_tree_changes(b'M066\0other\0',False),[('M066',('other',))])
+  self.assertEqual(m.parse_tree_changes(b'R001\0old\0new\0',True),[('R001',('old','new'))])
+ def test_invalid_scores_and_disallowed_rename_remain_rejected(self):
+  for raw,allow in ((b'M101\0x\0',False),(b'M0000\0x\0',False),(b'R001\0a\0b\0',False),(b'R001\0a\0',True)):
+   with self.subTest(raw=raw),self.assertRaises(m.Stop):m.parse_tree_changes(raw,allow)
+ def test_scored_rename_cannot_move_canonical_spec(self):
+  raw=b'R001\0'+m.SPEC.encode()+b'\0other\0'
+  with self.assertRaisesRegex(m.Stop,'spec_path_changed_or_renamed'):m.parse_tree_changes(raw,True)
+
 if __name__=='__main__':unittest.main(verbosity=2)

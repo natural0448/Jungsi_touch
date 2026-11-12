@@ -96,9 +96,10 @@ import {
   readBasicRuntimeSettings,
   type RuntimeEnvironment,
 } from "./runtime_settings.ts";
-import { SupabaseNativeAuth } from "./supabase_auth.ts";
+import { type SafeProfileLookupObservation, SupabaseNativeAuth } from "./supabase_auth.ts";
+import type { SafeExchangeObservation } from "./auth_exchange_observation.ts";
 import { type NativeSqlPool, SupabaseSqlTransport } from "./transaction_sql.ts";
-import { BoundVerifiedSessionProvider } from "./verified_session.ts";
+import { type AdminExceptionReason, BoundVerifiedSessionProvider } from "./verified_session.ts";
 import type { ReadViewCatalogFactory } from "./read_view_catalog_runtime.ts";
 export interface RuntimeRoutePolicy extends ApiRoutePolicy {
   readonly contract_ref: string;
@@ -149,6 +150,31 @@ export interface RuntimeTimingObservation {
   readonly total_ms: number;
   readonly stage_ms: Readonly<Record<string, number>>;
 }
+/** No bearer, account ID, role/status value, profile row, or exception text. */
+export interface SafeAuthObservation extends SafeProfileLookupObservation {
+  readonly kind: "profile_lookup";
+  readonly request_id: string;
+  readonly admin_exception_reason: AdminExceptionReason | null;
+}
+export interface SafeDetailedAuthObservation extends SafeExchangeObservation {
+  readonly request_id: string;
+}
+/** Uses only the internally generated request identifier and fixed transport categories. */
+export function detailedAuthObserver(
+  requestId: string,
+  sink?: (event: SafeDetailedAuthObservation) => void | Promise<void>,
+): ((event: SafeExchangeObservation) => void | Promise<void>) | undefined {
+  if (!sink) return undefined;
+  if (!/^[a-f0-9]{32}$/.test(requestId)) throw new Error("auth_observation_invalid");
+  return (event) =>
+    sink(Object.freeze({
+      kind: event.kind,
+      outcome: event.outcome,
+      http_status: event.http_status,
+      elapsed_ms: event.elapsed_ms,
+      request_id: requestId,
+    }));
+}
 export interface RuntimeComposition {
   readonly memberShortlistExtensions?: true;
   readonly readViewExtensions?: true;
@@ -187,6 +213,10 @@ export interface RuntimeComposition {
   readonly observe?: (event: SafeRuntimeObservation) => void | Promise<void>;
   /** Durations only (milliseconds per stage); never request data. Sink failures are ignored. */
   readonly observeTiming?: (event: RuntimeTimingObservation) => void | Promise<void>;
+  /** Fixed categories and timings only; sink failures do not alter authorization. */
+  readonly observeAuth?: (event: SafeAuthObservation) => void | Promise<void>;
+  /** Opt-in transport-only reason codes; no request data or exception text. */
+  readonly observeAuthDetailed?: (event: SafeDetailedAuthObservation) => void | Promise<void>;
 }
 /** New route only: verify the exact issuer and phase before consulting candidate authorities. */
 export function currentPageBudgetScope(
@@ -997,8 +1027,35 @@ export class NativeRuntimeApi {
         },
         sessions: {
           verifyUserBearer: async (token, now) => {
-            const auth = new SupabaseNativeAuth(basic().auth, this.fetcher);
-            return await new BoundVerifiedSessionProvider(auth, auth).verifyUserBearer(token, now);
+            if (request.signal.aborted) throw new AccessError("auth_unavailable", 503);
+            let lookup: SafeProfileLookupObservation | undefined;
+            let adminReason: AdminExceptionReason | null = null;
+            const auth = new SupabaseNativeAuth(
+              basic().auth,
+              this.fetcher,
+              (event) => {
+                lookup = event;
+              },
+              detailedAuthObserver(requestId, this.config.observeAuthDetailed),
+              request.signal,
+            );
+            const user = await new BoundVerifiedSessionProvider(auth, auth, (reason) => {
+              adminReason = reason;
+            }).verifyUserBearer(token, now);
+            if (request.signal.aborted) throw new AccessError("auth_unavailable", 503);
+            if (lookup && this.config.observeAuth) {
+              try {
+                const event: SafeAuthObservation = Object.freeze({
+                  kind: "profile_lookup",
+                  request_id: requestId,
+                  ...lookup,
+                  admin_exception_reason: adminReason,
+                });
+                void Promise.resolve(this.config.observeAuth(event)).catch(() => {});
+              } catch { /* Observation never changes authorization. */ }
+            }
+            if (request.signal.aborted) throw new AccessError("auth_unavailable", 503);
+            return user;
           },
         },
         passes: {
@@ -1047,7 +1104,7 @@ export class NativeRuntimeApi {
             }
           },
         },
-      });
+      }, requestId);
       const response = await handler(request);
       // Handler error responses are already safe; keep their status, request ID and headers.
       // Successful/redirect-class representations include conditional 304 and must be current.

@@ -85,7 +85,7 @@
         "supabase/functions/_shared/jungsi/domain/total_model.ts": "3d4d810703481517f8f60b0fc3efe2f3042deaf930e10a81d2f1e78214b21953",
         "supabase/functions/_shared/jungsi/domain/university_distribution.ts": "0e65df0c643c91d9420d0e95b5d55b1f4274cfdf52c272c788a5718ab7854820",
         "supabase/functions/_shared/jungsi/domain/year_equating.ts": "552a92a2d216ef85754167fd153bfd3f5a7b70b1967f8c189db77e5fdaf1ef25",
-        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
+        "supabase/functions/_shared/jungsi/infrastructure/api_http.ts": "2253b3e702077d533d9c4352e5e12c78a21a856c046a41808ea2ca2278f30612",
         "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
         "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts": "e83c4df6858c907a81a2cc3495657f577654f63c663a3dda6a55bc6f586a87ad",
         "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",

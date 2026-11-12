@@ -120,6 +120,41 @@ class SyntheticTimeoutTests(unittest.TestCase):
         self.assertFalse((destination / "retained_results_location.json").exists())
         self.assertEqual((destination / "runner.stdout").read_bytes(), b"PASS-SYN")
 
+    def test_invalid_python_receipts_never_start_edge(self):
+        workspace = self.base / "receipt_workspace"
+        for name, data in self.files.items():
+            path = workspace / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        manifest = {"format": "jungsi.retained-snapshot/v1", "snapshot": "synthetic",
+            "files": {name: hashlib.sha256(data).hexdigest() for name, data in self.files.items()}}
+        valid = {"tests_run": 1, "selected_tests": 1, "not_executed": 0,
+            "failures": 0, "errors": 0, "skipped": 0, "successful": True}
+        cases = {
+            "missing_selected": {k:v for k,v in valid.items() if k != "selected_tests"},
+            "wrong_count": {**valid, "selected_tests": 2},
+            "skipped": {**valid, "skipped": 1},
+            "missing_skipped": {k:v for k,v in valid.items() if k != "skipped"},
+            "unexecuted": {**valid, "not_executed": 1},
+            "missing_unexecuted": {k:v for k,v in valid.items() if k != "not_executed"},
+            "boolean_count": {**valid, "tests_run": True},
+            "failure": {**valid, "failures": 1},
+            "error": {**valid, "errors": 1},
+        }
+        for name, receipt in cases.items():
+            with self.subTest(name=name):
+                response = SimpleNamespace(returncode=0,
+                    stdout=("JUNGSI_TEST_RESULT=" + json.dumps(receipt) + "\n").encode(), stderr=b"")
+                with patch.object(runner, "validate_content", return_value=[]), \
+                     patch.object(runner, "classify_sources") as edge, \
+                     patch.object(runner.subprocess, "run", return_value=response) as invoke:
+                    result = runner.run_retained(workspace, manifest, self.scratch / ("invalid_" + name))
+                self.assertFalse(result["successful"])
+                self.assertTrue(result["source_preserved"])
+                self.assertEqual(result["edge"]["status"], "NOT_RUN_PYTHON_FAILED")
+                invoke.assert_called_once()
+                edge.assert_not_called()
+
     def test_inner_edge_timeout_writes_failure_and_preserves_source(self):
         workspace = self.base / "workspace"
         for name, data in self.files.items():
@@ -131,7 +166,7 @@ class SyntheticTimeoutTests(unittest.TestCase):
         manifest_path = self.base / "input_manifest.json"
         manifest_path.write_bytes(runner.encode(manifest))
         destination = self.scratch / "results"
-        python = SimpleNamespace(returncode=0, stdout=b'JUNGSI_TEST_RESULT={"tests_run":1,"failures":0,"errors":0,"skipped":0,"successful":true}\n',
+        python = SimpleNamespace(returncode=0, stdout=b'JUNGSI_TEST_RESULT={"tests_run":1,"selected_tests":1,"not_executed":0,"failures":0,"errors":0,"skipped":0,"successful":true}\n',
             stderr=b"PY-SYN-ERR")
         edge_timeout = subprocess.TimeoutExpired(["synthetic-edge"], 300,
             output=b"EDGE-SYN-OUT", stderr=b"EDGE-SYN-ERR")

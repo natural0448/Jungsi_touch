@@ -333,12 +333,16 @@ def candidate(current=None):
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
     spec = retained_legacy28_fixture(current)
     from check_project_consistency import (service_aux_registration, service_staged_registration,
-        service_wildcard_registration, current_page_route_test_registration, reference_db_registration)
+        service_wildcard_registration, current_page_route_test_registration, reference_db_registration, auth_503_registration)
     # Retain the complete new DB suite only after validating its exact registration.
     reference_suite, reference_errors = reference_db_registration(spec)
     if reference_errors:
         raise ValueError("Synthetic fixture cannot ignore invalid reference DB registration")
     reference_tests = set(reference_suite["test_paths"]) if reference_suite is not None else set()
+    auth_suite, auth_errors = auth_503_registration(spec)
+    if auth_errors:
+        raise ValueError("Synthetic fixture cannot ignore invalid authentication registration")
+    auth_tests = set(auth_suite["test_paths"]) if auth_suite is not None else set()
     # Validate the real additive suite before projecting it out of this invented legacy fixture.
     _, page_errors = current_page_route_test_registration(spec)
     if page_errors:
@@ -371,7 +375,7 @@ def candidate(current=None):
         raise ValueError('Synthetic fixture cannot ignore invalid Guide registration')
     for p in list(files):
         if (p.startswith('tests/edge/test_') and p not in spec['edge_harness']['tests']
-                and p not in guide_tests and p not in wildcard_tests and p not in reference_tests):
+                and p not in guide_tests and p not in wildcard_tests and p not in reference_tests and p not in auth_tests):
             files.pop(p)
     service = 'supabase/functions/_shared/jungsi/application/synthetic_read_view.ts'
     test = 'tests/edge/test_synthetic_read_view_extension.ts'
@@ -403,6 +407,22 @@ def candidate(current=None):
 
 
 class ReadViewExtensionContractTests(unittest.TestCase):
+    def test_legacy_read_fixture_preserves_valid_authentication_registration(self):
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        original = deepcopy(current)
+        fixture = candidate(current)
+        suite = current['supabase_deployment_contract']['live_execution']['auth_503_cancel_followup_20261112']['synthetic_suite']
+        for path in suite['test_paths']:
+            self.assertEqual(fixture['edge_harness']['files'][path], current['edge_harness']['files'][path])
+        self.assertEqual(validate_read_view_extension(fixture), [])
+        self.assertEqual(current, original)
+
+    def test_legacy_read_fixture_rejects_invalid_authentication_registration(self):
+        current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        current['supabase_deployment_contract']['live_execution']['auth_503_cancel_followup_20261112']['synthetic_suite']['test_count'] = 0
+        with self.assertRaisesRegex(ValueError, 'invalid authentication registration'):
+            candidate(current)
+
     def test_legacy_read_fixture_preserves_valid_reference_db_registration(self):
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
         original = deepcopy(current)
@@ -831,3 +851,35 @@ class ReadViewGuideFixtureCompatibilityTests(unittest.TestCase):
                     files[self.GUIDE_TEST]['layer'] = 'application'
                 with self.assertRaisesRegex(ValueError, 'cannot ignore invalid Guide registration'):
                     self.from_source(source)
+
+
+class DenoFailFastCommandTests(unittest.TestCase):
+    def test_test_command_preserves_permissions_and_junit(self):
+        argv=['deno','test','--deny-net','--deny-env','--junit-path','out.xml','suite.ts']
+        with patch.object(runner,'command',return_value=b'ok') as call:
+            self.assertEqual(runner.deno_test_command(argv,root=Path('.'),output=Path('.'),name='synthetic'),b'ok')
+        self.assertEqual(call.call_args.args[0],['deno','test','--fail-fast',*argv[2:]])
+        self.assertEqual(argv,['deno','test','--deny-net','--deny-env','--junit-path','out.xml','suite.ts'])
+
+    def test_existing_or_conflicting_failfast_options_are_rejected(self):
+        for flag in ('--fail-fast','--fail-fast=1','--fail-fast=2'):
+            with self.subTest(flag=flag), patch.object(runner,'command') as call:
+                with self.assertRaisesRegex(edge.EdgeFailure,'deno_test_fail_fast_conflict'):
+                    runner.deno_test_command(['deno','test',flag,'suite.ts'],root=Path('.'),output=Path('.'),name='synthetic')
+                call.assert_not_called()
+
+    def test_review_suite_rejects_existing_failfast_options(self):
+        import test_service_candidate_suites as support
+        binary=Path('synthetic-deno').resolve()
+        with patch.object(support,'DENO',binary), patch.object(support,'DENO_SHA256','pinned'), \
+             patch.object(support,'sha',return_value='pinned'), patch.object(support.subprocess,'run') as call:
+            for flag in ('--fail-fast','--fail-fast=1','--fail-fast=2'):
+                with self.subTest(flag=flag), self.assertRaisesRegex(ValueError,'conflicting Deno fail-fast option'):
+                    support.invoke([str(binary),'test',flag,'suite.ts'])
+            call.assert_not_called()
+
+    def test_non_test_command_is_rejected(self):
+        with patch.object(runner,'command') as call:
+            with self.assertRaisesRegex(edge.EdgeFailure,'deno_test_command_scope_invalid'):
+                runner.deno_test_command(['deno','info','--json'],root=Path('.'),output=Path('.'),name='synthetic')
+        call.assert_not_called()

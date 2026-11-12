@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "97a92acbac70577384c2fa29aa8a94945d2332322b15839e40f12cd536d37d80",
+      "source_sha256": "d4f220ab8624a04028e51c49e6aa7242679423d42d2b691a2087ea4aa142fb50",
       "symbols": [
         {
           "kind": "class",
@@ -706,6 +706,18 @@
           "kind": "function",
           "name": "_validate_observer_deployment",
           "signature": "def _validate_observer_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "auth_503_registration",
+          "signature": "def auth_503_registration(spec, source_hashes=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "auth_503_runtime_registration",
+          "signature": "def auth_503_runtime_registration(spec, source_hashes=None):",
           "decorators": []
         },
         {
@@ -1669,7 +1681,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "0b561393bd12493a1ca65913a13f33d32fa678914bde4efa14e112fe652de8f2",
+      "source_sha256": "e96791e5647af26fa7f30ae358d70c5ea986f1ddc9d15691660be2de71c83518",
       "symbols": [
         {
           "kind": "class",
@@ -1897,12 +1909,24 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "aeb3156c59e87d2d70dbe05cf6fcb772c3abe53fbe1161a645c00fb01bcf482a",
+      "source_sha256": "a0df9b3b583beaaaeaf55416360a07fdeb4e027ddd26834325609ea11199d038",
       "symbols": [
         {
           "kind": "function",
           "name": "additional_p1_unit_flags",
           "signature": "def additional_p1_unit_flags(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "auth_503_runtime_unit_required",
+          "signature": "def auth_503_runtime_unit_required(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "auth_503_unit_required",
+          "signature": "def auth_503_unit_required(spec):",
           "decorators": []
         },
         {
@@ -1962,7 +1986,13 @@
         {
           "kind": "function",
           "name": "summarize_edge_units",
-          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None):",
+          "signature": "def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False, p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None, auth_503_required=False, auth_503_runtime_required=False):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "valid_python_receipt",
+          "signature": "def valid_python_receipt(receipt):",
           "decorators": []
         }
       ]
@@ -1972,7 +2002,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "7b243275991a44dfc90fd19a0b81421d28e6dc40c263ea344cdf4433e29392c5",
+      "source_sha256": "3a167ab603c4638cae430df64befa8c3c05571fc544e9dfdc46affa4609eccc4",
       "symbols": [
         {
           "kind": "function",
@@ -2186,6 +2216,12 @@
         },
         {
           "kind": "function",
+          "name": "deno_test_command",
+          "signature": "def deno_test_command(argv, **kwargs):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "main",
           "signature": "def main():",
           "decorators": []
@@ -2330,6 +2366,12 @@
         },
         {
           "kind": "function",
+          "name": "require_no_auth_runtime_overlap",
+          "signature": "def require_no_auth_runtime_overlap(path, runtime_suite):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
           "name": "require_no_recovery_cases",
           "signature": "def require_no_recovery_cases(path, excluded):",
           "decorators": []
@@ -2386,6 +2428,12 @@
           "kind": "function",
           "name": "service_end_synthetic_registration",
           "signature": "def service_end_synthetic_registration(spec, before):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "split_auth_runtime_foundation",
+          "signature": "def split_auth_runtime_foundation(path, expected_foundation, runtime_suite):",
           "decorators": []
         },
         {
@@ -10576,12 +10624,28 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
+        "source_sha256": "2253b3e702077d533d9c4352e5e12c78a21a856c046a41808ea2ca2278f30612",
         "declared_exports": [
           "API_REQUEST_STAGES",
           "ApiHttpPorts",
           "ApiRequestStage",
           "createApiHandler"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts",
+        "layer": "data_infrastructure",
+        "status": "source_candidate_synthetic_verified_native_deployment_NOT_RUN",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "88b7fa8eeb52eec3507175c5359123d7eaa164c2871eb7d4ed5d15223f3b69d4",
+        "declared_exports": [
+          "SafeExchangeObservation",
+          "observeAuthExchange"
         ]
       },
       {
@@ -11629,7 +11693,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
+        "source_sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969",
         "declared_exports": [
           "NativeRuntimeApi",
           "REFERENCE_TAIL_PREFETCH_CONCURRENCY",
@@ -11637,6 +11701,7 @@
           "REFERENCE_TAIL_REQUEST_OBJECTS",
           "RuntimeComposition",
           "RuntimeRoutePolicy",
+          "SafeAuthObservation",
           "SafeRuntimeObservation",
           "currentPageBudgetScope",
           "observeRuntimeResponse",
@@ -11713,7 +11778,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
+        "source_sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2",
         "declared_exports": [
           "RuntimeReadBudget",
           "SupabaseRuntimeControls"
@@ -12101,10 +12166,11 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
+        "source_sha256": "0c57f601630dc645045827cb06831f404acaa87962c432236d574cfc5556fbeb",
         "declared_exports": [
           "SupabaseAuthSettings",
-          "SupabaseNativeAuth"
+          "SupabaseNativeAuth",
+          "SafeProfileLookupObservation"
         ]
       },
       {
@@ -12199,14 +12265,16 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "8f08df5c2f455b363d27fb07ea2ea5ec69c623424d328672eb587d61d539ce30",
+        "source_sha256": "7a3c856d9341a01a18a16d59f8c4a55a1dd557b5677e5a53ea3574c9379bd04e",
         "declared_exports": [
           "NativeSessionReceipt",
           "NativeSessionVerificationPort",
           "OwnProfileReceipt",
           "OwnProfileVerificationPort",
           "bearerSha256",
-          "BoundVerifiedSessionProvider"
+          "BoundVerifiedSessionProvider",
+          "AdminExceptionReason",
+          "AdminExceptionObserver"
         ]
       },
       {
@@ -12619,7 +12687,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "278bc1a47635f7dfbe2bc78ba89e5a1f5266134d141a2878411e0f21369be18a",
+        "source_sha256": "f5ff89c5411086395617c1f07b7a5e89d4d6a7e640f3af3e5e18a886366122a1",
         "declared_exports": []
       },
       {

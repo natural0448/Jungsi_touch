@@ -31,8 +31,9 @@ class ProgressResult(unittest.TextTestResult):
             self.stream.write('JUNGSI_TEST_PROGRESS='+json.dumps(dict(test_number=self.testsRun,test_id=self.progress_id,phase='complete',elapsed_seconds=round(elapsed,3)))+chr(10))
             self.stream.flush()
         super().stopTest(test)
-result=unittest.TextTestRunner(verbosity=1,resultclass=ProgressResult).run(suite)
-print('JUNGSI_TEST_RESULT='+json.dumps(dict(tests_run=result.testsRun,failures=len(result.failures),errors=len(result.errors),skipped=len(result.skipped),successful=result.wasSuccessful())))
+selected_tests=suite.countTestCases()
+result=unittest.TextTestRunner(verbosity=1,resultclass=ProgressResult,failfast=True).run(suite)
+print('JUNGSI_TEST_RESULT='+json.dumps(dict(tests_run=result.testsRun,selected_tests=selected_tests,not_executed=max(0,selected_tests-result.testsRun),failures=len(result.failures),errors=len(result.errors),skipped=len(result.skipped),successful=result.wasSuccessful())))
 sys.exit(0 if result.wasSuccessful() else 1)
 """
 def encode(data):return (json.dumps(data,ensure_ascii=False,sort_keys=True,indent=2)+"\n").encode()
@@ -54,15 +55,16 @@ EDGE_UNIT_KEYS = frozenset({
     "read_view_extension_unit", "professional_unit", "school_reference_unit",
     "member_shortlist_unit", "incident_recovery_unit", "service_candidate_aux_unit", "service_staged_aux_unit", "service_wildcard_unit",
     "p1_recruitment_score_review_unit", "p1_selection_bridge_review_unit", "service_end_score_cutoff_unit",
-    "cursor_contract_review_unit", "reference_db_unit",
+    "cursor_contract_review_unit", "reference_db_unit", "auth_503_unit", "auth_503_runtime_unit",
 })
 
 def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary_required=False, staged_required=False, wildcard_required=False,
-                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None):
+                         p1_review_required=False, p1_selection_required=False, service_end_required=False, cursor_required=False, reference_db_count=None, auth_503_required=False, auth_503_runtime_required=False):
     """Count all executed, separately registered Edge suites; keep oracle cases separate."""
     if (not isinstance(edge,dict) or type(expected_foundation)is not int or expected_foundation<1 or
         any(type(flag) is not bool for flag in (recovery_required,auxiliary_required,staged_required,wildcard_required,
-            p1_review_required,p1_selection_required,service_end_required,cursor_required))):raise ValueError("edge_count_input_invalid")
+            p1_review_required,p1_selection_required,service_end_required,cursor_required,auth_503_required,auth_503_runtime_required))):raise ValueError("edge_count_input_invalid")
+    if auth_503_runtime_required and not auth_503_required:raise ValueError("edge_runtime_without_auth_invalid")
     if reference_db_count is not None and (type(reference_db_count) is not int or reference_db_count < 1):
         raise ValueError("reference_db_count_invalid")
     keys={name for name in edge if name=="unit" or name.endswith("_unit")}
@@ -75,7 +77,9 @@ def summarize_edge_units(edge, expected_foundation, recovery_required, auxiliary
     additional=(("p1_recruitment_score_review_unit",p1_review_required,72),
         ("p1_selection_bridge_review_unit",p1_selection_required,17),
         ("service_end_score_cutoff_unit",service_end_required,3),
-        ("cursor_contract_review_unit",cursor_required,22))
+        ("cursor_contract_review_unit",cursor_required,22),
+        ("auth_503_unit",auth_503_required,27),
+        ("auth_503_runtime_unit",auth_503_runtime_required,5))
     for name,required,_ in additional:
         if (name in keys)!=required:raise ValueError("edge_additional_unit_missing_or_unregistered:"+name)
     counts={}
@@ -107,6 +111,26 @@ def cursor_unit_required(spec):
     if not isinstance(spec,dict):raise ValueError("edge_count_spec_invalid")
     return "cursor_contract_offline_graph_verification" in spec
 
+def auth_503_unit_required(spec):
+    """An existing historical spec has no new auth suite; registered suites are mandatory."""
+    if not isinstance(spec,dict):raise ValueError("auth_503_spec_invalid")
+    live=spec.get("supabase_deployment_contract",{}).get("live_execution",{})
+    if not isinstance(live,dict):raise ValueError("auth_503_spec_invalid")
+    followup=live.get("auth_503_cancel_followup_20261112")
+    if followup is None:return False
+    if not isinstance(followup,dict):raise ValueError("auth_503_spec_invalid")
+    return "synthetic_suite" in followup
+
+def auth_503_runtime_unit_required(spec):
+    """Keep historic 27-only registrations valid; require the five when registered."""
+    if not isinstance(spec,dict):raise ValueError("auth_503_spec_invalid")
+    live=spec.get("supabase_deployment_contract",{}).get("live_execution",{})
+    if not isinstance(live,dict):raise ValueError("auth_503_spec_invalid")
+    followup=live.get("auth_503_cancel_followup_20261112")
+    if followup is None:return False
+    if not isinstance(followup,dict):raise ValueError("auth_503_spec_invalid")
+    return "runtime_integration_suite" in followup
+
 def reference_db_unit_count(spec):
     """Require the exact additive reference suite only when registered in this snapshot."""
     if not isinstance(spec,dict):raise ValueError("reference_db_spec_invalid")
@@ -121,6 +145,17 @@ def suite_python_environment(base,deno,scratch):
     if not deno or not Path(deno).is_absolute() or not Path(scratch).is_absolute():
         raise ValueError("Explicit absolute Deno and suite scratch are required")
     return {**base,"JUNGSI_DENO":str(deno),"JUNGSI_REVIEW_SUITE_SCRATCH":str(scratch)}
+
+def valid_python_receipt(receipt):
+    """Accept only a complete, non-skipped execution of every selected test."""
+    if not isinstance(receipt,dict) or receipt.get("successful") is not True:
+        return False
+    keys=("selected_tests","tests_run","not_executed","failures","errors","skipped")
+    if any(type(receipt.get(key)) is not int or receipt[key]<0 for key in keys):
+        return False
+    return (receipt["selected_tests"]>0 and receipt["tests_run"]==receipt["selected_tests"] and
+            receipt["not_executed"]==0 and receipt["failures"]==0 and
+            receipt["errors"]==0 and receipt["skipped"]==0)
 
 def run_retained(workspace,manifest,destination,deno=None):
     workspace=Path(workspace).resolve();destination=Path(destination)
@@ -153,7 +188,7 @@ def run_retained(workspace,manifest,destination,deno=None):
     if len(lines)!=1:python=dict(successful=False,missing_or_duplicate_test_result=True)
     else:python=json.loads(lines[0].split("=",1)[1])
     python["exit_code"]=result.returncode
-    py_ok=result.returncode==0 and python.get("successful") is True and python.get("tests_run",0)>0 and python.get("skipped",0)==0
+    py_ok=result.returncode==0 and valid_python_receipt(python)
     if not py_ok:
         summary=dict(format="jungsi.combined-snapshot-tests/v1",successful=False,python=python,edge=dict(status="NOT_RUN_PYTHON_FAILED"),source_manifest_sha256=hashlib.sha256(encode(manifest)).hexdigest())
     else:
@@ -183,7 +218,9 @@ def run_retained(workspace,manifest,destination,deno=None):
                         staged_required=selected_spec.get("backend_platform_contract",{}).get("service_staged_test_extension") is not None
                         wildcard_required=selected_spec.get("backend_platform_contract",{}).get("service_wildcard_test_extension") is not None
                         counts=summarize_edge_units(edge,selected_spec["edge_harness"]["unit_count"],recovery_required,auxiliary_required,staged_required,wildcard_required,
-                            cursor_required=cursor_unit_required(selected_spec),reference_db_count=reference_db_unit_count(selected_spec),**additional_p1_unit_flags(selected_spec))
+                            cursor_required=cursor_unit_required(selected_spec),reference_db_count=reference_db_unit_count(selected_spec),
+                            auth_503_required=auth_503_unit_required(selected_spec),
+                            auth_503_runtime_required=auth_503_runtime_unit_required(selected_spec),**additional_p1_unit_flags(selected_spec))
                         edge["total_tests"]=counts["total_tests"]
                         edge["unit_counts"]=counts["by_suite"]
                     except (KeyError,TypeError,ValueError) as error:

@@ -1560,6 +1560,114 @@ def reference_db_registration(spec, source_hashes=None):
         return None, [error]
 
 
+
+AUTH_503_TEST_PATH = "tests/edge/test_auth_exchange_observation.synthetic.ts"
+AUTH_503_SOURCE_PATHS = ('supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts', 'supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts', 'tests/edge/test_auth_exchange_observation.synthetic.ts')
+AUTH_503_CASE_NAMES = ('auth diagnostic records status and preserves result without logging input', 'non-200 status is distinct from fast transport failure', 'observer errors never change successful results', 'a successful operation with no recorded status is not labeled HTTP success', 'five-second deadline is retained and classified as timeout', 'opt-in native auth diagnostic preserves 503 and does not read a profile', 'opt-in profile diagnostic preserves fail-closed profile behavior', 'auth rejection statuses remain null and diagnostic identifies only the request', 'invalid auth JSON fails closed and invalid profile shape remains null', 'slow diagnostic sink never blocks authentication result', 'received bearer denial remains rejected when body cancellation crosses deadline', 'profile timeout remains unverified and is classified separately', 'cancelled HTTP request aborts auth exchange without being reported as timeout', 'request cancellation reaches native auth and own profile transport', 'already cancelled request never starts the auth operation', 'request abort during a diagnostic observer cannot return native receipts', 'request abort remains first cause even if the local deadline also fires', 'request abort does not wait indefinitely for rejected response body cleanup', 'known bearer denial stays denied when body cleanup exceeds the existing deadline', 'known bearer denial is preserved when response cleanup rejects', 'caller abort takes priority when denied response cleanup rejects', 'caller abort bounds a fetch that ignores its signal', 'caller abort bounds a successful response body that ignores cancellation', 'caller abort bounds cleanup of an oversized declared response', 'late successful auth fetch cannot authenticate after caller abort', 'deadline bounds a fetch that ignores cancellation and reports timeout', 'late transport rejection after request abort is observed')
+
+def auth_503_registration(spec, source_hashes=None):
+    """Register only the separately receipted synthetic authentication suite."""
+    error = "AUTH-503 exact synthetic registration invalid"
+    try:
+        files = spec.get("edge_harness", {}).get("files", {})
+        tests = spec.get("edge_harness", {}).get("tests", [])
+        live = spec.get("supabase_deployment_contract", {}).get("live_execution", {})
+        if not isinstance(live, dict): raise ValueError("live execution")
+        present = "auth_503_cancel_followup_20261112" in live
+        followup = live.get("auth_503_cancel_followup_20261112")
+        if present and not isinstance(followup, dict): raise ValueError("followup")
+        suite = followup.get("synthetic_suite") if present else None
+        if not isinstance(files, dict) or not isinstance(tests, list): raise ValueError("harness")
+        if not present and suite is None and AUTH_503_TEST_PATH not in files: return None, []
+        expected = {"format", "status", "baseline_foundation_count", "test_paths", "test_count", "case_names_by_path", "source_bindings", "native_acceptance", "activation_status", "operating_writes"}
+        if not isinstance(suite, dict) or set(suite) != expected: raise ValueError("shape")
+        if (suite["format"] != "jungsi.auth-503-synthetic-suite/v1" or
+            suite["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+            type(suite["baseline_foundation_count"]) is not int or suite["baseline_foundation_count"] != 656 or
+            suite["test_paths"] != [AUTH_503_TEST_PATH] or
+            type(suite["test_count"]) is not int or suite["test_count"] != len(AUTH_503_CASE_NAMES) or
+            suite["case_names_by_path"] != {AUTH_503_TEST_PATH: list(AUTH_503_CASE_NAMES)} or
+            suite["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            suite["activation_status"] != "NOT_RUN" or type(suite["operating_writes"]) is not int or suite["operating_writes"] != 0 or
+            AUTH_503_TEST_PATH in tests or files.get(AUTH_503_TEST_PATH, {}).get("layer") != "verification"):
+            raise ValueError("boundary")
+        bindings=suite["source_bindings"]
+        if not isinstance(bindings,list) or len(bindings)!=len(AUTH_503_SOURCE_PATHS): raise ValueError("bindings")
+        if any(not isinstance(b,dict) or set(b)!={"path","sha256"} for b in bindings): raise ValueError("binding shape")
+        if {b["path"] for b in bindings} != set(AUTH_503_SOURCE_PATHS): raise ValueError("binding scope")
+        indexed={p:r.get("declarations",{}).get("source_sha256") for p,r in files.items() if isinstance(r,dict)}
+        code=spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{}).get("files",[])
+        if not isinstance(code,list): raise ValueError("index")
+        indexed.update({r["path"]:r.get("source_sha256") for r in code if isinstance(r,dict) and isinstance(r.get("path"),str)})
+        for binding in bindings:
+            path,sha=binding["path"],binding["sha256"]
+            if not isinstance(sha,str) or not re.fullmatch(r"[a-f0-9]{64}",sha) or indexed.get(path)!=sha: raise ValueError("index binding")
+            if source_hashes is not None and source_hashes.get(path)!=sha: raise ValueError("snapshot binding")
+        return suite, []
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return None, [error]
+
+
+AUTH_503_RUNTIME_TEST_PATH = "tests/edge/test_runtime_composition.ts"
+AUTH_503_RUNTIME_BASELINE_NAMES_SHA256 = "60070225139890938692563a8afe0cbe42344a87023764ed041c9c3f53123824"
+AUTH_503_RUNTIME_CASE_NAMES = (
+    "synthetic /me auth failure correlates response and safe observations",
+    "synthetic /me entitlement failure is distinguishable after successful auth",
+    "synthetic concurrent /me failures ignore client request ids and stay separate",
+    "HTTP request abort reaches native authentication and cannot return success",
+    "abort from synchronous auth observer cannot return a session",
+)
+
+def auth_503_runtime_registration(spec, source_hashes=None):
+    """Bind five additive runtime cases while retaining the existing foundation."""
+    error = "AUTH-503 runtime integration registration invalid"
+    try:
+        live = spec.get("supabase_deployment_contract", {}).get("live_execution", {})
+        if not isinstance(live, dict): raise ValueError("live execution")
+        if "auth_503_cancel_followup_20261112" not in live: return None, []
+        followup = live.get("auth_503_cancel_followup_20261112")
+        if not isinstance(followup, dict): raise ValueError("followup")
+        auth, auth_errors = auth_503_registration(spec, source_hashes)
+        if auth_errors or auth is None: raise ValueError("auth suite")
+        # Historic 27-only auth registrations remain valid. If five runtime
+        # cases exist without this addition, the frozen 656-case JUnit gate fails.
+        if "runtime_integration_suite" not in followup: return None, []
+        suite = followup.get("runtime_integration_suite")
+        expected = {"format", "status", "baseline_foundation_count", "baseline_runtime_count",
+                    "baseline_runtime_names_sha256", "test_path", "test_count", "case_names",
+                    "test_source_sha256", "native_acceptance", "activation_status", "operating_writes"}
+        if not isinstance(suite, dict) or set(suite) != expected: raise ValueError("shape")
+        if (suite["format"] != "jungsi.auth-503-runtime-integration/v1" or
+            suite["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+            type(suite["baseline_foundation_count"]) is not int or suite["baseline_foundation_count"] != 656 or
+            type(suite["baseline_runtime_count"]) is not int or suite["baseline_runtime_count"] != 25 or
+            suite["baseline_runtime_names_sha256"] != AUTH_503_RUNTIME_BASELINE_NAMES_SHA256 or
+            suite["test_path"] != AUTH_503_RUNTIME_TEST_PATH or
+            type(suite["test_count"]) is not int or suite["test_count"] != len(AUTH_503_RUNTIME_CASE_NAMES) or
+            suite["case_names"] != list(AUTH_503_RUNTIME_CASE_NAMES) or
+            suite["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            suite["activation_status"] != "NOT_RUN" or type(suite["operating_writes"]) is not int or suite["operating_writes"] != 0):
+            raise ValueError("boundary")
+        cfg = spec.get("edge_harness", {})
+        files, tests = cfg.get("files"), cfg.get("tests")
+        sha = suite["test_source_sha256"]
+        if (not isinstance(files, dict) or not isinstance(tests, list) or
+            tests.count(AUTH_503_RUNTIME_TEST_PATH) != 1 or type(cfg.get("unit_count")) is not int or
+            cfg["unit_count"] != 656 or len(tests) != 44 or not isinstance(sha, str) or
+            not re.fullmatch(r"[a-f0-9]{64}", sha) or
+            files.get(AUTH_503_RUNTIME_TEST_PATH, {}).get("declarations", {}).get("source_sha256") != sha):
+            raise ValueError("foundation binding")
+        entries = spec.get("workflow", {}).get("documentation_sync", {}).get("code_index", {}).get("edge_sources", {}).get("files", [])
+        if not isinstance(entries, list): raise ValueError("source index")
+        matched = [item for item in entries if isinstance(item, dict) and item.get("path") == AUTH_503_RUNTIME_TEST_PATH]
+        if len(matched) > 1 or matched and matched[0].get("source_sha256") != sha: raise ValueError("source index binding")
+        if source_hashes is not None and source_hashes.get(AUTH_503_RUNTIME_TEST_PATH) != sha: raise ValueError("snapshot binding")
+        auth_names = {name for names in auth["case_names_by_path"].values() for name in names}
+        if auth_names.intersection(AUTH_503_RUNTIME_CASE_NAMES): raise ValueError("overlapping auth cases")
+        return suite, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1595,6 +1703,11 @@ def validate_read_view_extension(spec):
     reference_db, reference_db_errors = reference_db_registration(spec)
     if reference_db is not None: separate_tests -= set(reference_db["test_paths"])
     professional_errors += reference_db_errors
+    auth_503, auth_503_errors=auth_503_registration(spec)
+    if auth_503 is not None:separate_tests-=set(auth_503["test_paths"])
+    professional_errors+=auth_503_errors
+    _auth_runtime, auth_runtime_errors=auth_503_runtime_registration(spec)
+    professional_errors+=auth_runtime_errors
     page_tests,page_errors=current_page_route_test_registration(spec)
     separate_tests-=page_tests
     professional_errors+=page_errors

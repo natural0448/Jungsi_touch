@@ -383,7 +383,12 @@ async function management(
 export function createApiHandler(
   policies: readonly ApiRoutePolicy[],
   ports: ApiHttpPorts,
+  internalRequestId?: string,
 ): (request: Request) => Promise<Response> {
+  // Internal runtime-generated correlation only; never derive this value from a client header.
+  if (internalRequestId !== undefined && !/^[a-f0-9]{32}$/.test(internalRequestId)) {
+    configuration();
+  }
   const candidates = policies.filter((p) => p?.id === CURRENT_PAGE_OPERATION_ID);
   const currentPageEnabled = candidates.length === 1 && isCurrentPagePolicy(candidates[0]) &&
     !!ports.readViewScope && typeof ports.currentPageScope?.assert === "function" &&
@@ -433,7 +438,7 @@ export function createApiHandler(
     typeof ports.business.execute !== "function"
   ) configuration();
   return async (request) => {
-    const requestId = crypto.randomUUID().replaceAll("-", "");
+    const requestId = internalRequestId ?? crypto.randomUUID().replaceAll("-", "");
     const stage = (value: ApiRequestStage) => {
       try {
         const pending: unknown = ports.onStage?.(value);

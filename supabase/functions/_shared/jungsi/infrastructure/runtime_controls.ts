@@ -81,6 +81,15 @@ export class RuntimeReadBudget {
     this.bytes += bytes;
     this.reusedArtifacts++;
   }
+  /** Reused control metadata is still charged as a logical read and its full byte size. */
+  reuseControl(bytes: number): void {
+    if (
+      this.requests >= this.limits.maxRequests || !Number.isSafeInteger(bytes) || bytes < 1 ||
+      bytes > this.limits.maxBytes - this.bytes
+    ) fail();
+    this.requests++;
+    this.bytes += bytes;
+  }
   snapshot(): Readonly<{
     requests: number;
     bytes: number;
@@ -246,16 +255,51 @@ export class SupabaseRuntimeControls implements NativeSelectionHeadPort {
       signal?.removeEventListener("abort", stop);
     }
   }
+  private recentBucket?: {
+    readonly startedMs: number;
+    readonly signal?: AbortSignal;
+    readonly raw: Promise<Uint8Array<ArrayBuffer>>;
+    complete: boolean;
+  };
+  /** Only identical in-flight checks may share work; completed checks are never reused. */
+  private async bucketMetadata(signal?: AbortSignal): Promise<Uint8Array<ArrayBuffer>> {
+    this.assertLive();
+    if (signal?.aborted) fail();
+    const now = performance.now(), recent = this.recentBucket;
+    if (
+      recent && !recent.complete && recent.signal === signal && Number.isFinite(now) &&
+      now >= recent.startedMs && now - recent.startedMs < STORAGE_CHECK_REUSE_MS
+    ) {
+      const raw = await recent.raw;
+      if (signal?.aborted) fail();
+      this.assertLive();
+      this.readBudget.reuseControl(raw.length);
+      return raw;
+    }
+    const raw = this.get(
+      "bucket/" + encodeURIComponent(this.binding.storage.bucket),
+      this.binding.storage.limits.maxMetadataBytes,
+      signal,
+    );
+    const entry = { startedMs: now, signal, raw, complete: false };
+    this.recentBucket = entry;
+    try {
+      const value = await raw;
+      if (signal?.aborted) fail();
+      this.assertLive();
+      entry.complete = true;
+      return value;
+    } catch (error) {
+      if (this.recentBucket === entry) this.recentBucket = undefined;
+      throw error;
+    }
+  }
   async read(name: ControlSourceName, signal?: AbortSignal): Promise<Uint8Array<ArrayBuffer>> {
     const reference = this.binding.references[name];
     if (!reference) fail();
     const bucket = this.binding.storage.bucket;
     const metadata = object(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(
-      await this.get(
-        "bucket/" + encodeURIComponent(bucket),
-        this.binding.storage.limits.maxMetadataBytes,
-        signal,
-      ),
+      await this.bucketMetadata(signal),
     )));
     const cap = metadata.file_size_limit;
     if (

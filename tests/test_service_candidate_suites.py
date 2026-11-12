@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "7b97489ca7666aacb3341ad9f1f48d16ce0e728074e4016dfbd706f8bb33a9f9"
+MANIFEST_SHA256 = "36726bd9de89ba7163541fb99a9ac576a88494d05153774b0dc473578339be80"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -149,6 +149,10 @@ def invoke(args, timeout=90):
     if (DENO is None or DENO_SHA256 is None or not args or Path(args[0]).resolve() != DENO or
             sha(DENO) != DENO_SHA256):
         raise ValueError("Deno changed or not validated")
+    if len(args)>1 and args[1]=="test":
+        if any(isinstance(arg,str) and (arg=="--fail-fast" or arg.startswith("--fail-fast=")) for arg in args[2:]):
+            raise ValueError("conflicting Deno fail-fast option")
+        args=[*args[:2],"--fail-fast",*args[2:]]
     result = subprocess.run(args, cwd=ROOT, env=isolated_env(), capture_output=True, timeout=timeout)
     if result.returncode != 0:
         raise AssertionError("child failed " + str(result.returncode) + ": " +

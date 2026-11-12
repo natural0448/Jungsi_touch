@@ -107800,7 +107800,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "e6dde85ba899b45fc7843dd688e1edc78f716155fccfe401f448123f8ec9fb09",
+        "source_sha256": "2253b3e702077d533d9c4352e5e12c78a21a856c046a41808ea2ca2278f30612",
         "symbols": [
           {
             "declarations": [
@@ -109220,7 +109220,7 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(\n  policies: readonly ApiRoutePolicy[],\n  ports: ApiHttpPorts,\n)",
+                  "parameter_source": "(\n  policies: readonly ApiRoutePolicy[],\n  ports: ApiHttpPorts,\n  internalRequestId?: string,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -109261,6 +109261,16 @@
                           },
                           "typeName": "ApiHttpPorts"
                         }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "internalRequestId",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
                       }
                     }
                   ],
@@ -109936,6 +109946,343 @@
         "ApiHttpPorts",
         "ApiRequestStage",
         "createApiHandler"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts": {
+      "declarations": {
+        "imports": [],
+        "source_sha256": "88b7fa8eeb52eec3507175c5359123d7eaa164c2871eb7d4ed5d15223f3b69d4",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "kind",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "auth_lookup",
+                            "value": {
+                              "kind": "string",
+                              "string": "auth_lookup"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "profile_lookup",
+                            "value": {
+                              "kind": "string",
+                              "string": "profile_lookup"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "outcome",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "ok",
+                            "value": {
+                              "kind": "string",
+                              "string": "ok"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "http_status",
+                            "value": {
+                              "kind": "string",
+                              "string": "http_status"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "timeout",
+                            "value": {
+                              "kind": "string",
+                              "string": "timeout"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "request_failed",
+                            "value": {
+                              "kind": "string",
+                              "string": "request_failed"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "status_unobserved",
+                            "value": {
+                              "kind": "string",
+                              "string": "status_unobserved"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "http_status",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "elapsed_ms",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SafeExchangeObservation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  kind: SafeExchangeObservation[\"kind\"],\n  operation: (signal: AbortSignal, recordStatus: (status: number) => void) => Promise<T>,\n  observe?: (event: SafeExchangeObservation) => void | Promise<void>,\n  requestSignal?: AbortSignal,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "kind",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "kind",
+                            "value": {
+                              "kind": "string",
+                              "string": "kind"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "SafeExchangeObservation",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "SafeExchangeObservation"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "operation",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "recordStatus",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [
+                                    {
+                                      "kind": "identifier",
+                                      "name": "status",
+                                      "optional": false,
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "number",
+                                        "value": "number"
+                                      }
+                                    }
+                                  ],
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "void",
+                                    "value": "void"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "T",
+                                  "value": {
+                                    "resolution": {
+                                      "declaringKind": "function",
+                                      "declaringName": "observeAuthExchange",
+                                      "kind": "typeParam"
+                                    },
+                                    "typeName": "T"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "observe",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "event",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SafeExchangeObservation",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "SafeExchangeObservation"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "requestSignal",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "T",
+                          "value": {
+                            "resolution": {
+                              "declaringKind": "function",
+                              "declaringName": "observeAuthExchange",
+                              "kind": "typeParam"
+                            },
+                            "typeName": "T"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "typeParams": [
+                    {
+                      "name": "T"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "observeAuthExchange"
+          }
+        ]
+      },
+      "dependencies": [],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "SafeExchangeObservation",
+        "observeAuthExchange"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": {
@@ -154771,6 +155118,11 @@
             "src": "supabase/functions/_shared/jungsi/application/access.ts"
           },
           {
+            "importedName": "AdminExceptionReason",
+            "originalName": "AdminExceptionReason",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+          },
+          {
             "importedName": "ApiBusinessPort",
             "originalName": "ApiBusinessPort",
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
@@ -155016,6 +155368,16 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
+            "importedName": "SafeExchangeObservation",
+            "originalName": "SafeExchangeObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+          },
+          {
+            "importedName": "SafeProfileLookupObservation",
+            "originalName": "SafeProfileLookupObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
+          },
+          {
             "importedName": "ScoreInputService",
             "originalName": "ScoreInputService",
             "src": "supabase/functions/_shared/jungsi/application/score_input_service.ts"
@@ -155174,7 +155536,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "2bff43e6f6e4a8f0647ad68e771dac90e2f2f549ee6f96a8e050570e9e399567",
+        "source_sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969",
         "symbols": [
           {
             "declarations": [
@@ -155469,6 +155831,255 @@
               }
             ],
             "name": "RuntimeTimingObservation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "extends": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "SafeProfileLookupObservation",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "SafeProfileLookupObservation",
+                          "specifier": "./supabase_auth.ts"
+                        },
+                        "typeName": "SafeProfileLookupObservation"
+                      }
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "name": "kind",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "literal",
+                        "repr": "profile_lookup",
+                        "value": {
+                          "kind": "string",
+                          "string": "profile_lookup"
+                        }
+                      }
+                    },
+                    {
+                      "name": "request_id",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "admin_exception_reason",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "AdminExceptionReason",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "AdminExceptionReason",
+                                "specifier": "./verified_session.ts"
+                              },
+                              "typeName": "AdminExceptionReason"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SafeAuthObservation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "extends": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "SafeExchangeObservation",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "SafeExchangeObservation",
+                          "specifier": "./auth_exchange_observation.ts"
+                        },
+                        "typeName": "SafeExchangeObservation"
+                      }
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "name": "request_id",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SafeDetailedAuthObservation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  requestId: string,\n  sink?: (event: SafeDetailedAuthObservation) => void | Promise<void>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "requestId",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "sink",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "event",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SafeDetailedAuthObservation",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "SafeDetailedAuthObservation"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "parenthesized",
+                        "value": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "event",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "SafeExchangeObservation",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "SafeExchangeObservation",
+                                      "specifier": "./auth_exchange_observation.ts"
+                                    },
+                                    "typeName": "SafeExchangeObservation"
+                                  }
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                },
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "void",
+                                        "value": "void"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "undefined",
+                        "value": "undefined"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "detailedAuthObserver"
           },
           {
             "declarations": [
@@ -156086,6 +156697,110 @@
                                     "kind": "local"
                                   },
                                   "typeName": "RuntimeTimingObservation"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "observeAuth",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "event",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SafeAuthObservation",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "SafeAuthObservation"
+                                }
+                              }
+                            }
+                          ],
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "void",
+                                      "value": "void"
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "observeAuthDetailed",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "event",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SafeDetailedAuthObservation",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "SafeDetailedAuthObservation"
                                 }
                               }
                             }
@@ -157733,6 +158448,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "./auth_exchange_observation.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./auth_relay.ts",
           "targets": [
             {
@@ -157960,6 +158685,7 @@
         "REFERENCE_TAIL_REQUEST_OBJECTS",
         "RuntimeComposition",
         "RuntimeRoutePolicy",
+        "SafeAuthObservation",
         "SafeRuntimeObservation",
         "currentPageBudgetScope",
         "observeRuntimeResponse",
@@ -160031,7 +160757,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "17f5206934a666de23b03655d9ad2eda048d7dba010d41980462e47381746eb2",
+        "source_sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2",
         "symbols": [
           {
             "declarations": [
@@ -160209,6 +160935,30 @@
                       },
                       "kind": "method",
                       "name": "reuseArtifact"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      },
+                      "kind": "method",
+                      "name": "reuseControl"
                     },
                     {
                       "functionDef": {
@@ -160617,6 +161367,54 @@
                       "name": "get"
                     },
                     {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Uint8Array",
+                                "value": {
+                                  "typeName": "Uint8Array",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "ArrayBuffer",
+                                      "value": {
+                                        "typeName": "ArrayBuffer"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "bucketMetadata"
+                    },
+                    {
                       "functionDef": {
                         "hasBody": true,
                         "isAsync": true,
@@ -160850,6 +161648,76 @@
                         "kind": "typeQuery",
                         "repr": "fetch",
                         "value": "fetch"
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "recentBucket",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "typeLiteral",
+                        "value": {
+                          "properties": [
+                            {
+                              "name": "startedMs",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "number",
+                                "value": "number"
+                              }
+                            },
+                            {
+                              "name": "signal",
+                              "optional": true,
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
+                            },
+                            {
+                              "name": "raw",
+                              "readonly": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "Uint8Array",
+                                      "value": {
+                                        "typeName": "Uint8Array",
+                                        "typeParams": [
+                                          {
+                                            "kind": "typeRef",
+                                            "repr": "ArrayBuffer",
+                                            "value": {
+                                              "typeName": "ArrayBuffer"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "name": "complete",
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            }
+                          ]
+                        }
                       }
                     },
                     {
@@ -174008,9 +174876,19 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
           },
           {
+            "importedName": "SafeExchangeObservation",
+            "originalName": "SafeExchangeObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+          },
+          {
             "importedName": "bearerSha256",
             "originalName": "bearerSha256",
             "src": "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts"
+          },
+          {
+            "importedName": "observeAuthExchange",
+            "originalName": "observeAuthExchange",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
           },
           {
             "importedName": "parseNativeJson",
@@ -174023,7 +174901,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "50f5df287dcbb82a7dbc6380ef5954d97c1eb5a0ae0fe076fa1454b4ad296264",
+        "source_sha256": "0c57f601630dc645045827cb06831f404acaa87962c432236d574cfc5556fbeb",
         "symbols": [
           {
             "declarations": [
@@ -174061,11 +174939,139 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "properties": [
+                    {
+                      "name": "outcome",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "ok",
+                            "value": {
+                              "kind": "string",
+                              "string": "ok"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "http_status",
+                            "value": {
+                              "kind": "string",
+                              "string": "http_status"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "invalid_shape",
+                            "value": {
+                              "kind": "string",
+                              "string": "invalid_shape"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "invalid_status",
+                            "value": {
+                              "kind": "string",
+                              "string": "invalid_status"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "request_failed",
+                            "value": {
+                              "kind": "string",
+                              "string": "request_failed"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "http_status",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "row_count",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "0",
+                            "value": {
+                              "kind": "number",
+                              "number": 0.0
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "1",
+                            "value": {
+                              "kind": "number",
+                              "number": 1.0
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "2",
+                            "value": {
+                              "kind": "number",
+                              "number": 2.0
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "elapsed_ms",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SafeProfileLookupObservation"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "constructors": [
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(config: SupabaseAuthSettings, private readonly fetcher: typeof fetch = fetch)",
+                      "parameter_source": "(\n    config: SupabaseAuthSettings,\n    private readonly fetcher: typeof fetch = fetch,\n    private readonly observeProfile?: (event: SafeProfileLookupObservation) => void,\n    private readonly observeExchange?: (event: SafeExchangeObservation) => void | Promise<void>,\n    private readonly requestSignal?: AbortSignal,\n  )",
                       "params": [
                         {
                           "kind": "identifier",
@@ -174097,6 +175103,111 @@
                           },
                           "readonly": true,
                           "right": "fetch"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "observeProfile",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "event",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "SafeProfileLookupObservation",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "SafeProfileLookupObservation"
+                                    }
+                                  }
+                                }
+                              ],
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "observeExchange",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [
+                                {
+                                  "kind": "identifier",
+                                  "name": "event",
+                                  "optional": false,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "SafeExchangeObservation",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "SafeExchangeObservation",
+                                        "specifier": "./auth_exchange_observation.ts"
+                                      },
+                                      "typeName": "SafeExchangeObservation"
+                                    }
+                                  }
+                                }
+                              ],
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "void",
+                                    "value": "void"
+                                  },
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "Promise",
+                                    "value": {
+                                      "typeName": "Promise",
+                                      "typeParams": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "void",
+                                          "value": "void"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "requestSignal",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "AbortSignal",
+                            "value": {
+                              "typeName": "AbortSignal"
+                            }
+                          }
                         }
                       ]
                     }
@@ -174151,6 +175262,18 @@
                               "kind": "keyword",
                               "repr": "string",
                               "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
                             }
                           }
                         ],
@@ -174502,7 +175625,141 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(response: Response, maximum: number)",
+                  "parameter_source": "(pending: Promise<T>, signal: AbortSignal)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pending",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "T",
+                              "value": {
+                                "resolution": {
+                                  "declaringKind": "function",
+                                  "declaringName": "awaitRequest",
+                                  "kind": "typeParam"
+                                },
+                                "typeName": "T"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "signal",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "T",
+                          "value": {
+                            "resolution": {
+                              "declaringKind": "function",
+                              "declaringName": "awaitRequest",
+                              "kind": "typeParam"
+                            },
+                            "typeName": "T"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "typeParams": [
+                    {
+                      "name": "T"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "awaitRequest"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(response: Response, signal: AbortSignal)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "response",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Response",
+                        "value": {
+                          "typeName": "Response"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "signal",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "cancelResponseBody"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  response: Response,\n  maximum: number,\n  signal: AbortSignal,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -174524,6 +175781,18 @@
                         "kind": "keyword",
                         "repr": "number",
                         "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "signal",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
                       }
                     }
                   ],
@@ -174582,6 +175851,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "./auth_exchange_observation.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "./verified_session.ts",
           "targets": [
             {
@@ -174593,6 +175872,7 @@
       ],
       "layer": "data_infrastructure",
       "symbols": [
+        "SafeProfileLookupObservation",
         "SupabaseAuthSettings",
         "SupabaseNativeAuth"
       ]
@@ -177402,7 +178682,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "8f08df5c2f455b363d27fb07ea2ea5ec69c623424d328672eb587d61d539ce30",
+        "source_sha256": "7a3c856d9341a01a18a16d59f8c4a55a1dd557b5677e5a53ea3574c9379bd04e",
         "symbols": [
           {
             "declarations": [
@@ -177711,6 +178991,109 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "literal",
+                        "repr": "profile_unavailable",
+                        "value": {
+                          "kind": "string",
+                          "string": "profile_unavailable"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "profile_binding_invalid",
+                        "value": {
+                          "kind": "string",
+                          "string": "profile_binding_invalid"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "role_not_admin",
+                        "value": {
+                          "kind": "string",
+                          "string": "role_not_admin"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "status_not_active",
+                        "value": {
+                          "kind": "string",
+                          "string": "status_not_active"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "aal_not_aal2",
+                        "value": {
+                          "kind": "string",
+                          "string": "aal_not_aal2"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "admin_allowed",
+                        "value": {
+                          "kind": "string",
+                          "string": "admin_allowed"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "AdminExceptionReason"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "fnOrConstructor",
+                    "value": {
+                      "constructor": false,
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "reason",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "AdminExceptionReason",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "AdminExceptionReason"
+                            }
+                          }
+                        }
+                      ],
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "void",
+                        "value": "void"
+                      }
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "AdminExceptionObserver"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "hasBody": true,
                   "isAsync": true,
                   "parameter_source": "(token: string)",
@@ -177755,7 +179138,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly auth: NativeSessionVerificationPort,\n    private readonly profiles: OwnProfileVerificationPort,\n  )",
+                      "parameter_source": "(\n    private readonly auth: NativeSessionVerificationPort,\n    private readonly profiles: OwnProfileVerificationPort,\n    private readonly observeAdminException?: AdminExceptionObserver,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -177788,6 +179171,23 @@
                                 "kind": "local"
                               },
                               "typeName": "OwnProfileVerificationPort"
+                            }
+                          }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "observeAdminException",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "AdminExceptionObserver",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "AdminExceptionObserver"
                             }
                           }
                         }
@@ -177913,6 +179313,8 @@
       ],
       "layer": "data_infrastructure",
       "symbols": [
+        "AdminExceptionObserver",
+        "AdminExceptionReason",
         "BoundVerifiedSessionProvider",
         "NativeSessionReceipt",
         "NativeSessionVerificationPort",
@@ -187374,6 +188776,175 @@
             {
               "kind": "code",
               "path": "tests/edge/synthetic_api_contract.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "verification",
+      "symbols": []
+    },
+    "tests/edge/test_auth_exchange_observation.synthetic.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "SafeExchangeObservation",
+            "originalName": "SafeExchangeObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+          },
+          {
+            "importedName": "SafeProfileLookupObservation",
+            "originalName": "SafeProfileLookupObservation",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
+          },
+          {
+            "importedName": "SupabaseNativeAuth",
+            "originalName": "SupabaseNativeAuth",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
+          },
+          {
+            "importedName": "detailedAuthObserver",
+            "originalName": "detailedAuthObserver",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+          },
+          {
+            "importedName": "observeAuthExchange",
+            "originalName": "observeAuthExchange",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+          }
+        ],
+        "source_sha256": "63940b4da43cca8d232cba58114868c548eb30e89a2d5e9cda82ae90e598e78c",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "asserts v",
+                    "value": {
+                      "asserts": true,
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "assert"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(operation: () => T)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "operation",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "fnOrConstructor",
+                        "value": {
+                          "constructor": false,
+                          "params": [],
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "T",
+                            "value": {
+                              "resolution": {
+                                "declaringKind": "function",
+                                "declaringName": "syntheticPromise",
+                                "kind": "typeParam"
+                              },
+                              "typeName": "T"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "T",
+                          "value": {
+                            "resolution": {
+                              "declaringKind": "function",
+                              "declaringName": "syntheticPromise",
+                              "kind": "typeParam"
+                            },
+                            "typeName": "T"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "typeParams": [
+                    {
+                      "name": "T"
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "syntheticPromise"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
             }
           ]
         }
@@ -215091,7 +216662,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "256479d822937cf7d183e759a2bb03f158dc00c55ae8f3e6368dcbacccc0fb98",
+        "source_sha256": "9068115febab60b410e5a13bc9b69c4dcf589a06688b1ab74c7f3959ff80dee9",
         "symbols": [
           {
             "declarations": [
@@ -215240,7 +216811,7 @@
                 "def": {
                   "hasBody": true,
                   "isAsync": true,
-                  "parameter_source": "(subjectOnly = false, observe?: RuntimeComposition[\"observe\"])",
+                  "parameter_source": "(\n  subjectOnly = false,\n  observe?: RuntimeComposition[\"observe\"],\n  observeAuthDetailed?: RuntimeComposition[\"observeAuthDetailed\"],\n  observeTiming?: RuntimeComposition[\"observeTiming\"],\n  observeAuth?: RuntimeComposition[\"observeAuth\"],\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -215269,6 +216840,96 @@
                             "value": {
                               "kind": "string",
                               "string": "observe"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "RuntimeComposition",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "RuntimeComposition",
+                                "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+                              },
+                              "typeName": "RuntimeComposition"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "observeAuthDetailed",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "observeAuthDetailed",
+                            "value": {
+                              "kind": "string",
+                              "string": "observeAuthDetailed"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "RuntimeComposition",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "RuntimeComposition",
+                                "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+                              },
+                              "typeName": "RuntimeComposition"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "observeTiming",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "observeTiming",
+                            "value": {
+                              "kind": "string",
+                              "string": "observeTiming"
+                            }
+                          },
+                          "objType": {
+                            "kind": "typeRef",
+                            "repr": "RuntimeComposition",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "RuntimeComposition",
+                                "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+                              },
+                              "typeName": "RuntimeComposition"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "observeAuth",
+                      "optional": true,
+                      "tsType": {
+                        "kind": "indexedAccess",
+                        "value": {
+                          "indexType": {
+                            "kind": "literal",
+                            "repr": "observeAuth",
+                            "value": {
+                              "kind": "string",
+                              "string": "observeAuth"
                             }
                           },
                           "objType": {
