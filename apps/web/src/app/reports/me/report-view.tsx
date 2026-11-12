@@ -166,7 +166,7 @@ export function SubjectsSheet({ a, second = true }: { a: OverallAnalysisDto; sec
           </tr>
         </tbody>
       </table>
-      <p className="rp-sheet-note">상위 %는 그 과목을 본 응시자 중에서 내가 위에서 몇 번째쯤인지입니다(과목마다 본 사람이 달라 과목끼리 직접 비교하지 않습니다). 영어·한국사{second && "·제2외국어/한문"}은 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
+      <p className="rp-sheet-note">상위 %는 그 과목을 본 응시자 중에서 내가 위에서 몇 % 안에 드는지입니다(과목마다 본 사람이 달라 과목끼리 직접 비교하지 않습니다). 영어·한국사{second && "·제2외국어/한문"}은 절대평가라 등급만 표시하며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.</p>
     </div>
   );
 }
