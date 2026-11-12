@@ -370,12 +370,15 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
     ["수학 + 탐구(1과목)", sum(m, q1best)],
   ];
   const best = q1 !== null && q2 !== null ? (q1 >= q2 ? a.subjects.find((s) => s.area === "inquiry1") : a.subjects.find((s) => s.area === "inquiry2")) : null;
+  const tie = q1 !== null && q1 === q2;
   return (
     <section className="rp-chart" aria-label="반영 조합별 내 표준점수 합">
       <header>
         <h3>반영 조합별 내 표준점수 합</h3>
         <small>대학마다 반영하는 과목 조합이 달라, 자주 쓰는 조합별로 내 표준점수를 더해 보여 줍니다</small>
       </header>
+      {/* 표만 두면 오른쪽 절반이 비어 보여(2026-11-12 최종관리자 지적) 읽는 법을 표 옆에 둔다. 좁은 화면에서는 아래로 쌓인다 */}
+      <div className="rp-combo-wrap">
       <div className="tblwrap">
         <table className="tb rp-combo">
           <thead>
@@ -394,11 +397,26 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
           </tbody>
         </table>
       </div>
-      <p className="pc-note">
-        탐구 1과목은 두 과목 중 표준점수가 높은 과목{best ? `(${best.subject})` : ""}으로 더했습니다(대학마다 다를 수 있습니다).
-        {" "}대학은 표준점수 대신 백분위·변환표준점수를 쓰거나 과목마다 반영 비율을 곱하므로, 이 합은 실제 환산점수와 다릅니다.
-        {" "}이 합만으로는 그 조합에서 내 위치(상위 %)를 알 수 없습니다. 대학별 환산은 「전체 대학·학과 가능성 보기」와 「유리한 대학 찾기」에서 확인하세요.
-      </p>
+      <aside className="rp-combo-read" aria-label="표 읽는 법">
+        <h4>이 표를 읽는 법</h4>
+        <ul>
+          <li>
+            <b>탐구 1과목</b>은 두 과목 중 표준점수가 높은 과목으로 더했습니다
+            {tie ? " (두 과목 표준점수가 같아 어느 과목이든 같습니다)" : best ? ` (${best.subject})` : ""}. 어느 과목을 쓰는지는 대학마다 다를 수 있습니다.
+          </li>
+          <li>
+            <b>실제 환산점수와 다릅니다.</b> 대학은 표준점수 대신 백분위나 변환표준점수를 쓰기도 하고, 과목마다 반영 비율을 곱하며 영어·한국사를 따로 더하거나 뺍니다.
+          </li>
+          <li>
+            <b>합이 크다고 그 조합에서 위치가 높은 것은 아닙니다.</b> 조합마다 함께 본 응시자가 달라 이 합으로는 위치(상위 %)를 알 수 없습니다.
+          </li>
+        </ul>
+        <div className="rp-combo-go">
+          <Link prefetch={false} href="/admissions/possibilities" className="btn">전체 대학·학과 가능성 보기</Link>
+          <Link prefetch={false} href="/admissions/favorable" className="btn">유리한 대학 찾기</Link>
+        </div>
+      </aside>
+      </div>
     </section>
   );
 }
