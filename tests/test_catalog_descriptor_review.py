@@ -12,13 +12,50 @@ TEST_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_review
 SOURCE_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_review.ts"
 BRIDGE_PATH = "tests/test_catalog_descriptor_review.py"
 EXPECTED_CASES = 21
-GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261102.json"
-GRAPH_MANIFEST_SHA256 = "afd44c9dd856112d480b11b4653091b891e031c2643e69dbf9e3ab1eaf12c3f1"
-BASE_COMMIT = "42b7ac28bae3c2c5c0041d16bcf505c2014bf404"
+GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261113_fmt.current.json"
+GRAPH_MANIFEST_SHA256 = "4af47ec7ca92a1108ce55dc9b8c0514d9886dc7f8e5a223b4a03390305b0849d"
+BASE_COMMIT = "125d112edcf8100d201487c9157a0d5c702c58e8"
 SCANNER_PATH = "scripts/check_edge_contract.py"
-SCANNER_SHA256 = "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f"
+SCANNER_SHA256 = "ee123870172124a28f4f0aa3f6ee4517e49e6747d33fdd27580137777a93392e"
 SUPPORT_PATH = "tests/test_service_candidate_suites.py"
-SUPPORT_SHA256 = "6e3586fbb43fedb7fc199443a928f4277a163c5f5bea069f7734062f0c0b5934"
+SUPPORT_SHA256 = "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
+
+
+DESCRIPTOR_HISTORY_SHA256 = "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0"
+DESCRIPTOR_CURRENT_KEY = "descriptor_rebind_review_current_source_20261113"
+
+
+def current_descriptor_contract(spec):
+    """Select only the exact current graph while keeping historical evidence intact."""
+    import copy
+
+    supply = spec["current_public_supply_contract"]
+    historical = supply["descriptor_rebind_review"]
+    marker = supply[DESCRIPTOR_CURRENT_KEY]
+    digest = hashlib.sha256(json.dumps(
+        historical, ensure_ascii=True, sort_keys=True, separators=(",", ":")
+    ).encode()).hexdigest()
+    expected = {
+        "format", "status", "activation_status", "native_acceptance", "operating_writes",
+        "historical_sha256", "graph_manifest_path", "graph_manifest_sha256", "bridge_sha256",
+    }
+    if (not isinstance(marker, dict) or set(marker) != expected
+        or marker["format"] != "jungsi.catalog-descriptor-current-source-rebound/v1"
+        or marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED"
+        or marker["activation_status"] != "NOT_RUN"
+        or marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE"
+        or type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0
+        or marker["historical_sha256"] != DESCRIPTOR_HISTORY_SHA256
+        or digest != DESCRIPTOR_HISTORY_SHA256
+        or marker["graph_manifest_path"] != GRAPH_MANIFEST_PATH
+        or marker["graph_manifest_sha256"] != GRAPH_MANIFEST_SHA256
+        or not isinstance(marker["bridge_sha256"], str)
+        or re.fullmatch(r"[0-9a-f]{64}", marker["bridge_sha256"]) is None):
+        raise ValueError("descriptor current source rebound invalid")
+    current = copy.deepcopy(historical)
+    for key in ("graph_manifest_path", "graph_manifest_sha256", "bridge_sha256"):
+        current[key] = marker[key]
+    return current
 
 
 def snapshot_file(name):
@@ -50,7 +87,7 @@ class CatalogDescriptorReviewSnapshotTests(unittest.TestCase):
         # Reuse the repository's pinned Deno and isolated, retained scratch.
         support.load_manifest()
         spec = json.loads(support.safe_file("docs/current/service_spec.json").read_bytes())
-        contract = spec["current_public_supply_contract"]["descriptor_rebind_review"]
+        contract = current_descriptor_contract(spec)
         self.assertEqual(contract["status"], "HOLD_REVIEW_ONLY_NOT_ACTIVATED")
         self.assertEqual(contract["source"], SOURCE_PATH)
         self.assertEqual(contract["test_source"], TEST_PATH)

@@ -1,6 +1,6 @@
 # Google Drive·Supabase 전용 배포와 화면 후속작업
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.168이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.176이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 기존 Supabase 기반 실제 인증·기존22와 신규6 논리 API 계약의 코드·선택 연결·운영 배포를 구분한다. Google Drive와 기존 Supabase를 사용하고 P1 조정 메타데이터 Durable Object 한정 예외만 적용한다. 현재 결합20 후보·기존14 운영판·미연결8을 혼동하지 않는다.
 
@@ -164,8 +164,8 @@ Python990·Deno116·독립 oracle993 및 세션/관리 권한 foundation. 실제
 
 | 소스 진입점 | 경로 | SHA-256 |
 | --- | --- | --- |
-| native_entry | supabase/functions/jungsi-api/index.ts | ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2 |
-| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557 |
+| native_entry | supabase/functions/jungsi-api/index.ts | 9b258d5800adf1615293cf715f89a6d71de331881065664a5d330241575e289b |
+| composition | supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts | eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969 |
 
 | 서버 설정 이름 | 허용된 기존 이름 | 현재 상태 | 입력의 의미 |
 | --- | --- | --- | --- |
@@ -589,7 +589,7 @@ Root는 P1/P3의 새 안내와 관리자 머리글 표시만 읽기 전용으로
 
 
 
-<!-- jungsi:generated spec_sha256=f9086eb2e641a2600bbe5a64e8d4d59af39d8fbbd33badfe47ebd0b3d7739417 -->
+<!-- jungsi:generated spec_sha256=22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542 -->
 
 
 ## 기존 운영 조회의 후속 검수
@@ -778,6 +778,7 @@ P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURC
 - 별도 발표 통계의 실제 비율은 1~100 정수 또는 null이다. 평균·최저 등 비백분위 통계는 null을 보존하고 원래 통계 라벨로 표시한다. 새 DTO의 닫힌 필드·개별 항목 수·전체 bytes/행 경계는 계속 검증한다.
 - 기존 수집된 예비순위와 최종 발표 범위의 근거를 관측별로 확인한다. 날짜·URL metadata 결측만으로 이미 확인된 숫자를 지우지 않으며, 최종 예비번호 자격 미확정·다른 차수/전형 충돌은 원문 독립 검수 후에만 해소한다. 순위를 인원으로 치환하지 않는다.
 - 2026-11-01 화면 정책: 최종 합격 예비번호 단일 열, 추가합격 인원은 내부에서 보존한다. 같은 뜻으로 검증된 원문 표현만 해당 관측에 연결한다. 기존 발행물 전체에 별칭이 소급 적용됐다고 추정하지 않는다.
+- 2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다.
 
 인수 기준:
 
@@ -791,7 +792,7 @@ P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURC
 - 2027 실제 모집행은 과거 자료 유무와 무관하게 전국 검색·목록에 나타난다.
 - 2024~2026만 있는 단독 모집행은 1·3·4페이지 회원 화면에 노출되지 않지만 정본과 관리자 검수에는 보존된다.
 - 검증된 2027 연계 과거 입결은 원래 학년도·전형·군·코호트·통계·단위와 출처를 유지한다.
-- 0명·이월 미확정 행은 비노출하고, 공식 이월 후 양수 모집이 확인되면 같은 행의 새 정본으로 추가한다.
+- 실제 모집 없음이 확인된 최종 0명과 이월 발생 전 모집 자체가 불명확한 조건부 전용 행은 비노출한다. 모집 사실이 확인된 최초 0은 최초 단계로 보존하고, 최종 인원과 미확정 이월이 함께 제시되면 해당 값·관계 행만 HOLD한다. 이후 모집이 공식 확인되면 새 Guide head와 이에 대응하는 snapshot head를 각각 검증해 반영한다.
 - 모집 사실만 확인되고 인원이 미확인인 행은 확인 중으로 표시하며 0과 구분한다.
 - 연결이 불명확한 과거 행은 현재 행의 잘못된 값으로 붙이지 않으며 2027 현재 모집행 자체는 유지한다.
 - 필터를 페이지와 건수 계산 전에 적용하고 1·3·4페이지 결과 범위와 PK/권한을 일치시킨다.

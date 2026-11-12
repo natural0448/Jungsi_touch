@@ -23,6 +23,15 @@ export interface OwnProfileReceipt {
 export interface OwnProfileVerificationPort {
   readOwnStatus(token: string, subjectId: string): Promise<OwnProfileReceipt | null>;
 }
+/** Fixed, non-identifying categories; never include profile values or credentials. */
+export type AdminExceptionReason =
+  | "profile_unavailable"
+  | "profile_binding_invalid"
+  | "role_not_admin"
+  | "status_not_active"
+  | "aal_not_aal2"
+  | "admin_allowed";
+export type AdminExceptionObserver = (reason: AdminExceptionReason) => void;
 export async function bearerSha256(token: string): Promise<string> {
   const raw = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
   return [...new Uint8Array(raw)].map((x) => x.toString(16).padStart(2, "0")).join("");
@@ -31,6 +40,7 @@ export class BoundVerifiedSessionProvider implements UserSessionPort {
   constructor(
     private readonly auth: NativeSessionVerificationPort,
     private readonly profiles: OwnProfileVerificationPort,
+    private readonly observeAdminException?: AdminExceptionObserver,
   ) {}
   async verifyUserBearer(token: string, nowUtc: bigint): Promise<VerifiedUser | null> {
     if (
@@ -59,8 +69,10 @@ export class BoundVerifiedSessionProvider implements UserSessionPort {
     }
     let accountStatus: string | null = null;
     let accountRole: string | null = null;
+    let profileReason: AdminExceptionReason | null = "profile_unavailable";
     try {
       const own = await this.profiles.readOwnStatus(token, verified.subjectId);
+      if (own) profileReason = "profile_binding_invalid";
       if (
         own && own.verification === "own_profile_same_bearer_publishable_RLS" &&
         own.bearerSha256 === digest && own.subjectId === verified.subjectId &&
@@ -68,11 +80,29 @@ export class BoundVerifiedSessionProvider implements UserSessionPort {
           (typeof own.status === "string" && own.status.trim() && own.status.length <= 64))
       ) {
         accountStatus = own.status;
+        profileReason = null;
         if (typeof own.role === "string" && own.role.trim() && own.role.length <= 64) {
           accountRole = own.role;
         }
       }
     } catch { /* Unknown status closes management; student/session reads survive. */ }
+    // No subject, token, raw role/status, or exception is exposed to the observer.
+    if (profileReason || accountRole === "admin" || verified.assuranceLevel === "aal2") {
+      const reason: AdminExceptionReason = profileReason ??
+        (accountRole !== "admin"
+          ? "role_not_admin"
+          : accountStatus !== "active"
+          ? "status_not_active"
+          : verified.assuranceLevel !== "aal2"
+          ? "aal_not_aal2"
+          : "admin_allowed");
+      try {
+        const pending: unknown = this.observeAdminException?.(reason);
+        if (pending && typeof (pending as PromiseLike<unknown>).then === "function") {
+          void Promise.resolve(pending).catch(() => {});
+        }
+      } catch { /* Observation is not authority. */ }
+    }
     return Object.freeze({
       subjectId: verified.subjectId,
       expiresAtUtc: verified.expiresAtUtc,

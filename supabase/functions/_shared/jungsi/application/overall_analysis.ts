@@ -39,9 +39,26 @@ function clone(value: unknown): unknown {
   return value;
 }
 const IDENTIFIER = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+/** 제2외국어/한문 과목(성적표 표기). 절대평가 등급만 받고 총점·누백에는 넣지 않는다(2026-11-12 최종관리자 결정). */
+const SECOND_LANGUAGE_SUBJECTS: readonly string[] = [
+  "독일어Ⅰ",
+  "프랑스어Ⅰ",
+  "스페인어Ⅰ",
+  "중국어Ⅰ",
+  "일본어Ⅰ",
+  "러시아어Ⅰ",
+  "아랍어Ⅰ",
+  "베트남어Ⅰ",
+  "한문Ⅰ",
+];
+/** 없음·null 은 미응시. 이 필드가 생기기 전에 저장된 성적도 미응시로 읽는다. */
+function secondLanguageResult(value: unknown): ExamRow | null {
+  if (!record(value)) return null;
+  return { subject: value.subject, grade: value.grade };
+}
 export function validateScoreStructure(value: unknown): ExamRow {
   const required = ["exam_id", "pack_version", "korean", "math", "inquiry"],
-    allowed = [...required, "english_grade", "korean_history_grade"];
+    allowed = [...required, "english_grade", "korean_history_grade", "second_language"];
   if (
     !record(value) || required.some((k) => !Object.hasOwn(value, k)) ||
     Object.keys(value).some((k) => !allowed.includes(k)) || typeof value.exam_id !== "string" ||
@@ -76,6 +93,14 @@ export function validateScoreStructure(value: unknown): ExamRow {
   for (const field of ["english_grade", "korean_history_grade"]) {
     if (Object.hasOwn(value, field) && value[field] !== null && !integer(value[field])) invalid();
   }
+  const second = value.second_language;
+  if (
+    Object.hasOwn(value, "second_language") && second !== null && (
+      !record(second) || Object.keys(second).length !== 2 || !Object.hasOwn(second, "subject") ||
+      !Object.hasOwn(second, "grade") || typeof second.subject !== "string" ||
+      !SECOND_LANGUAGE_SUBJECTS.includes(second.subject) || !integer(second.grade)
+    )
+  ) invalid("invalid_second_language");
   return clone(value) as ExamRow;
 }
 export function validateScoreInput(value: unknown): ExamRow {
@@ -89,6 +114,11 @@ export function validateScoreInput(value: unknown): ExamRow {
         invalid("invalid_reported_" + field);
       }
     }
+  }
+  const second = result.second_language;
+  if (record(second)) {
+    const grade = second.grade as number | bigint;
+    if (grade < 1 || grade > 9) invalid("invalid_second_language");
   }
   return result;
 }
@@ -165,6 +195,7 @@ export class OverallAnalysisService {
       total_standard_score: analysis.totalStandardScore,
       subjects,
       absolute_grades: analysis.absoluteGrades,
+      second_language: secondLanguageResult(payload.second_language),
       overall,
     };
   }

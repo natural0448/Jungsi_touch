@@ -1,7 +1,8 @@
 /** Same closed recursive public catalog as the Python service, supplied by composition. */
 import { AccessError } from "./access.ts";
 import { validWildcardSelection } from "./wildcard_public_contract.ts";
-import { JsonFloat } from "../domain/native_json.ts";
+import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
+import { nativeJsonSha256 } from "../domain/json_value.ts";
 
 type Row = Record<string, unknown>;
 /** Must be supplied only from an independently verified, request-bound immutable writer record.
@@ -22,7 +23,25 @@ export interface WildcardProjectionAuthority {
     },
   ): boolean;
 }
+/** Separate immutable-writer proof for reference fields on the exact owned report revision.
+ * The caller must recheck head, source, consumer, expiry and revision before and after delivery.
+ * Merely creating this object or matching a hash does not establish authority. */
+export interface ReferenceProjectionAuthority {
+  assertCurrent(signal: AbortSignal): Promise<void>;
+  /** Request-local settled receipt only. Must not perform or schedule any I/O. */
+  assertSettled?(signal: AbortSignal): void;
+  authorizes(
+    input: {
+      readonly operation: string;
+      readonly tier: "standard" | "paid";
+      readonly root: unknown;
+      readonly kind: "assessment" | "candidates";
+      readonly value: unknown;
+    },
+  ): boolean;
+}
 type ProjectionContext = {
+  readonly referenceAuthority?: ReferenceProjectionAuthority;
   readonly operation: string;
   readonly tier: "standard" | "paid";
   readonly root: unknown;
@@ -31,6 +50,12 @@ type ProjectionContext = {
 function record(value: unknown): value is Row {
   return value !== null && typeof value === "object" && !Array.isArray(value) &&
     [Object.prototype, null].includes(Object.getPrototypeOf(value));
+}
+function freezeRegistry(value: unknown, seen = new WeakSet<object>()): void {
+  if (!value || typeof value !== "object" || seen.has(value)) return;
+  seen.add(value);
+  for (const child of Object.values(value)) freezeRegistry(child, seen);
+  Object.freeze(value);
 }
 function unavailable(): never {
   throw new AccessError("security_policy_unavailable", 503);
@@ -42,7 +67,55 @@ const JSON_NUMBER = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?$/;
 export class PublicResponseProjection {
   private readonly schemas: Row;
   private readonly operations = new Map<string, Row>();
+  private readonly contractRefs = new Map<string, string>();
   private readonly auxiliaryRoots: Row;
+  private readonly registrySnapshot: unknown;
+  #exactRegistryBytes?: Uint8Array;
+  /** Parse the same immutable bytes whose SHA is presented to the independent issuer. */
+  static fromExactRegistryBytes(
+    bytes: Uint8Array,
+    expectedOperations: readonly { id: string; contract_ref: string }[],
+  ): PublicResponseProjection {
+    try {
+      if (!(bytes instanceof Uint8Array) || bytes.length === 0) unavailable();
+      const exact = new Uint8Array(bytes);
+      const text = new TextDecoder("utf-8", { fatal: true }).decode(exact);
+      // Reject duplicate JSON keys before the native JS schema parser can collapse them.
+      parseNativeJson(text);
+      const projection = new PublicResponseProjection(JSON.parse(text), expectedOperations);
+      projection.#exactRegistryBytes = exact;
+      return projection;
+    } catch {
+      return unavailable();
+    }
+  }
+  hasExactRegistryBytes(): boolean {
+    return this.#exactRegistryBytes !== undefined;
+  }
+  /** Name and contract must both agree with the separately supplied route policy. */
+  supportsOperation(operation: string, contractRef: string): boolean {
+    return this.operations.has(operation) && this.contractRefs.get(operation) === contractRef;
+  }
+  /** Canonical semantic digest, not the SHA of any original schema file bytes. */
+  async schemaBinding(operation: string, contractRef: string): Promise<
+    Readonly<{
+      operation: string;
+      contract_ref: string;
+      schema_sha256: string;
+      schema_bytes_sha256: string;
+    }>
+  > {
+    if (!this.supportsOperation(operation, contractRef) || !this.#exactRegistryBytes) unavailable();
+    const digest = new Uint8Array(
+      await crypto.subtle.digest("SHA-256", new Uint8Array(this.#exactRegistryBytes)),
+    );
+    return Object.freeze({
+      operation,
+      contract_ref: contractRef,
+      schema_sha256: await nativeJsonSha256(this.registrySnapshot),
+      schema_bytes_sha256: Array.from(digest, (v) => v.toString(16).padStart(2, "0")).join(""),
+    });
+  }
   constructor(
     registry: unknown,
     expectedOperations: readonly { id: string; contract_ref: string }[],
@@ -64,16 +137,20 @@ export class PublicResponseProjection {
       for (const item of input.operations) {
         if (
           !record(item) || !exactKeys(item, ["id", "contract_ref", "roots"]) ||
-          typeof item.id !== "string" || this.operations.has(item.id) ||
+          typeof item.id !== "string" || typeof item.contract_ref !== "string" ||
+          !item.contract_ref || this.operations.has(item.id) ||
           expected.get(item.id) !== item.contract_ref || !record(item.roots) ||
           !exactKeys(item.roots, ["standard", "paid"])
         ) unavailable();
         for (const root of Object.values(item.roots)) this.validate(root, new Set());
         this.operations.set(item.id, item.roots);
+        this.contractRefs.set(item.id, item.contract_ref);
       }
       if (this.operations.size !== expected.size) unavailable();
       for (const root of Object.values(this.auxiliaryRoots)) this.validate(root, new Set());
       for (const [name, node] of Object.entries(this.schemas)) this.validate(node, new Set([name]));
+      freezeRegistry(input);
+      this.registrySnapshot = input;
     } catch {
       unavailable();
     }
@@ -147,8 +224,40 @@ export class PublicResponseProjection {
     const node = raw as Row;
     if (value === null) return node.nullable === true ? null : unavailable();
     if (Object.hasOwn(node, "ref")) {
+      if (
+        node.ref === "assessment" && record(value) && Object.hasOwn(value, "reference_percentile")
+      ) {
+        const input: Row = { ...value };
+        let trusted = false;
+        try {
+          trusted = context?.referenceAuthority?.authorizes({
+            operation: context.operation,
+            tier: context.tier,
+            root: context.root,
+            kind: "assessment",
+            value,
+          }) === true;
+        } catch {
+          trusted = false;
+        }
+        if (!trusted) delete input.reference_percentile;
+        return this.walk(this.schemas[node.ref as string], input, context);
+      }
       if (node.ref === "candidates" && record(value)) {
         const input: Row = { ...value };
+        let referenceTrusted = false;
+        try {
+          referenceTrusted = context?.referenceAuthority?.authorizes({
+            operation: context.operation,
+            tier: context.tier,
+            root: context.root,
+            kind: "candidates",
+            value,
+          }) === true;
+        } catch {
+          referenceTrusted = false;
+        }
+        if (!referenceTrusted) delete input.reference_university_groups;
         // Old unknown fields never authorize a new result. Keep legacy cards unchanged.
         delete input.wildcard_selection;
         const privateView = value._wildcard_selection_view;
@@ -241,11 +350,18 @@ export class PublicResponseProjection {
     tier: "standard" | "paid",
     value: unknown,
     authority?: WildcardProjectionAuthority,
+    referenceAuthority?: ReferenceProjectionAuthority,
   ): unknown {
     try {
       const roots = this.operations.get(operation);
       if (!roots || !Object.hasOwn(roots, tier)) unavailable();
-      return this.walk(roots[tier], value, { operation, tier, root: value, authority });
+      return this.walk(roots[tier], value, {
+        operation,
+        tier,
+        root: value,
+        authority,
+        referenceAuthority,
+      });
     } catch {
       unavailable();
     }

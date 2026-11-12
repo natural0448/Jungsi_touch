@@ -21,6 +21,32 @@ export interface VerifiedStorageArtifact {
   readonly verifiedSha256: string;
   readonly verifiedBytes: number;
 }
+/** Binder context of a saved reference tail plus the public offerings it may serve. */
+export const REFERENCE_TAIL_CONTEXT_KEYS = [
+  "academic_year",
+  "exam_id",
+  "exam_type",
+  "model_version",
+  "offering_ids",
+  "profile_sha256",
+  "reference_curve_id",
+  "resolved_model_scenario",
+  "rule_version",
+  "score_scale_id",
+  "source_pack_version",
+  "source_scenario_field_present",
+  "source_scenario_value",
+  "weight_encoding",
+].sort().join(",");
+export const REFERENCE_TAIL_EVIDENCE_KEYS = [
+  "binder_sha256",
+  "definition_sha256",
+  "independent_sha256",
+  "shared_proof_sha256",
+  "source_cdf_sha256",
+  "source_csv_sha256",
+].sort().join(",");
+export const REFERENCE_TAIL_MAX_BYTES = 8388608;
 function fail(code: string): never {
   throw new AccessError(code, 503);
 }
@@ -53,6 +79,8 @@ function objectKey(value: unknown): string {
   }
   return value;
 }
+/** Max age of a reused head/bucket verification inside one request (monotonic clock). */
+export const STORAGE_CHECK_REUSE_MS = 1500;
 function parsed(content: Uint8Array): NativeObject {
   try {
     return object(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(content)));
@@ -295,16 +323,116 @@ export class SupabaseArtifactClient {
     ) fail("storage_artifact_too_large");
     return key;
   }
-  private async get(path: string, limit: number): Promise<Uint8Array<ArrayBuffer>> {
+  /** Saved reference tails: same reference-only scope, exact binder context and evidence pins. */
+  validateReferenceTail(raw: Readonly<NativeObject>): string {
+    const entry = object(raw), key = this.validateReference(entry);
+    if (
+      entry.kind !== "reference_tail" || entry.status !== "approved_reference" ||
+      entry.approval_scope !== "same_exam_mathematical_reference" ||
+      entry.engine_approved !== false || entry.production_allowed !== false ||
+      typeof entry.source_review_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.source_review_sha256) ||
+      typeof entry.independent_review_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(entry.independent_review_sha256)
+    ) {
+      fail("artifact_not_approved");
+    }
+    if (entry.archive_only !== false) fail("storage_archive_only");
+    const context = object(entry.reference_context), evidence = object(entry.reference_evidence);
+    if (
+      Object.keys(context).sort().join(",") !== REFERENCE_TAIL_CONTEXT_KEYS ||
+      typeof context.academic_year !== "number" || !Number.isSafeInteger(context.academic_year) ||
+      context.academic_year < 2024 || context.academic_year > 2027 ||
+      !["csat", "june_mock", "september_mock"].includes(String(context.exam_type)) ||
+      ["exam_id", "source_pack_version", "rule_version", "score_scale_id"].some((k) =>
+        typeof context[k] !== "string" ||
+        !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(context[k] as string)
+      ) ||
+      ["model_version", "reference_curve_id", "weight_encoding", "resolved_model_scenario"].some(
+        (k) =>
+          typeof context[k] !== "string" || !(context[k] as string).length ||
+          (context[k] as string).length > 256 || hasAsciiControl(context[k] as string),
+      ) ||
+      typeof context.profile_sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/.test(context.profile_sha256) ||
+      typeof context.source_scenario_field_present !== "boolean" ||
+      !Array.isArray(context.offering_ids) || context.offering_ids.length < 1 ||
+      context.offering_ids.length > 256 ||
+      context.offering_ids.some((v) =>
+        typeof v !== "string" || v.length < 1 || v.length > 128 || hasAsciiControl(v)
+      ) ||
+      new Set(context.offering_ids).size !== context.offering_ids.length ||
+      Object.keys(evidence).sort().join(",") !== REFERENCE_TAIL_EVIDENCE_KEYS ||
+      Object.values(evidence).some((v) => typeof v !== "string" || !/^[a-f0-9]{64}$/.test(v))
+    ) fail("storage_reference_invalid");
+    if (
+      (entry.bytes as number | bigint) > this.settings.limits.maxArtifactBytes ||
+      (entry.bytes as number | bigint) > REFERENCE_TAIL_MAX_BYTES
+    ) fail("storage_artifact_too_large");
+    return key;
+  }
+  /** A separately selected compatibility receipt, never a production approval. */
+  validateReferenceCompatibility(raw: Readonly<NativeObject>): string {
+    const entry = object(raw), key = this.validateReference(entry);
+    if (
+      entry.kind !== "reference_compatibility" || entry.status !== "approved_reference" ||
+      entry.approval_scope !== "same_exam_mathematical_reference" ||
+      entry.engine_approved !== false || entry.production_allowed !== false ||
+      entry.archive_only !== false ||
+      ![entry.source_review_sha256, entry.independent_review_sha256].every((v) =>
+        typeof v === "string" && /^[a-f0-9]{64}$/.test(v)
+      )
+    ) fail("artifact_not_approved");
+    if (
+      (entry.bytes as number | bigint) > this.settings.limits.maxArtifactBytes ||
+      (entry.bytes as number | bigint) > 131072
+    ) fail("storage_artifact_too_large");
+    return key;
+  }
+  /** The selected head and issuer still must validate the receipt's exact semantic scope. */
+  async referenceCompatibilityArtifact(
+    raw: Readonly<NativeObject>,
+    signal: AbortSignal,
+  ): Promise<VerifiedStorageArtifact> {
+    if (!signal || signal.aborted) fail("storage_unavailable");
+    const entry = cloneNativeJson(object(raw)), key = this.validateReferenceCompatibility(entry);
+    return await this.fetchArtifact(entry, key, signal);
+  }
+  /** Raw pinned bytes for request-local projection binding; SHA is verified by the binder. */
+  async referenceTailBytes(raw: Readonly<NativeObject>, signal?: AbortSignal): Promise<Uint8Array> {
+    const entry = cloneNativeJson(object(raw)), key = this.validateReferenceTail(entry);
+    const bytes = Number(entry.bytes);
+    await this.assertBucket(bytes, signal);
+    if (signal?.aborted) fail("storage_unavailable");
+    const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
+      key.split("/").map(encodeURIComponent).join("/");
+    const content = await this.get(path, bytes, signal);
+    if (content.length !== bytes) fail("storage_size_mismatch");
+    return content;
+  }
+  private async get(
+    path: string,
+    limit: number,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array<ArrayBuffer>> {
     const url = this.origin + "/storage/v1/" + path, controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.settings.limits.requestTimeoutMs);
+    const stop = () => controller.abort();
     try {
+      if (signal) {
+        signal.addEventListener("abort", stop, { once: true });
+        if (signal.aborted) fail("storage_unavailable");
+      }
       const response = await this.fetcher(url, {
         method: "GET",
         headers: { apikey: this.settings.secretKey, Accept: "application/json" },
         redirect: "error",
         signal: controller.signal,
       });
+      if (signal?.aborted) {
+        await response.body?.cancel();
+        fail("storage_unavailable");
+      }
       if (
         response.status !== 200 || response.redirected || response.url !== url || !response.body
       ) {
@@ -320,10 +448,19 @@ export class SupabaseArtifactClient {
         fail("storage_artifact_too_large");
       }
       const reader = response.body.getReader(), chunks: Uint8Array[] = [];
-      let total = 0;
+      let total = 0, cancellation: Promise<void> | null = null;
+      const cancelReader = () => {
+        cancellation ??= reader.cancel().catch(() => {});
+      };
+      controller.signal.addEventListener("abort", cancelReader, { once: true });
+      if (controller.signal.aborted) cancelReader();
       try {
         while (true) {
           const chunk = await reader.read();
+          if (controller.signal.aborted || signal?.aborted) {
+            cancelReader();
+            fail("storage_unavailable");
+          }
           if (chunk.done) break;
           if (!(chunk.value instanceof Uint8Array) || chunk.value.length > limit - total) {
             await reader.cancel();
@@ -333,6 +470,8 @@ export class SupabaseArtifactClient {
           chunks.push(chunk.value);
         }
       } finally {
+        controller.signal.removeEventListener("abort", cancelReader);
+        if (cancellation) await cancellation;
         reader.releaseLock();
       }
       const content = new Uint8Array(total);
@@ -341,21 +480,49 @@ export class SupabaseArtifactClient {
         content.set(chunk, offset);
         offset += chunk.length;
       }
+      if (signal?.aborted) fail("storage_unavailable");
       return content;
     } catch (error) {
       if (error instanceof AccessError) throw error;
-      fail("storage_unavailable");
+      throw new AccessError("storage_unavailable", 503);
     } finally {
       clearTimeout(timer);
+      if (signal) signal.removeEventListener("abort", stop);
     }
   }
-  private async assertBucket(bytes: number): Promise<void> {
-    const bucket = parsed(
-      await this.get(
-        "bucket/" + encodeURIComponent(this.settings.bucket),
-        this.settings.limits.maxMetadataBytes,
-      ),
+  private recentBucket?: {
+    readonly startedMs: number;
+    readonly signal?: AbortSignal;
+    readonly raw: Promise<Uint8Array>;
+    complete: boolean;
+  };
+  /** Completed metadata may be reused within its age bound; in-flight reads stay scope-bound. */
+  private bucketMetadata(signal?: AbortSignal): Promise<Uint8Array> {
+    if (signal?.aborted) fail("storage_unavailable");
+    const now = performance.now(), recent = this.recentBucket;
+    if (
+      recent && now >= recent.startedMs && now - recent.startedMs < STORAGE_CHECK_REUSE_MS &&
+      (recent.complete || recent.signal === signal)
+    ) {
+      return recent.raw;
+    }
+    const raw = this.get(
+      "bucket/" + encodeURIComponent(this.settings.bucket),
+      this.settings.limits.maxMetadataBytes,
+      signal,
     );
+    const entry = { startedMs: now, signal, raw, complete: false };
+    this.recentBucket = entry;
+    void raw.then(() => {
+      entry.complete = true;
+    }, () => {
+      if (this.recentBucket === entry) this.recentBucket = undefined;
+    });
+    return raw;
+  }
+  private async assertBucket(bytes: number, signal?: AbortSignal): Promise<void> {
+    const bucket = parsed(await this.bucketMetadata(signal));
+    if (signal?.aborted) fail("storage_unavailable");
     if (bucket.id !== this.settings.bucket || bucket.public !== false) {
       fail("storage_bucket_not_private");
     }
@@ -370,6 +537,8 @@ export class SupabaseArtifactClient {
     let maximum = 0;
     for (const entry of entries) {
       if (entry.kind === "reference_conversion") this.validateReferenceCalculation(entry);
+      else if (entry.kind === "reference_tail") this.validateReferenceTail(entry);
+      else if (entry.kind === "reference_compatibility") this.validateReferenceCompatibility(entry);
       else this.validateSelectedReference(entry);
       maximum = Math.max(maximum, Number(entry.bytes));
     }
@@ -382,19 +551,26 @@ export class SupabaseArtifactClient {
   }
   async referenceCalculationArtifact(
     raw: Readonly<NativeObject>,
+    signal?: AbortSignal,
   ): Promise<VerifiedStorageArtifact> {
     const entry = cloneNativeJson(object(raw)), key = this.validateReferenceCalculation(entry);
-    return await this.fetchArtifact(entry, key);
+    return await this.fetchArtifact(entry, key, signal);
   }
-  private async fetchArtifact(entry: NativeObject, key: string): Promise<VerifiedStorageArtifact> {
+  private async fetchArtifact(
+    entry: NativeObject,
+    key: string,
+    signal?: AbortSignal,
+  ): Promise<VerifiedStorageArtifact> {
     const bytes = Number(entry.bytes);
-    await this.assertBucket(bytes);
+    await this.assertBucket(bytes, signal);
+    if (signal?.aborted) fail("storage_unavailable");
     const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
       key.split("/").map(encodeURIComponent).join("/");
-    const load = () => this.get(path, bytes);
-    if (this.reuse) {
-      return await this.reuse.cache.artifact(this.settings, entry, load, this.reuse.onReuse);
-    }
-    return await verifyContent(await load(), entry);
+    const load = () => this.get(path, bytes, signal);
+    const result = this.reuse
+      ? await this.reuse.cache.artifact(this.settings, entry, load, this.reuse.onReuse)
+      : await verifyContent(await load(), entry);
+    if (signal?.aborted) fail("storage_unavailable");
+    return result;
   }
 }

@@ -92,7 +92,7 @@ class RetainedGitHistoryTests(unittest.TestCase):
         cls.call('config','core.longpaths','true')
     @classmethod
     def call(cls,*arguments,input=None):
-        result=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false',
+        result=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false','-c','core.longpaths=true',
                                '-c','user.name=Synthetic policy fixture',
                                '-c','user.email=synthetic@example.invalid',*arguments],
                               cwd=cls.repo,input=input,capture_output=True,env=cls.git_env)
@@ -211,7 +211,7 @@ class RetainedGitHistoryTests(unittest.TestCase):
 class RetainedMergeScopeTests(unittest.TestCase):
     """Native two-parent trees/indexes; every repository, object and index is retained."""
     def setUp(self):
-        import tempfile,uuid
+        import uuid
         self.spec=json.loads((ROOT/'docs/current/service_spec.json').read_text(encoding='utf-8'))
         self._blobs={};self._trees={}
         self.spec['workflow']['branch_governance']['merge_scope_policy']={
@@ -224,7 +224,7 @@ class RetainedMergeScopeTests(unittest.TestCase):
         stamp=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'_'+uuid.uuid4().hex[:8]
         self.repo=ROOT/'outputs/branch_policy_merge_tests'/stamp
         self.repo.mkdir(parents=True,exist_ok=False)
-        self.git_dir=Path(tempfile.gettempdir())/'jungsi_touch_retained_policy_git'/stamp
+        self.git_dir=ROOT/'outputs/branch_policy_git'/stamp
         self.git_dir.parent.mkdir(parents=True,exist_ok=True)
         self.call('init','--initial-branch=fixture','--separate-git-dir='+str(self.git_dir))
         # Retained snapshot paths can exceed Windows Git's default stat limit.
@@ -244,7 +244,7 @@ class RetainedMergeScopeTests(unittest.TestCase):
         self.env_patch.stop()
 
     def call(self,*args,input=None,raw=False):
-        result=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false',
+        result=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false','-c','core.longpaths=true',
             '-c','user.name=Synthetic policy fixture','-c','user.email=synthetic@example.invalid',
             *args],cwd=self.repo,input=input,capture_output=True,env=self.git_env)
         if result.returncode:raise AssertionError(result.stderr.decode('utf-8',errors='replace'))

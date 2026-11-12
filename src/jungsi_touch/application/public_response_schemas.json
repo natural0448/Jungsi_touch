@@ -1071,7 +1071,9 @@
         "wildcard_assessment_pending",
         "wildcard_comparison_unverified",
         "wildcard_evidence_unavailable",
-        "year_bridge_required"
+        "year_bridge_required",
+        "reference_attendance_confirmation_required",
+        "reference_attendance_policy_invalid"
       ]
     },
     "identifier": {
@@ -1435,6 +1437,25 @@
         "한국사"
       ]
     },
+    "second_language": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "subject": {
+          "type": "string",
+          "nullable": false
+        },
+        "grade": {
+          "type": "integer",
+          "nullable": false
+        }
+      },
+      "required": [
+        "subject",
+        "grade"
+      ],
+      "optional": []
+    },
     "tie_interval": {
       "type": "object",
       "nullable": false,
@@ -1574,6 +1595,10 @@
           "ref": "absolute_grades",
           "nullable": false
         },
+        "second_language": {
+          "ref": "second_language",
+          "nullable": true
+        },
         "overall": {
           "ref": "overall_position",
           "nullable": false
@@ -1589,7 +1614,9 @@
         "absolute_grades",
         "overall"
       ],
-      "optional": []
+      "optional": [
+        "second_language"
+      ]
     },
     "recruitment_change": {
       "type": "object",
@@ -2849,6 +2876,10 @@
             "ref": "recommendation_reason",
             "nullable": false
           }
+        },
+        "reference_percentile": {
+          "ref": "reference_percentile",
+          "nullable": true
         }
       },
       "required": [
@@ -2868,7 +2899,8 @@
         "decision_evidence",
         "conversion",
         "percentile",
-        "recommendation_reasons"
+        "recommendation_reasons",
+        "reference_percentile"
       ]
     },
     "candidate_item": {
@@ -3058,6 +3090,14 @@
             "card_stability"
           ],
           "optional": []
+        },
+        "reference_university_groups": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "reference_university_group",
+            "nullable": false
+          }
         }
       },
       "required": [
@@ -3071,7 +3111,8 @@
         "ineligible_offerings"
       ],
       "optional": [
-        "wildcard_selection"
+        "wildcard_selection",
+        "reference_university_groups"
       ]
     },
     "shortlist": {
@@ -3241,6 +3282,10 @@
         "analysis_status": {
           "ref": "analysis_status",
           "nullable": false
+        },
+        "reference_attendance_requirements": {
+          "ref": "reference_attendance_status",
+          "nullable": false
         }
       },
       "required": [
@@ -3255,7 +3300,9 @@
         "shortlist",
         "analysis_status"
       ],
-      "optional": []
+      "optional": [
+        "reference_attendance_requirements"
+      ]
     },
     "snapshot_standard": {
       "type": "object",
@@ -6843,6 +6890,14 @@
             "ref": "history_snapshot_r27_history_link",
             "nullable": false
           }
+        },
+        "applicant_eligibility": {
+          "ref": "history_snapshot_admission_guidance",
+          "nullable": false
+        },
+        "selection_method": {
+          "ref": "history_snapshot_admission_guidance",
+          "nullable": false
         }
       },
       "required": [
@@ -6854,7 +6909,10 @@
         "history_link_pending_years",
         "historical_links"
       ],
-      "optional": []
+      "optional": [
+        "applicant_eligibility",
+        "selection_method"
+      ]
     },
     "history_snapshot_r27_partial_coverage": {
       "type": "object",
@@ -6890,6 +6948,229 @@
         "included_rows",
         "excluded_rows",
         "review_pending_rows"
+      ],
+      "optional": []
+    },
+    "history_snapshot_admission_guidance": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "pending",
+            "verified_official"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_url": {
+          "type": "string",
+          "nullable": true
+        },
+        "source_as_of": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "status",
+        "text",
+        "source_url",
+        "source_as_of"
+      ],
+      "optional": []
+    },
+    "reference_percentile": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "pending",
+            "reference_estimated"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "reference_conversion_unavailable",
+            "reference_tail_missing",
+            "reference_tail_context_mismatch",
+            "reference_exam_context_mismatch",
+            "reference_conversion_context_mismatch",
+            "reference_score_outside_saved_support",
+            "reference_tail_unavailable"
+          ]
+        },
+        "estimated_upper_cumulative_percent_all_examinees": {
+          "ref": "decimal_or_integer",
+          "nullable": true
+        },
+        "metric": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "estimated_upper_cumulative_percent_all_examinees"
+          ]
+        },
+        "denominator_kind": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "same_year_original_model_whole_exact_mass"
+          ]
+        },
+        "calculation_review_scope": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "same_exam_mathematical_reference"
+          ]
+        },
+        "production_allowed": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        },
+        "actual_admission_full_total_approved": {
+          "type": "boolean",
+          "nullable": false,
+          "enum": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "estimated_upper_cumulative_percent_all_examinees",
+        "calculation_review_scope",
+        "production_allowed",
+        "actual_admission_full_total_approved"
+      ],
+      "optional": [
+        "reason_code",
+        "metric",
+        "denominator_kind"
+      ]
+    },
+    "reference_candidate_item": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "offering": {
+          "ref": "offering",
+          "nullable": false
+        },
+        "reference_percentile": {
+          "ref": "reference_percentile",
+          "nullable": false
+        }
+      },
+      "required": [
+        "offering",
+        "reference_percentile"
+      ],
+      "optional": []
+    },
+    "reference_university_group": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "university_id": {
+          "type": "string",
+          "nullable": false
+        },
+        "university_name": {
+          "type": "string",
+          "nullable": true
+        },
+        "offerings": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "ref": "reference_candidate_item",
+            "nullable": false
+          }
+        }
+      },
+      "required": [
+        "university_id",
+        "university_name",
+        "offerings"
+      ],
+      "optional": []
+    },
+    "reference_attendance_status": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "confirmation_required"
+          ]
+        },
+        "confirmation_kind": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "self_reported"
+          ]
+        },
+        "profile_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "exam_id": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "pack_version": {
+          "ref": "identifier",
+          "nullable": false
+        },
+        "offerings": {
+          "type": "map",
+          "nullable": false,
+          "keys": {
+            "ref": "identifier",
+            "nullable": false
+          },
+          "values": {
+            "type": "array",
+            "nullable": false,
+            "items": {
+              "type": "string",
+              "nullable": false,
+              "enum": [
+                "korean",
+                "math",
+                "english",
+                "korean_history",
+                "inquiry_1",
+                "inquiry_2"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "status",
+        "profile_id",
+        "exam_id",
+        "pack_version",
+        "confirmation_kind",
+        "offerings"
       ],
       "optional": []
     }

@@ -34,7 +34,7 @@ class DeletionApprovalTests(unittest.TestCase):
         r['record_sha256']=policy.canonical_hash({k:v for k,v in r.items() if k!='record_sha256'})
     @classmethod
     def call(cls,*args,input=None):
-        r=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false','-c','user.name=Synthetic approval fixture','-c','user.email=synthetic@example.invalid',*args],cwd=cls.repo,env=cls.git_env,input=input,capture_output=True)
+        r=subprocess.run(['git','-c','gc.auto=0','-c','maintenance.auto=false','-c','core.longpaths=true','-c','user.name=Synthetic approval fixture','-c','user.email=synthetic@example.invalid',*args],cwd=cls.repo,env=cls.git_env,input=input,capture_output=True)
         if r.returncode:raise AssertionError(r.stderr.decode('utf-8',errors='replace'))
         return r.stdout.strip()
     @classmethod

@@ -16,7 +16,7 @@ import { bindP1R27ConsumerGate, assertP1R27ConsumerGate } from "../../supabase/f
 import { bindReviewedR27Scope, combineReviewedR27Scopes, bindReviewedR27Links, projectStandaloneR27Row } from "../../supabase/functions/_shared/jungsi/application/r27_standalone.ts";
 import { bindHistoricalReferencePublication } from "../../supabase/functions/_shared/jungsi/application/history_reference_estimates.ts";
 import { bindFieldQualificationPublication } from "../../supabase/functions/_shared/jungsi/application/history_field_qualification.ts";
-import { rebindP1R27Candidate, bindP1R27Evidence, composeP1R27Candidate, buildCandidateR27ScopeIndex, buildCandidateR27PartialScopeIndex, buildCandidateR27PartialBody } from "../../supabase/functions/_shared/jungsi/application/p1_r27_composition.ts";
+import { rebindP1R27Candidate, bindP1R27Evidence, composeP1R27Candidate, buildCandidateR27ScopeIndex, buildCandidateR27PartialScopeIndex, buildCandidateR27PartialBody, assertSealedR27Publication } from "../../supabase/functions/_shared/jungsi/application/p1_r27_composition.ts";
 
 const S = "a".repeat(64), H = "b".repeat(64), OLD = "c".repeat(64), PUB = "d".repeat(64), SCOPE = "e".repeat(64), EV = "f".repeat(64);
 const rebindAuthority = { revoked:false, hang:false, calls:0, scopes:[], async assertCurrent(scope) {
@@ -275,6 +275,130 @@ await test("partial_scope_holds_unknown_and_excludes_practical_with_pinned_publi
   const projector=new PublicResponseProjection(registry,registry.operations.map(x=>({id:x.id,contract_ref:x.contract_ref})));
   assert.deepEqual({...projector.project("history.snapshot.head","standard",head).r27_scope_coverage},head.r27_scope_coverage);
   assert.doesNotThrow(()=>projector.project("history.snapshot.read","standard",body));
+
+  // Scoped identity checks share this existing case and do not change its stdout contract.
+  // These synthetic scope grants are not physical target or publication approval.
+  const checkedScope = [];
+  async function scopeCheck(name, work) {
+    await work();
+    checkedScope.push(name);
+  }
+  const scopedSource = (pk, overrides = {}) =>
+    sourceRow({ original_pk: pk, campus: null, group: "가", quota_stage: "initial", ...overrides });
+  const current = (candidate) => candidate.body.rows.filter((row) => row.academic_year === 2027);
+  async function run(rows) {
+    const input = await fixture(rows), candidate = await input.build();
+    return { f: { evidence: input.context }, c: candidate };
+  }
+  await scopeCheck("independent campus, track and group scopes remain separate", async () => {
+    for (const field of ["campus", "admission_track", "group"]) {
+      const a = scopedSource("SYN-SHARED"), b = scopedSource("SYN-SHARED", {
+        [field]: field === "group" ? "나" : "SYN-VARIANT",
+        quota_condition_text: "SYN CONDITION",
+      });
+      const { f, c } = await run([a, b, scopedSource("SYN-NEIGHBOR")]);
+      const rows = current(c);
+      assert.equal(c.status, "HOLD_UNPUBLISHED");
+      assert.equal(c.held_rows.length, 0);
+      assert.deepEqual(rows.map((r) => r.original_pk), ["SYN-SHARED", "SYN-SHARED", "SYN-NEIGHBOR"]);
+      assert.notEqual(rows[0].r27_source.scope_key, rows[1].r27_source.scope_key);
+      assert.equal(rows[0].offering_id, rows[1].offering_id);
+      assert.equal(rows[0].recruitment_count_with_stage.value, 0);
+      assert.equal(rows[1].r27_source.quota.quota_condition_text, "SYN CONDITION");
+      assert.equal(rows[1].recruitment_count_with_stage.stage, "unspecified");
+      const idx = await buildCandidateR27ScopeIndex(c, f.evidence);
+      assert.equal(idx.entries.length, 3);
+      assert.notEqual(idx.entries[0].row_sha256, idx.entries[1].row_sha256);
+    }
+  });
+  await scopeCheck("distinct scopes across pages remain separate", async () => {
+    const pending = (i) => scopedSource("SYN-FILL-" + i, {
+      scope: { state: "review_pending", evidence_sha256: null },
+    });
+    const rows = Array.from({ length: 130 }, (_, i) => pending(i));
+    rows[0] = scopedSource("SYN-SHARED", { campus: "SYN-A" });
+    rows[129] = scopedSource("SYN-SHARED", { campus: "SYN-B" });
+    rows[64] = scopedSource("SYN-NEIGHBOR");
+    const { f, c } = await run(rows);
+    assert.deepEqual(current(c).map((r) => r.original_pk), ["SYN-SHARED", "SYN-NEIGHBOR", "SYN-SHARED"]);
+    assert.equal(c.held_rows.length, 127);
+    const idx = await buildCandidateR27PartialScopeIndex(c, f.evidence);
+    assert.deepEqual([idx.source_rows, idx.included_rows, idx.excluded_rows, idx.review_pending_rows],
+      [130, 3, 0, 127]);
+  });
+  await scopeCheck("review-pending scope does not hide independently approved peer", async () => {
+    const a = scopedSource("SYN-SHARED", { campus: "SYN-A",
+      scope: { state: "review_pending", evidence_sha256: null } });
+    const b = scopedSource("SYN-SHARED", { campus: "SYN-B" });
+    const { f, c } = await run([a, b, scopedSource("SYN-NEIGHBOR")]);
+    assert.equal(c.held_rows.length, 1);
+    assert.equal(c.held_rows[0].scope_review, "review_pending");
+    assert.deepEqual(current(c).map((r) => r.campus), ["SYN-B", null]);
+    const idx = await buildCandidateR27PartialScopeIndex(c, f.evidence);
+    assert.deepEqual([idx.source_rows, idx.included_rows, idx.excluded_rows, idx.review_pending_rows],
+      [3, 2, 0, 1]);
+    const body = buildCandidateR27PartialBody(c, f.evidence, idx);
+    await assertSealedR27Publication(idx, encode(idx), [encode(body)], Object.freeze({}));
+    const copy = parseNativeJson(new TextDecoder().decode(encode(idx)));
+    await assert.rejects(
+      assertSealedR27Publication(copy, encode(idx), [encode(body)], Object.freeze({})),
+      /candidate_index_unsealed/,
+    );
+  });
+  await scopeCheck("excluded practical scope does not hide independently approved peer", async () => {
+    const a = scopedSource("SYN-SHARED", { campus: "SYN-A",
+      scope: { state: "excluded_practical", evidence_sha256: EV } });
+    const b = scopedSource("SYN-SHARED", { campus: "SYN-B" });
+    const pending = scopedSource("SYN-PENDING", { scope: { state: "review_pending", evidence_sha256: null } });
+    const { f, c } = await run([a, b, pending, scopedSource("SYN-NEIGHBOR")]);
+    assert.equal(c.excluded_count, 1);
+    assert.equal(c.held_rows.length, 1);
+    assert.equal(c.held_rows[0].original_pk, "SYN-PENDING");
+    assert.deepEqual(current(c).map((r) => r.campus), ["SYN-B", null]);
+    const idx = await buildCandidateR27PartialScopeIndex(c, f.evidence);
+    assert.deepEqual([idx.source_rows, idx.included_rows, idx.excluded_rows, idx.review_pending_rows],
+      [4, 2, 1, 1]);
+  });
+  await scopeCheck("distinct base PK rows remain included and build a complete index", async () => {
+    const { f, c } = await run([scopedSource("SYN-A"), scopedSource("SYN-B"), scopedSource("SYN-C")]);
+    assert.equal(c.held_rows.length, 0);
+    assert.deepEqual(current(c).map((r) => r.original_pk), ["SYN-A", "SYN-B", "SYN-C"]);
+    assert.equal((await buildCandidateR27ScopeIndex(c, f.evidence)).entries.length, 3);
+  });
+  await scopeCheck("cross-school PK collision remains held with its established reason", async () => {
+    const a = scopedSource("SYN-DUP"), b = scopedSource("SYN-DUP", { school_id: "SYN-SCHOOL-B" });
+    const { c } = await run([a, b, scopedSource("SYN-NEIGHBOR")]);
+    assert.equal(c.held_rows.filter((r) => r.scope_review === "cross_school_pk_pending").length, 2);
+    assert.deepEqual(current(c).map((r) => r.original_pk), ["SYN-NEIGHBOR"]);
+  });
+  await scopeCheck("identical six-field duplicate keeps the existing whole-draft failure", async () => {
+    const a = scopedSource("SYN-DUP"), b = scopedSource("SYN-DUP", { quota_value: 5 });
+    await assert.rejects(run([a, b, scopedSource("SYN-NEIGHBOR")]), /coverage_source_scope_conflict/);
+  });
+  await scopeCheck("cross-school excluded variant stays excluded and eligible peer is held", async () => {
+    const a = scopedSource("SYN-DUP", { school_id: "SYN-SCHOOL-A", campus: "SYN-A",
+      scope: { state: "excluded_practical", evidence_sha256: EV } });
+    const b = scopedSource("SYN-DUP", { school_id: "SYN-SCHOOL-B", campus: "SYN-B" });
+    const { f, c } = await run([a, b, scopedSource("SYN-NEIGHBOR")]);
+    assert.equal(c.excluded_count, 1);
+    assert.equal(c.held_rows.length, 1);
+    assert.equal(c.held_rows[0].scope_review, "cross_school_pk_pending");
+    assert.deepEqual(current(c).map((r) => r.original_pk), ["SYN-NEIGHBOR"]);
+    const idx = await buildCandidateR27PartialScopeIndex(c, f.evidence);
+    assert.deepEqual([idx.source_rows, idx.included_rows, idx.excluded_rows, idx.review_pending_rows],
+      [3, 1, 1, 1]);
+  });
+  assert.deepEqual(checkedScope, [
+    "independent campus, track and group scopes remain separate",
+    "distinct scopes across pages remain separate",
+    "review-pending scope does not hide independently approved peer",
+    "excluded practical scope does not hide independently approved peer",
+    "distinct base PK rows remain included and build a complete index",
+    "cross-school PK collision remains held with its established reason",
+    "identical six-field duplicate keeps the existing whole-draft failure",
+    "cross-school excluded variant stays excluded and eligible peer is held",
+  ]);
+
 });
 await test("partial_index_rejects_tampered_counts_and_empty_or_false_partial",async()=>{
   const f=await fixture([sourceRow({original_pk:"SYN-A"}),sourceRow({original_pk:"SYN-B",scope:{state:"review_pending",evidence_sha256:null}})]);
@@ -301,6 +425,23 @@ await test("partial_rejects_prior_held_2027_and_all_unknown",async()=>{
   await assert.rejects(buildCandidateR27PartialScopeIndex(out,f.context),/candidate_partial_scope_unresolved/);
   const all=await fixture([sourceRow({original_pk:"SYN-ONLY",scope:{state:"review_pending",evidence_sha256:null}})]);
   await assert.rejects(buildCandidateR27PartialScopeIndex(await all.build(),all.context),/candidate_partial_scope_incomplete/);
+});
+
+await test("compose_head_assertions_require_exact_void",async()=>{
+  for(const which of ["source","previous"]) {
+    for(const value of [false,null,"throw"]) {
+      const f=await fixture([sourceRow()]);
+      const outcome=()=>{if(value==="throw")throw new Error("SYN_COMPOSE_"+which.toUpperCase()+"_EXCEPTION");return value;};
+      if(which==="source")f.source.assertSourceHead=async expected=>{assert.equal(expected,H);return outcome();};
+      else f.previous.assertCurrent=async expected=>{assert.equal(expected.previous_publication_sha256,f.previous.pub.publicationSha256);return outcome();};
+      const expected=value==="throw"?new RegExp("SYN_COMPOSE_"+which.toUpperCase()+"_EXCEPTION"):
+        new RegExp("compose_"+which+"_assert_invalid");
+      await assert.rejects(f.build(),expected);
+      if(which==="source")assert.equal(f.previous.finishes,0);
+    }
+  }
+  const good=await (await fixture([sourceRow()])).build();
+  assert.equal(good.status,"HOLD_UNPUBLISHED");
 });
 
 
@@ -663,6 +804,51 @@ await test("qualified_rank_rebinds_with_new_receipt_and_final_manifest_without_l
   assert.equal(receipt.status,"global_checks_passed");
   assert.ok(rebindAuthority.scopes.some(x=>x.phase==="candidate" && x.publication_sha256===null));
   assert.ok(rebindAuthority.scopes.some(x=>x.phase==="publication" && x.publication_sha256===manifestSha));
+  await test("rebind_assertions_require_void_at_candidate_and_publication",async()=>{
+    const seen={source:0,previous:0,authority:0};
+    const modes={source:null,previous:null,authority:null};
+    const reset=()=>{for(const key of Object.keys(seen)){seen[key]=0;modes[key]=null;}};
+    const outcome=(key)=>{
+      seen[key]++;
+      const m=modes[key];
+      if(!m || seen[key]!==m.at)return undefined;
+      if(m.value==="throw")throw new Error("SYN_REBIND_"+key.toUpperCase()+"_EXCEPTION");
+      return m.value;
+    };
+    const source={...f.source,async assertSourceHead(expected){await f.source.assertSourceHead(expected);return outcome("source");}};
+    const previousPort={...f.previous,async assertCurrent(expected){await f.previous.assertCurrent(expected);return outcome("previous");}};
+    const authority={async assertCurrent(input){await rebindAuthority.assertCurrent(input);return outcome("authority");}};
+    for(const which of ["source","previous","authority"]) {
+      for(const value of [false,null,"throw"]) {
+        for(const at of [1,2]) {
+          reset();modes[which]={at,value};
+          const expected=value==="throw"?new RegExp("SYN_REBIND_"+which.toUpperCase()+"_EXCEPTION"):
+            new RegExp("rebind_"+which+"_assert_invalid");
+          await assert.rejects(rebindP1R27Candidate(candidate,f.context,source,previousPort,authority,proof),expected);
+          assert.equal(seen[which],at);assert.equal(candidate.rebind_required.length,1);
+        }
+      }
+    }
+    reset();
+    const guarded=await rebindP1R27Candidate(candidate,f.context,source,previousPort,authority,proof);
+    const guardedIndex=await buildCandidateR27ScopeIndex(guarded,f.context), guardedBytes=encode(guardedIndex);
+    assert.equal(nativeJsonText(guarded.body,true),nativeJsonText(rebound.body,true));
+    assert.equal(nativeJsonText(guardedIndex,true),nativeJsonText(index,true));
+    for(const which of ["source","previous","authority"]) {
+      for(const value of [false,null,"throw"]) {
+        reset();modes[which]={at:1,value};
+        const expected=value==="throw"?new RegExp("SYN_REBIND_"+which.toUpperCase()+"_EXCEPTION"):
+          new RegExp("rebind_"+which+"_assert_invalid");
+        await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,guardedBytes,await hash(guardedBytes),
+          guarded.coverage_sha256,[Uint8Array.from(compressed)],limits,guardedIndex),expected);
+        assert.equal(seen[which],1);
+      }
+    }
+    reset();
+    const ok=await prepareP1R27GlobalReceipt(pub,manifestBytes,guardedBytes,await hash(guardedBytes),
+      guarded.coverage_sha256,[Uint8Array.from(compressed)],limits,guardedIndex);
+    assert.equal(ok.status,"global_checks_passed");
+  });
   rebindAuthority.hang=true;
   await assert.rejects(prepareP1R27GlobalReceipt(pub,manifestBytes,indexBytes,await hash(indexBytes),
     rebound.coverage_sha256,[Uint8Array.from(compressed)],{...limits,timeoutMs:30},index),

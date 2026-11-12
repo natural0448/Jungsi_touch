@@ -146,6 +146,9 @@ Deno.test("saved tail enforces complete sorted exact mass chain and no productio
       (p: NativeObject) => ((p.rows as NativeObject[])[0].inclusive_weight_units = "14"),
       (p: NativeObject) => ((p.rows as NativeObject[])[0].tie_weight_units = "0"),
       (p: NativeObject) => ((p.projection as NativeObject).whole_mass_numerator = "1"),
+      (p: NativeObject) => ((p.rows as NativeObject[])[1].score_denominator = "0"),
+      (p: NativeObject) => ((p.rows as NativeObject[])[1].score_numerator = "10"),
+      (p: NativeObject) => ((p.rows as NativeObject[])[1].score_numerator = 20),
     ]
   ) {
     const p = fixture();

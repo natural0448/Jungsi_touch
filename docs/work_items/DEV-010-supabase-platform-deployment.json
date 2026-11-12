@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.168",
+  "contract_version": "1.9.176",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -700,7 +700,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "source_sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -766,7 +766,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "source_sha256": "0021c82e44126e5a75faafa619809df2f33a6d2e9cd80873398d069d74a4badf",
+            "source_sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638",
             "symbol": "UniversityAnalysisService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -1835,11 +1835,11 @@
         "bindings": {
           "native_entry": {
             "path": "supabase/functions/jungsi-api/index.ts",
-            "source_sha256": "ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2"
+            "source_sha256": "9b258d5800adf1615293cf715f89a6d71de331881065664a5d330241575e289b"
           },
           "composition": {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "source_sha256": "b757ad470d5a3d9cb44b8ad08203ca7d42359dd2657d9d91581674c639e6f557"
+            "source_sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
           }
         },
         "operation_ids": [
@@ -4277,6 +4277,117 @@
         "source_regression": "Reuse the prior exact maintenance-source/CI and bounded component regression where the freshly read source SHA agrees. Rerun only changed paths or unresolved cases.",
         "Owner": "Existing frontend/system-service responsibility and existing installation authority; no new DB, scoring or Secrets delegation.",
         "production_ready": false
+      },
+      "auth_503_cancel_followup_20261112": {
+        "format": "jungsi.503-auth-cancellation-followup/v1",
+        "status": "LOCAL_CANDIDATE_NOT_COMMITTED_NOT_DEPLOYED",
+        "branch": "feature/application-pre-data-platform",
+        "requirements": [
+          "REQ-20",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "controls": [
+          "SEC-01",
+          "SEC-03",
+          "SEC-04",
+          "SEC-07",
+          "SEC-08"
+        ],
+        "operations": [
+          "session.read"
+        ],
+        "affected_boundary": "기존 사용자 Bearer를 검증하는 공통 서버 인증 경로와 GET /api/v1/me; API 경로·권한·회원 분류는 바꾸지 않는다.",
+        "incident": "화면 Owner는 2026-11-11 10시대 session.read 5.94초 후 503을 보고했다. 01시 접근 제한이 aal1이었는지는 별도 과거 로그가 없어 미확정이며 두 사건을 동일 원인으로 단정하지 않는다.",
+        "change": "기존 인증·본인 프로필 조회에 요청별 취소를 전달하고 기존 5초 제한을 유지한다. 이미 확인한 인증 거절은 응답 정리 실패로 503으로 바꾸지 않는다. 관측 실패는 인증 결과를 바꾸지 않는다.",
+        "observability": "서버 전용 고정 단계·안전한 결과·상태 코드·소요 시간 및 서버 생성 요청 ID만 기록한다. 토큰·쿠키·계정·성적·본문·URL·예외 원문은 기록하지 않는다.",
+        "preservation": "기존 relay·실제 사용자 인증·OTP·소유권·이용권·CSRF·공유 예산·no-store와 기존 저장 성적 및 리포트가 유지된다. 플랜·서비스·DB를 추가하지 않는다.",
+        "validation": "401/403 거절과 body 정리 실패, 요청 취소/지연 응답, 5초 한도, 정상 로그인과 기존 API, 진단 비노출을 최종 같은 스냅샷에서 검수하고 정상 훅·정확한 SHA의 GitHub CI를 요구한다.",
+        "not_run": "실제 BFF에서 Edge까지의 취소 전달·실제 장애 원인 및 재발 해결, GitHub CI·병합·운영 배포·운영 인수는 별도로 확인하기 전 미완료다.",
+        "owner_followup": "Owner와 현재 함수의 최종 SHA·설정 일치 여부를 맞추어 기존 Supabase에 적용하고, 실제 로그인 세션과 기존 저장 리포트의 반복 조회 및 안전한 요청 번호를 확인한다. 실제 사용자 성적을 변경하는 시험은 하지 않는다.",
+        "limits": "기존 5초 취소 신호를 사용하며 취소에 협조하지 않는 fetch·성공 본문 읽기나 실제 전송의 물리 정산이 기한 내 끝난다고 보장하지 않는다.",
+        "synthetic_suite": {
+          "format": "jungsi.auth-503-synthetic-suite/v1",
+          "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+          "baseline_foundation_count": 656,
+          "test_paths": [
+            "tests/edge/test_auth_exchange_observation.synthetic.ts"
+          ],
+          "test_count": 27,
+          "case_names_by_path": {
+            "tests/edge/test_auth_exchange_observation.synthetic.ts": [
+              "auth diagnostic records status and preserves result without logging input",
+              "non-200 status is distinct from fast transport failure",
+              "observer errors never change successful results",
+              "a successful operation with no recorded status is not labeled HTTP success",
+              "five-second deadline is retained and classified as timeout",
+              "opt-in native auth diagnostic preserves 503 and does not read a profile",
+              "opt-in profile diagnostic preserves fail-closed profile behavior",
+              "auth rejection statuses remain null and diagnostic identifies only the request",
+              "invalid auth JSON fails closed and invalid profile shape remains null",
+              "slow diagnostic sink never blocks authentication result",
+              "received bearer denial remains rejected when body cancellation crosses deadline",
+              "profile timeout remains unverified and is classified separately",
+              "cancelled HTTP request aborts auth exchange without being reported as timeout",
+              "request cancellation reaches native auth and own profile transport",
+              "already cancelled request never starts the auth operation",
+              "request abort during a diagnostic observer cannot return native receipts",
+              "request abort remains first cause even if the local deadline also fires",
+              "request abort does not wait indefinitely for rejected response body cleanup",
+              "known bearer denial stays denied when body cleanup exceeds the existing deadline",
+              "known bearer denial is preserved when response cleanup rejects",
+              "caller abort takes priority when denied response cleanup rejects",
+              "caller abort bounds a fetch that ignores its signal",
+              "caller abort bounds a successful response body that ignores cancellation",
+              "caller abort bounds cleanup of an oversized declared response",
+              "late successful auth fetch cannot authenticate after caller abort",
+              "deadline bounds a fetch that ignores cancellation and reports timeout",
+              "late transport rejection after request abort is observed"
+            ]
+          },
+          "source_bindings": [
+            {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts",
+              "sha256": "88b7fa8eeb52eec3507175c5359123d7eaa164c2871eb7d4ed5d15223f3b69d4"
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts",
+              "sha256": "0c57f601630dc645045827cb06831f404acaa87962c432236d574cfc5556fbeb"
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+              "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
+            },
+            {
+              "path": "tests/edge/test_auth_exchange_observation.synthetic.ts",
+              "sha256": "63940b4da43cca8d232cba58114868c548eb30e89a2d5e9cda82ae90e598e78c"
+            }
+          ],
+          "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+          "activation_status": "NOT_RUN",
+          "operating_writes": 0
+        },
+        "runtime_integration_suite": {
+          "format": "jungsi.auth-503-runtime-integration/v1",
+          "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+          "baseline_foundation_count": 656,
+          "baseline_runtime_count": 25,
+          "baseline_runtime_names_sha256": "60070225139890938692563a8afe0cbe42344a87023764ed041c9c3f53123824",
+          "test_path": "tests/edge/test_runtime_composition.ts",
+          "test_count": 5,
+          "case_names": [
+            "synthetic /me auth failure correlates response and safe observations",
+            "synthetic /me entitlement failure is distinguishable after successful auth",
+            "synthetic concurrent /me failures ignore client request ids and stay separate",
+            "HTTP request abort reaches native authentication and cannot return success",
+            "abort from synchronous auth observer cannot return a session"
+          ],
+          "test_source_sha256": "9068115febab60b410e5a13bc9b69c4dcf589a06688b1ab74c7f3959ff80dee9",
+          "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+          "activation_status": "NOT_RUN",
+          "operating_writes": 0
+        }
       }
     }
   }

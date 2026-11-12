@@ -7,6 +7,7 @@ import { JsonFloat } from "../domain/native_json.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { hasAsciiControl } from "../domain/text.ts";
 import { calendarDate } from "../domain/time.ts";
+import { validatePublicAdmissionGuidance } from "./p1_admission_guidance.review-only.ts";
 import { publicSourceUrl } from "./catalog.ts";
 import {
   assertR27ScopeIndex,
@@ -144,7 +145,7 @@ function r27Optional(raw: unknown, allowed: readonly string[]): NativeObject {
   return exact(raw, fields);
 }
 function r27Source(row: NativeObject): void {
-  const info = exact(row.r27_source, [
+  const required = [
     "scope_key",
     "scope_review",
     "quota",
@@ -152,7 +153,13 @@ function r27Source(row: NativeObject): void {
     "history_link_status",
     "history_link_pending_years",
     "historical_links",
-  ]);
+  ];
+  const optional = ["applicant_eligibility", "selection_method"];
+  const info = r27Optional(row.r27_source, [...required, ...optional]);
+  if (required.some((field) => !Object.hasOwn(info, field))) invalid();
+  for (const field of optional) {
+    if (Object.hasOwn(info, field)) validatePublicAdmissionGuidance(info[field]);
+  }
   if (info.scope_key !== r27ScopeKey(row) || info.scope_review !== "eligible") invalid();
   const quota = r27Optional(info.quota, [
     "quota_value",

@@ -8,23 +8,37 @@ export class JsonFloat {
 export type NativeJson = null | boolean | string | number | bigint | JsonFloat | NativeJson[] | {
   [key: string]: NativeJson;
 };
+const NUMBER = /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/y;
+const LITERALS = [["true", true], ["false", false], ["null", null]] as const;
 export function parseNativeJson(text: string): NativeJson {
   let i = 0;
+  // Same accepted whitespace as before (space, tab, CR, LF) without a regex per character.
   const ws = () => {
-    while (/[ \t\r\n]/.test(text[i] ?? "x")) i++;
+    for (;;) {
+      const c = text.charCodeAt(i);
+      if (c === 32 || c === 9 || c === 13 || c === 10) i++;
+      else return;
+    }
   };
   function string(): string {
     const start = i++;
+    let plain = true;
     while (i < text.length) {
-      const c = text[i++];
-      if (c === '"') {
+      const c = text.charCodeAt(i++);
+      if (c === 34) {
+        // No escape and no control character: exactly what JSON.parse would return.
+        if (plain) return text.slice(start + 1, i - 1);
         try {
           return JSON.parse(text.slice(start, i));
         } catch {
           break;
         }
       }
-      if (c === "\\") i++;
+      if (c < 32) plain = false;
+      else if (c === 92) {
+        plain = false;
+        i++;
+      }
     }
     throw new Error("native_json_invalid");
   }
@@ -75,13 +89,15 @@ export function parseNativeJson(text: string): NativeJson {
         ws();
       }
     } else {
-      for (const [token, value] of [["true", true], ["false", false], ["null", null]] as const) {
+      for (const [token, value] of LITERALS) {
         if (text.startsWith(token, i)) {
           i += token.length;
           return value;
         }
       }
-      const m = /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/.exec(text.slice(i));
+      // Sticky match at i: same grammar without copying the remaining text for every number.
+      NUMBER.lastIndex = i;
+      const m = NUMBER.exec(text);
       if (m) {
         i += m[0].length;
         if (/[.eE]/.test(m[0])) return new JsonFloat(m[0]);

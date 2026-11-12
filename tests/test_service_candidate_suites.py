@@ -14,8 +14,8 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "tests/review_suite_manifest.json"
-MANIFEST_SHA256 = "9edf17b8ee73179070121142802790e693533e5e0ec7313dd66321f500ca2b95"
+MANIFEST = ROOT / "tests/review_suite_manifest.20261113_fmt.current.json"
+MANIFEST_SHA256 = "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -28,7 +28,7 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
     "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
 }
 
-SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('839a70ed64ef53b626b0b404b91a0a4fbbdc58704159d5b6d76ed82945f57744', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
+SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
 
 SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
 SERVICE_P1_ROOTS = ['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT]
@@ -39,7 +39,8 @@ SERVICE_ROOTS = ["tests/service_end/" + name for name in (
     "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
     "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts",
 )]
-P1_ROOTS = ["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"]
+P1_ROOTS = ["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs", "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs", "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs"]
+P1_MULTIPART_CASES = ['real validators accept per-part synthetic history and retain 85 pending as unpublished input', 'missing track or group is rejected without conversion to null', 'absent campus stays page-bound UNKNOWN without changing source or becoming confirmed null', 'ambiguous grant campuses remain held instead of selecting a value', 'absent campus does not convert quota zero, null or missing stage', 'same school and PK with conflicting track or group is held when campus is absent', 'same PK conflicts across campus presence and separate source pages hold only related claims', 'same PK collisions hold present-campus and formerly excluded claims', 'source page also honors the requested max_depth before schema validation', 'explicit null is a separate input value and does not issue prior-decision approval', 'existing q requires real previous qualified context and never authorizes the new publication', 'a source scope candidate is not a prior-decision approval', 'unverified initial stage stays unspecified while native source stage and zero are preserved', 'explicit review-pending scope stays held and is not promoted by a different grant', 'global duplicate identities across parts fail closed', 'previous head and source head are checked before and after their reads', 'false or null from current-head assertions is rejected', 'compressed and source page alterations fail their own pins', 'part and compressed input arrays reject getters and sparse elements', 'source bytes and all input rows, including held rows, consume explicit budgets', 'mutable limits are snapshotted before the first asynchronous boundary', 'combined source and baseline cannot exceed the existing row limit', 'unsealed evidence and missing scope context do not create publication authority', '151 synthetic parts and 15476 prior rows above 64 MiB are validated part by part']
 SEARCH_ROOTS = ["tests/search503/test_combined_search503_end.synthetic.v5.mjs",
                 "tests/search503/test_search503_stream_limits.synthetic.v4.mjs",
                 "tests/search503/test_search503_reader_unlock.synthetic.v3.mjs",
@@ -148,6 +149,10 @@ def invoke(args, timeout=90):
     if (DENO is None or DENO_SHA256 is None or not args or Path(args[0]).resolve() != DENO or
             sha(DENO) != DENO_SHA256):
         raise ValueError("Deno changed or not validated")
+    if len(args)>1 and args[1]=="test":
+        if any(isinstance(arg,str) and (arg=="--fail-fast" or arg.startswith("--fail-fast=")) for arg in args[2:]):
+            raise ValueError("conflicting Deno fail-fast option")
+        args=[*args[:2],"--fail-fast",*args[2:]]
     result = subprocess.run(args, cwd=ROOT, env=isolated_env(), capture_output=True, timeout=timeout)
     if result.returncode != 0:
         raise AssertionError("child failed " + str(result.returncode) + ": " +
@@ -247,7 +252,7 @@ def layer_bindings(files,graphs):
 
 def load_manifest():
     global DENO, DENO_SHA256
-    if sha(safe_file("tests/review_suite_manifest.json")) != MANIFEST_SHA256:
+    if sha(safe_file("tests/review_suite_manifest.20261113_fmt.current.json")) != MANIFEST_SHA256:
         raise ValueError("review manifest mismatch")
     data = json.loads(MANIFEST.read_bytes())
     if data.get("format") != "jungsi.review-suite-closure/v2" or data.get("review_only") is not True:
@@ -300,7 +305,7 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
 class ReviewSuites(unittest.TestCase):
     def test_p1_deno_80(self):
         data = load_manifest()
-        suite = verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 80)
+        suite = verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 108)
         manual = ["tests/p1_review/fixtures/p1_public_registry_799.reference.json",
                   "src/jungsi_touch/application/public_response_schemas.json"]
         if suite["manual_read_files"] != manual:
@@ -312,18 +317,22 @@ class ReviewSuites(unittest.TestCase):
             {"cases": 37, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"cases": 19, "status": "PASS_SYNTHETIC_ONLY", "v2_source_gate": True, "synthetic_http": True, "actual_data": False},
             {"cases": 24, "status": "PASS_SYNTHETIC_ONLY", "v2_source_gate": True, "synthetic_http": True, "actual_data": False},
+            {"status": "PASS_SYNTHETIC_PRELIGHT_ONLY", "tests": 24, "cases": P1_MULTIPART_CASES, "db_calls": 0, "storage_calls": 0, "output_parts": "NOT_BUILT", "publication": "NOT_RUN"},
+            {'status': 'PASS_SYNTHETIC_SINGLE_REVIEW_ONLY', 'cases': 4, 'case_names': ['single_source_without_field_review_stays_pending_through_existing_gate', 'invalid_field_pending_without_blocking_other_rows', 'source_page_or_head_change_rejected', 'previous_snapshot_preserved_and_new_guidance_pending'], 'owner': 'NOT_CONNECTED', 'publication': 'NOT_RUN'},
         ]
+        if len(P1_ROOTS) != len(expected):
+            raise ValueError("P1 output registration incomplete")
         for root, wanted in zip(P1_ROOTS, expected):
             args = [str(DENO), "run", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
                     "--no-remote", "--no-npm", "--allow-read=" + ",".join(reads), "--deny-write",
                     "--deny-net", "--deny-env", "--deny-run", "--deny-sys", "--deny-ffi", root]
             if json.loads(invoke(args, 90)) != wanted:
                 raise AssertionError("P1 exact result or case count mismatch: " + root)
-        verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 80)
+        verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 108)
 
     def test_service_p1_deno_46(self):
         data = load_manifest()
-        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 79)
+        suite = verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 81)
         manual = ["src/jungsi_touch/application/public_response_schemas.json"]
         if suite["manual_read_files"] != manual:
             raise ValueError("service P1 manual-read scope mismatch")
@@ -331,7 +340,7 @@ class ReviewSuites(unittest.TestCase):
         if "," in path:
             raise ValueError("comma in allowed path is unsupported")
         expected = [
-            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 23, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",
@@ -363,7 +372,7 @@ class ReviewSuites(unittest.TestCase):
         matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
         if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (33, 0, 0, 0):
             raise AssertionError("score-null Deno result/count mismatch: " + output[-1000:])
-        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 79)
+        verify_suite(data, "service_p1", SERVICE_P1_ROOTS, NODE_ALLOWED, 81)
 
     def test_service_end_deno_125(self):
         data = load_manifest()

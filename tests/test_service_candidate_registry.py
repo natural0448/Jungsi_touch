@@ -35,7 +35,7 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
 
     def test_exact_four_suites_are_registered(self):
         self.assertEqual(self.errors(), [])
-        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [80, 125, 48, 79])
+        self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [108, 125, 48, 81])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
 
     def test_new_builtin_is_limited_to_score_null_root(self):
@@ -176,7 +176,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         path=ROOT/"tests/test_service_candidate_suites.py"
         spec=importlib.util.spec_from_file_location("portable_candidate_suite_test",path)
         self.m=importlib.util.module_from_spec(spec);spec.loader.exec_module(self.m)
-        self.data=json.loads((ROOT/"tests/review_suite_manifest.json").read_bytes())
+        self.data=json.loads(self.m.MANIFEST.read_bytes())
 
     def test_runtime_and_scratch_are_required_without_skip(self):
         with patch.dict(self.m.os.environ,{},clear=True):
@@ -215,13 +215,20 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
         suite={"manual_read_files":manual}
         outputs=[{"cases":37,"status":"PASS_SYNTHETIC_ONLY","v1_and_v2_service":True},
                  {"cases":19,"status":"PASS_SYNTHETIC_ONLY","v2_source_gate":True,"synthetic_http":True,"actual_data":False},
-                 {"cases":24,"status":"PASS_SYNTHETIC_ONLY","v2_source_gate":True,"synthetic_http":True,"actual_data":False}]
+                 {"cases":24,"status":"PASS_SYNTHETIC_ONLY","v2_source_gate":True,"synthetic_http":True,"actual_data":False},
+                 {"status":"PASS_SYNTHETIC_PRELIGHT_ONLY","tests":24,"cases":self.m.P1_MULTIPART_CASES,"db_calls":0,"storage_calls":0,"output_parts":"NOT_BUILT","publication":"NOT_RUN"},
+                 {"status":"PASS_SYNTHETIC_SINGLE_REVIEW_ONLY","cases":4,
+                  "case_names":["single_source_without_field_review_stays_pending_through_existing_gate",
+                                "invalid_field_pending_without_blocking_other_rows",
+                                "source_page_or_head_change_rejected",
+                                "previous_snapshot_preserved_and_new_guidance_pending"],
+                  "owner":"NOT_CONNECTED","publication":"NOT_RUN"}]
         with patch.object(self.m,"load_manifest",return_value=self.data), \
              patch.object(self.m,"verify_suite",return_value=suite), \
              patch.object(self.m,"DENO",Path(sys.executable)), \
              patch.object(self.m,"invoke",side_effect=[json.dumps(x) for x in outputs]) as call:
             self.m.ReviewSuites("test_p1_deno_80").test_p1_deno_80()
-        self.assertEqual(call.call_count,3)
+        self.assertEqual(call.call_count,5)
         for invocation in call.call_args_list:
             args=invocation.args[0]
             self.assertEqual(args[1],"run")
@@ -313,7 +320,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
 
     def test_service_p1_old_and_new_counts_are_checked_separately(self):
         legacy = [
-            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 23, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",
@@ -342,7 +349,7 @@ class CandidateRuntimePortabilityTests(unittest.TestCase):
 
     def test_service_p1_wrong_new_count_fails(self):
         legacy = [
-            {"cases": 21, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
+            {"cases": 23, "status": "PASS_SYNTHETIC_ONLY", "v1_and_v2_service": True},
             {"result": "SYNTHETIC_ONLY", "passed": 4, "cases": [
                 "real runtime context wires request admission into synthetic P1 v2 source",
                 "invalid optional R27 settings and credentials fail v2 before r27 metadata",

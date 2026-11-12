@@ -47,6 +47,7 @@ export const BUDGET_OPERATIONS = [
   "report.sample.read",
   "history.snapshot.head",
   "history.snapshot.read",
+  "history.current-page",
   "report.list-own",
   "member-shortlist.read",
   "member-shortlist.update",

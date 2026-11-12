@@ -27,9 +27,21 @@ def _identifier(value):
     return isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", value) is not None
 
 
+# 제2외국어/한문(성적표 표기). 절대평가 등급만 받고 총점·누백에는 넣지 않는다(2026-11-12 최종관리자 결정).
+SECOND_LANGUAGE_SUBJECTS = ("독일어Ⅰ", "프랑스어Ⅰ", "스페인어Ⅰ", "중국어Ⅰ", "일본어Ⅰ",
+                            "러시아어Ⅰ", "아랍어Ⅰ", "베트남어Ⅰ", "한문Ⅰ")
+
+
+def _second_language(value):
+    """없음·None 은 미응시. 이 필드가 생기기 전에 저장된 성적도 미응시로 읽는다."""
+    if not isinstance(value, dict):
+        return None
+    return {"subject": value["subject"], "grade": value["grade"]}
+
+
 def _scores(request):
     required = {"exam_id", "pack_version", "korean", "math", "inquiry"}
-    optional = {"english_grade", "korean_history_grade"}
+    optional = {"english_grade", "korean_history_grade", "second_language"}
     if not isinstance(request, dict) or not required <= set(request) or set(request) - required - optional:
         raise OverallAnalysisError("invalid_request", 422, "필수 성적과 허용된 입력 필드를 확인하세요.")
     if not _identifier(request["exam_id"]) or not _identifier(request["pack_version"]):
@@ -47,6 +59,13 @@ def _scores(request):
         for field,lo,hi in [('percentile',0,100),('grade',1,9)]:
             if field in row and (type(row[field]) is not int or not lo<=row[field]<=hi):
                 raise OverallAnalysisError('invalid_reported_'+field,422,'성적표 백분위·등급은 유효 범위의 정수여야 합니다.')
+    second = request.get("second_language")
+    if second is not None and (
+        not isinstance(second, dict) or set(second) != {"subject", "grade"}
+        or second["subject"] not in SECOND_LANGUAGE_SUBJECTS
+        or type(second["grade"]) is not int or not 1 <= second["grade"] <= 9
+    ):
+        raise OverallAnalysisError("invalid_second_language", 422, "제2외국어/한문 과목과 등급(1~9)을 확인하세요.")
     return {key: deepcopy(value) for key, value in request.items() if key != "pack_version"}
 
 
@@ -79,6 +98,7 @@ def _student_response(analysis, payload, overall):
         "total_standard_score": analysis["total_standard_score"], "subjects": subjects,
         "absolute_grades": {key: analysis["absolute_grades"][key] for key in ("영어", "한국사")
                             if key in analysis["absolute_grades"]},
+        "second_language": _second_language(payload.get("second_language")),
         "overall": deepcopy(overall),
     }
 

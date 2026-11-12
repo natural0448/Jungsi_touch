@@ -10,8 +10,10 @@ import {
   type RuntimeRoutePolicy,
 } from "../_shared/jungsi/infrastructure/runtime_composition.ts";
 import { createSupabaseApiIngress } from "../_shared/jungsi/infrastructure/supabase_api_ingress.ts";
+import { publishedReferenceFactory } from "../_shared/jungsi/infrastructure/published_reference_runtime.ts";
 import { createNativePostgresPool } from "./postgres_pool.ts";
 const runtime = new NativeRuntimeApi({
+  referenceFactory: publishedReferenceFactory,
   environment: { get: (name) => Deno.env.get(name) },
   policies: routeCatalog.operations as readonly RuntimeRoutePolicy[],
   responseSchemas,
