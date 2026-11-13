@@ -141,7 +141,9 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
             <p className="pro-note">
               {stageSt.stage === "final" && stageSt.stage_state === "not_open"
                 ? <><b>수능 성적표 입력은 {stageSt.opens_at ? seoulDateTime(stageSt.opens_at) : "성적표 배부 3일 뒤"}부터 열립니다.</b> 그 전까지는 가채점으로 예상 위치를 확인해 주세요.</>
-                : "이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다."}
+                : stageSt.stage === "provisional" && stageSt.stage_state === "not_open"
+                  ? <><b>수능 가채점 입력은 {stageSt.opens_at ? seoulDateTime(stageSt.opens_at) : "11월 23일"}부터 열립니다.</b></>
+                  : "이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다."}
             </p>
           )}
           {!canInput && status && status.initial_remaining === 0 && !shown && (

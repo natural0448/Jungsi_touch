@@ -49,6 +49,11 @@ export function NoInput({ st, correctHref }: { st: ScoreInputStatusDto | null; c
         <p>
           <b>수능 성적표 입력은 {st.opens_at ? seoulDateTime(st.opens_at) : "성적표 배부 3일 뒤"}부터 열립니다.</b> 그 전까지는 가채점으로 예상 위치를 확인해 주세요.
         </p>
+      ) : st.stage === "provisional" && st.stage_state === "not_open" ? (
+        // 수능 가채점은 2026-11-23부터(2026-11-13 최종관리자 결정, 시각은 서버 입력 상태 그대로)
+        <p>
+          <b>수능 가채점 입력은 {st.opens_at ? seoulDateTime(st.opens_at) : "11월 23일"}부터 열립니다.</b> 그 전까지는 저장한 9월 모의평가 리포트를 볼 수 있습니다.
+        </p>
       ) : st.stage_state !== "open" ? (
         <p>이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다.</p>
       ) : (
