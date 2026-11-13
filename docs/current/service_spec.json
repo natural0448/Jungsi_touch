@@ -15114,7 +15114,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "c96d357584e434d39281cfa18de3d57b867543845f645ee5720ddc3576c0ed12",
+            "source_sha256": "5b561fbe4c200505aa0b9c8347e541a2c69f61c214295e28cc48f3060ec5d721",
             "symbols": [
               {
                 "kind": "function",
@@ -31415,6 +31415,15 @@
         "REQ-26"
       ],
       "summary": "현재 saved-report 등록의 실제 소스 해시를 관련 단위검사 fixture에 제공하고, 과거 검수 등록의 불변성과 변조 거절을 별도로 확인한다. 서비스 코드·권한·자료·운영 상태는 바꾸지 않으며 GitHub CI의 해당 커밋 결과는 별도로 확인한다."
+    },
+    {
+      "date": "2026-11-14",
+      "requirements": [
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "PR #75의 cd616932 기준 오프라인 cursor 그래프를 새 manifest에 등록한다. 기존 그래프와 검수 이력을 보존하며, 현재 소스 해시 5개와 json_value 실행 코드 간선 1개의 변경을 결속한다. 루트 2개, 기존 22개 합성 사례, 권한·예산·배포 및 운영 상태를 유지한다. 같은 실패 CI의 재실행 여부와 새 후보의 정확한 SHA 검수는 별도로 기록한다."
     }
   ],
   "overall_analysis_contract": {
@@ -364930,8 +364939,8 @@
   "cursor_contract_offline_graph_verification": {
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
-    "manifest_path": "tests/cursor_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "beb9e0f16a4a7878a0c2a583fc529480bfb85196f4dcfec35d4e52c38a66adc1",
+    "manifest_path": "tests/cursor_contract_review_graph.20261114_pr75.current.json",
+    "manifest_sha256": "53d964e3d58877c6374315a6d3553c36936f0458943b2bef52fff8acdb77c2f2",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
@@ -365110,7 +365119,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
       "scripts/check_project_consistency.py": "badc73c99087f63f5792503dd41d8c5b65caec5090fd4c77f7aae787b9f8909c",
-      "scripts/run_edge_tests.py": "c96d357584e434d39281cfa18de3d57b867543845f645ee5720ddc3576c0ed12"
+      "scripts/run_edge_tests.py": "5b561fbe4c200505aa0b9c8347e541a2c69f61c214295e28cc48f3060ec5d721"
     },
     "receipt_bindings": {
       "current_public": {
