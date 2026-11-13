@@ -86,7 +86,8 @@ export interface ProStudentInput {
   class_label: string | null;
   class_number: string | null;
   tags: string[];
-  memo: string | null;
+  /** 2026-11-13부터 화면은 메모를 보내지 않는다(빼면 서버가 예전 값을 그대로 둔다) */
+  memo?: string | null;
 }
 
 /** student_report — 학생별 리포트 판. published_result 는 개인용과 같은 persisted-report 모양 */

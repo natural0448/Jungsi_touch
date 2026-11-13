@@ -3,7 +3,7 @@ import type { Session } from "@/lib/dto";
 import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
 import { PAGES, ROOT_REDIRECT, lockFor } from "@/lib/routes";
-import { Tabs } from "./tabs";
+import { Tabs, UserChip } from "./tabs";
 
 /**
  * 정시터치 머리글. 에듀터치 로고와 색·글꼴로 같은 사이트임을 알리고, 화면 넷을 탭으로 둔다.
@@ -26,6 +26,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             정시<em>터치</em>
           </Link>
           <div className="jt-user">
+            <UserChip>
             {down ? (
               <span className="pass off">연결 대기</span>
             ) : !session ? (
@@ -45,6 +46,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
                 <a className="btn t" href={PASS_HREF}>이용권 보기</a>
               </>
             )}
+            </UserChip>
           </div>
         </div>
       </div>

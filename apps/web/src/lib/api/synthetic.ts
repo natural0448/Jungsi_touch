@@ -144,8 +144,8 @@ export const syntheticSource: JungsiSource = {
       academic_year: 2027,
       stage: stage ?? (syn === "final_locked" ? "final" : syn),
       stage_state: locked ? "not_open" : "open",
-      // 지어낸 배부일(합성): 실제 배부일은 서버·관리자 설정이 정한다
-      opens_at: locked ? "2026-12-10T23:00:00Z" : null,
+      // 합성 실채점 개방 시각 = 2026-12-14(월) 0시(성적표 배부 12-11 금 + 3일, 2026-11-13 최종관리자 결정). 실제 시각은 서버 설정이 정한다
+      opens_at: locked ? "2026-12-13T15:00:00Z" : null,
       closes_at: null,
       paid_input_allowed: paid,
       input_limit_mode: "stage_rights",

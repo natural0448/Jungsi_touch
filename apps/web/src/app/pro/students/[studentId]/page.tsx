@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import Link from "@/components/link";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
+import { currentStage } from "@/lib/pro-stage";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoreInputStatusDto } from "@/lib/dto";
 import { EXAM, examTitle, examTypeLabel, stageOf, type InputStage } from "@/lib/exam";
@@ -17,25 +18,13 @@ import { StageSteps } from "../../../reports/me/stage-steps";
 import { findCandidates, submitStudentScores } from "../../actions";
 import { ActionButton } from "../../action-button";
 import { CandidatesView, PickedList } from "../../candidates-view";
+import { ProfileView } from "../../profile-view";
 import { StudentForm } from "../../student-form";
 import "../../../reports/me/report.css";
 import "../../pro.css";
 
 export const metadata: Metadata = { title: "학생 · 정시터치 전문가용" };
 export const dynamic = "force-dynamic";
-
-/**
- * 지금 입력 단계(모의평가·수능 가채점·수능 실채점)는 개인용 2페이지와 같은 서버 입력 상태(score-input-status, 단계 미지정)가
- * 정한다(2026-11-13 화면팀: 수능 뒤에도 9월 모의평가 양식만 보이던 것을 고침). 읽지 못하면 단계를 짐작하지 않고 입력을 열지 않는다.
- */
-async function currentStage(caller: Awaited<ReturnType<typeof getCaller>>): Promise<ScoreInputStatusDto | null> {
-  try {
-    return await source().readScoreInputStatus(caller, EXAM.exam_id);
-  } catch (e) {
-    if (e instanceof ConnectionError || e instanceof AccessDenied) return null;
-    throw e;
-  }
-}
 
 /*
   전문가용 학생 화면(계약 pro.student). 화면 위에 '지금 보는 학생' 띠를 고정하고, 그 아래 학생별 입력 상태 → 성적 입력
@@ -108,14 +97,13 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           <span className="lab">지금 보는 학생</span>
           <b>{student.display_name}</b>
           {cls && <span className="cls">{cls}</span>}
-          {student.tags.map((t) => <span key={t} className="tag">{t}</span>)}
           <span className="org">{org.org_name}</span>
         </div>
       </div>
       <div className="wrap pg-body pro rp">
         <div className="pro-sechd">{back}{svc.role !== "viewer" && !editing && <Link className="btn" href={`${self}&edit=1`}>학생 정보 수정</Link>}</div>
         {editing && svc.role !== "viewer" && <StudentForm orgId={svc.org_id} idem={crypto.randomUUID()} student={student} onDone={self} />}
-        {student.memo && <p className="pro-note">메모: {student.memo}</p>}
+        <ProfileView tags={student.tags} />
 
         <section className="pro-sec" aria-labelledby="score-h">
           <div className="pro-sechd">
@@ -152,7 +140,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           {status && !stageOpen && stageSt && (
             <p className="pro-note">
               {stageSt.stage === "final" && stageSt.stage_state === "not_open"
-                ? <><b>수능 성적표 입력은 {stageSt.opens_at ? seoulDateTime(stageSt.opens_at) : "성적표 배부일"}부터 열립니다.</b> 그 전까지는 가채점으로 예상 위치를 확인해 주세요.</>
+                ? <><b>수능 성적표 입력은 {stageSt.opens_at ? seoulDateTime(stageSt.opens_at) : "성적표 배부 3일 뒤"}부터 열립니다.</b> 그 전까지는 가채점으로 예상 위치를 확인해 주세요.</>
                 : "이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다."}
             </p>
           )}

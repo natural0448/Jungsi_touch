@@ -149,7 +149,7 @@ const synScore = (id: string): SynScore => {
 function seed(): ProStudentDto[] {
   const at = "2026-11-20T01:00:00Z";
   return [
-    ["김하늘", "3-2", "7", ["정시"]],
+    ["김하늘", "3-2", "7", ["희망 계열: 공학", "희망 대학: 서울대, 연세대"]],
     ["이서준", "3-2", "15", []],
     ["박지민", "3-4", "3", ["재수"]],
   ].map(([name, cls, no, tags], i) => ({
@@ -183,7 +183,7 @@ const synSource: ProSource = {
     if (orgId !== SYN_ORG.org_id) return { ok: false, code: "not_found", status: 404 };
     if (v !== SYN_ORG.contract_version) return { ok: false, code: "expected_version_changed", status: 409 };
     if (syn.used >= SYN_ORG.contracted_student_count) return { ok: false, code: "student_seat_limit_reached", status: 409 };
-    const s: ProStudentDto = { org_id: orgId, student_id: `syn-stu-${syn.students.length + 1}`, ...input, archived: false, version: 1, assigned_teacher_ids: ["syn-teacher-1"], created_at_utc: new Date().toISOString() };
+    const s: ProStudentDto = { org_id: orgId, student_id: `syn-stu-${syn.students.length + 1}`, ...input, memo: input.memo ?? null, archived: false, version: 1, assigned_teacher_ids: ["syn-teacher-1"], created_at_utc: new Date().toISOString() };
     syn.students.push(s);
     syn.used++;
     syn.keys.set(key, s);

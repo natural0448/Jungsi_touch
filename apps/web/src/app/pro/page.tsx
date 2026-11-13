@@ -9,7 +9,10 @@ import { proSource } from "@/lib/api/pro-source";
 import { edutouch, loginHref } from "@/lib/links";
 import type { ProOrganization, ProStudentPageDto } from "@/lib/pro-dto";
 import { KIND_LABEL, ROLE_LABEL, daysUntil, proAccess, type ProOrg } from "@/lib/pro-access";
-import { plainDate, seoulDate } from "@/lib/format";
+import { plainDate } from "@/lib/format";
+import { EXAM } from "@/lib/exam";
+import { inBatches } from "@/lib/pro-stage";
+import { ProfileView } from "./profile-view";
 import { StudentForm } from "./student-form";
 import "./pro.css";
 
@@ -49,12 +52,22 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
   let svc: ProOrganization | null = null;
   let page: ProStudentPageDto | null = null;
   let down: ConnectionError | null = null;
+  // 학생별 성적 입력 표시(2026-11-13 최종관리자 결정): 수능 가채점·실채점을 따로 '입력 전'·'입력 완료'. 못 읽은 칸은 '─'
+  const entered = new Map<string, { provisional: boolean | null; final: boolean | null }>();
   if (org) {
     const caller = await getCaller();
     const src = proSource();
     try {
       svc = (await src.session(caller)).organizations.find((o) => o.org_id === String(org.org_id)) ?? null;
-      if (svc) page = await src.listStudents(caller, svc.org_id, { limit: 50, q });
+      if (svc) {
+        page = await src.listStudents(caller, svc.org_id, { limit: 50, q });
+        const s = svc;
+        const used = (id: string, stage: "provisional" | "final") =>
+          src.scoreStatus(caller, s.org_id, id, EXAM.exam_id, EXAM.pack_version, stage).then((r) => (r ? r.initial_used > 0 : null), () => null);
+        // 학생마다 두 단계를 읽는다. 동시 요청은 6개 안쪽(계정당 동시 한도 429를 피한다)
+        const done = await inBatches(page.items, 3, async (x) => ({ provisional: await used(x.student_id, "provisional"), final: await used(x.student_id, "final") }));
+        page.items.forEach((x, i) => entered.set(x.student_id, done[i]));
+      }
     } catch (e) {
       if (e instanceof ConnectionError) down = e;
       else if (!(e instanceof AccessDenied)) throw e;
@@ -121,8 +134,9 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
                         <tr>
                           <th scope="col">반·번호</th>
                           <th scope="col">이름</th>
-                          <th scope="col">태그</th>
-                          <th scope="col">추가한 날</th>
+                          <th scope="col">상담 참고</th>
+                          <th scope="col">수능 가채점</th>
+                          <th scope="col">수능 실채점</th>
                           <th scope="col"><span className="sr">열기</span></th>
                         </tr>
                       </thead>
@@ -133,8 +147,9 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
                             <th scope="row">
                               <Link href={`/pro/students/${encodeURIComponent(s.student_id)}?${orgQ}`}>{s.display_name}</Link>
                             </th>
-                            <td>{s.tags.length ? s.tags.map((t) => <span key={t} className="tag">{t}</span>) : "─"}</td>
-                            <td className="num">{seoulDate(s.created_at_utc)}</td>
+                            <td><ProfileView tags={s.tags} empty="─" /></td>
+                            <td><Entered v={entered.get(s.student_id)?.provisional} /></td>
+                            <td><Entered v={entered.get(s.student_id)?.final} /></td>
                             <td className="r"><Link className="btn" href={`/pro/students/${encodeURIComponent(s.student_id)}?${orgQ}`}>열기</Link></td>
                           </tr>
                         ))}
@@ -155,6 +170,11 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
       </div>
     </>
   );
+}
+
+/** 한 단계의 입력 여부: 입력 완료 / 입력 전 / 확인 못 함('─') */
+function Entered({ v }: { v: boolean | null | undefined }) {
+  return v === true ? <span className="pro-done">입력 완료</span> : v === false ? <span className="pro-todo">입력 전</span> : <>─</>;
 }
 
 /** 기관·역할·계약 기간·학생 수·파기일 띠. 학생 수는 서비스의 사용/남은 수, 파기일이 2주 안이면 강조 */

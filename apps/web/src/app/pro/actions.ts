@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
+import { emptyProfile, PROFILE_FIELDS, profileProblem, profileToTags, splitItems } from "@/lib/pro-profile";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoresInput } from "@/lib/dto";
 import { EXAM } from "@/lib/exam";
@@ -10,7 +11,7 @@ import type { ProPrintDto, ProStudentInput } from "@/lib/pro-dto";
 import type { ScoreFormState } from "../reports/me/actions";
 import type { ScoreDefaults } from "../reports/me/score-form";
 
-export type StudentFormState = { error: string; values: Partial<Record<keyof ProStudentInput, string>> } | null;
+export type StudentFormState = { error: string; values: Record<string, string> } | null;
 
 const MESSAGE: Record<string, string> = {
   student_seat_limit_reached: "계약한 학생 수를 모두 사용했습니다. 학생을 더 추가하려면 기관 관리자에게 계약 학생 수 조정을 요청해 주세요.",
@@ -21,16 +22,23 @@ const MESSAGE: Record<string, string> = {
   invalid_request: "입력 칸을 다시 확인해 주세요.",
 };
 
-/** 폼 → 학생 입력. 이름 필수(실명 허용), 반·번호·태그·메모는 선택. 연락처·주민번호 칸은 두지 않는다 */
+/**
+ * 폼 → 학생 입력. 이름 필수(실명 허용), 반·번호·상담 참고는 선택. 연락처·주민번호 칸은 두지 않는다.
+ * 상담 참고(희망 계열·전공·대학·지역·기타, 항목마다 5개까지)는 서버 태그에 항목 하나씩 담는다(lib/pro-profile).
+ * 메모 칸은 2026-11-13 최종관리자 결정으로 뺐다 — 보내지 않으므로 예전에 적은 메모는 서버에 그대로 남는다.
+ */
 function parse(fd: FormData): { input: ProStudentInput; values: Record<string, string> } | { error: string; values: Record<string, string> } {
-  const values = Object.fromEntries(["display_name", "class_label", "class_number", "tags", "memo"].map((k) => [k, String(fd.get(k) ?? "").trim()]));
+  const keys = ["display_name", "class_label", "class_number", ...PROFILE_FIELDS.map((f) => `p_${f.key}`)];
+  const values = Object.fromEntries(keys.map((k) => [k, String(fd.get(k) ?? "").trim()]));
   const name = values.display_name;
   if (!name || name.length > 40) return { error: "학생 이름을 1~40자로 넣어 주세요.", values };
   if (values.class_label.length > 20) return { error: "반은 20자 안으로 넣어 주세요.", values };
   if (values.class_number && !/^\d{1,3}$/.test(values.class_number)) return { error: "번호는 숫자로 넣어 주세요.", values };
-  if (values.memo.length > 300) return { error: "메모는 300자 안으로 넣어 주세요.", values };
-  const tags = values.tags ? values.tags.split(/[,\s]+/).filter(Boolean).slice(0, 5).map((t) => t.slice(0, 12)) : [];
-  return { input: { display_name: name, class_label: values.class_label || null, class_number: values.class_number || null, tags, memo: values.memo || null }, values };
+  const profile = emptyProfile();
+  for (const f of PROFILE_FIELDS) profile[f.key] = splitItems(values[`p_${f.key}`]);
+  const problem = profileProblem(profile);
+  if (problem) return { error: problem, values };
+  return { input: { display_name: name, class_label: values.class_label || null, class_number: values.class_number || null, tags: profileToTags(profile) }, values };
 }
 
 function failText(e: unknown): string | null {
