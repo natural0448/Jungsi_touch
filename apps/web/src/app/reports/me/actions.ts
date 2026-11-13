@@ -42,7 +42,7 @@ const CONTENT_REJECTIONS = new Set([
 
 /** 성적 저장 뒤 전체 분석 단계에서 멈췄을 때. 공개 오류코드만 붙인다 */
 const partial = (code: string) =>
-  `성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 이 화면을 다시 열어 주세요. (전체 분석 단계 · 사유 코드 ${code})`;
+  `성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 이 화면을 다시 열어 주세요. (전체 분석 단계 · 문의 번호 ${code})`;
 
 const int = (fd: FormData, k: string) => {
   const v = String(fd.get(k) ?? "").trim();
@@ -113,9 +113,9 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
       if (profile.status === 422 && CONTENT_REJECTIONS.has(profile.code)) {
         const st = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
         const left = st ? `남은 성적 정정 가능 횟수는 ${st.correction_request_remaining}회이며, 정정은 고객센터에 요청해 주세요.` : "정정은 고객센터에 요청해 주세요.";
-        return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. ${left} (사유 코드 ${profile.code})`);
+        return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. ${left} (문의 번호 ${profile.code})`);
       }
-      return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (사유 코드 ${profile.code})`);
+      return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (문의 번호 ${profile.code})`);
     }
     step = "전체 분석";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);
@@ -132,7 +132,7 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
           ? `오늘 분석할 수 있는 서로 다른 성적 조합을 모두 썼습니다. 이미 저장한 성적과 리포트는 그대로 볼 수 있습니다.${e.retryAt ? ` ${seoulTime(e.retryAt.toISOString())} 이후 다시 저장할 수 있습니다.` : ""}`
           : e.kind === "rate_limited"
           ? `같은 계정의 요청이 겹쳐 잠시 제한되었습니다. 보통 몇 초 뒤 다시 저장하면 됩니다. 입력한 값은 그대로 남아 있습니다.${e.retryAt ? ` (늦어도 ${seoulTime(e.retryAt.toISOString())} 이후)` : ""}`
-          : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요. (${step} 단계 · 사유 코드 ${e.code})`,
+          : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. 잠시 뒤 다시 저장해 주세요. (${step} 단계 · 문의 번호 ${e.code})`,
       );
     throw e;
   }

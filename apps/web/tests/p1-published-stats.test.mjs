@@ -69,7 +69,7 @@ test("published-score null uses the exact label without changing source reasons 
   for (const r of [null, "SOURCE_NONDISCLOSED_LE_3", "SOURCE_NONDISCLOSED_LE_5", "NO_FINAL_REGISTRANT_SAME_BASIS_CUT50"]) {
     const c = { ...none, r };
     const before = structuredClone(c);
-    assert.equal(publishedScoreNullLabel(c), "3인이하미발표");
+    assert.equal(publishedScoreNullLabel(c), "3인 이하 미발표");
     assert.deepEqual(c, before);
   }
   for (const v of ["0", "0.000", "631.300", 0, undefined])
@@ -81,6 +81,11 @@ test("hidden reference roles and unknown score bases keep the existing display",
   for (const pr of ["simulation_reference", "unresolved"])
     assert.equal(publishedScoreNullLabel({ ...none, pr }), null);
   assert.equal(publishedScoreNullLabel({ ...none, b: "대학 발표 성적 · 기준 확인 중" }), null);
-  assert.equal(publishedScoreNullLabel({ ...none, pr: "actual_result" }), "3인이하미발표");
+  assert.equal(publishedScoreNullLabel({ ...none, pr: "actual_result" }), "3인 이하 미발표");
   assert.deepEqual(publishedStats(row(null, null, [])), [undefined, undefined]);
+});
+
+test("empty values do not hide a valid zero in another result", () => {
+  assert.deepEqual(pick(row(cell("50%컷", " "), cell("70%컷", "0"), [])), ["─", "70%컷 0"]);
+  assert.deepEqual(pick(row(cell("50%컷", "0"), cell("70%컷", ""), [])), ["50%컷 0", "─"]);
 });

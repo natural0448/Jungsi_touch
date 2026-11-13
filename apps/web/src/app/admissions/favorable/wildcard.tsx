@@ -33,7 +33,7 @@ export function WildcardDeck({ picks, selection, picked, stats, statsKey, canPic
   const empty = lay.status === "pending"
     ? `${wildcardReasonText(lay.reasonCode)} 후보가 없다는 뜻이 아닙니다.`
     : analysisPending
-      ? "대학 분석 자료가 결속되기 전이라 와일드카드도 보류 상태입니다 — 후보가 없다는 뜻이 아닙니다."
+      ? "대학별 분석 자료를 준비하고 있어 와일드카드를 아직 보여 드리지 못합니다. 후보가 없다는 뜻은 아닙니다."
       : `이번 성적으로 찾은 ${groups} 계열 후보가 없습니다.`;
   return (
     <section className="wd" id="wildcard" aria-labelledby="wd-t">
@@ -48,7 +48,7 @@ export function WildcardDeck({ picks, selection, picked, stats, statsKey, canPic
             ? `${groups} 계열 중 내 성적으로 지원 검토 범위에 드는 곳을 최대 ${MAX_SELECTED}장 골랐습니다. 여유 → 핵심 → 도전 순서이고, 앞 3장은 되도록 서로 다른 계열입니다.`
             : `${groups} 계열 중 내 성적으로 지원 검토 범위에 드는 곳을 따로 모았습니다.`}
         </p>
-        {lay.status === "partial" && <p className="wd-note">{wildcardReasonText(lay.reasonCode)} '순서 확인 중' 표시가 있는 카드는 순서가 바뀔 수 있습니다.</p>}
+        {lay.status === "partial" && <p className="wd-note">{wildcardReasonText(lay.reasonCode)} &lsquo;순서 확인 중&rsquo; 표시가 있는 카드는 순서가 바뀔 수 있습니다.</p>}
       </div>
 
       {shown === 0 ? (

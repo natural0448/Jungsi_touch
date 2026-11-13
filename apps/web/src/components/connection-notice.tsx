@@ -19,7 +19,7 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
   const transitionPending = e.code === "score_input_transition_pending";
   // 전문가용 서버 연결 전(시범 준비 중, 2026-10-29 사용자 결정): 선생님께는 사유 코드 없이 준비 안내만 보인다
   const proPending = e.code === "pro_api_not_configured";
-  const heading = proPending ? "정시터치 전문가용을 준비하고 있습니다" : transitionPending ? "성적 입력 정책 전환을 준비하고 있습니다" : pendingScope
+  const heading = proPending ? "정시터치 전문가용을 준비하고 있습니다" : transitionPending ? "성적 입력 방식을 바꾸는 작업을 하고 있습니다" : pendingScope
     ? "이 화면의 자료를 연결하고 있습니다"
     : e.kind === "unconfigured" ? "정시터치 서버 연결 설정을 기다리고 있습니다" : e.kind === "rate_limited" ? "요청이 많아 잠시 제한되었습니다" : "정시터치 서버에 잠시 연결할 수 없습니다";
   const body = proPending
@@ -33,7 +33,7 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
       : e.kind === "rate_limited"
         ? // 서버의 재시도 시각은 '최악의 경우 만료 시각'이라 실제 대기(보통 몇 초)보다 훨씬 늦다(담당자 DB 요약). 몇 초 뒤를 먼저 안내한다
           `같은 계정의 요청이 겹쳐 이번 요청을 잠시 제한했습니다. 보통 몇 초 뒤 다시 열면 그대로 이용할 수 있습니다.${e.retryAt ? ` (늦어도 ${seoulTime(e.retryAt.toISOString())} 이후)` : ""}`
-        : "로그인 확인이나 자료 서버가 응답하지 않습니다. 잠시 뒤 다시 열어 주세요. 그동안 다른 결과로 대신 보여 드리지 않습니다.";
+        : "로그인 확인이나 자료 서버가 응답하지 않습니다. 잠시 뒤 다시 열어 주세요. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다.";
   return (
     <div className="wrap pg-body">
       <section className="gate" aria-labelledby="conn-h">
@@ -52,7 +52,7 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
         )}
         {(!proPending || showNames) && (
           <p className="conn-code">
-            사유 코드 <code>{e.code}</code>
+            문의 번호 <code>{e.code}</code>
           </p>
         )}
       </section>

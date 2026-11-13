@@ -148,8 +148,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
                  결속되지 않은 자료 보류다 — '지원 가능한 대학 없음'류 결론으로 말하지 않는다
                  (담당자 지시 2026-10-11: 카탈로그 부재와 결과 0 판정을 구분) */
               <section className="gate flat">
-                <h2>올해 모집행 자료가 아직 연결되지 않았습니다</h2>
-                <p>{YEAR}학년도 모집행 카탈로그가 결속되기 전이라 검색 결과를 보여 드릴 수 없습니다. 지원할 수 없다는 뜻이 아니며, 자료가 연결되면 이 화면에서 검색할 수 있습니다.</p>
+                <h2>올해 모집 정보가 아직 연결되지 않았습니다</h2>
+                <p>{YEAR}학년도 모집 정보를 맞춰 보는 중이라 검색 결과를 아직 보여 드릴 수 없습니다. 지원할 수 없다는 뜻이 아니며, 자료가 연결되면 이 화면에서 검색할 수 있습니다.</p>
               </section>
             ) : groups.length === 0 ? (
               <section className="gate flat">

@@ -89,7 +89,7 @@ export default async function Page() {
           </dl>
         </header>
 
-        <OverallCard a={a} />
+        <OverallCard a={a} fold={false} />
         <h2>과목별 결과</h2>
         <SubjectsSheet a={a} />
         <PositionChart a={a} />

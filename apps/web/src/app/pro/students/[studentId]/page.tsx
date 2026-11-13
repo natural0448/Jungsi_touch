@@ -107,7 +107,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
               <span>
                 최초 입력 남음 <b className="num">{status.initial_remaining}</b>회 · 정정(고객센터) 승인 남음 <b className="num">{Math.max(0, status.correction_granted - status.correction_used)}</b>회
               </span>
-              {status.last_rejection_code && <span className="warn">지난 입력이 정상 계산되지 않았습니다(사유 코드 {status.last_rejection_code}). 정정은 고객센터에 요청해 주세요.</span>}
+              {status.last_rejection_code && <span className="warn">지난 입력이 정상 계산되지 않았습니다(문의 번호 {status.last_rejection_code}). 정정은 고객센터에 요청해 주세요.</span>}
             </div>
           ) : (
             <p className="pro-note">이 학생의 입력 상태를 지금 확인할 수 없습니다. 입력을 열지 않았습니다.</p>

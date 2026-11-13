@@ -6,7 +6,7 @@ import type { R27Summary } from "@/lib/p1-shape";
 import { YearTable } from "./snapshot-table";
 import { loadSchoolRows, type UnitRows } from "./unit-actions";
 
-/** 접힌 줄에는 2027학년도 모집인원만 보인다(2026-10-24 사용자 결정). 2027 모집행이 없으면 r27 = null → '준비 중' */
+/** 접힌 줄에는 2027 모집인원 또는 별도 과거 발표 결과 여부를 보인다. */
 export type SumItem = { k: string; g: string | null; d: string; sub: string; r27: R27Summary | null; ratio27: string | null; eligibility27?: string | null };
 /* ratio27: 2027 수능 영역별 반영비율 한 줄(예: "국 30 · 수 40 · 영 20 · 탐 10"). 담당자 자료 연결 전에는 null 이라 칸을 그리지 않는다 */
 
@@ -109,10 +109,8 @@ function Item({ loader, schoolName, it }: { loader: SchoolLoader; schoolName: st
         </span>
         {it.ratio27 && <span className="rs-ratio" title="2027학년도 수능 영역별 반영비율">{it.ratio27}</span>}
         <span className="rs-sum">
-          <span className="y num">2027</span>
-          <span>
-            <small>모집</small> {it.r27 ? <V c={it.r27} /> : <span className="unpub" title="2027학년도 모집인원 자료를 연결하고 있습니다">준비 중</span>}
-          </span>
+          {it.r27 ? <><span className="y num">2027</span><span><small>모집</small> <V c={it.r27} /></span></>
+            : <span>과거 발표 결과</span>}
         </span>
         <span className="go"><ChevronIcon /></span>
       </button>
@@ -124,7 +122,7 @@ function Item({ loader, schoolName, it }: { loader: SchoolLoader; schoolName: st
           <YearTable rows={got.rows} schoolName={schoolName} />
         ) : (
           <p className="rs-wait">
-            {got.code === "publication_changed" ? "입시결과 정리본이 새 판으로 바뀌었습니다. 화면을 새로 고쳐 주세요." : `불러오지 못했습니다(사유 코드 ${got.code}). 접었다가 다시 펼쳐 보세요.`}
+            {got.code === "publication_changed" ? "입시결과 자료가 새로 바뀌었습니다. 화면을 새로 고쳐 주세요." : `불러오지 못했습니다(문의 번호 ${got.code}). 접었다가 다시 펼쳐 보세요.`}
           </p>
         ))}
     </li>

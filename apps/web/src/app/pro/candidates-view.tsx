@@ -48,7 +48,7 @@ export function CandidatesView({ c, shortlist, fields, reasons }: { c: Candidate
   if (c.status === "pending" && c.basic_university_groups.length === 0 && c.wildcards.length === 0)
     return (
       <>
-        <p className="pro-note">대학 판단 자료가 아직 연결되지 않아 후보를 고르지 못했습니다(사유 코드 {c.reason_code ?? "pending"}). 숫자를 지어내지 않습니다.</p>
+        <p className="pro-note">대학 판단 자료가 아직 연결되지 않아 후보를 고르지 못했습니다(문의 번호 {c.reason_code ?? "pending"}). 숫자를 지어내지 않습니다.</p>
         {refs}
       </>
     );

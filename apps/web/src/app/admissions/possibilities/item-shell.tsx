@@ -92,7 +92,7 @@ export function ItemShell({
           ) : (
             <div className="recruit">
               <span>2027 모집군<b>{o.group}군</b></span>
-              <span>모집 인원<b><span className="wait">불러오지 못했습니다(사유 코드 {extras.code})</span></b></span>
+              <span>모집 인원<b><span className="wait">불러오지 못했습니다(문의 번호 {extras.code})</span></b></span>
             </div>
           )}
           {detail}

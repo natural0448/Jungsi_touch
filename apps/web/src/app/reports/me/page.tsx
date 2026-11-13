@@ -48,7 +48,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     <PageHead
       kicker={`PAGE ${route.number}`}
       title={route.label}
-      desc="수능(모의평가) 표준점수를 넣으면 전체 응시자 중 내 위치를 보여 드립니다. 이용권이 있으면 담아 둔 학교의 분석까지 한 장으로 정리합니다."
+      desc="수능(모의평가) 성적을 넣으면 전체 응시자 중 내 위치를 보여 드립니다. 이용권이 있으면 담아 둔 학교의 분석까지 한 장으로 정리합니다."
     />
   );
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
@@ -197,7 +197,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                 <RunAnalysis
                   ids={unanalyzed}
                   title={`담은 학교 ${unanalyzed.length}곳은 지금 성적으로 아직 분석하지 않았습니다`}
-                  desc="누르면 이 리포트의 성적으로 그 학교만 분석합니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+                  desc="누르면 이 리포트의 성적으로 그 학교만 분석합니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
                   label="지금 성적으로 분석"
                   busy="분석하는 중…"
                 />
@@ -225,7 +225,7 @@ async function Picked({ src, caller, report }: { src: JungsiSource; caller: Call
     failed = e;
   }
   if (failed instanceof ConnectionError) return <ConnectionNotice e={failed} />;
-  if (failed || !items) return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요.{failed ? ` (사유 코드 ${failed.code})` : ""}</p>;
+  if (failed || !items) return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요.{failed ? ` (문의 번호 ${failed.code})` : ""}</p>;
   return <PickedTable items={items} />;
 }
 

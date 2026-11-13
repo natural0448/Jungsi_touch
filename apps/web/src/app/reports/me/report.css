@@ -119,6 +119,8 @@
 .et .rp-overall .est{margin-left:8px;padding:2px 7px;border-radius:3px;background:var(--reach-soft);color:var(--reach);font-size:12px;font-weight:700;vertical-align:middle}
 .et .rp-overall .wait{font-size:22px;font-weight:900;color:var(--muted)}
 .et .rp-overall .tie{margin:6px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6}
+.et .rp-overall .tie-more{margin-top:6px}
+.et .rp-overall .tie-more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--touch)}
 .et .rp-sec{display:grid;gap:10px}
 .et .rp-sec h2,.et .pr-sheet h2{font-size:18px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
 .et .rp-sec h2::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:var(--touch);vertical-align:.25em}

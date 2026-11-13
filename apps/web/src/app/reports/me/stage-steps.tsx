@@ -10,11 +10,10 @@ export function StageSteps({ stage, finalOpen = stage === "final" }: { stage: In
   if (stage === "mock") return null;
   // 성적표 배부 뒤(실채점 단계)에는 가채점 단계가 잠겨 입력·확인할 수 없다(2026-11-12 최종관리자 결정)
   const finalNow = stage === "final" && finalOpen;
+  // 두 단계 모두 같은 기준(성적표 배부일, lib/csat-release.ts 의 당일 포함 규칙)으로 말한다(2026-11-13 최종관리자 지시)
   const steps: { k: InputStage; label: string; sub: string; cls?: string }[] = [
-    finalNow
-      ? { k: "provisional", label: "수능 가채점", sub: "성적표 배부 뒤 잠김", cls: "locked" }
-      : { k: "provisional", label: "수능 가채점", sub: "실채점 공개 뒤에는 볼 수 없음", cls: "on" },
-    { k: "final", label: "수능 실채점", sub: "성적표 배부 이후 공개", cls: finalNow ? "on" : undefined },
+    { k: "provisional", label: "수능 가채점", sub: "성적표 배부일부터 잠김", cls: finalNow ? "locked" : "on" },
+    { k: "final", label: "수능 실채점", sub: "성적표 배부일부터 입력", cls: finalNow ? "on" : undefined },
   ];
   return (
     <ol className="rp-steps" aria-label="성적 입력 단계">

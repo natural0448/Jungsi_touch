@@ -7,7 +7,8 @@ import type { ProReason } from "@/lib/pro-dto";
   값이 빠졌으면 그 문장을 만들지 않는다(지어내지 않는다). 확률·합격 예측 표현은 쓰지 않는다.
 */
 
-export type TipLine = { text: string; caution?: string };
+/** ref: 근거 정책 버전(담당자 근거 보존 요건, 10-23). 문장 밖에 작은 '근거 번호'로 보인다(2026-11-13 최종관리자 지시) */
+export type TipLine = { text: string; caution?: string; ref?: string };
 
 /** 받침에 따라 이/가, 을/를 */
 const has = (w: string) => {
@@ -20,7 +21,7 @@ const eul = (w: string) => `${w}${has(w) ? "을" : "를"}`;
 const v = (r: ProReason, name: string) => r.values.find((x) => x.name === name)?.value ?? null;
 
 const CAT_TITLE: Record<Category, string> = {
-  challenge: "도전으로", core: "핵심 검토로", room: "여유 후보로", outside: "추천 범위 밖으로", pending: "판단 보류로", ineligible: "지원 조건 미충족으로",
+  challenge: "도전으로", core: "핵심 검토로", room: "여유 후보로", outside: "검토 범위 밖으로", pending: "판단 보류로", ineligible: "지원 조건 미충족으로",
 };
 export const tipTitle = (c: Category) => `${CAT_TITLE[c]} 본 이유`;
 
@@ -38,8 +39,9 @@ export function tipLine(r: ProReason): TipLine | null {
       if (!s || !lo || !hi || !unit || !ctx?.range_definition || !ctx.policy_version || ctx.range_role !== "baseline_reference") return null;
       if (r.values.some((x) => ["converted_score", "acceptance_lower", "acceptance_upper"].includes(x.name) && x.unit !== unit)) return null;
       return {
-        text: `이 학생의 올해 환산점수는 ${s}${unit}입니다. 서비스 예상 기준구간 참고: ${lo}~${hi}${unit}. 정의: ${ctx.range_definition} (정책 ${ctx.policy_version}).`,
-        caution: "이 기준구간은 대학 공식 발표 합격선이 아닙니다. 공식 출처는 과거 발표자료의 참고이며, 상담자 조정이 포함될 수 있는 최종 분류의 직접 근거로 단정하지 않습니다.",
+        text: `이 학생의 올해 환산점수는 ${s}${unit}입니다. 서비스 예상 기준구간 참고: ${lo}~${hi}${unit}. 정의: ${ctx.range_definition}.`,
+        caution: "이 기준구간은 대학 공식 발표 합격선이 아닙니다. 이 구간은 지난 발표 자료를 참고한 서비스 예상치이고, 최종 분류에는 입시 상담 조정이 들어갈 수 있습니다.",
+        ref: ctx.policy_version,
       };
     }
     case "rule_weight_change": {
@@ -47,7 +49,7 @@ export function tipLine(r: ProReason): TipLine | null {
       if (!area || !p || !c) return null;
       return {
         text: `${area} 반영 비율은 작년 ${p}%, 올해 ${c}%입니다.`,
-        caution: "반영 비율의 변화만으로 이 학생의 유불리를 판단할 수 없습니다. 학생별 영향은 검증된 별도 근거가 필요합니다.",
+        caution: "반영 비율이 바뀐 것만으로는 이 학생에게 유리한지 불리한지 알 수 없습니다.",
       };
     }
     case "subject_weight_strength": {

@@ -12,7 +12,7 @@ export type { Cell, Row, School } from "./p1-shape";
  * Credentials and request-scoped I/O promises never enter shared state. Authenticate at each page/action.
  * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
  */
-const FORMAT = 3;
+const FORMAT = 4;
 const R27_SNAPSHOT_SCHEMA = "jungsi.history-snapshot/v2";
 const PARTS_PER_STEP = 6;
 /** Equals the warm lease (120s): no step can outlive it, so a check this fresh cannot lapse before the step commits. */
@@ -42,14 +42,14 @@ async function services(mode: Mode): Promise<Services> {
   // 명시한 합성+development 에서는 아래 메모리 상태 기계를 쓴다 — 배포(production)·live 는 이 분기를 타지 않는다
   const localDev = mode === "synthetic" && env().NODE_ENV === "development";
   if (!localDev && store && typeof store.get === "function" && typeof store.put === "function" && ns) {
-    const actorName = mode === "live" ? "public-v3:live" : "public-v3:synthetic";
+    const actorName = mode === "live" ? "public-v4:live" : "public-v4:synthetic";
     const stub = ns.getByName ? ns.getByName(actorName) : ns.idFromName && ns.get ? ns.get(ns.idFromName(actorName)) : null;
     if (stub) return { kv: store, coordinator: p1CoordinatorClient(stub) };
   }
   if (mode !== "synthetic" || !["development", "test"].includes(env().NODE_ENV ?? ""))
     throw new ConnectionError("unconfigured", "p1_shared_coordination_unconfigured");
-  const g = globalThis as { __jtP1ExplicitLocalV3?: Local };
-  const local = g.__jtP1ExplicitLocalV3 ??= { cache: new Map(), state: null };
+  const g = globalThis as { __jtP1ExplicitLocalV4?: Local };
+  const local = g.__jtP1ExplicitLocalV4 ??= { cache: new Map(), state: null };
   const atomic: CoordinationStore = { read: () => local.state, atomic: change => { const next = change(local.state); local.state = next.state; return next.result; } };
   return { kv: { get: async k => local.cache.get(k) ?? null, put: async (k, v) => { local.cache.set(k, v); } }, coordinator: localP1CoordinatorClient(new P1CoordinationCore(atomic)) };
 }
@@ -95,14 +95,17 @@ function currentScopeCounts(rows: readonly Row[]): ReadonlyMap<string, number> {
   }
   return counts;
 }
-/** Only a server-verified 2027 recruitment row anchors a v2 member-facing group.
- * Missing quota is allowed; historical rows remain stored and are shown only when linked. */
+/** Only a server-verified 2027 recruitment row anchors a current-year group. */
 function isCurrentRecruitment(r: Row, scopes: ReadonlyMap<string, number>): boolean {
   return r.y === 2027 && r.pk !== null && typeof r.scope27 === "string" &&
     r.scope27.length > 0 && scopes.get(r.scope27) === 1 && r.q27 !== undefined;
 }
 function hasCurrentRecruitment(rows: readonly Row[], scopes: ReadonlyMap<string, number>): boolean {
   return rows.some(r => isCurrentRecruitment(r, scopes));
+}
+/** An unlinked past group stays distinct; it never supplies a 2027 anchor. */
+function isHistoricalOnly(rows: readonly Row[]): boolean {
+  return rows.length > 0 && rows.every(r => r.y >= 2024 && r.y < 2027);
 }
 export type Ready = {
   snapshot_id: string; publication_sha256: string; source_head_sha256: string;
@@ -399,7 +402,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
         let rawPending = 0, visiblePending = 0, visibleUnits = 0;
         for (const [k, rs] of by) {
           if (k.startsWith("ob:")) rawPending++;
-          if (isR27 && !hasCurrentRecruitment(rs, scopes)) continue;
+          if (isR27 && !hasCurrentRecruitment(rs, scopes) && !isHistoricalOnly(rs)) continue;
           if (k.startsWith("ob:")) visiblePending++;
           visibleUnits++;
           const conditionRows = isR27 ? rs.filter(r => isCurrentRecruitment(r, scopes)) : rs;
@@ -409,7 +412,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
           // enrollment filters must never inherit a historical group or region.
           segment.units.push([at, k, uniq(rs, r => r.d), uniq(conditionRows, r => r.g), uniq(conditionRows, r => r.rg), uniq(rs, r => r.n)]);
         }
-        // Head counts cover all original rows, including hidden historical-only groups.
+        // Head counts cover all original rows, including unverified current groups.
         segment.pending += rawPending;
         const regions = [...new Set((isR27 ? currentRows : rows).map(r => r.rg).filter((x): x is string => !!x))];
         const name = isR27 ? currentRows[0]?.n ?? names[0] ?? u : names[0] ?? u;
@@ -535,13 +538,13 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
   return (await schoolUnitRows(ready, schoolId, [key]))[key] ?? [];
 }
-/** 한 학교의 여러 모집단위를 한 번에. 키마다 unitRows 와 같은 규칙(현재 모집 연결이 없으면 빈 배열)을 쓴다 */
+/** 한 학교의 여러 모집단위를 한 번에. 독립 과거 행은 그대로 두고 미검증 2027 행은 제외한다. */
 export async function schoolUnitRows(ready: Ready, schoolId: string, keys: readonly string[]): Promise<Record<string, Row[]>> {
   const allRows = await school(ready, schoolId);
   const isR27 = ready.schema_version === R27_SNAPSHOT_SCHEMA, scopes = isR27 ? currentScopeCounts(allRows) : new Map<string, number>();
   const wanted = new Set(keys), by = new Map<string, Row[]>();
   for (const r of allRows) { const k = unitKey(r); if (wanted.has(k)) by.set(k, [...(by.get(k) ?? []), r]); }
   const out: Record<string, Row[]> = {};
-  for (const k of wanted) { const rows = by.get(k) ?? []; out[k] = isR27 && !hasCurrentRecruitment(rows, scopes) ? [] : rows; }
+  for (const k of wanted) { const rows = by.get(k) ?? []; out[k] = isR27 && !hasCurrentRecruitment(rows, scopes) && !isHistoricalOnly(rows) ? [] : rows; }
   return out;
 }

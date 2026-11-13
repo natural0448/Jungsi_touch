@@ -89,7 +89,7 @@ export default async function Page({ searchParams }: PageProps<"/pro/guide">) {
   const sp = await searchParams;
   const orgParam = typeof sp.org === "string" ? sp.org : "";
   const orgs = await proAccess();
-  const head = <PageHead kicker="전문가용" title="정시 기본 안내" desc="상담 전에 함께 확인할 공통 규칙과 용어입니다. 학생별 이유는 학생 화면의 상담 tip에 있습니다." />;
+  const head = <PageHead kicker="전문가용" title="정시 기본 안내" desc="상담 전에 함께 확인할 공통 규칙과 용어입니다. 학생별 이유는 학생 화면의 상담 팁에 있습니다." />;
   if (!orgs || orgs.length === 0)
     return (
       <>

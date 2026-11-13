@@ -20,11 +20,39 @@ const officialEstimate = (o: OverallAnalysisDto["overall"]) =>
 const OFFICIAL_ALL = "official_all_examinees";
 
 /** 전체 위치: 국·수·탐2 표준점수 합을 점수축으로, 서버가 밝힌 비교집단에서 위에서 몇 % */
-export function OverallCard({ a }: { a: OverallAnalysisDto }) {
+/** fold: 긴 계산 설명을 '자세히 보기'로 접는다(2026-11-13 최종관리자 지시). 인쇄본은 접을 수 없으므로 fold={false} 로 모두 펼친다 */
+export function OverallCard({ a, fold = true }: { a: OverallAnalysisDto; fold?: boolean }) {
   const o = a.overall;
   const interval = o.tie_interval_percent && typeof o.tie_interval_percent === "object" ? o.tie_interval_percent : null;
   const kind = o.data_kind ? DATA_KIND[o.data_kind] : null;
   const official = officialEstimate(o);
+  // 추정 분포의 동점 비중을 실제로 센 학생 수로 말하지 않는다
+  const tieText = interval && (official ? (
+    <>
+      나와 총점이 똑같은 학생도 있어서, 나보다 점수가 높은 학생만 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 같은 점수 학생까지 함께 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다(위의 큰 숫자는 같은 점수까지 센 값).
+      {" "}두 숫자의 차이는 같은 점수를 어떻게 세느냐의 차이일 뿐, 합격 가능성이나 오차 범위를 뜻하지 않습니다.
+    </>
+  ) : (
+    <>
+      나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함해 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
+    </>
+  ));
+  // 정확한 model_version 은 근거로 남기되 화면 글자로는 보이지 않는다(10-26 사용자 결정: 학생·학부모·교사에게 의미 없는 내부 식별자)
+  const more = official ? (
+    <>
+      {tieText && <p className="tie">{tieText}</p>}
+      <p className="tie" data-model-version={o.model_version ?? undefined}>
+        이 위치는 이번 시험의 공식 전체 응시자 수를 기준으로 계산한 <b>추정값</b>입니다. 정시터치 회원들의 성적을 모아 순위를 매긴 것이 아닙니다.
+        {" "}학생마다 본 과목이 다르고 일부 과목을 보지 않은 학생도 있어, 그런 부분은 통계 모형으로 채워 계산했습니다.
+        {" "}그래서 성적표의 과목별 백분위나 실제 대학 지원 결과와는 차이가 날 수 있습니다.
+      </p>
+    </>
+  ) : (
+    <>
+      {tieText && <p className="tie">{tieText}</p>}
+      {kind && <p className="tie">{kind.note}</p>}
+    </>
+  );
   return (
     <section className="rp-overall" aria-label="전체 성적 위치">
       <div className="n">
@@ -33,33 +61,21 @@ export function OverallCard({ a }: { a: OverallAnalysisDto }) {
         <span className="unit">점</span>
       </div>
       <div className="n">
-        <small>{official ? "공식 전체 응시자 기준 추정 전체 누적백분위" : "전체 응시자 기준 상위"}</small>
+        <small>{official ? "전체 응시자 중 내 위치 · 누적 백분위(누백)" : "전체 응시자 기준 상위"}</small>
         {o.status !== "pending" && o.inclusive_top_percent ? (
           <>
             <b className="num big">{pctText(o.inclusive_top_percent)}%</b>
             {o.status === "estimated" && <span className="est">{official ? "추정" : kind?.label ?? "추정"}</span>}
-            {interval &&
-              (official ? (
-                // 추정 분포의 동점 비중을 실제로 센 학생 수로 말하지 않는다
-                <p className="tie">
-                  누적백분위는 전체 응시자를 국어·수학·탐구 2과목 표준점수 합 순서로 줄 세웠을 때 내가 위에서 몇 % 안에 드는지를 뜻합니다.
-                  {" "}나와 총점이 똑같은 학생도 있어서, 나보다 점수가 높은 학생만 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 같은 점수 학생까지 함께 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다(큰 숫자는 같은 점수까지 센 값).
-                  {" "}두 숫자의 차이는 같은 점수를 어떻게 세느냐의 차이일 뿐, 합격 가능성이나 오차 범위를 뜻하지 않습니다.
-                </p>
-              ) : (
-                <p className="tie">
-                  나와 총점이 같은 학생들이 있어, 같은 점수인 사람을 빼고 세면 상위 <b className="num">{pctText(interval.lower)}%</b>, 포함해 세면 상위 <b className="num">{pctText(interval.upper)}%</b>입니다. 이 구간은 세는 방법의 차이일 뿐, 합격 확률이나 오차 범위가 아닙니다.
-                </p>
-              ))}
-            {official ? (
-              // 정확한 model_version 은 근거로 남기되 화면 글자로는 보이지 않는다(10-26 사용자 결정: 학생·학부모·교사에게 의미 없는 내부 식별자)
-              <p className="tie" data-model-version={o.model_version ?? undefined}>
-                이 위치는 이번 시험의 공식 전체 응시자 수를 기준으로 계산한 <b>추정값</b>입니다. 정시터치 회원들의 성적을 모아 순위를 매긴 것이 아닙니다.
-                {" "}학생마다 본 과목이 다르고 일부 과목을 보지 않은 학생도 있어, 그런 부분은 통계 모형으로 채워 계산했습니다.
-                {" "}그래서 성적표의 과목별 백분위나 실제 대학 지원 결과와는 차이가 날 수 있습니다. 내 대략적인 위치를 가늠하는 참고 자료로 보시고, 대학별 지원 가능성은 &lsquo;가능성 보기&rsquo;에서 학교마다 따로 확인하세요.
-              </p>
+            <p className="tie">
+              전체 응시자를 국어·수학·탐구 2과목 표준점수 합 순서로 줄 세웠을 때 내가 위에서 몇 % 안에 드는지를 보여 주는 추정값입니다. 합격 가능성이 아니며, 대학별 지원 가능성은 &lsquo;가능성 보기&rsquo;에서 학교마다 따로 확인하세요.
+            </p>
+            {fold ? (
+              <details className="tie-more">
+                <summary>이 숫자는 어떻게 계산했나요?</summary>
+                {more}
+              </details>
             ) : (
-              kind && <p className="tie">{kind.note}</p>
+              more
             )}
           </>
         ) : (
@@ -174,7 +190,7 @@ export function SubjectsSheet({ a, second = true }: { a: OverallAnalysisDto; sec
 /* ── 위치 그래프: 서버가 준 상위 % 를 눈금 위에 표시만 한다(계산 없음) ── */
 
 const COMBO_PENDING: Record<string, string> = {
-  combo_model_missing: "이 조합의 분포가 아직 발행되지 않았습니다",
+  combo_model_missing: "이 조합의 분포가 아직 준비되지 않았습니다",
   total_model_missing: "전체 누백 분포 자료 연결 대기",
   total_model_not_approved: "분포 검수 중",
 };
@@ -341,7 +357,7 @@ export function PositionChart({ a }: { a: OverallAnalysisDto }) {
       <p className="pc-note">
         {official
           ? "과목 줄은 그 과목을 본 응시자 중의 내 위치, 전체 줄은 국·수·탐2 표준점수 합으로 본 공식 전체 응시자 기준 추정 위치입니다(미응시·결측 과목은 모형으로 보완). 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다."
-          : "과목 줄은 그 과목을 본 응시자 중의 내 위치, 전체 줄은 국·수·탐2 표준점수 합으로 본 서버 비교 집단 중의 내 위치입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다."}
+          : "과목 줄은 그 과목을 본 응시자 중의 내 위치, 전체 줄은 국·수·탐2 표준점수 합으로 본, 정시터치가 비교한 학생들 가운데 내 위치입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다."}
       </p>
     </section>
   );
@@ -435,7 +451,7 @@ export function PickedTable({ items, print = false }: { items: PickedItem[]; pri
             return (
               <tr key={s.offering_id}>
                 <th scope="row">
-                  {s.offering ? s.offering.university_name : "카탈로그에 없는 모집단위"}
+                  {s.offering ? s.offering.university_name : "지금 목록에서 찾을 수 없는 모집단위"}
                   {s.offering && <small> {s.offering.department} · {s.offering.group}군</small>}
                   {s.entry.assessment_status === "needs_revalidation" && <span className="stale-tag">다시 확인 필요</span>}
                 </th>
@@ -454,7 +470,7 @@ export function PickedTable({ items, print = false }: { items: PickedItem[]; pri
       </table>
       <p className="rp-short-note">
         내 환산점수는 그 대학이 정한 과목 비율대로 다시 계산한 점수(대학마다 만점이 달라 서로 비교하지 않음),
-        환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 얼마나 오르내리는지(%p)입니다.
+        환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 얼마나 오르내리는지입니다(%p: 상위 %가 몇 %만큼 바뀌는지, 예 +0.5%p는 상위 5.6%→5.1%).
         지원 가부는 지원가능성 판단을 보세요 — 각 학과를 누르면 가능성 보기에서 자세한 설명이 열립니다.
       </p>
     </div>

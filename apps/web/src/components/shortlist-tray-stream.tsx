@@ -37,7 +37,7 @@ async function RestNames({ rest, src, caller }: { rest: [string, ShortlistEntryD
     <>
       {rows.map((r) => (
         <span key={r.id} className={r.entry.assessment_status === "needs_revalidation" ? "stale" : undefined}>
-          {r.offering ? `${r.offering.university_name} ${r.offering.department}` : "카탈로그에 없는 모집단위"}
+          {r.offering ? `${r.offering.university_name} ${r.offering.department}` : "지금 목록에서 찾을 수 없는 모집단위"}
         </span>
       ))}
     </>

@@ -184,7 +184,7 @@ function DecisionCard({ a }: { a: AssessmentDto }) {
           <p>{CATEGORY[a.category].desc}</p>
           {d?.adjusted_category && (
             <p className="adj">
-              점수로 본 판단은 <b>{CATEGORY[d.base_category].label}</b>이지만, 상담 경험을 반영해 <b>{CATEGORY[d.adjusted_category].label}</b>로 조정했습니다.
+              점수로 본 판단은 <b>{CATEGORY[d.base_category].label}</b>이지만, 입시 상담 경험을 반영해 <b>{CATEGORY[d.adjusted_category].label}</b>로 조정했습니다.
             </p>
           )}
         </>
@@ -206,7 +206,7 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
           {a.status === "ineligible"
             ? "지원 자격을 충족하지 않아 유불리를 계산하지 않았습니다."
             : otherPop
-              ? "이 대학 위치는 반영 성적을 모두 가진 응시자 기준이라 전체 응시자 위치와 분모가 다릅니다. 두 위치의 차이를 유불리로 보이지 않습니다."
+              ? "이 대학 위치는 반영 성적을 모두 가진 응시자만 비교한 것이라, 전체 응시자 위치와 비교하는 학생 범위가 다릅니다. 그래서 두 위치의 차이를 유불리로 보여 드리지 않습니다."
               : reasonText(decisionReasonCode(a)) || "비교할 수 있는 분포와 환산 자료를 확인하고 있습니다."}
         </p>
       </section>
@@ -231,7 +231,7 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
           : v.status === "unfavorable"
             ? "이 대학 반영식에서는 전체 성적 기준보다 위치가 이만큼 내려갑니다."
             : "이 대학 반영식으로 계산해도 전체 성적 기준과 위치가 거의 같습니다."}
-        {outsideButFavorable && <b> 다만 유리해 보여도 이 학과는 올해 추천 범위 밖입니다 — 왼쪽 판정이 우선입니다.</b>}
+        {outsideButFavorable && <b> 다만 유리해 보여도 이 학과는 올해 지원 검토 범위 밖입니다 — 왼쪽 판정이 우선입니다.</b>}
       </p>
       <span className="note">지원 여부 판단과는 별개인 보조 지표입니다 — 판단은 <b>지원가능성</b> 칸.</span>
     </section>
@@ -317,16 +317,16 @@ function AdoptedEvidence({ a }: { a: AssessmentDto }) {
     <div className="evidence">
       <h3>
         이 분석이 채택한 발표 자료
-        {version && <small> · 자료판 {version}</small>}
+        {version && <small> · 자료 기준 {version}</small>}
       </h3>
       {issues.length === 0 && !adj?.applied ? (
-        <p className="ev-only-version">이 판단은 위 자료판에 결속돼 있습니다. 올해 변화·상담 조정 항목은 없습니다.</p>
+        <p className="ev-only-version">이 판단은 위 자료로 계산했습니다. 올해 바뀐 점이나 상담 조정은 없습니다.</p>
       ) : (
         <ul>
           {issues.map((t) => <IssueItem key={t.issue_id} t={t} />)}
           {adj?.applied && (
             <li>
-              <b>상담 조정</b> {adj.reason ?? "상담 경험을 반영해 기준을 조정했습니다."}
+              <b>상담 조정</b> {adj.reason ?? "입시 상담 경험을 반영해 기준을 조정했습니다."}
               {adj.version && <small> · {adj.version}</small>}
             </li>
           )}

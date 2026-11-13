@@ -66,11 +66,11 @@ export function Published({ f, same }: { f: ForecastPublicDto | null; same: bool
   return (
     <div className="published">
       <h3>
-        이 판단에 쓴 자료 <small>자료판 {f.release_version}</small>
+        이 판단에 쓴 자료 <small>자료 기준 {f.release_version}</small>
       </h3>
       <p>
         올해 예상 기준이 {ready ? "검수를 마치고 준비돼 있습니다." : <span className="wait">아직 발표 대기입니다.</span>}
-        {f.adjustment_summary.applied && <> 상담 경험을 반영한 조정이 들어 있습니다.</>}
+        {f.adjustment_summary.applied && <> 입시 상담 경험을 반영한 조정이 들어 있습니다.</>}
       </p>
       {f.issue_summaries.length > 0 && (
         <ul className="pub-issues">
@@ -80,7 +80,7 @@ export function Published({ f, same }: { f: ForecastPublicDto | null; same: bool
       <span className="note">
         {same
           ? "이 학과의 지원 판단도 이 자료로 계산했습니다. "
-          : "이 학과의 지원 판단은 다른 판 자료로 계산됐을 수 있습니다. 최신 기준으로 보려면 성적을 다시 분석해 주세요. "}
+          : "이 학과의 지원 판단은 예전 자료로 계산됐을 수 있습니다. 최신 기준으로 보려면 성적을 다시 분석해 주세요. "}
         판단에 쓰는 기준 점수는 공개하지 않으며, 이 자료는 실제 합격 확률이나 최저 합격점이 아닙니다.
       </span>
     </div>

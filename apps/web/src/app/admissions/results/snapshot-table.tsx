@@ -1,7 +1,7 @@
 import { asOfDate, ratioText } from "@/lib/format";
 import { derived } from "@/lib/p1-derived";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
-import { publishedScoreNullLabel, publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
+import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
 import { ScrollHint } from "./scroll-hint";
 
@@ -34,18 +34,18 @@ const REASON: Record<string, string> = {
   MULTIPLE_CURRENT_CANDIDATES_DEFINITION_EVENT_OR_VALUE_CONFLICT: "발표가 여러 건이고 정의·시점·값이 달라 확인 중",
   EXPLICIT75_ALTERNATE_NOT70_REPLACEMENT: "대학이 75%컷으로 발표(70%컷 대체 아님)",
   UNCLASSIFIED_BASIS_NEEDS_SOURCE_DEFINITION_NO_TOTAL_CUT_PROMOTION: "점수 기준 분류 전 — 원문 정의 확인 중",
-  OFFERING_MAPPING_PENDING_ORIGINAL_OBSERVATION_PRESERVED: "모집행 연결 확인 중(원문 보존)",
+  OFFERING_MAPPING_PENDING_ORIGINAL_OBSERVATION_PRESERVED: "학과 연결 확인 중(원문 그대로)",
   NONNUMERIC_LITERAL_REQUIRES_SOURCE_REVIEW: "숫자가 아닌 원문 값 — 확인 중",
 };
 export const reasonText = (code: string | null) => (code ? (REASON[code] ?? code) : null);
 
 /**
  * 값 칸. '확인 중' 꼬리표와 확인 사유는 보이지 않는다(2026-11-04 사용자 결정: 1페이지 '확인 중' 꼬리표 전부 제거).
- * 값은 발표 그대로, 값이 없으면 상태와 상관없이 '─'(null 은 0 이 아니다). 자료의 status·reason 은 그대로 보존된다.
+ * 값은 발표 그대로, null 과 빈 문자열은 빈칸으로 표시한다. 실제 0과 자료의 status·reason 은 그대로 보존된다.
  * 숫자가 아닌 원문 값(pending_value_type)도 값만 보인다. '원문' 꼬리표는 붙이지 않는다(2026-11-08 사용자 결정: 꼬리표는 화면에 보이지 않음).
  */
 function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
-  if (c.v === null) return <span className="unpub">─</span>;
+  if (c.v === null || c.v.trim() === "") return null;
   const unit = unitOverride ?? c.u;
   return (
     <>
@@ -61,9 +61,9 @@ function RankValue({ c }: { c: Cell }) {
 }
 
 /** 발표 성적 한 칸: 통계 이름 + 값. 대상 집단은 쓰지 않고, 학생부 등급일 때만 기준을 붙인다(2026-10-28 사용자 결정) */
-function Stat({ s, closed }: { s: PublishedStat | undefined; closed?: string | null }) {
-  // 발표 성적의 null 표시만 통일한다. 수집값·원문 사유는 바꾸지 않는다(2026-10-29 사용자 결정)
-  if (!s) return closed ? <span className="unpub">{closed}</span> : <span className="unpub">─</span>;
+function Stat({ s }: { s: PublishedStat | undefined }) {
+  // 값이 없으면 사유는 자료에 보존하고 화면 셀은 비운다.
+  if (!s) return null;
   const asOf = asOfDate(s.cell.at);
   return (
     <>
@@ -92,7 +92,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
   return (
     <div className="rs-yt">
-      {pending && <p className="rs-idnote">모집행 연결 확인 중인 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다. 대학이 여러 학과를 묶어 한꺼번에 발표했을 수 있으니, 이 숫자를 이 학과만의 결과로 보지 마세요.</p>}
+      {pending && <p className="rs-idnote">학과 연결을 확인하고 있는 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다. 대학이 여러 학과를 묶어 한꺼번에 발표했을 수 있으니, 이 숫자를 이 학과만의 결과로 보지 마세요.</p>}
       <ScrollHint>
         <table className="tb rs-years">
           <thead>
@@ -123,16 +123,16 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                       {renamedDept && <small>당시 {renamedDept}</small>}
                     </th>
                     <td className="r"><Value c={r.rc} /></td>
-                    <td className="r"><Value c={r.cr.v === null ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
+                    <td className="r"><Value c={r.cr.v === null || r.cr.v.trim() === "" ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
                     <td className="r derived">
-                      {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small></>}
+                      {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
                     <td className="r"><RankValue c={r.rk} /></td>
                     <td className="r derived">
-                      {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small></>}
+                      {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>
-                    <td className="r"><Stat s={ps[0]} closed={publishedScoreNullLabel(r.c50)} /></td>
-                    <td className="r"><Stat s={ps[1]} closed={publishedScoreNullLabel(r.c70)} /></td>
+                    <td className="r"><Stat s={ps[0]} /></td>
+                    <td className="r"><Stat s={ps[1]} /></td>
                   </tr>
                 );
               }),

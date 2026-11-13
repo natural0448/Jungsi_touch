@@ -48,7 +48,7 @@ async function world(t, { parts = 2, schools = 1, missing = false, row = {}, row
     w.writes.push({ key, at: w.now }); w.cache.set(key, value);
   } };
   globalThis.__p1TestBindings = { env: missing ? {} : { JT_SHARED_CACHE: w.kv, JT_P1_COORDINATOR: { getByName(name) {
-    assert.equal(name, "public-v3:live"); return { fetch: request => w.actor.fetch(request) };
+    assert.equal(name, "public-v4:live"); return { fetch: request => w.actor.fetch(request) };
   } } } };
   const pins = [], bodies = new Map();
   let total = 0;
@@ -292,7 +292,7 @@ test("live and deployed synthetic modes fail closed when shared bindings are abs
 });
 test("explicit local synthetic dev mode uses the same coordinator state machine", async t => {
   const w = await world(t, { missing: true }); process.env.JUNGSI_API_MODE = "synthetic";
-  globalThis.__jtP1ExplicitLocalV3 = undefined;
+  globalThis.__jtP1ExplicitLocalV4 = undefined;
   const ready = await w.module.warmStep({ ...w.source, kind: "synthetic" }, w.caller);
   assert.equal(ready.state, "running"); assert.equal(w.partCalls, 2);
 });
@@ -390,8 +390,8 @@ test("live and synthetic use separate server-selected actors on the same native 
     transactionSync(work) { db.exec("BEGIN IMMEDIATE"); try { const r = work(); db.exec("COMMIT"); return r; } catch (e) { db.exec("ROLLBACK"); throw e; } },
   } });
   globalThis.__p1TestBindings.env.JT_P1_COORDINATOR.getByName = name => {
-    names.push(name); assert.ok(["public-v3:live", "public-v3:synthetic"].includes(name));
-    return { fetch: request => (name === "public-v3:live" ? w.actor : syntheticActor).fetch(request) };
+    names.push(name); assert.ok(["public-v4:live", "public-v4:synthetic"].includes(name));
+    return { fetch: request => (name === "public-v4:live" ? w.actor : syntheticActor).fetch(request) };
   };
   const ready = await w.prepare(), live = JSON.stringify(w.state());
   await w.second.warmStep({ ...w.source, kind: "synthetic", async readSnapshotHead() {
@@ -400,7 +400,7 @@ test("live and synthetic use separate server-selected actors on the same native 
   assert.equal(JSON.stringify(w.state()), live);
   assert.equal((await w.module.currentSnapshot(w.source, w.caller)).state, "ready");
   assert.equal(ready.cache_mode, "live");
-  assert.ok(names.includes("public-v3:live")); assert.ok(names.includes("public-v3:synthetic"));
+  assert.ok(names.includes("public-v4:live")); assert.ok(names.includes("public-v4:synthetic"));
 });
 
 test("published statistics retain their own percent, cohort, source context and native numeric text through warming", async t => {
@@ -461,14 +461,14 @@ test("a v2 partial publication keeps 2027 quotas verbatim and groups only server
   const result = await w.module.searchSnapshot(ready, {}), rows = result.schools[0].rows;
   const { unitKey, r27Summary } = await import("../src/lib/p1-shape.ts");
   const keyOf = pk => unitKey(rows.find(r => r.pk === pk));
-  // Reviewed history remains attached; ambiguous and past-only groups are hidden from members.
+  // Reviewed history remains attached; ambiguous and past-only groups stay separate.
   assert.match(keyOf("k27a"), /^r27:[0-9]+$/);
   assert.equal(keyOf("p26a"), keyOf("k27a")); assert.equal(keyOf("p25a"), keyOf("k27a"));
-  assert.equal(rows.some(r => r.pk === "shared" || r.pk === "alone"), false);
-  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:shared"), []);
-  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:alone"), []);
-  assert.equal(result.total_units, 3);
-  // Hidden history remains in the immutable school cache, not deleted.
+  assert.ok(rows.some(r => r.pk === "shared")); assert.ok(rows.some(r => r.pk === "alone"));
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:shared")).map(r => r.y), [2026]);
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:alone")).map(r => r.y), [2024]);
+  assert.equal(result.total_units, 5);
+  // The original history also remains in the immutable school cache.
   const savedIndex = JSON.parse(w.cache.get(ready.index_key));
   const savedRows = JSON.parse(w.cache.get(savedIndex.school_keys.TEST0));
   assert.ok(savedRows.some(r => r.pk === "shared")); assert.ok(savedRows.some(r => r.pk === "alone"));
@@ -513,9 +513,9 @@ test("an unreviewed same-PK 2027 row remains separate through cache and search",
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   const { unitKey } = await import("../src/lib/p1-shape.ts");
   const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027);
-  assert.equal(rows.some(r => r.y === 2026), false);
-  assert.equal(result.total_units, 1);
-  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:same"), []);
+  assert.equal(rows.some(r => r.y === 2026), true);
+  assert.equal(result.total_units, 2);
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:same")).map(r => r.y), [2026]);
   assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
 });
 
@@ -525,32 +525,32 @@ test("ambiguous historical identity is not linked through cache and search", asy
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   const { unitKey } = await import("../src/lib/p1-shape.ts");
   const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027), historical = rows.filter(r => r.y === 2026);
-  assert.equal(historical.length, 0);
-  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:duplicate"), []);
+  assert.equal(historical.length, 2);
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:duplicate")).map(r => r.y), [2026, 2026]);
   const savedIndex = JSON.parse(w.cache.get(ready.index_key));
   const savedRows = JSON.parse(w.cache.get(savedIndex.school_keys.TEST0));
   assert.equal(savedRows.filter(r => r.y === 2026).length, 2);
   assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
 });
 
-test("v2 keeps current enrollment with missing quota and hides past-only groups without changing raw counts", async t => {
+test("v2 keeps missing quotas and shows past-only groups separately without changing raw counts", async t => {
   const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
     rowsOf: (_i, u) => [r27Row(u, "current", { quota_value: null, quota_stage: null }), pastRow(u, 2026, "old"), { ...pastRow(u, 2024, null), observation_key: "past-observation" }] });
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   assert.equal(ready.schema_version, "jungsi.history-snapshot/v2");
   assert.equal(ready.counts.rows, 3); assert.equal(ready.counts.mapping_pending_rows, 1);
-  assert.equal(result.total_units, 1); assert.equal(result.total_pending, 0);
-  assert.equal(result.schools[0].rows.length, 1);
+  assert.equal(result.total_units, 2); assert.equal(result.total_pending, 1);
+  assert.equal(result.schools[0].rows.length, 3);
   assert.equal(result.schools[0].rows[0].q27.v, null);
-  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:old"), []);
-  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "ob:past-observation"), []);
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:old")).map(r => r.y), [2026]);
+  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "ob:past-observation")).map(r => r.y), [2024]);
 });
 
-test("v2 with only past rows has no member-facing schools", async t => {
+test("v2 with only past rows shows them as historical results", async t => {
   const v2 = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage }, rowsOf: (_i, u) => [pastRow(u, 2026, "old")] });
   const ready = await v2.prepare(), result = await v2.module.searchSnapshot(ready, {});
-  assert.equal(result.total_schools, 0); assert.equal(result.total_units, 0);
-  assert.deepEqual(await v2.module.unitRows(ready, "TEST0", "pk:old"), []);
+  assert.equal(result.total_schools, 1); assert.equal(result.total_units, 1);
+  assert.deepEqual((await v2.module.unitRows(ready, "TEST0", "pk:old")).map(r => r.y), [2026]);
 });
 
 test("duplicate 2027 scope keys do not surface as separate member offerings", async t => {
@@ -570,16 +570,16 @@ test("duplicate 2027 scope keys do not surface as separate member offerings", as
   assert.equal(JSON.parse(w.cache.get(savedIndex.school_keys.TEST0)).length, 3);
 });
 
-test("v2 pagination and search count only schools with current anchors", async t => {
+test("v2 pagination and search include separately identified historical schools", async t => {
   const w = await world(t, { parts: 22, schools: 22, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
     rowsOf: (i, u) => i < 21 ? [{ ...r27Row(u, `current-${i}`, { quota_value: i + 1, quota_stage: "initial" }), department: `current-${i}` }] : [{ ...pastRow(u, 2026, "old"), department: "past-only" }] });
   const ready = await w.prepare();
   const first = await w.module.searchSnapshot(ready, { page: 1 }), second = await w.module.searchSnapshot(ready, { page: 2 });
   assert.equal(ready.counts.schools, 22);
-  assert.equal(first.total_schools, 21); assert.equal(first.total_units, 21); assert.equal(first.pages, 2);
-  assert.equal(first.schools.length, 20); assert.equal(second.schools.length, 1);
-  assert.equal(new Set([...first.schools, ...second.schools].map(x => x.school.id)).size, 21);
-  assert.equal((await w.module.searchSnapshot(ready, { unit: "past-only" })).total_units, 0);
+  assert.equal(first.total_schools, 22); assert.equal(first.total_units, 22); assert.equal(first.pages, 2);
+  assert.equal(first.schools.length, 20); assert.equal(second.schools.length, 2);
+  assert.equal(new Set([...first.schools, ...second.schools].map(x => x.school.id)).size, 22);
+  assert.equal((await w.module.searchSnapshot(ready, { unit: "past-only" })).total_units, 1);
   assert.equal((await w.module.searchSnapshot(ready, { unit: "current-20" })).total_units, 1);
 });
 
@@ -697,10 +697,10 @@ test("schoolUnitRows answers many units in one read with the same rule as unitRo
     ] });
   const ready = await w.prepare(), rows = (await w.module.searchSnapshot(ready, {})).schools[0].rows;
   const { unitKey } = await import("../src/lib/p1-shape.ts");
-  const keys = [...new Set(rows.map(unitKey)), "pk:alone", "pk:missing"];
+  const keys = [...new Set([...rows.map(unitKey), "pk:alone", "pk:missing"])];
   const all = await w.module.schoolUnitRows(ready, "TEST0", keys);
   assert.deepEqual(Object.keys(all).sort(), [...keys].sort());
   for (const k of keys) assert.deepEqual(all[k], await w.module.unitRows(ready, "TEST0", k));
-  assert.deepEqual(all["pk:alone"], []); assert.deepEqual(all["pk:missing"], []);
+  assert.deepEqual(all["pk:alone"].map(r => r.y), [2024]); assert.deepEqual(all["pk:missing"], []);
   assert.deepEqual(all[unitKey(rows.find(r => r.pk === "k27a"))].map(r => r.y).sort(), [2025, 2026, 2027]);
 });

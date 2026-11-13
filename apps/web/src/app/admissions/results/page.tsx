@@ -87,7 +87,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 대학 발표 성적 ① 칸에는 50%컷(없으면 평균), ② 칸에는 70%컷(없으면 75%·80%컷 등)을 같은 기준끼리 보여 드리며, 최종등록자 기준을 먼저 씁니다. 대학마다 발표 방식이 달라 학교마다 보이는 통계가 다를 수 있습니다.</p>
+          <p className="hint">
+            대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종등록자 기준을 먼저 쓰고, 대학마다 발표 방식이 달라 학교마다 보이는 통계가 다를 수 있습니다.
+            <br />① 칸: 합격자 가운데쯤 점수(50%컷, 없으면 평균)
+            <br />② 칸: 합격자 70% 지점 점수(70%컷, 없으면 75%·80%컷 등)
+          </p>
         </section>
 
         {snap.state !== "ready" || !res ? (
@@ -97,7 +101,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             <div className="rs-count">
               <span>
                 <b className="num">{res.total_schools}</b>개 대학 · <b className="num">{res.total_units}</b>개 모집단위
-                {res.total_pending > 0 && <> · 모집행 연결 확인 중 <b className="num">{res.total_pending}</b>건</>}
+                {res.total_pending > 0 && <> · 학과 연결 확인 중 <b className="num">{res.total_pending}</b>건</>}
                 <small>
                   {" "}· 정리본 갱신 {seoulDate(snap.ready.generated_at)}
                   {/* 기준일이 없으면 '확인 중'을 쓰지 않고 항목을 뺀다(2026-11-05 사용자 결정: 안내문의 '확인 중'도 제거) */}
@@ -171,7 +175,7 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
     // 모집군은 '가군·나군·다군'으로 통일해 보인다(발표 표기 '다'·'다군'이 섞여 있다, 10-24 사용자 결정)
     g: l.g ? l.g.replace(/^([가나다])군?$/, "$1군") : null,
     d: l.d,
-    sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
+    sub: [l.c, l.t, l.pk === null ? "학과 연결 확인 중" : null].filter(Boolean).join(" · "),
     r27: r27 ? r27Summary(r27.q27) : null,
     eligibility27: applicantEligibilityLabel(r27?.ae27),
     ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
@@ -181,12 +185,12 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
 function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking" | "ready" }) {
   const text =
     state === "checking"
-      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "몇 초 뒤 자동으로 다시 불러옵니다. 계속 이 화면이면 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
+      ? { h: "입시결과 최신 자료를 확인하고 있습니다", p: "몇 초 뒤 자동으로 다시 불러옵니다. 계속 이 화면이면 잠시 후 다시 열어 주세요. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다." }
       : state === "changed"
-      ? { h: "입시결과 새 판을 준비하고 있습니다", p: "대학 발표 정리본이 새 판으로 바뀌어, 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 이전 판을 최신처럼 보이지 않기 위해서입니다." }
+      ? { h: "입시결과 새 자료를 준비하고 있습니다", p: "대학 발표 자료가 새로 바뀌어 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다." }
       : state === "expired"
-        ? { h: "입시결과 정리본의 확인 기간이 지났습니다", p: "새로 확인된 판을 준비하는 동안 잠시 보여 드리지 않습니다." }
-        : { h: "입시결과 자료를 준비하고 있습니다", p: "검수가 끝난 대학 발표 정리본을 준비하는 중입니다. 자료가 없는 것이지 결과가 0건인 것은 아닙니다." };
+        ? { h: "입시결과 자료를 새로 확인하고 있습니다", p: "새로 확인한 자료를 준비하는 동안 잠시 보여 드리지 않습니다. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다." }
+        : { h: "입시결과 자료를 준비하고 있습니다", p: "확인을 마친 대학 발표 자료를 준비하는 중입니다. 아직 자료가 준비되지 않은 것이지 결과가 0건인 것은 아닙니다." };
   return (
     <section className="gate flat">
       <h2>{text.h}</h2>

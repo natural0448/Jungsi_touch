@@ -34,8 +34,8 @@ function parse(fd: FormData): { input: ProStudentInput; values: Record<string, s
 }
 
 function failText(e: unknown): string | null {
-  if (e instanceof AccessDenied) return e.status === 401 ? "로그인이 필요합니다. 다시 로그인해 주세요." : MESSAGE[e.code] ?? `권한이 없어 처리하지 못했습니다. (사유 코드 ${e.code})`;
-  if (e instanceof ConnectionError) return e.kind === "rate_limited" ? "요청이 겹쳐 잠시 제한되었습니다. 몇 초 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다." : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. (사유 코드 ${e.code})`;
+  if (e instanceof AccessDenied) return e.status === 401 ? "로그인이 필요합니다. 다시 로그인해 주세요." : MESSAGE[e.code] ?? `권한이 없어 처리하지 못했습니다. (문의 번호 ${e.code})`;
+  if (e instanceof ConnectionError) return e.kind === "rate_limited" ? "요청이 겹쳐 잠시 제한되었습니다. 몇 초 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다." : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. (문의 번호 ${e.code})`;
   return null;
 }
 
@@ -55,7 +55,7 @@ export async function createStudent(_prev: StudentFormState, fd: FormData): Prom
   let studentId: string;
   try {
     const r = await proSource().createStudent(await getCaller(), orgId, p.input, cv, key);
-    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (사유 코드 ${r.code})`, values: p.values };
+    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (문의 번호 ${r.code})`, values: p.values };
     studentId = r.value.student_id;
   } catch (e) {
     const t = failText(e);
@@ -76,7 +76,7 @@ export async function updateStudent(_prev: StudentFormState, fd: FormData): Prom
   if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(v)) return { error: "화면을 새로 고친 뒤 다시 저장해 주세요.", values: p.values };
   try {
     const r = await proSource().updateStudent(await getCaller(), orgId, studentId, p.input, v, key);
-    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (사유 코드 ${r.code})`, values: p.values };
+    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (문의 번호 ${r.code})`, values: p.values };
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t, values: p.values };
@@ -132,15 +132,15 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
   try {
     const saved = await src.createScore(caller, orgId, studentId, { exam_id: EXAM.exam_id, pack_version: EXAM.pack_version, stage, scores, expected_entry_version: entry }, `${key}:profile`);
     if (!saved.ok) {
-      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code)) return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. 이 학생의 입력 1회가 사용되었습니다. 정정은 고객센터에 요청해 주세요. (사유 코드 ${saved.code})`);
-      return fail(SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (사유 코드 ${saved.code})`);
+      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code)) return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. 이 학생의 입력 1회가 사용되었습니다. 정정은 고객센터에 요청해 주세요. (문의 번호 ${saved.code})`);
+      return fail(SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (문의 번호 ${saved.code})`);
     }
     step = "전체 분석";
     const p = saved.value.profile;
     const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
-    if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (사유 코드 ${r.code})`);
+    if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
   } catch (e) {
-    if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (사유 코드 ${e.code})`);
+    if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);
     if (t) return fail(t);
     throw e;
@@ -157,7 +157,7 @@ export async function findCandidates(_prev: ProActionState, fd: FormData): Promi
   if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
     const r = await proSource().candidates(await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
-    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `대학을 찾지 못했습니다. (사유 코드 ${r.code})` };
+    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `대학을 찾지 못했습니다. (문의 번호 ${r.code})` };
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t };
@@ -173,7 +173,7 @@ export async function addStudentBookmark(_prev: ProActionState, fd: FormData): P
   if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !validId(offeringId) || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
     const r = await proSource().addBookmark(await getCaller(), orgId, studentId, reportId, offeringId, key);
-    if (!r.ok) return { error: `담지 못했습니다. (사유 코드 ${r.code})` };
+    if (!r.ok) return { error: `담지 못했습니다. (문의 번호 ${r.code})` };
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t };
@@ -194,7 +194,7 @@ export async function exportStudentReport(_prev: PrintState, fd: FormData): Prom
   if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !Number.isSafeInteger(rev) || rev < 1 || !/^[0-9a-f-]{36}$/i.test(key)) return { ok: false, error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
     const r = await proSource().exportReport(await getCaller(), orgId, studentId, reportId, rev, key);
-    if (!r.ok) return { ok: false, error: `인쇄본을 만들지 못했습니다. (사유 코드 ${r.code})` };
+    if (!r.ok) return { ok: false, error: `인쇄본을 만들지 못했습니다. (문의 번호 ${r.code})` };
     return { ok: true, data: r.value };
   } catch (e) {
     const t = failText(e);
@@ -209,7 +209,7 @@ const ADMIN_MESSAGE: Record<string, string> = {
   expected_version_changed: "다른 화면에서 이 학생 정보가 먼저 바뀌었습니다. 화면을 새로 고쳐 주세요.",
   invalid_request: "고른 담당자가 이 기관의 교사·열람 전용 구성원이 아닙니다.",
 };
-const adminText = (code: string) => ADMIN_MESSAGE[code] ?? `처리하지 못했습니다. (사유 코드 ${code})`;
+const adminText = (code: string) => ADMIN_MESSAGE[code] ?? `처리하지 못했습니다. (문의 번호 ${code})`;
 
 /** 기관 관리자: 학생 담당 교사(·열람 전용) 목록을 새로 정한다(체크한 구성원 전체로 바꿈) */
 export async function assignStudentAction(_prev: ProActionState, fd: FormData): Promise<ProActionState> {

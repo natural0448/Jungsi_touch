@@ -24,7 +24,7 @@ export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickR
     const report = await loadMine(src, caller);
     if (!report) return { error: `${failed}. 내 성적 리포트를 먼저 열어 주세요.` };
     const st = await setPick(src, caller, report, id, selected);
-    if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${st.code})` };
+    if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (문의 번호 ${st.code})` };
     if (st.kind === "score_required") return { error: `${failed}. 성적 확인이 끝난 뒤 담을 수 있습니다.` };
     if (st.kind === "none") return { error: `${failed}. 리포트를 찾지 못했습니다.` };
   } catch (e) {
@@ -36,7 +36,7 @@ export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickR
       const unsure = e.kind === "unavailable" && e.code !== "score_input_transition_pending";
       if (unsure) revalidatePath("/", "layout");
       // 저장됐을 수 있으므로 '못했습니다·다시 눌러 주세요'라고 하지 않는다(10-27 사용자 지적)
-      if (unsure) return { error: `${MAYBE_SAVED} (사유 코드 ${e.code})` };
+      if (unsure) return { error: `${MAYBE_SAVED} (문의 번호 ${e.code})` };
       return { error: `${failed}. ${connectionText(e)}` };
     }
     throw e;

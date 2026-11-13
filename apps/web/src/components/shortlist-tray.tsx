@@ -21,7 +21,7 @@ export function ShortlistTray({ items, other, more }: { items: PickedItem[]; oth
               <>
               {items.map((s) => (
                 <span key={s.offering_id} className={s.entry.assessment_status === "needs_revalidation" ? "stale" : undefined}>
-                  {s.offering ? `${s.offering.university_name} ${s.offering.department}` : "카탈로그에 없는 모집단위"}
+                  {s.offering ? `${s.offering.university_name} ${s.offering.department}` : "지금 목록에서 찾을 수 없는 모집단위"}
                 </span>
               ))}
               {more?.count ? more.names : null}

@@ -305,7 +305,7 @@ export function ScoreForm({
           </button>
         </div>
       </div>
-      <p className="sf-note">저장하면 이 시험 단계의 성적 입력 1회를 사용합니다. 저장한 성적은 직접 고칠 수 없고, 정정은 고객센터에 요청하면 1회 처리해 드립니다. 성적표에 없는 점수로 저장하면 계산되지 않고 입력 1회가 사용됩니다.</p>
+      <p className="sf-note">저장하기 전에 성적표와 한 칸씩 대조해 주세요. 저장하면 이 시험 단계의 성적 입력 1회를 사용하고, 저장한 성적은 직접 고칠 수 없습니다. 성적표에 없는 점수로 저장하면 계산되지 않고 입력 1회가 사용되니 주의해 주세요. 잘못 넣었으면 고객센터에 정정을 1회 요청할 수 있습니다.</p>
 
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="sf-dialog-h" onClose={() => setReview(null)}>
         {review && (

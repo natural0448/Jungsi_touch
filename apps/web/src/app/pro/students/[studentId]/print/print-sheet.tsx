@@ -17,7 +17,7 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
         {Object.entries(fields).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
         <button className="btn p" type="submit" disabled={pending}>{pending ? "만드는 중…" : "인쇄본 만들기"}</button>
         {state && !state.ok && <span className="err" role="alert">{state.error}</span>}
-        <p className="pro-note">인쇄본을 만들면 학생 이름과 기관·교사 표시가 들어간 고정 판이 열립니다. 학생에게는 PDF나 종이로 전달해 주세요.</p>
+        <p className="pro-note">인쇄본을 만들면 학생 이름과 기관·교사 표시가 들어간, 이 시점 내용으로 고정된 인쇄본이 열립니다. 학생에게는 PDF나 종이로 전달해 주세요. 계약 기간이 끝나면 이 화면을 열 수 없으니, 충원 기간(2월 중순까지)에 다시 볼 리포트는 PDF로 저장해 두세요.</p>
       </form>
     );
   }
@@ -48,7 +48,7 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
             <div><dt>기관</dt><dd>{w.organization_name}</dd></div>
           </dl>
         </header>
-        <OverallCard a={a} />
+        <OverallCard a={a} fold={false} />
         <h2>과목별 결과</h2>
         <SubjectsSheet a={a} second={false} />
         <PositionChart a={a} />

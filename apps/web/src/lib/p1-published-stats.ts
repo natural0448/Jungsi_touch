@@ -28,12 +28,12 @@ export function publishedScoreNullLabel(c: Cell): string | null {
   // 검증된 칸별 사유는 서버가 아직 공급하지 않는다. 공급 전에는 10-29 결정 표시를 유지한다(2026-11-03 사용자 결정).
   // 공급되면 그 사유만 쓴다. 일반 사유 코드·모집인원·단순 null은 근거가 아니다.
   const reasons = c.verified_score_null_reasons;
-  if (reasons === undefined) return "3인이하미발표";
+  if (reasons === undefined) return "3인 이하 미발표";
   if (!Array.isArray(reasons) || reasons.length < 1 || reasons.length > 2 ||
       reasons.some(r => r !== "other_statistic_only" && r !== "three_or_fewer") ||
       new Set(reasons).size !== reasons.length) return null;
-  if (reasons.includes("three_or_fewer")) return "3인이하미발표";
-  if (reasons.includes("other_statistic_only")) return "해당조건미발표";
+  if (reasons.includes("three_or_fewer")) return "3인 이하 미발표";
+  if (reasons.includes("other_statistic_only")) return "해당 조건 미발표";
   return null;
 }
 
@@ -82,7 +82,7 @@ const SECOND_NAMED: Record<string, number> = { 평균: 2, 최저: 3, 최고: 4 }
 export function publishedStats(r: Row): [PublishedStat | undefined, PublishedStat | undefined] {
   const all: { label: string; cell: Cell; i: number }[] = [];
   const add = (label: string | null, cell: Cell) => {
-    if (label === null || cell.v === null || cell.b === UNKNOWN_BASIS || (cell.pr !== undefined && cell.pr !== "actual_result")) return;
+    if (label === null || cell.v === null || cell.v.trim() === "" || cell.b === UNKNOWN_BASIS || (cell.pr !== undefined && cell.pr !== "actual_result")) return;
     all.push({ label, cell, i: all.length });
   };
   add("50%컷", r.c50);

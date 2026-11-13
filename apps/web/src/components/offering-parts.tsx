@@ -6,10 +6,10 @@ import { pctText, seoulDate } from "@/lib/format";
 /** 학과마다의 지원 판단(assessment.category). 색과 함께 점 모양으로도 구분, 빨강은 '지원 조건 미충족'에만.
  * desc 는 입시 용어에 익숙하지 않은 사용자(수험생·학부모)를 위한 쉬운 풀이 — 기준 점수는 적지 않는다 */
 export const CATEGORY: Record<Category, { cls: string; label: string; desc: string }> = {
-  challenge: { cls: "reach", label: "도전", desc: "지금 점수보다 다소 높은 곳이지만, 남은 기간을 보고 노려볼 수 있는 범위입니다." },
+  challenge: { cls: "reach", label: "도전", desc: "지금 점수보다 다소 높아 결과를 장담하기 어렵지만, 지원해 볼 수 있는 범위입니다." },
   core: { cls: "core", label: "핵심 검토", desc: "올해 적극적으로 검토해 볼 만한 범위입니다." },
   room: { cls: "safe", label: "여유 후보", desc: "내 점수에 비교적 여유가 있는 범위입니다. 그래도 합격이 보장되는 것은 아닙니다." },
-  outside: { cls: "out", label: "추천 범위 밖", desc: "올해 기준으로는 추천 범위에 들지 않습니다. 지원 자체가 불가능하다는 뜻은 아닙니다." },
+  outside: { cls: "out", label: "검토 범위 밖", desc: "올해 기준으로는 지원 검토 범위에 들지 않습니다. 지원 자체가 불가능하다는 뜻은 아닙니다." },
   pending: { cls: "check", label: "판단 보류", desc: "판단에 필요한 자료가 아직 갖춰지지 않아 결론을 내리지 않았습니다." },
   ineligible: { cls: "inel", label: "지원 조건 미충족", desc: "이 전형이 요구하는 지원 조건(과목·자격)을 충족하지 않습니다." },
 };
@@ -27,10 +27,10 @@ const REASON: Record<string, string> = {
   // — 환산 성공과 독립이라 환산 자료가 없다는 표현을 쓰지 않는다
   analysis_release_missing: "지원 판단에 필요한 이 모집단위의 분석 기준이 아직 없습니다.",
   analysis_release_not_approved: "이 모집단위의 지원 판단 기준을 검수하고 있습니다.",
-  analysis_pack_mismatch: "입력한 시험과 지원 판단 자료의 버전이 맞지 않습니다.",
+  analysis_pack_mismatch: "입력한 시험과 판단 자료의 기준 시험이 달라 판단하지 않았습니다.",
   target_distribution_missing: "그해 비교 분포가 아직 없습니다.",
-  total_model_missing: "전체 누백 분포 자료가 아직 연결되지 않았습니다(계산 진행 중이 아님).",
-  year_bridge_required: "과거 학년도 모집행과 올해 성적을 잇는 연도 연계 자료가 아직 없습니다.",
+  total_model_missing: "전체 위치를 계산할 자료가 아직 연결되지 않았습니다. 기다린다고 계산되는 것은 아니니, 같은 성적을 다시 저장하지 않으셔도 됩니다.",
+  year_bridge_required: "지난해 결과를 올해 성적과 비교할 자료가 아직 없습니다.",
   reference_conversion_not_production_approved: "학교별 수능 반영분으로 계산한 참고 점수입니다. 최종 전형 총점과 지원 가능성은 확인 중입니다.",
   reference_conversion_unavailable: "이 모집단위의 참고 환산 자료를 확인하고 있습니다.",
   reference_conversion_missing: "이 모집단위의 참고 환산 자료를 연결하고 있습니다.",
@@ -46,14 +46,14 @@ const REASON: Record<string, string> = {
   reference_decision_pending: "참고 점수만 계산했습니다. 이 모집단위의 지원 판단 기준은 아직 확인 중입니다.",
   reference_score_outside_domain: "이 환산식의 확인된 계산 범위를 벗어나 참고 점수를 표시하지 않았습니다.",
   conversion_not_ready: "환산 결과가 준비되지 않아 이 대학 위치를 계산하지 않았습니다.",
-  offering_analysis_pending: "올해 모집행과 대학 분석 자료가 결속되기 전이라 후보 산출을 보류했습니다.",
+  offering_analysis_pending: "올해 모집 정보와 대학 분석 자료를 맞춰 보는 중이라 후보를 아직 만들지 않았습니다.",
   counselor_adjustment_unapproved: "상담 조정 기준을 검수하고 있습니다.",
-  percentile_curve_unpublished: "이 대학 환산 분포가 아직 발행되지 않았습니다.",
-  percentile_release_missing: "이 대학의 환산 분포 자료가 아직 발행되지 않아 대학 안 위치를 계산하지 않았습니다.",
-  percentile_conversion_context_missing: "환산 척도 근거가 없어 대학 위치를 계산하지 않았습니다.",
-  advantage_population_mismatch: "비교집단이 전체 응시자와 달라 유불리를 보류합니다.",
-  forecast_70_not_published: "올해 70% 예상선이 아직 발행되지 않았습니다.",
-  forecast_not_published: "학과별 예상 기준이 아직 발행되지 않았습니다.",
+  percentile_curve_unpublished: "이 대학 환산 분포가 아직 준비되지 않았습니다.",
+  percentile_release_missing: "이 대학의 환산 분포 자료가 아직 준비되지 않아 대학 안 위치를 계산하지 않았습니다.",
+  percentile_conversion_context_missing: "이 대학 환산점수를 위치로 바꿀 자료가 없어 대학 안 위치를 계산하지 않았습니다.",
+  advantage_population_mismatch: "비교하는 학생 범위가 전체 응시자와 달라 유불리를 보여 드리지 않습니다.",
+  forecast_70_not_published: "올해 70% 예상선이 아직 준비되지 않았습니다.",
+  forecast_not_published: "학과별 예상 기준이 아직 준비되지 않았습니다.",
 };
 export const reasonText = (code: string | null | undefined) => (code ? REASON[code] ?? "자료를 확인하고 있습니다." : "");
 

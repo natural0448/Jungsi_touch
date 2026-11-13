@@ -25,7 +25,7 @@ import "./favorable.css";
 
 const route = page("PAGE-04");
 export const metadata: Metadata = { title: route.label };
-const FEATURES = ["내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원가능성 확인", "간호 · 보건 · 교육 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
+const FEATURES = ["내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원가능성 확인", "간호 · 교육 · 계약학과 · 해양 · 철도 등 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
 
 export default async function Page({ searchParams }: PageProps<"/admissions/favorable">) {
   const p3 = page("PAGE-03");
@@ -99,7 +99,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           <ScoreBasis overall={report.overall} emptyText="" />
           <RunAnalysis
             title="이 성적으로 아직 유리한 학교를 찾지 않았습니다"
-            desc="누르면 저장한 성적으로 학교 목록과 와일드카드를 한 번 만듭니다. 만든 목록은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+            desc="누르면 저장한 성적으로 학교 목록과 와일드카드를 한 번 만듭니다. 만든 목록은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
             label="유리한 학교 찾기"
             busy="찾는 중…"
           />
@@ -135,7 +135,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
         <RunAnalysis
           refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
           title="저장된 후보를 현재 자료로 다시 확인합니다"
-          desc="저장한 성적을 그대로 사용해 후보를 현재 승인 자료로 다시 확인합니다. 현재 결과가 갱신될 수 있으며 성적 입력권은 사용하지 않습니다."
+          desc="저장한 성적을 그대로 사용해 후보를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
           label="후보 다시 확인"
           busy="다시 확인하는 중…"
         />
@@ -177,8 +177,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
               <section className="gate flat">
                 <h2>대학 분석 자료가 아직 준비되지 않았습니다</h2>
                 <p>
-                  성적과 총점은 계산됐지만 올해 모집행·대학 분석 자료가 결속되기 전이라 후보 산출을 보류한 상태입니다
-                  {report.analysis_status.reason_code ? <> (보류 코드 <code>{report.analysis_status.reason_code}</code>)</> : null}.
+                  성적과 총점은 계산됐지만 올해 모집 정보와 대학 분석 자료를 맞춰 보는 중이라 후보를 아직 만들지 않았습니다
+                  {report.analysis_status.reason_code ? <> (문의 번호 <code>{report.analysis_status.reason_code}</code>)</> : null}.
                   지원 가능한 대학이 없다는 뜻이 아니며, 자료가 연결되면 이 화면에 후보가 나타납니다.
                 </p>
               </section>
@@ -198,7 +198,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
             <ReferenceGroups groups={refGroups} />
             {(outsideCount > 0 || ineligibleCount > 0) && (
               <p className="fv-note">
-                판단이 끝난 모집단위 중 추천 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+                판단이 끝난 모집단위 중 지원 검토 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
               </p>
             )}
             {pendingCount > 0 && (

@@ -178,7 +178,9 @@ function OrgBand({ o, svc }: { o: ProOrg; svc: ProOrganization | null }) {
           <dd className="num">{plainDate(o.purge_on)}{left >= 0 && ` (D-${left})`}</dd>
         </div>
       </dl>
-      {left <= 14 && <p className="pro-purge">파기일이 가까워졌습니다. 필요한 학생 리포트는 파기일 전에 PDF로 저장해 주세요. 파기일 0시부터 학생 기록을 볼 수 없습니다.</p>}
+      {left <= 14
+        ? <p className="pro-purge">파기일이 가까워졌습니다. 필요한 학생 리포트는 파기일 전에 PDF로 저장해 주세요. 파기일 0시부터 학생 기록을 볼 수 없습니다.</p>
+        : <p className="pro-save">계약 기간이 끝나면 전문가용 화면과 학생 기록을 볼 수 없습니다. 충원 합격 발표는 2월 중순까지 이어지니, 상담에 쓸 학생 리포트는 {plainDate(o.ends_on)}까지 PDF로 저장해 두세요.</p>}
     </section>
   );
 }
