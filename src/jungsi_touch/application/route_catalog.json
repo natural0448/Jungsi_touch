@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.176",
-  "source_sha256": "22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542",
+  "spec_version": "1.9.177",
+  "source_sha256": "bd8722d1654509470b5123d3a1b0770b6babfbecfd7b32a8828c073831949839",
   "pages": [
     {
       "id": "PAGE-01",
@@ -3909,11 +3909,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.20261113_fmt.current.json",
-        "sha256": "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
+        "sha256": "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
+        "sha256": "ea9a10e3960e581f56b708d939c6d5628b682bf29344e79e536514b0718d6f36"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -5740,7 +5740,30 @@
         "Storage_activation": "NOT_RUN",
         "frontdoor": "NOT_RUN"
       },
-      "implementation_boundary": "Member shortlist JSON storage/runtime implemented with saved DB assessment compatibility reader. School conversion/percentile component JSON writer/cache remains NOT_IMPLEMENTED; do not claim completed result reuse."
+      "implementation_boundary": "Member shortlist JSON storage/runtime implemented with saved DB assessment compatibility reader. School conversion/percentile component JSON writer/cache remains NOT_IMPLEMENTED; do not claim completed result reuse.",
+      "2027_member_result_retrieval_20261113": {
+        "status": "USER_PRIORITY_IMPLEMENTATION_AND_OPERATING_ACCEPTANCE_PENDING",
+        "priority": 2,
+        "scope": "2027학년도 각 회원의 입력 성적에 해당 학교·모집행의 기존 산식을 적용한 결과를 저장하고 본인에게 재조회한다.",
+        "storage": "기존 Supabase private Storage 회원 전용 JSON 및 현재 저장 포트를 재사용한다. 새 결과 테이블·추가 서비스·요금제 변경은 도입하지 않는다.",
+        "requested_fields": [
+          "academic_year",
+          "offering_pk",
+          "university_name",
+          "department_name",
+          "converted_score",
+          "converted_percentile"
+        ],
+        "identity": "서버가 검증한 회원·성적 프로필/리비전과 학년도·대학·캠퍼스·모집행 PK·전형·모집군, 산식과 사용된 자료 버전을 결속한다. 학교명·학과명은 동일 PK의 승인된 Guide 표시값을 사용한다.",
+        "percentile": "기존 API의 converted_percentile은 동일 대학 환산점수의 상위누백 호환 필드이므로, 동일 학년도·회원 성적·산식·곡선에 결속된 ready 값을 그대로 저장하고 재조회한다. 별도의 대학 반영 백분위·과목 백분위와 혼동하거나 100-x로 역산하지 않는다. 해당 기존 누백이 없거나 결속되지 않은 경우만 빈칸으로 둔다.",
+        "storage_transition": "저장 객체를 먼저 검증한 뒤 기존 report revision의 내부 참조를 원자적으로 연결한다. 이전 inline 본문은 현재 report_revisions와 requests.result replay에서 임시 보존되므로 DB 중복 절감 완료 상태가 아니다. report.read·replay·관심대학 등 전체 독자의 실제 전환을 확인하기 전에는 기존 본문이나 저장 객체를 삭제하지 않는다. CAS 실패 시 기존 결과와 생성 후보를 보존한다.",
+        "candidate_implementation": "2027 결과의 불변 private Storage 저장과 report CAS 참조, 관심대학 직접 SQL 재조회 후보를 통합했다. 기존 보고서와 재실행 호환을 위해 inline도 임시 보존하며 실제 DB 및 운영 연결은 미검증이다.",
+        "privacy": "서버 검증 JWT의 소유 리포트만 저장·재조회하고 기존 이용권·예산·no-store 경계와 다른 회원 격리를 유지한다. 실제 성적·개인정보·원본 산식·모형은 Git에 넣지 않는다.",
+        "operation": "university.analyze /api/v1/reports/{report_id}/university-results",
+        "evidence": "기존 산식·자료·정본과 검수 결과를 재사용한다. 코드를 작성하거나 합성 검사만 통과한 상태는 실제 저장·재조회 또는 운영 배포 완료가 아니다.",
+        "batch_policy": "100개는 한 저장 객체당 최대 개수이며 전체 모집단위 제한이 아니다. 기존 승인된 객체 크기·개수 한도에 따라 분할하고 소유자·성적·report·source revision과 PK 중복을 확인한다.",
+        "legacy_retrieval": "과거 형식에 표시 필드가 없을 때 같은 소유자·시험·성적·학년도·산식·분포에 결속된 저장값만 복원한다. 기존 값·명시적 null과 미결속 항목은 바꾸지 않는다."
+      }
     }
   },
   "member_shortlist_contract": {

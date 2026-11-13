@@ -75,12 +75,15 @@ import { PublicResponseProjection } from "../application/public_response.ts";
 import { REPORT_ACTION_OPERATIONS, ReportActionService } from "../application/report_actions.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import {
+  type MemberSchoolResultsWriterPort,
   UNIVERSITY_ANALYSIS_OPERATIONS,
   type UniversityAnalysisDataPort,
   UniversityAnalysisService,
 } from "../application/university_analysis.ts";
+import { projectMemberSchoolResultBatches } from "../application/member_school_results.ts";
+import { MemberSchoolResultsStorage } from "./member_school_results_storage.ts";
 import { utcText } from "../domain/time.ts";
-import { nativeJsonText } from "../domain/json_value.ts";
+import { nativeJsonSha256, nativeJsonText, type NativeObject } from "../domain/json_value.ts";
 import {
   API_REQUEST_STAGES,
   type ApiHttpPorts,
@@ -919,6 +922,69 @@ export class NativeRuntimeApi {
         },
       };
       const mode = { mode: "rights" as const, workflow };
+      const memberSchoolResults: MemberSchoolResultsWriterPort = {
+        stage: async (owner, profile, report, offerings) => {
+          const [binding, controls] = await Promise.all([context.binding(), context.controls()]);
+          const member = binding.memberJson;
+          if (!member) return null;
+          if (
+            typeof profile.scores.exam_id !== "string" ||
+            typeof profile.scores.pack_version !== "string"
+          ) {
+            throw new AccessError("storage_result_invalid", 503);
+          }
+          await context.assertCurrent();
+          const storage = new MemberSchoolResultsStorage({
+            projectUrl: binding.projectUrl,
+            bucket: binding.storage.bucket,
+            prefix: member.prefix,
+            secretKey: binding.storage.secretKey,
+            maxBytes: member.maxObjectBytes,
+            maxItems: Math.min(member.maxItems, 100),
+            timeoutMs: binding.storage.limits.requestTimeoutMs,
+          }, controls.fetcher);
+          const identity = Object.freeze({
+            owner,
+            academicYear: 2027,
+            reportId: report.report_id,
+            reportRevision: report.revision,
+            currentReportRevision: report.revision,
+            profileId: profile.profile_id,
+            profileFingerprint: await nativeJsonSha256(profile.scores),
+            examId: profile.scores.exam_id,
+            packVersion: profile.scores.pack_version,
+          });
+          const documents = await projectMemberSchoolResultBatches(
+            owner,
+            profile,
+            report,
+            offerings,
+            Math.min(member.maxItems, 100),
+            member.maxObjectBytes,
+          );
+          const refs: NativeObject[] = [];
+          // Keep storage traffic bounded and wait for the complete group before failing.
+          for (let i = 0; i < documents.length; i += 2) {
+            const group = await Promise.allSettled(
+              documents.slice(i, i + 2).map((document) => storage.create(identity, document)),
+            );
+            const failed = group.find((outcome) => outcome.status === "rejected");
+            if (failed && failed.status === "rejected") throw failed.reason;
+            for (const outcome of group) {
+              if (outcome.status !== "fulfilled") throw new AccessError("storage_unavailable", 503);
+              const ref = outcome.value;
+              refs.push({
+                object_key: ref.object_key,
+                sha256: ref.sha256,
+                bytes: ref.bytes,
+                source_report_revision: ref.source_report_revision,
+              });
+            }
+          }
+          await context.assertCurrent();
+          return refs;
+        },
+      };
       const profiles = new ProfileReportService(platform, data, this.clock, mode);
       const actions = new ReportActionService(platform, catalog, this.clock);
       const universities = new UniversityAnalysisService(
@@ -932,6 +998,7 @@ export class NativeRuntimeApi {
         null,
         // Existing approved selection remains the fallback only when the new factory is unselected.
         () => referenceCandidateScopePort(context),
+        memberSchoolResults,
       );
       let inputAdmission: PreparedUsageAdmission | undefined;
       let currentPageBudget: RuntimeRequestBudget | undefined;
@@ -1260,6 +1327,7 @@ export class NativeRuntimeApi {
                 mode,
                 null,
                 enabled.candidateScope,
+                memberSchoolResults,
               );
             } else if (referenceFailed || activeReference) {
               // A failed authority or an active factory without candidate scope must never fall back to legacy reference data.
@@ -1272,6 +1340,7 @@ export class NativeRuntimeApi {
                 mode,
                 null,
                 null,
+                memberSchoolResults,
               );
             }
             return await selectedUniversities.execute(r, boundary);

@@ -296,6 +296,11 @@ export function memberFixture(maxItems = 100) {
                     "SYNTHETIC-exam",
                     "SYNTHETIC-pack",
                     nativeJsonText(selected),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
                   ]]
                   : [],
               );
@@ -303,7 +308,7 @@ export function memberFixture(maxItems = 100) {
             if (sql.startsWith("SELECT v.profile_id,v.body::text")) {
               const r = pick(args[0], args[3], args[1], args[2]);
               return Promise.resolve(
-                r ? [[r.profile_id, nativeJsonText(r.body), r.updated_at]] : [],
+                r ? [[r.profile_id, nativeJsonText(r.body), r.updated_at, null, null, null]] : [],
               );
             }
             throw new Error("unexpected synthetic SQL");

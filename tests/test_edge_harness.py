@@ -327,10 +327,43 @@ def retained_legacy28_fixture(current):
     return spec
 
 
+def before_member_school_overlay(current):
+    """Project an authenticated current fixture to its earlier, non-operating baseline."""
+    import check_project_consistency as c
+    if c.MEMBER_SCHOOL_OVERLAY_FIELD not in current:
+        return current
+    c.member_school_overlay(current)
+    spec = deepcopy(current)
+    spec.pop(c.MEMBER_SCHOOL_OVERLAY_FIELD)
+    school = {row['path']: row['sha256'] for row in
+              current['university_scoring_contract']['scoped_reference_contract']
+              ['verification_current_source_rebound_20261113_v2']['source_bindings']}
+    member = {row['path']: row['sha256'] for row in
+              current['member_shortlist_contract']['source_registration']['verification']['source_bindings']}
+    old = {path: school[path] for path in (c._MU, c._MC, c._MX)}
+    old.update({path: member[path] for path in (c._MS, c._MF)})
+    files = spec['edge_harness']['files']
+    current_pins = spec['score_input_policy_contract']['current_source_bindings']
+    code_index = spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']
+    for path, sha in old.items():
+        files[path]['declarations']['source_sha256'] = sha
+        current_pins[path] = sha
+        for row in code_index:
+            if row['path'] == path:
+                row['source_sha256'] = sha
+    return spec
+
+
 def candidate(current=None):
     """A source registration fixture, never a runtime implementation or approval."""
     if current is None:
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+    from check_project_consistency import (university_cancellation_test_registration,
+        UNIVERSITY_CANCELLATION_TEST)
+    cancellation, cancellation_errors = university_cancellation_test_registration(current)
+    if cancellation_errors or (cancellation is None and UNIVERSITY_CANCELLATION_TEST in current['edge_harness']['files']):
+        raise ValueError("Synthetic fixture cannot ignore invalid university cancellation registration")
+    current = before_member_school_overlay(current)
     spec = retained_legacy28_fixture(current)
     from check_project_consistency import (service_aux_registration, service_staged_registration,
         service_wildcard_registration, current_page_route_test_registration, reference_db_registration, auth_503_registration)
@@ -339,8 +372,6 @@ def candidate(current=None):
     if reference_errors:
         raise ValueError("Synthetic fixture cannot ignore invalid reference DB registration")
     reference_tests = set(reference_suite["test_paths"]) if reference_suite is not None else set()
-    from check_project_consistency import (university_cancellation_test_registration,
-        UNIVERSITY_CANCELLATION_TEST)
     cancellation, cancellation_errors = university_cancellation_test_registration(spec)
     if cancellation_errors or (cancellation is None and UNIVERSITY_CANCELLATION_TEST in spec['edge_harness']['files']):
         raise ValueError("Synthetic fixture cannot ignore invalid university cancellation registration")
@@ -458,6 +489,7 @@ class ReadViewExtensionContractTests(unittest.TestCase):
 
     def test_legacy_read_fixture_accepts_complete_university_cancellation_absence(self):
         current = json.loads((ROOT / 'docs/current/service_spec.json').read_text(encoding='utf-8'))
+        current = before_member_school_overlay(current)
         suite = current['backend_platform_contract'].pop('university_cancellation_test_extension', None)
         if suite is not None:
             for path in suite['test_paths']:

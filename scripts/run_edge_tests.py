@@ -483,6 +483,11 @@ def school_reference_registration(spec,before):
     if v is None:
         if set(SCHOOL_REFERENCE_TESTS).intersection(before):raise EdgeFailure('school_reference_verification_missing')
         return None
+    from check_project_consistency import apply_member_school_overlay
+    try:
+        v=apply_member_school_overlay(spec,"school",v,before)
+    except (KeyError,TypeError,ValueError,AttributeError) as error:
+        raise EdgeFailure("school_reference_overlay_invalid") from error
     required={*SCHOOL_REFERENCE_SOURCES,*SCHOOL_REFERENCE_TESTS,'tests/edge/synthetic_school_reference.ts',
       'tests/edge/reference_candidate_scope_cases.ts','tests/edge/saved_reference_tail_source_cases.ts',
       'tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts',

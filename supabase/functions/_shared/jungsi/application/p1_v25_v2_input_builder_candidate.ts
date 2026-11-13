@@ -238,7 +238,9 @@ export class P1V25V2ReviewInput {
         if (
           FIELDS.some((f) => Object.hasOwn(values, f)) ||
           Object.keys(values).length !== VALUE_FIELDS.length ||
-          VALUE_FIELDS.some((f) => !Object.hasOwn(values, f) || typeof values[f] !== "string") ||
+          VALUE_FIELDS.some((f) =>
+            !Object.hasOwn(values, f) || (values[f] !== null && typeof values[f] !== "string")
+          ) ||
           v25.has(k)
         ) fail();
         v25.set(k, row);

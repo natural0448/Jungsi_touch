@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "26ca663c787d03144b85ce57efc4c3c92ba2596001639df49c22d790aaa19c0c",
+      "source_sha256": "0a9e13574e87e728dc3e41e1bb68505e743c5fdc00e9a9e590a518e73b88f7d6",
       "symbols": [
         {
           "kind": "class",
@@ -706,6 +706,18 @@
           "kind": "function",
           "name": "_validate_observer_deployment",
           "signature": "def _validate_observer_deployment(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "apply_member_school_overlay",
+          "signature": "def apply_member_school_overlay(spec, family, selected, source_hashes=None):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "apply_member_school_overlay.bind_list",
+          "signature": "def bind_list(rows, expected):",
           "decorators": []
         },
         {
@@ -892,6 +904,18 @@
           "kind": "function",
           "name": "main",
           "signature": "def main():",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "member_school_effective_sha",
+          "signature": "def member_school_effective_sha(spec, path, previous):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "member_school_overlay",
+          "signature": "def member_school_overlay(spec, source_hashes=None):",
           "decorators": []
         },
         {
@@ -2065,7 +2089,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "99ce40c01a8eb195e2ac9bdd2e37543382d6aabdd6e223fb8c8e2be2d4bfcd72",
+      "source_sha256": "3e3158f9b7ab084fbae68413ceda7bf30d4d179c0f145dce2c087339c911c2af",
       "symbols": [
         {
           "kind": "function",
@@ -9001,6 +9025,27 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/application/member_school_results.ts",
+        "layer": "application",
+        "status": "member_results_source_synthetic_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-04",
+          "REQ-05",
+          "REQ-06",
+          "REQ-08",
+          "REQ-14",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26"
+        ],
+        "source_sha256": "2542121b10b5bd4289dcda66520d5df5ac947c6f1df66cf65bc01c9ec44769ef",
+        "declared_exports": [
+          "projectMemberSchoolResults",
+          "projectMemberSchoolResultBatches",
+          "composeMemberSchoolResults"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/application/member_shortlist.ts",
         "layer": "application",
         "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
@@ -9473,7 +9518,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "d6fecd4bccc38b8390faa71a174ab43f29c139c6daaceeb7987261ce13d0a0bf",
+        "source_sha256": "fae6d71c5cdd6b9d53d0fce6c09cae84a970e7ca70d047c3a43aa0e829f0b3b2",
         "declared_exports": [
           "P1V2InputPins",
           "P1V2InputAuthority",
@@ -10735,14 +10780,15 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638",
+        "source_sha256": "b147346e1c17bc65207745dbf5ac367bc90135de914c5b30340e9394111ca397",
         "declared_exports": [
           "UNIVERSITY_ANALYSIS_OPERATIONS",
           "UniversityAnalysisDataPort",
           "productionCandidateRows",
           "PublishedForecastPort",
           "candidateGroups",
-          "UniversityAnalysisService"
+          "UniversityAnalysisService",
+          "MemberSchoolResultsWriterPort"
         ]
       },
       {
@@ -11907,6 +11953,26 @@
         ]
       },
       {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+        "layer": "data_infrastructure",
+        "status": "member_results_source_synthetic_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-04",
+          "REQ-08",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-30"
+        ],
+        "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c",
+        "declared_exports": [
+          "MemberSchoolResultIdentity",
+          "MemberSchoolResultReference",
+          "MemberSchoolResultsStorage"
+        ]
+      },
+      {
         "path": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts",
         "layer": "data_infrastructure",
         "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
@@ -11919,7 +11985,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c",
+        "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
         "declared_exports": [
           "MEMBER_LEGACY_EXACT_SQL",
           "MEMBER_LEGACY_LOCK_SQL",
@@ -12775,7 +12841,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773",
+        "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
         "declared_exports": [
           "REFERENCE_TAIL_REQUEST_OBJECTS",
           "REFERENCE_TAIL_REQUEST_BYTES",
@@ -12827,7 +12893,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+        "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]

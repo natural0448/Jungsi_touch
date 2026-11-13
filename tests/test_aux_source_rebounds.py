@@ -8,7 +8,8 @@ class AuxSourceReboundTests(unittest.TestCase):
   s=json.loads((ROOT/'docs/current/service_spec.json').read_bytes());families={}
   for name,(historical,path,sha) in c.AUX_SOURCE_REBOUND_PINS.items():families[name]={'historical_sha256':historical,'changed_source_bindings':{path:sha}}
   s['current_aux_source_rebounds_20261113']=dict(format='jungsi.current-aux-source-rebounds/v1',status='SOURCE_REGISTERED_NOT_EXECUTED',activation_status='NOT_RUN',native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',operating_writes=0,families=families)
-  path=c.AUX_SOURCE_REBOUND_PINS['dev010_runtime_assembly'][1];digest=c.AUX_SOURCE_REBOUND_PINS['dev010_runtime_assembly'][2]
+  path=c.AUX_SOURCE_REBOUND_PINS['dev010_runtime_assembly'][1]
+  digest=c.member_school_effective_sha(s,path,c.AUX_SOURCE_REBOUND_PINS['dev010_runtime_assembly'][2])
   for row in s['workflow']['documentation_sync']['code_index']['edge_sources']['files']:
    if row['path']==path:row['source_sha256']=digest
   if path in s['edge_harness']['files']:s['edge_harness']['files'][path]['declarations']['source_sha256']=digest
@@ -39,7 +40,9 @@ class AuxSourceReboundTests(unittest.TestCase):
   for x in spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']:
    if x['path']==p:x['source_sha256']='0'*64
   spec['edge_harness']['files'][p]['declarations']['source_sha256']='0'*64
-  self.assertIn('DEV-010 runtime assembly source binding drift: composition',c.validate_live_execution(spec))
+  errors=c.validate_live_execution(spec)
+  self.assertTrue(any(x in errors for x in ('DEV-010 runtime assembly source binding drift: composition',
+                                           'DEV-010 runtime assembly current source rebound invalid')))
  def test_no_sibling_preserves_original_behavior(self):
   s=self.fixture();s.pop('current_aux_source_rebounds_20261113');a=s['supabase_deployment_contract']['live_execution']['runtime_assembly'];n=s['backend_platform_contract']['native_seed_candidate_extension']
   self.assertIs(c.select_aux_current_rebound(s,'dev010_runtime_assembly',a),a);self.assertIs(c.select_aux_current_rebound(s,'native_seed',n),n)

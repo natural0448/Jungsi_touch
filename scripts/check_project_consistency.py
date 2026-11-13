@@ -50,11 +50,154 @@ _OTHER_REBOUND_FAMILIES = {
         "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901"),
 }
 
+# The member-school storage transition registers new bytes without changing prior receipts.
+MEMBER_SCHOOL_OVERLAY_FIELD = "member_school_results_current_source_overlay_20261113"
+MEMBER_SCHOOL_OVERLAY_PATHS = frozenset({
+    "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts",
+    "supabase/functions/_shared/jungsi/application/member_school_results.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+    "supabase/functions/_shared/jungsi/application/p1_v25_v2_input_builder_candidate.ts",
+    "tests/edge/member_shortlist_fixture.ts",
+    "scripts/check_project_consistency.py",
+    "scripts/run_edge_tests.py",
+})
+MEMBER_SCHOOL_BASELINES = {
+    "source_rebounds": "8726e77ec1ae8800f295ea6f0c392fa5cfff790bb76f4cb35552cc1b89e351d4",
+    "aux_rebounds": "310ce7e0418e05c47852d6ef13e5beba5d48b30808d004b5475e037fd3f2bc3f",
+    "school_v2": "2fb1e247d13720d30eb0369e37ee551bb9164a9f2029894619210e0b1df5994c",
+    "cancellation": "e4462945d71e0e5d5c343a86599ea399504306df68443dc92c732e8b54bfe6c8",
+    "stage": "efd451ced10190ddaa90932f41b0f693b566f27739e71524ccefa307f6ccd992",
+}
+_MU = "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+_MC = "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+_MX = "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
+_MS = "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
+_MF = "tests/edge/member_shortlist_fixture.ts"
+_MRUN = "scripts/run_edge_tests.py"
+
+def member_school_overlay(spec, source_hashes=None):
+    """Check all new source/index pins; absence preserves the prior validation path."""
+    marker = spec.get(MEMBER_SCHOOL_OVERLAY_FIELD)
+    if marker is None:
+        return None
+    try:
+        fields = {"format", "status", "activation_status", "native_acceptance",
+                  "operating_writes", "baseline_sha256", "source_bindings"}
+        if (not isinstance(marker, dict) or set(marker) != fields or
+            marker["format"] != "jungsi.member-school-current-source-overlay/v1" or
+            marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+            marker["activation_status"] != "NOT_RUN" or
+            marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0 or
+            marker["baseline_sha256"] != MEMBER_SCHOOL_BASELINES):
+            raise ValueError("overlay envelope")
+        base = {
+            "source_rebounds": spec["current_source_rebounds_20261113"],
+            "aux_rebounds": spec["current_aux_source_rebounds_20261113"],
+            "school_v2": spec["university_scoring_contract"]["scoped_reference_contract"]
+                ["verification_current_source_rebound_20261113_v2"],
+            "cancellation": spec["backend_platform_contract"]["university_cancellation_test_extension"],
+            "stage": spec["backend_platform_contract"]["stage_projection_source_extension"],
+        }
+        for key, value in base.items():
+            actual = hashlib.sha256(json.dumps(value, ensure_ascii=True, sort_keys=True,
+                separators=(",", ":")).encode()).hexdigest()
+            if actual != MEMBER_SCHOOL_BASELINES[key]:
+                raise ValueError("overlay historical receipt")
+        pins = marker["source_bindings"]
+        if (not isinstance(pins, dict) or set(pins) != MEMBER_SCHOOL_OVERLAY_PATHS or
+            any(not isinstance(v, str) or not re.fullmatch(r"[a-f0-9]{64}", v)
+                for v in pins.values())):
+            raise ValueError("overlay exact source set")
+        code_index = spec["workflow"]["documentation_sync"]["code_index"]
+        py_rows = code_index["files"]
+        edge_rows = code_index["edge_sources"]["files"]
+        if not isinstance(py_rows, list) or not isinstance(edge_rows, list):
+            raise ValueError("overlay code index")
+        py = {r["path"]: r["source_sha256"] for r in py_rows}
+        edge_index = {r["path"]: r["source_sha256"] for r in edge_rows}
+        if len(py) != len(py_rows) or len(edge_index) != len(edge_rows):
+            raise ValueError("overlay duplicated index")
+        edge = spec["edge_harness"]["files"]
+        for path, sha in pins.items():
+            if path.startswith("scripts/"):
+                if py.get(path) != sha:
+                    raise ValueError("overlay python source index")
+            else:
+                if edge.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+                    raise ValueError("overlay edge source index")
+                if path.startswith("supabase/functions/") and edge_index.get(path) != sha:
+                    raise ValueError("overlay documentation source index")
+            if source_hashes is not None and source_hashes.get(path) != sha:
+                raise ValueError("overlay selected snapshot bytes")
+        return dict(pins)
+    except (KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise ValueError("member school current-source overlay invalid") from exc
+
+def member_school_effective_sha(spec, path, previous):
+    pins = member_school_overlay(spec)
+    return pins[path] if pins is not None and path in pins else previous
+
+def apply_member_school_overlay(spec, family, selected, source_hashes=None):
+    """Apply only fixed family paths to a detached registration, never its receipt."""
+    pins = member_school_overlay(spec, source_hashes)
+    if pins is None:
+        return selected
+    value = copy.deepcopy(selected)
+    def bind_list(rows, expected):
+        if not isinstance(rows, list):
+            raise ValueError("overlay binding list")
+        seen = set()
+        for row in rows:
+            if not isinstance(row, dict) or set(row) != {"path", "sha256"}:
+                raise ValueError("overlay binding row")
+            path = row["path"]
+            if path in expected:
+                if path in seen or path not in pins:
+                    raise ValueError("overlay duplicate binding")
+                seen.add(path)
+                row["sha256"] = pins[path]
+        if seen != set(expected):
+            raise ValueError("overlay missing family binding")
+    if family == "member":
+        bind_list(value["verification"]["source_bindings"], {_MC, _MX, _MS, _MF})
+    elif family in ("auth", "current_page"):
+        bind_list(value["source_bindings"], {_MC})
+    elif family == "read_view":
+        bind_list(value["verification"]["source_bindings"], {_MC})
+        if _MC not in value["runtime_test_bindings"]:
+            raise ValueError("overlay read-view runtime")
+        value["runtime_test_bindings"][_MC] = pins[_MC]
+    elif family == "req27":
+        if _MC not in value:
+            raise ValueError("overlay REQ-27 runtime")
+        value[_MC] = pins[_MC]
+    elif family == "school":
+        bind_list(value["source_bindings"], {_MU, _MC, _MX})
+    elif family == "cancellation":
+        bind_list(value["source_bindings"], {_MU})
+    elif family == "stage":
+        bind_list(value["source_bindings"], {_MX})
+    elif family == "dev010_runtime_assembly":
+        if value["bindings"]["composition"]["path"] != _MC:
+            raise ValueError("overlay DEV-010 runtime")
+        value["bindings"]["composition"]["source_sha256"] = pins[_MC]
+    elif family == "native_seed":
+        bind_list(value["source_bindings"], {_MRUN})
+    else:
+        raise ValueError("overlay unknown family")
+    return value
+
 def select_current_source_rebound(spec, family, historical):
     """Return a checked copy for current source only; never edit historical receipt."""
     import copy
     marker = spec.get(CURRENT_SOURCE_REBOUND_FIELD)
     if marker is None:
+        if spec.get(MEMBER_SCHOOL_OVERLAY_FIELD) is not None:
+            member_school_overlay(spec)
         return historical
     if not isinstance(marker, dict) or set(marker) != {
         "format", "status", "activation_status", "native_acceptance", "operating_writes", "families"
@@ -95,10 +238,11 @@ def select_current_source_rebound(spec, family, historical):
     if not isinstance(edge, dict) or not isinstance(rows, list):
         raise ValueError("current source rebound source index")
     for path, sha in changes.items():
-        if edge.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+        effective = member_school_effective_sha(spec, path, sha)
+        if edge.get(path, {}).get("declarations", {}).get("source_sha256") != effective:
             raise ValueError("current source rebound edge source")
         matches = [row for row in rows if isinstance(row, dict) and row.get("path") == path]
-        if len(matches) != 1 or matches[0].get("source_sha256") != sha:
+        if len(matches) != 1 or matches[0].get("source_sha256") != effective:
             raise ValueError("current source rebound documentation index")
     current = copy.deepcopy(historical)
     def update_bindings(bindings):
@@ -131,7 +275,7 @@ def select_current_source_rebound(spec, family, historical):
             if path not in current or current[path] == sha:
                 raise ValueError("current source rebound REQ-27 path")
             current[path] = sha
-    return current
+    return apply_member_school_overlay(spec, family, current)
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC_PATH="docs/current/service_spec.json"
@@ -1149,7 +1293,9 @@ def school_reference_test_registration(spec):
     bindings=verification.get('source_bindings')
     if not isinstance(bindings,list):return set(),['School reference source/test registration invalid']
     try:
-        hashes={b['path']:b['sha256']for b in bindings}
+        hashes={b['path']:member_school_effective_sha(spec,b['path'],b['sha256']) for b in bindings}
+        overlay=member_school_overlay(spec)
+        if overlay is not None:hashes.update(overlay)
         registered=school_reference_registration(spec,hashes)
         indexed={p:v.get('declarations',{}).get('source_sha256')for p,v in spec.get('edge_harness',{}).get('files',{}).items()}
         indexed.update({v['path']:v.get('source_sha256')for v in spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])})
@@ -1849,13 +1995,14 @@ def university_cancellation_test_registration(spec, source_hashes=None):
             UNIVERSITY_CANCELLATION_TEST in cfg['tests'] or files[UNIVERSITY_CANCELLATION_TEST]['layer']!='verification' or
             files[UNIVERSITY_CANCELLATION_BASELINE_TEST]['declarations']['source_sha256']!=UNIVERSITY_CANCELLATION_BASELINE_SHA256):
             raise ValueError('foundation separation')
-        for b in expected:
+        current=apply_member_school_overlay(spec,'cancellation',ext,source_hashes)
+        for b in current['source_bindings']:
             p,h=b['path'],b['sha256']
             if files[p]['declarations']['source_sha256']!=h or source_hashes is not None and source_hashes.get(p)!=h:
                 raise ValueError('current source binding')
         implementations=[x for x in spec['implementation'] if x.get('path')==UNIVERSITY_CANCELLATION_TEST]
         if len(implementations)!=1 or implementations[0].get('layer')!='verification':raise ValueError('test registration')
-        return ext, []
+        return current, []
     except (KeyError,TypeError,ValueError,AttributeError):return None,[error]
 
 
@@ -2027,6 +2174,23 @@ def policy_baseline_source_matches(spec,path,digest,indexed):
     prior=c.get("prior_source_bindings",{})
     if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
     if prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path): return True
+    # These two source-only operation bindings predate the current member-results
+    # candidate. Keep their historical SHA in place, require the independently pinned
+    # school-reference receipt and current index, and never promote runtime/deployment.
+    if path == _MU:
+        try:
+            pins=member_school_overlay(spec)
+            school=spec['university_scoring_contract']['scoped_reference_contract']['verification_current_source_rebound_20261113_v2']
+            old=[r['sha256'] for r in school['source_bindings'] if r.get('path')==path]
+            ops=spec['supabase_deployment_contract']['live_execution']['operations']
+            if (pins is not None and old==[digest] and pins[path]==indexed.get(path) and
+                c.get('current_source_bindings',{}).get(path)==indexed.get(path) and
+                all(ops[name]['binding']['path']==path and ops[name]['binding']['source_sha256']==digest and
+                    ops[name]['native']=='NOT_RUN' and ops[name]['deployment']=='NOT_RUN'
+                    for name in ('university.analyze','candidates.build'))):
+                return True
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return False
     # The previous editor entrypoint is a fixed historical source, not a new deployment.
     history=spec.get("workflow",{}).get("development_harness",{}).get("reference_db_entrypoint_history_20261110",{})
     return (path=="supabase/functions/jungsi-api/index.ts" and digest=="ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2" and
@@ -2072,7 +2236,8 @@ def stage_projection_guard_registration(spec):
             ext["authenticated_API_verified"] is not False or ext["rollout_approved"] is not False or
             type(ext["writes"]) is not int or ext["writes"]!=0 or backend.get("native_edge_v5_extension") is not None):
             raise ValueError("source-only boundary")
-        cfg=spec["edge_harness"];files=cfg["files"];rows=ext["source_bindings"]
+        current=apply_member_school_overlay(spec,"stage",ext)
+        cfg=spec["edge_harness"];files=cfg["files"];rows=current["source_bindings"]
         if (not isinstance(rows,list) or len(rows)!=len(STAGE_PROJECTION_SOURCE_PATHS) or
             any(not isinstance(x,dict) or set(x)!={"path","sha256"} for x in rows) or
             {x["path"]for x in rows}!=set(STAGE_PROJECTION_SOURCE_PATHS)):
@@ -2092,7 +2257,7 @@ def stage_projection_guard_registration(spec):
         if (cfg["unit_count"]!=656 or tests.count("tests/edge/test_score_input_policy.ts")!=1 or
             v["test_path"] in tests or view.count(v["test_path"])!=1):
             raise ValueError("disjoint foundation and additions")
-        return ext,[]
+        return current,[]
     except (KeyError,TypeError,ValueError,AttributeError):
         return None,[error]
 
@@ -3495,7 +3660,7 @@ def select_aux_current_rebound(spec,family,historical):
             rows=[r for r in selected['source_bindings'] if isinstance(r,dict) and r.get('path')==path]
             if len(rows)!=1:raise ValueError('native seed source')
             rows[0]['sha256']=current
-        return selected
+        return apply_member_school_overlay(spec,family,selected)
     except (KeyError,TypeError,ValueError,AttributeError):
         raise ValueError('auxiliary current source rebound invalid')
 

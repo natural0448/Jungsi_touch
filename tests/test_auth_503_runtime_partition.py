@@ -34,6 +34,28 @@ def compact_spec():
               "workflow": {"documentation_sync": {"code_index": {"edge_sources": {"files": entries}}}}}
     if "current_source_rebounds_20261113" in original:
         result["current_source_rebounds_20261113"] = deepcopy(original["current_source_rebounds_20261113"])
+    overlay_name = "member_school_results_current_source_overlay_20261113"
+    if overlay_name in original:
+        overlay = original[overlay_name]
+        result[overlay_name] = deepcopy(overlay)
+        result["current_aux_source_rebounds_20261113"] = deepcopy(original["current_aux_source_rebounds_20261113"])
+        result["university_scoring_contract"] = {"scoped_reference_contract": {
+            "verification_current_source_rebound_20261113_v2": deepcopy(
+                original["university_scoring_contract"]["scoped_reference_contract"]
+                ["verification_current_source_rebound_20261113_v2"]),
+        }}
+        result["backend_platform_contract"] = {
+            key: deepcopy(original["backend_platform_contract"][key])
+            for key in ("university_cancellation_test_extension", "stage_projection_source_extension")
+        }
+        pins = set(overlay["source_bindings"])
+        for path in pins:
+            if not path.startswith("scripts/"):
+                result["edge_harness"]["files"][path] = deepcopy(edge["files"][path])
+        code_index = original["workflow"]["documentation_sync"]["code_index"]
+        target_index = result["workflow"]["documentation_sync"]["code_index"]
+        target_index["files"] = [deepcopy(row) for row in code_index["files"] if row["path"] in pins]
+        target_index["edge_sources"]["files"] = [deepcopy(row) for row in index if row["path"] in paths | pins]
     return result
 
 

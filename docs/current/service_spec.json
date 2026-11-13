@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.176",
+  "version": "1.9.177",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -4208,7 +4208,8 @@
         "productionCandidateRows",
         "PublishedForecastPort",
         "candidateGroups",
-        "UniversityAnalysisService"
+        "UniversityAnalysisService",
+        "MemberSchoolResultsWriterPort"
       ]
     },
     {
@@ -10050,6 +10051,45 @@
         "REQ-26"
       ],
       "symbols": []
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/member_school_results.ts",
+      "layer": "application",
+      "status": "member_results_source_synthetic_verified_runtime_NOT_RUN",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-06",
+        "REQ-08",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "symbols": [
+        "projectMemberSchoolResults",
+        "projectMemberSchoolResultBatches",
+        "composeMemberSchoolResults"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+      "layer": "data_infrastructure",
+      "status": "member_results_source_synthetic_verified_runtime_NOT_RUN",
+      "requirements": [
+        "REQ-04",
+        "REQ-08",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-30"
+      ],
+      "symbols": [
+        "MemberSchoolResultIdentity",
+        "MemberSchoolResultReference",
+        "MemberSchoolResultsStorage"
+      ]
     }
   ],
   "workflow": {
@@ -10763,7 +10803,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -10937,7 +10977,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -11103,7 +11143,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -11122,7 +11162,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -11147,7 +11187,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -11172,7 +11212,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -12883,6 +12923,14 @@
             ]
           }
         }
+      },
+      "isolated_session_error_policy_20261113": {
+        "user_decision": "같은 오류가 세 번 반복되면 문제가 발생한 세션만 멈추고 기획팀과 사용자에게 보고한다.",
+        "planning_response": "기획팀이 원인과 수정 범위를 파악해 다른 팀에 전달하고, 오류가 없는 세션은 독립 작업을 계속한다.",
+        "shared_boundary": "여러 팀이 공유하는 DB 쓰기·발행·권한 자체에 영향이 있으면 해당 공통 작업만 중단한다. 무관한 세션 전체는 중단하지 않는다.",
+        "resume": "기존 사용자 재개 지시와 세션별 조정에 따라 재개한다. 권한 거부 우회, 같은 오류 무작정 재시도 및 파일 삭제는 허용하지 않는다.",
+        "drive_access": "Windows 탐색기와 기본 sandbox의 접근 차이를 구별하고 필요한 정확한 파일만 승인된 읽기 전용 권한 상승으로 확인한다. 자동 승인에서 거부된 경로는 우회하지 않는다.",
+        "user_desktop": "사용자가 PC를 작업 중인 현재 세션에서는 GUI가 필요하면 Codex 내부 탭만 사용하고 외부 브라우저나 데스크톱 포커스를 건드리지 않는다."
       }
     },
     "documentation_sync": {
@@ -13573,7 +13621,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "26ca663c787d03144b85ce57efc4c3c92ba2596001639df49c22d790aaa19c0c",
+            "source_sha256": "0a9e13574e87e728dc3e41e1bb68505e743c5fdc00e9a9e590a518e73b88f7d6",
             "symbols": [
               {
                 "kind": "class",
@@ -13603,6 +13651,18 @@
                 "kind": "function",
                 "name": "_validate_observer_deployment",
                 "signature": "def _validate_observer_deployment(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "apply_member_school_overlay",
+                "signature": "def apply_member_school_overlay(spec, family, selected, source_hashes=None):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "apply_member_school_overlay.bind_list",
+                "signature": "def bind_list(rows, expected):",
                 "decorators": []
               },
               {
@@ -13789,6 +13849,18 @@
                 "kind": "function",
                 "name": "main",
                 "signature": "def main():",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "member_school_effective_sha",
+                "signature": "def member_school_effective_sha(spec, path, previous):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "member_school_overlay",
+                "signature": "def member_school_overlay(spec, source_hashes=None):",
                 "decorators": []
               },
               {
@@ -14962,7 +15034,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "99ce40c01a8eb195e2ac9bdd2e37543382d6aabdd6e223fb8c8e2be2d4bfcd72",
+            "source_sha256": "3e3158f9b7ab084fbae68413ceda7bf30d4d179c0f145dce2c087339c911c2af",
             "symbols": [
               {
                 "kind": "function",
@@ -21898,6 +21970,27 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/application/member_school_results.ts",
+              "layer": "application",
+              "status": "member_results_source_synthetic_verified_runtime_NOT_RUN",
+              "requirements": [
+                "REQ-04",
+                "REQ-05",
+                "REQ-06",
+                "REQ-08",
+                "REQ-14",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26"
+              ],
+              "source_sha256": "2542121b10b5bd4289dcda66520d5df5ac947c6f1df66cf65bc01c9ec44769ef",
+              "declared_exports": [
+                "projectMemberSchoolResults",
+                "projectMemberSchoolResultBatches",
+                "composeMemberSchoolResults"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/application/member_shortlist.ts",
               "layer": "application",
               "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
@@ -22370,7 +22463,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "d6fecd4bccc38b8390faa71a174ab43f29c139c6daaceeb7987261ce13d0a0bf",
+              "source_sha256": "fae6d71c5cdd6b9d53d0fce6c09cae84a970e7ca70d047c3a43aa0e829f0b3b2",
               "declared_exports": [
                 "P1V2InputPins",
                 "P1V2InputAuthority",
@@ -23632,14 +23725,15 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638",
+              "source_sha256": "b147346e1c17bc65207745dbf5ac367bc90135de914c5b30340e9394111ca397",
               "declared_exports": [
                 "UNIVERSITY_ANALYSIS_OPERATIONS",
                 "UniversityAnalysisDataPort",
                 "productionCandidateRows",
                 "PublishedForecastPort",
                 "candidateGroups",
-                "UniversityAnalysisService"
+                "UniversityAnalysisService",
+                "MemberSchoolResultsWriterPort"
               ]
             },
             {
@@ -24804,6 +24898,26 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+              "layer": "data_infrastructure",
+              "status": "member_results_source_synthetic_verified_runtime_NOT_RUN",
+              "requirements": [
+                "REQ-04",
+                "REQ-08",
+                "REQ-12",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-30"
+              ],
+              "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c",
+              "declared_exports": [
+                "MemberSchoolResultIdentity",
+                "MemberSchoolResultReference",
+                "MemberSchoolResultsStorage"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts",
               "layer": "data_infrastructure",
               "status": "member_shortlist_JSON_source_synthetic59_verified_operating_NOT_RUN",
@@ -24816,7 +24930,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c",
+              "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
               "declared_exports": [
                 "MEMBER_LEGACY_EXACT_SQL",
                 "MEMBER_LEGACY_LOCK_SQL",
@@ -25672,7 +25786,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773",
+              "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
               "declared_exports": [
                 "REFERENCE_TAIL_REQUEST_OBJECTS",
                 "REFERENCE_TAIL_REQUEST_BYTES",
@@ -25724,7 +25838,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+              "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -31065,6 +31179,20 @@
         "REQ-31"
       ],
       "summary": "2027 학생별 환산·과거 비교·50/70 예상구간과 새 정본 연결 후보의 소스 및 독립 안전검사 등록. 신규 경로는 기본 비활성이며 실제 발행·소유권·저장·CI·운영 인수는 별도 미완료. 기존 검수 이력은 보존한다."
+    },
+    {
+      "date": "2026-11-13",
+      "requirements": [
+        "REQ-01",
+        "REQ-04",
+        "REQ-08",
+        "REQ-13",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "최신 사용자 지시에 따라 1페이지는 기존 정본의 학년도·기본 PK로 실제 컬럼을 우선 연결하고 빈 값은 빈칸으로 표시한다. 2027 대학별 환산 결과는 기존 회원 전용 저장소에 학교·모집행 PK·환산점수·환산백분위를 결속해 재조회한다. 환산백분위와 상위누백을 구별하고 가야대도 모집행별로 처리한다. 실제 저장·발행·배포는 미실행이다. 반복 오류는 해당 세션만 중단하고 기획팀이 대응을 정리하며 다른 세션의 독립 작업은 계속한다."
     }
   ],
   "overall_analysis_contract": {
@@ -33295,11 +33423,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.20261113_fmt.current.json",
-        "sha256": "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
+        "sha256": "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
+        "sha256": "ea9a10e3960e581f56b708d939c6d5628b682bf29344e79e536514b0718d6f36"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -35475,7 +35603,30 @@
         "Storage_activation": "NOT_RUN",
         "frontdoor": "NOT_RUN"
       },
-      "implementation_boundary": "Member shortlist JSON storage/runtime implemented with saved DB assessment compatibility reader. School conversion/percentile component JSON writer/cache remains NOT_IMPLEMENTED; do not claim completed result reuse."
+      "implementation_boundary": "Member shortlist JSON storage/runtime implemented with saved DB assessment compatibility reader. School conversion/percentile component JSON writer/cache remains NOT_IMPLEMENTED; do not claim completed result reuse.",
+      "2027_member_result_retrieval_20261113": {
+        "status": "USER_PRIORITY_IMPLEMENTATION_AND_OPERATING_ACCEPTANCE_PENDING",
+        "priority": 2,
+        "scope": "2027학년도 각 회원의 입력 성적에 해당 학교·모집행의 기존 산식을 적용한 결과를 저장하고 본인에게 재조회한다.",
+        "storage": "기존 Supabase private Storage 회원 전용 JSON 및 현재 저장 포트를 재사용한다. 새 결과 테이블·추가 서비스·요금제 변경은 도입하지 않는다.",
+        "requested_fields": [
+          "academic_year",
+          "offering_pk",
+          "university_name",
+          "department_name",
+          "converted_score",
+          "converted_percentile"
+        ],
+        "identity": "서버가 검증한 회원·성적 프로필/리비전과 학년도·대학·캠퍼스·모집행 PK·전형·모집군, 산식과 사용된 자료 버전을 결속한다. 학교명·학과명은 동일 PK의 승인된 Guide 표시값을 사용한다.",
+        "percentile": "기존 API의 converted_percentile은 동일 대학 환산점수의 상위누백 호환 필드이므로, 동일 학년도·회원 성적·산식·곡선에 결속된 ready 값을 그대로 저장하고 재조회한다. 별도의 대학 반영 백분위·과목 백분위와 혼동하거나 100-x로 역산하지 않는다. 해당 기존 누백이 없거나 결속되지 않은 경우만 빈칸으로 둔다.",
+        "storage_transition": "저장 객체를 먼저 검증한 뒤 기존 report revision의 내부 참조를 원자적으로 연결한다. 이전 inline 본문은 현재 report_revisions와 requests.result replay에서 임시 보존되므로 DB 중복 절감 완료 상태가 아니다. report.read·replay·관심대학 등 전체 독자의 실제 전환을 확인하기 전에는 기존 본문이나 저장 객체를 삭제하지 않는다. CAS 실패 시 기존 결과와 생성 후보를 보존한다.",
+        "candidate_implementation": "2027 결과의 불변 private Storage 저장과 report CAS 참조, 관심대학 직접 SQL 재조회 후보를 통합했다. 기존 보고서와 재실행 호환을 위해 inline도 임시 보존하며 실제 DB 및 운영 연결은 미검증이다.",
+        "privacy": "서버 검증 JWT의 소유 리포트만 저장·재조회하고 기존 이용권·예산·no-store 경계와 다른 회원 격리를 유지한다. 실제 성적·개인정보·원본 산식·모형은 Git에 넣지 않는다.",
+        "operation": "university.analyze /api/v1/reports/{report_id}/university-results",
+        "evidence": "기존 산식·자료·정본과 검수 결과를 재사용한다. 코드를 작성하거나 합성 검사만 통과한 상태는 실제 저장·재조회 또는 운영 배포 완료가 아니다.",
+        "batch_policy": "100개는 한 저장 객체당 최대 개수이며 전체 모집단위 제한이 아니다. 기존 승인된 객체 크기·개수 한도에 따라 분할하고 소유자·성적·report·source revision과 PK 중복을 확인한다.",
+        "legacy_retrieval": "과거 형식에 표시 필드가 없을 때 같은 소유자·시험·성적·학년도·산식·분포에 결속된 저장값만 복원한다. 기존 값·명시적 null과 미결속 항목은 바꾸지 않는다."
+      }
     }
   },
   "university_percentile_contract": {
@@ -136467,7 +136618,8 @@
           "productionCandidateRows",
           "PublishedForecastPort",
           "candidateGroups",
-          "UniversityAnalysisService"
+          "UniversityAnalysisService",
+          "MemberSchoolResultsWriterPort"
         ],
         "declarations": {
           "symbols": [
@@ -136596,6 +136748,130 @@
                           }
                         },
                         "parameter_source": "(offeringId: string)"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "MemberSchoolResultsWriterPort",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "methods": [
+                      {
+                        "name": "stage",
+                        "kind": "method",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "profile",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "StoredProfile",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "StoredProfile",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./platform_repository.ts",
+                                  "name": "StoredProfile"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "report",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "StoredReport",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "StoredReport",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./platform_repository.ts",
+                                  "name": "StoredReport"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "offerings",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "repr": "NativeObject",
+                                    "kind": "typeRef",
+                                    "value": {
+                                      "typeName": "NativeObject",
+                                      "resolution": {
+                                        "kind": "import",
+                                        "specifier": "../domain/json_value.ts",
+                                        "name": "NativeObject"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "repr": "Promise",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "array",
+                                    "value": {
+                                      "repr": "NativeObject",
+                                      "kind": "typeRef",
+                                      "value": {
+                                        "typeName": "NativeObject",
+                                        "resolution": {
+                                          "kind": "import",
+                                          "specifier": "../domain/json_value.ts",
+                                          "name": "NativeObject"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "repr": "null",
+                                    "kind": "keyword",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ],
+                            "typeName": "Promise"
+                          }
+                        },
+                        "parameter_source": "(\n    owner: string,\n    profile: StoredProfile,\n    report: StoredReport,\n    offerings: readonly NativeObject[],\n  )"
                       }
                     ]
                   }
@@ -137317,9 +137593,40 @@
                             },
                             "right": "null",
                             "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "memberSchoolResults",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "repr": "MemberSchoolResultsWriterPort",
+                                    "kind": "typeRef",
+                                    "value": {
+                                      "typeName": "MemberSchoolResultsWriterPort",
+                                      "resolution": {
+                                        "kind": "local"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "repr": "null",
+                                    "kind": "keyword",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "right": "null",
+                            "readonly": true
                           }
                         ],
-                        "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly catalog: CatalogService,\n    private readonly data: UniversityAnalysisDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly forecasts: PublishedForecastPort | null,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    private readonly wildcardGate: WildcardRuntimeGate | null = null,\n    private readonly referenceCandidateScope:\n      | ReferenceCandidateScopePort\n      | (() => Promise<ReferenceCandidateScopePort | null>)\n      | null = null,\n  )"
+                        "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly catalog: CatalogService,\n    private readonly data: UniversityAnalysisDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly forecasts: PublishedForecastPort | null,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    private readonly wildcardGate: WildcardRuntimeGate | null = null,\n    private readonly referenceCandidateScope:\n      | ReferenceCandidateScopePort\n      | (() => Promise<ReferenceCandidateScopePort | null>)\n      | null = null,\n    private readonly memberSchoolResults: MemberSchoolResultsWriterPort | null = null,\n  )"
                       }
                     ],
                     "properties": [
@@ -137441,6 +137748,146 @@
                                       "name": "StoredReport"
                                     }
                                   }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "stageMemberResults",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "owner",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profile",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "StoredProfile",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "StoredProfile",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./platform_repository.ts",
+                                    "name": "StoredProfile"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "record",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "StoredReport",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "StoredReport",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./platform_repository.ts",
+                                    "name": "StoredReport"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "release",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "repr": "CatalogRelease",
+                                    "kind": "typeRef",
+                                    "value": {
+                                      "typeName": "CatalogRelease",
+                                      "resolution": {
+                                        "kind": "import",
+                                        "specifier": "./catalog.ts",
+                                        "name": "CatalogRelease"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "repr": "null",
+                                    "kind": "keyword",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "updated",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "expected",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "number",
+                                "kind": "keyword",
+                                "value": "number"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "boundary",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "ApiExecutionBoundary",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "ApiExecutionBoundary",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "./api_dispatch.ts",
+                                    "name": "ApiExecutionBoundary"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "boolean",
+                                  "kind": "keyword",
+                                  "value": "boolean"
                                 }
                               ],
                               "typeName": "Promise"
@@ -137798,6 +138245,11 @@
               "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             },
             {
+              "importedName": "CatalogRelease",
+              "originalName": "CatalogRelease",
+              "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+            },
+            {
               "importedName": "CatalogService",
               "originalName": "CatalogService",
               "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
@@ -138011,7 +138463,7 @@
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
             }
           ],
-          "source_sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+          "source_sha256": "b147346e1c17bc65207745dbf5ac367bc90135de914c5b30340e9394111ca397"
         },
         "dependencies": [
           {
@@ -174668,21 +175120,9 @@
                   "kind": "variable",
                   "def": {
                     "tsType": {
-                      "repr": "SELECT r.report_id,v.revision::text,v.profile_id,\n p.scores->>'exam_id',p.scores->>'pack_version',\n (SELECT COALESCE(jsonb_object_agg(i.id,v.body->'analyses'->i.id),'{}'::jsonb)::text\n FROM jsonb_array_elements_text($3::text::jsonb) i(id) WHERE (v.body->'analyses') ? i.id)\n FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v\n ON (r.report_id,r.owner_id)=(v.report_id,v.owner_id)\n AND v.revision=COALESCE($5::bigint,r.revision)\n JOIN jungsi_backend.profiles p ON (v.profile_id,v.owner_id)=(p.profile_id,p.owner_id)\n WHERE r.owner_id=$1 AND v.owner_id=$1 AND p.owner_id=$1\n AND v.body#>>'{overall,exam,academic_year}'=$2\n AND ($4::text IS NULL OR r.report_id=$4)\n AND ($4::text IS NOT NULL OR EXISTS(SELECT 1 FROM jungsi_backend.score_input_states s\n WHERE s.owner_id=$1 AND s.current_profile_id=v.profile_id))\n ORDER BY r.updated_at DESC,r.report_id COLLATE \"C\" DESC LIMIT 1",
-                      "kind": "literal",
-                      "value": {
-                        "kind": "template",
-                        "tsTypes": [
-                          {
-                            "repr": "SELECT r.report_id,v.revision::text,v.profile_id,\n p.scores->>'exam_id',p.scores->>'pack_version',\n (SELECT COALESCE(jsonb_object_agg(i.id,v.body->'analyses'->i.id),'{}'::jsonb)::text\n FROM jsonb_array_elements_text($3::text::jsonb) i(id) WHERE (v.body->'analyses') ? i.id)\n FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v\n ON (r.report_id,r.owner_id)=(v.report_id,v.owner_id)\n AND v.revision=COALESCE($5::bigint,r.revision)\n JOIN jungsi_backend.profiles p ON (v.profile_id,v.owner_id)=(p.profile_id,p.owner_id)\n WHERE r.owner_id=$1 AND v.owner_id=$1 AND p.owner_id=$1\n AND v.body#>>'{overall,exam,academic_year}'=$2\n AND ($4::text IS NULL OR r.report_id=$4)\n AND ($4::text IS NOT NULL OR EXISTS(SELECT 1 FROM jungsi_backend.score_input_states s\n WHERE s.owner_id=$1 AND s.current_profile_id=v.profile_id))\n ORDER BY r.updated_at DESC,r.report_id COLLATE \"C\" DESC LIMIT 1",
-                            "kind": "literal",
-                            "value": {
-                              "kind": "string",
-                              "string": "SELECT r.report_id,v.revision::text,v.profile_id,\n p.scores->>'exam_id',p.scores->>'pack_version',\n (SELECT COALESCE(jsonb_object_agg(i.id,v.body->'analyses'->i.id),'{}'::jsonb)::text\n FROM jsonb_array_elements_text($3::text::jsonb) i(id) WHERE (v.body->'analyses') ? i.id)\n FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v\n ON (r.report_id,r.owner_id)=(v.report_id,v.owner_id)\n AND v.revision=COALESCE($5::bigint,r.revision)\n JOIN jungsi_backend.profiles p ON (v.profile_id,v.owner_id)=(p.profile_id,p.owner_id)\n WHERE r.owner_id=$1 AND v.owner_id=$1 AND p.owner_id=$1\n AND v.body#>>'{overall,exam,academic_year}'=$2\n AND ($4::text IS NULL OR r.report_id=$4)\n AND ($4::text IS NOT NULL OR EXISTS(SELECT 1 FROM jungsi_backend.score_input_states s\n WHERE s.owner_id=$1 AND s.current_profile_id=v.profile_id))\n ORDER BY r.updated_at DESC,r.report_id COLLATE \"C\" DESC LIMIT 1"
-                            }
-                          }
-                        ]
-                      }
+                      "repr": "string",
+                      "kind": "keyword",
+                      "value": "string"
                     },
                     "kind": "const"
                   }
@@ -174810,12 +175250,210 @@
                               "value": "number"
                             },
                             "readonly": true
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "schoolResults",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "repr": "Pick",
+                                    "kind": "typeRef",
+                                    "value": {
+                                      "typeParams": [
+                                        {
+                                          "repr": "MemberSchoolResultsStorage",
+                                          "kind": "typeRef",
+                                          "value": {
+                                            "typeName": "MemberSchoolResultsStorage",
+                                            "resolution": {
+                                              "kind": "import",
+                                              "specifier": "./member_school_results_storage.ts",
+                                              "name": "MemberSchoolResultsStorage"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "repr": "read",
+                                          "kind": "literal",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "read"
+                                          }
+                                        }
+                                      ],
+                                      "typeName": "Pick"
+                                    }
+                                  },
+                                  {
+                                    "repr": "null",
+                                    "kind": "keyword",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "right": "null",
+                            "readonly": true
                           }
                         ],
-                        "parameter_source": "(\n    private readonly sql: SupabaseSqlTransport,\n    private readonly maxBytes: number,\n    private readonly maxItems: number,\n  )"
+                        "parameter_source": "(\n    private readonly sql: SupabaseSqlTransport,\n    private readonly maxBytes: number,\n    private readonly maxItems: number,\n    private readonly schoolResults: Pick<MemberSchoolResultsStorage, \"read\"> | null = null,\n  )"
                       }
                     ],
                     "methods": [
+                      {
+                        "accessibility": "private",
+                        "name": "hydrate",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "report",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "StoredReport",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "StoredReport",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../application/platform_repository.ts",
+                                    "name": "StoredReport"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "year",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "number",
+                                "kind": "keyword",
+                                "value": "number"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profile",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "StoredProfile",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "StoredProfile",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../application/platform_repository.ts",
+                                    "name": "StoredProfile"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "StoredReport",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "StoredReport",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../application/platform_repository.ts",
+                                      "name": "StoredReport"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "profile",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "owner",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "profileId",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "scores",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "confirmed",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "createdAt",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "unknown",
+                                "kind": "keyword",
+                                "value": "unknown"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "StoredProfile",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "StoredProfile",
+                              "resolution": {
+                                "kind": "import",
+                                "specifier": "../application/platform_repository.ts",
+                                "name": "StoredProfile"
+                              }
+                            }
+                          },
+                          "hasBody": true
+                        }
+                      },
                       {
                         "name": "legacyIn",
                         "kind": "method",
@@ -175847,6 +176485,35 @@
               ]
             },
             {
+              "name": "PROFILE_TIME",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "to_char(p.created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "repr": "to_char(p.created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "to_char(p.created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
               "name": "OWN_JOIN",
               "declarations": [
                 {
@@ -176049,6 +176716,16 @@
               "src": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
             },
             {
+              "importedName": "MemberSchoolResultReference",
+              "originalName": "MemberSchoolResultReference",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
+            },
+            {
+              "importedName": "MemberSchoolResultsStorage",
+              "originalName": "MemberSchoolResultsStorage",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
+            },
+            {
               "importedName": "MemberSelection",
               "originalName": "MemberSelection",
               "src": "supabase/functions/_shared/jungsi/application/member_shortlist.ts"
@@ -176074,6 +176751,11 @@
               "src": "supabase/functions/_shared/jungsi/application/member_shortlist.ts"
             },
             {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
               "importedName": "NativeSqlTransaction",
               "originalName": "NativeSqlTransaction",
               "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
@@ -176084,6 +176766,11 @@
               "src": "supabase/functions/_shared/jungsi/application/member_shortlist.ts"
             },
             {
+              "importedName": "StoredProfile",
+              "originalName": "StoredProfile",
+              "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
+            },
+            {
               "importedName": "StoredReport",
               "originalName": "StoredReport",
               "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
@@ -176092,6 +176779,16 @@
               "importedName": "SupabaseSqlTransport",
               "originalName": "SupabaseSqlTransport",
               "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "composeMemberSchoolResults",
+              "originalName": "composeMemberSchoolResults",
+              "src": "supabase/functions/_shared/jungsi/application/member_school_results.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             },
             {
               "importedName": "nativeJsonText",
@@ -176119,7 +176816,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
             }
           ],
-          "source_sha256": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c"
+          "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d"
         },
         "dependencies": [
           {
@@ -176139,6 +176836,16 @@
               {
                 "kind": "type",
                 "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/member_school_results.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/member_school_results.ts"
               }
             ]
           },
@@ -176189,6 +176896,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_school_results_storage.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
               }
             ]
           },
@@ -212334,6 +213051,16 @@
               "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             },
             {
+              "importedName": "MemberSchoolResultsStorage",
+              "originalName": "MemberSchoolResultsStorage",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
+            },
+            {
+              "importedName": "MemberSchoolResultsWriterPort",
+              "originalName": "MemberSchoolResultsWriterPort",
+              "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+            },
+            {
               "importedName": "NativeDataProvider",
               "originalName": "NativeDataProvider",
               "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
@@ -212342,6 +213069,11 @@
               "importedName": "NativeForecastInputs",
               "originalName": "NativeForecastInputs",
               "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             },
             {
               "importedName": "NativeRuntimeRequest",
@@ -212637,6 +213369,11 @@
               "src": "supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts"
             },
             {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
               "importedName": "nativeJsonText",
               "originalName": "nativeJsonText",
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -212650,6 +213387,11 @@
               "importedName": "preservePrefetchFailures",
               "originalName": "preservePrefetchFailures",
               "src": "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts"
+            },
+            {
+              "importedName": "projectMemberSchoolResultBatches",
+              "originalName": "projectMemberSchoolResultBatches",
+              "src": "supabase/functions/_shared/jungsi/application/member_school_results.ts"
             },
             {
               "importedName": "readBasicRuntimeSettings",
@@ -212702,7 +213444,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773"
+          "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4"
         },
         "dependencies": [
           {
@@ -212766,6 +213508,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/member_school_results.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/member_school_results.ts"
               }
             ]
           },
@@ -213026,6 +213778,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_school_results_storage.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
               }
             ]
           },
@@ -214740,6 +215502,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
             },
             {
+              "importedName": "MemberSchoolResultsStorage",
+              "originalName": "MemberSchoolResultsStorage",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
+            },
+            {
               "importedName": "MemberShortlistService",
               "originalName": "MemberShortlistService",
               "src": "supabase/functions/_shared/jungsi/application/member_shortlist.ts"
@@ -214905,7 +215672,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
             }
           ],
-          "source_sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
+          "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8"
         },
         "dependencies": [
           {
@@ -215079,6 +215846,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_school_results_storage.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
               }
             ]
           },
@@ -234848,7 +235625,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "2bab484557612a697916f287b89ce08603bd5b2b3e8a34378ddea4d7f420af35"
+          "source_sha256": "b3b191000d0b88307dcf86fe269eb13de35ebf6f290ff498ed79a2a0ea917fd3"
         },
         "dependencies": [
           {
@@ -303602,7 +304379,7 @@
               "src": "supabase/functions/_shared/jungsi/application/p1_r27_global_parts.ts"
             }
           ],
-          "source_sha256": "d6fecd4bccc38b8390faa71a174ab43f29c139c6daaceeb7987261ce13d0a0bf"
+          "source_sha256": "fae6d71c5cdd6b9d53d0fce6c09cae84a970e7ca70d047c3a43aa0e829f0b3b2"
         },
         "dependencies": [
           {
@@ -353903,6 +354680,1797 @@
             ]
           }
         ]
+      },
+      "supabase/functions/_shared/jungsi/application/member_school_results.ts": {
+        "layer": "application",
+        "symbols": [
+          "projectMemberSchoolResults",
+          "projectMemberSchoolResultBatches",
+          "composeMemberSchoolResults"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "projectMemberSchoolResults",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "owner",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "profile",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredProfile",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredProfile",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredProfile"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "report",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredReport",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredReport",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredReport"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "offerings",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "Readonly",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeParams": [
+                                    {
+                                      "repr": "NativeObject",
+                                      "kind": "typeRef",
+                                      "value": {
+                                        "typeName": "NativeObject",
+                                        "resolution": {
+                                          "kind": "import",
+                                          "specifier": "../domain/json_value.ts",
+                                          "name": "NativeObject"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "typeName": "Readonly"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "NativeObject",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "NativeObject",
+                              "resolution": {
+                                "kind": "import",
+                                "specifier": "../domain/json_value.ts",
+                                "name": "NativeObject"
+                              }
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  owner: string,\n  profile: StoredProfile,\n  report: StoredReport,\n  offerings: readonly Readonly<NativeObject>[],\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "projectMemberSchoolResultBatches",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "owner",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "profile",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredProfile",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredProfile",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredProfile"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "report",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredReport",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredReport",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredReport"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "offerings",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "Readonly",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeParams": [
+                                    {
+                                      "repr": "NativeObject",
+                                      "kind": "typeRef",
+                                      "value": {
+                                        "typeName": "NativeObject",
+                                        "resolution": {
+                                          "kind": "import",
+                                          "specifier": "../domain/json_value.ts",
+                                          "name": "NativeObject"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "typeName": "Readonly"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "maxPerBatch",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "number",
+                            "kind": "keyword",
+                            "value": "number"
+                          }
+                        },
+                        "right": "100"
+                      },
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "maxBytes",
+                          "optional": false
+                        },
+                        "right": "[Number.MAX_SAFE_INTEGER]"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "kind": "array",
+                            "value": {
+                              "repr": "NativeObject",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "NativeObject",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "../domain/json_value.ts",
+                                  "name": "NativeObject"
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  owner: string,\n  profile: StoredProfile,\n  report: StoredReport,\n  offerings: readonly Readonly<NativeObject>[],\n  maxPerBatch = 100,\n  maxBytes = Number.MAX_SAFE_INTEGER,\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "composeMemberSchoolResults",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "owner",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "profile",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredProfile",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredProfile",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredProfile"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "report",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredReport",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredReport",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredReport"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "documents",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "Readonly",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeParams": [
+                                    {
+                                      "repr": "NativeObject",
+                                      "kind": "typeRef",
+                                      "value": {
+                                        "typeName": "NativeObject",
+                                        "resolution": {
+                                          "kind": "import",
+                                          "specifier": "../domain/json_value.ts",
+                                          "name": "NativeObject"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "typeName": "Readonly"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "analyses",
+                                  "tsType": {
+                                    "repr": "NativeObject",
+                                    "kind": "typeRef",
+                                    "value": {
+                                      "typeName": "NativeObject",
+                                      "resolution": {
+                                        "kind": "import",
+                                        "specifier": "../domain/json_value.ts",
+                                        "name": "NativeObject"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "name": "offerings",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "repr": "NativeObject",
+                                      "kind": "typeRef",
+                                      "value": {
+                                        "typeName": "NativeObject",
+                                        "resolution": {
+                                          "kind": "import",
+                                          "specifier": "../domain/json_value.ts",
+                                          "name": "NativeObject"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  owner: string,\n  profile: StoredProfile,\n  report: StoredReport,\n  documents: readonly Readonly<NativeObject>[],\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "fail",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [],
+                    "returnType": {
+                      "repr": "never",
+                      "kind": "keyword",
+                      "value": "never"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "()"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "object",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "value is NativeObject",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "value"
+                        },
+                        "type": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "identifier",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "value is string",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "value"
+                        },
+                        "type": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "scalar",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "value is NativeJson",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "value"
+                        },
+                        "type": {
+                          "repr": "NativeJson",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeJson",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/native_json.ts",
+                              "name": "NativeJson"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "label",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        },
+                        {
+                          "repr": "null",
+                          "kind": "keyword",
+                          "value": "null"
+                        }
+                      ]
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "restoreMissingSummaries",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "assessment",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "row",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "profile",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "StoredProfile",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "StoredProfile",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./platform_repository.ts",
+                              "name": "StoredProfile"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "NativeObject",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "NativeObject",
+                        "resolution": {
+                          "kind": "import",
+                          "specifier": "../domain/json_value.ts",
+                          "name": "NativeObject"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(\n  assessment: NativeObject,\n  row: NativeObject,\n  profile: StoredProfile,\n)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Derive the member-owned storage document from an already authorized report.\nThis projection performs no scoring, I/O, authorization, or publication."
+              }
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeJson",
+              "originalName": "NativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "StoredProfile",
+              "originalName": "StoredProfile",
+              "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
+            },
+            {
+              "importedName": "StoredReport",
+              "originalName": "StoredReport",
+              "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
+            },
+            {
+              "importedName": "cloneNativeJson",
+              "originalName": "cloneNativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ],
+          "source_sha256": "2542121b10b5bd4289dcda66520d5df5ac947c6f1df66cf65bc01c9ec44769ef"
+        },
+        "dependencies": [
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/native_json.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./platform_repository.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": {
+        "layer": "data_infrastructure",
+        "symbols": [
+          "MemberSchoolResultIdentity",
+          "MemberSchoolResultReference",
+          "MemberSchoolResultsStorage"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "MemberSchoolResultIdentity",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "owner",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "academicYear",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "reportId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "reportRevision",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "currentReportRevision",
+                        "readonly": true,
+                        "optional": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "profileId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "profileFingerprint",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "examId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "packVersion",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "MemberSchoolResultReference",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "object_key",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "sha256",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "bytes",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "source_report_revision",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "MemberSchoolResultsStorage",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "class",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "settings",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "MemberJsonStorageSettings",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "MemberJsonStorageSettings",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./member_json_storage.ts",
+                                  "name": "MemberJsonStorageSettings"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "fetcher",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "fetch",
+                                "kind": "typeQuery",
+                                "value": "fetch"
+                              }
+                            },
+                            "right": "fetch",
+                            "readonly": true
+                          }
+                        ],
+                        "parameter_source": "(settings: MemberJsonStorageSettings, private readonly fetcher: typeof fetch = fetch)"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "tsType": {
+                          "repr": "MemberJsonStorageSettings",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "MemberJsonStorageSettings",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./member_json_storage.ts",
+                              "name": "MemberJsonStorageSettings"
+                            }
+                          }
+                        },
+                        "readonly": true,
+                        "accessibility": "private",
+                        "name": "settings"
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "accessibility": "private",
+                        "name": "prefix",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "identity",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultIdentity",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultIdentity",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "string",
+                            "kind": "keyword",
+                            "value": "string"
+                          },
+                          "hasBody": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "validateReference",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "reference",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultReference",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultReference",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "identity",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultIdentity",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultIdentity",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "void",
+                            "kind": "keyword",
+                            "value": "void"
+                          },
+                          "hasBody": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "validateDocument",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "document",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "identity",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultIdentity",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultIdentity",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "void",
+                                  "kind": "keyword",
+                                  "value": "void"
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "request",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "reference",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultReference",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultReference",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "body",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "Uint8Array",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "Uint8Array"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "Response",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "Response"
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "name": "read",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "identity",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultIdentity",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultIdentity",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "reference",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultReference",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultReference",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "NativeObject",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "NativeObject",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../domain/json_value.ts",
+                                      "name": "NativeObject"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
+                        "name": "create",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "identity",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "MemberSchoolResultIdentity",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "MemberSchoolResultIdentity",
+                                  "resolution": {
+                                    "kind": "local"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "value",
+                              "optional": false,
+                              "tsType": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "MemberSchoolResultReference",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "MemberSchoolResultReference",
+                                    "resolution": {
+                                      "kind": "local"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "UUID",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "ID",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "HASH",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "^[a-f0-9]{64}$",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DOCUMENT_FIELDS",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "string",
+                        "kind": "keyword",
+                        "value": "string"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "OFFERING_FIELDS",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "repr": "string",
+                        "kind": "keyword",
+                        "value": "string"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "fail",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "code",
+                          "optional": false,
+                          "tsType": {
+                            "repr": "string",
+                            "kind": "keyword",
+                            "value": "string"
+                          }
+                        },
+                        "right": "storage_result_invalid"
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "never",
+                      "kind": "keyword",
+                      "value": "never"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(code = \"storage_result_invalid\")"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "positive",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "value is number",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "value"
+                        },
+                        "type": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "exact",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "fields",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "value is NativeObject",
+                      "kind": "typePredicate",
+                      "value": {
+                        "param": {
+                          "type": "identifier",
+                          "name": "value"
+                        },
+                        "type": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown, fields: readonly string[])"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "nullableText",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "boolean",
+                      "kind": "keyword",
+                      "value": "boolean"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "nullableScalar",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "boolean",
+                      "kind": "keyword",
+                      "value": "boolean"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "validateIdentity",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "identity",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "MemberSchoolResultIdentity",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "MemberSchoolResultIdentity",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "void",
+                      "kind": "keyword",
+                      "value": "void"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(identity: MemberSchoolResultIdentity)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "stableIdentity",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "identity",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "MemberSchoolResultIdentity",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "MemberSchoolResultIdentity",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "MemberSchoolResultIdentity",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "MemberSchoolResultIdentity",
+                        "resolution": {
+                          "kind": "local"
+                        }
+                      }
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(identity: MemberSchoolResultIdentity)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Private, immutable member school-result objects. Report publication/CAS is a separate port."
+              }
+            },
+            {
+              "importedName": "JsonFloat",
+              "originalName": "JsonFloat",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "MemberJsonStorageSettings",
+              "originalName": "MemberJsonStorageSettings",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "memberBytesSha",
+              "originalName": "memberBytesSha",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
+            },
+            {
+              "importedName": "nativeJsonSha256",
+              "originalName": "nativeJsonSha256",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "parseNativeObject",
+              "originalName": "parseNativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            },
+            {
+              "importedName": "resultObject",
+              "originalName": "resultObject",
+              "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+            }
+          ],
+          "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c"
+        },
+        "dependencies": [
+          {
+            "specifier": "../application/access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/paid_result_components.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/native_json.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_json_storage.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
+              }
+            ]
+          }
+        ]
       }
     },
     "format": "jungsi.edge-contract/v1",
@@ -354321,7 +356889,7 @@
       "supabase/functions/_shared/jungsi/application/score_null_reason_review.ts": "e0552f3b3862d28b07bf28d4212c93c46695cdb3cf92b5965bdb9f385eb8339a",
       "supabase/functions/_shared/jungsi/application/service_end_admission.ts": "31374b04ce1cbb236fc50c835df6ceaf55dc1c4bca1a95e6f85089d695821baa",
       "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
-      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638",
+      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "b147346e1c17bc65207745dbf5ac367bc90135de914c5b30340e9394111ca397",
       "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
       "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
@@ -354362,7 +356930,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/legacy_reference_carryover.ts": "f6b98b9889dd3f7abb433ff887920813caf59b9718917f94926ee9b1c6242951",
       "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts": "a80ccb35c33703d76a765b530a2d9e02d3cd86d9ba72d15cd3db51c481435032",
       "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
-      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "5dfc7f16f6e9b3d505b00bc4a611826be781131fecb29c79b9d4c526131deb5c",
+      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
       "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e",
       "supabase/functions/_shared/jungsi/infrastructure/native_reference_db_tail.ts": "b85cb358c51544883f2a0da37b8447d94ec057a379d1fa2150c9baa562284ad4",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",
@@ -354390,8 +356958,8 @@
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_factory.ts": "81a3f8abe39ea77da8c9f77b478864cf2f8ddfdafa98f184f05e990bacf943ed",
       "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
@@ -354411,7 +356979,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/usage_postgres.ts": "6f18fff45c14e97d02379cc8ef13c13ee414a605ff287f1807be9c0f980cdd9a",
       "supabase/functions/_shared/jungsi/infrastructure/verified_session.ts": "7a3c856d9341a01a18a16d59f8c4a55a1dd557b5677e5a53ea3574c9379bd04e",
       "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
-      "tests/edge/member_shortlist_fixture.ts": "2bab484557612a697916f287b89ce08603bd5b2b3e8a34378ddea4d7f420af35",
+      "tests/edge/member_shortlist_fixture.ts": "b3b191000d0b88307dcf86fe269eb13de35ebf6f290ff498ed79a2a0ea917fd3",
       "tests/edge/parity_driver.ts": "8121d1f2d181b4efe5f4c826d5ac2e8b348522ddd5e89fe272517ac7c03ecb9a",
       "tests/edge/public_api_contract_fixture.ts": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471",
       "tests/edge/reference_candidate_scope_cases.ts": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c",
@@ -354567,7 +357135,7 @@
       "supabase/functions/_shared/jungsi/application/owned_student_reference_batch_handler_candidate.ts": "be0755b7eb8c1fd1fc6f80ce11e4626f5aa3f0ad0c56b092a09a6c0a15b5ac8c",
       "supabase/functions/_shared/jungsi/application/owner_v25_batch_candidate.ts": "1c21fd68a721dce75343ecc65b1ee734594208ea11c14b5147e16571137a314c",
       "supabase/functions/_shared/jungsi/application/p1_r27_lineage_page_candidate.ts": "0966b0dc3ce86cd6cc15ecd00d26f0b2d8affb67d7f38c2e8be9d57de32043d1",
-      "supabase/functions/_shared/jungsi/application/p1_v25_v2_input_builder_candidate.ts": "d6fecd4bccc38b8390faa71a174ab43f29c139c6daaceeb7987261ce13d0a0bf",
+      "supabase/functions/_shared/jungsi/application/p1_v25_v2_input_builder_candidate.ts": "fae6d71c5cdd6b9d53d0fce6c09cae84a970e7ca70d047c3a43aa0e829f0b3b2",
       "supabase/functions/_shared/jungsi/application/personal_historical_reference_comparison.review-only.ts": "34577ef4b2066728d961a4993daa21fda3ba85c9f651b1be643137aecfec5b96",
       "supabase/functions/_shared/jungsi/application/personal_historical_reference_projection.review-only.ts": "14769899ecfa8401780b20e3339f339c581f1b8a86acf976b81f50fb40420276",
       "supabase/functions/_shared/jungsi/application/personal_owner_cache_bounded_workflow_candidate.ts": "26510db0f4cfe7445991ef6ee54cad7c6f9bea99c2f214b177dedd9dee0e64df",
@@ -354601,7 +357169,9 @@
       "supabase/functions/_shared/jungsi/infrastructure/student_cache_r2_read_candidate.ts": "108d6e05cea7fc159a6ce3b063f40fce816db673016e763df819fdbf8ea86101",
       "supabase/functions/_shared/jungsi/infrastructure/student_reference_batch_provider_candidate.ts": "6000d12d11059abafe9983942c43a2cd648fe64d8194fdd213459f4bb98c42e3",
       "supabase/functions/_shared/jungsi/infrastructure/unified_reference_tail_batch_candidate.ts": "9e19020e7299892649edd1cce29da08fe3b94aa0e7614df70d60412fa35182d7",
-      "supabase/functions/_shared/jungsi/application/named_owner_port.synthetic_test.ts": "e4a9cdef6d57cf8fd4551e72527a8813ff035384ec88bdcbeff4a95ae41a7cf6"
+      "supabase/functions/_shared/jungsi/application/named_owner_port.synthetic_test.ts": "e4a9cdef6d57cf8fd4551e72527a8813ff035384ec88bdcbeff4a95ae41a7cf6",
+      "supabase/functions/_shared/jungsi/application/member_school_results.ts": "2542121b10b5bd4289dcda66520d5df5ac947c6f1df66cf65bc01c9ec44769ef",
+      "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -356476,8 +359046,8 @@
       "operating_writes": 0,
       "historical_sha256": "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_fmt.current.json",
-      "graph_manifest_sha256": "4af47ec7ca92a1108ce55dc9b8c0514d9886dc7f8e5a223b4a03390305b0849d",
-      "bridge_sha256": "d023834d051e7585ce4cc8215289a225777ce0dedddda883ace27cfdd2e2babd"
+      "graph_manifest_sha256": "c86710b0d766e0cf05cd2a76fb0aff2a26732b2154586e8af4f1a4a0abe69378",
+      "bridge_sha256": "b0347f0cf5a00851633212882c7f5c11826ec07b7212d843c91a0579689573aa"
     }
   },
   "P1_display_snapshot_contract": {
@@ -357364,6 +359934,31 @@
         "service_decision_end_to_end_integration": "NOT_RUN"
       },
       "head_and_correspondence_binding": "입결 snapshot head와 2027 Guide head는 서로 다른 식별자이며 각각 고정·검증한다. 현재 모집행·Guide 인원과 전형 조건·직전 연도 비교·과거 관계·공란과 이월 근거는 각각에 해당하는 head와 학년도·학교·캠퍼스·모집단위·전형·군, 그리고 두 head 사이의 독립 검증된 대응 근거에 결속한다. 서로 다른 head를 같다고 요구하거나 동일시하지 않으며 대응이 미확인·상충하면 해당 범위를 보류한다."
+    },
+    "existing_results_row_policy_20261113": {
+      "id": "P1-EXISTING-RESULT-ROW-POLICY-20261113",
+      "status": "SOURCE_CANDIDATE_AND_POLICY_NOT_ACTIVATED",
+      "page": "/admissions/results",
+      "owner_and_layers": "정본·PK·출처·발행 연결은 사용자 주도 데이터/애플리케이션 계층이 관리하고 화면팀은 승인된 DTO를 표시한다.",
+      "existing_values": "기존 승인 정본과 학년도·모집행 기본 PK 및 발표 출처를 재사용한다. 이미 정리한 값 연결에 학교별 재수집이나 전국 재검수를 선행하지 않는다.",
+      "null_preservation": "입력 후보의 필수 13개 값은 명시적인 null 또는 문자열로 보존하며 필드 누락과 숫자·불리언·객체는 거절한다. null, 빈 문자열과 문자열 0은 구별한다.",
+      "null_meaning": "사용자의 최신 지시에 따라 실제 값이 null이거나 빈 문자열인 칸은 우선 빈칸으로 표시한다. 실제 0과 구별하고 공란을 0이나 특정 사유로 추정하지 않는다. 확인된 비공개 상태·출처 메타데이터는 보존하되 빈칸의 값을 대신 만들지 않는다.",
+      "individual_row_scope": "가야대를 포함해 대학 전체를 일괄 보류하지 않고 학년도·모집단위·전형·모집군 및 각 관측의 권한·출처별로 판단한다. 확인된 다른 모집행은 영향을 받지 않는다.",
+      "past_only_rows": "현재 승인된 기존 v2 snapshot의 과거 모집행이 2027 모집행과 연결되지 않아도 과거 발표 결과로 독립 표시한다. 다른 PK에 임의 결합하거나 2027 모집행으로 표시하지 않는다. 현재 모집군·지역 필터는 2027 현재 모집조건으로 적용하므로 과거 전용 행의 옛 조건을 2027 조건으로 대입하지 않는다. 기본 목록과 대학·학과 검색에서는 과거 발표임을 구분한다.",
+      "all_admitted": "동일 학년도·모집행에서 공식적으로 지원자 전원 합격이 확인된 경우에만 해당 상태를 서버가 전달하고 화면이 전원 합격으로 표시한다. 경쟁률 1 이하나 충원순위 공란만으로 전원 합격을 추정하지 않는다.",
+      "all_admitted_evidence_port": {
+        "status": "CONTRACT_PROPOSED_IMPLEMENTATION_AND_OPERATING_ACCEPTANCE_NOT_RUN",
+        "identity": "학년도·대학·모집단위 기본 PK·전형·모집군 및 동일 발표 범위와 승인된 발행 head/release를 결속한다.",
+        "proof": "서버 내부 포트가 공식 출처의 현재 증명과 변경·폐기 상태를 확인한다. 기존 확인 결과를 재사용하며 새 실제 값을 만들지 않는다.",
+        "public_projection": "증명이 유효한 동일 모집행에만 verified_all_admitted=true를 전달한다. 미확인에는 null 또는 미제공으로 응답하고 비공개 출처 참조를 공개 DTO에 복사하지 않는다.",
+        "compatibility": "현재 정확한 필드 검증을 임의로 우회하지 않는다. 필드·DTO 버전·서버 공급자와 화면의 동시 적용 전까지 기존 발행판의 동작을 보존한다."
+      },
+      "authorization": "기존 인증, 발행 head/release 결속과 공유 조회 예산을 유지한다. 부분 후보나 합성 테스트는 발행 권한을 부여하지 않는다.",
+      "verification": "null 보존 변경 범위의 Deno 2.9.7 합성 검사 4건 통과. 실제 DB 접속·발행·운영 화면은 이 근거에 포함되지 않는다.",
+      "actual_DB": "NOT_RUN",
+      "publication": "NOT_RUN",
+      "deployment": "NOT_RUN",
+      "implementation_priority": "1순위는 기존 정본의 실제 컬럼을 학년도와 모집행 기본 PK로 연결해 승인된 기존 화면에 표시하는 것이다. 값이 없는 셀이나 특정 행의 미확인이 이미 연결 가능한 다른 값·학교의 표시를 막지 않는다."
     }
   },
   "administrator_verification_quota_contract": {
@@ -360219,7 +362814,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "cec5a1c3b22d7f98d303e4fc044196e23580dbaf1a52e052f54f77bfe561cc16",
+    "manifest_sha256": "b804d9f902b3ecb430fa8baac3a29c18e578e412b75ee5d3eb8a25dbbc2760c6",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -360230,7 +362825,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "962f237553425716c7e6d7bd6859602a74ce6c2b238978d8b7836f81ebd94aa1",
+    "manifest_sha256": "beb9e0f16a4a7878a0c2a583fc529480bfb85196f4dcfec35d4e52c38a66adc1",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
@@ -360355,6 +362950,32 @@
           "scripts/run_edge_tests.py": "99ce40c01a8eb195e2ac9bdd2e37543382d6aabdd6e223fb8c8e2be2d4bfcd72"
         }
       }
+    }
+  },
+  "member_school_results_current_source_overlay_20261113": {
+    "format": "jungsi.member-school-current-source-overlay/v1",
+    "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+    "activation_status": "NOT_RUN",
+    "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+    "operating_writes": 0,
+    "baseline_sha256": {
+      "source_rebounds": "8726e77ec1ae8800f295ea6f0c392fa5cfff790bb76f4cb35552cc1b89e351d4",
+      "aux_rebounds": "310ce7e0418e05c47852d6ef13e5beba5d48b30808d004b5475e037fd3f2bc3f",
+      "school_v2": "2fb1e247d13720d30eb0369e37ee551bb9164a9f2029894619210e0b1df5994c",
+      "cancellation": "e4462945d71e0e5d5c343a86599ea399504306df68443dc92c732e8b54bfe6c8",
+      "stage": "efd451ced10190ddaa90932f41b0f693b566f27739e71524ccefa307f6ccd992"
+    },
+    "source_bindings": {
+      "scripts/check_project_consistency.py": "0a9e13574e87e728dc3e41e1bb68505e743c5fdc00e9a9e590a518e73b88f7d6",
+      "scripts/run_edge_tests.py": "3e3158f9b7ab084fbae68413ceda7bf30d4d179c0f145dce2c087339c911c2af",
+      "supabase/functions/_shared/jungsi/application/member_school_results.ts": "2542121b10b5bd4289dcda66520d5df5ac947c6f1df66cf65bc01c9ec44769ef",
+      "supabase/functions/_shared/jungsi/application/p1_v25_v2_input_builder_candidate.ts": "fae6d71c5cdd6b9d53d0fce6c09cae84a970e7ca70d047c3a43aa0e829f0b3b2",
+      "supabase/functions/_shared/jungsi/application/university_analysis.ts": "b147346e1c17bc65207745dbf5ac367bc90135de914c5b30340e9394111ca397",
+      "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c",
+      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
+      "tests/edge/member_shortlist_fixture.ts": "b3b191000d0b88307dcf86fe269eb13de35ebf6f290ff498ed79a2a0ea917fd3"
     }
   }
 }

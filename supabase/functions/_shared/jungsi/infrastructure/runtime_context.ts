@@ -45,6 +45,7 @@ import { OwnReportCursor } from "./own_report_cursor.ts";
 import { MemberShortlistService } from "../application/member_shortlist.ts";
 import { MemberJsonResults } from "../application/member_json_results.ts";
 import { MemberJsonStorage } from "./member_json_storage.ts";
+import { MemberSchoolResultsStorage } from "./member_school_results_storage.ts";
 import {
   SupabaseMemberShortlist,
   SupabaseMemberShortlistLegacy,
@@ -188,6 +189,15 @@ export class NativeRuntimeRequest {
       this.sql(),
       b.repositoryLimits.maxRecordBytes,
       m.maxItems,
+      new MemberSchoolResultsStorage({
+        projectUrl: b.projectUrl,
+        bucket: b.storage.bucket,
+        prefix: m.prefix,
+        secretKey: b.storage.secretKey,
+        maxBytes: m.maxObjectBytes,
+        maxItems: Math.min(m.maxItems, 100),
+        timeoutMs: b.storage.limits.requestTimeoutMs,
+      }, controls.fetcher),
     );
     const approvedYears = new Set(
       [...(await this.budget()).policy.exams.values()].map((e) => e.academicYear),
