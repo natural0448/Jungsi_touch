@@ -56,6 +56,30 @@ def compact_spec():
         target_index = result["workflow"]["documentation_sync"]["code_index"]
         target_index["files"] = [deepcopy(row) for row in code_index["files"] if row["path"] in pins]
         target_index["edge_sources"]["files"] = [deepcopy(row) for row in index if row["path"] in paths | pins]
+    saved_name = "saved_report_current_source_overlay_20261113_v1"
+    if saved_name in original:
+        # Keep the current source overlay together with its original pinned
+        # historical receipts; a truncated overlay is not a valid fixture.
+        saved = original[saved_name]
+        result[saved_name] = deepcopy(saved)
+        pins = set(saved["source_bindings"]) | set(result[overlay_name]["source_bindings"])
+        for path in pins:
+            if path in edge["files"]:
+                result["edge_harness"]["files"][path] = deepcopy(edge["files"][path])
+        code_index = original["workflow"]["documentation_sync"]["code_index"]
+        target_index = result["workflow"]["documentation_sync"]["code_index"]
+        target_index["files"] = [deepcopy(row) for row in code_index["files"] if row["path"] in pins]
+        target_index["edge_sources"]["files"] = [deepcopy(row) for row in index if row["path"] in paths | pins]
+        supply = original["current_public_supply_contract"]
+        result["current_public_supply_contract"] = {
+            key: deepcopy(supply[key]) for key in (
+                "verification", "own_2027_batch_verification", "snapshot_batch_verification",
+                "current_page_projection_verification",
+            )
+        }
+        result["p1_selection_bridge_review_verification"] = deepcopy(
+            original["p1_selection_bridge_review_verification"]
+        )
     return result
 
 
@@ -186,6 +210,21 @@ class Runtime503PartitionTests(unittest.TestCase):
             with self.subTest(kind=kind), patch.object(Path, "read_text", return_value=json.dumps(damaged)):
                 with self.assertRaisesRegex(AssertionError, "invalid original AUTH-503 registration"):
                     compact_spec()
+
+    def test_saved_report_projection_preserves_receipts_and_rejects_promotion(self):
+        original = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
+        name = "saved_report_current_source_overlay_20261113_v1"
+        if name not in original:
+            self.skipTest("historical fixture does not declare the saved report overlay")
+        compact = compact_spec()
+        self.assertEqual(compact[name], original[name])
+        self.assertIsNot(compact[name], original[name])
+        self.assertEqual(auth_503_runtime_registration(compact)[1], [])
+        damaged = deepcopy(original)
+        damaged[name]["activation_status"] = "PASS"
+        with patch.object(Path, "read_text", return_value=json.dumps(damaged)):
+            with self.assertRaisesRegex(AssertionError, "invalid original AUTH-503 registration"):
+                compact_spec()
 
     def test_historical_27_only_registration_remains_valid_but_unregistered_five_fail(self):
         historical = deepcopy(self.spec)

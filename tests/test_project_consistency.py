@@ -2802,6 +2802,7 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         # current-source sibling whose canonical member receipt it cannot prove.
         spec.pop(checker.CURRENT_SOURCE_REBOUND_FIELD,None)
         spec.pop(checker.MEMBER_SCHOOL_OVERLAY_FIELD,None)
+        spec.pop(checker.SAVED_REPORT_OVERLAY_FIELD,None)
         if registration is not None:
             spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
             for path in checker.MEMBER_SHORTLIST_TESTS:spec['edge_harness']['files'].pop(path,None)
@@ -2816,6 +2817,7 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         self.assertEqual([],checker.member_shortlist_registration(spec)[1])
         spec.pop(checker.CURRENT_SOURCE_REBOUND_FIELD,None)
         spec.pop(checker.MEMBER_SCHOOL_OVERLAY_FIELD,None)
+        spec.pop(checker.SAVED_REPORT_OVERLAY_FIELD,None)
         spec.pop('member_shortlist_contract',None)
         spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
         base=copy.deepcopy(spec['operations'][0])

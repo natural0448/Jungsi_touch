@@ -33,6 +33,7 @@ class SchoolReferenceConsistencyReboundTests(unittest.TestCase):
     def test_prior_and_history_fallbacks(self):
         # This isolated historical fixture predates the newer member-results overlay.
         self.spec.pop(c.MEMBER_SCHOOL_OVERLAY_FIELD, None)
+        self.spec.pop(c.SAVED_REPORT_OVERLAY_FIELD, None)
         self.contract.pop('verification_current_source_rebound_20261113_v2')
         v1=self.contract['verification_current_source_rebound_20261113'];self.align_index_to(v1)
         self.assertEqual(c.school_reference_test_registration(self.spec)[1],[])

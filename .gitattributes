@@ -44,6 +44,7 @@
 /supabase/functions/_shared/combined_policy_catalog_runtime.ts text eol=lf
 /supabase/functions/_shared/current_admission_review.ts text eol=lf
 /supabase/functions/_shared/current_public_catalog.ts text eol=lf
+/supabase/functions/_shared/current_public_catalog_test.ts text eol=lf
 /supabase/functions/_shared/current_public_key_index.ts text eol=lf
 /supabase/functions/_shared/official_history_display.ts text eol=lf
 /supabase/functions/_shared/search_failure_diagnostic.ts text eol=lf

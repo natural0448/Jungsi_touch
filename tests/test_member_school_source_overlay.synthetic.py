@@ -18,6 +18,28 @@ def digest(path):
 
 def make():
     spec=json.loads((PLANNING/"docs/current/service_spec.json").read_text(encoding="utf-8"))
+    # Rebuild the prior index pins before replacing the member-school overlay
+    # that the later saved-report overlay is bound to.
+    if spec.pop(check.SAVED_REPORT_OVERLAY_FIELD, None) is not None:
+        member = spec["member_shortlist_contract"]["source_registration"]["verification"]
+        member_pins = {row["path"]: row["sha256"] for row in member["source_bindings"]}
+        stage = spec["backend_platform_contract"]["stage_projection_source_extension"]
+        stage_pins = {row["path"]: row["sha256"] for row in stage["source_bindings"]}
+        rebound = spec[check.CURRENT_SOURCE_REBOUND_FIELD]["families"]["member"]
+        previous_pins = {
+            check._MB: rebound["changed_source_bindings"][check._MB],
+            check._MJSON: member_pins[check._MJSON],
+            check._PUBLIC_CATALOG: member_pins[check._PUBLIC_CATALOG],
+            check._COMBINED_CATALOG: member_pins[check._COMBINED_CATALOG],
+            check._SCORE_INPUT: stage_pins[check._SCORE_INPUT],
+        }
+        edge_sources = spec["workflow"]["documentation_sync"]["code_index"]["edge_sources"]
+        for row in edge_sources["files"]:
+            if row["path"] in previous_pins:
+                row["source_sha256"] = previous_pins[row["path"]]
+        edge_files = spec["edge_harness"]["files"]
+        for path in previous_pins.keys() & edge_files.keys():
+            edge_files[path]["declarations"]["source_sha256"] = previous_pins[path]
     pins={}
     for path in check.MEMBER_SCHOOL_OVERLAY_PATHS:
         file=(ROOT if path.startswith("scripts/") else PLANNING)/path

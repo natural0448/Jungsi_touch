@@ -7,7 +7,8 @@ from pathlib import Path
 import unittest
 
 import run_edge_tests as runner
-from check_project_consistency import MEMBER_SCHOOL_OVERLAY_FIELD, MEMBER_SCHOOL_OVERLAY_PATHS, _MU, _MC, _MX
+from check_project_consistency import (MEMBER_SCHOOL_OVERLAY_FIELD, MEMBER_SCHOOL_OVERLAY_PATHS,
+    SAVED_REPORT_OVERLAY_FIELD, SAVED_REPORT_OVERLAY_PATHS, _MU, _MC, _MX)
 
 
 class SchoolReferenceHarnessCases(unittest.TestCase):
@@ -23,7 +24,8 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         if overlay is not None:
             root = Path(__file__).resolve().parents[1]
             # Check every registered source and overlay pin against selected snapshot bytes.
-            for path in sorted(set(before) | set(MEMBER_SCHOOL_OVERLAY_PATHS)):
+            saved_paths = set(SAVED_REPORT_OVERLAY_PATHS) if spec.get(SAVED_REPORT_OVERLAY_FIELD) else set()
+            for path in sorted(set(before) | set(MEMBER_SCHOOL_OVERLAY_PATHS) | saved_paths):
                 relative = Path(path)
                 if relative.is_absolute() or '..' in relative.parts or '\\' in path or ':' in path:
                     raise ValueError('unsafe snapshot source path')
@@ -77,9 +79,14 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         history = copy.deepcopy(contract['verification'])
         selected = copy.deepcopy(contract.get('verification_current_source_rebound_20261113_v2', rebound))
         if spec.get(MEMBER_SCHOOL_OVERLAY_FIELD) is not None:
+            expected_bindings = {path: before[path] for path in (_MU, _MC, _MX)}
+            saved = spec.get(SAVED_REPORT_OVERLAY_FIELD)
+            if saved is not None:
+                catalog = 'supabase/functions/_shared/current_public_catalog.ts'
+                expected_bindings[catalog] = saved['source_bindings'][catalog]
             for row in selected['source_bindings']:
-                if row['path'] in {_MU, _MC, _MX}:
-                    row['sha256'] = before[row['path']]
+                if row['path'] in expected_bindings:
+                    row['sha256'] = expected_bindings[row['path']]
         self.assertEqual(runner.school_reference_registration(spec, before), selected)
         self.assertEqual(contract['verification'], history)
         keys = ['verification', 'verification_current_source_rebound_20261113']
@@ -112,6 +119,7 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         self.assertIsNotNone(runner.school_reference_registration(current, before))
         spec = copy.deepcopy(current)
         spec.pop(MEMBER_SCHOOL_OVERLAY_FIELD, None)
+        spec.pop(SAVED_REPORT_OVERLAY_FIELD, None)
         contract = spec['university_scoring_contract']['scoped_reference_contract']
         contract.pop('verification_current_source_rebound_20261113', None)
         contract.pop('verification_current_source_rebound_20261113_v2', None)
@@ -124,6 +132,7 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         self.assertIsNotNone(runner.school_reference_registration(current, before))
         spec = copy.deepcopy(current)
         spec.pop(MEMBER_SCHOOL_OVERLAY_FIELD, None)
+        spec.pop(SAVED_REPORT_OVERLAY_FIELD, None)
         contract = spec['university_scoring_contract']['scoped_reference_contract']
         contract.pop('verification_current_source_rebound_20261113_v2', None)
         historical = copy.deepcopy(contract['verification'])

@@ -330,11 +330,14 @@ def retained_legacy28_fixture(current):
 def before_member_school_overlay(current):
     """Project an authenticated current fixture to its earlier, non-operating baseline."""
     import check_project_consistency as c
-    if c.MEMBER_SCHOOL_OVERLAY_FIELD not in current:
+    if c.member_school_overlay(current) is None:
         return current
-    c.member_school_overlay(current)
+    has_saved_report = c.SAVED_REPORT_OVERLAY_FIELD in current
+    if has_saved_report and validate_score_input_native_guard(current):
+        raise ValueError('Synthetic fixture cannot ignore invalid stage guard evidence')
     spec = deepcopy(current)
     spec.pop(c.MEMBER_SCHOOL_OVERLAY_FIELD)
+    spec.pop(c.SAVED_REPORT_OVERLAY_FIELD, None)
     school = {row['path']: row['sha256'] for row in
               current['university_scoring_contract']['scoped_reference_contract']
               ['verification_current_source_rebound_20261113_v2']['source_bindings']}
@@ -342,15 +345,28 @@ def before_member_school_overlay(current):
               current['member_shortlist_contract']['source_registration']['verification']['source_bindings']}
     old = {path: school[path] for path in (c._MU, c._MC, c._MX)}
     old.update({path: member[path] for path in (c._MS, c._MF)})
+    policy = spec['score_input_policy_contract']
+    if has_saved_report:
+        rebound = current[c.CURRENT_SOURCE_REBOUND_FIELD]['families']['member']
+        stage = current['backend_platform_contract']['stage_projection_source_extension']
+        stage_pins = {row['path']: row['sha256'] for row in stage['source_bindings']}
+        old.update({
+            c._MB: rebound['changed_source_bindings'][c._MB],
+            c._MJSON: member[c._MJSON],
+            c._PUBLIC_CATALOG: school[c._PUBLIC_CATALOG],
+            c._COMBINED_CATALOG: member[c._COMBINED_CATALOG],
+            c._SCORE_INPUT: stage_pins[c._SCORE_INPUT],
+        })
+        policy['native_SQL_preparation_evidence'].pop('guard_saved_report_source_candidate_20261113')
     files = spec['edge_harness']['files']
-    current_pins = spec['score_input_policy_contract']['current_source_bindings']
+    current_pins = policy['current_source_bindings']
+    for path in old.keys() & files.keys():
+        files[path]['declarations']['source_sha256'] = old[path]
+        current_pins[path] = old[path]
     code_index = spec['workflow']['documentation_sync']['code_index']['edge_sources']['files']
-    for path, sha in old.items():
-        files[path]['declarations']['source_sha256'] = sha
-        current_pins[path] = sha
-        for row in code_index:
-            if row['path'] == path:
-                row['source_sha256'] = sha
+    for row in code_index:
+        if row['path'] in old:
+            row['source_sha256'] = old[row['path']]
     return spec
 
 

@@ -73,6 +73,7 @@ class ReboundTests(unittest.TestCase):
         # The newer overlay depends on this marker; a historical fixture omits both.
         historical=copy.deepcopy(BASE)
         historical.pop(c.MEMBER_SCHOOL_OVERLAY_FIELD, None)
+        historical.pop(c.SAVED_REPORT_OVERLAY_FIELD, None)
         self.assertIs(c.select_current_source_rebound(historical,"auth",historic(historical,"auth")),historic(historical,"auth"))
         self.assertTrue(c.auth_503_registration(historical)[1])
     def test_old_receipt_tamper_and_sha_tamper_rejected(self):
