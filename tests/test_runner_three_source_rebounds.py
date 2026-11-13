@@ -4,11 +4,16 @@ import json
 from pathlib import Path
 import unittest
 import run_edge_tests as r
+from check_project_consistency import SAVED_REPORT_OVERLAY_FIELD
+from saved_report_registration_fixture import current_source_hashes
 ROOT=Path(__file__).resolve().parents[1]
 
 class RunnerThreeReboundTests(unittest.TestCase):
     def fixture(self):
         s=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        # This fixture reconstructs the earlier runner rebound. A newer overlay
+        # needs the actual current snapshot, tested separately below.
+        s.pop(SAVED_REPORT_OVERLAY_FIELD, None)
         original={
           'whole_population':s['overall_analysis_contract']['whole_population_transition']['verification'],
           'period_renewal':s['backend_platform_contract']['period_renewal_source_extension'],
@@ -36,6 +41,25 @@ class RunnerThreeReboundTests(unittest.TestCase):
                 self.assertEqual(originals[family],history[family])
                 old=copy.deepcopy(spec);old.pop('current_source_rebounds_20261113')
                 self.assertEqual(r.select_runner_current_rebound(old,family,originals[family]),originals[family])
+
+    def test_current_snapshot_registers_period_renewal_and_p1_selection(self):
+        spec=json.loads((ROOT/'docs/current/service_spec.json').read_bytes())
+        period=spec['backend_platform_contract']['period_renewal_source_extension']
+        selection=spec['p1_selection_bridge_review_verification']
+        cases=(
+            (r.period_renewal_registration, period, (), 9),
+            (r.p1_selection_bridge_registration, selection,
+             (selection['test_path'], selection['fixture_path']), 17),
+        )
+        for register, historical, extra_paths, expected_count in cases:
+            with self.subTest(registration=register.__name__):
+                receipt=copy.deepcopy(historical)
+                before=current_source_hashes(spec,historical,*extra_paths)
+                current=register(spec,before)
+                self.assertEqual(current['test_count'],expected_count)
+                self.assertEqual({row['path']:row['sha256'] for row in current['source_bindings']},
+                                 {row['path']:before[row['path']] for row in receipt['source_bindings']})
+                self.assertEqual(historical,receipt)
 
     def test_history_rebound_and_unrelated_source_forgery_rejected(self):
         for family in r.RUNNER_REBOUND_PINS:
