@@ -103,8 +103,10 @@ const SCORE_MESSAGE: Record<string, string> = {
 const CONTENT_REJECTIONS = new Set(["unobserved_standard_score", "invalid_score", "invalid_integer", "invalid_grade", "invalid_reported_grade", "invalid_reported_percentile", "reported_grade_conflict", "reported_percentile_conflict"]);
 
 /**
- * 전문가용 학생 성적 저장 → 전체 위치. 학생×시험×단계 입력 1회(개인용과 같은 규칙). 같은 화면에서 두 번 눌러도
- * 같은 요청 키라 한 번만 저장된다. 성적은 저장됐는데 분석만 못 했으면 그 사실을 알리고 다시 저장하지 말라고 한다
+ * 전문가용 학생 성적 저장 → 전체 위치 → 유리한 대학 찾기(자동 1회). 학생×시험×단계 입력 1회(개인용과 같은 규칙). 같은 화면에서 두 번 눌러도
+ * 같은 요청 키라 한 번만 저장된다. 성적은 저장됐는데 분석만 못 했으면 그 사실을 알리고 다시 저장하지 말라고 한다.
+ * 유리한 대학 찾기는 같은 성적이면 결과가 같으므로 저장 때 한 번만 계산한다(2026-11-13 최종관리자 결정: '다시 찾기' 없음,
+ * 계산 횟수 = 학생·단계당 입력 1 + 정정 1). 이 단계만 실패하면 저장·전체 위치는 그대로 두고 학생 화면의 '찾기' 버튼으로 한 번 더 할 수 있다
  */
 export async function submitStudentScores(prev: ScoreFormState, fd: FormData): Promise<ScoreFormState> {
   const int = (k: string) => {
@@ -147,6 +149,9 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
     const p = saved.value.profile;
     const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
     if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
+    step = "대학 찾기";
+    // 실패해도 저장·전체 위치는 끝났다. 학생 화면에 '찾기' 버튼이 남아 한 번 더 할 수 있다
+    await src.candidates(caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
   } catch (e) {
     if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);

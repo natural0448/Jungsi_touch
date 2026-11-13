@@ -102,3 +102,9 @@
 .et .pro-done{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--safe-soft);color:var(--safe);font-size:12px;font-weight:800}
 .et .pro-todo{font-size:12px;font-weight:700;color:var(--muted)}
 .et .pro-th-sub{font-size:11px;font-weight:600;color:var(--muted)}
+/* 인쇄본에서 뺄 학교 고르기(화면에서만, 인쇄에는 .pr-tools 째로 숨는다) */
+.et .pr-tools{flex-wrap:wrap}
+.et .pr-pick{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);min-width:0;flex:1 1 320px}
+.et .pr-pick legend{padding:0 4px;font-size:13px;font-weight:800;color:var(--deep)}
+.et .pr-pick legend small{margin-left:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.et .pr-pick label{display:flex;gap:6px;align-items:center;font-size:13px}

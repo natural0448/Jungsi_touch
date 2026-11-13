@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { CATEGORY } from "@/components/offering-parts";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { GRADE_RUMOR_NOTE, tipLine, tipsByOffering, tipTitle } from "@/lib/pro-tips";
@@ -11,6 +11,9 @@ import { exportStudentReport, type PrintState } from "../../../actions";
 /** 인쇄본 만들기 → 고정 판을 그대로 그린다. 워터마크(기관·교사 코드·인쇄 시각)는 화면 전체에 옅게, 인쇄·PDF 에도 찍힌다 */
 export function PrintSheet({ fields }: { fields: Record<string, string> }) {
   const [state, action, pending] = useActionState<PrintState, FormData>(exportStudentReport, null);
+  // 인쇄에서 뺄 학교(2026-11-13: 담은 학교를 서버에서 빼는 기능이 생기기 전까지, 잘못 담은 학교가 학생에게 가지 않게).
+  // 화면에서만 고르고 서버 기록은 바꾸지 않는다
+  const [skip, setSkip] = useState<Set<string>>(() => new Set());
   if (!state?.ok) {
     return (
       <form action={action} className="pr-tools">
@@ -25,7 +28,8 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
   const a = snapshot.report.overall;
   const text = `${w.organization_name} · ${w.teacher_code} · ${w.printed_at_seoul}`;
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='200'><text x='10' y='115' transform='rotate(-24 180 100)' font-family='sans-serif' font-size='13' fill='rgba(15,23,42,0.05)'>${text.replace(/[<>&'"]/g, "")}</text></svg>`;
-  const shortlist = Object.entries(snapshot.report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
+  const picked = Object.entries(snapshot.report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
+  const shortlist = picked.filter((id) => !skip.has(id));
   const cands = snapshot.report.candidates;
   const tips = tipsByOffering(state.data.counseling_reasons ?? []);
   const names = new Map([...(cands?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(cands?.wildcards ?? []), ...(cands?.reference_university_groups?.flatMap((g) => g.offerings) ?? [])].map((it) => [it.offering.offering_id, it.offering]));
@@ -35,7 +39,32 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
   return (
     <>
       <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 2147483000, pointerEvents: "none", backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" }} />
-      <div className="pr-tools"><PrintButton /></div>
+      <div className="pr-tools">
+        <PrintButton />
+        {picked.length > 0 && (
+          <fieldset className="pr-pick">
+            <legend>인쇄에 넣을 학교 <small>체크를 풀면 이 인쇄본에서만 빠집니다(담은 기록은 그대로)</small></legend>
+            {picked.map((id) => {
+              const o = names.get(id);
+              return (
+                <label key={id}>
+                  <input
+                    type="checkbox"
+                    checked={!skip.has(id)}
+                    onChange={(e) => {
+                      const next = new Set(skip);
+                      if (e.currentTarget.checked) next.delete(id);
+                      else next.add(id);
+                      setSkip(next);
+                    }}
+                  />
+                  {o ? `${o.university_name} ${o.department}` : id}
+                </label>
+              );
+            })}
+          </fieldset>
+        )}
+      </div>
       <article className="pr-sheet">
         <header className="pr-hd">
           <div>

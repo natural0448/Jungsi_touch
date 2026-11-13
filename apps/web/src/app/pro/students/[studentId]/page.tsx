@@ -173,11 +173,13 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           <section className="pro-sec" aria-labelledby="cand-h">
             <div className="pro-sechd">
               <h2 id="cand-h">유리한 대학 찾기</h2>
-              {svc.role === "teacher" && !student.archived && (
+              {/* 성적 저장 때 자동으로 한 번 찾는다(2026-11-13 결정). 같은 성적이면 결과가 같아 '다시 찾기'는 두지 않고,
+                  자동 찾기가 실패해 결과가 없을 때만 버튼을 보인다 */}
+              {svc.role === "teacher" && !student.archived && !shown.published_result.candidates && (
                 <ActionButton
                   act={findCandidates}
                   primary
-                  label={shown.published_result.candidates ? "다시 찾기" : "이 학생에게 유리한 대학 찾기"}
+                  label="이 학생에게 유리한 대학 찾기"
                   busy="찾는 중…"
                   fields={{ org_id: svc.org_id, student_id: student.student_id, profile_id: shown.profile_id, profile_version: shown.profile_id, idem: crypto.randomUUID() }}
                 />
@@ -191,7 +193,11 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
                 reasons={shown.counseling_reasons ?? []}
               />
             ) : (
-              <p className="pro-note">아직 찾지 않았습니다. 저장한 성적으로 대학별 환산·유불리와 와일드카드 후보를 찾습니다.</p>
+              <p className="pro-note">
+                {svc.role === "teacher" && !student.archived
+                  ? "아직 대학 후보가 없습니다. 성적을 저장할 때 자동으로 찾는데, 이번에는 끝나지 않았습니다. 위 버튼을 한 번 눌러 주세요."
+                  : "아직 대학 후보가 없습니다. 담당 교사가 성적을 저장하면 자동으로 찾습니다."}
+              </p>
             )}
           </section>
         )}
