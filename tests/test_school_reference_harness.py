@@ -1,11 +1,13 @@
 """The added source suite cannot borrow the original foundation count or stale bytes."""
 import ast
 import copy
+import hashlib
 import json
 from pathlib import Path
 import unittest
 
 import run_edge_tests as runner
+from check_project_consistency import MEMBER_SCHOOL_OVERLAY_FIELD, MEMBER_SCHOOL_OVERLAY_PATHS, _MU, _MC, _MX
 
 
 class SchoolReferenceHarnessCases(unittest.TestCase):
@@ -16,7 +18,20 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         rebound = contract.get('verification_current_source_rebound_20261113')
         rebound_v2 = contract.get('verification_current_source_rebound_20261113_v2')
         selected = rebound_v2 if rebound_v2 is not None else (rebound if rebound is not None else verification)
-        return spec, {b['path']: b['sha256'] for b in selected['source_bindings']}
+        before = {b['path']: b['sha256'] for b in selected['source_bindings']}
+        overlay = spec.get(MEMBER_SCHOOL_OVERLAY_FIELD)
+        if overlay is not None:
+            root = Path(__file__).resolve().parents[1]
+            # Check every registered source and overlay pin against selected snapshot bytes.
+            for path in sorted(set(before) | set(MEMBER_SCHOOL_OVERLAY_PATHS)):
+                relative = Path(path)
+                if relative.is_absolute() or '..' in relative.parts or '\\' in path or ':' in path:
+                    raise ValueError('unsafe snapshot source path')
+                target = root / relative
+                if target.is_symlink() or not target.resolve().is_relative_to(root.resolve()):
+                    raise ValueError('unsafe snapshot source path')
+                before[path] = hashlib.sha256(target.read_bytes()).hexdigest()
+        return spec, before
 
     def test_separate_exact_suite_retains_foundation(self):
         spec, before = self.fixture()
@@ -60,7 +75,11 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         if rebound is None:
             self.skipTest('current source rebound is absent from this snapshot')
         history = copy.deepcopy(contract['verification'])
-        selected = contract.get('verification_current_source_rebound_20261113_v2', rebound)
+        selected = copy.deepcopy(contract.get('verification_current_source_rebound_20261113_v2', rebound))
+        if spec.get(MEMBER_SCHOOL_OVERLAY_FIELD) is not None:
+            for row in selected['source_bindings']:
+                if row['path'] in {_MU, _MC, _MX}:
+                    row['sha256'] = before[row['path']]
         self.assertEqual(runner.school_reference_registration(spec, before), selected)
         self.assertEqual(contract['verification'], history)
         keys = ['verification', 'verification_current_source_rebound_20261113']
@@ -75,8 +94,24 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
                     runner.school_reference_registration(changed, before)
         self.assertEqual(contract['verification'], history)
 
+    def test_current_overlay_binds_actual_snapshot_and_rejects_tampering(self):
+        spec, before = self.fixture()
+        self.assertIsNotNone(runner.school_reference_registration(spec, before))
+        overlay = spec.get(MEMBER_SCHOOL_OVERLAY_FIELD)
+        if overlay is None:
+            return
+        for path in overlay['source_bindings']:
+            with self.subTest(path=path):
+                forged = dict(before)
+                forged[path] = '0' * 64 if before[path] != '0' * 64 else 'f' * 64
+                with self.assertRaisesRegex(runner.EdgeFailure, 'school_reference_overlay_invalid'):
+                    runner.school_reference_registration(spec, forged)
+
     def test_historical_only_fixture_retains_original_binding(self):
-        spec, _ = self.fixture()
+        current, before = self.fixture()
+        self.assertIsNotNone(runner.school_reference_registration(current, before))
+        spec = copy.deepcopy(current)
+        spec.pop(MEMBER_SCHOOL_OVERLAY_FIELD, None)
         contract = spec['university_scoring_contract']['scoped_reference_contract']
         contract.pop('verification_current_source_rebound_20261113', None)
         contract.pop('verification_current_source_rebound_20261113_v2', None)
@@ -85,7 +120,10 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
         self.assertEqual(runner.school_reference_registration(spec, before), historical)
 
     def test_three_source_v2_rebound_rejects_forgery_and_preserves_history(self):
-        spec, _ = self.fixture()
+        current, before = self.fixture()
+        self.assertIsNotNone(runner.school_reference_registration(current, before))
+        spec = copy.deepcopy(current)
+        spec.pop(MEMBER_SCHOOL_OVERLAY_FIELD, None)
         contract = spec['university_scoring_contract']['scoped_reference_contract']
         contract.pop('verification_current_source_rebound_20261113_v2', None)
         historical = copy.deepcopy(contract['verification'])
