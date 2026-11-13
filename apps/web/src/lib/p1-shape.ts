@@ -67,6 +67,25 @@ export function historyConditionsChanged(row: Pick<Row, "c" | "t" | "g">, previo
     return now !== "" && before !== "" && now !== before;
   }));
 }
+/** 해당 과거 행의 확인된 전형·군이 현재 모집행과 다를 때만 원문을 표시한다.
+ * 2027 모집행이 없으면 유일한 최신 과거 행을 기준으로 삼는다. */
+export function historicalConditionLabel(
+  row: Pick<Row, "y" | "c" | "t" | "g">,
+  rows: readonly Pick<Row, "y" | "c" | "t" | "g">[],
+): string | null {
+  if (![2024, 2025, 2026].includes(row.y)) return null;
+  const current = rows.filter((item) => item.y === 2027);
+  if (current.length > 1) return null;
+  const past = rows.filter((item) => [2024, 2025, 2026].includes(item.y));
+  if (past.length === 0) return null;
+  const latestYear = Math.max(...past.map((item) => item.y));
+  const references = current.length ? current : past.filter((item) => item.y === latestYear);
+  if (references.length !== 1) return null;
+  const reference = references[0], label = historyConditions(row);
+  if (!reference || !label || !historyConditionsChanged(row, [reference])) return null;
+  return `당시 ${label}`;
+}
+
 /** 과거 행 식별자. 캠퍼스·전형·군이 없는 행은 null 그대로 둬야 그 과거 행의 c·t·g 와 맞는다 */
 export type HistoryLink = {
   academic_year: number; school_id: string | null; original_pk: string | null;

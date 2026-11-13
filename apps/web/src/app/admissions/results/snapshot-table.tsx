@@ -2,7 +2,7 @@ import { asOfDate, ratioText } from "@/lib/format";
 import { derived } from "@/lib/p1-derived";
 import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
-import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 import { ScrollHint } from "./scroll-hint";
 
 /*
@@ -114,6 +114,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                 const ps = publishedStats(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
+                const historicalConditions = historicalConditionLabel(r, all);
                 return (
                   <tr key={`${y}-${i}`}>
                     <th scope="row">
@@ -121,6 +122,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                       {byYear.get(y)!.length > 1 && <small>같은 해 발표 {i + 1}</small>}
                       {otherName && <small>발표명 {otherName}</small>}
                       {renamedDept && <small>당시 {renamedDept}</small>}
+                      {historicalConditions && <small>{historicalConditions}</small>}
                     </th>
                     <td className="r"><Value c={r.rc} /></td>
                     <td className="r"><Value c={r.cr.v === null || r.cr.v.trim() === "" ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
