@@ -94,3 +94,11 @@ test("layout and page share one /me call per request", async (t) => {
   assert.equal(b.member_tier, "paid");
   assert.equal(seen.filter((s) => s.path === "/me").length, 1);
 });
+
+test("snapshot part path keeps ':' in the snapshot id and still encodes other characters", async (t) => {
+  const seen = fake(t, [() => new Response("x", { status: 200 })]);
+  await liveSource.readSnapshotPart(caller(9), "p1-public-history:00000000000000000026", "part-1");
+  assert.equal(seen[0].path.split("?")[0], "/admission-history/snapshots/p1-public-history:00000000000000000026");
+  const { snapshotSegment } = await import("../src/lib/api/live.ts");
+  assert.equal(snapshotSegment("a:b/c d"), "a:b%2Fc%20d");
+});
