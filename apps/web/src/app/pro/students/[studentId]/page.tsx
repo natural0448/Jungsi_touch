@@ -3,14 +3,17 @@ import type { ReactNode } from "react";
 import Link from "@/components/link";
 import { ConnectionNotice } from "@/components/connection-notice";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
-import { EXAM, examTypeLabel } from "@/lib/exam";
+import type { ScoreInputStatusDto } from "@/lib/dto";
+import { EXAM, examTitle, examTypeLabel, stageOf, type InputStage } from "@/lib/exam";
 import { seoulDate, seoulDateTime } from "@/lib/format";
 import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess } from "@/lib/pro-access";
 import { OverallCard, PositionChart, SubjectsSheet } from "../../../reports/me/report-view";
 import { ScoreForm } from "../../../reports/me/score-form";
+import { ProvisionalForm } from "../../../reports/me/provisional-form";
+import { StageSteps } from "../../../reports/me/stage-steps";
 import { findCandidates, submitStudentScores } from "../../actions";
 import { ActionButton } from "../../action-button";
 import { CandidatesView, PickedList } from "../../candidates-view";
@@ -21,8 +24,18 @@ import "../../pro.css";
 export const metadata: Metadata = { title: "학생 · 정시터치 전문가용" };
 export const dynamic = "force-dynamic";
 
-/** 이번 시험의 입력 단계. 9월 모의평가는 mock 하나만 승인돼 있다(Owner 최종 설정 input_scope) */
-const STAGE = "mock";
+/**
+ * 지금 입력 단계(모의평가·수능 가채점·수능 실채점)는 개인용 2페이지와 같은 서버 입력 상태(score-input-status, 단계 미지정)가
+ * 정한다(2026-11-13 화면팀: 수능 뒤에도 9월 모의평가 양식만 보이던 것을 고침). 읽지 못하면 단계를 짐작하지 않고 입력을 열지 않는다.
+ */
+async function currentStage(caller: Awaited<ReturnType<typeof getCaller>>): Promise<ScoreInputStatusDto | null> {
+  try {
+    return await source().readScoreInputStatus(caller, EXAM.exam_id);
+  } catch (e) {
+    if (e instanceof ConnectionError || e instanceof AccessDenied) return null;
+    throw e;
+  }
+}
 
 /*
   전문가용 학생 화면(계약 pro.student). 화면 위에 '지금 보는 학생' 띠를 고정하고, 그 아래 학생별 입력 상태 → 성적 입력
@@ -49,12 +62,17 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   let status: ProScoreStatusDto | null = null;
   let reports: ProStudentReportDto[] = [];
   let shown: ProStudentReportDto | null = null;
+  const stageP = currentStage(caller);
+  let stageSt: ScoreInputStatusDto | null = null;
+  let stage: InputStage | null = null;
   try {
     svc = (await src.session(caller)).organizations.find((o) => o.org_id === String(org.org_id));
     if (svc) {
       student = await src.readStudent(caller, svc.org_id, studentId);
       if (student) {
-        status = await src.scoreStatus(caller, svc.org_id, studentId, EXAM.exam_id, EXAM.pack_version, STAGE);
+        stageSt = await stageP;
+        stage = stageSt ? stageOf(stageSt.stage) : null;
+        status = stage ? await src.scoreStatus(caller, svc.org_id, studentId, EXAM.exam_id, EXAM.pack_version, stage) : null;
         reports = (await src.listReports(caller, svc.org_id, studentId)).items;
         const want = reportParam && validId(reportParam) ? reportParam : reports[0]?.report_id;
         shown = want ? (reports.find((r) => r.report_id === want) ?? (await src.readReport(caller, svc.org_id, studentId, want))) : null;
@@ -67,7 +85,9 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   if (!svc || !student) return <>{head}<NotFound back={back} /></>;
   const cls = [student.class_label, student.class_number ? `${student.class_number}번` : null].filter(Boolean).join(" ");
   const self = `/pro/students/${encodeURIComponent(student.student_id)}?org=${encodeURIComponent(svc.org_id)}`;
-  const canInput = svc.role === "teacher" && !student.archived && status !== null && status.initial_remaining > 0;
+  const stageOpen = stageSt?.stage_state === "open";
+  const canInput = svc.role === "teacher" && !student.archived && status !== null && status.initial_remaining > 0 && stageOpen;
+  const title = stage ? examTitle(stage, stageSt?.academic_year ?? 2027) : EXAM.label;
   const a = shown?.published_result.overall ?? null;
   // 판 번호 대신 꼬리표(2026-10-28, 2026-11-04 사용자 결정): 서버 입력 상태의 current_report_id 리포트 중 가장 최근 판이 현재 성적이다.
   // 정정을 모두 썼으면 개인용 2페이지와 같은 '정정 입력 횟수 소진', 아니면 '현재 성적'(교사는 학생의 예전 판도 고르므로 남긴다). 판 번호는 열기·인쇄 주소에만 쓴다
@@ -99,8 +119,9 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
 
         <section className="pro-sec" aria-labelledby="score-h">
           <div className="pro-sechd">
-            <h2 id="score-h">{EXAM.label} 성적</h2>
+            <h2 id="score-h">{title} 성적</h2>
           </div>
+          {stage && <StageSteps stage={stage} finalOpen={stageOpen} />}
           {status ? (
             <div className="rp-rights">
               <b>이 학생의 입력</b>
@@ -110,17 +131,30 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
               {status.last_rejection_code && <span className="warn">지난 입력이 정상 계산되지 않았습니다(문의 번호 {status.last_rejection_code}). 정정은 고객센터에 요청해 주세요.</span>}
             </div>
           ) : (
-            <p className="pro-note">이 학생의 입력 상태를 지금 확인할 수 없습니다. 입력을 열지 않았습니다.</p>
+            <p className="pro-note">{stage ? "이 학생의 입력 상태를 지금 확인할 수 없습니다. 입력을 열지 않았습니다." : "지금 입력 단계(모의평가·가채점·실채점)를 확인할 수 없어 입력을 열지 않았습니다. 잠시 뒤 다시 열어 주세요."}</p>
           )}
-          {canInput && status && (
+          {canInput && status && stage === "provisional" && (
+            // 가채점 저장은 개인용과 같이 수능 뒤 서버 연결 전까지 값 검사만 하고 보내지 않는다(입력 횟수도 쓰지 않음)
+            <ProvisionalForm examLabel={title} subject={student.display_name} />
+          )}
+          {canInput && status && stage !== "provisional" && stage && (
             <ScoreForm
-              examLabel={EXAM.label}
+              examLabel={title}
+              kicker={stage === "final" ? "성적 입력 · 수능 실채점" : "성적 입력"}
+              banner={stage === "final" ? "가채점 성적이 있으면 실채점 성적을 저장할 때 리포트가 실채점 기준으로 바뀝니다. 가채점 기록은 그대로 남습니다." : undefined}
               idem={crypto.randomUUID()}
               defaults={{}}
               submit={submitStudentScores}
               subject={student.display_name}
-              hidden={{ org_id: svc.org_id, student_id: student.student_id, entry_version: String(status.entry_version), stage: STAGE }}
+              hidden={{ org_id: svc.org_id, student_id: student.student_id, entry_version: String(status.entry_version), stage }}
             />
+          )}
+          {status && !stageOpen && stageSt && (
+            <p className="pro-note">
+              {stageSt.stage === "final" && stageSt.stage_state === "not_open"
+                ? <><b>수능 성적표 입력은 {stageSt.opens_at ? seoulDateTime(stageSt.opens_at) : "성적표 배부일"}부터 열립니다.</b> 그 전까지는 가채점으로 예상 위치를 확인해 주세요.</>
+                : "이 시험 단계는 지금 성적을 입력할 수 있는 기간이 아닙니다."}
+            </p>
           )}
           {!canInput && status && status.initial_remaining === 0 && !shown && (
             <p className="pro-note">이 학생은 입력 1회를 사용했습니다. 리포트가 아직 없다면 잠시 뒤 다시 열어 주세요.</p>

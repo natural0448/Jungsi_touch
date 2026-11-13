@@ -13,7 +13,8 @@ import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } 
 */
 const REQUIRED = ["inq1", "inq2", "korean", "math", "english", "history", "inq1_raw", "inq2_raw"] as const;
 
-export function ProvisionalForm({ examLabel }: { examLabel: string }) {
+/** subject: 전문가용 — 확인 창·버튼에 크게 보일 학생 이름(잘못 고른 학생에 저장하지 않게, 성적표 양식과 같음) */
+export function ProvisionalForm({ examLabel, subject }: { examLabel: string; subject?: string }) {
   const [state, action, pending] = useActionState<ProvisionalFormState, FormData>(submitProvisional, null);
   const d: ProvisionalValues = state?.values ?? {};
   const [raw, setRaw] = useState<Record<string, string>>(() => ({
@@ -217,7 +218,7 @@ export function ProvisionalForm({ examLabel }: { examLabel: string }) {
         <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
         <div className="sf-acts">
           <button className="btn p" type="button" disabled={pending} onClick={openReview}>
-            {pending ? "저장하는 중" : "가채점 저장하고 예상 위치 보기"}
+            {pending ? "저장하는 중" : subject ? `${subject} 학생 가채점 저장하고 예상 위치 보기` : "가채점 저장하고 예상 위치 보기"}
           </button>
         </div>
       </div>
@@ -226,7 +227,8 @@ export function ProvisionalForm({ examLabel }: { examLabel: string }) {
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="pf-dialog-h" onClose={() => setReview(null)}>
         {review && (
           <div className="sf-dialog-in">
-            <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : "이 원점수로 저장할까요?"}</h3>
+            <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : subject ? "이 학생의 원점수로 저장할까요?" : "이 원점수로 저장할까요?"}</h3>
+            {subject && !review.problem && <p className="sf-dialog-subject">{subject}</p>}
             {review.problem ? (
               <p className="sf-dialog-problem">{review.problem}</p>
             ) : (
