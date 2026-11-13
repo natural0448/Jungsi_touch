@@ -19,7 +19,7 @@ export function AssignForm({ orgId, studentId, version, assigned, members, idem 
       {pickable.map((m) => (
         <label key={m.subject_id}>
           <input type="checkbox" name="teacher" value={m.subject_id} defaultChecked={assigned.includes(m.subject_id)} />
-          구성원 {m.member_id} · {ROLE[m.role]}
+          {m.display_name || `구성원 ${m.member_id}`} · {ROLE[m.role]}
         </label>
       ))}
       <button className="btn" type="submit" disabled={pending}>{pending ? "저장 중…" : "담당 저장"}</button>

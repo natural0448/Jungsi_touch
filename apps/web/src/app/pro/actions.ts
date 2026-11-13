@@ -195,6 +195,22 @@ export async function addStudentBookmark(_prev: ProActionState, fd: FormData): P
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
 }
 
+/** 담은 학교 빼기(2026-11-13, pro.bookmark.remove). 서버는 지우지 않고 뺀 기록을 쌓는다. 이미 빠졌으면 그대로 돌아간다 */
+export async function removeStudentBookmark(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), reportId = String(fd.get("report_id") ?? "");
+  const offeringId = String(fd.get("offering_id") ?? ""), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !validId(offeringId) || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  try {
+    const r = await proSource().removeBookmark(await getCaller(), orgId, studentId, reportId, offeringId, key);
+    if (!r.ok && r.code !== "professional_bookmark_not_found") return { error: `빼지 못했습니다. (문의 번호 ${r.code})` };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { error: t };
+    throw e;
+  }
+  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
 export type PrintState = { ok: true; data: ProPrintDto } | { ok: false; error: string } | null;
 
 /**

@@ -35,6 +35,8 @@ export interface ProSource {
   candidates(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<ProCandidatesDto>>;
   listBookmarks(caller: Caller, orgId: string, studentId: string, reportId?: string): Promise<ProBookmarksDto | null>;
   addBookmark(caller: Caller, orgId: string, studentId: string, reportId: string, offeringId: string, key: string): Promise<Result<ProBookmarksDto>>;
+  /** pro.bookmark.remove(2026-11-13) — 담은 학교 빼기. 서버는 장부를 지우지 않고 뺀 기록을 쌓는다 */
+  removeBookmark(caller: Caller, orgId: string, studentId: string, reportId: string, offeringId: string, key: string): Promise<Result<ProBookmarksDto>>;
   /** pro.report.export — 고정 판 인쇄본. 워터마크(기관·교사 코드·인쇄 시각·학생 이름)를 서버가 준다 */
   exportReport(caller: Caller, orgId: string, studentId: string, reportId: string, revisionId: number, key: string): Promise<Result<ProPrintDto>>;
   /** pro.member.list(기관 관리자) */
@@ -125,6 +127,8 @@ const liveSource: ProSource = {
   listBookmarks: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks${qs({ report_id: reportId })}`),
   addBookmark: (caller, orgId, id, reportId, offeringId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks`, { report_id: reportId, offering_id: offeringId }, key),
+  removeBookmark: (caller, orgId, id, reportId, offeringId, key) =>
+    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks/remove`, { report_id: reportId, offering_id: offeringId }, key),
   exportReport: (caller, orgId, id, reportId, revisionId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key),
   listMembers: (caller, orgId) => get(caller, `/organizations/${enc(orgId)}/members${qs({ limit: 100 })}`),
@@ -158,9 +162,9 @@ function seed(): ProStudentDto[] {
   }));
 }
 const SYN_MEMBERS: ProMemberPageDto["items"] = [
-  { member_id: "1", subject_id: "syn-admin-1", role: "org_admin", status: "active", version: 1 },
-  { member_id: "2", subject_id: "syn-teacher-1", role: "teacher", status: "active", version: 1 },
-  { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1 },
+  { member_id: "1", subject_id: "syn-admin-1", role: "org_admin", status: "active", version: 1, display_name: "가상 관리자" },
+  { member_id: "2", subject_id: "syn-teacher-1", role: "teacher", status: "active", version: 1, display_name: "김가상" },
+  { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1, display_name: null },
   { member_id: "4", subject_id: "syn-viewer-1", role: "viewer", status: "active", version: 1 },
 ];
 const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-07T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
@@ -273,6 +277,19 @@ const synSource: ProSource = {
     if (!last || last.report_id !== reportId) return { ok: false, code: "professional_report_not_found", status: 404 };
     const a = last.published_result.analyses?.[offeringId];
     const shortlist = { ...(last.published_result.shortlist ?? {}), [offeringId]: { selected: true, changed_at: new Date().toISOString(), assessment_status: a?.status ?? "pending", profile_id: last.profile_id, catalog_version: "SYNTHETIC-catalog-v1" } };
+    last.published_result = { ...last.published_result, shortlist };
+    const value = { org_id: orgId, student_id: id, shortlist };
+    x.keys.set(key, value);
+    return { ok: true, value };
+  },
+  async removeBookmark(_c, orgId, id, reportId, offeringId, key) {
+    const x = synScore(id);
+    const prior = x.keys.get(key) as ProBookmarksDto | undefined;
+    if (prior) return { ok: true, value: prior };
+    const last = x.reports.at(-1);
+    if (!last || last.report_id !== reportId) return { ok: false, code: "professional_report_not_found", status: 404 };
+    if (!last.published_result.shortlist?.[offeringId]?.selected) return { ok: false, code: "professional_bookmark_not_found", status: 404 };
+    const shortlist = Object.fromEntries(Object.entries(last.published_result.shortlist).filter(([k]) => k !== offeringId));
     last.published_result = { ...last.published_result, shortlist };
     const value = { org_id: orgId, student_id: id, shortlist };
     x.keys.set(key, value);

@@ -175,7 +175,8 @@ export interface ProPrintDto {
 /** member_page — 기관 구성원(이메일·이름 없이 구성원 번호·로그인 ID·역할만) */
 export interface ProMemberPageDto {
   org_id: string;
-  items: { member_id: string; subject_id: string; role: ProRole; status: "active" | "inactive"; version: number }[];
+  /** display_name: 기관 관리자에게만 오는 구성원 이름(2026-11-13). 서버에 이름 기능이 없거나 이름이 비면 null·없음 */
+  items: { member_id: string; subject_id: string; role: ProRole; status: "active" | "inactive"; version: number; display_name?: string | null }[];
   next_cursor: string | null;
   has_more: boolean;
 }

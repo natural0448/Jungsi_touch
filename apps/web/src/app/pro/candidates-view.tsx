@@ -6,7 +6,7 @@ import type { CandidateItemDto, CandidatesDto, ShortlistEntryDto } from "@/lib/d
 import type { ProReason } from "@/lib/pro-dto";
 import { tipsByOffering } from "@/lib/pro-tips";
 import { TipBox } from "./tip-box";
-import { addStudentBookmark } from "./actions";
+import { addStudentBookmark, removeStudentBookmark } from "./actions";
 import { ActionButton } from "./action-button";
 
 /*
@@ -29,7 +29,12 @@ function Row({ it, picked, fields, tips }: { it: CandidateItemDto; picked: boole
       <td className="r num">{a.converted_score ?? "─"}</td>
       <td className="r num">{a.advantage ? `${a.advantage.delta_pp}%p` : "─"}</td>
       <td className="r">
-        {picked ? <span className="cur">담음</span> : fields ? <ActionButton act={addStudentBookmark} fields={{ ...fields, offering_id: o.offering_id, idem: crypto.randomUUID() }} label="담기" busy="담는 중…" /> : null}
+        {picked ? (
+          <span className="pro-picked">
+            <span className="cur">담음</span>
+            {fields && <ActionButton act={removeStudentBookmark} fields={{ ...fields, offering_id: o.offering_id, idem: crypto.randomUUID() }} label="빼기" busy="빼는 중…" />}
+          </span>
+        ) : fields ? <ActionButton act={addStudentBookmark} fields={{ ...fields, offering_id: o.offering_id, idem: crypto.randomUUID() }} label="담기" busy="담는 중…" /> : null}
       </td>
     </tr>
     {tips && tips.length > 0 && (
@@ -127,7 +132,7 @@ function ReferenceTables({ c }: { c: CandidatesDto }) {
 }
 
 /** 담은 학교 목록(고정 리포트 판의 shortlist + 판단 결과) */
-export function PickedList({ shortlist, analyses, names, reasons }: { shortlist: Record<string, ShortlistEntryDto>; analyses: Record<string, CandidateItemDto["assessment"]>; names: Map<string, CandidateItemDto["offering"]>; reasons: ProReason[] }) {
+export function PickedList({ shortlist, analyses, names, reasons, fields = null }: { shortlist: Record<string, ShortlistEntryDto>; analyses: Record<string, CandidateItemDto["assessment"]>; names: Map<string, CandidateItemDto["offering"]>; reasons: ProReason[]; fields?: Record<string, string> | null }) {
   const tips = tipsByOffering(reasons);
   const ids = Object.entries(shortlist).filter(([, e]) => e.selected).map(([id]) => id);
   if (ids.length === 0) return <p className="pro-note">아직 담은 학교가 없습니다. 위 후보에서 &lsquo;담기&rsquo;를 눌러 주세요.</p>;
@@ -140,6 +145,7 @@ export function PickedList({ shortlist, analyses, names, reasons }: { shortlist:
             <th scope="col">대학·모집단위</th>
             <th scope="col" className="r">환산점수</th>
             <th scope="col" className="r">환산 유불리</th>
+            {fields && <th scope="col"><span className="sr">빼기</span></th>}
           </tr>
         </thead>
         <tbody>
@@ -154,10 +160,11 @@ export function PickedList({ shortlist, analyses, names, reasons }: { shortlist:
                   <th scope="row">{o ? `${o.university_name} ${o.department}` : id}<small>{o ? [o.group ? `${o.group}군` : null, o.track].filter(Boolean).join(" · ") : ""}</small></th>
                   <td className="r num">{a?.converted_score ?? "─"}</td>
                   <td className="r num">{a?.advantage ? `${a.advantage.delta_pp}%p` : "─"}</td>
+                  {fields && <td className="r"><ActionButton act={removeStudentBookmark} fields={{ ...fields, offering_id: id, idem: crypto.randomUUID() }} label="빼기" busy="빼는 중…" /></td>}
                 </tr>
                 {a && t && t.length > 0 && (
                   <tr className="pro-tip-row">
-                    <td colSpan={4}><TipBox reasons={t} category={a.category} /></td>
+                    <td colSpan={fields ? 5 : 4}><TipBox reasons={t} category={a.category} /></td>
                   </tr>
                 )}
               </Fragment>

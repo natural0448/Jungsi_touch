@@ -207,7 +207,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
         {shown && (
           <section className="pro-sec" aria-labelledby="picked-h">
             <h2 id="picked-h">담은 학교</h2>
-            <PickedList shortlist={shown.published_result.shortlist ?? {}} analyses={shown.published_result.analyses ?? {}} names={names} reasons={shown.counseling_reasons ?? []} />
+            <PickedList shortlist={shown.published_result.shortlist ?? {}} analyses={shown.published_result.analyses ?? {}} names={names} reasons={shown.counseling_reasons ?? []} fields={svc.role === "teacher" && !student.archived ? { org_id: svc.org_id, student_id: student.student_id, report_id: shown.report_id } : null} />
           </section>
         )}
 

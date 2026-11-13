@@ -108,3 +108,4 @@
 .et .pr-pick legend{padding:0 4px;font-size:13px;font-weight:800;color:var(--deep)}
 .et .pr-pick legend small{margin-left:6px;font-size:12px;font-weight:600;color:var(--muted)}
 .et .pr-pick label{display:flex;gap:6px;align-items:center;font-size:13px}
+.et .pro-picked{display:inline-flex;gap:6px;align-items:center}
