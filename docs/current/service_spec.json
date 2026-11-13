@@ -361133,6 +361133,18 @@
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_fmt.current.json",
       "graph_manifest_sha256": "c86710b0d766e0cf05cd2a76fb0aff2a26732b2154586e8af4f1a4a0abe69378",
       "bridge_sha256": "b0347f0cf5a00851633212882c7f5c11826ec07b7212d843c91a0579689573aa"
+    },
+    "descriptor_rebind_review_saved_report_source_20261113": {
+      "format": "jungsi.catalog-descriptor-current-source-rebound/v2",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "activation_status": "NOT_RUN",
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "operating_writes": 0,
+      "historical_sha256": "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0",
+      "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
+      "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
+      "graph_manifest_sha256": "44a07becf0af6089e3611c52ffbf2ba04c32f0035c26c23274781659a569a65d",
+      "bridge_sha256": "832d5ef446c4ebbf56933a7313d987ad19041711d08a479863c494c7bf586975"
     }
   },
   "P1_display_snapshot_contract": {
