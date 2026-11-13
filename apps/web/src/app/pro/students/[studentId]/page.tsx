@@ -8,7 +8,7 @@ import { currentStage } from "@/lib/pro-stage";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoreInputStatusDto } from "@/lib/dto";
 import { EXAM, examTitle, examTypeLabel, stageOf, type InputStage } from "@/lib/exam";
-import { seoulDate, seoulDateTime } from "@/lib/format";
+import { seoulDateTime } from "@/lib/format";
 import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess } from "@/lib/pro-access";
 import { OverallCard, PositionChart, SubjectsSheet } from "../../../reports/me/report-view";
@@ -223,7 +223,8 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
             </ul>
           </section>
         )}
-        <p className="pro-note">추가한 날 {seoulDate(student.created_at_utc)} · 학생 번호 {student.student_id}</p>
+        {/* '추가한 날'은 뺀다(2026-11-13 최종관리자 결정). 학생 번호는 고객센터 문의용으로만 작게 남긴다 */}
+        <p className="pro-note pro-sid">학생 번호 {student.student_id} · 고객센터 문의 때 알려 주세요</p>
       </div>
     </>
   );

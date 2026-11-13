@@ -28,7 +28,10 @@ export async function EdutouchUtil() {
     <nav className="jt-top" aria-label="이용 메뉴">
       <div className="wrap">
         <ul>
-          {me ? (
+          {apiMode() === "synthetic" ? (
+            // 합성(PC 안 시험) 화면은 에듀터치 로그인과 연결되지 않는다. '로그인'이 보이면 로그아웃된 줄 알기 쉬워(2026-11-13) 시험 화면임을 적는다
+            <li className="me"><span className="urole">PC 안 시험 화면 · 에듀터치 로그인과 별개</span></li>
+          ) : me ? (
             <>
               <li className="me">
                 <a href={edutouch("/mypage")} className="uname">{me.name}님</a>

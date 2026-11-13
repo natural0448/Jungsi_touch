@@ -6,10 +6,10 @@ import { archiveStudentAction, assignStudentAction, type ProActionState } from "
 
 const ROLE = { teacher: "교사", viewer: "열람 전용", org_admin: "기관 관리자" } as const;
 
-/** 담당 변경: 이 기관의 교사·열람 전용 구성원을 체크해 저장(체크한 사람 전체가 새 담당) */
+/** 담당 변경: 이 기관의 교사를 체크해 저장(체크한 사람 전체가 새 담당). 열람 전용은 입력할 수 없어 담당 후보에서 뺀다(2026-11-13 최종관리자 결정) */
 export function AssignForm({ orgId, studentId, version, assigned, members, idem }: { orgId: string; studentId: string; version: number; assigned: string[]; members: ProMemberPageDto["items"]; idem: string }) {
   const [state, action, pending] = useActionState<ProActionState, FormData>(assignStudentAction, null);
-  const pickable = members.filter((m) => m.status === "active" && m.role !== "org_admin");
+  const pickable = members.filter((m) => m.status === "active" && m.role === "teacher");
   return (
     <form action={action} className="pro-assign">
       <input type="hidden" name="org_id" value={orgId} />

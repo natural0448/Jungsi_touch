@@ -222,7 +222,11 @@ export function ProvisionalForm({ examLabel, subject }: { examLabel: string; sub
           </button>
         </div>
       </div>
-      <p className="sf-note">가채점은 이 단계의 입력 1회를 사용합니다. 잘못 넣었으면 성적표 배부 전날까지 정정을 1회 요청할 수 있습니다.</p>
+      <p className="sf-note">
+        {subject
+          ? "가채점은 이 학생의 가채점 단계 입력 1회를 사용합니다. 잘못 넣었으면 고객센터에 정정을 요청해 주세요(1회, 성적표 배부 전날까지)."
+          : "가채점은 이 단계의 입력 1회를 사용합니다. 잘못 넣었으면 성적표 배부 전날까지 정정을 1회 요청할 수 있습니다."}
+      </p>
 
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="pf-dialog-h" onClose={() => setReview(null)}>
         {review && (

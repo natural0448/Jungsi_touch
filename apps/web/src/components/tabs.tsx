@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { PASS_HREF } from "@/lib/links";
 import type { Lock } from "@/lib/routes";
 import { LockIcon } from "./icons";
+import { useProAdmin } from "./pro-role";
 
 /** 휴대폰에서 네 탭이 한 줄에 보이도록 쓰는 짧은 이름(10-24 QA: 넷째 탭이 화면 밖으로 밀려 있는 줄 몰랐다) */
 const SHORT: Record<string, string> = {
@@ -36,12 +37,15 @@ export function UserChip({ children }: { children: React.ReactNode }) {
 export function Tabs({ items: personal }: { items: { href: string; label: string; lock: Lock }[] }) {
   const path = usePathname();
   const pro = isProPath(path);
-  const items = pro ? PRO_TABS : personal;
+  const proAdmin = useProAdmin();
+  // 기관 관리자에게만 '기관 관리' 탭(2026-11-13 최종관리자 결정)
+  const items = pro ? (proAdmin ? [...PRO_TABS, { href: "/pro/management", label: "기관 관리", lock: null }] : PRO_TABS) : personal;
   return (
     <ul>
       {items.map((t) => {
         // 전문가용: 학생 화면·인쇄는 '학생 목록' 아래로 본다(정시 기본 안내만 따로)
-        const on = pro ? (t.href === "/pro/guide" ? path.startsWith("/pro/guide") : !path.startsWith("/pro/guide")) : path === t.href || path.startsWith(`${t.href}/`);
+        const sub = (p: string) => path === p || path.startsWith(`${p}/`);
+        const on = pro ? (t.href === "/pro" ? !sub("/pro/guide") && !sub("/pro/management") : sub(t.href)) : path === t.href || path.startsWith(`${t.href}/`);
         const why = t.lock === "login" ? "로그인 필요" : t.lock === "paid" ? "이용권 필요" : null;
         const body = (
           <>
