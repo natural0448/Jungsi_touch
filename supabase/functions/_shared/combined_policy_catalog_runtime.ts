@@ -121,6 +121,7 @@ function createBoundCatalogService(
     },
     search: async (...args) => (await port()).search(...args),
     lookup: async (...args) => (await port()).lookup(...args),
+    lookupSavedGuide: async (...args) => (await port()).lookupSavedGuide(...args),
   };
   const cursor: PublicCatalogCursorPort = {
     seal: (...args) => key().seal(...args),

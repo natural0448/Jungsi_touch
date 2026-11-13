@@ -17,7 +17,7 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | score-profile.create | POST /api/v1/score-profiles | scores: 기존 overall_analysis_contract 입력; confirmed: boolean; stage?: mock/provisional/final (서버 승인 단계만) | 없음 | profile; backend_platform_contract.dto_schemas.profile | True |
 | overall.analyze | POST /api/v1/overall-reports | profile_id: 본인이 저장한 현재 입력 프로필; report_id (선택); expected_version (report_id 사용 시 필수) | 없음 | report; backend_platform_contract.dto_schemas.report | True |
 | report.read | GET /api/v1/reports/{report_id} | 없음 | 없음 | report; backend_platform_contract.dto_schemas.report | False |
-| offerings.search | GET /api/v1/offerings/search | 없음 | academic_year (2024~2027 선택), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=offering); backend_platform_contract.dto_schemas.catalog_search | False |
+| offerings.search | GET /api/v1/offerings/search | 없음 | academic_year (2024~2027 선택), exam_id (선택; 본인 저장 점수의 승인 시험 식별자), stage (선택; 해당 시험의 승인된 입력 단계), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=offering; 본인 조회가 허용된 저장 점수 my_score는 선택 필드); backend_platform_contract.dto_schemas.catalog_search | False |
 | offering.read | GET /api/v1/offerings/{offering_id} | 없음 | 없음 | {status, reason_code, offering, catalog_version}; backend_platform_contract.dto_schemas.offering_detail | False |
 | university.analyze | POST /api/v1/reports/{report_id}/university-results | expected_version: positive integer; offering_ids: 서로 다른 등록 ID 1~100개; attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null | 없음 | report (analyses 갱신); backend_platform_contract.dto_schemas.report | True |
 | candidates.build | POST /api/v1/reports/{report_id}/candidates | expected_version: positive integer; attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null | 없음 | report (analyses/candidates 갱신); backend_platform_contract.dto_schemas.report | True |
@@ -438,7 +438,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=2998ecf3deff6b6ec63df6e63abf2204ad00bf929dd6b0c2a13ba33b5354f531 -->
+<!-- jungsi:generated spec_sha256=bdaa7213f67e03368878d52a59adc5b3317a32677d917d798e3361875dd15e64 -->
 
 
 ## 회원별 관심대학 JSON API

@@ -121,6 +121,7 @@ export class SupabaseMemberShortlistLegacy
     report: StoredReport,
     year: number,
     profile: StoredProfile,
+    signal?: AbortSignal,
   ): Promise<StoredReport> {
     if (!Object.hasOwn(report.body, "member_school_results_refs")) return report;
     if (
@@ -160,7 +161,7 @@ export class SupabaseMemberShortlistLegacy
           profileFingerprint: fingerprint,
           examId: profile.scores.exam_id,
           packVersion: profile.scores.pack_version,
-        }, ref),
+        }, ref, signal),
       );
     }
     const composed = await composeMemberSchoolResults(report.owner_id, profile, report, documents);
@@ -296,6 +297,7 @@ export class SupabaseMemberShortlistLegacy
     ids: readonly string[],
     reportId: string | null,
     revision?: number,
+    signal?: AbortSignal,
   ) {
     if (ids.length > this.maxItems || ids.some((x) => id(x) !== x)) invalid();
     const result = await this.sql.read(owner, async (tx) => {
@@ -306,7 +308,7 @@ export class SupabaseMemberShortlistLegacy
           JSON.stringify(ids),
           reportId,
           revision === undefined ? null : String(revision),
-        ]),
+        ], signal),
         11,
       );
       if (!r) return null;
@@ -338,12 +340,12 @@ export class SupabaseMemberShortlistLegacy
         profile.scores.pack_version !== context.pack_version
       ) invalid();
       return { context, analyses, report, profile };
-    });
+    }, signal);
     if (!result) return null;
     if (!result.report || !result.profile) {
       return { context: result.context, analyses: result.analyses };
     }
-    const restored = await this.hydrate(result.report, year, result.profile);
+    const restored = await this.hydrate(result.report, year, result.profile, signal);
     if (!resultObject(restored.body.analyses)) invalid();
     const analyses: NativeObject = {};
     for (const offeringId of ids) {

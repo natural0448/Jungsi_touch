@@ -17,9 +17,13 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
     def setUp(self):
         self.spec = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
         self.ext = self.spec["backend_platform_contract"]["service_candidate_suite_extension"]
-        self.manifest = json.loads((ROOT / self.ext["manifest"]["path"]).read_bytes())
+        self.overlay = self.spec["backend_platform_contract"]["service_candidate_suite_source_overlay_20261113_v1"]
+        self.manifest = json.loads((ROOT / self.overlay["current_manifest"]["path"]).read_bytes())
+        self.additive = json.loads((ROOT / self.overlay["additive_manifest"]["path"]).read_bytes())
         self.names = {p for suite in self.manifest["suites"].values() for p in suite["files"]}
+        self.names |= set(self.additive["files"]) | {self.additive["workflow"]["path"]}
         self.names |= {self.ext[k]["path"] for k in ("manifest", "wrapper", "regression_test")}
+        self.names |= {self.overlay[k]["path"] for k in ("current_manifest", "additive_manifest", "wrapper", "regression_test")}
         self.overrides = {}
 
     def read(self, path):
@@ -27,8 +31,8 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
 
     def rebind_manifest(self, manifest):
         raw = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
-        self.overrides[self.ext["manifest"]["path"]] = raw
-        self.ext["manifest"]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.overrides[self.overlay["current_manifest"]["path"]] = raw
+        self.overlay["current_manifest"]["sha256"] = hashlib.sha256(raw).hexdigest()
 
     def errors(self):
         return checker.service_candidate_suite_errors(sorted(self.names), self.read, self.spec)
@@ -126,6 +130,30 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         changed = copy.deepcopy(self.manifest)
         changed["suites"]["service_p1"]["manual_read_files"] = []
         self.rebind_manifest(changed)
+        self.assertTrue(self.errors())
+
+    def test_source_overlay_rejects_status_promotion_and_historical_rewrite(self):
+        self.overlay["activation_status"] = "PASS"
+        self.assertTrue(self.errors())
+        self.overlay["activation_status"] = "NOT_RUN"
+        self.ext["activation_status"] = "PASS"
+        self.assertTrue(self.errors())
+
+    def test_additive_roots_and_manifest_are_required(self):
+        path = self.overlay["additive_manifest"]["path"]
+        self.names.remove(path)
+        self.assertTrue(self.errors())
+        self.names.add(path)
+        self.names.remove("tests/service_p1/test_student_pk_scoped.synthetic.ts")
+        self.assertTrue(self.errors())
+
+    def test_additive_workflow_and_source_are_hash_bound(self):
+        path = self.additive["workflow"]["path"]
+        self.overrides[path] = b"synthetic changed workflow"
+        self.assertTrue(self.errors())
+        self.overrides.clear()
+        root = "tests/service_p1/test_current_guide_scoped.synthetic.ts"
+        self.overrides[root] = b'Deno.test("synthetic", () => {});'
         self.assertTrue(self.errors())
 
     def test_runtime_missing_is_failure_not_skip_for_each_suite(self):

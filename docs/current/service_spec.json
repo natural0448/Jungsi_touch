@@ -636,6 +636,8 @@
         "body": [],
         "query": [
           "academic_year (2024~2027 선택)",
+          "exam_id (선택; 본인 저장 점수의 승인 시험 식별자)",
+          "stage (선택; 해당 시험의 승인된 입력 단계)",
           "university_q",
           "department_q",
           "region",
@@ -643,7 +645,7 @@
           "cursor",
           "limit (1~100; 기본 50)"
         ],
-        "response": "catalog_search (items=offering)",
+        "response": "catalog_search (items=offering; 본인 조회가 허용된 저장 점수 my_score는 선택 필드)",
         "idempotency_key_required": false,
         "response_schema": "catalog_search"
       },
@@ -5603,7 +5605,8 @@
         "publicCatalogKey",
         "publicCatalogOffering",
         "publicCatalogOfferingId",
-        "publicCatalogRecruitment"
+        "publicCatalogRecruitment",
+        "SavedGuideReadGuard"
       ]
     },
     {
@@ -5680,7 +5683,8 @@
         "CURRENT_PUBLIC_PREPARED_RECRUITMENT_SQL",
         "CurrentPublicCatalogSql",
         "buildCurrentPublicP1DirectOfferingsSql",
-        "P1DirectGuideGuard"
+        "P1DirectGuideGuard",
+        "CURRENT_PUBLIC_SAVED_GUIDE_SQL"
       ]
     },
     {
@@ -8860,7 +8864,7 @@
     {
       "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
       "layer": "application",
-      "status": "score_map_source_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+      "status": "score_map_source_candidate_table_metadata_exists_runtime_NOT_VERIFIED",
       "requirements": [
         "REQ-03",
         "REQ-14",
@@ -8892,7 +8896,7 @@
     {
       "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
       "layer": "data_infrastructure",
-      "status": "score_map_store_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+      "status": "score_map_store_candidate_table_metadata_exists_runtime_NOT_VERIFIED",
       "requirements": [
         "REQ-03",
         "REQ-14",
@@ -8905,6 +8909,76 @@
         "SCORE_MAP_PROFILE_SQL",
         "SCORE_MAP_READ_SQL",
         "SupabaseScoreMapStore"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts",
+      "layer": "application",
+      "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+      "requirements": [
+        "REQ-03",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "symbols": [
+        "SavedPageScoresPort",
+        "attachSavedPageScores"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts",
+      "layer": "application",
+      "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+      "requirements": [
+        "REQ-03",
+        "REQ-11",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "symbols": [
+        "readSavedOfferingGroups",
+        "SavedReportIdentity"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts",
+      "layer": "application",
+      "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+      "requirements": [
+        "REQ-03",
+        "REQ-11",
+        "REQ-12",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "symbols": [
+        "readSavedCandidateGroups"
+      ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts",
+      "layer": "data_infrastructure",
+      "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+      "requirements": [
+        "REQ-03",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "symbols": [
+        "SavedScoreReadScope",
+        "readSavedScoreMap",
+        "SavedScoreTransientUnavailable"
       ]
     },
     {
@@ -13621,7 +13695,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "0a9e13574e87e728dc3e41e1bb68505e743c5fdc00e9a9e590a518e73b88f7d6",
+            "source_sha256": "badc73c99087f63f5792503dd41d8c5b65caec5090fd4c77f7aae787b9f8909c",
             "symbols": [
               {
                 "kind": "class",
@@ -13963,6 +14037,12 @@
                 "kind": "function",
                 "name": "runtime_connection_document",
                 "signature": "def runtime_connection_document(spec):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "saved_report_overlay",
+                "signature": "def saved_report_overlay(spec, source_hashes=None):",
                 "decorators": []
               },
               {
@@ -15034,7 +15114,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "3e3158f9b7ab084fbae68413ceda7bf30d4d179c0f145dce2c087339c911c2af",
+            "source_sha256": "c96d357584e434d39281cfa18de3d57b867543845f645ee5720ddc3576c0ed12",
             "symbols": [
               {
                 "kind": "function",
@@ -15466,6 +15546,12 @@
                 "kind": "function",
                 "name": "select_runner_current_rebound",
                 "signature": "def select_runner_current_rebound(spec, family, historical):",
+                "decorators": []
+              },
+              {
+                "kind": "function",
+                "name": "select_saved_report_runner_binding",
+                "signature": "def select_saved_report_runner_binding(spec, before, family, historical, selected):",
                 "decorators": []
               },
               {
@@ -20311,7 +20397,7 @@
                 "REQ-11",
                 "REQ-12"
               ],
-              "source_sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
+              "source_sha256": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
               "declared_exports": [
                 "createCombinedPolicyCatalogService",
                 "createMemberShortlistCatalogService"
@@ -20659,7 +20745,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
+              "source_sha256": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
               "declared_exports": [
                 "CURRENT_PUBLIC_OPERATIONS",
                 "CurrentPublicCatalogCursor",
@@ -20683,7 +20769,8 @@
                 "publicCatalogKey",
                 "publicCatalogOffering",
                 "publicCatalogOfferingId",
-                "publicCatalogRecruitment"
+                "publicCatalogRecruitment",
+                "SavedGuideReadGuard"
               ]
             },
             {
@@ -20787,7 +20874,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "85d4ff60680434f2202fcbf7748fb7a3e26df2759afbae235e869564eb7e2758",
+              "source_sha256": "ab1c20bfd31f7667867338fb30e832255210f098a2b848ce374ff6a4e0eaed69",
               "declared_exports": [
                 "CURRENT_PUBLIC_SOURCE_VIEWS",
                 "CURRENT_PUBLIC_METADATA_SQL",
@@ -20804,7 +20891,8 @@
                 "CURRENT_PUBLIC_PREPARED_RECRUITMENT_SQL",
                 "CurrentPublicCatalogSql",
                 "buildCurrentPublicP1DirectOfferingsSql",
-                "P1DirectGuideGuard"
+                "P1DirectGuideGuard",
+                "CURRENT_PUBLIC_SAVED_GUIDE_SQL"
               ]
             },
             {
@@ -21070,7 +21158,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "60cf086a7e1ca5a30969857492eb0fccc11144a01aa1cf714547aadf1e8ddd91",
+              "source_sha256": "dd88b02c3be866d1f4d0b586db3f2e3bc7ea637af72a198e3143b4584c43ba94",
               "declared_exports": [
                 "CurrentPublicSearchScopedService"
               ]
@@ -21415,6 +21503,24 @@
                 "ApiExecution",
                 "ApiExecutionBoundary",
                 "ApiBusinessPort"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts",
+              "layer": "application",
+              "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+              "requirements": [
+                "REQ-03",
+                "REQ-14",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-27"
+              ],
+              "source_sha256": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33",
+              "declared_exports": [
+                "SavedPageScoresPort",
+                "attachSavedPageScores"
               ]
             },
             {
@@ -21962,11 +22068,48 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
+              "source_sha256": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516",
               "declared_exports": [
                 "MemberAssessmentContext",
                 "MemberJsonResults",
                 "MemberSavedResultsPort"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts",
+              "layer": "application",
+              "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+              "requirements": [
+                "REQ-03",
+                "REQ-11",
+                "REQ-12",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-27"
+              ],
+              "source_sha256": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b",
+              "declared_exports": [
+                "readSavedCandidateGroups"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts",
+              "layer": "application",
+              "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+              "requirements": [
+                "REQ-03",
+                "REQ-11",
+                "REQ-12",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-27"
+              ],
+              "source_sha256": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36",
+              "declared_exports": [
+                "readSavedOfferingGroups",
+                "SavedReportIdentity"
               ]
             },
             {
@@ -23528,7 +23671,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
               "layer": "application",
-              "status": "score_map_source_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+              "status": "score_map_source_candidate_table_metadata_exists_runtime_NOT_VERIFIED",
               "requirements": [
                 "REQ-03",
                 "REQ-14",
@@ -24910,11 +25053,30 @@
                 "REQ-26",
                 "REQ-30"
               ],
-              "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c",
+              "source_sha256": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
               "declared_exports": [
                 "MemberSchoolResultIdentity",
                 "MemberSchoolResultReference",
                 "MemberSchoolResultsStorage"
+              ]
+            },
+            {
+              "path": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts",
+              "layer": "data_infrastructure",
+              "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+              "requirements": [
+                "REQ-03",
+                "REQ-14",
+                "REQ-24",
+                "REQ-25",
+                "REQ-26",
+                "REQ-27"
+              ],
+              "source_sha256": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345",
+              "declared_exports": [
+                "SavedScoreReadScope",
+                "readSavedScoreMap",
+                "SavedScoreTransientUnavailable"
               ]
             },
             {
@@ -24930,7 +25092,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
+              "source_sha256": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584",
               "declared_exports": [
                 "MEMBER_LEGACY_EXACT_SQL",
                 "MEMBER_LEGACY_LOCK_SQL",
@@ -25490,7 +25652,7 @@
                 "REQ-29",
                 "REQ-30"
               ],
-              "source_sha256": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
+              "source_sha256": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
               "declared_exports": [
                 "ReadViewCatalogContext",
                 "ReadViewCatalogFactory",
@@ -25743,7 +25905,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756",
+              "source_sha256": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
               "declared_exports": [
                 "RuntimeExamBudget",
                 "buildPeriodRenewalContext",
@@ -25786,7 +25948,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
+              "source_sha256": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba",
               "declared_exports": [
                 "REFERENCE_TAIL_REQUEST_OBJECTS",
                 "REFERENCE_TAIL_REQUEST_BYTES",
@@ -25838,7 +26000,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
+              "source_sha256": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -26057,7 +26219,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
+              "source_sha256": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
               "declared_exports": [
                 "SupabaseScoreInputRepository",
                 "isCommittedScoreRejection",
@@ -26070,7 +26232,7 @@
             {
               "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
               "layer": "data_infrastructure",
-              "status": "score_map_store_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+              "status": "score_map_store_candidate_table_metadata_exists_runtime_NOT_VERIFIED",
               "requirements": [
                 "REQ-03",
                 "REQ-14",
@@ -26897,7 +27059,7 @@
                 "REQ-26",
                 "REQ-28"
               ],
-              "source_sha256": "c19df933f6106db252bb99acb9625ea38f7e7a15bc10e3286cc455a4a619ece4",
+              "source_sha256": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",
               "declared_exports": [
                 "SearchPhase",
                 "SearchFailure",
@@ -31193,6 +31355,46 @@
         "REQ-26"
       ],
       "summary": "최신 사용자 지시에 따라 1페이지는 기존 정본의 학년도·기본 PK로 실제 컬럼을 우선 연결하고 빈 값은 빈칸으로 표시한다. 2027 대학별 환산 결과는 기존 회원 전용 저장소에 학교·모집행 PK·환산점수·환산백분위를 결속해 재조회한다. 환산백분위와 상위누백을 구별하고 가야대도 모집행별로 처리한다. 실제 저장·발행·배포는 미실행이다. 반복 오류는 해당 세션만 중단하고 기획팀이 대응을 정리하며 다른 세션의 독립 작업은 계속한다."
+    },
+    {
+      "date": "2026-11-13",
+      "requirements": [
+        "REQ-01",
+        "REQ-04",
+        "REQ-08",
+        "REQ-13",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "사용자 지시에 따라 이미 마이그레이션된 학교·입결 정본을 학년도와 기본 PK로 조회하고 기존 대학 코드로 묶어 제공한다. 회원 결과는 검증된 학생 ID·프로필과 모집행 PK의 기존 관계를 재사용하며 GET에서 새 점수 계산이나 중복 저장을 하지 않는다. 운영 Supabase 메타데이터에서 jungsi_backend.score_maps 테이블과 owner_id·profile_id·data_pin·offering_id 복합 PK, converted_score 컬럼 및 앱 역할 SELECT grant의 존재를 확인했다. converted_percentile 컬럼은 없으며 기저 RLS를 통과하는 실제 SELECT·개인별 행·활성 pin·새 코드의 검수·운영 반영은 미확인이다. 3페이지는 저장된 점수의 독립 필드를 표시하고 누백·판정이 없으면 빈칸으로 둔다. 4페이지는 기존에 확인된 경계권 결과만 활용하며 미분석 범위를 전체 완료로 표시하지 않는다. 새 수집·새 DB·기존 테이블 재생성은 이 연결의 전제가 아니다."
+    },
+    {
+      "date": "2026-11-13",
+      "requirements": [
+        "REQ-03",
+        "REQ-11",
+        "REQ-12",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26",
+        "REQ-27"
+      ],
+      "summary": "3페이지 저장 점수와 4페이지 저장 분석을 인증된 회원·보고서·학년도·기존 모집단위 PK 및 승인 자료판에 묶어 읽는 후보를 서비스 작업본에 연결했다. 4페이지는 부분 결과이며 기존 결과와 미분석 상태를 보존한다. 3페이지 v5가 기존 상위누백을 숨길 수 있어 보류하고, 보완한 v6과 4페이지 v2를 Owner 공유 폴더에 올렸으며 화면 소스 사본에서 패치 적용 가능을 확인했다. 서버 타입 검사 최초 실패 3건은 수정 후 재검사에서 통과했다. 사용자 승인 범위의 별도 합성 검사는 자동 승인 심사의 거절로 미실행이며, Edge 선언·기획/라우팅 검사와 실제 DB 조회·배포도 미완료다. 과거 검수 증거를 이번 후보 검수로 재표시하지 않는다."
+    },
+    {
+      "date": "2026-11-13",
+      "requirements": [
+        "REQ-01",
+        "REQ-03",
+        "REQ-14",
+        "REQ-24",
+        "REQ-25",
+        "REQ-26"
+      ],
+      "summary": "운영 시스템 카탈로그에서 v25 입결 정본은 2024~2026 학년도·모집행 PK이며, 2027 모집행은 기존 Guide 정본에 있음을 확인했다. v25 원 테이블과 기존 Owner 뷰의 서비스 역할 테이블 및 컬럼 SELECT 권한은 없고, Owner 전용 FORCE RLS 정책이 적용돼 있다. 새 권한이나 DB 변경은 하지 않았으며 서비스 런타임을 Owner 권한으로 연결하지 않는다. 필요한 범위의 최소 권한·기존 PK 연결 후보를 별도로 준비한다. G: 원문은 다시 읽지 않았다."
     }
   ],
   "overall_analysis_contract": {
@@ -34278,6 +34480,53 @@
     "score_map_source_extension": {
       "format": "jungsi.score-map-source-extension/v1",
       "status": "SOURCE_PREPARED_NOT_ACTIVATED",
+      "observed_operating_table_20261113": {
+        "table": "jungsi_backend.score_maps",
+        "observation": "TABLE_AND_COLUMN_METADATA_ONLY",
+        "primary_key": [
+          "owner_id",
+          "profile_id",
+          "data_pin",
+          "offering_id"
+        ],
+        "verified_columns": [
+          "status",
+          "converted_score",
+          "official_max_score",
+          "reason_code",
+          "computed_at"
+        ],
+        "converted_percentile_column": "ABSENT",
+        "runtime_role_select": "GRANT_METADATA_TRUE_BASE_RLS_AND_QUERY_NOT_VERIFIED",
+        "saved_member_rows_and_current_data_pin": "NOT_VERIFIED",
+        "live_API_connection": "NOT_VERIFIED"
+      },
+      "student_pk_existing_read_candidate_20261113": {
+        "status": "SOURCE_SCOPED_UNIT_TESTS_PASSED_NOT_DEPLOYED",
+        "operation": "offerings.search",
+        "selection": "검증된 세션의 학생 식별자와 승인 시험·단계의 현재 profile, 승인된 data_pin, 화면에 전달할 모집단위 PK 목록으로 기존 score_maps에서 이미 저장된 점수만 읽는다.",
+        "query": [
+          "exam_id_optional",
+          "stage_optional"
+        ],
+        "response": "기존 items[].my_score 선택 필드를 사용하며 null과 실제 0을 구분한다. 누백·판정이 없는 경우 만들지 않는다.",
+        "cursor": "선택한 시험과 입력 단계를 검색 커서 결속에 반영한다.",
+        "scope": "기존 정본의 대학 코드와 모집단위 PK를 사용하고 전국 검색을 관심대학에 한정하지 않는다. 조회 시 계산·쓰기·재수집·새 테이블 생성을 하지 않는다.",
+        "security": "기존 유료 권한·본인 소유권·자료판·공유 예산·물리 SQL 취소·private/no-store 및 역할별 응답 허용목록을 유지한다.",
+        "page4": "report.read의 본인 보고서·현재 승인 head·학년도와 원 PK로 저장된 분석을 부분 연결한다. 이미 존재하는 결과는 보존한다. 미분석 범위와 와일드카드는 전체 완료로 표시하지 않는다.",
+        "verification": "Deno 2.9.7: 12 scoped synthetic tests passed (2026-11-13); 3P v6 and 4P v2 screen patches apply-check passed; runtime type check passed. Stage projection guard: 15 scoped tests passed after historical/current binding correction. Remote CI, actual DB calls, screen execution and deployment remain NOT_RUN.",
+        "operating_application": "NOT_RUN",
+        "targeted_unit_tests": {
+          "status": "PASS_SYNTHETIC_ONLY",
+          "total": 12,
+          "paths": [
+            "tests/service_p1/test_student_pk_scoped.synthetic.ts",
+            "tests/service_p1/test_current_guide_scoped.synthetic.ts"
+          ],
+          "no_operating_db_or_real_student_data": true,
+          "CI_status_for_this_candidate": "NOT_RUN"
+        }
+      },
       "schema_source": "database/migrations/011_score_maps.prepared.sql",
       "schema_version": "score_maps_2026",
       "legacy_ledgers_modified": false,
@@ -34387,6 +34636,30 @@
         "path": "tests/reference_safety_suite_manifest.20261113_fmt.current.json",
         "sha256": "08a8d4689214f5eeb7890b8623f1eab7ff52e2d06eb80d1fafa9c16403e8e018"
       }
+    },
+    "service_candidate_suite_source_overlay_20261113_v1": {
+      "format": "jungsi.service-suite-source-overlay/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
+      "current_manifest": {
+        "path": "tests/review_suite_manifest.20261113_source_candidate.json",
+        "sha256": "3d3e2959e6f1e3e916a4c4e90e81ca74b6adc98c022eb2c9b20574fff860a7c1"
+      },
+      "additive_manifest": {
+        "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
+        "sha256": "9e94d0290c840c0a7d131737b6a5cbc542d23eca26e3c45bf731b6f95ff914ef"
+      },
+      "wrapper": {
+        "path": "tests/test_service_candidate_suites.py",
+        "sha256": "436cc42abf8455e551650fe9559d29b32391dafaaf0b5dcb1a68d8e5f7d58fda"
+      },
+      "regression_test": {
+        "path": "tests/test_service_candidate_registry.py",
+        "sha256": "3b9fddab23f175c713ae8af210460e2833fba4bd96fecf4879cb998b2a3832ea"
+      },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
     }
   },
   "repository_layout": {
@@ -82614,6 +82887,18 @@
                               "kind": "keyword",
                               "value": "number"
                             }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "repr": "AbortSignal",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
                           }
                         ],
                         "returnType": {
@@ -82672,7 +82957,7 @@
                             "typeName": "Promise"
                           }
                         },
-                        "parameter_source": "(\n    owner: string,\n    year: number,\n    ids: readonly string[],\n    reportId: string | null,\n    revision?: number,\n  )"
+                        "parameter_source": "(\n    owner: string,\n    year: number,\n    ids: readonly string[],\n    reportId: string | null,\n    revision?: number,\n    signal?: AbortSignal,\n  )"
                       }
                     ]
                   }
@@ -82798,6 +83083,18 @@
                                 "kind": "keyword",
                                 "value": "number"
                               }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "AbortSignal",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
                             }
                           ],
                           "hasBody": true,
@@ -82835,7 +83132,7 @@
               "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
             }
           ],
-          "source_sha256": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090"
+          "source_sha256": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516"
         },
         "dependencies": [
           {
@@ -175355,6 +175652,18 @@
                                   }
                                 }
                               }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "AbortSignal",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
                             }
                           ],
                           "returnType": {
@@ -175803,6 +176112,18 @@
                                 "repr": "number",
                                 "kind": "keyword",
                                 "value": "number"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "AbortSignal",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
                               }
                             }
                           ],
@@ -176816,7 +177137,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
             }
           ],
-          "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d"
+          "source_sha256": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584"
         },
         "dependencies": [
           {
@@ -202696,6 +203017,191 @@
                           "value": "void"
                         },
                         "parameter_source": "(data: UniversityAnalysisDataPort)"
+                      },
+                      {
+                        "name": "selectedSavedGuideOfferings",
+                        "kind": "method",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "string",
+                              "kind": "keyword",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "year",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "number",
+                              "kind": "keyword",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "ids",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "repr": "string",
+                                    "kind": "keyword",
+                                    "value": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "guard",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "signal",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "repr": "AbortSignal",
+                                      "kind": "typeRef",
+                                      "value": {
+                                        "typeName": "AbortSignal"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "maxBytes",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "repr": "number",
+                                      "kind": "keyword",
+                                      "value": "number"
+                                    }
+                                  },
+                                  {
+                                    "name": "assertActive",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "kind": "fnOrConstructor",
+                                      "value": {
+                                        "constructor": false,
+                                        "tsType": {
+                                          "repr": "void",
+                                          "kind": "keyword",
+                                          "value": "void"
+                                        },
+                                        "params": []
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "name": "settle",
+                                    "readonly": true,
+                                    "tsType": {
+                                      "kind": "fnOrConstructor",
+                                      "value": {
+                                        "constructor": false,
+                                        "tsType": {
+                                          "repr": "void",
+                                          "kind": "keyword",
+                                          "value": "void"
+                                        },
+                                        "params": [
+                                          {
+                                            "kind": "identifier",
+                                            "name": "actualBytes",
+                                            "optional": false,
+                                            "tsType": {
+                                              "repr": "number",
+                                              "kind": "keyword",
+                                              "value": "number"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "optional": true,
+                        "returnType": {
+                          "repr": "Promise",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "kind": "typeLiteral",
+                                "value": {
+                                  "properties": [
+                                    {
+                                      "name": "version",
+                                      "tsType": {
+                                        "kind": "union",
+                                        "value": [
+                                          {
+                                            "repr": "string",
+                                            "kind": "keyword",
+                                            "value": "string"
+                                          },
+                                          {
+                                            "repr": "null",
+                                            "kind": "keyword",
+                                            "value": "null"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "name": "rows",
+                                      "tsType": {
+                                        "repr": "ReadonlyMap",
+                                        "kind": "typeRef",
+                                        "value": {
+                                          "typeParams": [
+                                            {
+                                              "repr": "string",
+                                              "kind": "keyword",
+                                              "value": "string"
+                                            },
+                                            {
+                                              "repr": "NativeObject",
+                                              "kind": "typeRef",
+                                              "value": {
+                                                "typeName": "NativeObject",
+                                                "resolution": {
+                                                  "kind": "import",
+                                                  "specifier": "../domain/json_value.ts",
+                                                  "name": "NativeObject"
+                                                }
+                                              }
+                                            }
+                                          ],
+                                          "typeName": "ReadonlyMap"
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ],
+                            "typeName": "Promise"
+                          }
+                        },
+                        "parameter_source": "(\n    owner: string,\n    year: number,\n    ids: readonly string[],\n    guard: {\n      readonly signal: AbortSignal;\n      readonly maxBytes: number;\n      readonly assertActive: () => void;\n      readonly settle: (actualBytes: number) => void;\n    },\n  )"
                       }
                     ]
                   }
@@ -202850,6 +203356,11 @@
               }
             },
             {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
               "importedName": "RequestClockPort",
               "originalName": "RequestClockPort",
               "src": "supabase/functions/_shared/jungsi/application/ports.ts"
@@ -202870,7 +203381,7 @@
               "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
             }
           ],
-          "source_sha256": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7"
+          "source_sha256": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d"
         },
         "dependencies": [
           {
@@ -202910,6 +203421,16 @@
               {
                 "kind": "type",
                 "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
               }
             ]
           },
@@ -209118,7 +209639,7 @@
               "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
             }
           ],
-          "source_sha256": "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756"
+          "source_sha256": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7"
         },
         "dependencies": [
           {
@@ -213256,6 +213777,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
             },
             {
+              "importedName": "SavedScoreTransientUnavailable",
+              "originalName": "SavedScoreTransientUnavailable",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
+            },
+            {
               "importedName": "ScoreInputService",
               "originalName": "ScoreInputService",
               "src": "supabase/functions/_shared/jungsi/application/score_input_service.ts"
@@ -213322,6 +213848,11 @@
               "importedName": "assertAdmissionMicros",
               "originalName": "assertAdmissionMicros",
               "src": "supabase/functions/_shared/jungsi/application/service_end_admission.ts"
+            },
+            {
+              "importedName": "attachSavedPageScores",
+              "originalName": "attachSavedPageScores",
+              "src": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts"
             },
             {
               "importedName": "bindRuntimeReferencePorts",
@@ -213399,6 +213930,16 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
             },
             {
+              "importedName": "readSavedCandidateGroups",
+              "originalName": "readSavedCandidateGroups",
+              "src": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts"
+            },
+            {
+              "importedName": "readSavedScoreMap",
+              "originalName": "readSavedScoreMap",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
+            },
+            {
               "importedName": "referenceCandidateScopePort",
               "originalName": "referenceCandidateScopePort",
               "src": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts"
@@ -213434,6 +213975,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts"
             },
             {
+              "importedName": "scoreMapPin",
+              "originalName": "scoreMapPin",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
               "importedName": "sessionDto",
               "originalName": "sessionDto",
               "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
@@ -213444,7 +213990,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4"
+          "source_sha256": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba"
         },
         "dependencies": [
           {
@@ -213468,6 +214014,16 @@
               {
                 "kind": "type",
                 "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/attach_saved_scores.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts"
               }
             ]
           },
@@ -213508,6 +214064,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/member_saved_candidate_groups.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts"
               }
             ]
           },
@@ -213652,6 +214218,16 @@
             ]
           },
           {
+            "specifier": "../application/score_map.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+              }
+            ]
+          },
+          {
             "specifier": "../application/service_end_admission.ts",
             "dynamic": false,
             "targets": [
@@ -213788,6 +214364,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_score_map_read.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
               }
             ]
           },
@@ -214753,6 +215339,36 @@
                         }
                       },
                       {
+                        "name": "memberResults",
+                        "kind": "method",
+                        "functionDef": {
+                          "params": [],
+                          "returnType": {
+                            "repr": "Promise",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "MemberJsonResults",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "MemberJsonResults",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../application/member_json_results.ts",
+                                      "name": "MemberJsonResults"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "Promise"
+                            }
+                          },
+                          "hasBody": true,
+                          "isAsync": true
+                        }
+                      },
+                      {
                         "name": "memberShortlist",
                         "kind": "method",
                         "functionDef": {
@@ -215672,7 +216288,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
             }
           ],
-          "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8"
+          "source_sha256": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272"
         },
         "dependencies": [
           {
@@ -223543,6 +224159,18 @@
                                   }
                                 }
                               }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "AbortSignal",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
                             }
                           ],
                           "returnType": {
@@ -225347,7 +225975,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77"
+          "source_sha256": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18"
         },
         "dependencies": [
           {
@@ -355845,6 +356473,18 @@
                                   "typeName": "Uint8Array"
                                 }
                               }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "AbortSignal",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
                             }
                           ],
                           "returnType": {
@@ -355899,6 +356539,18 @@
                                   "resolution": {
                                     "kind": "local"
                                   }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "signal",
+                              "optional": true,
+                              "tsType": {
+                                "repr": "AbortSignal",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "AbortSignal"
                                 }
                               }
                             }
@@ -356417,7 +357069,7 @@
               "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
             }
           ],
-          "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c"
+          "source_sha256": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625"
         },
         "dependencies": [
           {
@@ -356467,6 +357119,1402 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts": {
+        "layer": "application",
+        "symbols": [
+          "SavedPageScoresPort",
+          "attachSavedPageScores"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "SavedPageScoresPort",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "methods": [
+                      {
+                        "name": "read",
+                        "kind": "method",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "session",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "SessionSnapshot",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "SessionSnapshot",
+                                "resolution": {
+                                  "kind": "import",
+                                  "specifier": "./session_service.ts",
+                                  "name": "SessionSnapshot"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "year",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "number",
+                              "kind": "keyword",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "offeringIds",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "repr": "string",
+                                    "kind": "keyword",
+                                    "value": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": false,
+                            "tsType": {
+                              "repr": "AbortSignal",
+                              "kind": "typeRef",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "repr": "Promise",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "state",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "repr": "ready",
+                                            "kind": "literal",
+                                            "value": {
+                                              "kind": "string",
+                                              "string": "ready"
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "name": "scores",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "repr": "ReadonlyMap",
+                                            "kind": "typeRef",
+                                            "value": {
+                                              "typeParams": [
+                                                {
+                                                  "repr": "string",
+                                                  "kind": "keyword",
+                                                  "value": "string"
+                                                },
+                                                {
+                                                  "repr": "MyScore",
+                                                  "kind": "typeRef",
+                                                  "value": {
+                                                    "typeName": "MyScore",
+                                                    "resolution": {
+                                                      "kind": "import",
+                                                      "specifier": "./score_map.ts",
+                                                      "name": "MyScore"
+                                                    }
+                                                  }
+                                                }
+                                              ],
+                                              "typeName": "ReadonlyMap"
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "state",
+                                          "readonly": true,
+                                          "tsType": {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "repr": "no_profile",
+                                                "kind": "literal",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "no_profile"
+                                                }
+                                              },
+                                              {
+                                                "repr": "unavailable",
+                                                "kind": "literal",
+                                                "value": {
+                                                  "kind": "string",
+                                                  "string": "unavailable"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            ],
+                            "typeName": "Promise"
+                          }
+                        },
+                        "parameter_source": "(\n    session: SessionSnapshot,\n    year: number,\n    offeringIds: readonly string[],\n    signal: AbortSignal,\n  )"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "attachSavedPageScores",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "result",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "NativeObject",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "NativeObject",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "../domain/json_value.ts",
+                              "name": "NativeObject"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "session",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SessionSnapshot",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SessionSnapshot",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./session_service.ts",
+                              "name": "SessionSnapshot"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "clock",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "RequestClockPort",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "RequestClockPort",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./ports.ts",
+                              "name": "RequestClockPort"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "signal",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "AbortSignal",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "AbortSignal"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "scores",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SavedPageScoresPort",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SavedPageScoresPort",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "NativeObject",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "NativeObject",
+                              "resolution": {
+                                "kind": "import",
+                                "specifier": "../domain/json_value.ts",
+                                "name": "NativeObject"
+                              }
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  result: NativeObject,\n  session: SessionSnapshot,\n  clock: RequestClockPort,\n  signal: AbortSignal,\n  scores: SavedPageScoresPort,\n)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Attach existing scores to a paid user's current catalog page."
+              }
+            },
+            {
+              "importedName": "MyScore",
+              "originalName": "MyScore",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "RequestClockPort",
+              "originalName": "RequestClockPort",
+              "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_ID",
+              "originalName": "SCORE_MAP_ID",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SessionSnapshot",
+              "originalName": "SessionSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "requirePaidSession",
+              "originalName": "requirePaidSession",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "resultObject",
+              "originalName": "resultObject",
+              "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+            }
+          ],
+          "source_sha256": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33"
+        },
+        "dependencies": [
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./paid_result_components.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./score_map.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+              },
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./session_service.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+              },
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts": {
+        "layer": "application",
+        "symbols": [
+          "readSavedCandidateGroups"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "readSavedCandidateGroups",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "session",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SessionSnapshot",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SessionSnapshot",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./session_service.ts",
+                              "name": "SessionSnapshot"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "year",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rows",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "catalogVersion",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "results",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "MemberJsonResults",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "MemberJsonResults",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./member_json_results.ts",
+                              "name": "MemberJsonResults"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "clock",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "RequestClockPort",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "RequestClockPort",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./ports.ts",
+                              "name": "RequestClockPort"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "signal",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "AbortSignal",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "AbortSignal"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "expected",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SavedReportIdentity",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SavedReportIdentity",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./member_saved_offering_lookup.ts",
+                              "name": "SavedReportIdentity"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "requestedIds",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "NativeObject",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeName": "NativeObject",
+                              "resolution": {
+                                "kind": "import",
+                                "specifier": "../domain/json_value.ts",
+                                "name": "NativeObject"
+                              }
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  session: SessionSnapshot,\n  year: number,\n  rows: readonly NativeObject[],\n  catalogVersion: string,\n  results: MemberJsonResults,\n  clock: RequestClockPort,\n  signal: AbortSignal,\n  expected: SavedReportIdentity,\n  requestedIds: readonly string[],\n)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Candidate: reuse saved assessments and the existing boundary-group rules."
+              }
+            },
+            {
+              "importedName": "MemberJsonResults",
+              "originalName": "MemberJsonResults",
+              "src": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "RequestClockPort",
+              "originalName": "RequestClockPort",
+              "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+            },
+            {
+              "importedName": "SavedReportIdentity",
+              "originalName": "SavedReportIdentity",
+              "src": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
+            },
+            {
+              "importedName": "SessionSnapshot",
+              "originalName": "SessionSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "candidateGroups",
+              "originalName": "candidateGroups",
+              "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+            },
+            {
+              "importedName": "readSavedOfferingGroups",
+              "originalName": "readSavedOfferingGroups",
+              "src": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
+            }
+          ],
+          "source_sha256": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b"
+        },
+        "dependencies": [
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_json_results.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_saved_offering_lookup.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./session_service.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./university_analysis.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": {
+        "layer": "application",
+        "symbols": [
+          "readSavedOfferingGroups",
+          "SavedReportIdentity"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "SavedReportIdentity",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "reportId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "revision",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "profileId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "examId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "packVersion",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "readSavedOfferingGroups",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "session",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SessionSnapshot",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SessionSnapshot",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./session_service.ts",
+                              "name": "SessionSnapshot"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "year",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "number",
+                          "kind": "keyword",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "rows",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "NativeObject",
+                                "kind": "typeRef",
+                                "value": {
+                                  "typeName": "NativeObject",
+                                  "resolution": {
+                                    "kind": "import",
+                                    "specifier": "../domain/json_value.ts",
+                                    "name": "NativeObject"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "results",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "MemberJsonResults",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "MemberJsonResults",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./member_json_results.ts",
+                              "name": "MemberJsonResults"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "clock",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "RequestClockPort",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "RequestClockPort",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./ports.ts",
+                              "name": "RequestClockPort"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "signal",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "AbortSignal",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "AbortSignal"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "expected",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SavedReportIdentity",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SavedReportIdentity",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  session: SessionSnapshot,\n  year: number,\n  rows: readonly NativeObject[],\n  results: MemberJsonResults,\n  clock: RequestClockPort,\n  signal: AbortSignal,\n  expected: SavedReportIdentity,\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "ID",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Review candidate: combine an already-authorized catalog page with saved\nmember assessments through the existing report.read runtime candidate.\nThis module adds no HTTP route; the caller maintains ownership, the shared\nrequest budget, and cancellation for the underlying saved-results port."
+              }
+            },
+            {
+              "importedName": "MemberJsonResults",
+              "originalName": "MemberJsonResults",
+              "src": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+            },
+            {
+              "importedName": "NativeObject",
+              "originalName": "NativeObject",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "RequestClockPort",
+              "originalName": "RequestClockPort",
+              "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+            },
+            {
+              "importedName": "SessionSnapshot",
+              "originalName": "SessionSnapshot",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "importedName": "cloneNativeJson",
+              "originalName": "cloneNativeJson",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            },
+            {
+              "importedName": "offeringDto",
+              "originalName": "offeringDto",
+              "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+            },
+            {
+              "importedName": "requirePaidSession",
+              "originalName": "requirePaidSession",
+              "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ],
+          "source_sha256": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36"
+        },
+        "dependencies": [
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./catalog.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/catalog.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./member_json_results.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./ports.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./session_service.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+              }
+            ]
+          }
+        ]
+      },
+      "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": {
+        "layer": "data_infrastructure",
+        "symbols": [
+          "SavedScoreReadScope",
+          "readSavedScoreMap",
+          "SavedScoreTransientUnavailable"
+        ],
+        "declarations": {
+          "symbols": [
+            {
+              "name": "SavedScoreTransientUnavailable",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "class",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "params": [],
+                        "parameter_source": "()"
+                      }
+                    ],
+                    "extends": "AccessError"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "SavedScoreReadScope",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "interface",
+                  "def": {
+                    "methods": [
+                      {
+                        "name": "assertActive",
+                        "kind": "method",
+                        "params": [],
+                        "returnType": {
+                          "repr": "void",
+                          "kind": "keyword",
+                          "value": "void"
+                        },
+                        "parameter_source": "()"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "name": "owner",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "profileId",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "dataPin",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "string",
+                          "kind": "keyword",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "signal",
+                        "readonly": true,
+                        "tsType": {
+                          "repr": "AbortSignal",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "AbortSignal"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "readSavedScoreMap",
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "sql",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SupabaseSqlTransport",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SupabaseSqlTransport",
+                            "resolution": {
+                              "kind": "import",
+                              "specifier": "./transaction_sql.ts",
+                              "name": "SupabaseSqlTransport"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "scope",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "SavedScoreReadScope",
+                          "kind": "typeRef",
+                          "value": {
+                            "typeName": "SavedScoreReadScope",
+                            "resolution": {
+                              "kind": "local"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "offeringIds",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "repr": "string",
+                                "kind": "keyword",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "Promise",
+                      "kind": "typeRef",
+                      "value": {
+                        "typeParams": [
+                          {
+                            "repr": "ReadonlyMap",
+                            "kind": "typeRef",
+                            "value": {
+                              "typeParams": [
+                                {
+                                  "repr": "string",
+                                  "kind": "keyword",
+                                  "value": "string"
+                                },
+                                {
+                                  "repr": "MyScore",
+                                  "kind": "typeRef",
+                                  "value": {
+                                    "typeName": "MyScore",
+                                    "resolution": {
+                                      "kind": "import",
+                                      "specifier": "../application/score_map.ts",
+                                      "name": "MyScore"
+                                    }
+                                  }
+                                }
+                              ],
+                              "typeName": "ReadonlyMap"
+                            }
+                          }
+                        ],
+                        "typeName": "Promise"
+                      }
+                    },
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(\n  sql: SupabaseSqlTransport,\n  scope: SavedScoreReadScope,\n  offeringIds: readonly string[],\n)"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "READ_SAVED_SCORES_SQL",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "variable",
+                  "def": {
+                    "tsType": {
+                      "repr": "SELECT m.offering_id,m.status,m.converted_score,\n m.official_max_score,m.reason_code\n FROM jungsi_backend.score_maps m\n WHERE m.owner_id=$1 AND m.profile_id=$2 AND m.data_pin=$3\n AND m.offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))\n AND EXISTS (SELECT 1 FROM jungsi_backend.profiles p\n   WHERE p.owner_id=$1 AND p.profile_id=$2 AND p.confirmed)",
+                      "kind": "literal",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "repr": "SELECT m.offering_id,m.status,m.converted_score,\n m.official_max_score,m.reason_code\n FROM jungsi_backend.score_maps m\n WHERE m.owner_id=$1 AND m.profile_id=$2 AND m.data_pin=$3\n AND m.offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))\n AND EXISTS (SELECT 1 FROM jungsi_backend.profiles p\n   WHERE p.owner_id=$1 AND p.profile_id=$2 AND p.confirmed)",
+                            "kind": "literal",
+                            "value": {
+                              "kind": "string",
+                              "string": "SELECT m.offering_id,m.status,m.converted_score,\n m.official_max_score,m.reason_code\n FROM jungsi_backend.score_maps m\n WHERE m.owner_id=$1 AND m.profile_id=$2 AND m.data_pin=$3\n AND m.offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))\n AND EXISTS (SELECT 1 FROM jungsi_backend.profiles p\n   WHERE p.owner_id=$1 AND p.profile_id=$2 AND p.confirmed)"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "kind": "const"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "transientConnectionError",
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "kind": "function",
+                  "def": {
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "error",
+                        "optional": false,
+                        "tsType": {
+                          "repr": "unknown",
+                          "kind": "keyword",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "repr": "boolean",
+                      "kind": "keyword",
+                      "value": "boolean"
+                    },
+                    "hasBody": true,
+                    "parameter_source": "(error: unknown)"
+                  }
+                }
+              ]
+            }
+          ],
+          "imports": [
+            {
+              "importedName": "AccessError",
+              "originalName": "AccessError",
+              "src": "supabase/functions/_shared/jungsi/application/access.ts",
+              "jsDoc": {
+                "doc": "Read-only candidate for the existing member score map; no score calculation or writes."
+              }
+            },
+            {
+              "importedName": "MyScore",
+              "originalName": "MyScore",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_ID",
+              "originalName": "SCORE_MAP_ID",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_OWNER",
+              "originalName": "SCORE_MAP_OWNER",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SCORE_MAP_PIN",
+              "originalName": "SCORE_MAP_PIN",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "SupabaseSqlTransport",
+              "originalName": "SupabaseSqlTransport",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            },
+            {
+              "importedName": "myScore",
+              "originalName": "myScore",
+              "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "importedName": "nativeJsonText",
+              "originalName": "nativeJsonText",
+              "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ],
+          "source_sha256": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345"
+        },
+        "dependencies": [
+          {
+            "specifier": "../application/access.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/access.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../application/score_map.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "../domain/json_value.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "specifier": "./transaction_sql.ts",
+            "dynamic": false,
+            "targets": [
+              {
+                "kind": "type",
+                "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
               }
             ]
           }
@@ -356552,7 +358600,17 @@
       "tests/edge/test_score_input_policy.ts",
       "tests/edge/test_current_catalog_composition.ts"
     ],
-    "unit_count": 656
+    "unit_count": 656,
+    "bound_graph_saved_report_candidate_20261113": {
+      "format": "jungsi.foundation-graph-saved-report-source/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "historical_extension_sha256": "81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6",
+      "path": "supabase/functions/_shared/current_public_catalog.ts",
+      "previous_source_sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
+      "current_source_sha256": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    }
   },
   "score_input_policy_contract": {
     "format": "jungsi.score-input-policy-contract/v1",
@@ -356839,7 +358897,7 @@
       "supabase/functions/_shared/jungsi/application/history_snapshot.ts": "b7928544429a574a4770d733deb53fd2dd468167e7a80b61e6c3823dac07e4d6",
       "supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts": "410ecb11e7dc9a07c4b09b3d8cc4c5c0e8c2675f1122618a48d327a0650628fa",
       "supabase/functions/_shared/jungsi/application/management_access.ts": "a24b9196afffeec9d2ce7bdd7b748e48425fbd1a046a11470b4cd546d1c3ae57",
-      "supabase/functions/_shared/jungsi/application/member_json_results.ts": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
+      "supabase/functions/_shared/jungsi/application/member_json_results.ts": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516",
       "supabase/functions/_shared/jungsi/application/member_shortlist.ts": "3a66a21ca2f337a41b66dd32aef9573a818fe21db4d0321ea2c8aa0fb21416d6",
       "supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts": "bf24dfd519f07c99651299bd5d3ace8a1cbd1e0ccab6bbadaf0e919013faa934",
       "supabase/functions/_shared/jungsi/application/offering_analysis.ts": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a",
@@ -356930,7 +358988,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/legacy_reference_carryover.ts": "f6b98b9889dd3f7abb433ff887920813caf59b9718917f94926ee9b1c6242951",
       "supabase/functions/_shared/jungsi/infrastructure/management_postgres.ts": "a80ccb35c33703d76a765b530a2d9e02d3cd86d9ba72d15cd3db51c481435032",
       "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
-      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
+      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584",
       "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e",
       "supabase/functions/_shared/jungsi/infrastructure/native_reference_db_tail.ts": "b85cb358c51544883f2a0da37b8447d94ec057a379d1fa2150c9baa562284ad4",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",
@@ -356950,16 +359008,16 @@
       "supabase/functions/_shared/jungsi/infrastructure/published_reference_candidate_scope.ts": "2694eafeff3e040c3b16e55027370d12f7da4bb9d1899c3c33246c5f4ffb981e",
       "supabase/functions/_shared/jungsi/infrastructure/published_reference_runtime.ts": "53460640186e14596c3237c3ba32ce8c4306ccc8f68bd228876eb963539ee0fd",
       "supabase/functions/_shared/jungsi/infrastructure/published_reference_tail_issuer.ts": "8cc7e588eb3624b43b0f72265cee7ef92dfce7752d85d32e1f6ad30c6882ad99",
-      "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
+      "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
       "supabase/functions/_shared/jungsi/infrastructure/reference_percentile_postgres.ts": "f937804ffdf84e246f10dcd393efbefa02da34e23f5ad3f28e5da5841e1a632f",
       "supabase/functions/_shared/jungsi/infrastructure/reference_projection_transition.ts": "02c315e142d4bc915e433ada5e20bcc47b9301a69d6bbc25ea639c46c0b2d562",
       "supabase/functions/_shared/jungsi/infrastructure/reference_report_evidence_verifier.ts": "6beb18282650c0e27d40dafbe142a6342fea6abf0d5e602dfb5580d76f845290",
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd",
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_factory.ts": "81a3f8abe39ea77da8c9f77b478864cf2f8ddfdafa98f184f05e990bacf943ed",
       "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
@@ -356967,7 +359025,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11",
       "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts": "de75ae9445513699af0bd6aa0ce4004b2aea6b6daf0c65e195906b34ec5c7d88",
       "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394",
-      "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
+      "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
       "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f",
       "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts": "6cc9fa76e48fe325851a2239e4009c30e28acf32401230fecd96cebe3f6608cd",
       "supabase/functions/_shared/jungsi/infrastructure/session_http.ts": "70cf3f60478a9a200dc4e8d6c772a04e98ed360e1dc03e0c4d0e296e9420f3d3",
@@ -357171,7 +359229,11 @@
       "supabase/functions/_shared/jungsi/infrastructure/unified_reference_tail_batch_candidate.ts": "9e19020e7299892649edd1cce29da08fe3b94aa0e7614df70d60412fa35182d7",
       "supabase/functions/_shared/jungsi/application/named_owner_port.synthetic_test.ts": "e4a9cdef6d57cf8fd4551e72527a8813ff035384ec88bdcbeff4a95ae41a7cf6",
       "supabase/functions/_shared/jungsi/application/member_school_results.ts": "2542121b10b5bd4289dcda66520d5df5ac947c6f1df66cf65bc01c9ec44769ef",
-      "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c"
+      "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
+      "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33",
+      "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b",
+      "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36",
+      "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -357233,6 +359295,18 @@
         "authenticated_API_verified": false,
         "rollout_approved": false,
         "writes": 0
+      },
+      "guard_saved_report_source_candidate_20261113": {
+        "format": "jungsi.score-input-native-guard-continuation/v1",
+        "historical_guard_sha256": "93236619b0293ac768c2968542bdc4e515bd5155417da728b765db9179e58b42",
+        "historical_source_commit": "848dc97b6657eb36932ba33908b6cdc147c032c4",
+        "source_path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
+        "source_sha256": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
+        "native_API_empty_guard": "NOT_RUN",
+        "authenticated_API_verified": false,
+        "rollout_approved": false,
+        "writes": 0,
+        "previous_continuation_sha256": "19a317541d5a758c5d4d701ddab706cb325d4f2ba10a900ad14a141eeb823d04"
       }
     },
     "frontend_handoff": {
@@ -362976,6 +365050,57 @@
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
       "tests/edge/member_shortlist_fixture.ts": "b3b191000d0b88307dcf86fe269eb13de35ebf6f290ff498ed79a2a0ea917fd3"
+    }
+  },
+  "saved_report_current_source_overlay_20261113_v1": {
+    "format": "jungsi.saved-report-current-source-overlay/v1",
+    "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+    "activation_status": "NOT_RUN",
+    "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+    "operating_writes": 0,
+    "previous_overlay_sha256": "cb253a886da3519d18c72897439bd10844067f5b79ea29a6a3ae730501b9ae0f",
+    "source_bindings": {
+      "supabase/functions/_shared/current_public_catalog.ts": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
+      "supabase/functions/_shared/current_public_catalog_sql.ts": "ab1c20bfd31f7667867338fb30e832255210f098a2b848ce374ff6a4e0eaed69",
+      "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
+      "supabase/functions/_shared/current_public_scoped_service.ts": "dd88b02c3be866d1f4d0b586db3f2e3bc7ea637af72a198e3143b4584c43ba94",
+      "supabase/functions/_shared/search_failure_diagnostic.ts": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",
+      "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33",
+      "supabase/functions/_shared/jungsi/application/member_json_results.ts": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516",
+      "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b",
+      "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36",
+      "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345",
+      "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
+      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584",
+      "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
+      "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
+      "scripts/check_project_consistency.py": "badc73c99087f63f5792503dd41d8c5b65caec5090fd4c77f7aae787b9f8909c",
+      "scripts/run_edge_tests.py": "c96d357584e434d39281cfa18de3d57b867543845f645ee5720ddc3576c0ed12"
+    },
+    "receipt_bindings": {
+      "current_public": {
+        "historical_sha256": "06f1e26e0719cabc45ece3dab98e82c0df5db9d3739906f2a47933117e3be0c5",
+        "status": "NOT_RUN"
+      },
+      "own_2027": {
+        "historical_sha256": "1297aa820a4dd9573552fad416291af5024a7be8de439f3d77f738ab6545bcee",
+        "status": "NOT_RUN"
+      },
+      "snapshot_batch": {
+        "historical_sha256": "ceedf2c8ce46ee394bedb422f63b445c8d5a434e732802e1f7d1ba4a2a461c14",
+        "status": "NOT_RUN"
+      },
+      "current_page_projection": {
+        "historical_sha256": "7497e7c5afcd69bdc80cecc8781a755415efa3dda4f1f597f63d1c371beef647",
+        "status": "NOT_RUN"
+      },
+      "p1_selection": {
+        "historical_sha256": "baae156bbc3786fd45e09730e4c662ee44d99b38c0ce4b8ebc2e44883c325db7",
+        "status": "NOT_RUN"
+      }
     }
   }
 }

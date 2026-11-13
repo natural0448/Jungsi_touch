@@ -137,6 +137,13 @@ export interface CurrentPublicKeySelectionPort {
     recruitment: boolean,
   ): Promise<PublicPreparedKeyPage>;
 }
+/** Request-bound budget and cancellation for the saved-report Guide lookup. */
+export interface SavedGuideReadGuard {
+  readonly signal: AbortSignal;
+  readonly maxBytes: number;
+  readonly assertActive: () => void;
+  readonly settle: (actualBytes: number) => void;
+}
 export interface CurrentPublicCatalogPort {
   publication(): Promise<PublicCatalogPublication>;
   search(
@@ -149,6 +156,13 @@ export interface CurrentPublicCatalogPort {
     subject: string,
     ids: readonly string[],
     recruitment: boolean,
+  ): Promise<PublicCatalogPage>;
+  /** Only the already verified year and original PKs of an owned report. */
+  lookupSavedGuide?(
+    subject: string,
+    year: number,
+    pks: readonly string[],
+    guard: SavedGuideReadGuard,
   ): Promise<PublicCatalogPage>;
 }
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
@@ -590,6 +604,55 @@ export function publicCatalogRecruitment(guide: NativeObject): NativeObject {
 }
 /** Four public reads never call getCatalog(); selected analysis alone may reuse its old artifact. */
 export class CurrentPublicCatalogService extends CatalogService {
+  /** Resolve saved public addresses without making a new school mapping. */
+  async selectedSavedGuideOfferings(
+    owner: string,
+    year: number,
+    ids: readonly string[],
+    guard: SavedGuideReadGuard,
+  ): Promise<{ version: string | null; rows: ReadonlyMap<string, NativeObject> }> {
+    if (
+      ![2024, 2025, 2026, 2027].includes(year) || ids.length > 100 ||
+      new Set(ids).size !== ids.length || ids.some((id) => !ID.test(id)) ||
+      !guard || !(guard.signal instanceof AbortSignal) || guard.signal.aborted ||
+      typeof guard.assertActive !== "function" || typeof guard.settle !== "function" ||
+      !Number.isSafeInteger(guard.maxBytes) || guard.maxBytes < 1
+    ) fail("current_catalog_page_invalid");
+    const prefix = `${year}:`;
+    const pks = ids.filter((id) => id.startsWith(prefix) && id.length > prefix.length)
+      .map((id) => id.slice(prefix.length));
+    if (!pks.length) return { version: null, rows: new Map() };
+    const lookup = this.current.lookupSavedGuide;
+    if (!lookup) return fail("current_catalog_unavailable");
+    guard.assertActive();
+    const pub = await this.live();
+    guard.assertActive();
+    const page = await lookup.call(this.current, owner, year, pks, guard);
+    guard.assertActive();
+    this.page(page, pub, pks.length);
+    const rows = new Map<string, NativeObject>();
+    for (const record of page.rows) {
+      const row = await publicCatalogOffering(record.row, record.guide);
+      const offeringId = row.offering_id;
+      if (typeof offeringId !== "string") return fail("current_catalog_identity_conflict");
+      if (
+        !ids.includes(offeringId) || row.academic_year !== year || rows.has(offeringId)
+      ) fail("current_catalog_identity_conflict");
+      const metadata = record.guide && object(record.guide.metadata) ? record.guide.metadata : {};
+      // Existing analysis may be shown only for a currently qualified service row.
+      if (
+        metadata.practical_required !== false ||
+        metadata.participation_conditions_status !== "verified" ||
+        typeof row.university_id !== "string" || !ID.test(row.university_id)
+      ) continue;
+      rows.set(offeringId, offeringDto(row));
+    }
+    const after = await this.live();
+    guard.assertActive();
+    if (after.version !== pub.version || after.sha256 !== pub.sha256 ||
+        after.expiresAtUtc !== pub.expiresAtUtc) fail("current_catalog_state_unapproved");
+    return { version: `current:${page.head.slice(0, 40)}`, rows };
+  }
   override async selectedOfferings(
     owner: string,
     year: number,

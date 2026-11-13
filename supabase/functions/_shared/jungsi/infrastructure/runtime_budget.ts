@@ -654,7 +654,9 @@ export class RuntimeRequestBudget implements RequestBudgetPort {
       const result = await shared.run(request, async (activeAdmission) => {
         if (
           request.operation === CURRENT_PAGE_OPERATION_ID ||
-          request.operation === STUDENT_REFERENCE_OPERATION_ID
+          request.operation === STUDENT_REFERENCE_OPERATION_ID ||
+          request.operation === "offerings.search" ||
+          request.operation === "report.read"
         ) {
           if (!activeAdmission || typeof activeAdmission !== "object") fail();
           const prepared = activeAdmission as PreparedUsageAdmission;

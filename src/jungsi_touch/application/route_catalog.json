@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "2998ecf3deff6b6ec63df6e63abf2204ad00bf929dd6b0c2a13ba33b5354f531",
+  "source_sha256": "bdaa7213f67e03368878d52a59adc5b3317a32677d917d798e3361875dd15e64",
   "pages": [
     {
       "id": "PAGE-01",
@@ -335,6 +335,8 @@
         "body": [],
         "query": [
           "academic_year (2024~2027 선택)",
+          "exam_id (선택; 본인 저장 점수의 승인 시험 식별자)",
+          "stage (선택; 해당 시험의 승인된 입력 단계)",
           "university_q",
           "department_q",
           "region",
@@ -342,7 +344,7 @@
           "cursor",
           "limit (1~100; 기본 50)"
         ],
-        "response": "catalog_search (items=offering)",
+        "response": "catalog_search (items=offering; 본인 조회가 허용된 저장 점수 my_score는 선택 필드)",
         "idempotency_key_required": false,
         "response_schema": "catalog_search"
       },
@@ -4764,6 +4766,53 @@
     "score_map_source_extension": {
       "format": "jungsi.score-map-source-extension/v1",
       "status": "SOURCE_PREPARED_NOT_ACTIVATED",
+      "observed_operating_table_20261113": {
+        "table": "jungsi_backend.score_maps",
+        "observation": "TABLE_AND_COLUMN_METADATA_ONLY",
+        "primary_key": [
+          "owner_id",
+          "profile_id",
+          "data_pin",
+          "offering_id"
+        ],
+        "verified_columns": [
+          "status",
+          "converted_score",
+          "official_max_score",
+          "reason_code",
+          "computed_at"
+        ],
+        "converted_percentile_column": "ABSENT",
+        "runtime_role_select": "GRANT_METADATA_TRUE_BASE_RLS_AND_QUERY_NOT_VERIFIED",
+        "saved_member_rows_and_current_data_pin": "NOT_VERIFIED",
+        "live_API_connection": "NOT_VERIFIED"
+      },
+      "student_pk_existing_read_candidate_20261113": {
+        "status": "SOURCE_SCOPED_UNIT_TESTS_PASSED_NOT_DEPLOYED",
+        "operation": "offerings.search",
+        "selection": "검증된 세션의 학생 식별자와 승인 시험·단계의 현재 profile, 승인된 data_pin, 화면에 전달할 모집단위 PK 목록으로 기존 score_maps에서 이미 저장된 점수만 읽는다.",
+        "query": [
+          "exam_id_optional",
+          "stage_optional"
+        ],
+        "response": "기존 items[].my_score 선택 필드를 사용하며 null과 실제 0을 구분한다. 누백·판정이 없는 경우 만들지 않는다.",
+        "cursor": "선택한 시험과 입력 단계를 검색 커서 결속에 반영한다.",
+        "scope": "기존 정본의 대학 코드와 모집단위 PK를 사용하고 전국 검색을 관심대학에 한정하지 않는다. 조회 시 계산·쓰기·재수집·새 테이블 생성을 하지 않는다.",
+        "security": "기존 유료 권한·본인 소유권·자료판·공유 예산·물리 SQL 취소·private/no-store 및 역할별 응답 허용목록을 유지한다.",
+        "page4": "report.read의 본인 보고서·현재 승인 head·학년도와 원 PK로 저장된 분석을 부분 연결한다. 이미 존재하는 결과는 보존한다. 미분석 범위와 와일드카드는 전체 완료로 표시하지 않는다.",
+        "verification": "Deno 2.9.7: 12 scoped synthetic tests passed (2026-11-13); 3P v6 and 4P v2 screen patches apply-check passed; runtime type check passed. Stage projection guard: 15 scoped tests passed after historical/current binding correction. Remote CI, actual DB calls, screen execution and deployment remain NOT_RUN.",
+        "operating_application": "NOT_RUN",
+        "targeted_unit_tests": {
+          "status": "PASS_SYNTHETIC_ONLY",
+          "total": 12,
+          "paths": [
+            "tests/service_p1/test_student_pk_scoped.synthetic.ts",
+            "tests/service_p1/test_current_guide_scoped.synthetic.ts"
+          ],
+          "no_operating_db_or_real_student_data": true,
+          "CI_status_for_this_candidate": "NOT_RUN"
+        }
+      },
       "schema_source": "database/migrations/011_score_maps.prepared.sql",
       "schema_version": "score_maps_2026",
       "legacy_ledgers_modified": false,
@@ -4873,6 +4922,30 @@
         "path": "tests/reference_safety_suite_manifest.20261113_fmt.current.json",
         "sha256": "08a8d4689214f5eeb7890b8623f1eab7ff52e2d06eb80d1fafa9c16403e8e018"
       }
+    },
+    "service_candidate_suite_source_overlay_20261113_v1": {
+      "format": "jungsi.service-suite-source-overlay/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
+      "current_manifest": {
+        "path": "tests/review_suite_manifest.20261113_source_candidate.json",
+        "sha256": "3d3e2959e6f1e3e916a4c4e90e81ca74b6adc98c022eb2c9b20574fff860a7c1"
+      },
+      "additive_manifest": {
+        "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
+        "sha256": "9e94d0290c840c0a7d131737b6a5cbc542d23eca26e3c45bf731b6f95ff914ef"
+      },
+      "wrapper": {
+        "path": "tests/test_service_candidate_suites.py",
+        "sha256": "436cc42abf8455e551650fe9559d29b32391dafaaf0b5dcb1a68d8e5f7d58fda"
+      },
+      "regression_test": {
+        "path": "tests/test_service_candidate_registry.py",
+        "sha256": "3b9fddab23f175c713ae8af210460e2833fba4bd96fecf4879cb998b2a3832ea"
+      },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
     }
   },
   "university_scoring_contract": {

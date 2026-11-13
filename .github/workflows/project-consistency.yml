@@ -105,6 +105,10 @@ jobs:
           python3.12 -B scripts/check_project_consistency.py --revision "$GITHUB_SHA"
           python3.12 -B scripts/bootstrap_edge_runtime.py --destination outputs/ci_edge_runtime
           export JUNGSI_DENO="$JUNGSI_CI_SNAPSHOT_DIR/outputs/ci_edge_runtime/bin/deno"
+          DENO_DIR="$JUNGSI_CI_SNAPSHOT_DIR/outputs/ci_student_pk_cache" "$JUNGSI_DENO" test \
+            --no-remote --no-npm --no-lock --config supabase/functions/deno.json \
+            --deny-read --deny-write --deny-net --deny-env --deny-run --deny-sys --deny-ffi \
+            tests/service_p1/test_student_pk_scoped.synthetic.ts tests/service_p1/test_current_guide_scoped.synthetic.ts
           python3.12 -B scripts/bootstrap_backend_runtime.py --destination outputs/ci_backend_runtime
           export PYTHONPATH="$JUNGSI_CI_SNAPSHOT_DIR/outputs/ci_backend_runtime/site"
           python3.12 -B scripts/run_committed_tests.py --revision "$GITHUB_SHA"

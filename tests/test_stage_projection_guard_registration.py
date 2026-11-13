@@ -13,6 +13,11 @@ import check_project_consistency as checker
 class StageProjectionGuardTests(unittest.TestCase):
     def fixture(self):
         s = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
+        # This fixture replaces the stage registration with synthetic hashes.
+        # Keep independently pinned overlays on the real spec in
+        # test_absent_extension_retains_original_native_boundary instead.
+        s.pop(checker.MEMBER_SCHOOL_OVERLAY_FIELD, None)
+        s.pop(checker.SAVED_REPORT_OVERLAY_FIELD, None)
         c = s["score_input_policy_contract"]
         rows = []
         for path in checker.STAGE_PROJECTION_SOURCE_PATHS:
@@ -64,6 +69,19 @@ class StageProjectionGuardTests(unittest.TestCase):
     def test_absent_extension_retains_original_native_boundary(self):
         s = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
         self.assertEqual(checker.validate_score_input_native_guard(s), [])
+
+    def test_saved_report_candidate_cannot_claim_native_pass(self):
+        s = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
+        evidence = s["score_input_policy_contract"]["native_SQL_preparation_evidence"]
+        candidate = evidence["guard_saved_report_source_candidate_20261113"]
+        self.assertEqual(candidate["native_API_empty_guard"], "NOT_RUN")
+        candidate["native_API_empty_guard"] = "PASS"
+        self.assertTrue(checker.validate_score_input_native_guard(s))
+
+    def test_saved_report_candidate_rejects_modified_prior_receipt(self):
+        s = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
+        s["score_input_policy_contract"]["native_SQL_preparation_evidence"]["guard_current_source"]["writes"] = 1
+        self.assertTrue(checker.validate_score_input_native_guard(s))
 
     def test_exact_new_source_remains_not_run_and_keeps_native_history(self):
         s = self.fixture()

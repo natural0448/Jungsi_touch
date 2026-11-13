@@ -216,6 +216,7 @@ export class MemberSchoolResultsStorage {
   private async request(
     reference: MemberSchoolResultReference,
     body?: Uint8Array,
+    signal?: AbortSignal,
   ): Promise<Response> {
     const write = body !== undefined;
     const key = reference.object_key.split("/").map((part) => encodeURIComponent(part)).join("/");
@@ -232,7 +233,9 @@ export class MemberSchoolResultsStorage {
           "Cache-Control": "no-store",
         },
         redirect: "error",
-        signal: AbortSignal.timeout(this.settings.timeoutMs),
+        signal: signal
+          ? AbortSignal.any([signal, AbortSignal.timeout(this.settings.timeoutMs)])
+          : AbortSignal.timeout(this.settings.timeoutMs),
         ...(write ? { body: Uint8Array.from(body) } : {}),
       });
       if (response.redirected || response.url && response.url !== url) fail("storage_unavailable");
@@ -245,6 +248,7 @@ export class MemberSchoolResultsStorage {
   async read(
     identity: MemberSchoolResultIdentity,
     reference: MemberSchoolResultReference,
+    signal?: AbortSignal,
   ): Promise<NativeObject> {
     const bound = stableIdentity(identity);
     this.validateReference(reference, bound);
@@ -254,7 +258,7 @@ export class MemberSchoolResultsStorage {
       bytes: reference.bytes,
       source_report_revision: reference.source_report_revision,
     });
-    const response = await this.request(ref);
+    const response = await this.request(ref, undefined, signal);
     if (response.status !== 200) {
       await response.body?.cancel();
       fail("storage_unavailable");

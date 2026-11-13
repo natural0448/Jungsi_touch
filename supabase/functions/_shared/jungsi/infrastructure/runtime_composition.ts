@@ -66,6 +66,10 @@ import type { PlatformRepositoryPort } from "../application/platform_repository.
 import type { PreparedUsageAdmission } from "../application/usage_service.ts";
 import { isCommittedScoreRejection } from "./score_input_postgres.ts";
 import { ScoreInputService } from "../application/score_input_service.ts";
+import { attachSavedPageScores } from "../application/attach_saved_scores.ts";
+import { readSavedCandidateGroups } from "../application/member_saved_candidate_groups.ts";
+import { scoreMapPin } from "../application/score_map.ts";
+import { readSavedScoreMap, SavedScoreTransientUnavailable } from "./member_score_map_read.ts";
 import { SCORE_POLICY_OPERATION_IDS } from "../application/api_dispatch.ts";
 import type { ScoreInputWorkflowPort } from "../application/score_input_ports.ts";
 import { resultObject } from "../application/paid_result_components.ts";
@@ -808,6 +812,9 @@ export class NativeRuntimeApi {
           headers: { "Cache-Control": "no-store" },
         });
       }
+      const ownedReportRead: {
+        last?: Awaited<ReturnType<PlatformRepositoryPort["getReport"]>>;
+      } = {};
       const platform: PlatformRepositoryPort = {
         replay: async (...a) =>
           await phase("platform_replay", async () => (await context.platform()).replay(...a)),
@@ -821,8 +828,11 @@ export class NativeRuntimeApi {
         },
         getProfile: async (...a) =>
           await phase("profile_read", async () => (await context.platform()).getProfile(...a)),
-        getReport: async (...a) =>
-          await phase("report_read", async () => (await context.platform()).getReport(...a)),
+        getReport: async (...a) => {
+          const value = await phase("report_read", async () => (await context.platform()).getReport(...a));
+          ownedReportRead.last = value;
+          return value;
+        },
         getReportRevision: async (...a) => {
           const binding = await context.binding(), controls = await context.controls();
           const settle = controls.reserveExternalRead(binding.repositoryLimits.maxRecordBytes);
@@ -1272,7 +1282,58 @@ export class NativeRuntimeApi {
             if (this.config.readViewExtensions && !this.config.candidateCatalog) {
               throw new AccessError("security_policy_unavailable", 503);
             }
-            return await catalog.execute(r);
+            const result = await catalog.execute(r);
+            if (r.operation !== "offerings.search" || !selectedCatalog || r.session.tier !== "paid") {
+              return result;
+            }
+            if (!boundary?.admission || boundary.signal.aborted) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const scoreBoundary = boundary;
+            const budget = await context.budget();
+            const assertActive = () => {
+              if (scoreBoundary.signal.aborted) throw new AccessError("security_policy_unavailable", 503);
+              budget.assertRunAdmission(scoreBoundary.admission as PreparedUsageAdmission, r, "active");
+            };
+            assertActive();
+            return await attachSavedPageScores(result, r.session, this.clock, scoreBoundary.signal, {
+              read: async (session, year, ids, signal) => {
+                assertActive();
+                const exams = [...budget.policy.exams.values()].filter((exam) =>
+                  exam.academicYear === year && (r.query.exam_id === undefined || exam.examId === r.query.exam_id)
+                );
+                if (exams.length !== 1 || !budget.policy.operating) return { state: "unavailable" };
+                const selected = budget.policy.operating.context(
+                  session, exams[0].examId, r.query.stage, this.clock.nowUtc(), false,
+                );
+                if (selected.stage.academicYear !== year) return { state: "unavailable" };
+                const state = await (await context.scoreInputs()).state(selected, signal);
+                assertActive();
+                if (!state.currentProfileId) return { state: "no_profile" };
+                const binding = await context.binding();
+                const pin = await scoreMapPin(binding.references);
+                assertActive();
+                const controls = await context.controls();
+                const settle = controls.reserveExternalRead(binding.repositoryLimits.maxRecordBytes);
+                try {
+                  const values = await readSavedScoreMap(sql(), {
+                    owner: session.user.subjectId,
+                    profileId: state.currentProfileId,
+                    dataPin: pin,
+                    signal,
+                    assertActive,
+                  }, ids);
+                  assertActive();
+                  settle(new TextEncoder().encode(JSON.stringify([...values.entries()])).byteLength);
+                  return { state: "ready", scores: values };
+                } catch (error) {
+                  assertActive();
+                  requirePaidSession(session, this.clock.nowUtc());
+                  if (error instanceof SavedScoreTransientUnavailable) return { state: "unavailable" };
+                  throw error;
+                }
+              },
+            });
           }
           if (REPORT_ACTION_OPERATIONS.some((id) => id === r.operation)) {
             if (r.operation === "shortlist.update") selectedCatalog?.prepareSelection(r);
@@ -1348,7 +1409,152 @@ export class NativeRuntimeApi {
           if (FORECAST_OPERATIONS.some((id) => id === r.operation)) {
             return await forecasts.execute(r);
           }
-          return await profiles.execute(r);
+          const reportResult = await profiles.execute(r);
+          if (
+            r.operation !== "report.read" || r.session.tier !== "paid" || !selectedCatalog ||
+            !selectedCatalog.selectedSavedGuideOfferings ||
+            !this.config.memberShortlistExtensions ||
+            !resultObject(reportResult.analyses) || !Object.keys(reportResult.analyses).length
+          ) return reportResult;
+          const previousCandidates = reportResult.candidates;
+          if (previousCandidates !== null) {
+            if (!resultObject(previousCandidates) || previousCandidates.status !== "pending") {
+              return reportResult;
+            }
+            const arrays = [
+              "basic_university_groups", "wildcards", "pending_offerings",
+              "outside_offerings", "ineligible_offerings",
+            ];
+            const required = ["status", "reason_code", "catalog_version", ...arrays];
+            const allowed = new Set([...required, "reference_university_groups", "wildcard_selection"]);
+            if (
+              required.some((name) => !Object.hasOwn(previousCandidates, name)) ||
+              Object.keys(previousCandidates).some((name) => !allowed.has(name)) ||
+              arrays.some((name) => {
+                const value = previousCandidates[name];
+                return !Array.isArray(value) || value.length !== 0;
+              }) ||
+              ![null, "approved_candidates_missing", "current_saved_assessment_missing", "saved_assessment_missing"]
+                .includes(previousCandidates.reason_code as string | null) ||
+              (previousCandidates.catalog_version !== null &&
+                typeof previousCandidates.catalog_version !== "string") ||
+              (Object.hasOwn(previousCandidates, "reference_university_groups") &&
+                (!Array.isArray(previousCandidates.reference_university_groups) ||
+                  previousCandidates.reference_university_groups.length !== 0)) ||
+              (Object.hasOwn(previousCandidates, "wildcard_selection") &&
+                previousCandidates.wildcard_selection !== null)
+            ) return reportResult;
+          }
+          const selectSavedGuide = selectedCatalog.selectedSavedGuideOfferings;
+          if (!selectSavedGuide) return reportResult;
+          if (!boundary?.admission || boundary.signal.aborted) {
+            throw new AccessError("security_policy_unavailable", 503);
+          }
+          const reportBoundary = boundary;
+          const budget = await context.budget();
+          const assertActive = () => {
+            if (reportBoundary.signal.aborted) throw new AccessError("security_policy_unavailable", 503);
+            budget.assertRunAdmission(reportBoundary.admission as PreparedUsageAdmission, r, "active");
+            requirePaidSession(r.session, this.clock.nowUtc());
+          };
+          assertActive();
+          const record = ownedReportRead.last;
+          if (
+            !record || record.owner_id !== r.session.user.subjectId ||
+            record.report_id !== reportResult.report_id || record.profile_id !== reportResult.profile_id ||
+            record.revision !== reportResult.report_version
+          ) throw new AccessError("storage_result_invalid", 503);
+          if (
+            !resultObject(record.body) || !resultObject(record.body.analyses) ||
+            !resultObject(record.body.overall)
+          ) return reportResult;
+          const overall = record.body.overall;
+          if (!resultObject(overall.exam)) return reportResult;
+          const exam = overall.exam;
+          const year = exam.academic_year, examId = exam.exam_id, packVersion = overall.pack_version;
+          if (
+            typeof year !== "number" || ![2024, 2025, 2026, 2027].includes(year) ||
+            typeof examId !== "string" || typeof packVersion !== "string"
+          ) return reportResult;
+          const approvedExam = budget.policy.exams.get(examId);
+          if (!approvedExam || approvedExam.academicYear !== year || approvedExam.packVersion !== packVersion) {
+            return reportResult;
+          }
+          const savedCatalog = record.body.catalog_version;
+          // Legacy snapshots without a current-head binding remain unchanged.
+          if (typeof savedCatalog !== "string" || !savedCatalog.startsWith("current:")) return reportResult;
+          if (
+            resultObject(previousCandidates) && previousCandidates.catalog_version !== null &&
+            previousCandidates.catalog_version !== savedCatalog
+          ) return reportResult;
+          const binding = await context.binding(), controls = await context.controls();
+          if (!binding.memberJson) return reportResult;
+          const limit = Math.min(100, binding.memberJson.maxItems, binding.repositoryLimits.maxBatchIds);
+          if (!Number.isSafeInteger(limit) || limit < 1) throw new AccessError("security_policy_unavailable", 503);
+          const allIds = Object.keys(record.body.analyses).sort(), prefix = `${year}:`;
+          const ids = [
+            ...allIds.filter((id) => id.startsWith(prefix)),
+            ...allIds.filter((id) => !id.startsWith(prefix)),
+          ].slice(0, limit);
+          if (!ids.length) return reportResult;
+          if (!ids.some((id) => id.startsWith(prefix) && id.length > prefix.length)) {
+            return reportResult;
+          }
+          await context.assertCurrent(reportBoundary.signal);
+          assertActive();
+          const maximum = binding.repositoryLimits.maxRecordBytes;
+          const settleGuide = controls.reserveExternalRead(maximum);
+          const selected = await selectSavedGuide.call(
+            selectedCatalog,
+            r.session.user.subjectId,
+            year,
+            ids,
+            { signal: reportBoundary.signal, maxBytes: maximum, assertActive, settle: settleGuide },
+          );
+          assertActive();
+          if (selected.version === null) return reportResult;
+          if (selected.version !== savedCatalog) return reportResult;
+          const results = await context.memberResults();
+          assertActive();
+          const resultsMaximum = maximum * 3 + 8192;
+          if (!Number.isSafeInteger(resultsMaximum)) throw new AccessError("security_policy_unavailable", 503);
+          const settleResults = controls.reserveExternalRead(resultsMaximum);
+          const candidates = await readSavedCandidateGroups(
+            r.session,
+            year,
+            [...selected.rows.values()],
+            selected.version,
+            results,
+            this.clock,
+            reportBoundary.signal,
+            {
+              reportId: record.report_id,
+              revision: record.revision,
+              profileId: record.profile_id,
+              examId,
+              packVersion,
+            },
+            ids,
+          );
+          assertActive();
+          // The SQL reader bounds each saved object; reserve the full bound without a refund.
+          settleResults(resultsMaximum);
+          const settleCurrent = controls.reserveExternalRead(4096);
+          const current = await sql().read(r.session.user.subjectId, async (tx) =>
+            await tx.query(
+              `SELECT 'ok'::text FROM jungsi_backend.reports
+               WHERE owner_id=$1 AND report_id=$2 AND profile_id=$3 AND revision=$4::bigint`,
+              [r.session.user.subjectId, record.report_id, record.profile_id, record.revision],
+              reportBoundary.signal,
+            ), reportBoundary.signal);
+          assertActive();
+          if (current.length !== 1 || current[0].length !== 1 || current[0][0] !== "ok") {
+            throw new AccessError("revision_conflict", 409);
+          }
+          settleCurrent(new TextEncoder().encode(JSON.stringify(current)).byteLength);
+          await context.assertCurrent(reportBoundary.signal);
+          assertActive();
+          return { ...reportResult, candidates };
         },
       };
       const handler = createApiHandler(requestPolicies, {

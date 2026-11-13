@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "0a9e13574e87e728dc3e41e1bb68505e743c5fdc00e9a9e590a518e73b88f7d6",
+      "source_sha256": "badc73c99087f63f5792503dd41d8c5b65caec5090fd4c77f7aae787b9f8909c",
       "symbols": [
         {
           "kind": "class",
@@ -1018,6 +1018,12 @@
           "kind": "function",
           "name": "runtime_connection_document",
           "signature": "def runtime_connection_document(spec):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "saved_report_overlay",
+          "signature": "def saved_report_overlay(spec, source_hashes=None):",
           "decorators": []
         },
         {
@@ -2089,7 +2095,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3e3158f9b7ab084fbae68413ceda7bf30d4d179c0f145dce2c087339c911c2af",
+      "source_sha256": "c96d357584e434d39281cfa18de3d57b867543845f645ee5720ddc3576c0ed12",
       "symbols": [
         {
           "kind": "function",
@@ -2521,6 +2527,12 @@
           "kind": "function",
           "name": "select_runner_current_rebound",
           "signature": "def select_runner_current_rebound(spec, family, historical):",
+          "decorators": []
+        },
+        {
+          "kind": "function",
+          "name": "select_saved_report_runner_binding",
+          "signature": "def select_saved_report_runner_binding(spec, before, family, historical, selected):",
           "decorators": []
         },
         {
@@ -7366,7 +7378,7 @@
           "REQ-11",
           "REQ-12"
         ],
-        "source_sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53",
+        "source_sha256": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
         "declared_exports": [
           "createCombinedPolicyCatalogService",
           "createMemberShortlistCatalogService"
@@ -7714,7 +7726,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
+        "source_sha256": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
         "declared_exports": [
           "CURRENT_PUBLIC_OPERATIONS",
           "CurrentPublicCatalogCursor",
@@ -7738,7 +7750,8 @@
           "publicCatalogKey",
           "publicCatalogOffering",
           "publicCatalogOfferingId",
-          "publicCatalogRecruitment"
+          "publicCatalogRecruitment",
+          "SavedGuideReadGuard"
         ]
       },
       {
@@ -7842,7 +7855,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "85d4ff60680434f2202fcbf7748fb7a3e26df2759afbae235e869564eb7e2758",
+        "source_sha256": "ab1c20bfd31f7667867338fb30e832255210f098a2b848ce374ff6a4e0eaed69",
         "declared_exports": [
           "CURRENT_PUBLIC_SOURCE_VIEWS",
           "CURRENT_PUBLIC_METADATA_SQL",
@@ -7859,7 +7872,8 @@
           "CURRENT_PUBLIC_PREPARED_RECRUITMENT_SQL",
           "CurrentPublicCatalogSql",
           "buildCurrentPublicP1DirectOfferingsSql",
-          "P1DirectGuideGuard"
+          "P1DirectGuideGuard",
+          "CURRENT_PUBLIC_SAVED_GUIDE_SQL"
         ]
       },
       {
@@ -8125,7 +8139,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "60cf086a7e1ca5a30969857492eb0fccc11144a01aa1cf714547aadf1e8ddd91",
+        "source_sha256": "dd88b02c3be866d1f4d0b586db3f2e3bc7ea637af72a198e3143b4584c43ba94",
         "declared_exports": [
           "CurrentPublicSearchScopedService"
         ]
@@ -8470,6 +8484,24 @@
           "ApiExecution",
           "ApiExecutionBoundary",
           "ApiBusinessPort"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts",
+        "layer": "application",
+        "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+        "requirements": [
+          "REQ-03",
+          "REQ-14",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27"
+        ],
+        "source_sha256": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33",
+        "declared_exports": [
+          "SavedPageScoresPort",
+          "attachSavedPageScores"
         ]
       },
       {
@@ -9017,11 +9049,48 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
+        "source_sha256": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516",
         "declared_exports": [
           "MemberAssessmentContext",
           "MemberJsonResults",
           "MemberSavedResultsPort"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts",
+        "layer": "application",
+        "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+        "requirements": [
+          "REQ-03",
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27"
+        ],
+        "source_sha256": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b",
+        "declared_exports": [
+          "readSavedCandidateGroups"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts",
+        "layer": "application",
+        "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+        "requirements": [
+          "REQ-03",
+          "REQ-11",
+          "REQ-12",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27"
+        ],
+        "source_sha256": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36",
+        "declared_exports": [
+          "readSavedOfferingGroups",
+          "SavedReportIdentity"
         ]
       },
       {
@@ -10583,7 +10652,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
         "layer": "application",
-        "status": "score_map_source_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+        "status": "score_map_source_candidate_table_metadata_exists_runtime_NOT_VERIFIED",
         "requirements": [
           "REQ-03",
           "REQ-14",
@@ -11965,11 +12034,30 @@
           "REQ-26",
           "REQ-30"
         ],
-        "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c",
+        "source_sha256": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
         "declared_exports": [
           "MemberSchoolResultIdentity",
           "MemberSchoolResultReference",
           "MemberSchoolResultsStorage"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts",
+        "layer": "data_infrastructure",
+        "status": "student_pk_read_source_candidate_NOT_TESTED_NOT_DEPLOYED",
+        "requirements": [
+          "REQ-03",
+          "REQ-14",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27"
+        ],
+        "source_sha256": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345",
+        "declared_exports": [
+          "SavedScoreReadScope",
+          "readSavedScoreMap",
+          "SavedScoreTransientUnavailable"
         ]
       },
       {
@@ -11985,7 +12073,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
+        "source_sha256": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584",
         "declared_exports": [
           "MEMBER_LEGACY_EXACT_SQL",
           "MEMBER_LEGACY_LOCK_SQL",
@@ -12545,7 +12633,7 @@
           "REQ-29",
           "REQ-30"
         ],
-        "source_sha256": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
+        "source_sha256": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
         "declared_exports": [
           "ReadViewCatalogContext",
           "ReadViewCatalogFactory",
@@ -12798,7 +12886,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756",
+        "source_sha256": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
         "declared_exports": [
           "RuntimeExamBudget",
           "buildPeriodRenewalContext",
@@ -12841,7 +12929,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
+        "source_sha256": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba",
         "declared_exports": [
           "REFERENCE_TAIL_REQUEST_OBJECTS",
           "REFERENCE_TAIL_REQUEST_BYTES",
@@ -12893,7 +12981,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
+        "source_sha256": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
         "declared_exports": [
           "NativeRuntimeRequest"
         ]
@@ -13112,7 +13200,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
+        "source_sha256": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
         "declared_exports": [
           "SupabaseScoreInputRepository",
           "isCommittedScoreRejection",
@@ -13125,7 +13213,7 @@
       {
         "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
         "layer": "data_infrastructure",
-        "status": "score_map_store_candidate_synthetic_verified_migration_011_NOT_APPLIED",
+        "status": "score_map_store_candidate_table_metadata_exists_runtime_NOT_VERIFIED",
         "requirements": [
           "REQ-03",
           "REQ-14",
@@ -13952,7 +14040,7 @@
           "REQ-26",
           "REQ-28"
         ],
-        "source_sha256": "c19df933f6106db252bb99acb9625ea38f7e7a15bc10e3286cc455a4a619ece4",
+        "source_sha256": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",
         "declared_exports": [
           "SearchPhase",
           "SearchFailure",

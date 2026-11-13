@@ -306,8 +306,13 @@ export class SupabaseScoreInputRepository implements ScoreInputRepositoryPort {
     await this.guard(tx, c, row !== null);
     return row ? stateRow(row) : initialScoreInputState();
   }
-  state(c: ScoreInputContext): Promise<ScoreInputState> {
-    return this.read(c.owner, (tx) => this.stateIn(tx, c));
+  state(c: ScoreInputContext, signal?: AbortSignal): Promise<ScoreInputState> {
+    if (!signal) return this.read(c.owner, (tx) => this.stateIn(tx, c));
+    if (this.active) throw new AccessError("storage_transaction_context_invalid", 503);
+    identity(c.owner);
+    return this.sql.read(c.owner, (tx) => this.stateIn({
+      query: (statement, parameters) => tx.query(statement, parameters, signal),
+    }, c), signal);
   }
   private async profileIn(
     tx: NativeSqlTransaction,

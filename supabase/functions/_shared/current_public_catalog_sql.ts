@@ -42,6 +42,7 @@ import {
   type PublicCatalogQuery,
   type PublicCatalogRecord,
   type PublicPreparedKeyPage,
+  type SavedGuideReadGuard,
 } from "./current_public_catalog.ts";
 export const CURRENT_PUBLIC_SOURCE_VIEWS = {
   admissions: "jungsi_data_ingest.admission_results_current",
@@ -435,6 +436,18 @@ export const CURRENT_PUBLIC_OFFERINGS_SQL = `WITH ${headCTE},page_offerings AS M
 }), 'row',${guideWire("g")},'guide',${
   guideWire("g")
 }) AS wire FROM page_offerings g) ${headSelect}`;
+/** A saved-report lookup: original PKs only, in one year, never a catalog scan. */
+export const CURRENT_PUBLIC_SAVED_GUIDE_SQL = `WITH ${headCTE},
+ requested AS MATERIALIZED (SELECT value AS offering_pk FROM jsonb_array_elements_text($2::text::jsonb)),
+ page_offerings AS MATERIALIZED (SELECT ${guideColumns("g")} FROM requested i
+ CROSS JOIN LATERAL (SELECT selected.* FROM ${G} selected
+ WHERE selected.academic_year=$1::integer AND selected.offering_pk=i.offering_pk
+ AND ${serviceGuide("selected")} OFFSET 0) g LIMIT 101),
+ payload AS (SELECT g.academic_year AS year,COALESCE(g.school_id,'') AS school,
+ g.offering_pk AS offering,''::text AS metric,${offeringId("g")} AS tie,
+ jsonb_build_object('key',jsonb_build_array(g.academic_year,COALESCE(g.school_id,''),
+ g.offering_pk,'',${offeringId("g")}), 'row',${guideWire("g")},
+ 'guide',${guideWire("g")}) AS wire FROM page_offerings g) ${headSelect}`;
 /** REVIEW ONLY. The direct P1 variant retains unclassified candidates until the
  * independently approved per-target service/practical decision, and exposes the
  * source fingerprint only to the server verifier. It does not use the metadata
@@ -597,11 +610,36 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
     resumed = false,
     prepared?: PublicPreparedKeyPage,
     comparePreparedRows = true,
+    guard?: SavedGuideReadGuard,
   ): Promise<PublicCatalogPage> {
+    const active = () => {
+      if (guard) {
+        if (guard.signal.aborted) fail("security_policy_unavailable");
+        guard.assertActive();
+      }
+    };
+    active();
     const { descriptor, publication } = await this.load();
+    active();
     await this.publication();
-    return await this.sql.read(subject, async (tx) => {
-      const rows = await tx.query(CURRENT_PUBLIC_METADATA_SQL, [
+    active();
+    let actualBytes = 0;
+    const page = await this.sql.read(subject, async (tx) => {
+      const query = async (statement: string, parameters: readonly unknown[]) => {
+        active();
+        const result = await tx.query(statement, parameters, guard?.signal);
+        active();
+        if (guard) {
+          const wire = JSON.stringify(result);
+          if (typeof wire !== "string") fail("current_catalog_page_invalid");
+          actualBytes += new TextEncoder().encode(wire).byteLength;
+          if (!Number.isSafeInteger(actualBytes) || actualBytes > guard.maxBytes) {
+            fail("security_policy_unavailable");
+          }
+        }
+        return result;
+      };
+      const rows = await query(CURRENT_PUBLIC_METADATA_SQL, [
         JSON.stringify(CURRENT_PUBLIC_METADATA_SEEDS),
       ]);
       if (!rows.length || rows.length > 128) {
@@ -656,7 +694,7 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
           fail("current_catalog_schema_unapproved");
         }
       }
-      const commandRows = await tx.query(
+      const commandRows = await query(
         CURRENT_PUBLIC_GUIDE_COMMAND_SQL,
         CURRENT_PUBLIC_GUIDE_COMMAND_RELATIONS.map((name) =>
           descriptor.guide_command_state[name].count + 1
@@ -681,7 +719,7 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
           await nativeJsonSha256(headers) !== expected.sha256
         ) changed();
       }
-      const result = await tx.query(
+      const result = await query(
         buildCurrentPublicPayloadSql(metadata, statement),
         parameters,
       );
@@ -750,8 +788,30 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
         rows: items as unknown as PublicCatalogRecord[],
       };
       await this.publication();
+      active();
       return page;
-    });
+    }, guard?.signal);
+    active();
+    guard?.settle(actualBytes);
+    return page;
+  }
+  async lookupSavedGuide(
+    subject: string,
+    year: number,
+    pks: readonly string[],
+    guard: SavedGuideReadGuard,
+  ): Promise<PublicCatalogPage> {
+    if (
+      ![2024, 2025, 2026, 2027].includes(year) || !Array.isArray(pks) ||
+      !pks.length || pks.length > 100 || new Set(pks).size !== pks.length ||
+      pks.some((pk) => typeof pk !== "string" || !pk ||
+        !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(`${year}:${pk}`)) ||
+      !guard || !(guard.signal instanceof AbortSignal) || guard.signal.aborted ||
+      typeof guard.assertActive !== "function" || typeof guard.settle !== "function" ||
+      !Number.isSafeInteger(guard.maxBytes) || guard.maxBytes < 1
+    ) fail("current_catalog_page_invalid");
+    return await this.read(subject, CURRENT_PUBLIC_SAVED_GUIDE_SQL,
+      [year, JSON.stringify(pks)], false, undefined, true, guard);
   }
   /** P1 internal candidate only; caller must also bind the returned rows to the
    * same request-scoped authority before projection. No public route is added. */

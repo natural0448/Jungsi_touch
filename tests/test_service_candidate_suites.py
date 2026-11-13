@@ -14,8 +14,13 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "tests/review_suite_manifest.20261113_fmt.current.json"
-MANIFEST_SHA256 = "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
+HISTORICAL_MANIFEST = "tests/review_suite_manifest.20261113_fmt.current.json"
+HISTORICAL_MANIFEST_SHA256 = "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
+MANIFEST_NAME = "tests/review_suite_manifest.20261113_source_candidate.json"
+MANIFEST = ROOT / MANIFEST_NAME
+MANIFEST_SHA256 = "3d3e2959e6f1e3e916a4c4e90e81ca74b6adc98c022eb2c9b20574fff860a7c1"
+ADDITIVE_MANIFEST = "tests/student_pk_additive_manifest.20261113_source_candidate.json"
+ADDITIVE_SHA256 = "9e94d0290c840c0a7d131737b6a5cbc542d23eca26e3c45bf731b6f95ff914ef"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -252,7 +257,9 @@ def layer_bindings(files,graphs):
 
 def load_manifest():
     global DENO, DENO_SHA256
-    if sha(safe_file("tests/review_suite_manifest.20261113_fmt.current.json")) != MANIFEST_SHA256:
+    if sha(safe_file(HISTORICAL_MANIFEST)) != HISTORICAL_MANIFEST_SHA256:
+        raise ValueError("historical review manifest mismatch")
+    if sha(safe_file(MANIFEST_NAME)) != MANIFEST_SHA256:
         raise ValueError("review manifest mismatch")
     data = json.loads(MANIFEST.read_bytes())
     if data.get("format") != "jungsi.review-suite-closure/v2" or data.get("review_only") is not True:
@@ -261,12 +268,14 @@ def load_manifest():
     version = invoke([str(DENO), "--version"], 10).splitlines()[0]
     if version != "deno 2.9.7 (stable, release, " + target + ")":
         raise ValueError("unexpected Deno version")
+    verify_additive_suite(data)
     return data
 
 
-def verify_suite(data, name, expected_roots, allowed, expected_count):
+def verify_suite(data, name, expected_roots, allowed, expected_count, shared_fixtures=None):
     suite_name = name
     suite = data["suites"][name]
+    fixtures = SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()) if shared_fixtures is None else shared_fixtures
     if (suite["roots"] != expected_roots or suite["allowed_builtins"] != allowed or
             suite["expected_count"] != expected_count or set(suite["graphs"]) != set(expected_roots)):
         raise ValueError("suite registration mismatch")
@@ -284,10 +293,10 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
                 if pinned is None or sha(source) != pinned[0] or literals != pinned[1]:
                     raise ValueError("dynamic import is not allowed in P1 closure")
     for path in suite["files"]:
-        if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
+        if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in fixtures:
             raise ValueError("unregistered test scope: " + path)
     extra_fixtures = {p for p in suite["files"] if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
-    if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+    if extra_fixtures != set(fixtures):
         raise ValueError("exact shared fixture set mismatch")
     if GENERATED_ROUTE in suite["files"]:
         verify_generated_route()
@@ -301,6 +310,34 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
         if graph(root, root_allowed) != suite["graphs"][root]:
             raise ValueError("module closure mismatch: " + root)
     return suite
+
+def verify_additive_suite(data):
+    """Verify the separate source registration without claiming execution results."""
+    if sha(safe_file(ADDITIVE_MANIFEST)) != ADDITIVE_SHA256:
+        raise ValueError("additive manifest mismatch")
+    add = json.loads(safe_file(ADDITIVE_MANIFEST).read_bytes())
+    roots = ["tests/service_p1/test_student_pk_scoped.synthetic.ts", "tests/service_p1/test_current_guide_scoped.synthetic.ts"]
+    fields = {"format", "status", "roots", "case_count", "case_names", "config", "workflow", "files", "graphs", "layers", "native_acceptance", "activation_status", "operating_writes"}
+    if (set(add) != fields or add["format"] != "jungsi.student-pk-additive-suite-source/v1" or
+        add["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or add["roots"] != roots or
+        type(add["case_count"]) is not int or add["case_count"] != 12 or
+        add["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or add["activation_status"] != "NOT_RUN" or
+        type(add["operating_writes"]) is not int or add["operating_writes"] != 0 or add["config"] != data["config"]):
+        raise ValueError("additive registration mismatch")
+    workflow = {"path": ".github/workflows/project-consistency.yml", "sha256": "f44b782193d2c9b7020f3755342ee631a5189dc1b119502a5857fdc4ef325c42"}
+    if add["workflow"] != workflow or sha(safe_file(workflow["path"])) != workflow["sha256"]:
+        raise ValueError("additive workflow mismatch")
+    if set(add["case_names"]) != set(roots):
+        raise ValueError("additive case roots mismatch")
+    for root, count in zip(roots, (8, 4)):
+        source = safe_file(root).read_text(encoding="utf8")
+        names = re.findall(r'Deno\.test\(\s*("(?:[^"\\]|\\.)*")\s*,', source)
+        if len(names) != count or source.count("Deno.test(") != count or [json.loads(x) for x in names] != add["case_names"][root]:
+            raise ValueError("additive case names mismatch")
+    suite = {"roots": roots, "expected_count": 12, "allowed_builtins": [], "manual_read_files": [],
+             "files": add["files"], "graphs": add["graphs"], "layers": add["layers"]}
+    verify_suite({"suites": {"service_p1": suite}}, "service_p1", roots, [], 12, shared_fixtures=frozenset())
+
 
 class ReviewSuites(unittest.TestCase):
     def test_p1_deno_80(self):

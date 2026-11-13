@@ -173,6 +173,26 @@ export class NativeRuntimeRequest {
     const b = await this.binding();
     if (!b.memberJson) throw new AccessError("operation_scope_not_approved", 503);
   }
+  /** The same owner/revision-bound reader used by the member shortlist. */
+  async memberResults(): Promise<MemberJsonResults> {
+    await this.assertMemberShortlistScope();
+    const [b, controls] = await Promise.all([this.binding(), this.controls()]), m = b.memberJson!;
+    const schoolResults = new MemberSchoolResultsStorage({
+      projectUrl: b.projectUrl,
+      bucket: b.storage.bucket,
+      prefix: m.prefix,
+      secretKey: b.storage.secretKey,
+      maxBytes: m.maxObjectBytes,
+      maxItems: Math.min(m.maxItems, 100),
+      timeoutMs: b.storage.limits.requestTimeoutMs,
+    }, controls.fetcher);
+    return new MemberJsonResults(
+      new SupabaseMemberShortlistLegacy(
+        this.sql(), b.repositoryLimits.maxRecordBytes, m.maxItems, schoolResults,
+      ),
+      Math.min(m.maxItems, 100),
+    );
+  }
   async memberShortlist(catalog: CatalogService): Promise<MemberShortlistService> {
     await this.assertMemberShortlistScope();
     const [b, controls] = await Promise.all([this.binding(), this.controls()]), m = b.memberJson!;

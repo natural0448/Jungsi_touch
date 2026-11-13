@@ -21,6 +21,16 @@
       "sha256": "8b38f69a8e78b1ddcc9f8d90dbe56e82813dbf07856a5ef4365ac64dfbcb9eb1"
     }
   },
+  "bound_graph_saved_report_candidate_20261113": {
+    "activation_status": "NOT_RUN",
+    "current_source_sha256": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
+    "format": "jungsi.foundation-graph-saved-report-source/v1",
+    "historical_extension_sha256": "81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6",
+    "operating_writes": 0,
+    "path": "supabase/functions/_shared/current_public_catalog.ts",
+    "previous_source_sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
+    "status": "SOURCE_REGISTERED_NOT_EXECUTED"
+  },
   "config": "supabase/functions/deno.json",
   "files": {
     "supabase/functions/_shared/jungsi/application/access.ts": {
@@ -3797,6 +3807,421 @@
         "ApiExecution",
         "ApiExecutionBoundary",
         "ApiBusinessPort"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Attach existing scores to a paid user's current catalog page."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "MyScore",
+            "originalName": "MyScore",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "RequestClockPort",
+            "originalName": "RequestClockPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "SCORE_MAP_ID",
+            "originalName": "SCORE_MAP_ID",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "SessionSnapshot",
+            "originalName": "SessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "requirePaidSession",
+            "originalName": "requirePaidSession",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "resultObject",
+            "originalName": "resultObject",
+            "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+          }
+        ],
+        "source_sha256": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "read",
+                      "parameter_source": "(\n    session: SessionSnapshot,\n    year: number,\n    offeringIds: readonly string[],\n    signal: AbortSignal,\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "session",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "SessionSnapshot",
+                            "value": {
+                              "resolution": {
+                                "kind": "import",
+                                "name": "SessionSnapshot",
+                                "specifier": "./session_service.ts"
+                              },
+                              "typeName": "SessionSnapshot"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "year",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "offeringIds",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "signal",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "AbortSignal",
+                            "value": {
+                              "typeName": "AbortSignal"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeLiteral",
+                                  "value": {
+                                    "properties": [
+                                      {
+                                        "name": "state",
+                                        "readonly": true,
+                                        "tsType": {
+                                          "kind": "literal",
+                                          "repr": "ready",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "ready"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "name": "scores",
+                                        "readonly": true,
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "ReadonlyMap",
+                                          "value": {
+                                            "typeName": "ReadonlyMap",
+                                            "typeParams": [
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "string",
+                                                "value": "string"
+                                              },
+                                              {
+                                                "kind": "typeRef",
+                                                "repr": "MyScore",
+                                                "value": {
+                                                  "resolution": {
+                                                    "kind": "import",
+                                                    "name": "MyScore",
+                                                    "specifier": "./score_map.ts"
+                                                  },
+                                                  "typeName": "MyScore"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "typeLiteral",
+                                  "value": {
+                                    "properties": [
+                                      {
+                                        "name": "state",
+                                        "readonly": true,
+                                        "tsType": {
+                                          "kind": "union",
+                                          "value": [
+                                            {
+                                              "kind": "literal",
+                                              "repr": "no_profile",
+                                              "value": {
+                                                "kind": "string",
+                                                "string": "no_profile"
+                                              }
+                                            },
+                                            {
+                                              "kind": "literal",
+                                              "repr": "unavailable",
+                                              "value": {
+                                                "kind": "string",
+                                                "string": "unavailable"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SavedPageScoresPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  result: NativeObject,\n  session: SessionSnapshot,\n  clock: RequestClockPort,\n  signal: AbortSignal,\n  scores: SavedPageScoresPort,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "result",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "session",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionSnapshot",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "SessionSnapshot",
+                            "specifier": "./session_service.ts"
+                          },
+                          "typeName": "SessionSnapshot"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "clock",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RequestClockPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RequestClockPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "RequestClockPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "signal",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "scores",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SavedPageScoresPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SavedPageScoresPort"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "attachSavedPageScores"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./paid_result_components.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./score_map.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            },
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            },
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "SavedPageScoresPort",
+        "attachSavedPageScores"
       ]
     },
     "supabase/functions/_shared/jungsi/application/catalog.ts": {
@@ -35800,7 +36225,7 @@
             "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
           }
         ],
-        "source_sha256": "59363bd855241f2524a0985c2d52dea2520a52ab9b2fa571dc3a3615ca238090",
+        "source_sha256": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516",
         "symbols": [
           {
             "declarations": [
@@ -35912,7 +36337,7 @@
                     {
                       "kind": "method",
                       "name": "read",
-                      "parameter_source": "(\n    owner: string,\n    year: number,\n    ids: readonly string[],\n    reportId: string | null,\n    revision?: number,\n  )",
+                      "parameter_source": "(\n    owner: string,\n    year: number,\n    ids: readonly string[],\n    reportId: string | null,\n    revision?: number,\n    signal?: AbortSignal,\n  )",
                       "params": [
                         {
                           "kind": "identifier",
@@ -35981,6 +36406,18 @@
                             "kind": "keyword",
                             "repr": "number",
                             "value": "number"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "signal",
+                          "optional": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "AbortSignal",
+                            "value": {
+                              "typeName": "AbortSignal"
+                            }
                           }
                         }
                       ],
@@ -36165,6 +36602,18 @@
                               "repr": "number",
                               "value": "number"
                             }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
                           }
                         ]
                       },
@@ -36217,6 +36666,642 @@
         "MemberAssessmentContext",
         "MemberJsonResults",
         "MemberSavedResultsPort"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Candidate: reuse saved assessments and the existing boundary-group rules."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "MemberJsonResults",
+            "originalName": "MemberJsonResults",
+            "src": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "RequestClockPort",
+            "originalName": "RequestClockPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "SavedReportIdentity",
+            "originalName": "SavedReportIdentity",
+            "src": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
+          },
+          {
+            "importedName": "SessionSnapshot",
+            "originalName": "SessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "candidateGroups",
+            "originalName": "candidateGroups",
+            "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+          },
+          {
+            "importedName": "readSavedOfferingGroups",
+            "originalName": "readSavedOfferingGroups",
+            "src": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
+          }
+        ],
+        "source_sha256": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  session: SessionSnapshot,\n  year: number,\n  rows: readonly NativeObject[],\n  catalogVersion: string,\n  results: MemberJsonResults,\n  clock: RequestClockPort,\n  signal: AbortSignal,\n  expected: SavedReportIdentity,\n  requestedIds: readonly string[],\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "session",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionSnapshot",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "SessionSnapshot",
+                            "specifier": "./session_service.ts"
+                          },
+                          "typeName": "SessionSnapshot"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "year",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rows",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "catalogVersion",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "results",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "MemberJsonResults",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "MemberJsonResults",
+                            "specifier": "./member_json_results.ts"
+                          },
+                          "typeName": "MemberJsonResults"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "clock",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RequestClockPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RequestClockPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "RequestClockPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "signal",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SavedReportIdentity",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "SavedReportIdentity",
+                            "specifier": "./member_saved_offering_lookup.ts"
+                          },
+                          "typeName": "SavedReportIdentity"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "requestedIds",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readSavedCandidateGroups"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./member_json_results.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./member_saved_offering_lookup.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./session_service.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./university_analysis.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "readSavedCandidateGroups"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Review candidate: combine an already-authorized catalog page with saved\nmember assessments through the existing report.read runtime candidate.\nThis module adds no HTTP route; the caller maintains ownership, the shared\nrequest budget, and cancellation for the underlying saved-results port."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "MemberJsonResults",
+            "originalName": "MemberJsonResults",
+            "src": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "RequestClockPort",
+            "originalName": "RequestClockPort",
+            "src": "supabase/functions/_shared/jungsi/application/ports.ts"
+          },
+          {
+            "importedName": "SessionSnapshot",
+            "originalName": "SessionSnapshot",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          },
+          {
+            "importedName": "cloneNativeJson",
+            "originalName": "cloneNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "offeringDto",
+            "originalName": "offeringDto",
+            "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
+          },
+          {
+            "importedName": "requirePaidSession",
+            "originalName": "requirePaidSession",
+            "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
+          }
+        ],
+        "source_sha256": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "reportId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "revision",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "name": "profileId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "examId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "packVersion",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SavedReportIdentity"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  session: SessionSnapshot,\n  year: number,\n  rows: readonly NativeObject[],\n  results: MemberJsonResults,\n  clock: RequestClockPort,\n  signal: AbortSignal,\n  expected: SavedReportIdentity,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "session",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SessionSnapshot",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "SessionSnapshot",
+                            "specifier": "./session_service.ts"
+                          },
+                          "typeName": "SessionSnapshot"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "year",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rows",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "results",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "MemberJsonResults",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "MemberJsonResults",
+                            "specifier": "./member_json_results.ts"
+                          },
+                          "typeName": "MemberJsonResults"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "clock",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RequestClockPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RequestClockPort",
+                            "specifier": "./ports.ts"
+                          },
+                          "typeName": "RequestClockPort"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "signal",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "expected",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SavedReportIdentity",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SavedReportIdentity"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readSavedOfferingGroups"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ID"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./catalog.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/catalog.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./member_json_results.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./ports.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./session_service.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/session_service.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "readSavedOfferingGroups",
+        "SavedReportIdentity"
       ]
     },
     "supabase/functions/_shared/jungsi/application/member_school_results.ts": {
@@ -169133,7 +170218,7 @@
             "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
           }
         ],
-        "source_sha256": "ed68ee0121cc3c3f8bcc7bbd001db114613b05577c339680e6656d3276968b2c",
+        "source_sha256": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
         "symbols": [
           {
             "declarations": [
@@ -169491,6 +170576,18 @@
                                 "typeName": "Uint8Array"
                               }
                             }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
                           }
                         ],
                         "returnType": {
@@ -169545,6 +170642,18 @@
                                   "kind": "local"
                                 },
                                 "typeName": "MemberSchoolResultReference"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
                               }
                             }
                           }
@@ -170094,6 +171203,351 @@
         "MemberSchoolResultsStorage"
       ]
     },
+    "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "AccessError",
+            "jsDoc": {
+              "doc": "Read-only candidate for the existing member score map; no score calculation or writes."
+            },
+            "originalName": "AccessError",
+            "src": "supabase/functions/_shared/jungsi/application/access.ts"
+          },
+          {
+            "importedName": "MyScore",
+            "originalName": "MyScore",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "SCORE_MAP_ID",
+            "originalName": "SCORE_MAP_ID",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "SCORE_MAP_OWNER",
+            "originalName": "SCORE_MAP_OWNER",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "SCORE_MAP_PIN",
+            "originalName": "SCORE_MAP_PIN",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "SupabaseSqlTransport",
+            "originalName": "SupabaseSqlTransport",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+          },
+          {
+            "importedName": "myScore",
+            "originalName": "myScore",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
+            "importedName": "nativeJsonText",
+            "originalName": "nativeJsonText",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          }
+        ],
+        "source_sha256": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "()",
+                      "params": []
+                    }
+                  ],
+                  "extends": "AccessError"
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "SavedScoreTransientUnavailable"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "assertActive",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "keyword",
+                        "repr": "void",
+                        "value": "void"
+                      }
+                    }
+                  ],
+                  "properties": [
+                    {
+                      "name": "owner",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "profileId",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "dataPin",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "name": "signal",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "AbortSignal",
+                        "value": {
+                          "typeName": "AbortSignal"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SavedScoreReadScope"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "(\n  sql: SupabaseSqlTransport,\n  scope: SavedScoreReadScope,\n  offeringIds: readonly string[],\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "sql",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SupabaseSqlTransport",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "SupabaseSqlTransport",
+                            "specifier": "./transaction_sql.ts"
+                          },
+                          "typeName": "SupabaseSqlTransport"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "scope",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "SavedScoreReadScope",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "SavedScoreReadScope"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "offeringIds",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "ReadonlyMap",
+                          "value": {
+                            "typeName": "ReadonlyMap",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "MyScore",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "MyScore",
+                                    "specifier": "../application/score_map.ts"
+                                  },
+                                  "typeName": "MyScore"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readSavedScoreMap"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SELECT m.offering_id,m.status,m.converted_score,\n m.official_max_score,m.reason_code\n FROM jungsi_backend.score_maps m\n WHERE m.owner_id=$1 AND m.profile_id=$2 AND m.data_pin=$3\n AND m.offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))\n AND EXISTS (SELECT 1 FROM jungsi_backend.profiles p\n   WHERE p.owner_id=$1 AND p.profile_id=$2 AND p.confirmed)",
+                    "value": {
+                      "kind": "template",
+                      "tsTypes": [
+                        {
+                          "kind": "literal",
+                          "repr": "SELECT m.offering_id,m.status,m.converted_score,\n m.official_max_score,m.reason_code\n FROM jungsi_backend.score_maps m\n WHERE m.owner_id=$1 AND m.profile_id=$2 AND m.data_pin=$3\n AND m.offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))\n AND EXISTS (SELECT 1 FROM jungsi_backend.profiles p\n   WHERE p.owner_id=$1 AND p.profile_id=$2 AND p.confirmed)",
+                          "value": {
+                            "kind": "string",
+                            "string": "SELECT m.offering_id,m.status,m.converted_score,\n m.official_max_score,m.reason_code\n FROM jungsi_backend.score_maps m\n WHERE m.owner_id=$1 AND m.profile_id=$2 AND m.data_pin=$3\n AND m.offering_id IN (SELECT jsonb_array_elements_text($4::jsonb))\n AND EXISTS (SELECT 1 FROM jungsi_backend.profiles p\n   WHERE p.owner_id=$1 AND p.profile_id=$2 AND p.confirmed)"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "READ_SAVED_SCORES_SQL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(error: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "error",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "transientConnectionError"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/access.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/access.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/score_map.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./transaction_sql.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "SavedScoreReadScope",
+        "readSavedScoreMap",
+        "SavedScoreTransientUnavailable"
+      ]
+    },
     "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": {
       "declarations": {
         "imports": [
@@ -170231,7 +171685,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
           }
         ],
-        "source_sha256": "8ca199309fab6a53a6fa49ddbe1247163dac41c0593cbd000fecd7ae07c29a9d",
+        "source_sha256": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584",
         "symbols": [
           {
             "declarations": [
@@ -170660,6 +172114,18 @@
                                   "specifier": "../application/platform_repository.ts"
                                 },
                                 "typeName": "StoredProfile"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
                               }
                             }
                           }
@@ -171110,6 +172576,18 @@
                               "kind": "keyword",
                               "repr": "number",
                               "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
                             }
                           }
                         ]
@@ -202316,6 +203794,11 @@
             "src": "supabase/functions/_shared/jungsi/application/catalog.ts"
           },
           {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
             "importedName": "RequestClockPort",
             "originalName": "RequestClockPort",
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
@@ -202336,7 +203819,7 @@
             "src": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
           }
         ],
-        "source_sha256": "67b19e17bc51dddd30a9130f449cd628e0e9408a08671ed0a750ab64ffb788e7",
+        "source_sha256": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
         "symbols": [
           {
             "declarations": [
@@ -202484,6 +203967,191 @@
                         "kind": "keyword",
                         "repr": "void",
                         "value": "void"
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "selectedSavedGuideOfferings",
+                      "optional": true,
+                      "parameter_source": "(\n    owner: string,\n    year: number,\n    ids: readonly string[],\n    guard: {\n      readonly signal: AbortSignal;\n      readonly maxBytes: number;\n      readonly assertActive: () => void;\n      readonly settle: (actualBytes: number) => void;\n    },\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "owner",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "year",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "ids",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "guard",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "signal",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "AbortSignal",
+                                    "value": {
+                                      "typeName": "AbortSignal"
+                                    }
+                                  }
+                                },
+                                {
+                                  "name": "maxBytes",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "number",
+                                    "value": "number"
+                                  }
+                                },
+                                {
+                                  "name": "assertActive",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "fnOrConstructor",
+                                    "value": {
+                                      "constructor": false,
+                                      "params": [],
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "void",
+                                        "value": "void"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "name": "settle",
+                                  "readonly": true,
+                                  "tsType": {
+                                    "kind": "fnOrConstructor",
+                                    "value": {
+                                      "constructor": false,
+                                      "params": [
+                                        {
+                                          "kind": "identifier",
+                                          "name": "actualBytes",
+                                          "optional": false,
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "number",
+                                            "value": "number"
+                                          }
+                                        }
+                                      ],
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "void",
+                                        "value": "void"
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "properties": [
+                                  {
+                                    "name": "version",
+                                    "tsType": {
+                                      "kind": "union",
+                                      "value": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        },
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "null",
+                                          "value": "null"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "name": "rows",
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "ReadonlyMap",
+                                      "value": {
+                                        "typeName": "ReadonlyMap",
+                                        "typeParams": [
+                                          {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          },
+                                          {
+                                            "kind": "typeRef",
+                                            "repr": "NativeObject",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "NativeObject",
+                                                "specifier": "../domain/json_value.ts"
+                                              },
+                                              "typeName": "NativeObject"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
                       }
                     }
                   ]
@@ -202652,6 +204320,16 @@
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ]
         },
@@ -211260,7 +212938,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756",
+        "source_sha256": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
         "symbols": [
           {
             "declarations": [
@@ -213656,6 +215334,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts"
           },
           {
+            "importedName": "SavedScoreTransientUnavailable",
+            "originalName": "SavedScoreTransientUnavailable",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
+          },
+          {
             "importedName": "ScoreInputService",
             "originalName": "ScoreInputService",
             "src": "supabase/functions/_shared/jungsi/application/score_input_service.ts"
@@ -213722,6 +215405,11 @@
             "importedName": "assertAdmissionMicros",
             "originalName": "assertAdmissionMicros",
             "src": "supabase/functions/_shared/jungsi/application/service_end_admission.ts"
+          },
+          {
+            "importedName": "attachSavedPageScores",
+            "originalName": "attachSavedPageScores",
+            "src": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts"
           },
           {
             "importedName": "bindRuntimeReferencePorts",
@@ -213799,6 +215487,16 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
           },
           {
+            "importedName": "readSavedCandidateGroups",
+            "originalName": "readSavedCandidateGroups",
+            "src": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts"
+          },
+          {
+            "importedName": "readSavedScoreMap",
+            "originalName": "readSavedScoreMap",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
+          },
+          {
             "importedName": "referenceCandidateScopePort",
             "originalName": "referenceCandidateScopePort",
             "src": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts"
@@ -213834,6 +215532,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts"
           },
           {
+            "importedName": "scoreMapPin",
+            "originalName": "scoreMapPin",
+            "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
+          },
+          {
             "importedName": "sessionDto",
             "originalName": "sessionDto",
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
@@ -213844,7 +215547,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "f4b320ba65eff8cc223c532e622ee6bd88e8f2d7bbcf3b06a477c78d945e03b4",
+        "source_sha256": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba",
         "symbols": [
           {
             "declarations": [
@@ -217479,6 +219182,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../application/attach_saved_scores.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "../application/catalog.ts",
           "targets": [
             {
@@ -217514,6 +219227,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/application/history_current_page.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/member_saved_candidate_groups.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts"
             }
           ]
         },
@@ -217659,6 +219382,16 @@
         },
         {
           "dynamic": false,
+          "specifier": "../application/score_map.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/score_map.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
           "specifier": "../application/service_end_admission.ts",
           "targets": [
             {
@@ -217794,6 +219527,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./member_score_map_read.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
             }
           ]
         },
@@ -218284,7 +220027,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "bc86d4be93fed05c548c63edda01c6d568bd7e4e64405b44418e7696f9ebb5a8",
+        "source_sha256": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
         "symbols": [
           {
             "declarations": [
@@ -218756,6 +220499,36 @@
                       },
                       "kind": "method",
                       "name": "assertMemberShortlistScope"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "MemberJsonResults",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "MemberJsonResults",
+                                    "specifier": "../application/member_json_results.ts"
+                                  },
+                                  "typeName": "MemberJsonResults"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "memberResults"
                     },
                     {
                       "functionDef": {
@@ -226954,7 +228727,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77",
+        "source_sha256": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
         "symbols": [
           {
             "declarations": [
@@ -227675,6 +229448,18 @@
                                   "specifier": "../application/score_input_ports.ts"
                                 },
                                 "typeName": "ScoreInputContext"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
                               }
                             }
                           }

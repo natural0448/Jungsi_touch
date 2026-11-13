@@ -78,8 +78,111 @@ _MS = "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgre
 _MF = "tests/edge/member_shortlist_fixture.ts"
 _MRUN = "scripts/run_edge_tests.py"
 
+# Separate source-only continuation. The old overlay and all verification
+# receipts remain byte-for-byte unchanged; this marker never represents a run.
+SAVED_REPORT_OVERLAY_FIELD = "saved_report_current_source_overlay_20261113_v1"
+SAVED_REPORT_PREVIOUS_OVERLAY_SHA256 = "cb253a886da3519d18c72897439bd10844067f5b79ea29a6a3ae730501b9ae0f"
+_MB = "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+_MJSON = "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+_SCORE_INPUT = "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+_PUBLIC_CATALOG = "supabase/functions/_shared/current_public_catalog.ts"
+_PUBLIC_SQL = "supabase/functions/_shared/current_public_catalog_sql.ts"
+_COMBINED_CATALOG = "supabase/functions/_shared/combined_policy_catalog_runtime.ts"
+SAVED_REPORT_EDGE_PATHS = frozenset({
+    _MJSON, _MS, _MC, _MX, _MB, _SCORE_INPUT,
+    "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts",
+})
+SAVED_REPORT_OTHER_EDGE_SOURCES = frozenset({
+    _PUBLIC_CATALOG, _PUBLIC_SQL,
+    _COMBINED_CATALOG,
+    "supabase/functions/_shared/current_public_scoped_service.ts",
+    "supabase/functions/_shared/search_failure_diagnostic.ts",
+    "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts",
+    "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts",
+    "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts",
+})
+SAVED_REPORT_SCRIPT_PATHS = frozenset({"scripts/check_project_consistency.py", _MRUN})
+SAVED_REPORT_OVERLAY_PATHS = SAVED_REPORT_EDGE_PATHS | SAVED_REPORT_OTHER_EDGE_SOURCES | SAVED_REPORT_SCRIPT_PATHS
+
+SAVED_REPORT_RECEIPT_BASELINES = {'current_public': '06f1e26e0719cabc45ece3dab98e82c0df5db9d3739906f2a47933117e3be0c5', 'own_2027': '1297aa820a4dd9573552fad416291af5024a7be8de439f3d77f738ab6545bcee', 'snapshot_batch': 'ceedf2c8ce46ee394bedb422f63b445c8d5a434e732802e1f7d1ba4a2a461c14', 'current_page_projection': '7497e7c5afcd69bdc80cecc8781a755415efa3dda4f1f597f63d1c371beef647', 'p1_selection': 'baae156bbc3786fd45e09730e4c662ee44d99b38c0ce4b8ebc2e44883c325db7'}
+SAVED_REPORT_RECEIPT_PATHS = {'current_public': ('supabase/functions/_shared/current_public_catalog.ts', 'supabase/functions/_shared/current_public_catalog_sql.ts'), 'own_2027': ('supabase/functions/_shared/current_public_catalog.ts',), 'snapshot_batch': ('supabase/functions/_shared/current_public_catalog.ts',), 'current_page_projection': ('supabase/functions/_shared/current_public_catalog.ts', 'supabase/functions/_shared/current_public_catalog_sql.ts'), 'p1_selection': ('supabase/functions/_shared/current_public_catalog.ts',)}
+
+def saved_report_overlay(spec, source_hashes=None):
+    """Check the new candidate independently; no test or operating approval is inferred."""
+    marker = spec.get(SAVED_REPORT_OVERLAY_FIELD)
+    if marker is None:
+        return None
+    try:
+        old = spec[MEMBER_SCHOOL_OVERLAY_FIELD]
+        old_sha = hashlib.sha256(json.dumps(old, ensure_ascii=True, sort_keys=True,
+            separators=(",", ":")).encode()).hexdigest()
+        fields = {"format", "status", "activation_status", "native_acceptance", "operating_writes",
+                  "previous_overlay_sha256", "source_bindings", "receipt_bindings"}
+        if (old_sha != SAVED_REPORT_PREVIOUS_OVERLAY_SHA256 or not isinstance(marker, dict) or
+            set(marker) != fields or marker["format"] != "jungsi.saved-report-current-source-overlay/v1" or
+            marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or marker["activation_status"] != "NOT_RUN" or
+            marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0 or
+            marker["previous_overlay_sha256"] != SAVED_REPORT_PREVIOUS_OVERLAY_SHA256):
+            raise ValueError("saved report overlay envelope or previous receipt")
+        expected_receipts = {
+            name: {"historical_sha256": sha, "status": "NOT_RUN"}
+            for name, sha in SAVED_REPORT_RECEIPT_BASELINES.items()
+        }
+        if marker["receipt_bindings"] != expected_receipts:
+            raise ValueError("saved report receipt registrations")
+        supply = spec["current_public_supply_contract"]
+        historical = {
+            "current_public": supply["verification"],
+            "own_2027": supply["own_2027_batch_verification"],
+            "snapshot_batch": supply["snapshot_batch_verification"],
+            "current_page_projection": supply["current_page_projection_verification"],
+            "p1_selection": spec["p1_selection_bridge_review_verification"],
+        }
+        for name, value in historical.items():
+            actual = hashlib.sha256(json.dumps(value, ensure_ascii=True, sort_keys=True,
+                separators=(",", ":")).encode()).hexdigest()
+            if actual != SAVED_REPORT_RECEIPT_BASELINES[name]:
+                raise ValueError("saved report historical receipt changed")
+        pins = marker["source_bindings"]
+        if (not isinstance(pins, dict) or set(pins) != SAVED_REPORT_OVERLAY_PATHS or
+            any(not isinstance(sha, str) or not re.fullmatch(r"[a-f0-9]{64}", sha)
+                for sha in pins.values())):
+            raise ValueError("saved report overlay exact sources")
+        index = spec["workflow"]["documentation_sync"]["code_index"]
+        py_rows, edge_rows = index["files"], index["edge_sources"]["files"]
+        if not isinstance(py_rows, list) or not isinstance(edge_rows, list):
+            raise ValueError("saved report overlay indexes")
+        py = {row["path"]: row["source_sha256"] for row in py_rows}
+        edge = {row["path"]: row["source_sha256"] for row in edge_rows}
+        if len(py) != len(py_rows) or len(edge) != len(edge_rows):
+            raise ValueError("saved report overlay duplicate indexes")
+        harness = spec["edge_harness"]["files"]
+        if not isinstance(harness, dict):
+            raise ValueError("saved report overlay harness")
+        for path, sha in pins.items():
+            if path in SAVED_REPORT_SCRIPT_PATHS:
+                if py.get(path) != sha:
+                    raise ValueError("saved report overlay script index")
+            else:
+                if edge.get(path) != sha:
+                    raise ValueError("saved report overlay code index")
+                # Only paths already in the foundation are mandatory here. New
+                # source-only files do not acquire synthetic test membership.
+                if (path in SAVED_REPORT_EDGE_PATHS or path in harness) and \
+                    harness.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+                    raise ValueError("saved report overlay harness index")
+            if source_hashes is not None and source_hashes.get(path) != sha:
+                raise ValueError("saved report overlay snapshot")
+        return dict(pins)
+    except (KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise ValueError("saved report current-source overlay invalid") from exc
+
 def member_school_overlay(spec, source_hashes=None):
     """Check all new source/index pins; absence preserves the prior validation path."""
+    saved = saved_report_overlay(spec, source_hashes)
     marker = spec.get(MEMBER_SCHOOL_OVERLAY_FIELD)
     if marker is None:
         return None
@@ -123,22 +226,26 @@ def member_school_overlay(spec, source_hashes=None):
             raise ValueError("overlay duplicated index")
         edge = spec["edge_harness"]["files"]
         for path, sha in pins.items():
+            effective = saved.get(path, sha) if saved is not None else sha
             if path.startswith("scripts/"):
-                if py.get(path) != sha:
+                if py.get(path) != effective:
                     raise ValueError("overlay python source index")
             else:
-                if edge.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+                if edge.get(path, {}).get("declarations", {}).get("source_sha256") != effective:
                     raise ValueError("overlay edge source index")
-                if path.startswith("supabase/functions/") and edge_index.get(path) != sha:
+                if path.startswith("supabase/functions/") and edge_index.get(path) != effective:
                     raise ValueError("overlay documentation source index")
-            if source_hashes is not None and source_hashes.get(path) != sha:
+            if source_hashes is not None and source_hashes.get(path) != effective:
                 raise ValueError("overlay selected snapshot bytes")
-        return dict(pins)
+        return {path: saved.get(path, sha) if saved is not None else sha for path, sha in pins.items()}
     except (KeyError, TypeError, ValueError, AttributeError) as exc:
         raise ValueError("member school current-source overlay invalid") from exc
 
 def member_school_effective_sha(spec, path, previous):
     pins = member_school_overlay(spec)
+    saved = saved_report_overlay(spec)
+    if saved is not None and path in saved:
+        return saved[path]
     return pins[path] if pins is not None and path in pins else previous
 
 def apply_member_school_overlay(spec, family, selected, source_hashes=None):
@@ -146,6 +253,9 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
     pins = member_school_overlay(spec, source_hashes)
     if pins is None:
         return selected
+    saved = saved_report_overlay(spec, source_hashes)
+    if saved is not None:
+        pins.update(saved)
     value = copy.deepcopy(selected)
     def bind_list(rows, expected):
         if not isinstance(rows, list):
@@ -163,9 +273,11 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
         if seen != set(expected):
             raise ValueError("overlay missing family binding")
     if family == "member":
-        bind_list(value["verification"]["source_bindings"], {_MC, _MX, _MS, _MF})
+        bind_list(value["verification"]["source_bindings"],
+                  {_MC, _MX, _MS, _MF} |
+                  ({_MB, _MJSON, _PUBLIC_CATALOG, _COMBINED_CATALOG} if saved is not None else set()))
     elif family in ("auth", "current_page"):
-        bind_list(value["source_bindings"], {_MC})
+        bind_list(value["source_bindings"], {_MC} | ({_MB} if saved is not None and family == "current_page" else set()))
     elif family == "read_view":
         bind_list(value["verification"]["source_bindings"], {_MC})
         if _MC not in value["runtime_test_bindings"]:
@@ -176,11 +288,11 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
             raise ValueError("overlay REQ-27 runtime")
         value[_MC] = pins[_MC]
     elif family == "school":
-        bind_list(value["source_bindings"], {_MU, _MC, _MX})
+        bind_list(value["source_bindings"], {_MU, _MC, _MX} | ({_PUBLIC_CATALOG} if saved is not None else set()))
     elif family == "cancellation":
         bind_list(value["source_bindings"], {_MU})
     elif family == "stage":
-        bind_list(value["source_bindings"], {_MX})
+        bind_list(value["source_bindings"], {_MX} | ({_SCORE_INPUT} if saved is not None else set()))
     elif family == "dev010_runtime_assembly":
         if value["bindings"]["composition"]["path"] != _MC:
             raise ValueError("overlay DEV-010 runtime")
@@ -1296,6 +1408,8 @@ def school_reference_test_registration(spec):
         hashes={b['path']:member_school_effective_sha(spec,b['path'],b['sha256']) for b in bindings}
         overlay=member_school_overlay(spec)
         if overlay is not None:hashes.update(overlay)
+        saved=saved_report_overlay(spec)
+        if saved is not None:hashes.update(saved)
         registered=school_reference_registration(spec,hashes)
         indexed={p:v.get('declarations',{}).get('source_sha256')for p,v in spec.get('edge_harness',{}).get('files',{}).items()}
         indexed.update({v['path']:v.get('source_sha256')for v in spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])})
@@ -2309,6 +2423,27 @@ def validate_score_input_native_guard(spec):
       "rollout_approved":False,
       "writes":0,
     }
+    if spec.get(SAVED_REPORT_OVERLAY_FIELD) is not None:
+        # Preserve the earlier NOT_RUN continuation byte-for-byte; register this
+        # exact current source as a separate NOT_RUN candidate, not native proof.
+        try:
+            previous_sha = hashlib.sha256(json.dumps(continuation, ensure_ascii=False,
+                sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            if previous_sha != "19a317541d5a758c5d4d701ddab706cb325d4f2ba10a900ad14a141eeb823d04":
+                return [error]
+            old_rows = [row for row in spec["backend_platform_contract"]["stage_projection_source_extension"]["source_bindings"]
+                        if row.get("path") == NATIVE_GUARD_SOURCE_PATH]
+            pins = saved_report_overlay(spec)
+            candidate = evidence.get("guard_saved_report_source_candidate_20261113")
+            candidate_expected = {**expected, "previous_continuation_sha256": previous_sha}
+            if (len(old_rows) != 1 or old_rows[0].get("sha256") != continuation.get("source_sha256") or
+                pins is None or pins.get(NATIVE_GUARD_SOURCE_PATH) != current or
+                not isinstance(candidate,dict) or candidate != candidate_expected or
+                type(candidate.get("writes")) is not int or candidate.get("writes") != 0):
+                return [error]
+            continuation = {key: candidate[key] for key in expected}
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return [error]
     if (not isinstance(current,str) or not re.fullmatch(r"[a-f0-9]{64}",current) or
         current!=indexed or current!=v5_bindings.get(NATIVE_GUARD_SOURCE_PATH) or
         set(continuation)!=set(expected) or continuation!=expected or
@@ -5777,9 +5912,28 @@ def foundation_graph_extension_errors(paths,read,spec):
         if not isinstance(regression,dict) or set(regression)!={"path","sha256"} or regression["path"]!="tests/test_foundation_graph_extension.py" or regression["path"] not in paths or hashlib.sha256(read(regression["path"])).hexdigest()!=regression["sha256"]:raise ValueError("regression")
         offline_test=ext["offline_cli_test"]
         if not isinstance(offline_test,dict) or set(offline_test)!={"path","sha256"} or offline_test["path"]!="tests/test_offline_graph_cli.py" or offline_test["path"] not in paths or hashlib.sha256(read(offline_test["path"])).hexdigest()!=offline_test["sha256"]:raise ValueError("offline test")
+        candidate=spec.get("edge_harness",{}).get("bound_graph_saved_report_candidate_20261113")
+        effective={}
+        if candidate is not None:
+            # Historical graph registration is immutable; this new pin does not
+            # carry forward a successful test, runtime, or deployment receipt.
+            sealed=hashlib.sha256(json.dumps(ext,ensure_ascii=True,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+            pins=saved_report_overlay(spec)
+            path="supabase/functions/_shared/current_public_catalog.ts"
+            expected_candidate={"format":"jungsi.foundation-graph-saved-report-source/v1",
+                "status":"SOURCE_REGISTERED_NOT_EXECUTED",
+                "historical_extension_sha256":"81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6",
+                "path":path,"previous_source_sha256":"2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
+                "current_source_sha256":pins[path] if pins is not None else None,
+                "activation_status":"NOT_RUN","operating_writes":0}
+            if (sealed != "81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6" or not isinstance(candidate,dict) or
+                candidate != expected_candidate or type(candidate.get("operating_writes")) is not int or
+                candidate["operating_writes"] != 0 or ext["files"][path]["sha256"] != expected_candidate["previous_source_sha256"]):
+                raise ValueError("historical/current graph boundary")
+            effective[path]=candidate["current_source_sha256"]
         for path in expected:
             row=ext["files"][path]
-            if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=row["sha256"]:raise ValueError("binding")
+            if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=effective.get(path,row["sha256"]):raise ValueError("binding")
             impl=next(x for x in spec["implementation"] if x["path"]==path)
             if impl["layer"]!="application":raise ValueError("layer")
         return []
@@ -5921,6 +6075,25 @@ def service_candidate_suite_errors(paths, read, spec):
     if ext is None:
         return [error] if group_paths else []
     try:
+        overlay = backend.get("service_candidate_suite_source_overlay_20261113_v1")
+        if overlay is not None:
+            old_hash = hashlib.sha256(json.dumps(ext, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            if old_hash != "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9": raise ValueError("historical suite extension drift")
+            overlay_fields = {"format", "status", "historical_extension_sha256", "current_manifest", "additive_manifest", "wrapper", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+            if (not isinstance(overlay, dict) or set(overlay) != overlay_fields or
+                overlay["format"] != "jungsi.service-suite-source-overlay/v1" or overlay["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+                overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+                overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
+                raise ValueError("suite overlay status")
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261113_source_candidate.json", "3d3e2959e6f1e3e916a4c4e90e81ca74b6adc98c022eb2c9b20574fff860a7c1"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "9e94d0290c840c0a7d131737b6a5cbc542d23eca26e3c45bf731b6f95ff914ef"),
+                     "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
+            for key, (path, fixed) in bound.items():
+                item = overlay[key]
+                if (not isinstance(item, dict) or set(item) != {"path", "sha256"} or item["path"] != path or path not in names or
+                    not isinstance(item["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) or
+                    (fixed is not None and item["sha256"] != fixed) or hashlib.sha256(read(path)).hexdigest() != item["sha256"]):
+                    raise ValueError("suite overlay file")
         fields = {"format", "status", "manifest", "wrapper", "regression_test", "groups", "runtime_scope",
                   "native_acceptance", "activation_status", "operating_writes"}
         if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-candidate-suites/v1" or
@@ -5930,28 +6103,56 @@ def service_candidate_suite_errors(paths, read, spec):
         expected_files = {"manifest": "tests/review_suite_manifest.20261113_fmt.current.json", "wrapper": "tests/test_service_candidate_suites.py",
                           "regression_test": "tests/test_service_candidate_registry.py"}
         for key, path in expected_files.items():
-            item = ext[key]
+            item = overlay[key] if overlay is not None and key in {"wrapper", "regression_test"} else ext[key]
             if (not isinstance(item, dict) or set(item) != {"path", "sha256"} or item["path"] != path or path not in names or
                     not isinstance(item["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) or
                     hashlib.sha256(read(path)).hexdigest() != item["sha256"]): raise ValueError("bound guard file")
         expected_groups = {name: {"roots": roots, "test_count": count} for name, (roots, count, _) in SERVICE_CANDIDATE_GROUPS.items()}
         if ext["groups"] != expected_groups: raise ValueError("suite group metadata")
-        manifest = json.loads(read(expected_files["manifest"]))
+        manifest = json.loads(read(overlay["current_manifest"]["path"] if overlay is not None else expected_files["manifest"]))
+        groups = dict(SERVICE_CANDIDATE_GROUPS)
+        manual_reads = dict(SERVICE_CANDIDATE_MANUAL_READS)
+        fixtures = dict(SERVICE_CANDIDATE_SHARED_FIXTURES)
+        if overlay is not None:
+            add = json.loads(read(overlay["additive_manifest"]["path"]))
+            roots = ["tests/service_p1/test_student_pk_scoped.synthetic.ts", "tests/service_p1/test_current_guide_scoped.synthetic.ts"]
+            add_fields = {"format", "status", "roots", "case_count", "case_names", "config", "workflow", "files", "graphs", "layers", "native_acceptance", "activation_status", "operating_writes"}
+            if (not isinstance(add, dict) or set(add) != add_fields or add["format"] != "jungsi.student-pk-additive-suite-source/v1" or
+                add["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or add["roots"] != roots or type(add["case_count"]) is not int or add["case_count"] != 12 or
+                add["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or add["activation_status"] != "NOT_RUN" or
+                type(add["operating_writes"]) is not int or add["operating_writes"] != 0): raise ValueError("additive status")
+            workflow = add["workflow"]
+            if workflow != {"path": ".github/workflows/project-consistency.yml", "sha256": "f44b782193d2c9b7020f3755342ee631a5189dc1b119502a5857fdc4ef325c42"} or workflow["path"] not in names or hashlib.sha256(read(workflow["path"])).hexdigest() != workflow["sha256"]:
+                raise ValueError("additive workflow")
+            if set(add["case_names"]) != set(roots): raise ValueError("additive case roots")
+            for root, expected in zip(roots, (8, 4)):
+                source = read(root).decode("utf8")
+                declared = re.findall(r'Deno\.test\(\s*("(?:[^"\\]|\\.)*")\s*,', source)
+                if (len(declared) != expected or source.count("Deno.test(") != expected or
+                    [json.loads(x) for x in declared] != add["case_names"][root]): raise ValueError("additive test cases")
+            if add["config"] != manifest.get("config"): raise ValueError("additive config")
+            manifest = dict(manifest)
+            manifest["suites"] = dict(manifest["suites"])
+            manifest["suites"]["student_pk_additive"] = {"roots": roots, "expected_count": 12, "allowed_builtins": [],
+                "manual_read_files": [], "files": add["files"], "graphs": add["graphs"], "layers": add["layers"]}
+            groups["student_pk_additive"] = (roots, 12, [])
+            manual_reads["student_pk_additive"] = []
+            fixtures["student_pk_additive"] = frozenset()
         if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:
             raise ValueError("manifest format")
         if manifest.get("runtime") != {"deno_sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33", "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"}:
             raise ValueError("runtime pin")
-        if set(manifest.get("suites", {})) != set(SERVICE_CANDIDATE_GROUPS): raise ValueError("suite names")
+        if set(manifest.get("suites", {})) != set(groups): raise ValueError("suite names")
         config = manifest.get("config")
         if (not isinstance(config, dict) or set(config) != {"path", "sha256"} or
                 config.get("path") != "supabase/functions/deno.json" or config.get("path") not in names or
                 not isinstance(config.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", config["sha256"]) or
                 hashlib.sha256(read(config["path"])).hexdigest() != config["sha256"]): raise ValueError("suite config")
         union_tests = set()
-        for name, (roots, count, allowed) in SERVICE_CANDIDATE_GROUPS.items():
+        for name, (roots, count, allowed) in groups.items():
             suite = manifest["suites"][name]
             if (suite.get("roots") != roots or type(suite.get("expected_count")) is not int or suite["expected_count"] != count or
-                    suite.get("allowed_builtins") != allowed or suite.get("manual_read_files") != SERVICE_CANDIDATE_MANUAL_READS[name]):
+                    suite.get("allowed_builtins") != allowed or suite.get("manual_read_files") != manual_reads[name]):
                 raise ValueError("suite roots or count")
             sf, graphs, layers = suite["files"], suite["graphs"], suite["layers"]
             if not isinstance(sf, dict) or not isinstance(graphs, dict) or set(graphs) != set(roots): raise ValueError("suite graph")
@@ -5979,7 +6180,7 @@ def service_candidate_suite_errors(paths, read, spec):
                         src, dst = service_candidate_layer(source), service_candidate_layer(target)
                         if dst not in SERVICE_CANDIDATE_LAYERS.get(src, set()): raise ValueError("layer boundary")
                         layer_edges.add((src, dst))
-            if set(sf) != all_graph_files | set(SERVICE_CANDIDATE_MANUAL_READS[name]) | {"supabase/functions/deno.json"}:
+            if set(sf) != all_graph_files | set(manual_reads[name]) | {"supabase/functions/deno.json"}:
                 raise ValueError("closure coverage")
             for path, digest in sf.items():
                 q = PurePosixPath(path)
@@ -5991,11 +6192,13 @@ def service_candidate_suite_errors(paths, read, spec):
                         raise ValueError("generated route drift")
                 elif not re.fullmatch(r"[0-9a-f]{64}", digest) or hashlib.sha256(read(path)).hexdigest() != digest:
                     raise ValueError("closure source hash")
-                if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
+                suite_dir = "service_p1" if name == "student_pk_additive" else name
+                if path.startswith("tests/") and not path.startswith("tests/" + suite_dir + "/") and path not in fixtures.get(name, frozenset()):
                     raise ValueError("test scope")
                 if path.startswith(prefixes): union_tests.add(path)
-            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
-            if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+            suite_dir = "service_p1" if name == "student_pk_additive" else name
+            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + suite_dir + "/")}
+            if extra_fixtures != set(fixtures.get(name, frozenset())):
                 raise ValueError("exact shared fixture set")
             if layers["files"] != {p: service_candidate_layer(p) for p in sorted(sf)} or layers["observed_layer_edges"] != [list(x) for x in sorted(layer_edges)]:
                 raise ValueError("layer registry")
