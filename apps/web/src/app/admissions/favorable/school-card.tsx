@@ -4,6 +4,7 @@ import { AdvantageCell, CATEGORY, CategoryBadge, EnrichedReasonList, PickButton,
 import { StatsSlot, type StatsPromise } from "@/components/stats-slot";
 import type { CandidatesDto, Category } from "@/lib/dto";
 import { page } from "@/lib/routes";
+import { SchoolReflectedLine } from "@/components/school-reflected";
 import { hrefWith, type Query } from "./query";
 
 type Group = CandidatesDto["basic_university_groups"][number];
@@ -106,6 +107,7 @@ export function SchoolCard({ g, cur, picked, stats, statsKey }: { g: Group; cur:
                   <span className="c-adv r"><AdvantageCell a={a} /></span>
                   <span className="c-pick"><PickButton id={o.offering_id} on={picked.has(o.offering_id)} /></span>
                 </div>
+                <SchoolReflectedLine a={a} compact />
                 {(a.recommendation_reasons?.length ?? 0) > 0 && <EnrichedReasonList a={a} max={2} />}
                 <StatsSlot p={stats} id={o.offering_id} k={statsKey} />
               </li>

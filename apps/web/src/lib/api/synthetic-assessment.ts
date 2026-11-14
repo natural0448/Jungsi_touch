@@ -159,6 +159,14 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
     advantage: sameScope ? { delta_pp: fmt(delta), status: delta > 0.005 ? "favorable" : delta < -0.005 ? "unfavorable" : "neutral", baseline_version: "SYNTHETIC-baseline-v1" } : null,
     reason_code: sameScope ? null : "advantage_population_mismatch",
     recommendation_reasons: reasons,
+    // 학교 반영 백분위(참고, 합성): 운영에서는 서버가 허가 목록·시험 자료집으로 계산한다
+    school_reflected: {
+      status: "reference",
+      value: Math.round((100 - convPct * 0.8) * 10000) / 10000,
+      reason_code: null,
+      eligibility_note: base === "syn-h2",
+      excluded: ["english", "korean_history", "bonus"],
+    },
   };
 }
 

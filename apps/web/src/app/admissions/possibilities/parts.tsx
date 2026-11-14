@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto } from "@/lib/dto";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
+import { SchoolReflectedLine } from "@/components/school-reflected";
 import { IssueItem } from "./recruit-parts";
 
 /**
@@ -50,6 +51,7 @@ export function Detail({ o, a, extras, picked }: { o: OfferingDto; a: Cell; extr
         <DecisionCard a={a} />
         <AdvantageCard a={a} />
       </div>
+      <SchoolReflectedLine a={a} />
       {(a.recommendation_reasons?.length ?? 0) > 0 && (
         <div className="reasons">
           <h3>이 학과의 판단 이유</h3>

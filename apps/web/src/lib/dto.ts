@@ -271,6 +271,17 @@ export interface AssessmentDto {
   recommendation_reasons?: ReasonDto[] | null;
   // 참고 누백(추정). 서버는 승인된 곡선의 값만 보내고, 계산이 안 되면 칸을 뺀다
   reference_percentile?: ReferencePercentileDto | null;
+  // 학교 반영 백분위(참고, 2026-11-14). 허가된 2027 모집단위만, 읽을 때 서버가 계산해 붙인다
+  school_reflected?: SchoolReflectedDto | null;
+}
+
+/** 학교 반영 백분위(참고). value 는 0~100, 영어·한국사·가산점 제외 */
+export interface SchoolReflectedDto {
+  status: "reference" | "pending";
+  value: number | null;
+  reason_code: string | null;
+  eligibility_note: boolean;
+  excluded: ("english" | "korean_history" | "bonus")[];
 }
 
 /** 참고 누백(추정) — 9월 모의평가 응시자 전체 기준 추정 위치. 합격 가능성·지원 판정이 아니다 */
