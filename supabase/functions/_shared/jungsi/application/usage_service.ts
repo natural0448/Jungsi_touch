@@ -46,7 +46,11 @@ export interface PreparedUsageAdmission {
 }
 const admissions = new WeakMap<
   PreparedUsageAdmission,
-  { issuer: object; state: "prepared" | "running" | "settled" | "cancelled" }
+  {
+    issuer: object;
+    state: "prepared" | "running" | "settled" | "settlement_failed" | "cancelling" | "cancelled";
+    cancellation?: Promise<void>;
+  }
 >();
 export interface UsagePlanningPort {
   /** Resolve owned profile/direct scores, registered exam and adopted versions.
@@ -249,7 +253,8 @@ export class SharedRequestBudget implements RequestBudgetPort {
   assertAdmission(admission: PreparedUsageAdmission, request: BudgetRequest): void {
     const record = admissions.get(admission);
     if (
-      !record || record.issuer !== this || record.state === "cancelled" ||
+      !record || record.issuer !== this ||
+      ["cancelling", "cancelled", "settlement_failed"].includes(record.state) ||
       admission.originalRequest !== request
     ) unavailable();
     sessionDto(request.session, this.clock.nowUtc());
@@ -272,6 +277,9 @@ export class SharedRequestBudget implements RequestBudgetPort {
       !record || record.issuer !== this || record.state !== "prepared" ||
       admission.originalRequest !== request
     ) unavailable();
+    // Claim the admission before any asynchronous settlement or work begins.
+    // Cancellation cannot release its physical reservation while it is running.
+    record.state = "running";
     try {
       this.assertAdmission(admission, request);
     } catch (error) {
@@ -279,11 +287,11 @@ export class SharedRequestBudget implements RequestBudgetPort {
         await this.store.settle(admission.lease, "failure");
         record.state = "settled";
       } catch {
+        record.state = "settlement_failed";
         return unavailable();
       }
       throw error;
     }
-    record.state = "running";
     const { request: protectedRequest, plan, lease } = admission;
     let result: T, resultBytes = 0n;
     try {
@@ -308,6 +316,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
         await this.store.settle(lease, "failure");
         record.state = "settled";
       } catch {
+        record.state = "settlement_failed";
         return unavailable();
       }
       this.administrator(protectedRequest, plan);
@@ -323,6 +332,7 @@ export class SharedRequestBudget implements RequestBudgetPort {
       await this.store.settle(lease, "success", { resultBytes });
       record.state = "settled";
     } catch {
+      record.state = "settlement_failed";
       return unavailable();
     }
     sessionDto(request.session, this.clock.nowUtc());
@@ -339,12 +349,26 @@ export class SharedRequestBudget implements RequestBudgetPort {
     const record = admissions.get(admission);
     if (!record || record.issuer !== this) unavailable();
     if (record.state === "cancelled") return;
-    try {
-      await this.store.settle(admission.lease, "failure");
-      record.state = "cancelled";
-    } catch {
-      unavailable();
+    if (record.state === "running") unavailable();
+    if (record.state === "cancelling") {
+      if (!record.cancellation) unavailable();
+      return await record.cancellation;
     }
+    // A settled result can have been rolled back with the surrounding input
+    // transaction, so cleanup must still settle it after that rollback.
+    const previous = record.state;
+    record.state = "cancelling";
+    const cancellation = (async () => {
+      try {
+        await this.store.settle(admission.lease, "failure");
+        record.state = "cancelled";
+      } catch {
+        record.state = previous;
+        unavailable();
+      }
+    })();
+    record.cancellation = cancellation;
+    await cancellation;
   }
   async run<T>(request: BudgetRequest, work: (admission?: unknown) => Promise<T>): Promise<T> {
     return await this.runAdmitted(await this.admit(request), work, request);

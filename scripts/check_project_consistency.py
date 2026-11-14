@@ -6101,7 +6101,7 @@ def service_candidate_layer(path):
 def service_candidate_suite_errors(paths, read, spec):
     """Require each separate synthetic suite and its pinned local closure; never suppress existing gates."""
     error = "Service candidate suite registration or local closure invalid"
-    prefixes = tuple("tests/" + name + "/" for name in SERVICE_CANDIDATE_GROUPS)
+    prefixes = tuple("tests/" + name + "/" for name in (*SERVICE_CANDIDATE_GROUPS, "budget_admission"))
     names = set(paths)
     group_paths = {p for p in names if p.startswith(prefixes)}
     backend = spec.get("backend_platform_contract", {})
@@ -6119,7 +6119,7 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261113_source_candidate.json", "89182039b9b220f3875b653578eb12fefe073263c78c0ae370d9bf039c019a26"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"),
                      "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "5602cbc0638313c5e3cbd903e7b1007a0b9c7e14668792d23ab93ff4b3a1225a"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
@@ -6172,6 +6172,21 @@ def service_candidate_suite_errors(paths, read, spec):
             groups["student_pk_additive"] = (roots, 12, [])
             manual_reads["student_pk_additive"] = []
             fixtures["student_pk_additive"] = frozenset()
+        budget = backend.get("budget_admission_source_registration_20261114_v1")
+        if budget is not None:
+            expected_budget = {'format': 'jungsi.budget-admission-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/usage_service.ts', 'source_sha256': 'ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43', 'test_path': 'tests/budget_admission/test_usage_admission_race.synthetic.ts', 'test_sha256': 'a0b0082f32dc31f70c77a2d1924de9b3e845593101d13b6f99ceca11a98df898', 'case_count': 6, 'case_names': ['running admission cannot be cancelled before physical work finishes', 'concurrent cancellations share one failure settlement', 'post-rollback cleanup may settle a completed failure again', 'failed settlement remains eligible for rollback cleanup', 'concurrent cancellation shares delayed store failure and a later cleanup can retry', 'rolled-back successful settlement is compensated after the outer transaction'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
+            if budget != expected_budget or type(budget.get("case_count")) is not int or type(budget.get("operating_writes")) is not int:
+                raise ValueError("budget admission registration")
+            if budget["test_path"] not in names or budget["source_path"] not in names:
+                raise ValueError("budget admission source missing")
+            source_text = read(budget["test_path"]).decode("utf8")
+            declarations = ['Deno.test("' + value + '",' for value in budget["case_names"]]
+            positions = [source_text.find(value) for value in declarations]
+            if source_text.count("Deno.test(") != 6 or min(positions) < 0 or positions != sorted(set(positions)):
+                raise ValueError("budget admission case identities")
+            groups["budget_admission"] = ([budget["test_path"]], 6, [])
+            manual_reads["budget_admission"] = []
+            fixtures["budget_admission"] = frozenset({"tests/edge/fixture.ts"})
         if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:
             raise ValueError("manifest format")
         if manifest.get("runtime") != {"deno_sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33", "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"}:

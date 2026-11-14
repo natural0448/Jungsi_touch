@@ -13695,7 +13695,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "e6de32ffc031ad91323a7ca3e5542372790a3ff86621a5b6fb63e01fa7375fb1",
+            "source_sha256": "3cb5e3c44ca5cc103c12fdd0829da36e28fc5b38acf4feaaed5b822f0ead59b0",
             "symbols": [
               {
                 "kind": "class",
@@ -23986,7 +23986,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
+              "source_sha256": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
               "declared_exports": [
                 "ApprovedUsagePlan",
                 "RepositoryUsageReplays",
@@ -31442,6 +31442,13 @@
         "REQ-31"
       ],
       "summary": "화면팀이 PR #75 서버 코드를 인수했다(담당자 마지막 커밋 2543bfff). CI가 멈춘 시험 2건을 바로잡았다: 사고 복구 시험은 저장 리포트 덧씌움 이전 규칙만 따로 검사하고, 1페이지 계약 그래프 고정본은 바뀐 서버 파일 5개 지문으로 갱신했다. 담당자 012·013 SQL 준비안과 문서를 함께 싣고, 전문가용 담은 학교 빼기(pro.bookmark.remove, 22번째 작업)·기관 관리자용 구성원 이름(display_name, 013 함수 세 인자)·유리한 대학 찾기 비용을 모집단위 수와 떼어 1회로 세기를 서버 소스에 등록했다. 담기/빼기는 같은 기관·학생·리포트 단위로 직렬화하고 가장 큰 event_seq로 현재 상태를 정한다. DB 적용·운영 배포·활성화는 하지 않았다."
+    },
+    {
+      "date": "2026-11-14",
+      "requirements": [
+        "REQ-27"
+      ],
+      "summary": "시스템팀 검토 패치의 예산 취소 경합 보완을 반영했다. usage_service.ts에서 실행 중인 요청은 취소가 물리 예약을 먼저 풀지 못하게 하고, 동시 취소는 한 번의 실패 정산을 함께 기다리며, 정산 실패와 바깥 트랜잭션 롤백 뒤에도 정리 정산을 다시 할 수 있게 했다. 새 합성 시험 6건은 별도 budget_admission 묶음(Python 다리)으로 등록하고 Edge 기반 656건에는 더하지 않는다. 운영 546·429 원인은 이 변경으로 입증되지 않았고 배포하지 않았다."
     }
   ],
   "overall_analysis_contract": {
@@ -34689,8 +34696,8 @@
       "status": "SOURCE_REGISTERED_NOT_EXECUTED",
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
-        "path": "tests/review_suite_manifest.20261113_source_candidate.json",
-        "sha256": "89182039b9b220f3875b653578eb12fefe073263c78c0ae370d9bf039c019a26"
+        "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
+        "sha256": "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -34698,12 +34705,32 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "51b2b5b885fb4fc58a53fd67882466d0d7096c7690c790c8eb35660b69633343"
+        "sha256": "1681fe7d3349c2ffc4c4d71227d3d5187e0c4f254df2a175125ed6453c59ab70"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "3b9fddab23f175c713ae8af210460e2833fba4bd96fecf4879cb998b2a3832ea"
+        "sha256": "98ee6ee1a2f811273909024f3fe221d718807c4467cb1ef3e98b518ee67699f2"
       },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "budget_admission_source_registration_20261114_v1": {
+      "format": "jungsi.budget-admission-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "source_path": "supabase/functions/_shared/jungsi/application/usage_service.ts",
+      "source_sha256": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
+      "test_path": "tests/budget_admission/test_usage_admission_race.synthetic.ts",
+      "test_sha256": "a0b0082f32dc31f70c77a2d1924de9b3e845593101d13b6f99ceca11a98df898",
+      "case_count": 6,
+      "case_names": [
+        "running admission cannot be cancelled before physical work finishes",
+        "concurrent cancellations share one failure settlement",
+        "post-rollback cleanup may settle a completed failure again",
+        "failed settlement remains eligible for rollback cleanup",
+        "concurrent cancellation shares delayed store failure and a later cleanup can retry",
+        "rolled-back successful settlement is compensated after the outer transaction"
+      ],
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
       "operating_writes": 0
@@ -143088,1312 +143115,6 @@
       },
       "supabase/functions/_shared/jungsi/application/usage_service.ts": {
         "declarations": {
-          "symbols": [
-            {
-              "name": "ApprovedUsagePlan",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "interface",
-                  "def": {
-                    "properties": [
-                      {
-                        "name": "status",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "approved",
-                          "kind": "literal",
-                          "value": {
-                            "kind": "string",
-                            "string": "approved"
-                          }
-                        }
-                      },
-                      {
-                        "name": "policyVersion",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "string",
-                          "kind": "keyword",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "name": "approvalReferenceSha256",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "string",
-                          "kind": "keyword",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "name": "owner",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "string",
-                          "kind": "keyword",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "name": "operation",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "string",
-                          "kind": "keyword",
-                          "value": "string"
-                        }
-                      },
-                      {
-                        "name": "memberTier",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "union",
-                          "value": [
-                            {
-                              "repr": "standard",
-                              "kind": "literal",
-                              "value": {
-                                "kind": "string",
-                                "string": "standard"
-                              }
-                            },
-                            {
-                              "repr": "paid",
-                              "kind": "literal",
-                              "value": {
-                                "kind": "string",
-                                "string": "paid"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "examId",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "union",
-                          "value": [
-                            {
-                              "repr": "string",
-                              "kind": "keyword",
-                              "value": "string"
-                            },
-                            {
-                              "repr": "null",
-                              "kind": "keyword",
-                              "value": "null"
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "normalizedScoresSha256",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "union",
-                          "value": [
-                            {
-                              "repr": "string",
-                              "kind": "keyword",
-                              "value": "string"
-                            },
-                            {
-                              "repr": "null",
-                              "kind": "keyword",
-                              "value": "null"
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "calculationContextSha256",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "union",
-                          "value": [
-                            {
-                              "repr": "string",
-                              "kind": "keyword",
-                              "value": "string"
-                            },
-                            {
-                              "repr": "null",
-                              "kind": "keyword",
-                              "value": "null"
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "computation",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "union",
-                          "value": [
-                            {
-                              "repr": "required",
-                              "kind": "literal",
-                              "value": {
-                                "kind": "string",
-                                "string": "required"
-                              }
-                            },
-                            {
-                              "repr": "idempotent_replay",
-                              "kind": "literal",
-                              "value": {
-                                "kind": "string",
-                                "string": "idempotent_replay"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "demands",
-                        "readonly": true,
-                        "tsType": {
-                          "kind": "typeOperator",
-                          "value": {
-                            "operator": "readonly",
-                            "tsType": {
-                              "kind": "array",
-                              "value": {
-                                "repr": "UsageDemand",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "UsageDemand",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./usage_budget.ts",
-                                    "name": "UsageDemand"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "stageProof",
-                        "readonly": true,
-                        "optional": true,
-                        "tsType": {
-                          "repr": "StageBudgetProof",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "StageBudgetProof",
-                            "resolution": {
-                              "kind": "import",
-                              "specifier": "./operating_policy.ts",
-                              "name": "StageBudgetProof"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "administratorProof",
-                        "readonly": true,
-                        "optional": true,
-                        "tsType": {
-                          "repr": "AdministratorUsageProof",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "AdministratorUsageProof",
-                            "resolution": {
-                              "kind": "import",
-                              "specifier": "./administrator_usage_policy.ts",
-                              "name": "AdministratorUsageProof"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "maximumResultBytes",
-                        "readonly": true,
-                        "optional": true,
-                        "tsType": {
-                          "repr": "bigint",
-                          "kind": "keyword",
-                          "value": "bigint"
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "PreparedUsageAdmission",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "interface",
-                  "def": {
-                    "properties": [
-                      {
-                        "name": "originalRequest",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "BudgetRequest",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "BudgetRequest",
-                            "resolution": {
-                              "kind": "import",
-                              "specifier": "./request_budget.ts",
-                              "name": "BudgetRequest"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "request",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "BudgetRequest",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "BudgetRequest",
-                            "resolution": {
-                              "kind": "import",
-                              "specifier": "./request_budget.ts",
-                              "name": "BudgetRequest"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "plan",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "ApprovedUsagePlan",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "ApprovedUsagePlan",
-                            "resolution": {
-                              "kind": "local"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "name": "lease",
-                        "readonly": true,
-                        "tsType": {
-                          "repr": "UsageLease",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "UsageLease",
-                            "resolution": {
-                              "kind": "import",
-                              "specifier": "./usage_budget.ts",
-                              "name": "UsageLease"
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "UsagePlanningPort",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "interface",
-                  "def": {
-                    "methods": [
-                      {
-                        "name": "prepare",
-                        "kind": "method",
-                        "params": [
-                          {
-                            "kind": "identifier",
-                            "name": "request",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "BudgetRequest",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "BudgetRequest",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./request_budget.ts",
-                                  "name": "BudgetRequest"
-                                }
-                              }
-                            }
-                          }
-                        ],
-                        "returnType": {
-                          "repr": "Promise",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "kind": "union",
-                                "value": [
-                                  {
-                                    "repr": "ApprovedUsagePlan",
-                                    "kind": "typeRef",
-                                    "value": {
-                                      "typeName": "ApprovedUsagePlan",
-                                      "resolution": {
-                                        "kind": "local"
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "repr": "null",
-                                    "kind": "keyword",
-                                    "value": "null"
-                                  }
-                                ]
-                              }
-                            ],
-                            "typeName": "Promise"
-                          }
-                        },
-                        "parameter_source": "(request: BudgetRequest)"
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "UsageReplayVerificationPort",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "interface",
-                  "def": {
-                    "methods": [
-                      {
-                        "name": "exists",
-                        "kind": "method",
-                        "params": [
-                          {
-                            "kind": "identifier",
-                            "name": "request",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "BudgetRequest",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "BudgetRequest",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./request_budget.ts",
-                                  "name": "BudgetRequest"
-                                }
-                              }
-                            }
-                          }
-                        ],
-                        "returnType": {
-                          "repr": "Promise",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "repr": "boolean",
-                                "kind": "keyword",
-                                "value": "boolean"
-                              }
-                            ],
-                            "typeName": "Promise"
-                          }
-                        },
-                        "parameter_source": "(request: BudgetRequest)"
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "RepositoryUsageReplays",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "class",
-                  "def": {
-                    "constructors": [
-                      {
-                        "hasBody": true,
-                        "name": "constructor",
-                        "params": [
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "repository",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "PlatformRepositoryPort",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "PlatformRepositoryPort",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./platform_repository.ts",
-                                  "name": "PlatformRepositoryPort"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          }
-                        ],
-                        "parameter_source": "(private readonly repository: PlatformRepositoryPort)"
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "name": "exists",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "request",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "BudgetRequest",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "BudgetRequest",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./request_budget.ts",
-                                    "name": "BudgetRequest"
-                                  }
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "Promise",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeParams": [
-                                {
-                                  "repr": "boolean",
-                                  "kind": "keyword",
-                                  "value": "boolean"
-                                }
-                              ],
-                              "typeName": "Promise"
-                            }
-                          },
-                          "hasBody": true,
-                          "isAsync": true
-                        }
-                      }
-                    ],
-                    "implements": [
-                      {
-                        "repr": "UsageReplayVerificationPort",
-                        "kind": "typeRef",
-                        "value": {
-                          "typeName": "UsageReplayVerificationPort",
-                          "resolution": {
-                            "kind": "local"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "SharedRequestBudget",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "class",
-                  "def": {
-                    "constructors": [
-                      {
-                        "hasBody": true,
-                        "name": "constructor",
-                        "params": [
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "planner",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "UsagePlanningPort",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "UsagePlanningPort",
-                                "resolution": {
-                                  "kind": "local"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "store",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "UsageBudgetStorePort",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "UsageBudgetStorePort",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./usage_budget.ts",
-                                  "name": "UsageBudgetStorePort"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "clock",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "RequestClockPort",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "RequestClockPort",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./ports.ts",
-                                  "name": "RequestClockPort"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "replays",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "UsageReplayVerificationPort",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "UsageReplayVerificationPort",
-                                "resolution": {
-                                  "kind": "local"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "measureResult",
-                            "optional": true,
-                            "tsType": {
-                              "kind": "fnOrConstructor",
-                              "value": {
-                                "constructor": false,
-                                "tsType": {
-                                  "repr": "Promise",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeParams": [
-                                      {
-                                        "repr": "bigint",
-                                        "kind": "keyword",
-                                        "value": "bigint"
-                                      }
-                                    ],
-                                    "typeName": "Promise"
-                                  }
-                                },
-                                "params": [
-                                  {
-                                    "kind": "identifier",
-                                    "name": "request",
-                                    "optional": false,
-                                    "tsType": {
-                                      "repr": "BudgetRequest",
-                                      "kind": "typeRef",
-                                      "value": {
-                                        "typeName": "BudgetRequest",
-                                        "resolution": {
-                                          "kind": "import",
-                                          "specifier": "./request_budget.ts",
-                                          "name": "BudgetRequest"
-                                        }
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "kind": "identifier",
-                                    "name": "result",
-                                    "optional": false,
-                                    "tsType": {
-                                      "repr": "unknown",
-                                      "kind": "keyword",
-                                      "value": "unknown"
-                                    }
-                                  }
-                                ]
-                              }
-                            },
-                            "readonly": true
-                          }
-                        ],
-                        "parameter_source": "(\n    private readonly planner: UsagePlanningPort,\n    private readonly store: UsageBudgetStorePort,\n    private readonly clock: RequestClockPort,\n    private readonly replays: UsageReplayVerificationPort,\n    private readonly measureResult?: (request: BudgetRequest, result: unknown) => Promise<bigint>,\n  )"
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "accessibility": "private",
-                        "name": "administrator",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "request",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "BudgetRequest",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "BudgetRequest",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./request_budget.ts",
-                                    "name": "BudgetRequest"
-                                  }
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "plan",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "ApprovedUsagePlan",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "ApprovedUsagePlan",
-                                  "resolution": {
-                                    "kind": "local"
-                                  }
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "kind": "typeOperator",
-                            "value": {
-                              "operator": "readonly",
-                              "tsType": {
-                                "kind": "array",
-                                "value": {
-                                  "repr": "BudgetKind",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "BudgetKind",
-                                    "resolution": {
-                                      "kind": "import",
-                                      "specifier": "./usage_budget.ts",
-                                      "name": "BudgetKind"
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          "hasBody": true
-                        }
-                      },
-                      {
-                        "accessibility": "private",
-                        "name": "validate",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "request",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "BudgetRequest",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "BudgetRequest",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./request_budget.ts",
-                                    "name": "BudgetRequest"
-                                  }
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "plan",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "ApprovedUsagePlan",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "ApprovedUsagePlan",
-                                  "resolution": {
-                                    "kind": "local"
-                                  }
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "void",
-                            "kind": "keyword",
-                            "value": "void"
-                          },
-                          "hasBody": true
-                        }
-                      },
-                      {
-                        "name": "admit",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "request",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "BudgetRequest",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "BudgetRequest",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./request_budget.ts",
-                                    "name": "BudgetRequest"
-                                  }
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "Promise",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeParams": [
-                                {
-                                  "repr": "PreparedUsageAdmission",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "PreparedUsageAdmission",
-                                    "resolution": {
-                                      "kind": "local"
-                                    }
-                                  }
-                                }
-                              ],
-                              "typeName": "Promise"
-                            }
-                          },
-                          "hasBody": true,
-                          "isAsync": true
-                        }
-                      },
-                      {
-                        "name": "assertAdmission",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "admission",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "PreparedUsageAdmission",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "PreparedUsageAdmission",
-                                  "resolution": {
-                                    "kind": "local"
-                                  }
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "request",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "BudgetRequest",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "BudgetRequest",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./request_budget.ts",
-                                    "name": "BudgetRequest"
-                                  }
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "void",
-                            "kind": "keyword",
-                            "value": "void"
-                          },
-                          "hasBody": true
-                        }
-                      },
-                      {
-                        "name": "runAdmitted",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "admission",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "PreparedUsageAdmission",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "PreparedUsageAdmission",
-                                  "resolution": {
-                                    "kind": "local"
-                                  }
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "work",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "fnOrConstructor",
-                                "value": {
-                                  "constructor": false,
-                                  "tsType": {
-                                    "repr": "Promise",
-                                    "kind": "typeRef",
-                                    "value": {
-                                      "typeParams": [
-                                        {
-                                          "repr": "T",
-                                          "kind": "typeRef",
-                                          "value": {
-                                            "typeName": "T",
-                                            "resolution": {
-                                              "kind": "typeParam",
-                                              "declaringName": "runAdmitted",
-                                              "declaringKind": "method"
-                                            }
-                                          }
-                                        }
-                                      ],
-                                      "typeName": "Promise"
-                                    }
-                                  },
-                                  "params": [
-                                    {
-                                      "kind": "identifier",
-                                      "name": "admission",
-                                      "optional": true,
-                                      "tsType": {
-                                        "repr": "unknown",
-                                        "kind": "keyword",
-                                        "value": "unknown"
-                                      }
-                                    }
-                                  ]
-                                }
-                              }
-                            },
-                            {
-                              "kind": "assign",
-                              "left": {
-                                "kind": "identifier",
-                                "name": "request",
-                                "optional": false,
-                                "tsType": {
-                                  "repr": "BudgetRequest",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "BudgetRequest",
-                                    "resolution": {
-                                      "kind": "import",
-                                      "specifier": "./request_budget.ts",
-                                      "name": "BudgetRequest"
-                                    }
-                                  }
-                                }
-                              },
-                              "right": "[admission.originalRequest]"
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "Promise",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeParams": [
-                                {
-                                  "repr": "T",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "T",
-                                    "resolution": {
-                                      "kind": "typeParam",
-                                      "declaringName": "runAdmitted",
-                                      "declaringKind": "method"
-                                    }
-                                  }
-                                }
-                              ],
-                              "typeName": "Promise"
-                            }
-                          },
-                          "hasBody": true,
-                          "isAsync": true,
-                          "typeParams": [
-                            {
-                              "name": "T"
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "name": "cancel",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "admission",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "PreparedUsageAdmission",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "PreparedUsageAdmission",
-                                  "resolution": {
-                                    "kind": "local"
-                                  }
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "Promise",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeParams": [
-                                {
-                                  "repr": "void",
-                                  "kind": "keyword",
-                                  "value": "void"
-                                }
-                              ],
-                              "typeName": "Promise"
-                            }
-                          },
-                          "hasBody": true,
-                          "isAsync": true
-                        }
-                      },
-                      {
-                        "name": "run",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "request",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "BudgetRequest",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "BudgetRequest",
-                                  "resolution": {
-                                    "kind": "import",
-                                    "specifier": "./request_budget.ts",
-                                    "name": "BudgetRequest"
-                                  }
-                                }
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "work",
-                              "optional": false,
-                              "tsType": {
-                                "kind": "fnOrConstructor",
-                                "value": {
-                                  "constructor": false,
-                                  "tsType": {
-                                    "repr": "Promise",
-                                    "kind": "typeRef",
-                                    "value": {
-                                      "typeParams": [
-                                        {
-                                          "repr": "T",
-                                          "kind": "typeRef",
-                                          "value": {
-                                            "typeName": "T",
-                                            "resolution": {
-                                              "kind": "typeParam",
-                                              "declaringName": "run",
-                                              "declaringKind": "method"
-                                            }
-                                          }
-                                        }
-                                      ],
-                                      "typeName": "Promise"
-                                    }
-                                  },
-                                  "params": [
-                                    {
-                                      "kind": "identifier",
-                                      "name": "admission",
-                                      "optional": true,
-                                      "tsType": {
-                                        "repr": "unknown",
-                                        "kind": "keyword",
-                                        "value": "unknown"
-                                      }
-                                    }
-                                  ]
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "Promise",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeParams": [
-                                {
-                                  "repr": "T",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "T",
-                                    "resolution": {
-                                      "kind": "typeParam",
-                                      "declaringName": "run",
-                                      "declaringKind": "method"
-                                    }
-                                  }
-                                }
-                              ],
-                              "typeName": "Promise"
-                            }
-                          },
-                          "hasBody": true,
-                          "isAsync": true,
-                          "typeParams": [
-                            {
-                              "name": "T"
-                            }
-                          ]
-                        }
-                      }
-                    ],
-                    "implements": [
-                      {
-                        "repr": "RequestBudgetPort",
-                        "kind": "typeRef",
-                        "value": {
-                          "typeName": "RequestBudgetPort",
-                          "resolution": {
-                            "kind": "import",
-                            "specifier": "./request_budget.ts",
-                            "name": "RequestBudgetPort"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "admissions",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "variable",
-                  "def": {
-                    "tsType": {
-                      "repr": "WeakMap",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeParams": [
-                          {
-                            "repr": "PreparedUsageAdmission",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeName": "PreparedUsageAdmission",
-                              "resolution": {
-                                "kind": "local"
-                              }
-                            }
-                          },
-                          {
-                            "kind": "typeLiteral",
-                            "value": {
-                              "properties": [
-                                {
-                                  "name": "issuer",
-                                  "tsType": {
-                                    "repr": "object",
-                                    "kind": "keyword",
-                                    "value": "object"
-                                  }
-                                },
-                                {
-                                  "name": "state",
-                                  "tsType": {
-                                    "kind": "union",
-                                    "value": [
-                                      {
-                                        "repr": "prepared",
-                                        "kind": "literal",
-                                        "value": {
-                                          "kind": "string",
-                                          "string": "prepared"
-                                        }
-                                      },
-                                      {
-                                        "repr": "running",
-                                        "kind": "literal",
-                                        "value": {
-                                          "kind": "string",
-                                          "string": "running"
-                                        }
-                                      },
-                                      {
-                                        "repr": "settled",
-                                        "kind": "literal",
-                                        "value": {
-                                          "kind": "string",
-                                          "string": "settled"
-                                        }
-                                      },
-                                      {
-                                        "repr": "cancelled",
-                                        "kind": "literal",
-                                        "value": {
-                                          "kind": "string",
-                                          "string": "cancelled"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ],
-                        "typeName": "WeakMap"
-                      }
-                    },
-                    "kind": "const"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "ANALYSIS",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "variable",
-                  "def": {
-                    "tsType": {
-                      "kind": "array",
-                      "value": {
-                        "repr": "string",
-                        "kind": "keyword",
-                        "value": "string"
-                      }
-                    },
-                    "kind": "const"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "ID",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "variable",
-                  "def": {
-                    "tsType": {
-                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeName": "RegExp"
-                      }
-                    },
-                    "kind": "const"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "HASH",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "variable",
-                  "def": {
-                    "tsType": {
-                      "repr": "^[a-f0-9]{64}$",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeName": "RegExp"
-                      }
-                    },
-                    "kind": "const"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "unavailable",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [],
-                    "returnType": {
-                      "repr": "never",
-                      "kind": "keyword",
-                      "value": "never"
-                    },
-                    "hasBody": true,
-                    "parameter_source": "()"
-                  }
-                }
-              ]
-            }
-          ],
           "imports": [
             {
               "importedName": "AccessError",
@@ -144442,11 +143163,11 @@
             },
             {
               "importedName": "StageBudgetProof",
-              "originalName": "StageBudgetProof",
-              "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts",
               "jsDoc": {
                 "doc": "Approved server plans compose atomic budgets with work; no unapproved fallback."
-              }
+              },
+              "originalName": "StageBudgetProof",
+              "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
             },
             {
               "importedName": "UsageBudgetStorePort",
@@ -144495,19 +143216,1359 @@
             },
             {
               "importedName": "verifyStageBudgetProof",
-              "originalName": "verifyStageBudgetProof",
-              "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts",
               "jsDoc": {
                 "doc": "Approved server plans compose atomic budgets with work; no unapproved fallback."
-              }
+              },
+              "originalName": "verifyStageBudgetProof",
+              "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
             }
           ],
-          "source_sha256": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d"
+          "source_sha256": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "status",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "literal",
+                          "repr": "approved",
+                          "value": {
+                            "kind": "string",
+                            "string": "approved"
+                          }
+                        }
+                      },
+                      {
+                        "name": "policyVersion",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "approvalReferenceSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "owner",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "operation",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "memberTier",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "standard",
+                              "value": {
+                                "kind": "string",
+                                "string": "standard"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "paid",
+                              "value": {
+                                "kind": "string",
+                                "string": "paid"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "examId",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "normalizedScoresSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "calculationContextSha256",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "computation",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "required",
+                              "value": {
+                                "kind": "string",
+                                "string": "required"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "idempotent_replay",
+                              "value": {
+                                "kind": "string",
+                                "string": "idempotent_replay"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "demands",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "UsageDemand",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "UsageDemand",
+                                    "specifier": "./usage_budget.ts"
+                                  },
+                                  "typeName": "UsageDemand"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "name": "stageProof",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "StageBudgetProof",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "StageBudgetProof",
+                              "specifier": "./operating_policy.ts"
+                            },
+                            "typeName": "StageBudgetProof"
+                          }
+                        }
+                      },
+                      {
+                        "name": "administratorProof",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "AdministratorUsageProof",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "AdministratorUsageProof",
+                              "specifier": "./administrator_usage_policy.ts"
+                            },
+                            "typeName": "AdministratorUsageProof"
+                          }
+                        }
+                      },
+                      {
+                        "name": "maximumResultBytes",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "bigint",
+                          "value": "bigint"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ApprovedUsagePlan"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "originalRequest",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "BudgetRequest",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "BudgetRequest",
+                              "specifier": "./request_budget.ts"
+                            },
+                            "typeName": "BudgetRequest"
+                          }
+                        }
+                      },
+                      {
+                        "name": "request",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "BudgetRequest",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "BudgetRequest",
+                              "specifier": "./request_budget.ts"
+                            },
+                            "typeName": "BudgetRequest"
+                          }
+                        }
+                      },
+                      {
+                        "name": "plan",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ApprovedUsagePlan",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ApprovedUsagePlan"
+                          }
+                        }
+                      },
+                      {
+                        "name": "lease",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "UsageLease",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "UsageLease",
+                              "specifier": "./usage_budget.ts"
+                            },
+                            "typeName": "UsageLease"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "PreparedUsageAdmission"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "prepare",
+                        "parameter_source": "(request: BudgetRequest)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "request",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "BudgetRequest",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "BudgetRequest",
+                                  "specifier": "./request_budget.ts"
+                                },
+                                "typeName": "BudgetRequest"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ApprovedUsagePlan",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "local"
+                                      },
+                                      "typeName": "ApprovedUsagePlan"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "UsagePlanningPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "exists",
+                        "parameter_source": "(request: BudgetRequest)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "request",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "BudgetRequest",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "BudgetRequest",
+                                  "specifier": "./request_budget.ts"
+                                },
+                                "typeName": "BudgetRequest"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "boolean",
+                                "value": "boolean"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "UsageReplayVerificationPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(private readonly repository: PlatformRepositoryPort)",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "repository",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "PlatformRepositoryPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "PlatformRepositoryPort",
+                                  "specifier": "./platform_repository.ts"
+                                },
+                                "typeName": "PlatformRepositoryPort"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "implements": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "UsageReplayVerificationPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "UsageReplayVerificationPort"
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "request",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "BudgetRequest",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "BudgetRequest",
+                                    "specifier": "./request_budget.ts"
+                                  },
+                                  "typeName": "BudgetRequest"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "exists"
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "RepositoryUsageReplays"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    private readonly planner: UsagePlanningPort,\n    private readonly store: UsageBudgetStorePort,\n    private readonly clock: RequestClockPort,\n    private readonly replays: UsageReplayVerificationPort,\n    private readonly measureResult?: (request: BudgetRequest, result: unknown) => Promise<bigint>,\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "planner",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "UsagePlanningPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "UsagePlanningPort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "store",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "UsageBudgetStorePort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "UsageBudgetStorePort",
+                                  "specifier": "./usage_budget.ts"
+                                },
+                                "typeName": "UsageBudgetStorePort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "clock",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "RequestClockPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "RequestClockPort",
+                                  "specifier": "./ports.ts"
+                                },
+                                "typeName": "RequestClockPort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "replays",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "UsageReplayVerificationPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "UsageReplayVerificationPort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "measureResult",
+                            "optional": true,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "request",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "BudgetRequest",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "BudgetRequest",
+                                          "specifier": "./request_budget.ts"
+                                        },
+                                        "typeName": "BudgetRequest"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "kind": "identifier",
+                                    "name": "result",
+                                    "optional": false,
+                                    "tsType": {
+                                      "kind": "keyword",
+                                      "repr": "unknown",
+                                      "value": "unknown"
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "bigint",
+                                        "value": "bigint"
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "implements": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "RequestBudgetPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RequestBudgetPort",
+                            "specifier": "./request_budget.ts"
+                          },
+                          "typeName": "RequestBudgetPort"
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "request",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "BudgetRequest",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "BudgetRequest",
+                                    "specifier": "./request_budget.ts"
+                                  },
+                                  "typeName": "BudgetRequest"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "plan",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "ApprovedUsagePlan",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ApprovedUsagePlan"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "BudgetKind",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "BudgetKind",
+                                      "specifier": "./usage_budget.ts"
+                                    },
+                                    "typeName": "BudgetKind"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "administrator"
+                      },
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "request",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "BudgetRequest",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "BudgetRequest",
+                                    "specifier": "./request_budget.ts"
+                                  },
+                                  "typeName": "BudgetRequest"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "plan",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "ApprovedUsagePlan",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ApprovedUsagePlan"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "validate"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "request",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "BudgetRequest",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "BudgetRequest",
+                                    "specifier": "./request_budget.ts"
+                                  },
+                                  "typeName": "BudgetRequest"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "PreparedUsageAdmission",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "PreparedUsageAdmission"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "admit"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "admission",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "PreparedUsageAdmission",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "PreparedUsageAdmission"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "request",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "BudgetRequest",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "BudgetRequest",
+                                    "specifier": "./request_budget.ts"
+                                  },
+                                  "typeName": "BudgetRequest"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        },
+                        "kind": "method",
+                        "name": "assertAdmission"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "admission",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "PreparedUsageAdmission",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "PreparedUsageAdmission"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "work",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [
+                                    {
+                                      "kind": "identifier",
+                                      "name": "admission",
+                                      "optional": true,
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "unknown",
+                                        "value": "unknown"
+                                      }
+                                    }
+                                  ],
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "Promise",
+                                    "value": {
+                                      "typeName": "Promise",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "T",
+                                          "value": {
+                                            "resolution": {
+                                              "declaringKind": "method",
+                                              "declaringName": "runAdmitted",
+                                              "kind": "typeParam"
+                                            },
+                                            "typeName": "T"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "kind": "assign",
+                              "left": {
+                                "kind": "identifier",
+                                "name": "request",
+                                "optional": false,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "BudgetRequest",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "BudgetRequest",
+                                      "specifier": "./request_budget.ts"
+                                    },
+                                    "typeName": "BudgetRequest"
+                                  }
+                                }
+                              },
+                              "right": "[admission.originalRequest]"
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "T",
+                                  "value": {
+                                    "resolution": {
+                                      "declaringKind": "method",
+                                      "declaringName": "runAdmitted",
+                                      "kind": "typeParam"
+                                    },
+                                    "typeName": "T"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "typeParams": [
+                            {
+                              "name": "T"
+                            }
+                          ]
+                        },
+                        "kind": "method",
+                        "name": "runAdmitted"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "admission",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "PreparedUsageAdmission",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "PreparedUsageAdmission"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "keyword",
+                                  "repr": "void",
+                                  "value": "void"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "cancel"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "request",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "BudgetRequest",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "BudgetRequest",
+                                    "specifier": "./request_budget.ts"
+                                  },
+                                  "typeName": "BudgetRequest"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "work",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "fnOrConstructor",
+                                "value": {
+                                  "constructor": false,
+                                  "params": [
+                                    {
+                                      "kind": "identifier",
+                                      "name": "admission",
+                                      "optional": true,
+                                      "tsType": {
+                                        "kind": "keyword",
+                                        "repr": "unknown",
+                                        "value": "unknown"
+                                      }
+                                    }
+                                  ],
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "Promise",
+                                    "value": {
+                                      "typeName": "Promise",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "T",
+                                          "value": {
+                                            "resolution": {
+                                              "declaringKind": "method",
+                                              "declaringName": "run",
+                                              "kind": "typeParam"
+                                            },
+                                            "typeName": "T"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "T",
+                                  "value": {
+                                    "resolution": {
+                                      "declaringKind": "method",
+                                      "declaringName": "run",
+                                      "kind": "typeParam"
+                                    },
+                                    "typeName": "T"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "typeParams": [
+                            {
+                              "name": "T"
+                            }
+                          ]
+                        },
+                        "kind": "method",
+                        "name": "run"
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "SharedRequestBudget"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "WeakMap",
+                      "value": {
+                        "typeName": "WeakMap",
+                        "typeParams": [
+                          {
+                            "kind": "typeRef",
+                            "repr": "PreparedUsageAdmission",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "PreparedUsageAdmission"
+                            }
+                          },
+                          {
+                            "kind": "typeLiteral",
+                            "value": {
+                              "properties": [
+                                {
+                                  "name": "issuer",
+                                  "tsType": {
+                                    "kind": "keyword",
+                                    "repr": "object",
+                                    "value": "object"
+                                  }
+                                },
+                                {
+                                  "name": "state",
+                                  "tsType": {
+                                    "kind": "union",
+                                    "value": [
+                                      {
+                                        "kind": "literal",
+                                        "repr": "prepared",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "prepared"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "running",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "running"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "settled",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "settled"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "settlement_failed",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "settlement_failed"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "cancelling",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "cancelling"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "cancelled",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "cancelled"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "name": "cancellation",
+                                  "optional": true,
+                                  "tsType": {
+                                    "kind": "typeRef",
+                                    "repr": "Promise",
+                                    "value": {
+                                      "typeName": "Promise",
+                                      "typeParams": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "void",
+                                          "value": "void"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "admissions"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "ANALYSIS"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "ID"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[a-f0-9]{64}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "HASH"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "never",
+                      "value": "never"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "unavailable"
+            }
+          ]
         },
         "dependencies": [
           {
-            "specifier": "../domain/json_value.ts",
             "dynamic": false,
+            "specifier": "../domain/json_value.ts",
             "targets": [
               {
                 "kind": "code",
@@ -144516,8 +144577,8 @@
             ]
           },
           {
-            "specifier": "./access.ts",
             "dynamic": false,
+            "specifier": "./access.ts",
             "targets": [
               {
                 "kind": "code",
@@ -144526,8 +144587,8 @@
             ]
           },
           {
-            "specifier": "./administrator_usage_policy.ts",
             "dynamic": false,
+            "specifier": "./administrator_usage_policy.ts",
             "targets": [
               {
                 "kind": "code",
@@ -144536,8 +144597,8 @@
             ]
           },
           {
-            "specifier": "./operating_policy.ts",
             "dynamic": false,
+            "specifier": "./operating_policy.ts",
             "targets": [
               {
                 "kind": "code",
@@ -144546,8 +144607,8 @@
             ]
           },
           {
-            "specifier": "./platform_repository.ts",
             "dynamic": false,
+            "specifier": "./platform_repository.ts",
             "targets": [
               {
                 "kind": "type",
@@ -144556,8 +144617,8 @@
             ]
           },
           {
-            "specifier": "./ports.ts",
             "dynamic": false,
+            "specifier": "./ports.ts",
             "targets": [
               {
                 "kind": "type",
@@ -144566,8 +144627,8 @@
             ]
           },
           {
-            "specifier": "./request_budget.ts",
             "dynamic": false,
+            "specifier": "./request_budget.ts",
             "targets": [
               {
                 "kind": "code",
@@ -144576,8 +144637,8 @@
             ]
           },
           {
-            "specifier": "./session_service.ts",
             "dynamic": false,
+            "specifier": "./session_service.ts",
             "targets": [
               {
                 "kind": "code",
@@ -144586,8 +144647,8 @@
             ]
           },
           {
-            "specifier": "./usage_budget.ts",
             "dynamic": false,
+            "specifier": "./usage_budget.ts",
             "targets": [
               {
                 "kind": "type",
@@ -359180,7 +359241,7 @@
       "extension_route_case_count": 3
     },
     "current_descendant_source_bindings": {
-      "supabase/functions/_shared/jungsi/application/usage_service.ts": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
+      "supabase/functions/_shared/jungsi/application/usage_service.ts": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
       "tests/edge/test_runtime_budget.ts": "4e87eb4cb6779edfd03be5d4a6b236227f3f7ae0d9d504cc413080faec43492e",
       "tests/edge/test_usage_service.ts": "1488f2be2b2197fb05fffa32d976e6b9ee972daacb08a13364baebbe7db0eb9b"
     },
@@ -359380,7 +359441,7 @@
       "supabase/functions/_shared/jungsi/application/university_percentile.ts": "4d6b9ea2b070a530cbd56da456f10134d31feec88827fcbb9cb26225e77d420e",
       "supabase/functions/_shared/jungsi/application/university_scoring.ts": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201",
       "supabase/functions/_shared/jungsi/application/usage_budget.ts": "c9b902a74f74397dc255d9d0e0d15e58acd268e435a0a5b044c7e976996bafc7",
-      "supabase/functions/_shared/jungsi/application/usage_service.ts": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
+      "supabase/functions/_shared/jungsi/application/usage_service.ts": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
       "supabase/functions/_shared/jungsi/application/wildcard_candidate_review.ts": "5cc27e4ef6310cb1d36c74c6c8cb286aa4ec69944d511717acb5a287deaf8d6e",
       "supabase/functions/_shared/jungsi/application/wildcard_public_contract.ts": "6cd243ecd7e212500c00eff08357365e2bf5e4cbe25f4a964b0105a70a285b70",
       "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts": "0a295516b4587d3072ff6a6a34a7dac4395dbd86ed3e354beb2cb57575514137",
@@ -361562,7 +361623,7 @@
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
       "graph_manifest_sha256": "68dae5ed7e6e100411adede11c8769824eb6f868167e8679ad2f730891104f05",
-      "bridge_sha256": "755f18871f2ccf45bf6f72971e49d8f41ff6285e347616ba904cdf68e5b72b0d"
+      "bridge_sha256": "f8f46e75005ad05a916e412b57955531ff6dd03e25c9048e54744c560474d8f5"
     }
   },
   "P1_display_snapshot_contract": {
@@ -365616,7 +365677,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "17ad7b02685acb9cbcc8745a1113329d63f7542922efa17fb12d26a932856aef",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "ccc5f8580391db2ecd616c0f5d206caecfa43cacca52d72c284fc73b13da630a",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
-      "scripts/check_project_consistency.py": "e6de32ffc031ad91323a7ca3e5542372790a3ff86621a5b6fb63e01fa7375fb1",
+      "scripts/check_project_consistency.py": "3cb5e3c44ca5cc103c12fdd0829da36e28fc5b38acf4feaaed5b822f0ead59b0",
       "scripts/run_edge_tests.py": "5b561fbe4c200505aa0b9c8347e541a2c69f61c214295e28cc48f3060ec5d721"
     },
     "receipt_bindings": {

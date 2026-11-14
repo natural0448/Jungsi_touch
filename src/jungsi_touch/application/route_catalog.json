@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "732f8e7b7e8807531ec9a235ac26c7e26938d98894a6ff47cc0fcd80bb322ea2",
+  "source_sha256": "b0e8d90dd68d5f3e0e3bd3da1d4dfe531d8ad8f393f3789a77b47d56620e321a",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4928,8 +4928,8 @@
       "status": "SOURCE_REGISTERED_NOT_EXECUTED",
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
-        "path": "tests/review_suite_manifest.20261113_source_candidate.json",
-        "sha256": "89182039b9b220f3875b653578eb12fefe073263c78c0ae370d9bf039c019a26"
+        "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
+        "sha256": "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -4937,12 +4937,32 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "51b2b5b885fb4fc58a53fd67882466d0d7096c7690c790c8eb35660b69633343"
+        "sha256": "1681fe7d3349c2ffc4c4d71227d3d5187e0c4f254df2a175125ed6453c59ab70"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "3b9fddab23f175c713ae8af210460e2833fba4bd96fecf4879cb998b2a3832ea"
+        "sha256": "98ee6ee1a2f811273909024f3fe221d718807c4467cb1ef3e98b518ee67699f2"
       },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "budget_admission_source_registration_20261114_v1": {
+      "format": "jungsi.budget-admission-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "source_path": "supabase/functions/_shared/jungsi/application/usage_service.ts",
+      "source_sha256": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
+      "test_path": "tests/budget_admission/test_usage_admission_race.synthetic.ts",
+      "test_sha256": "a0b0082f32dc31f70c77a2d1924de9b3e845593101d13b6f99ceca11a98df898",
+      "case_count": 6,
+      "case_names": [
+        "running admission cannot be cancelled before physical work finishes",
+        "concurrent cancellations share one failure settlement",
+        "post-rollback cleanup may settle a completed failure again",
+        "failed settlement remains eligible for rollback cleanup",
+        "concurrent cancellation shares delayed store failure and a later cleanup can retry",
+        "rolled-back successful settlement is compensated after the outer transaction"
+      ],
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
       "operating_writes": 0

@@ -130352,7 +130352,7 @@
             "src": "supabase/functions/_shared/jungsi/application/operating_policy.ts"
           }
         ],
-        "source_sha256": "969582f43649cc60bc1b0689d00e81ebd593f8fcb6c429d08cf9017c0041852d",
+        "source_sha256": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
         "symbols": [
           {
             "declarations": [
@@ -131560,6 +131560,22 @@
                                     },
                                     {
                                       "kind": "literal",
+                                      "repr": "settlement_failed",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "settlement_failed"
+                                      }
+                                    },
+                                    {
+                                      "kind": "literal",
+                                      "repr": "cancelling",
+                                      "value": {
+                                        "kind": "string",
+                                        "string": "cancelling"
+                                      }
+                                    },
+                                    {
+                                      "kind": "literal",
                                       "repr": "cancelled",
                                       "value": {
                                         "kind": "string",
@@ -131567,6 +131583,24 @@
                                       }
                                     }
                                   ]
+                                }
+                              },
+                              {
+                                "name": "cancellation",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "void",
+                                        "value": "void"
+                                      }
+                                    ]
+                                  }
                                 }
                               }
                             ]

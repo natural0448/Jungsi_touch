@@ -42,6 +42,16 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [108, 125, 48, 81])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
 
+    def test_budget_admission_registration_is_exact_and_fail_closed(self):
+        budget = self.spec["backend_platform_contract"]["budget_admission_source_registration_20261114_v1"]
+        self.assertEqual(budget["case_count"], 6)
+        self.assertEqual(self.errors(), [])
+        budget["case_count"] = 5
+        self.assertTrue(self.errors())
+        budget["case_count"] = 6
+        self.names.remove(budget["test_path"])
+        self.assertTrue(self.errors())
+
     def test_new_builtin_is_limited_to_score_null_root(self):
         for root_index, bad_builtin in ((0, "node:test"), (-1, "node:fs")):
             with self.subTest(root_index=root_index, bad_builtin=bad_builtin):
@@ -162,7 +172,7 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         module = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(module)
         with patch.object(module, "load_manifest", side_effect=FileNotFoundError("synthetic missing runtime")):
-            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46"):
+            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46", "test_budget_admission_deno_6"):
                 result = unittest.TestResult()
                 module.ReviewSuites(name).run(result)
                 self.assertFalse(result.wasSuccessful())
