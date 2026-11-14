@@ -102,3 +102,11 @@ test("snapshot part path keeps ':' in the snapshot id and still encodes other ch
   const { snapshotSegment } = await import("../src/lib/api/live.ts");
   assert.equal(snapshotSegment("a:b/c d"), "a:b%2Fc%20d");
 });
+
+test("offering paths keep ':' in 2027:PK ids (recruitment and published forecast)", async (t) => {
+  const seen = fake(t, [() => json(200, { offering_id: "2027:1000001753" }), () => json(200, { status: "none" })]);
+  await liveSource.readRecruitment(caller(11), "2027:1000001753");
+  await liveSource.readPublishedForecast(caller(12), "2027:1000001753");
+  assert.equal(seen[0].path.split("?")[0], "/offerings/2027:1000001753/recruitment");
+  assert.equal(seen[1].path.split("?")[0], "/offerings/2027:1000001753/forecast");
+});

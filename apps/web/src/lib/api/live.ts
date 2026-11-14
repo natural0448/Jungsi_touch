@@ -30,13 +30,14 @@ import { AccessDenied, ConnectionError, SnapshotChanged, type Caller, type Jungs
 */
 
 const base = () => `${process.env.JUNGSI_API_URL}/api/v1`;
-const enc = encodeURIComponent;
 /**
- * 정리본 번호(예: p1-public-history:00000000000000000026)를 경로에 넣을 때 ':' 는 그대로 둔다.
- * 운영 jungsi-api 는 경로 값을 풀지 않고 형식 검사를 해서 '%3A' 를 invalid_identifier(422)로 거절한다(2026-11-13 운영 로그).
+ * 경로에 넣는 번호(정리본 p1-public-history:…, 모집단위 2027:1000001753 등)의 ':' 는 그대로 둔다.
+ * 운영 jungsi-api 는 경로 값을 풀지 않고 형식 검사를 해서 '%3A' 를 invalid_identifier(422)로 거절한다
+ * (2026-11-13 정리본, 2026-11-14 3페이지 모집 정보·발행 기준 운영 로그).
  * ':' 는 경로 조각에 그대로 쓸 수 있는 문자이고, 나머지 문자는 전처럼 인코딩한다.
  */
-export const snapshotSegment = (id: string) => enc(id).replace(/%3A/gi, ":");
+const enc = (id: string) => encodeURIComponent(id).replace(/%3A/gi, ":");
+export const snapshotSegment = enc;
 
 class NotFound extends Error {}
 /** 409: 자료·정책·카탈로그 버전이 바뀌었다. 조회 화면에서는 '없음'으로 받고 다른 근거와 합치지 않는다 */

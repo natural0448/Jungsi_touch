@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.176",
-  "source_sha256": "5255cbb85884fe0ce2e7dc84cbbae09d903c8874ee3cd59333df68b5bff84dc0",
+  "source_sha256": "62c199c378bc405f58b99ea7f227b12967f40709746648a65fd0030c81092f1b",
   "pages": [
     {
       "id": "PAGE-01",
