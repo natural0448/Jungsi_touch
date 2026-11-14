@@ -16,9 +16,11 @@ export interface SavedPageScoresPort {
     year: number,
     offeringIds: readonly string[],
     signal: AbortSignal,
-  ): Promise<{ readonly state: "ready"; readonly scores: ReadonlyMap<string, MyScore> } | {
-    readonly state: "no_profile" | "unavailable";
-  }>;
+  ): Promise<
+    { readonly state: "ready"; readonly scores: ReadonlyMap<string, MyScore> } | {
+      readonly state: "no_profile" | "unavailable";
+    }
+  >;
 }
 
 export async function attachSavedPageScores(

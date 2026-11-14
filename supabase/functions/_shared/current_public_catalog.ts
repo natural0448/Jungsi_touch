@@ -649,8 +649,10 @@ export class CurrentPublicCatalogService extends CatalogService {
     }
     const after = await this.live();
     guard.assertActive();
-    if (after.version !== pub.version || after.sha256 !== pub.sha256 ||
-        after.expiresAtUtc !== pub.expiresAtUtc) fail("current_catalog_state_unapproved");
+    if (
+      after.version !== pub.version || after.sha256 !== pub.sha256 ||
+      after.expiresAtUtc !== pub.expiresAtUtc
+    ) fail("current_catalog_state_unapproved");
     return { version: `current:${page.head.slice(0, 40)}`, rows };
   }
   override async selectedOfferings(

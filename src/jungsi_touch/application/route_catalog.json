@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "60bb2160d0d6b1069d1838babfbd122519afbc3a03404e2e847cddb5afee6d6b",
+  "source_sha256": "732f8e7b7e8807531ec9a235ac26c7e26938d98894a6ff47cc0fcd80bb322ea2",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4929,15 +4929,15 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261113_source_candidate.json",
-        "sha256": "3d3e2959e6f1e3e916a4c4e90e81ca74b6adc98c022eb2c9b20574fff860a7c1"
+        "sha256": "89182039b9b220f3875b653578eb12fefe073263c78c0ae370d9bf039c019a26"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "9e94d0290c840c0a7d131737b6a5cbc542d23eca26e3c45bf731b6f95ff914ef"
+        "sha256": "5602cbc0638313c5e3cbd903e7b1007a0b9c7e14668792d23ab93ff4b3a1225a"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "436cc42abf8455e551650fe9559d29b32391dafaaf0b5dcb1a68d8e5f7d58fda"
+        "sha256": "51b2b5b885fb4fc58a53fd67882466d0d7096c7690c790c8eb35660b69633343"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",

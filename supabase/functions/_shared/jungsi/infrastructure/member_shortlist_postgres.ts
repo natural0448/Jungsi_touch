@@ -151,17 +151,21 @@ export class SupabaseMemberShortlistLegacy
       seen.add(value.object_key);
       const ref = value as unknown as MemberSchoolResultReference;
       documents.push(
-        await this.schoolResults.read({
-          owner: report.owner_id,
-          academicYear: year,
-          reportId: report.report_id,
-          reportRevision: ref.source_report_revision,
-          currentReportRevision: report.revision,
-          profileId: report.profile_id,
-          profileFingerprint: fingerprint,
-          examId: profile.scores.exam_id,
-          packVersion: profile.scores.pack_version,
-        }, ref, signal),
+        await this.schoolResults.read(
+          {
+            owner: report.owner_id,
+            academicYear: year,
+            reportId: report.report_id,
+            reportRevision: ref.source_report_revision,
+            currentReportRevision: report.revision,
+            profileId: report.profile_id,
+            profileFingerprint: fingerprint,
+            examId: profile.scores.exam_id,
+            packVersion: profile.scores.pack_version,
+          },
+          ref,
+          signal,
+        ),
       );
     }
     const composed = await composeMemberSchoolResults(report.owner_id, profile, report, documents);

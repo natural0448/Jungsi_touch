@@ -56,7 +56,12 @@ export async function readSavedOfferingGroups(
   }
   if (ids.length === 0) return { context: null, groups: [], scope: "partial" as const };
   const saved = await results.read(
-    session.user.subjectId, year, ids, expected.reportId, expected.revision, signal,
+    session.user.subjectId,
+    year,
+    ids,
+    expected.reportId,
+    expected.revision,
+    signal,
   );
   if (signal.aborted) throw new AccessError("request_cancelled", 499);
   requirePaidSession(session, clock.nowUtc());

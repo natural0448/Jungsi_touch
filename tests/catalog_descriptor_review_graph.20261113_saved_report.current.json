@@ -2190,7 +2190,7 @@
         ]
       ],
       "files": {
-        "supabase/functions/_shared/current_public_catalog.ts": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
+        "supabase/functions/_shared/current_public_catalog.ts": "4378af0e17ecdb23db47e50c7205876939bc5ad1557f04656100d481d505b1c9",
         "supabase/functions/_shared/current_public_catalog_descriptor_review.ts": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
         "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
         "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
@@ -4747,10 +4747,10 @@
         ]
       ],
       "files": {
-        "supabase/functions/_shared/current_public_catalog.ts": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
+        "supabase/functions/_shared/current_public_catalog.ts": "4378af0e17ecdb23db47e50c7205876939bc5ad1557f04656100d481d505b1c9",
         "supabase/functions/_shared/current_public_catalog_descriptor_review.ts": "5c30c050407a9cbdd111ee3a9180d1afb7f78329ea65497a544ffdc28bc8f568",
         "supabase/functions/_shared/current_public_catalog_descriptor_review_test.ts": "ec828ecf5271021e2872bdf0e2595e3bf25fa0491b14851e339d4bb258dd28c5",
-        "supabase/functions/_shared/current_public_catalog_sql.ts": "ab1c20bfd31f7667867338fb30e832255210f098a2b848ce374ff6a4e0eaed69",
+        "supabase/functions/_shared/current_public_catalog_sql.ts": "2e7bbd9e4b341a7bcf6b622fd406da5866d08561750c9d9fd8a232af4280e729",
         "supabase/functions/_shared/current_public_key_index.ts": "7c9983b3ece51d1204cd63faae1632465fa32356b9546f023137983d8b393fae",
         "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",

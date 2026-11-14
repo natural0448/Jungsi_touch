@@ -23,7 +23,7 @@
   },
   "bound_graph_saved_report_candidate_20261113": {
     "activation_status": "NOT_RUN",
-    "current_source_sha256": "7b9a9aa6557108d8e381631b83548280fd16f759bad6e8772f2f5b1f3ce75070",
+    "current_source_sha256": "4378af0e17ecdb23db47e50c7205876939bc5ad1557f04656100d481d505b1c9",
     "format": "jungsi.foundation-graph-saved-report-source/v1",
     "historical_extension_sha256": "81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6",
     "operating_writes": 0,
@@ -3856,7 +3856,7 @@
             "src": "supabase/functions/_shared/jungsi/application/paid_result_components.ts"
           }
         ],
-        "source_sha256": "306a2cd14e76e5db453a99bb037e18b192dd76fda4f36d16815fffa1b3e3ad33",
+        "source_sha256": "8934b9dcc2883f043cde7e757b1cce00caea524ac28c97b5a9dcba34d6fbde86",
         "symbols": [
           {
             "declarations": [
@@ -36715,7 +36715,7 @@
             "src": "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts"
           }
         ],
-        "source_sha256": "1eac3e54f2bd26eaf86a1460d52a145f5c63ce3ccc2c0da9f9e9819773f1bf4b",
+        "source_sha256": "0f32c57ca93a838bc8d3c73b0b9d4b5be90b35508ab4c3b7b738e838a3862db0",
         "symbols": [
           {
             "declarations": [
@@ -37025,7 +37025,7 @@
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
           }
         ],
-        "source_sha256": "72d94528f8aa9b244f07dadbc9d6df36226e952eae15170ce3d73422d9b98c36",
+        "source_sha256": "f4a1bf7629508cc2c726c40514412a128f14e9c330878b2be354e77d175be16e",
         "symbols": [
           {
             "declarations": [
@@ -82293,7 +82293,7 @@
             "src": "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts"
           }
         ],
-        "source_sha256": "588827a7c3532d0134e9470345f06ff7f058bdcf68d4fc1306e6c49d31448870",
+        "source_sha256": "d998aa6a965c05a905b514c3e97248db3b642fd26db6089da6186eb1f24f3051",
         "symbols": [
           {
             "declarations": [
@@ -83413,7 +83413,7 @@
     "supabase/functions/_shared/jungsi/application/professional_contract.generated.ts": {
       "declarations": {
         "imports": [],
-        "source_sha256": "270f832b38515f4fc64ba7d04d1520bba4a81f79e3f0131a4dc3574d27b8a4a4",
+        "source_sha256": "f0180f1af5ed359c738fb5d04ac7704ff3ea293877e23f32f91640b95594b8d2",
         "symbols": [
           {
             "declarations": [
@@ -83848,7 +83848,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "6171a83c31dafe240b0d3595cd19b6cddf65f7041a6d5134d0aa9fcdc34ff8af",
+        "source_sha256": "7322e0a074c215ec4aa54965822dde493f93d2f6430b3898977c2a98d099f938",
         "symbols": [
           {
             "declarations": [
@@ -84760,7 +84760,7 @@
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
           }
         ],
-        "source_sha256": "e2a561f303f9ee39fe8afedbc7932fcd2e8d1d4a47e867a91c40fca97977c492",
+        "source_sha256": "5aae4f0dc9cde4dab0c0557fc50976e26c4159ba7037bae2990b00d9083e220e",
         "symbols": [
           {
             "declarations": [
@@ -86237,6 +86237,66 @@
                                     }
                                   }
                                 }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "memberNames",
+                      "optional": true,
+                      "parameter_source": "(authority: ProfessionalAuthority)",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "authority",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ProfessionalAuthority",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ProfessionalAuthority"
+                            }
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "Record",
+                                    "value": {
+                                      "typeName": "Record",
+                                      "typeParams": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        },
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
                               }
                             }
                           ]
@@ -87732,6 +87792,95 @@
                           ]
                         }
                       }
+                    },
+                    {
+                      "kind": "method",
+                      "name": "removeBookmark",
+                      "optional": true,
+                      "parameter_source": "(\n    scope: ProfessionalScope,\n    report: ProfessionalReport,\n    offeringId: string,\n    eventId: string,\n    maximum: number,\n  )",
+                      "params": [
+                        {
+                          "kind": "identifier",
+                          "name": "scope",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ProfessionalScope",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ProfessionalScope"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "report",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "ProfessionalReport",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "ProfessionalReport"
+                            }
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "offeringId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "eventId",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        },
+                        {
+                          "kind": "identifier",
+                          "name": "maximum",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "keyword",
+                            "repr": "number",
+                            "value": "number"
+                          }
+                        }
+                      ],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      }
                     }
                   ]
                 },
@@ -89170,7 +89319,7 @@
             "src": "supabase/functions/_shared/jungsi/application/public_response.ts"
           }
         ],
-        "source_sha256": "5cd70e5b5ef77f39c10ab7ad00cef27111fb1c9f34ee0f7d8a15b57948b96342",
+        "source_sha256": "4dfd5c31173c0b0889e31eeeb10df2714f65889f1395f4a35c1343e01c4fb3ef",
         "symbols": [
           {
             "declarations": [
@@ -90065,7 +90214,7 @@
             "src": "supabase/functions/_shared/jungsi/application/overall_analysis.ts"
           }
         ],
-        "source_sha256": "7a8f29503dd289fd20a2802fe9dc12a0515fb4ad5ecc650ecaa73d9184d149bc",
+        "source_sha256": "2e5326e5730a2bc9fd2d7680f61a511a4a438710c9e6a674c35dfccc4048bcf2",
         "symbols": [
           {
             "declarations": [
@@ -92813,7 +92962,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "4f211c6fdf0fcb0161de676431eade07845a87d8ccf993efa8ed8ee793fd81f6",
+        "source_sha256": "17865603f5b127ff8a4422984f12d323460774a91a91dc3407b4f53aa5ebb323",
         "symbols": [
           {
             "declarations": [
@@ -171250,7 +171399,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "405753a28c1233850aa26a9c2cd558c3522598819aa0f35482c6fdadb8423345",
+        "source_sha256": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0",
         "symbols": [
           {
             "declarations": [
@@ -171685,7 +171834,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
           }
         ],
-        "source_sha256": "521f634afddce8c066a19dd7744b083747beb319928cab8b1a461a655b316584",
+        "source_sha256": "6e17d43242286b3d589252987982ebe3cd556acf77288ac36db01595210e4bc0",
         "symbols": [
           {
             "declarations": [
@@ -190174,7 +190323,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "71b2c3a0c074523c732f92f121e137041efb7bd586e31644ea9a0d7fcb41d880",
+        "source_sha256": "2eef8e599e9e03d25e4b80ea674b28ae4d4c0d31eed0b64d8b7dc4f34891c6c1",
         "symbols": [
           {
             "declarations": [
@@ -190323,7 +190472,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly binding: ProfessionalAuthorityFunctionBinding,\n    private readonly query: ProfessionalAuthorityQuery,\n  )",
+                      "parameter_source": "(\n    private readonly binding: ProfessionalAuthorityFunctionBinding,\n    private readonly query: ProfessionalAuthorityQuery,\n    /** 선택: 구성원 이름 함수(013 jeongsi_pro_member_names(uuid,text,text[])). 없으면 이름 없이 동작한다 */\n    private readonly namesBinding: ProfessionalAuthorityFunctionBinding | null = null,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -190358,6 +190507,37 @@
                               "typeName": "ProfessionalAuthorityQuery"
                             }
                           }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "namesBinding",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ProfessionalAuthorityFunctionBinding",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "ProfessionalAuthorityFunctionBinding"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "readonly": true,
+                          "right": "null"
                         }
                       ]
                     }
@@ -190830,6 +191010,70 @@
                       },
                       "kind": "method",
                       "name": "assertCurrent"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "authority",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ProfessionalAuthority",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ProfessionalAuthority",
+                                  "specifier": "../application/professional_ports.ts"
+                                },
+                                "typeName": "ProfessionalAuthority"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "Record",
+                                      "value": {
+                                        "typeName": "Record",
+                                        "typeParams": [
+                                          {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          },
+                                          {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "memberNames"
                     },
                     {
                       "functionDef": {
@@ -192313,7 +192557,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
           }
         ],
-        "source_sha256": "2005a9720e4a3b60324db5ffdc318d1535905ca114191540c2c5bea4e265502a",
+        "source_sha256": "f44fe7cc6153c91129bdb550e17b515860e5c5e9afc53ba6624152b19aef9e73",
         "symbols": [
           {
             "declarations": [
@@ -193373,7 +193617,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "14655911862194fad474937e6cbf59754652cc0fc381ab85238430801c24da11",
+        "source_sha256": "ad6141dc9a7d0685194503ab34c4ea569e0c50d8ad4a12aec4bed9783489bed6",
         "symbols": [
           {
             "declarations": [
@@ -195824,6 +196068,101 @@
                           },
                           {
                             "kind": "identifier",
+                            "name": "report",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ProfessionalReport",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ProfessionalReport",
+                                  "specifier": "../application/professional_ports.ts"
+                                },
+                                "typeName": "ProfessionalReport"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "offeringId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "eventId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "maximum",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "removeBookmark"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "scope",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "ProfessionalScope",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ProfessionalScope",
+                                  "specifier": "../application/professional_ports.ts"
+                                },
+                                "typeName": "ProfessionalScope"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
                             "name": "event",
                             "optional": false,
                             "tsType": {
@@ -196167,6 +196506,49 @@
               }
             ],
             "name": "SupabaseProfessionalStore"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SELECT action FROM (\n SELECT 0::bigint AS seq,'add'::text AS action FROM jungsi_professional.bookmarks\n  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4\n UNION ALL\n SELECT event_seq,action FROM jungsi_professional.bookmark_events\n  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4\n) e ORDER BY seq DESC LIMIT 1",
+                    "value": {
+                      "kind": "template",
+                      "tsTypes": [
+                        {
+                          "kind": "literal",
+                          "repr": "SELECT action FROM (\n SELECT 0::bigint AS seq,'add'::text AS action FROM jungsi_professional.bookmarks\n  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4\n UNION ALL\n SELECT event_seq,action FROM jungsi_professional.bookmark_events\n  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4\n) e ORDER BY seq DESC LIMIT 1",
+                          "value": {
+                            "kind": "string",
+                            "string": "SELECT action FROM (\n SELECT 0::bigint AS seq,'add'::text AS action FROM jungsi_professional.bookmarks\n  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4\n UNION ALL\n SELECT event_seq,action FROM jungsi_professional.bookmark_events\n  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4\n) e ORDER BY seq DESC LIMIT 1"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "LATEST_BOOKMARK_ACTION"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "()",
+                  "params": []
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "randomEventId"
           },
           {
             "declarations": [
@@ -196757,7 +197139,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "8712cec557d746811e8c8127c086be84b72488b332de545e91a155e18faf5c03",
+        "source_sha256": "9878a89ec1e3a41e53e4e7b0bfdcb7f1c9c4323ade4eeb25d76e18d765dd3d08",
         "symbols": [
           {
             "declarations": [
@@ -215547,7 +215929,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "404bdb88b49635c3fa08af07949198a90bcdd9270a3993d4efc3656c354060ba",
+        "source_sha256": "17ad7b02685acb9cbcc8745a1113329d63f7542922efa17fb12d26a932856aef",
         "symbols": [
           {
             "declarations": [
@@ -220027,7 +220409,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "0c0f3d4ba000f0835e228dab657d57503a8b1a1511cb9bfeb72cf7e7c2256272",
+        "source_sha256": "ccc5f8580391db2ecd616c0f5d206caecfa43cacca52d72c284fc73b13da630a",
         "symbols": [
           {
             "declarations": [
@@ -228727,7 +229109,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "02d89a759f4ddc4cec85f454d9963a101c567620e6af09130840ad46d306ff18",
+        "source_sha256": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
         "symbols": [
           {
             "declarations": [

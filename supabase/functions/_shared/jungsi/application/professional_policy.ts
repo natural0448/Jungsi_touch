@@ -241,6 +241,7 @@ export class ProfessionalPolicy {
       "pro.university.analyze",
       "pro.candidates",
       "pro.bookmark.add",
+      "pro.bookmark.remove",
     ];
     if (teacherOnly.includes(operation) && (role !== "teacher" || !assigned)) {
       throw new AccessError("professional_access_denied", 403);

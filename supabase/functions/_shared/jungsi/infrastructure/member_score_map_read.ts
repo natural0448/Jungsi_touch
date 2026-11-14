@@ -20,7 +20,9 @@ const READ_SAVED_SCORES_SQL = `SELECT m.offering_id,m.status,m.converted_score,
 
 /** Internal marker: only a recognized connection/availability SQLSTATE may degrade the score. */
 export class SavedScoreTransientUnavailable extends AccessError {
-  constructor() { super("storage_unavailable", 503); }
+  constructor() {
+    super("storage_unavailable", 503);
+  }
 }
 function transientConnectionError(error: unknown): boolean {
   if (!error || typeof error !== "object" || error instanceof AccessError) return false;
@@ -85,12 +87,15 @@ export async function readSavedScoreMap(
         !Array.isArray(row) || row.length !== 5 || typeof row[0] !== "string" ||
         !requested.has(row[0]) || result.has(row[0])
       ) throw new AccessError("storage_result_invalid", 503);
-      result.set(row[0], myScore({
-        status: row[1],
-        converted_score: row[2],
-        official_max_score: row[3],
-        reason_code: row[4],
-      }));
+      result.set(
+        row[0],
+        myScore({
+          status: row[1],
+          converted_score: row[2],
+          official_max_score: row[3],
+          reason_code: row[4],
+        }),
+      );
     }
     return result;
   }, scope.signal);

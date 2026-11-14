@@ -804,14 +804,23 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
     if (
       ![2024, 2025, 2026, 2027].includes(year) || !Array.isArray(pks) ||
       !pks.length || pks.length > 100 || new Set(pks).size !== pks.length ||
-      pks.some((pk) => typeof pk !== "string" || !pk ||
-        !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(`${year}:${pk}`)) ||
+      pks.some((pk) =>
+        typeof pk !== "string" || !pk ||
+        !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(`${year}:${pk}`)
+      ) ||
       !guard || !(guard.signal instanceof AbortSignal) || guard.signal.aborted ||
       typeof guard.assertActive !== "function" || typeof guard.settle !== "function" ||
       !Number.isSafeInteger(guard.maxBytes) || guard.maxBytes < 1
     ) fail("current_catalog_page_invalid");
-    return await this.read(subject, CURRENT_PUBLIC_SAVED_GUIDE_SQL,
-      [year, JSON.stringify(pks)], false, undefined, true, guard);
+    return await this.read(
+      subject,
+      CURRENT_PUBLIC_SAVED_GUIDE_SQL,
+      [year, JSON.stringify(pks)],
+      false,
+      undefined,
+      true,
+      guard,
+    );
   }
   /** P1 internal candidate only; caller must also bind the returned rows to the
    * same request-scoped authority before projection. No public route is added. */

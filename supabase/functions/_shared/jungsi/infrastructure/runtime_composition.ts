@@ -829,7 +829,10 @@ export class NativeRuntimeApi {
         getProfile: async (...a) =>
           await phase("profile_read", async () => (await context.platform()).getProfile(...a)),
         getReport: async (...a) => {
-          const value = await phase("report_read", async () => (await context.platform()).getReport(...a));
+          const value = await phase(
+            "report_read",
+            async () => (await context.platform()).getReport(...a),
+          );
           ownedReportRead.last = value;
           return value;
         },
@@ -1283,7 +1286,9 @@ export class NativeRuntimeApi {
               throw new AccessError("security_policy_unavailable", 503);
             }
             const result = await catalog.execute(r);
-            if (r.operation !== "offerings.search" || !selectedCatalog || r.session.tier !== "paid") {
+            if (
+              r.operation !== "offerings.search" || !selectedCatalog || r.session.tier !== "paid"
+            ) {
               return result;
             }
             if (!boundary?.admission || boundary.signal.aborted) {
@@ -1292,48 +1297,73 @@ export class NativeRuntimeApi {
             const scoreBoundary = boundary;
             const budget = await context.budget();
             const assertActive = () => {
-              if (scoreBoundary.signal.aborted) throw new AccessError("security_policy_unavailable", 503);
-              budget.assertRunAdmission(scoreBoundary.admission as PreparedUsageAdmission, r, "active");
+              if (scoreBoundary.signal.aborted) {
+                throw new AccessError("security_policy_unavailable", 503);
+              }
+              budget.assertRunAdmission(
+                scoreBoundary.admission as PreparedUsageAdmission,
+                r,
+                "active",
+              );
             };
             assertActive();
-            return await attachSavedPageScores(result, r.session, this.clock, scoreBoundary.signal, {
-              read: async (session, year, ids, signal) => {
-                assertActive();
-                const exams = [...budget.policy.exams.values()].filter((exam) =>
-                  exam.academicYear === year && (r.query.exam_id === undefined || exam.examId === r.query.exam_id)
-                );
-                if (exams.length !== 1 || !budget.policy.operating) return { state: "unavailable" };
-                const selected = budget.policy.operating.context(
-                  session, exams[0].examId, r.query.stage, this.clock.nowUtc(), false,
-                );
-                if (selected.stage.academicYear !== year) return { state: "unavailable" };
-                const state = await (await context.scoreInputs()).state(selected, signal);
-                assertActive();
-                if (!state.currentProfileId) return { state: "no_profile" };
-                const binding = await context.binding();
-                const pin = await scoreMapPin(binding.references);
-                assertActive();
-                const controls = await context.controls();
-                const settle = controls.reserveExternalRead(binding.repositoryLimits.maxRecordBytes);
-                try {
-                  const values = await readSavedScoreMap(sql(), {
-                    owner: session.user.subjectId,
-                    profileId: state.currentProfileId,
-                    dataPin: pin,
-                    signal,
-                    assertActive,
-                  }, ids);
+            return await attachSavedPageScores(
+              result,
+              r.session,
+              this.clock,
+              scoreBoundary.signal,
+              {
+                read: async (session, year, ids, signal) => {
                   assertActive();
-                  settle(new TextEncoder().encode(JSON.stringify([...values.entries()])).byteLength);
-                  return { state: "ready", scores: values };
-                } catch (error) {
+                  const exams = [...budget.policy.exams.values()].filter((exam) =>
+                    exam.academicYear === year &&
+                    (r.query.exam_id === undefined || exam.examId === r.query.exam_id)
+                  );
+                  if (exams.length !== 1 || !budget.policy.operating) {
+                    return { state: "unavailable" };
+                  }
+                  const selected = budget.policy.operating.context(
+                    session,
+                    exams[0].examId,
+                    r.query.stage,
+                    this.clock.nowUtc(),
+                    false,
+                  );
+                  if (selected.stage.academicYear !== year) return { state: "unavailable" };
+                  const state = await (await context.scoreInputs()).state(selected, signal);
                   assertActive();
-                  requirePaidSession(session, this.clock.nowUtc());
-                  if (error instanceof SavedScoreTransientUnavailable) return { state: "unavailable" };
-                  throw error;
-                }
+                  if (!state.currentProfileId) return { state: "no_profile" };
+                  const binding = await context.binding();
+                  const pin = await scoreMapPin(binding.references);
+                  assertActive();
+                  const controls = await context.controls();
+                  const settle = controls.reserveExternalRead(
+                    binding.repositoryLimits.maxRecordBytes,
+                  );
+                  try {
+                    const values = await readSavedScoreMap(sql(), {
+                      owner: session.user.subjectId,
+                      profileId: state.currentProfileId,
+                      dataPin: pin,
+                      signal,
+                      assertActive,
+                    }, ids);
+                    assertActive();
+                    settle(
+                      new TextEncoder().encode(JSON.stringify([...values.entries()])).byteLength,
+                    );
+                    return { state: "ready", scores: values };
+                  } catch (error) {
+                    assertActive();
+                    requirePaidSession(session, this.clock.nowUtc());
+                    if (error instanceof SavedScoreTransientUnavailable) {
+                      return { state: "unavailable" };
+                    }
+                    throw error;
+                  }
+                },
               },
-            });
+            );
           }
           if (REPORT_ACTION_OPERATIONS.some((id) => id === r.operation)) {
             if (r.operation === "shortlist.update") selectedCatalog?.prepareSelection(r);
@@ -1422,11 +1452,18 @@ export class NativeRuntimeApi {
               return reportResult;
             }
             const arrays = [
-              "basic_university_groups", "wildcards", "pending_offerings",
-              "outside_offerings", "ineligible_offerings",
+              "basic_university_groups",
+              "wildcards",
+              "pending_offerings",
+              "outside_offerings",
+              "ineligible_offerings",
             ];
             const required = ["status", "reason_code", "catalog_version", ...arrays];
-            const allowed = new Set([...required, "reference_university_groups", "wildcard_selection"]);
+            const allowed = new Set([
+              ...required,
+              "reference_university_groups",
+              "wildcard_selection",
+            ]);
             if (
               required.some((name) => !Object.hasOwn(previousCandidates, name)) ||
               Object.keys(previousCandidates).some((name) => !allowed.has(name)) ||
@@ -1434,7 +1471,12 @@ export class NativeRuntimeApi {
                 const value = previousCandidates[name];
                 return !Array.isArray(value) || value.length !== 0;
               }) ||
-              ![null, "approved_candidates_missing", "current_saved_assessment_missing", "saved_assessment_missing"]
+              ![
+                null,
+                "approved_candidates_missing",
+                "current_saved_assessment_missing",
+                "saved_assessment_missing",
+              ]
                 .includes(previousCandidates.reason_code as string | null) ||
               (previousCandidates.catalog_version !== null &&
                 typeof previousCandidates.catalog_version !== "string") ||
@@ -1453,15 +1495,22 @@ export class NativeRuntimeApi {
           const reportBoundary = boundary;
           const budget = await context.budget();
           const assertActive = () => {
-            if (reportBoundary.signal.aborted) throw new AccessError("security_policy_unavailable", 503);
-            budget.assertRunAdmission(reportBoundary.admission as PreparedUsageAdmission, r, "active");
+            if (reportBoundary.signal.aborted) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            budget.assertRunAdmission(
+              reportBoundary.admission as PreparedUsageAdmission,
+              r,
+              "active",
+            );
             requirePaidSession(r.session, this.clock.nowUtc());
           };
           assertActive();
           const record = ownedReportRead.last;
           if (
             !record || record.owner_id !== r.session.user.subjectId ||
-            record.report_id !== reportResult.report_id || record.profile_id !== reportResult.profile_id ||
+            record.report_id !== reportResult.report_id ||
+            record.profile_id !== reportResult.profile_id ||
             record.revision !== reportResult.report_version
           ) throw new AccessError("storage_result_invalid", 503);
           if (
@@ -1471,26 +1520,39 @@ export class NativeRuntimeApi {
           const overall = record.body.overall;
           if (!resultObject(overall.exam)) return reportResult;
           const exam = overall.exam;
-          const year = exam.academic_year, examId = exam.exam_id, packVersion = overall.pack_version;
+          const year = exam.academic_year,
+            examId = exam.exam_id,
+            packVersion = overall.pack_version;
           if (
             typeof year !== "number" || ![2024, 2025, 2026, 2027].includes(year) ||
             typeof examId !== "string" || typeof packVersion !== "string"
           ) return reportResult;
           const approvedExam = budget.policy.exams.get(examId);
-          if (!approvedExam || approvedExam.academicYear !== year || approvedExam.packVersion !== packVersion) {
+          if (
+            !approvedExam || approvedExam.academicYear !== year ||
+            approvedExam.packVersion !== packVersion
+          ) {
             return reportResult;
           }
           const savedCatalog = record.body.catalog_version;
           // Legacy snapshots without a current-head binding remain unchanged.
-          if (typeof savedCatalog !== "string" || !savedCatalog.startsWith("current:")) return reportResult;
+          if (typeof savedCatalog !== "string" || !savedCatalog.startsWith("current:")) {
+            return reportResult;
+          }
           if (
             resultObject(previousCandidates) && previousCandidates.catalog_version !== null &&
             previousCandidates.catalog_version !== savedCatalog
           ) return reportResult;
           const binding = await context.binding(), controls = await context.controls();
           if (!binding.memberJson) return reportResult;
-          const limit = Math.min(100, binding.memberJson.maxItems, binding.repositoryLimits.maxBatchIds);
-          if (!Number.isSafeInteger(limit) || limit < 1) throw new AccessError("security_policy_unavailable", 503);
+          const limit = Math.min(
+            100,
+            binding.memberJson.maxItems,
+            binding.repositoryLimits.maxBatchIds,
+          );
+          if (!Number.isSafeInteger(limit) || limit < 1) {
+            throw new AccessError("security_policy_unavailable", 503);
+          }
           const allIds = Object.keys(record.body.analyses).sort(), prefix = `${year}:`;
           const ids = [
             ...allIds.filter((id) => id.startsWith(prefix)),
@@ -1517,7 +1579,9 @@ export class NativeRuntimeApi {
           const results = await context.memberResults();
           assertActive();
           const resultsMaximum = maximum * 3 + 8192;
-          if (!Number.isSafeInteger(resultsMaximum)) throw new AccessError("security_policy_unavailable", 503);
+          if (!Number.isSafeInteger(resultsMaximum)) {
+            throw new AccessError("security_policy_unavailable", 503);
+          }
           const settleResults = controls.reserveExternalRead(resultsMaximum);
           const candidates = await readSavedCandidateGroups(
             r.session,

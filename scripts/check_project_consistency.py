@@ -4571,7 +4571,7 @@ PROFESSIONAL_TEST = 'supabase/functions/_shared/professional_'
 PROFESSIONAL_MIGRATION = 'database/migrations/007_professional_platform.prepared.sql'
 PROFESSIONAL_SOURCE_STATUS = 'CODE_REGISTERED_RUNTIME_NOT_ACTIVATED'
 PROFESSIONAL_GENERATED = PROFESSIONAL_APP + 'contract.generated.ts'
-PROFESSIONAL_ROUTES = {'pro.session': ('GET', '/api/v1/pro/session'), 'pro.student.list': ('GET', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.create': ('POST', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.update': ('PATCH', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.archive': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/archive'), 'pro.student.assign': ('PUT', '/api/v1/pro/organizations/{org_id}/students/{student_id}/assignments'), 'pro.member.list': ('GET', '/api/v1/pro/organizations/{org_id}/members'), 'pro.score.status': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status'), 'pro.score.create': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles'), 'pro.overall.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis'), 'pro.report.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports'), 'pro.report.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}'), 'pro.university.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis'), 'pro.candidates': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates'), 'pro.bookmark.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.add': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.report.export': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export'), 'pro.correction.grant': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections'), 'pro.retention.preview': ('POST', '/api/v1/pro/organizations/{org_id}/management/retention-preview'), 'pro.retention.notice-targets': ('GET', '/api/v1/pro/organizations/{org_id}/management/retention-notice-targets')}
+PROFESSIONAL_ROUTES = {'pro.session': ('GET', '/api/v1/pro/session'), 'pro.student.list': ('GET', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.create': ('POST', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.update': ('PATCH', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.archive': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/archive'), 'pro.student.assign': ('PUT', '/api/v1/pro/organizations/{org_id}/students/{student_id}/assignments'), 'pro.member.list': ('GET', '/api/v1/pro/organizations/{org_id}/members'), 'pro.score.status': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status'), 'pro.score.create': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles'), 'pro.overall.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis'), 'pro.report.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports'), 'pro.report.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}'), 'pro.university.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis'), 'pro.candidates': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates'), 'pro.bookmark.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.add': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.remove': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks/remove'), 'pro.report.export': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export'), 'pro.correction.grant': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections'), 'pro.retention.preview': ('POST', '/api/v1/pro/organizations/{org_id}/management/retention-preview'), 'pro.retention.notice-targets': ('GET', '/api/v1/pro/organizations/{org_id}/management/retention-notice-targets')}
 
 
 def professional_source_path(path):
@@ -4741,6 +4741,40 @@ def professional_service_section(spec):
     """Render the separately adopted professional contract without registering a live API."""
     c=spec.get('professional_service_contract')
     if not c:return ''
+    proposal = c.get('bookmark_removal_and_member_names_proposal_20261113')
+    proposal_section = ''
+    if proposal:
+        route = proposal['proposed_operation']
+        names = proposal['proposed_member_list_extension']
+        verification = proposal['verification']
+        observation = proposal.get('database_metadata_observation')
+        observation_section = ''
+        if observation:
+            observation_section = (
+                observation['source'] + '에서 존재를 확인한 항목은 '
+                + ', '.join(f'`{item}`' for item in observation['observed_present']) + '이다. '
+                + '조회 당시 존재하지 않은 객체는 '
+                + ', '.join(f'`{item}`' for item in observation['observed_absent']) + '이다. '
+                + observation['schema_version_pattern_result'] + '\n\n'
+            )
+        proposal_section = (
+            '\n\n### 전문가용 담은 학교 빼기 및 구성원 이름 제안\n\n'
+            f"등록된 API는 {proposal['registered_professional_operation_count']}개다. "
+            f"22번째 제안은 `{route['id']}` · `{route['method']} {route['path']}`이며 "
+            f"현재 {route['implementation']}이다. 담당 교사에게만 허용하고 요청 키와 BFF CSRF를 요구한다. "
+            + route['rule'] + '\n\n'
+            + f"`{names['operation']}`의 선택 필드 `{names['field']}`도 {names['implementation']}이다. "
+            + names['rule'] + '\n\n'
+            + table(['SQL 후보', 'SHA-256', '실행 역할', '선행 계약', '적용 상태'], [
+                [row['path'], row['sha256'], row['apply_as'], row['prerequisite'], row['status']]
+                for row in proposal['migrations']
+            ]) + '\n\n'
+            + observation_section
+            + f"{verification['environment']} {verification['passed_cases']}건 {verification['status']}. "
+            + verification['scope'] + '. '
+            + f"운영 활성화 {proposal['activation_status']} · 배포 {proposal['deployment_status']}.\n\n"
+            + proposal['owner_and_handoff']
+        )
     return ('\n\n## 정시터치 전문가용 · 기관 소유 학생 상담\n\n'+c['status']+
         '. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 '+c['runtime_activation']+'이다.\n\n'+
         'DB 적용: '+c['DB_schema_application']+' / 별도 소스 등록: '+c.get('source_registration',{}).get('status','NOT_REGISTERED_CONTRACT_ONLY')+'. 합성 검수와 실제 운영 인수를 구분한다.\n\n'+
@@ -4752,7 +4786,7 @@ def professional_service_section(spec):
         c['counseling_tips']['student_specific']+' '+c['counseling_tips']['missing_basis']+'\n\n'+
         '파기는 학년도 공식 일정과 계약별 정확 명부·이전 해시·개별 승인 후 수행하며 현재 자동 작업/삭제는 없다. '+
         '[전문가용 서비스·DB 계약](전문가용_서비스_DB_계약.md)과 [별도 API 계약](professional_service_api_contract.json)을 따른다.\n\n'+
-        table(['담당','범위'],c['work_split'])+'\n\n'+c['next_steps'])
+        table(['담당','범위'],c['work_split'])+'\n\n'+c['next_steps']+proposal_section)
 
 
 def validate_professional_service_contract(spec):
@@ -4793,7 +4827,7 @@ def validate_professional_service_contract(spec):
             o.get('response_schema')not in c.get('DTOs',{}) or
             (o.get('method'),o.get('path'))!=PROFESSIONAL_ROUTES.get(o.get('id')) for o in candidates) or
         {o.get('id')for o in candidates}!=set(PROFESSIONAL_ROUTES)):
-        errors.append('Professional routes must match all21 separate tenant contracts')
+        errors.append('Professional routes must match all22 separate tenant contracts')
     for operation in candidates:
         request=operation.get('request',{})
         if (not isinstance(request,dict) or request.get('unknown_fields')!='reject' or
@@ -6085,8 +6119,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261113_source_candidate.json", "3d3e2959e6f1e3e916a4c4e90e81ca74b6adc98c022eb2c9b20574fff860a7c1"),
-                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "9e94d0290c840c0a7d131737b6a5cbc542d23eca26e3c45bf731b6f95ff914ef"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261113_source_candidate.json", "89182039b9b220f3875b653578eb12fefe073263c78c0ae370d9bf039c019a26"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "5602cbc0638313c5e3cbd903e7b1007a0b9c7e14668792d23ab93ff4b3a1225a"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
                 item = overlay[key]

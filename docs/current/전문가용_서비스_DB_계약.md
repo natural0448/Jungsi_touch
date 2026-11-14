@@ -36,6 +36,23 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 
 21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다. 2026-10-23 통합 요청: 학년도+모집단위 번호별 정본 규칙의 서버 내부 읽기 포트를 추가하고, 검증된 lineage에만 전년 비교를 결속한다. 영역별 비율·영어/한국사·가산점·탐구 선택조건과 원문/자격을 보존한다. 상담 근거의 실제 모집단/정책 버전·정밀도·충원 인원/예비번호·한해 컷 폭/3개년 변동의 의미를 구분한다. 최신 Owner008 설치 보고는 이전 준비 이력과 별도 수용하며 전체 UPDATE version 트리거를 유지한다. 전문가용 계산 한도는 실제 런타임 카탈로그 범위를 먼저 확인하고 개인용·공유 물리 통제를 보존한다. 새 포트 실DB/설정·전문가용/JWT/OTP/BFF·배포 인수는 각각 NOT_RUN이다.
 
+### 전문가용 담은 학교 빼기 및 구성원 이름 제안
+
+등록된 API는 22개다. 22번째 제안은 `pro.bookmark.remove` · `POST /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks/remove`이며 현재 SERVER_SOURCE_REGISTERED_RUNTIME_NOT_ACTIVATED이다. 담당 교사에게만 허용하고 요청 키와 BFF CSRF를 요구한다. 다른 기관·비담당 학생은 같은 404, 보관 학생은 409로 처리한다. 기존 담은 기록을 보존하고 같은 리포트의 담기·빼기를 멱등 트랜잭션에서 직렬화한다. 최신 event_seq를 목록과 인쇄에 반영한다.
+
+`pro.member.list`의 선택 필드 `display_name`도 SERVER_SOURCE_REGISTERED_RUNTIME_NOT_ACTIVATED이다. 현재 계약이 유효한 동일 기관의 관리자에게 현재 페이지 구성원 이름만 선택적으로 반환한다. 이메일과 연락처는 제외한다. 이름 확인 실패 시 기존 승인 목록을 이름 없이 제공한다.
+
+| SQL 후보 | SHA-256 | 실행 역할 | 선행 계약 | 적용 상태 |
+| --- | --- | --- | --- | --- |
+| database/migrations/012_professional_bookmark_events.prepared.sql | 5473ad73e5fcef38a90455fab6797bf6f4b1a7a8c9706da04bf7aee0e73dc524 | jungsi_backend_owner | 007_professional_platform | PREPARED_NOT_APPLIED |
+| database/migrations/013_professional_member_names.prepared.sql | 8257e43b04725f8246d06c27960eed1c9a80d71fe110bb98387be2bc3f12988c | postgres | 008_professional_authority | PREPARED_NOT_APPLIED |
+
+데이터팀 운영 DB 읽기 전용 메타데이터 조회에서 존재를 확인한 항목은 `schema_versions: 007_professional_platform`, `jungsi_professional.bookmarks`, `public.jeongsi_pro_authority(uuid,text,text,text,timestamptz)`이다. 조회 당시 존재하지 않은 객체는 `jungsi_professional.bookmark_events`, `public.jeongsi_pro_member_names(uuid,text,text[])`이다. schema_versions에서 008·011·012·013 숫자 패턴에 일치하는 행은 없었다. 다른 이름으로 등록된 버전의 존재 여부는 이 검색 범위에서 확인되지 않았다.
+
+PGlite 메모리 합성 DB 4건 PASS. 기존 011 번호 회피 및 008 함수 정의 보존, 기관 범위·장부 권한, 빼기·다시 담기 순서와 장부 불변, 이름의 현재 계약·관리자·기관 범위. 운영 활성화 NOT_RUN · 배포 NOT_RUN.
+
+화면팀은 서버·화면·설정 후보를 준비한다. Owner는 실제 스키마 등록부에서 012·013 사용 여부와 실행 역할을 확인한 뒤 서버 준비를 검수하고 Supabase에서 승인한 SQL을 적용한다. 화면팀은 적용 후 확인한 함수 정의 지문을 별도 서버 binding에 결속하고 운영을 검수한다.
+
 ## 별도 후보 API
 
 | 별도 ID | method | 서비스 경로 | 권한 | 응답 | 효과 | 소스 상태 |
@@ -57,6 +74,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 | pro.candidates | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/candidates | assigned_teacher | student_candidates | reuse_approved_engine | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
 | pro.bookmark.list | GET | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks | assigned_teacher_or_authorized_viewer_or_org_admin | student_bookmarks | read_only | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
 | pro.bookmark.add | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks | assigned_teacher | student_bookmarks | idempotent_bookmark | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
+| pro.bookmark.remove | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks/remove | assigned_teacher | student_bookmarks | idempotent_bookmark_removal | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
 | pro.report.export | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export | assigned_teacher_or_authorized_viewer_or_org_admin | student_print_projection | CSRF_protected_audited_private_output | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
 | pro.correction.grant | POST | /api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections | customer_support_active_admin_aal2_exact_ticket_scope | student_score_status | ticket_expected_version_idempotent_single_correction_grant | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
 | pro.retention.preview | POST | /api/v1/pro/organizations/{org_id}/management/retention-preview | platform_retention_operator_aal2 | retention_manifest | dry_run_only_no_delete | CODE_REGISTERED_RUNTIME_NOT_ACTIVATED |
@@ -369,7 +387,8 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     "subject_id",
     "role",
     "status",
-    "version"
+    "version",
+    "display_name"
   ],
   "comparison_context": [
     "academic_year",
@@ -853,6 +872,30 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
     }
   },
   {
+    "id": "pro.bookmark.remove",
+    "method": "POST",
+    "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks/remove",
+    "access": "assigned_teacher",
+    "response_schema": "student_bookmarks",
+    "effect": "idempotent_bookmark_removal",
+    "runtime_registration": "CODE_REGISTERED_RUNTIME_NOT_ACTIVATED",
+    "request": {
+      "path_parameters": [
+        "org_id",
+        "student_id"
+      ],
+      "body_fields": [
+        "report_id",
+        "offering_id"
+      ],
+      "query_fields": [],
+      "Idempotency_Key_required": true,
+      "BFF_CSRF_required": true,
+      "unknown_fields": "reject",
+      "tenant_and_actor_from_client_body": "forbidden"
+    }
+  },
+  {
     "id": "pro.report.export",
     "method": "POST",
     "path": "/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export",
@@ -1255,4 +1298,4 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=60bb2160d0d6b1069d1838babfbd122519afbc3a03404e2e847cddb5afee6d6b -->
+<!-- jungsi:generated spec_sha256=732f8e7b7e8807531ec9a235ac26c7e26938d98894a6ff47cc0fcd80bb322ea2 -->

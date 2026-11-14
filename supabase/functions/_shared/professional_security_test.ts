@@ -73,6 +73,18 @@ Deno.test("professional stored bookmarks round-trip into single report and print
       bookmarks.set(String(p[3]), stamp);
       return [];
     }
+    if (statement.startsWith("SELECT pg_advisory_xact_lock")) return [];
+    if (statement.startsWith("INSERT INTO jungsi_professional.bookmark_events")) {
+      // 합성 저장소: remove 는 지금 담겨 있을 때만 기록(RETURNING), add 는 마지막이 remove 일 때만(여기서는 위 bookmarks 가 대신)
+      equal(p[0], ORG);
+      equal(p[1], STUDENT);
+      if (statement.includes("$6,'remove'")) {
+        if (!bookmarks.has(String(p[3]))) return [];
+        bookmarks.delete(String(p[3]));
+        return [[p[5]]];
+      }
+      return [];
+    }
     if (statement.startsWith("SELECT offering_id,")) {
       return [...bookmarks].map(([id, time]) => [id, time]);
     }
@@ -129,6 +141,35 @@ Deno.test("professional stored bookmarks round-trip into single report and print
   assert((await read.json()).data.published_result.shortlist["SYNTHETIC-offering"].selected);
   assert((await printed.json()).data.snapshot.report.shortlist["SYNTHETIC-offering"].selected);
   assert((await list.json()).data.shortlist["SYNTHETIC-offering"].selected);
+  equal(nativeJsonText(report.body), before);
+  equal(store.isTransactionActive(), false);
+  // 2026-11-13 담은 학교 빼기: 빼면 목록에서 사라지고, 다시 빼면 404, 다시 담으면 돌아온다
+  const removeBody = { report_id: REPORT, offering_id: "SYNTHETIC-offering" };
+  // 동작마다 다른 요청 키(같은 키는 재전송으로 보고 앞 결과를 돌려준다)
+  const keyed = (r: Request, key: string) => {
+    const h = new Headers(r.headers);
+    h.set("Idempotency-Key", key);
+    return new Request(r, { headers: h });
+  };
+  equal(
+    (await handler(keyed(f.request("pro.bookmark.remove", removeBody), "SYNTHETIC-remove-1")))
+      .status,
+    200,
+  );
+  const afterRemove = await handler(f.request("pro.bookmark.list", {}, { report_id: REPORT }));
+  equal(afterRemove.status, 200);
+  assert((await afterRemove.json()).data.shortlist["SYNTHETIC-offering"] === undefined);
+  equal(
+    (await handler(keyed(f.request("pro.bookmark.remove", removeBody), "SYNTHETIC-remove-2")))
+      .status,
+    404,
+  );
+  equal(
+    (await handler(keyed(f.request("pro.bookmark.add", removeBody), "SYNTHETIC-readd-1"))).status,
+    200,
+  );
+  const readded = await handler(f.request("pro.bookmark.list", {}, { report_id: REPORT }));
+  assert((await readded.json()).data.shortlist["SYNTHETIC-offering"].selected);
   equal(nativeJsonText(report.body), before);
   equal(store.isTransactionActive(), false);
 });
@@ -292,7 +333,104 @@ function authorityFixture() {
   };
   return { state, adapter, user };
 }
+/**
+ * 2026-11-13 구성원 이름(013 jeongsi_pro_member_names): 기관 관리자에게만, 승인 지문이 맞을 때만 이름.
+ * 새 Deno.test 를 늘리지 않고(묶음 시험 수 고정) 기존 권한 시험 안에서 부른다
+ */
+async function memberNameChecks() {
+  const NAMES_HASH = "c".repeat(64);
+  let namesHash = NAMES_HASH, role = "org_admin";
+  const row = () => ({
+    format: "jungsi.professional-authority/v1",
+    subject_id: ACTOR,
+    account_status: "active",
+    account_role: "member",
+    organizations: [{
+      contract: {
+        org_id: ORG,
+        org_name: "가상 기관",
+        contract_id: "SYNTHETIC-contract",
+        academic_year: 2027,
+        version: 1,
+        status: "active",
+        starts_at_utc: utcText(NOW - 1n),
+        expires_at_utc: utcText(EXPIRY),
+        contracted_student_count: 30,
+        approved_exam_ids: ["SYNTHETIC-mock"],
+      },
+      members: [
+        { org_id: ORG, member_id: "1", subject_id: ACTOR, role, version: 1, active: true },
+        {
+          org_id: ORG,
+          member_id: "2",
+          subject_id: "SYNTHETIC-teacher",
+          role: "teacher",
+          version: 1,
+          active: true,
+        },
+      ],
+      source_version: "SYNTHETIC-source",
+    }],
+  });
+  const binding = (name: string, hash: string) => ({
+    status: "approved" as const,
+    schema: "synthetic",
+    name,
+    owner: "synthetic_owner",
+    definitionSha256: hash,
+    maxResultBytes: 65536,
+  });
+  const make = (withNames: boolean) =>
+    new SupabaseProfessionalAuthority(binding("authority", HASH), async (statement, params) => {
+      await Promise.resolve();
+      if (statement.includes("pg_get_userbyid")) {
+        const names = String(params[0]).includes("member_names");
+        return [[
+          "synthetic_owner",
+          "s",
+          false,
+          "3802",
+          "{search_path=pg_catalog}",
+          names ? namesHash : HASH,
+          false,
+          false,
+          true,
+        ]];
+      }
+      if (statement.includes('"member_names"')) {
+        // 승인 명단의 구성원 번호만 보낸다
+        equal(params[2], JSON.stringify(["1", "2"]));
+        return [[nativeJsonText({ "1": " 가상 관리자 ", "2": "가상 교사", "999": "다른 기관" })]];
+      }
+      return [[nativeJsonText(row())]];
+    }, withNames ? binding("member_names", NAMES_HASH) : null);
+  const user = {
+    subjectId: ACTOR,
+    expiresAtUtc: EXPIRY,
+    accountStatus: "active",
+    accountRole: "member",
+    assuranceLevel: "aal2" as const,
+  };
+  const admin = make(true), a = await admin.resolve(user, ORG, "member", NOW);
+  // 같은 기관 구성원 이름만, 앞뒤 공백 정리, 모르는 번호는 버린다
+  equal(await admin.memberNames(a), { "1": "가상 관리자", "2": "가상 교사" });
+  // 이름 함수가 설정에 없으면 이름 없이
+  const none = make(false);
+  equal(await none.memberNames(await none.resolve(user, ORG, "member", NOW)), {});
+  // 함수 지문이 승인 값과 다르면 이름 없이(목록은 막지 않음)
+  namesHash = "d".repeat(64);
+  equal(await admin.memberNames(await admin.resolve(user, ORG, "member", NOW)), {});
+  // 교사는 이름을 받지 못한다
+  role = "teacher";
+  const teacher = make(true);
+  await denied(
+    async () => await teacher.memberNames(await teacher.resolve(user, ORG, "member", NOW)),
+    "professional_access_denied",
+    403,
+  );
+}
 Deno.test("professional authority tolerates evaluation-time changes while rejecting contract/member changes", async () => {
+  await memberNameChecks();
   const f = authorityFixture(), a = await f.adapter.resolve(f.user, ORG, "member", NOW);
   await f.adapter.assertCurrent(a, NOW + 1000n);
   f.state.capacity--;
@@ -363,6 +501,30 @@ Deno.test("professional native engine bridge uses unchanged pack validation and 
       fresh++;
     },
   };
+  // 2026-11-13: 대학 찾기 비용은 모집단위 수와 떼어 센다(횟수) — 4,500곳이어도 1회 비용 1이 허용되고, 0은 거절
+  new ProfessionalApprovedAnalysis(async () => await data, f.ports.reports, f.policy, f.clock, {
+    maximumOfferings: 4500,
+    unitsPerOffering: 1n,
+    reservedCandidateUnits: 1n,
+  });
+  await denied(
+    () =>
+      Promise.resolve(
+        new ProfessionalApprovedAnalysis(
+          async () => await data,
+          f.ports.reports,
+          f.policy,
+          f.clock,
+          {
+            maximumOfferings: 4500,
+            unitsPerOffering: 1n,
+            reservedCandidateUnits: 0n,
+          },
+        ),
+      ),
+    "professional_policy_unavailable",
+    503,
+  );
   const bridge = new ProfessionalApprovedAnalysis(
     async () => await data,
     f.ports.reports,

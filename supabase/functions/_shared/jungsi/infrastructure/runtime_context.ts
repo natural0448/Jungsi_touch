@@ -188,7 +188,10 @@ export class NativeRuntimeRequest {
     }, controls.fetcher);
     return new MemberJsonResults(
       new SupabaseMemberShortlistLegacy(
-        this.sql(), b.repositoryLimits.maxRecordBytes, m.maxItems, schoolResults,
+        this.sql(),
+        b.repositoryLimits.maxRecordBytes,
+        m.maxItems,
+        schoolResults,
       ),
       Math.min(m.maxItems, 100),
     );

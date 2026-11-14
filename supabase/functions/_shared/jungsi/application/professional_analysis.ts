@@ -58,9 +58,12 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
   ) {
     this.maximumOfferings = proInteger(limits.maximumOfferings, 1);
     this.unitsPerOffering = limits.unitsPerOffering;
+    // 2026-11-13 대표님 결정: 전문가용 대학 찾기는 '횟수'로 센다(성적 저장 때 자동 1회, 학생·단계당 입력 1 + 정정 1에 묶임).
+    // 예전에는 한 번 비용을 '모집단위 수 × 단위'(약 3,926 이상)로 매겨 공용 하루 계산 한도(최대 200)를 넘어
+    // 한 번도 실행될 수 없었다. 비용은 모집단위 수와 떼고, 결과 크기는 maximumOfferings 로만 막는다
     if (
       typeof this.unitsPerOffering !== "bigint" || this.unitsPerOffering < 1n ||
-      BigInt(this.maximumOfferings) * this.unitsPerOffering > limits.reservedCandidateUnits ||
+      limits.reservedCandidateUnits < 1n ||
       limits.reservedCandidateUnits > policy.operating.maxRequestCalculationUnits
     ) throw new AccessError("professional_policy_unavailable", 503);
   }
