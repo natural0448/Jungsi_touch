@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "3cb5e3c44ca5cc103c12fdd0829da36e28fc5b38acf4feaaed5b822f0ead59b0",
+      "source_sha256": "9388409c2f16515f5778510f36ccdb0607f4a6348d39a043a257b08730f1de6d",
       "symbols": [
         {
           "kind": "class",
@@ -10571,6 +10571,24 @@
           "SchoolReferenceScoringPort",
           "SchoolReferenceScoringService",
           "projectReferenceInputs"
+        ]
+      },
+      {
+        "path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+        "layer": "application",
+        "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
+        "requirements": [
+          "REQ-27"
+        ],
+        "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+        "declared_exports": [
+          "ReflectedInquiryMode",
+          "ReflectedPendingReason",
+          "ReflectedReferenceResult",
+          "ReflectedReferenceRule",
+          "ReflectedStudentScores",
+          "ReflectedSubjectScore",
+          "schoolReflectedReference"
         ]
       },
       {

@@ -7578,6 +7578,70 @@
         "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs"
       ]
     },
+    "school_reflected": {
+      "allowed_builtins": [],
+      "expected_count": 6,
+      "files": {
+        "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+        "supabase/functions/deno.json": "c5841dae685359910e542b21bc01d569d5340d2a796b84414e04ca0a7bcde46f",
+        "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
+        "tests/school_reflected/test_school_reflected_reference.synthetic.ts": "15df0ff2aa6fd6d7ba3b48744ce65881b86a5262940c6a20ddcd179e3228180a"
+      },
+      "graphs": {
+        "tests/school_reflected/test_school_reflected_reference.synthetic.ts": {
+          "files": {
+            "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+            "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
+            "tests/school_reflected/test_school_reflected_reference.synthetic.ts": "15df0ff2aa6fd6d7ba3b48744ce65881b86a5262940c6a20ddcd179e3228180a"
+          },
+          "builtins": [],
+          "edges": [
+            [
+              "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
+              "../../supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+              [
+                [
+                  "code",
+                  "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+                ]
+              ]
+            ],
+            [
+              "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
+              "../edge/fixture.ts",
+              [
+                [
+                  "code",
+                  "tests/edge/fixture.ts"
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      "layers": {
+        "files": {
+          "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "application",
+          "supabase/functions/deno.json": "runtime_config",
+          "tests/edge/fixture.ts": "synthetic_fixture",
+          "tests/school_reflected/test_school_reflected_reference.synthetic.ts": "suite_test"
+        },
+        "observed_layer_edges": [
+          [
+            "suite_test",
+            "application"
+          ],
+          [
+            "suite_test",
+            "synthetic_fixture"
+          ]
+        ]
+      },
+      "manual_read_files": [],
+      "roots": [
+        "tests/school_reflected/test_school_reflected_reference.synthetic.ts"
+      ]
+    },
     "search503": {
       "allowed_builtins": [
         "node:assert/strict"

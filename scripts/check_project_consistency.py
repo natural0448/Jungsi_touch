@@ -6101,7 +6101,7 @@ def service_candidate_layer(path):
 def service_candidate_suite_errors(paths, read, spec):
     """Require each separate synthetic suite and its pinned local closure; never suppress existing gates."""
     error = "Service candidate suite registration or local closure invalid"
-    prefixes = tuple("tests/" + name + "/" for name in (*SERVICE_CANDIDATE_GROUPS, "budget_admission"))
+    prefixes = tuple("tests/" + name + "/" for name in (*SERVICE_CANDIDATE_GROUPS, "budget_admission", "school_reflected"))
     names = set(paths)
     group_paths = {p for p in names if p.startswith(prefixes)}
     backend = spec.get("backend_platform_contract", {})
@@ -6119,7 +6119,7 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "7dbaa25f6eb154a172fdbedf993cd031929affd4521e521969d1c8200ed2cf44"),
                      "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "5602cbc0638313c5e3cbd903e7b1007a0b9c7e14668792d23ab93ff4b3a1225a"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
@@ -6187,6 +6187,21 @@ def service_candidate_suite_errors(paths, read, spec):
             groups["budget_admission"] = ([budget["test_path"]], 6, [])
             manual_reads["budget_admission"] = []
             fixtures["budget_admission"] = frozenset({"tests/edge/fixture.ts"})
+        reflected = backend.get("school_reflected_reference_source_registration_20261114_v1")
+        if reflected is not None:
+            expected_reflected = {'format': 'jungsi.school-reflected-reference-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/school_reflected_reference.ts', 'source_sha256': 'e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231', 'test_path': 'tests/school_reflected/test_school_reflected_reference.synthetic.ts', 'test_sha256': '15df0ff2aa6fd6d7ba3b48744ce65881b86a5262940c6a20ddcd179e3228180a', 'case_count': 6, 'case_names': ['two inquiry subjects share the inquiry weight and English is excluded', 'best inquiry subject by percentile or by standard score', 'real zero is kept and unreflected areas are not required', 'missing reflected inputs wait instead of becoming zero', 'invalid rules and scores are rejected', 'eligibility note travels with the reference value'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
+            if reflected != expected_reflected:
+                raise ValueError("school reflected registration")
+            if reflected["test_path"] not in names or reflected["source_path"] not in names:
+                raise ValueError("school reflected source missing")
+            source_text = read(reflected["test_path"]).decode("utf8")
+            declarations = ['Deno.test("' + value + '",' for value in reflected["case_names"]]
+            positions = [source_text.find(value) for value in declarations]
+            if source_text.count("Deno.test(") != 6 or min(positions) < 0 or positions != sorted(set(positions)):
+                raise ValueError("school reflected case identities")
+            groups["school_reflected"] = ([reflected["test_path"]], 6, [])
+            manual_reads["school_reflected"] = []
+            fixtures["school_reflected"] = frozenset({"tests/edge/fixture.ts"})
         if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:
             raise ValueError("manifest format")
         if manifest.get("runtime") != {"deno_sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33", "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"}:

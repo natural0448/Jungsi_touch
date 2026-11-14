@@ -18,7 +18,7 @@ HISTORICAL_MANIFEST = "tests/review_suite_manifest.20261113_fmt.current.json"
 HISTORICAL_MANIFEST_SHA256 = "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
 MANIFEST_NAME = "tests/review_suite_manifest.20261114_budget_candidate.json"
 MANIFEST = ROOT / MANIFEST_NAME
-MANIFEST_SHA256 = "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"
+MANIFEST_SHA256 = "7dbaa25f6eb154a172fdbedf993cd031929affd4521e521969d1c8200ed2cf44"
 ADDITIVE_MANIFEST = "tests/student_pk_additive_manifest.20261113_source_candidate.json"
 ADDITIVE_SHA256 = "5602cbc0638313c5e3cbd903e7b1007a0b9c7e14668792d23ab93ff4b3a1225a"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
@@ -30,6 +30,7 @@ GENERATED_ROUTE_MARKER = "GENERATED_BY_SPEC_VIA_COMMON_GATE"
 NODE_ALLOWED = ["node:assert/strict", "node:fs", "node:zlib"]
 SERVICE_CANDIDATE_SHARED_FIXTURES = {
     "budget_admission": frozenset({"tests/edge/fixture.ts"}),
+    "school_reflected": frozenset({"tests/edge/fixture.ts"}),
     "service_end": frozenset({"tests/edge/synthetic_exam_pack.ts"}),
     "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
 }
@@ -341,6 +342,19 @@ def verify_additive_suite(data):
 
 
 class ReviewSuites(unittest.TestCase):
+    def test_school_reflected_deno_6(self):
+        data = load_manifest()
+        roots = ["tests/school_reflected/test_school_reflected_reference.synthetic.ts"]
+        verify_suite(data, "school_reflected", roots, [], 6)
+        args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
+                "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
+                "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *roots]
+        output = invoke(args, 90)
+        matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
+        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (6, 0, 0, 0):
+            raise AssertionError("school reflected result/count mismatch: " + output[-1000:])
+        verify_suite(data, "school_reflected", roots, [], 6)
+
     def test_budget_admission_deno_6(self):
         data = load_manifest()
         roots = ["tests/budget_admission/test_usage_admission_race.synthetic.ts"]

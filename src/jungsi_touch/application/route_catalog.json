@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "b0e8d90dd68d5f3e0e3bd3da1d4dfe531d8ad8f393f3789a77b47d56620e321a",
+  "source_sha256": "bb46cd301179326de88ed5239154443d10f8b5a4551dbcc23ecea508807fd525",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4929,7 +4929,7 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"
+        "sha256": "7dbaa25f6eb154a172fdbedf993cd031929affd4521e521969d1c8200ed2cf44"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -4937,11 +4937,11 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "1681fe7d3349c2ffc4c4d71227d3d5187e0c4f254df2a175125ed6453c59ab70"
+        "sha256": "4b56315bedc000e78e8a07d648ef2ec97100cbac63d439d47b20df84d0d7a952"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "98ee6ee1a2f811273909024f3fe221d718807c4467cb1ef3e98b518ee67699f2"
+        "sha256": "9408582dbc1209897b79b45748df2fa8c4b25d76cddd2e4e97f9597d0630fd42"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -4962,6 +4962,26 @@
         "failed settlement remains eligible for rollback cleanup",
         "concurrent cancellation shares delayed store failure and a later cleanup can retry",
         "rolled-back successful settlement is compensated after the outer transaction"
+      ],
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "school_reflected_reference_source_registration_20261114_v1": {
+      "format": "jungsi.school-reflected-reference-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+      "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+      "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
+      "test_sha256": "15df0ff2aa6fd6d7ba3b48744ce65881b86a5262940c6a20ddcd179e3228180a",
+      "case_count": 6,
+      "case_names": [
+        "two inquiry subjects share the inquiry weight and English is excluded",
+        "best inquiry subject by percentile or by standard score",
+        "real zero is kept and unreflected areas are not required",
+        "missing reflected inputs wait instead of becoming zero",
+        "invalid rules and scores are rejected",
+        "eligibility note travels with the reference value"
       ],
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",

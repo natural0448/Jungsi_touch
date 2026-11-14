@@ -10164,6 +10164,23 @@
         "MemberSchoolResultReference",
         "MemberSchoolResultsStorage"
       ]
+    },
+    {
+      "path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+      "layer": "application",
+      "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
+      "requirements": [
+        "REQ-27"
+      ],
+      "symbols": [
+        "ReflectedInquiryMode",
+        "ReflectedPendingReason",
+        "ReflectedReferenceResult",
+        "ReflectedReferenceRule",
+        "ReflectedStudentScores",
+        "ReflectedSubjectScore",
+        "schoolReflectedReference"
+      ]
     }
   ],
   "workflow": {
@@ -13695,7 +13712,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "3cb5e3c44ca5cc103c12fdd0829da36e28fc5b38acf4feaaed5b822f0ead59b0",
+            "source_sha256": "9388409c2f16515f5778510f36ccdb0607f4a6348d39a043a257b08730f1de6d",
             "symbols": [
               {
                 "kind": "class",
@@ -23593,6 +23610,24 @@
               ]
             },
             {
+              "path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+              "layer": "application",
+              "status": "implemented_source_synthetic_verified_runtime_NOT_RUN",
+              "requirements": [
+                "REQ-27"
+              ],
+              "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+              "declared_exports": [
+                "ReflectedInquiryMode",
+                "ReflectedPendingReason",
+                "ReflectedReferenceResult",
+                "ReflectedReferenceRule",
+                "ReflectedStudentScores",
+                "ReflectedSubjectScore",
+                "schoolReflectedReference"
+              ]
+            },
+            {
               "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts",
               "layer": "application",
               "status": "implemented_scoped_reference_source_synthetic_verified_hosted_NOT_RUN",
@@ -31449,6 +31484,13 @@
         "REQ-27"
       ],
       "summary": "시스템팀 검토 패치의 예산 취소 경합 보완을 반영했다. usage_service.ts에서 실행 중인 요청은 취소가 물리 예약을 먼저 풀지 못하게 하고, 동시 취소는 한 번의 실패 정산을 함께 기다리며, 정산 실패와 바깥 트랜잭션 롤백 뒤에도 정리 정산을 다시 할 수 있게 했다. 새 합성 시험 6건은 별도 budget_admission 묶음(Python 다리)으로 등록하고 Edge 기반 656건에는 더하지 않는다. 운영 546·429 원인은 이 변경으로 입증되지 않았고 배포하지 않았다."
+    },
+    {
+      "date": "2026-11-14",
+      "requirements": [
+        "REQ-27"
+      ],
+      "summary": "학교 반영 참고백분위 계산 모듈(school_reflected_reference.ts)을 추가했다. 학생의 같은 시험 국어·수학·탐구 백분위를 모집단위의 확인된 반영비율로 가중평균하고, 영어·한국사·가산점은 분자·분모에서 뺀다. 탐구는 미반영·2과목 같은 비중·백분위 상위 1과목·표준점수 상위 1과목 네 방식만 허용한다. 필요한 값이 없으면 0으로 바꾸지 않고 대기 사유를 돌려준다. 대표님이 정한 2027 표시 범위 1,945개 모집단위 허가 목록은 운영 연결 때 승인 자료판으로 올리며, 이번 변경은 서버 응답·화면·운영에 연결하지 않았다."
     }
   ],
   "overall_analysis_contract": {
@@ -34697,7 +34739,7 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "4cc15edce46281696220ac8ecf8d765ef4737bc0dfee59c77064199b6582a40b"
+        "sha256": "7dbaa25f6eb154a172fdbedf993cd031929affd4521e521969d1c8200ed2cf44"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -34705,11 +34747,11 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "1681fe7d3349c2ffc4c4d71227d3d5187e0c4f254df2a175125ed6453c59ab70"
+        "sha256": "4b56315bedc000e78e8a07d648ef2ec97100cbac63d439d47b20df84d0d7a952"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "98ee6ee1a2f811273909024f3fe221d718807c4467cb1ef3e98b518ee67699f2"
+        "sha256": "9408582dbc1209897b79b45748df2fa8c4b25d76cddd2e4e97f9597d0630fd42"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -34730,6 +34772,26 @@
         "failed settlement remains eligible for rollback cleanup",
         "concurrent cancellation shares delayed store failure and a later cleanup can retry",
         "rolled-back successful settlement is compensated after the outer transaction"
+      ],
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "school_reflected_reference_source_registration_20261114_v1": {
+      "format": "jungsi.school-reflected-reference-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+      "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+      "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
+      "test_sha256": "15df0ff2aa6fd6d7ba3b48744ce65881b86a5262940c6a20ddcd179e3228180a",
+      "case_count": 6,
+      "case_names": [
+        "two inquiry subjects share the inquiry weight and English is excluded",
+        "best inquiry subject by percentile or by standard score",
+        "real zero is kept and unreflected areas are not required",
+        "missing reflected inputs wait instead of becoming zero",
+        "invalid rules and scores are rejected",
+        "eligibility note travels with the reference value"
       ],
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -359009,6 +359071,731 @@
             ]
           }
         ]
+      },
+      "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": {
+        "declarations": {
+          "imports": [],
+          "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "none",
+                          "value": {
+                            "kind": "string",
+                            "string": "none"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "two_equal",
+                          "value": {
+                            "kind": "string",
+                            "string": "two_equal"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "best1_percentile",
+                          "value": {
+                            "kind": "string",
+                            "string": "best1_percentile"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "best1_standard",
+                          "value": {
+                            "kind": "string",
+                            "string": "best1_standard"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "ReflectedInquiryMode"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "offeringId",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "korean",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "math",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "inquiry",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "inquiryMode",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ReflectedInquiryMode",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ReflectedInquiryMode"
+                          }
+                        }
+                      },
+                      {
+                        "name": "eligibilityNote",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "boolean",
+                          "value": "boolean"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ReflectedReferenceRule"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "percentile",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "standard",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ReflectedSubjectScore"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "properties": [
+                      {
+                        "name": "korean",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReflectedSubjectScore",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ReflectedSubjectScore"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "math",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReflectedSubjectScore",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ReflectedSubjectScore"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "inquiry",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "typeRef",
+                                "repr": "ReflectedSubjectScore",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "ReflectedSubjectScore"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "ReflectedStudentScores"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "rule_invalid",
+                          "value": {
+                            "kind": "string",
+                            "string": "rule_invalid"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "korean_missing",
+                          "value": {
+                            "kind": "string",
+                            "string": "korean_missing"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "math_missing",
+                          "value": {
+                            "kind": "string",
+                            "string": "math_missing"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "inquiry_missing",
+                          "value": {
+                            "kind": "string",
+                            "string": "inquiry_missing"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "inquiry_two_subjects_required",
+                          "value": {
+                            "kind": "string",
+                            "string": "inquiry_two_subjects_required"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "score_invalid",
+                          "value": {
+                            "kind": "string",
+                            "string": "score_invalid"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "ReflectedPendingReason"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "status",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "literal",
+                                  "repr": "reference",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "reference"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "offeringId",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "value",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "number",
+                                  "value": "number"
+                                }
+                              },
+                              {
+                                "name": "excluded",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "typeOperator",
+                                  "value": {
+                                    "operator": "readonly",
+                                    "tsType": {
+                                      "kind": "tuple",
+                                      "value": [
+                                        {
+                                          "kind": "literal",
+                                          "repr": "english",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "english"
+                                          }
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "repr": "korean_history",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "korean_history"
+                                          }
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "repr": "bonus",
+                                          "value": {
+                                            "kind": "string",
+                                            "string": "bonus"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "name": "eligibilityNote",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "kind": "typeLiteral",
+                          "value": {
+                            "properties": [
+                              {
+                                "name": "status",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "literal",
+                                  "repr": "pending",
+                                  "value": {
+                                    "kind": "string",
+                                    "string": "pending"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "offeringId",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              },
+                              {
+                                "name": "reason",
+                                "readonly": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "ReflectedPendingReason",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "ReflectedPendingReason"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "ReflectedReferenceResult"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  rule: ReflectedReferenceRule,\n  scores: ReflectedStudentScores,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "rule",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ReflectedReferenceRule",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ReflectedReferenceRule"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "scores",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ReflectedStudentScores",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ReflectedStudentScores"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "ReflectedReferenceResult",
+                      "value": {
+                        "resolution": {
+                          "kind": "local"
+                        },
+                        "typeName": "ReflectedReferenceResult"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "schoolReflectedReference"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "english",
+                            "value": {
+                              "kind": "string",
+                              "string": "english"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "korean_history",
+                            "value": {
+                              "kind": "string",
+                              "string": "korean_history"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "bonus",
+                            "value": {
+                              "kind": "string",
+                              "string": "bonus"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "EXCLUDED"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(value: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "value",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "weight"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(score: ReflectedSubjectScore | null | undefined)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "score",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReflectedSubjectScore",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "ReflectedSubjectScore"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "null",
+                              "value": "null"
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "undefined",
+                              "value": "undefined"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "percentile"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(score: ReflectedSubjectScore)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "score",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ReflectedSubjectScore",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "ReflectedSubjectScore"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "standard"
+            }
+          ]
+        },
+        "dependencies": [],
+        "layer": "application",
+        "symbols": [
+          "ReflectedInquiryMode",
+          "ReflectedPendingReason",
+          "ReflectedReferenceResult",
+          "ReflectedReferenceRule",
+          "ReflectedStudentScores",
+          "ReflectedSubjectScore",
+          "schoolReflectedReference"
+        ]
       }
     },
     "format": "jungsi.edge-contract/v1",
@@ -359723,7 +360510,8 @@
       "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts": "8934b9dcc2883f043cde7e757b1cce00caea524ac28c97b5a9dcba34d6fbde86",
       "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts": "0f32c57ca93a838bc8d3c73b0b9d4b5be90b35508ab4c3b7b738e838a3862db0",
       "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": "f4a1bf7629508cc2c726c40514412a128f14e9c330878b2be354e77d175be16e",
-      "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0"
+      "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0",
+      "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231"
     },
     "migration_evidence": {
       "sql_path": "database/migrations/006_score_input_policy.prepared.sql",
@@ -361623,7 +362411,7 @@
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
       "graph_manifest_sha256": "68dae5ed7e6e100411adede11c8769824eb6f868167e8679ad2f730891104f05",
-      "bridge_sha256": "f8f46e75005ad05a916e412b57955531ff6dd03e25c9048e54744c560474d8f5"
+      "bridge_sha256": "df328dd8e44285fe27d3d756632bce8193ff8c9102b67ed223d70a6c8a0a22d5"
     }
   },
   "P1_display_snapshot_contract": {
@@ -365677,7 +366465,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "17ad7b02685acb9cbcc8745a1113329d63f7542922efa17fb12d26a932856aef",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "ccc5f8580391db2ecd616c0f5d206caecfa43cacca52d72c284fc73b13da630a",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
-      "scripts/check_project_consistency.py": "3cb5e3c44ca5cc103c12fdd0829da36e28fc5b38acf4feaaed5b822f0ead59b0",
+      "scripts/check_project_consistency.py": "9388409c2f16515f5778510f36ccdb0607f4a6348d39a043a257b08730f1de6d",
       "scripts/run_edge_tests.py": "5b561fbe4c200505aa0b9c8347e541a2c69f61c214295e28cc48f3060ec5d721"
     },
     "receipt_bindings": {
