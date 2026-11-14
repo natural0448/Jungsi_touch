@@ -191,9 +191,9 @@ def parse_tree_changes(raw,allow_renames):
         try:status=fields[i].decode('ascii')
         except UnicodeError as e:raise Stop('tree_diff_invalid') from e
         i+=1
-        rename=re.fullmatch(r'R(100|[0-9]{1,2})',status)
+        rename=re.fullmatch(r'R(100|0?[0-9]{1,2})',status)
         if rename and allow_renames:count=2
-        elif re.fullmatch(r'(?:A|D|T|M(?:100|[0-9]{1,2})?)',status):count=1
+        elif re.fullmatch(r'(?:A|D|T|M(?:100|0?[0-9]{1,2})?)',status):count=1
         else:raise Stop('tree_diff_invalid')
         if i+count>len(fields)-1:raise Stop('tree_diff_invalid')
         try:paths=tuple(fields[j].decode('utf8') for j in range(i,i+count))
@@ -272,6 +272,8 @@ def load_generator(repo,index,blob,expected_gen,expected_audit,dependencies):
 
 def check_destination(repo, dest):
     out=repo/'outputs'
+    if not out.exists() and not out.is_symlink():
+        raise Stop('outputs_missing: create the outputs folder in the repository root and retry')
     if not out.is_dir() or out.is_symlink(): raise Stop('outputs_not_regular')
     dest=Path(dest)
     if not dest.is_absolute(): dest=repo/dest

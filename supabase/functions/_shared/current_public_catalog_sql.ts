@@ -1,4 +1,10 @@
 /** Existing app-role/current-view reads only. No schema/RPC/index/write or engine path. */
+import type {
+  CurrentPageBoundary,
+  CurrentPageExecution,
+  CurrentPagePortContext,
+} from "./jungsi/application/history_current_page.ts";
+import { hasAsciiControl } from "./jungsi/domain/text.ts";
 import { AccessError } from "./jungsi/application/access.ts";
 import type { RequestClockPort } from "./jungsi/application/ports.ts";
 import { nativeJsonSha256, type NativeObject } from "./jungsi/domain/json_value.ts";
@@ -29,6 +35,7 @@ import {
   type CurrentPublicCatalogPort,
   type CurrentPublicKeySelectionPort,
   type PublicCatalogKey,
+  publicCatalogKey,
   type PublicCatalogKind,
   type PublicCatalogPage,
   type PublicCatalogPublication,
@@ -428,6 +435,35 @@ export const CURRENT_PUBLIC_OFFERINGS_SQL = `WITH ${headCTE},page_offerings AS M
 }), 'row',${guideWire("g")},'guide',${
   guideWire("g")
 }) AS wire FROM page_offerings g) ${headSelect}`;
+/** REVIEW ONLY. The direct P1 variant retains unclassified candidates until the
+ * independently approved per-target service/practical decision, and exposes the
+ * source fingerprint only to the server verifier. It does not use the metadata
+ * key index. LIMIT bounds output, not physical I/O; guarded access evidence remains
+ * mandatory before calling even publication(). */
+export function buildCurrentPublicP1DirectOfferingsSql(
+  original = CURRENT_PUBLIC_OFFERINGS_SQL,
+): string {
+  const excluded = ` AND ${serviceGuide("g")} AND `;
+  const row = `'row',${guideWire("g")},'guide'`;
+  if (original.split(excluded).length !== 2 || original.split(row).length !== 2) return fail();
+  return original.replace(excluded, " AND ").replace(
+    row,
+    `'row',${guideWire("g")}||jsonb_build_object('row_fingerprint',g.row_sha256),'guide'`,
+  );
+}
+/** Real guard must reuse existing verified view/head, role/RLS, unique key,
+ * practical scope, physical index and measured bounded-access evidence for this
+ * exact query class and filter/collation semantics. Estimated plans, LIMIT or a
+ * synthetic status alone are not such evidence. This is not a new nationwide
+ * source re-review. The guard is a server-only port, not a client-supplied flag. */
+export interface P1DirectGuideGuard {
+  authorizeBeforeBegin(execution: CurrentPageExecution, boundary: CurrentPageBoundary): void;
+  authorizeBeforeIO(
+    context: CurrentPagePortContext,
+    query: Readonly<PublicCatalogQuery>,
+    after: PublicCatalogKey | null,
+  ): void;
+}
 /** Prepared keys are private metadata; every value and guide body is reread in one DB snapshot. */
 const preparedKeysCTE = `page_keys AS MATERIALIZED (
  SELECT (v->'key'->>0)::integer AS academic_year,v->'key'->>1 AS school_id,v->'key'->>2 AS offering_pk,v->'key'->>3 AS metric_kind,v->'key'->>4 AS canonical_result_id,v->>'sourceKind' AS source_kind,v->>'nativeOfferingId' AS native_offering_id,v->>'expectedFingerprint' AS expected_fingerprint,v->'key' AS expected_key
@@ -716,6 +752,82 @@ export class CurrentPublicCatalogSql implements CurrentPublicCatalogPort {
       await this.publication();
       return page;
     });
+  }
+  /** P1 internal candidate only; caller must also bind the returned rows to the
+   * same request-scoped authority before projection. No public route is added. */
+  async searchDirect2027Offerings(
+    context: CurrentPagePortContext,
+    input: PublicCatalogQuery,
+    after: PublicCatalogKey | null,
+    guard: P1DirectGuideGuard | null,
+  ): Promise<PublicCatalogPage> {
+    if (
+      !context || context.execution?.operation !== "history.current-page" ||
+      !context.execution.session?.user || !context.boundary?.admission ||
+      !(context.boundary.signal instanceof AbortSignal) || context.boundary.signal.aborted ||
+      !guard || typeof guard.authorizeBeforeIO !== "function" || !input
+    ) return fail();
+    const names = [
+      "academic_year",
+      "university_q",
+      "department_q",
+      "region",
+      "group",
+      "limit",
+      "cursor",
+    ] as const;
+    if (
+      Reflect.ownKeys(input).length !== names.length || names.some((name) => {
+        const d = Object.getOwnPropertyDescriptor(input, name);
+        return !d || !("value" in d);
+      })
+    ) return fail();
+    const q = Object.freeze(
+      Object.fromEntries(
+        names.map((name) => [name, Object.getOwnPropertyDescriptor(input, name)!.value]),
+      ),
+    ) as unknown as Readonly<PublicCatalogQuery>;
+    if (
+      q.academic_year !== 2027 || !Number.isSafeInteger(q.limit) || q.limit < 1 || q.limit > 100 ||
+      q.cursor !== null ||
+      [q.university_q, q.department_q, q.region, q.group].some((v) =>
+        typeof v !== "string" || v.length > 100 || hasAsciiControl(v)
+      )
+    ) return fail();
+    let before: PublicCatalogKey | null = null;
+    if (after !== null) {
+      if (!Array.isArray(after) || after.length !== 5) return fail();
+      const values: unknown[] = [];
+      for (let i = 0; i < 5; i++) {
+        const d = Object.getOwnPropertyDescriptor(after, String(i));
+        if (!d || !("value" in d)) return fail();
+        values.push(d.value);
+      }
+      before = publicCatalogKey(values);
+    }
+    if (before && (before[0] !== 2027 || before[3] !== "" || before[4] !== `2027:${before[2]}`)) {
+      return fail();
+    }
+    if (before) Object.freeze(before);
+    const subject = context.execution.session.user.subjectId, signal = context.boundary.signal;
+    if (guard.authorizeBeforeIO(context, q, before) !== undefined || signal.aborted) return fail();
+    const position = before ?? [null, null, null, null, null];
+    const result = await this.read(subject, buildCurrentPublicP1DirectOfferingsSql(), [
+      2027,
+      q.university_q,
+      q.department_q,
+      q.region,
+      q.group,
+      ...position,
+      q.limit + 1,
+    ], before !== null);
+    if (
+      context.execution.operation !== "history.current-page" ||
+      context.execution.session.user.subjectId !== subject ||
+      context.boundary.signal !== signal || signal.aborted ||
+      guard.authorizeBeforeIO(context, q, before) !== undefined
+    ) return fail();
+    return result;
   }
   async search(
     subject: string,

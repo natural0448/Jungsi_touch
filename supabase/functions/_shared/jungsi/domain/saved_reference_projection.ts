@@ -1,14 +1,43 @@
 /** Query saved exact tails. No profile loading, score/CDF rebuild, fitting or materialization. */
 import { displayExact, exact, Rational, requireContract as check } from "./exact.ts";
-import { JsonFloat, parseNativeJson } from "./native_json.ts";
+import { JsonFloat } from "./native_json.ts";
 import { nativeJsonText, type NativeObject } from "./json_value.ts";
 export interface SavedReferenceProjectionPin {
   readonly sha256: string;
+  readonly version?: string;
   readonly bytes: number;
   readonly maxBytes: number;
   /** Independently verified binder output identity, provided by the server selection. */
   readonly context: Readonly<NativeObject>;
   readonly evidence: Readonly<NativeObject>;
+}
+export interface AuthorizedSavedTailPin extends SavedReferenceProjectionPin {
+  readonly key: string;
+  readonly releaseSha256: string;
+  readonly selectionSha256?: string;
+  readonly compatibilitySha256: string;
+  /** Public ID, physical PK and current catalog context are distinct fields. */
+  readonly binding: Readonly<NativeObject>;
+}
+export interface AuthorizedSavedTailBytesPort {
+  /** Selection must be independently authorized, never supplied by a client. */
+  select(offeringId: string, signal: AbortSignal): Promise<AuthorizedSavedTailPin | null>;
+  /** Must enforce the existing private storage byte/read/time budget and stop on abort. */
+  read(key: string, maximumBytes: number, signal: AbortSignal): Promise<Uint8Array>;
+  /** Recheck current selected release, head, expiry, user and request admission. */
+  assertCurrent(pin: AuthorizedSavedTailPin, signal: AbortSignal): Promise<void>;
+  /** Verify exact source/model/exam/score-axis equivalence, not only pack version. */
+  assertCompatible(
+    pin: AuthorizedSavedTailPin,
+    identity: Readonly<NativeObject>,
+    signal: AbortSignal,
+  ): Promise<void>;
+  /** Independent current issuer only; absent means no saved-result disclosure proof. */
+  verifiedProvenance?(
+    pin: AuthorizedSavedTailPin,
+    identity: Readonly<NativeObject>,
+    signal: AbortSignal,
+  ): Promise<Readonly<NativeObject>>;
 }
 const CONTEXT = [
   "academic_year",
@@ -50,7 +79,12 @@ function uint(v: unknown): bigint {
   check(typeof v === "string" && /^(0|[1-9][0-9]*)$/.test(v), "reference_tail_invalid");
   return BigInt(v);
 }
-type Tail = { score: Rational; strict: bigint; tie: bigint; inclusive: bigint };
+// Scores keep their exact numerator/denominator; a Rational is built only for compared rows.
+type Tail = { num: bigint; den: bigint; strict: bigint; tie: bigint; inclusive: bigint };
+const scoreOf = (t: Tail): Rational => new Rational(t.num, t.den);
+/** Exact a/b < c/d for positive denominators without gcd normalization. */
+const before = (a: Tail, b: Tail): boolean =>
+  a.den === b.den ? a.num < b.num : a.num * b.den < b.num * a.den;
 export class SavedReferenceTailProjection {
   private constructor(
     private readonly context: Readonly<NativeObject>,
@@ -75,7 +109,16 @@ export class SavedReferenceTailProjection {
       v.toString(16).padStart(2, "0")
     ).join("");
     check(sha === pin.sha256, "reference_tail_pin_invalid");
-    const p = object(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(bytes)), [
+    // SHA-pinned approved bytes. Every exact quantity is a decimal string (checked by uint()),
+    // and the only numeric fields are checked as safe integers, so the platform parser keeps
+    // exactness while avoiding the slower native-number parser on multi-MB tails (Edge CPU).
+    let decoded: unknown;
+    try {
+      decoded = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    } catch {
+      check(false, "reference_tail_invalid");
+    }
+    const p = object(decoded, [
       "format",
       "version",
       "context",
@@ -84,7 +127,8 @@ export class SavedReferenceTailProjection {
       "rows",
     ]);
     check(
-      p.format === "jungsi.saved-reference-tail-projection/v1" && typeof p.version === "string",
+      p.format === "jungsi.saved-reference-tail-projection/v1" && typeof p.version === "string" &&
+        (pin.version === undefined || p.version === pin.version),
       "reference_tail_invalid",
     );
     const c = object(p.context, CONTEXT), e = object(p.evidence, EVIDENCE);
@@ -150,15 +194,16 @@ export class SavedReferenceTailProjection {
         "tie_weight_units",
         "inclusive_weight_units",
       ]);
-      const score = new Rational(uint(r.score_numerator), uint(r.score_denominator)),
+      const num = uint(r.score_numerator),
+        den = uint(r.score_denominator),
         strict = uint(r.strict_weight_units),
         tie = uint(r.tie_weight_units),
         inclusive = uint(r.inclusive_weight_units);
       check(
-        tie > 0n && strict + tie === inclusive && inclusive <= eligible,
+        den > 0n && tie > 0n && strict + tie === inclusive && inclusive <= eligible,
         "reference_tail_invalid",
       );
-      return { score, strict, tie, inclusive };
+      return { num, den, strict, tie, inclusive };
     });
     check(
       rows[0].inclusive === eligible && rows[rows.length - 1].strict === 0n,
@@ -166,7 +211,7 @@ export class SavedReferenceTailProjection {
     );
     for (let i = 1; i < rows.length; i++) {
       check(
-        rows[i - 1].score.compare(rows[i].score) < 0 && rows[i - 1].strict === rows[i].inclusive,
+        before(rows[i - 1], rows[i]) && rows[i - 1].strict === rows[i].inclusive,
         "reference_tail_incomplete",
       );
     }
@@ -194,13 +239,13 @@ export class SavedReferenceTailProjection {
     );
     // The existing evidence does not authorize extrapolation outside saved support.
     if (
-      score.compare(this.rows[0].score) < 0 ||
-      score.compare(this.rows[this.rows.length - 1].score) > 0
+      score.compare(scoreOf(this.rows[0])) < 0 ||
+      score.compare(scoreOf(this.rows[this.rows.length - 1])) > 0
     ) return null;
     let lo = 0, hi = this.rows.length;
     while (lo < hi) {
       const mid = (lo + hi) >>> 1;
-      if (this.rows[mid].score.compare(score) < 0) lo = mid + 1;
+      if (scoreOf(this.rows[mid]).compare(score) < 0) lo = mid + 1;
       else hi = mid;
     }
     const tail = this.rows[lo],

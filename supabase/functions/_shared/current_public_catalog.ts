@@ -1011,6 +1011,45 @@ export function currentPublicResponseSchemas(registry: unknown): unknown {
     ref: "current_public_recruitment_values",
     nullable: true,
   };
+  // 3P score map: offerings.search items may carry the student's own converted score.
+  if (!out.schemas.offering || !out.schemas.offering_search) fail("security_policy_unavailable");
+  const optionalText = { type: "string", nullable: true };
+  out.schemas.current_public_my_score = {
+    type: "object",
+    nullable: false,
+    properties: {
+      status: { type: "string", nullable: false, enum: ["ready", "reference", "pending"] },
+      converted_score: optionalText,
+      official_max_score: optionalText,
+      reason_code: optionalText,
+    },
+    required: ["status", "converted_score", "official_max_score", "reason_code"],
+    optional: [],
+  } as unknown as Schema;
+  out.schemas.current_public_search_offering = structuredClone(out.schemas.offering);
+  out.schemas.current_public_search_offering.properties.my_score = {
+    ref: "current_public_my_score",
+    nullable: true,
+  };
+  ((out.schemas.current_public_search_offering as unknown as { optional: string[] }).optional ??=
+    []).push("my_score");
+  out.schemas.current_public_offering_search = structuredClone(out.schemas.offering_search);
+  (out.schemas.current_public_offering_search.properties.items as {
+    items: unknown;
+  }).items = { ref: "current_public_search_offering", nullable: false };
+  out.schemas.current_public_offering_search.properties.my_score_state = {
+    type: "string",
+    nullable: false,
+    enum: ["no_profile", "complete", "partial", "unavailable"],
+  };
+  ((out.schemas.current_public_offering_search as unknown as { optional: string[] }).optional ??=
+    []).push("my_score_state");
+  const search = out.operations.find((x) => x.id === "offerings.search");
+  if (!search) return fail("security_policy_unavailable");
+  for (const tier of ["standard", "paid"]) {
+    if (search.roots[tier]?.ref !== "offering_search") fail("security_policy_unavailable");
+    search.roots[tier] = { ...search.roots[tier], ref: "current_public_offering_search" };
+  }
   const recruitment = out.operations.find((x) => x.id === "recruitment.read");
   if (!recruitment) return fail("security_policy_unavailable");
   for (const tier of ["standard", "paid"]) {

@@ -81,6 +81,11 @@ export function reportDto(
     overall: cloneNativeJson(record.body.overall),
   };
   if (session.tier === "paid") {
+    if (Object.hasOwn(record.body, "reference_attendance_requirements")) {
+      result.reference_attendance_requirements = cloneNativeJson(
+        record.body.reference_attendance_requirements,
+      );
+    }
     for (const key of ["analyses", "candidates", "shortlist", "analysis_status"]) {
       if (!Object.hasOwn(record.body, key)) invalid();
       result[key] = cloneNativeJson(record.body[key]);

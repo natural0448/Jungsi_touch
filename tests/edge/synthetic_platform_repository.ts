@@ -1,6 +1,7 @@
 import { syncPromise } from "./fixture.ts";
 /** Sequential invented application-test repository. Native transaction tests are separate. */
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
+import { assertReferenceEvidenceTransition } from "../../supabase/functions/_shared/jungsi/application/legacy_reference_transition.ts";
 import type {
   PlatformRepositoryPort,
   ProfileWrite,
@@ -19,6 +20,7 @@ export class SyntheticNativeRepository implements PlatformRepositoryPort {
   readonly profiles = new Map<string, StoredProfile>();
   readonly reports = new Map<string, StoredReport>();
   readonly requests = new Map<string, { digest: string; result: StoredMutation }>();
+  readonly revisions = new Map<string, StoredReport>();
   readonly events: string[] = [];
   private key(owner: string, op: string, key: string) {
     return [owner, op, key].join("\0");
@@ -65,6 +67,13 @@ export class SyntheticNativeRepository implements PlatformRepositoryPort {
       return r?.owner_id === owner ? clone(r) : null;
     });
   }
+  getReportRevision(owner: string, rid: string, revision: number, signal?: AbortSignal) {
+    return syncPromise(() => {
+      if (signal?.aborted) throw new Error("cancelled");
+      const r = this.revisions.get([rid, revision].join("\0"));
+      return r?.owner_id === owner ? clone(r) : null;
+    });
+  }
   lookupAccess(owner: string, rid: string) {
     return syncPromise(() => {
       this.events.push("access");
@@ -89,16 +98,30 @@ export class SyntheticNativeRepository implements PlatformRepositoryPort {
     let result: StoredReport;
     if (previous && input.noOp) result = clone(previous);
     else {
+      const nextId = input.reportId ?? "report-SYNTHETIC-" + (this.reports.size + 1);
+      const nextRevision = previous ? previous.revision + 1 : 1;
+      await assertReferenceEvidenceTransition(
+        previous ?? null,
+        input.body,
+        input.owner,
+        nextId,
+        input.profileId,
+        nextRevision,
+      );
       this.events.push("write-report");
       result = {
-        report_id: input.reportId ?? "report-SYNTHETIC-" + (this.reports.size + 1),
+        report_id: nextId,
         owner_id: input.owner,
         profile_id: input.profileId,
         revision: previous ? previous.revision + 1 : 1,
         body: clone(input.body),
         updated_at: utcText(input.nowUtc),
       };
+      if (previous) {
+        this.revisions.set([previous.report_id, previous.revision].join("\0"), clone(previous));
+      }
       this.reports.set(result.report_id, clone(result));
+      this.revisions.set([result.report_id, result.revision].join("\0"), clone(result));
     }
     this.requests.set(this.key(input.owner, input.operation, input.key), {
       digest: input.digest,

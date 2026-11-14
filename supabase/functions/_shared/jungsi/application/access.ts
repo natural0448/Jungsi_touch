@@ -6,6 +6,23 @@ export class AccessError extends ContractError {
     super(code);
   }
 }
+/** Optional reference receipt state; shared authentication and budget errors stay separate. */
+export class ReferenceReceiptExpired extends AccessError {
+  constructor(
+    code: "security_policy_unavailable" | "reference_source_unavailable" =
+      "security_policy_unavailable",
+  ) {
+    super(code, 503);
+  }
+}
+export class ReferenceReceiptInvalidated extends AccessError {
+  constructor(
+    code: "security_policy_unavailable" | "reference_source_unavailable" =
+      "reference_source_unavailable",
+  ) {
+    super(code, 503);
+  }
+}
 export async function authorizeUser(
   token: string,
   sessions: UserSessionPort,

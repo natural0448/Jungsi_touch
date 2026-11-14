@@ -1,9 +1,11 @@
+import type { AttendanceConfirmation } from "./reference_attendance.ts";
 /** Same-exam student fields shared by production and scoped reference calculators. */
 import { examSubjectKey, type NativeExamAnalysis, NativeExamPack } from "../domain/exam_pack.ts";
 import { type NativeObject } from "../domain/json_value.ts";
 import type { NativeJson } from "../domain/native_json.ts";
 import { requireContract as check } from "../domain/exact.ts";
 export interface SchoolScoreInputs {
+  readonly attendanceConfirmation?: AttendanceConfirmation | null;
   readonly academicYear: number;
   readonly examId: string;
   readonly packVersion: string;

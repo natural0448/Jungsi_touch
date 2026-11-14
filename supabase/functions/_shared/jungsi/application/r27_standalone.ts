@@ -2,6 +2,10 @@
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { hasAsciiControl } from "../domain/text.ts";
 import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
+import {
+  ADMISSION_GUIDANCE_FIELDS,
+  pendingAdmissionGuidance,
+} from "./p1_admission_guidance.review-only.ts";
 
 const HASH = /^[a-f0-9]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
@@ -381,6 +385,115 @@ function compileScope(ctx?: ReviewedR27Scope): {
   }
   return { sourceSha: data.sourceSha, bySource, conflicts };
 }
+
+/** Review-only result: source campus remains ABSENT and is never equated with a grant value. */
+export interface R27AbsentCampusScopeReview {
+  readonly source_index: number;
+  readonly source_campus: "ABSENT";
+  readonly grant_campus: "NULL" | "PRESENT" | "UNKNOWN";
+  readonly scope_result: "SCOPE_CANDIDATE" | "SCOPE_EXCLUDED" | "SCOPE_HELD" | "SCOPE_UNREVIEWED";
+}
+
+/**
+ * Batch-match only already source-pinned ABSENT-campus rows to a sealed scope.
+ * This does not approve current recruitment, quota, prior decisions, history, or
+ * publication; the caller must preserve the original page location separately.
+ */
+export function reviewR27AbsentCampusScope(
+  inputs: readonly unknown[],
+  expectedSourceSha: string,
+  context: ReviewedR27Scope,
+): readonly R27AbsentCampusScopeReview[] {
+  const data = sealedScopes.get(context);
+  need(
+    data && HASH.test(expectedSourceSha) && data.sourceSha === expectedSourceSha,
+    "unsealed_scope_context",
+  );
+  need(Array.isArray(inputs) && inputs.length <= 20000, "scope_bound");
+  const noCampus = (r: NativeObject) =>
+    JSON.stringify([r.academic_year, r.school_id, r.original_pk, r.admission_track, r.group]);
+  const baseKey = (r: NativeObject) =>
+    JSON.stringify([r.academic_year, r.school_id, r.original_pk]);
+  const grants = new Map<string, ScopeGrant[]>();
+  for (const grant of data.grants) {
+    const key = noCampus(grant.source), current = grants.get(key) ?? [];
+    current.push(grant);
+    grants.set(key, current);
+  }
+  const rows = inputs.map((raw) => {
+    const row = exact(raw, REQUIRED.filter((field) => field !== "campus"), [
+      ...QUOTA_FIELDS,
+      ...PUBLIC_METADATA,
+      ...ADMISSION_GUIDANCE_FIELDS,
+    ]);
+    need(
+      !Object.hasOwn(row, "campus") && row.academic_year === 2027 &&
+        typeof row.school_id === "string" && ID.test(row.school_id) &&
+        typeof row.original_pk === "string" && ID.test(row.original_pk),
+      "invalid_identity",
+    );
+    nullableText(row.admission_track);
+    nullableText(row.group);
+    nullableText(row.source_ref, 4096);
+    const scope = exact(row.scope, ["state", "evidence_sha256"]);
+    need(
+      typeof scope.state === "string" &&
+        ["eligible_non_practical", "excluded_practical", "review_pending"].includes(scope.state) &&
+        (scope.evidence_sha256 === null ||
+          typeof scope.evidence_sha256 === "string" && HASH.test(scope.evidence_sha256)),
+      "invalid_scope",
+    );
+    for (const field of PUBLIC_METADATA) if (Object.hasOwn(row, field)) nullableText(row[field]);
+    if (Object.hasOwn(row, "quota_value")) scalar(row.quota_value);
+    for (const field of ["quota_literal_state", "quota_stage", "quota_condition_text"]) {
+      if (Object.hasOwn(row, field)) {
+        nullableText(row[field], field === "quota_condition_text" ? 4096 : 256);
+      }
+    }
+    let quotaMeta: NativeObject | null = null;
+    if (Object.hasOwn(row, "quota_cell") && row.quota_cell !== null) {
+      quotaMeta = exact(row.quota_cell, [], ["status", "reason_code", "unit", "source_as_of"]);
+      for (const k of Object.keys(quotaMeta)) {
+        nullableText(quotaMeta[k], k === "reason_code" ? 128 : 256);
+      }
+    }
+    return { row, scope, quotaMeta };
+  });
+  const keyCounts = new Map<string, number>(), variants = new Map<string, Set<string>>();
+  for (const { row } of rows) {
+    const key = noCampus(row), base = baseKey(row), set = variants.get(base) ?? new Set<string>();
+    keyCounts.set(key, (keyCounts.get(key) ?? 0) + 1);
+    set.add(JSON.stringify([row.admission_track, row.group]));
+    variants.set(base, set);
+  }
+  return Object.freeze(rows.map(({ row, scope, quotaMeta }, source_index) => {
+    const matches = grants.get(noCampus(row)) ?? [],
+      grant = matches.length === 1 ? matches[0] : undefined;
+    const ambiguous = matches.length > 1 || (keyCounts.get(noCampus(row)) ?? 0) > 1 ||
+      (variants.get(baseKey(row))?.size ?? 0) > 1;
+    const bound = grant && scope.state === grant.state && scope.evidence_sha256 === grant.evidence;
+    const quotaConflict = quotaMeta?.status === "verified_official" &&
+      (!Object.hasOwn(row, "quota_value") || row.quota_value === null || row.quota_value === "");
+    const scope_result: R27AbsentCampusScopeReview["scope_result"] =
+      ambiguous || scope.state === "review_pending" || quotaConflict
+        ? "SCOPE_HELD"
+        : !bound
+        ? "SCOPE_UNREVIEWED"
+        : grant.state === "excluded_practical"
+        ? "SCOPE_EXCLUDED"
+        : "SCOPE_CANDIDATE";
+    return Object.freeze({
+      source_index,
+      source_campus: "ABSENT" as const,
+      grant_campus: !grant
+        ? "UNKNOWN" as const
+        : grant.source.campus === null
+        ? "NULL" as const
+        : "PRESENT" as const,
+      scope_result,
+    });
+  }));
+}
 type Resolved = { target: NativeObject; targetKey: string };
 function compileLinks(ctx?: ReviewedR27Links): {
   sourceSha: string | null;
@@ -438,7 +551,11 @@ function project(
   scopes: ScopeIndex,
   retainExcluded = false,
 ): StandaloneProjection {
-  const source = exact(raw, REQUIRED, [...QUOTA_FIELDS, ...PUBLIC_METADATA]),
+  const source = exact(raw, REQUIRED, [
+      ...QUOTA_FIELDS,
+      ...PUBLIC_METADATA,
+      ...ADMISSION_GUIDANCE_FIELDS,
+    ]),
     ident = rowIdentity(source);
   const scope = exact(source.scope, ["state", "evidence_sha256"]);
   need(
@@ -501,6 +618,9 @@ function project(
     historical_links: linked,
   };
   for (const field of PUBLIC_METADATA) if (Object.hasOwn(source, field)) out[field] = source[field];
+  for (const field of ADMISSION_GUIDANCE_FIELDS) {
+    if (Object.hasOwn(source, field)) out[field] = pendingAdmissionGuidance();
+  }
   for (const field of QUOTA_FIELDS) {
     if (Object.hasOwn(source, field)) {
       const value = source[field];
@@ -634,7 +754,11 @@ export async function buildStandaloneR27(
       cursors.add(page.next_cursor as string);
     }
     for (const raw of page.rows) {
-      const source = exact(raw, REQUIRED, [...QUOTA_FIELDS, ...PUBLIC_METADATA]);
+      const source = exact(raw, REQUIRED, [
+        ...QUOTA_FIELDS,
+        ...PUBLIC_METADATA,
+        ...ADMISSION_GUIDANCE_FIELDS,
+      ]);
       const key = identityKey(rowIdentity(source));
       counts.set(key, (counts.get(key) ?? 0) + 1);
       seen++;

@@ -107,3 +107,33 @@
 /tests/test_service_wildcard_registration.py text eol=lf
 /tests/catalog_descriptor_review_graph.20261102.json text eol=lf
 /tests/test_catalog_descriptor_review.py text eol=lf
+
+# Exact-byte cursor suite registration and existing score-null fixture on Windows.
+/supabase/functions/_shared/current_public_bound_cursor.ts text eol=lf
+/supabase/functions/_shared/current_public_scoped_service.ts text eol=lf
+/tests/cursor_contract_review/combined_policy_catalog_runtime.original.ts text eol=lf
+/tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts text eol=lf
+/tests/cursor_contract_review/current_public_bound_cursor.test.ts text eol=lf
+/tests/cursor_contract_review_graph.json text eol=lf
+/tests/test_cursor_contract_graph_guard.py text eol=lf
+/tests/test_cursor_edge_unit_aggregation.py text eol=lf
+/tests/service_p1/test_score_null_reason_review.synthetic.mjs text eol=lf
+
+# Preserve exact-byte multipart preflight test on every checkout.
+/tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs text eol=lf
+
+# Preserve exact P1 contract graph and referenced bytes on checkout.
+/tests/p1_contract_review_graph.json text eol=lf
+/supabase/functions/_shared/current_public_r27_bounded.ts text eol=lf
+/supabase/functions/_shared/current_public_r27_selection.ts text eol=lf
+/supabase/functions/_shared/p1_r27_selection_bridge.ts text eol=lf
+/tests/p1_contract_review/fixture.bridge.v2.synthetic.mjs text eol=lf
+/tests/p1_contract_review/test_history_score_context_review.js text eol=lf
+/tests/p1_contract_review/test_history_score_context_validator.js text eol=lf
+/tests/p1_contract_review/test_p1_quota_fingerprint_adapter.js text eol=lf
+/tests/p1_contract_review/test_p1_r27_selection_bridge.synthetic.js text eol=lf
+/tests/p1_contract_review/test_recruitment_final_qualification.js text eol=lf
+/tests/p1_contract_review/test_score_010_cutoff.synthetic.js text eol=lf
+
+# Preserve exact-byte single guidance test on every checkout.
+/tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs text eol=lf

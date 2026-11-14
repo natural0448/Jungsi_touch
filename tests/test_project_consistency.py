@@ -1933,36 +1933,74 @@ class SupabaseDeploymentContractTests(unittest.TestCase):
 
     def test_runtime_alias_contract_rejects_privileged_defaults_and_generated_docs_keep_the_boundary(self):
         from check_project_consistency import validate_live_execution,live_execution_document
-        for name in ('DATABASE_URL','SUPABASE_SECRET_KEY'):
-            spec=deepcopy(self.spec)
-            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment_aliases'][name]='SUPABASE_DB_URL'
-            self.assertIn('DEV-010 runtime environment aliases drift',validate_live_execution(spec))
+        modes=(False,True) if 'current_aux_source_rebounds_20261113' in self.spec else (False,)
+        for rebound in modes:
+            for name in ('DATABASE_URL','SUPABASE_SECRET_KEY'):
+                with self.subTest(rebound=rebound,name=name):
+                    spec=deepcopy(self.spec)
+                    if not rebound:spec.pop('current_aux_source_rebounds_20261113',None)
+                    spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment_aliases'][name]='SUPABASE_DB_URL'
+                    expected=('DEV-010 runtime assembly current source rebound invalid' if rebound else 'DEV-010 runtime environment aliases drift')
+                    self.assertIn(expected,validate_live_execution(spec))
         text=live_execution_document(self.spec)
         for value in ('JUNGSI_DISPLAY_DATABASE_URL','JUNGSI_DISPLAY_DATABASE_CA','JUNGSI_DISPLAY_PUBLISHABLE_KEY','JUNGSI_DISPLAY_STORAGE_SECRET','빈 값','복수 key','display descriptor'):
             self.assertIn(value,text)
 
-
     def test_runtime_assembly_missing_scope_or_stale_entry_cannot_claim_source_assembly(self):
         from check_project_consistency import validate_live_execution
-        for field in ('native_entry','composition'):
-            spec=deepcopy(self.spec)
-            spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['bindings'][field]['source_sha256']='f'*64
-            self.assertIn('DEV-010 runtime assembly source binding drift: '+field,validate_live_execution(spec))
-        spec=deepcopy(self.spec)
-        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['operation_ids'].pop()
-        self.assertIn('DEV-010 runtime assembly scope drift',validate_live_execution(spec))
-        spec=deepcopy(self.spec)
-        spec['supabase_deployment_contract']['live_execution'].pop('runtime_assembly')
-        self.assertIn('DEV-010 runtime assembly missing',validate_live_execution(spec))
+        modes=(False,True) if 'current_aux_source_rebounds_20261113' in self.spec else (False,)
+        for rebound in modes:
+            for mutation in ('native_entry','composition','scope','missing'):
+                with self.subTest(rebound=rebound,mutation=mutation):
+                    spec=deepcopy(self.spec)
+                    if not rebound:spec.pop('current_aux_source_rebounds_20261113',None)
+                    live=spec['supabase_deployment_contract']['live_execution']
+                    if mutation in ('native_entry','composition'):
+                        live['runtime_assembly']['bindings'][mutation]['source_sha256']='f'*64
+                        legacy='DEV-010 runtime assembly source binding drift: '+mutation
+                    elif mutation=='scope':
+                        live['runtime_assembly']['operation_ids'].pop()
+                        legacy='DEV-010 runtime assembly scope drift'
+                    else:
+                        live.pop('runtime_assembly')
+                        legacy='DEV-010 runtime assembly missing'
+                    expected='DEV-010 runtime assembly current source rebound invalid' if rebound else legacy
+                    self.assertIn(expected,validate_live_execution(spec))
 
     def test_runtime_assembly_settings_cannot_contain_actual_values_or_drop_pending_inputs(self):
         from check_project_consistency import validate_live_execution
-        spec=deepcopy(self.spec)
-        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['environment'][0]['value']='SYNTHETIC'
-        self.assertIn('DEV-010 runtime environment contract drift',validate_live_execution(spec))
-        spec=deepcopy(self.spec)
-        spec['supabase_deployment_contract']['live_execution']['runtime_assembly']['waiting']=[]
-        self.assertIn('DEV-010 runtime assembly waiting conditions missing',validate_live_execution(spec))
+        modes=(False,True) if 'current_aux_source_rebounds_20261113' in self.spec else (False,)
+        for rebound in modes:
+            for mutation in ('environment','waiting'):
+                with self.subTest(rebound=rebound,mutation=mutation):
+                    spec=deepcopy(self.spec)
+                    if not rebound:spec.pop('current_aux_source_rebounds_20261113',None)
+                    assembly=spec['supabase_deployment_contract']['live_execution']['runtime_assembly']
+                    if mutation=='environment':
+                        assembly['environment'][0]['value']='SYNTHETIC'
+                        legacy='DEV-010 runtime environment contract drift'
+                    else:
+                        assembly['waiting']=[]
+                        legacy='DEV-010 runtime assembly waiting conditions missing'
+                    expected='DEV-010 runtime assembly current source rebound invalid' if rebound else legacy
+                    self.assertIn(expected,validate_live_execution(spec))
+
+    def test_runtime_assembly_current_rebound_rejects_forged_or_missing_binding(self):
+        from check_project_consistency import validate_live_execution
+        if 'current_aux_source_rebounds_20261113' not in self.spec:
+            self.skipTest('historical snapshot has no current auxiliary rebound')
+        original=deepcopy(self.spec)
+        for mutation in ('history_pin','current_pin','missing_family','wrong_state','missing_assembly'):
+            with self.subTest(mutation=mutation):
+                spec=deepcopy(self.spec);marker=spec['current_aux_source_rebounds_20261113']
+                entry=marker['families']['dev010_runtime_assembly']
+                if mutation=='history_pin':entry['historical_sha256']='0'*64
+                elif mutation=='current_pin':entry['changed_source_bindings'][next(iter(entry['changed_source_bindings']))]='0'*64
+                elif mutation=='missing_family':marker['families'].pop('dev010_runtime_assembly')
+                elif mutation=='wrong_state':marker['activation_status']='PASS'
+                else:spec['supabase_deployment_contract']['live_execution'].pop('runtime_assembly')
+                self.assertIn('DEV-010 runtime assembly current source rebound invalid',validate_live_execution(spec))
+        self.assertEqual(self.spec,original)
 
     def test_runtime_assembly_keeps_native_and_deployment_evidence_requirements(self):
         from check_project_consistency import validate_live_execution
@@ -2760,6 +2798,9 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         registration,errors=checker.member_shortlist_registration(current)
         self.assertEqual([],errors)
         spec=copy.deepcopy(current)
+        # This synthetic legacy view has no member receipt. Do not attach a
+        # current-source sibling whose canonical member receipt it cannot prove.
+        spec.pop(checker.CURRENT_SOURCE_REBOUND_FIELD,None)
         if registration is not None:
             spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
             for path in checker.MEMBER_SHORTLIST_TESTS:spec['edge_harness']['files'].pop(path,None)
@@ -2769,6 +2810,10 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         return spec
     def fixture(self):
         spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        # Validate the actual current receipt before constructing an independent
+        # synthetic historical registration with synthetic source hashes.
+        self.assertEqual([],checker.member_shortlist_registration(spec)[1])
+        spec.pop(checker.CURRENT_SOURCE_REBOUND_FIELD,None)
         spec.pop('member_shortlist_contract',None)
         spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
         base=copy.deepcopy(spec['operations'][0])
@@ -2787,6 +2832,13 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         reg=dict(format='jungsi.member-shortlist-source-registration/v1',status='SOURCE_REGISTERED_NOT_ACTIVATED',operation_ids=list(checker.MEMBER_SHORTLIST_ROUTES),baseline_operation_count=28,source_operation_count=30,activation_status='NOT_RUN',native_acceptance='NOT_VERIFIED_BY_SOURCE_SUITE',operating_writes=0,new_DB_result_tables=0,implementation_bindings=bindings,verification=dict(coverage='MEMBER_JSON_SHORTLIST_SYNTHETIC',test_paths=list(checker.MEMBER_SHORTLIST_TESTS),test_count=4,baseline_foundation_count=656,source_bindings=[dict(path=p,sha256=sha)for p,sha in sorted(hashes.items())]))
         spec['member_shortlist_contract']={'source_registration':reg}
         return spec,hashes
+    def test_current_receipt_forgery_is_rejected_before_synthetic_projection(self):
+        spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        if checker.CURRENT_SOURCE_REBOUND_FIELD not in spec:
+            self.skipTest('current source rebound is absent from this snapshot')
+        self.assertEqual([],checker.member_shortlist_registration(spec)[1])
+        spec['member_shortlist_contract']['source_registration']['verification']['test_count']+=1
+        self.assertTrue(checker.member_shortlist_registration(spec)[1])
     def test_default28_has_no_implicit_registration(self):
         spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
         spec=self.legacy28(spec)

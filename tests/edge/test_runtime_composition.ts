@@ -112,7 +112,13 @@ function passRow(expiry: string | null): unknown[] {
   for (const index of [1, 2, 3, 4]) values[index] = JSON.stringify(values[index]);
   return values;
 }
-async function fixture(subjectOnly = false, observe?: RuntimeComposition["observe"]) {
+async function fixture(
+  subjectOnly = false,
+  observe?: RuntimeComposition["observe"],
+  observeAuthDetailed?: RuntimeComposition["observeAuthDetailed"],
+  observeTiming?: RuntimeComposition["observeTiming"],
+  observeAuth?: RuntimeComposition["observeAuth"],
+) {
   const binding = await syntheticRuntimeBinding((d) => {
     if (subjectOnly) {
       (d.scope as Record<string, unknown>).operations = [
@@ -135,6 +141,7 @@ async function fixture(subjectOnly = false, observe?: RuntimeComposition["observ
     usageSchema: false,
     usageNative: undefined as unknown,
     badRole: false,
+    passFail: false,
   };
   const calls = { auth: 0, profile: 0, pass: 0, storage: 0, pool: 0, closed: 0 };
   const statements: { sql: string; parameters: readonly unknown[]; readOnly: boolean }[] = [];
@@ -164,6 +171,7 @@ async function fixture(subjectOnly = false, observe?: RuntimeComposition["observ
           }
           if (sql.startsWith("WITH runtime_guard AS MATERIALIZED")) {
             calls.pass++;
+            if (state.passFail) throw new Error("synthetic_pass_unavailable");
             const row = passRow(state.expiry);
             if (state.expireAfterPass) state.now += 10000000n;
             return Promise.resolve([row]);
@@ -182,6 +190,9 @@ async function fixture(subjectOnly = false, observe?: RuntimeComposition["observ
   };
   const api = new NativeRuntimeApi({
     observe,
+    observeAuthDetailed,
+    observeTiming,
+    observeAuth,
     environment: binding.env,
     policies,
     responseSchemas: schemas(),
@@ -725,4 +736,141 @@ Deno.test("observation rejects unregistered operation stage and invalid fallback
   equal(events[1].operation, "health.ready");
   equal(events[1].request_id, "6".repeat(32));
   assert(!JSON.stringify(events).includes("SYNTHETIC"));
+});
+
+Deno.test("synthetic /me auth failure correlates response and safe observations", async () => {
+  const errors: SafeRuntimeObservation[] = [];
+  const authEvents: Parameters<NonNullable<RuntimeComposition["observeAuthDetailed"]>>[0][] = [];
+  const timings: Parameters<NonNullable<RuntimeComposition["observeTiming"]>>[0][] = [];
+  const f = await fixture(false, (e) => {
+    errors.push(e);
+  }, (e) => {
+    authEvents.push(e);
+  }, (e) => {
+    timings.push(e);
+  });
+  f.state.authStatus = 503;
+  const response = await f.api.fetch(f.request());
+  const body = await response.json();
+  const id = response.headers.get("X-Request-ID");
+  equal(response.status, 503);
+  assert(id !== null && /^[a-f0-9]{32}$/.test(id));
+  equal(body.request_id, id);
+  equal(body.error.code, "auth_unavailable");
+  equal(errors.length, 1);
+  equal(errors[0].request_id, id);
+  equal(authEvents.length, 1);
+  equal(authEvents[0].request_id, id);
+  equal(authEvents[0].kind, "auth_lookup");
+  equal(authEvents[0].http_status, 503);
+  equal(timings.length, 1);
+  equal(timings[0].request_id, id);
+  const logged = JSON.stringify({ errors, authEvents, timings });
+  assert(
+    !logged.includes(SUBJECT) && !logged.includes("SYNTHETIC") &&
+      !logged.includes("synthetic.invalid"),
+  );
+  await f.api.close();
+});
+
+Deno.test("synthetic /me entitlement failure is distinguishable after successful auth", async () => {
+  const errors: SafeRuntimeObservation[] = [];
+  const authEvents: Parameters<NonNullable<RuntimeComposition["observeAuthDetailed"]>>[0][] = [];
+  const timings: Parameters<NonNullable<RuntimeComposition["observeTiming"]>>[0][] = [];
+  const f = await fixture(false, (e) => {
+    errors.push(e);
+  }, (e) => {
+    authEvents.push(e);
+  }, (e) => {
+    timings.push(e);
+  });
+  f.state.passFail = true;
+  const response = await f.api.fetch(f.request());
+  const body = await response.json();
+  const id = response.headers.get("X-Request-ID");
+  equal(response.status, 503);
+  assert(id !== null && /^[a-f0-9]{32}$/.test(id));
+  equal(body.request_id, id);
+  equal(body.error.code, "entitlement_unavailable");
+  equal(errors.length, 1);
+  equal(errors[0].request_id, id);
+  equal(authEvents[0].kind, "auth_lookup");
+  equal(authEvents[0].http_status, 200);
+  assert(authEvents.every((e) => e.request_id === id));
+  equal(timings.length, 1);
+  equal(timings[0].request_id, id);
+  equal(f.calls.pass, 1);
+  const logged = JSON.stringify({ errors, authEvents, timings });
+  assert(
+    !logged.includes(SUBJECT) && !logged.includes("SYNTHETIC") &&
+      !logged.includes("synthetic_pass_unavailable"),
+  );
+  await f.api.close();
+});
+
+Deno.test("synthetic concurrent /me failures ignore client request ids and stay separate", async () => {
+  const errors: SafeRuntimeObservation[] = [];
+  const authEvents: Parameters<NonNullable<RuntimeComposition["observeAuthDetailed"]>>[0][] = [];
+  const timings: Parameters<NonNullable<RuntimeComposition["observeTiming"]>>[0][] = [];
+  const f = await fixture(false, (e) => {
+    errors.push(e);
+  }, (e) => {
+    authEvents.push(e);
+  }, (e) => {
+    timings.push(e);
+  });
+  f.state.authStatus = 503;
+  const first = f.request();
+  const second = f.request();
+  first.headers.set("X-Request-ID", "a".repeat(32));
+  second.headers.set("X-Request-ID", "a".repeat(32));
+  const responses = await Promise.all([f.api.fetch(first), f.api.fetch(second)]);
+  const ids = responses.map((response) => response.headers.get("X-Request-ID"));
+  assert(ids.every((id) => id !== null && /^[a-f0-9]{32}$/.test(id) && id !== "a".repeat(32)));
+  assert(ids[0] !== ids[1]);
+  const bodies = await Promise.all(responses.map((response) => response.json()));
+  equal(bodies.map((body) => body.request_id), ids);
+  for (const id of ids) {
+    equal(errors.filter((event) => event.request_id === id).length, 1);
+    equal(authEvents.filter((event) => event.request_id === id).length, 1);
+    equal(timings.filter((event) => event.request_id === id).length, 1);
+  }
+  await f.api.close();
+});
+
+Deno.test("HTTP request abort reaches native authentication and cannot return success", async () => {
+  const f = await fixture(), controller = new AbortController();
+  let nativeAborted = false;
+  const api = new NativeRuntimeApi({
+    environment: f.binding.env,
+    policies,
+    responseSchemas: schemas(),
+    clock: { nowUtc: () => f.state.now },
+    createPool: () => f.pool,
+    fetcher: (_input, init) =>
+      new Promise((_resolve, reject) => {
+        const signal = init?.signal;
+        assert(signal && !signal.aborted);
+        signal.addEventListener("abort", () => {
+          nativeAborted = true;
+          reject(Error("synthetic-cancelled"));
+        }, { once: true });
+        controller.abort();
+      }),
+  });
+  const response = await api.fetch(new Request(f.request(), { signal: controller.signal }));
+  assert(nativeAborted && response.status >= 400);
+  assert(!(await response.text()).includes("synthetic-cancelled"));
+});
+
+Deno.test("abort from synchronous auth observer cannot return a session", async () => {
+  const controller = new AbortController();
+  let observed = false;
+  const f = await fixture(false, undefined, undefined, undefined, () => {
+    observed = true;
+    controller.abort();
+  });
+  const response = await f.api.fetch(new Request(f.request(), { signal: controller.signal }));
+  assert(observed && response.status >= 400);
+  await f.api.close();
 });

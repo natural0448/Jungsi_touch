@@ -2,9 +2,136 @@
 No file deletion. --write preserves prior generated content under ignored outputs.
 """
 from __future__ import annotations
-import argparse,ast,datetime,hashlib,json,re,subprocess,sys,posixpath
+import argparse,ast,copy,datetime,hashlib,json,re,subprocess,sys,posixpath
 from pathlib import Path,PurePosixPath
 from audit_documentation_sync import AGENT_MARKER,generated_sync_files,live_execution_progress_rows,validate_catalog,validate_sync_policy
+
+# Separate, registration-only source binding; prior verification records remain immutable.
+CURRENT_SOURCE_REBOUND_FIELD = "current_source_rebounds_20261113"
+_REBOUND_HISTORICAL = {
+    "member": "06ce67e47e934a71def462c2fc846308667dde5451ba53c1498e708b006cbea1",
+    "auth": "ef0d4d29e50112a8aed92bf9f84e8557b492afbf498e4e4d63ffb75d112d08ad",
+    "current_page": "bbb9ad213f6e1acb5ec1e930fe491577455b6ec8354fa0c0779781212d18cfcb",
+    "read_view": "947d3704ca724dc469e2d37b952b1a1d58b1c33a568096e07b0668e8feb1cf06",
+    "req27": "01c725e3b5f9ac2586bed7b1dc0819c46fa065a0245f7785eab73b0bb00cf231",
+}
+_REBOUND_PINS = {
+    "supabase/functions/_shared/jungsi/application/api_dispatch.ts":
+        "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",
+    "supabase/functions/_shared/jungsi/infrastructure/api_http.ts":
+        "0310f31f703cd5cc32297fc58b438e615460e0bf0f0d50d7eb79178d88a19cf4",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts":
+        "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts":
+        "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773",
+}
+_REBOUND_BASE = tuple(_REBOUND_PINS)
+_REBOUND_PATHS = {
+    "member": frozenset(_REBOUND_BASE),
+    "auth": frozenset((_REBOUND_BASE[3],)),
+    "current_page": frozenset(_REBOUND_BASE),
+    "read_view": frozenset((_REBOUND_BASE[0], _REBOUND_BASE[1], _REBOUND_BASE[3])),
+    "req27": frozenset((_REBOUND_BASE[0], _REBOUND_BASE[1], _REBOUND_BASE[3])),
+}
+# Other named families are validated independently by their own runner validators.
+_REBOUND_ALLOWED = frozenset((*_REBOUND_PATHS, "whole_population", "period_renewal", "p1_selection"))
+_OTHER_REBOUND_FAMILIES = {
+    "whole_population": (
+        "c3c9eb550c22a2c8fdfa0ad44236e07e5cb4a7db19033b78937845a47403a9ee",
+        "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+        "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e"),
+    "period_renewal": (
+        "2dbd67ed543cd12053d873675485ad36b2812091ffa84861a0911dd914781e2e",
+        "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
+        "8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756"),
+    "p1_selection": (
+        "baae156bbc3786fd45e09730e4c662ee44d99b38c0ce4b8ebc2e44883c325db7",
+        "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
+        "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901"),
+}
+
+def select_current_source_rebound(spec, family, historical):
+    """Return a checked copy for current source only; never edit historical receipt."""
+    import copy
+    marker = spec.get(CURRENT_SOURCE_REBOUND_FIELD)
+    if marker is None:
+        return historical
+    if not isinstance(marker, dict) or set(marker) != {
+        "format", "status", "activation_status", "native_acceptance", "operating_writes", "families"
+    } or marker["format"] != "jungsi.current-source-rebounds/v1" or \
+        marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or marker["activation_status"] != "NOT_RUN" or \
+        marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or \
+        type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0 or \
+        not isinstance(marker["families"], dict) or set(marker["families"]) != _REBOUND_ALLOWED:
+        raise ValueError("current source rebound envelope")
+    # Every declared family must have the exact planned historical reference and pins.
+    # Runner validators independently verify the other families' actual historical bytes.
+    for name, entry in marker["families"].items():
+        if name in _OTHER_REBOUND_FAMILIES:
+            h, path, sha = _OTHER_REBOUND_FAMILIES[name]
+            expected_changes = {path: sha}
+        else:
+            h = _REBOUND_HISTORICAL[name]
+            expected_changes = {path: _REBOUND_PINS[path] for path in _REBOUND_PATHS[name]}
+        if not isinstance(entry, dict) or set(entry) != {"historical_sha256", "changed_source_bindings"} or \
+            entry["historical_sha256"] != h or entry["changed_source_bindings"] != expected_changes:
+            raise ValueError("current source rebound family manifest")
+    if family not in _REBOUND_PATHS:
+        raise ValueError("current source rebound family")
+    entry = marker["families"].get(family)
+    if entry is None:
+        raise ValueError("current source rebound missing family")
+    expected = _REBOUND_HISTORICAL[family]
+    if not isinstance(entry, dict) or set(entry) != {"historical_sha256", "changed_source_bindings"} or \
+        entry["historical_sha256"] != expected or \
+        hashlib.sha256(json.dumps(historical, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode()).hexdigest() != expected:
+        raise ValueError("current source rebound historical receipt")
+    changes = entry["changed_source_bindings"]
+    if not isinstance(changes, dict) or set(changes) != _REBOUND_PATHS[family] or \
+        any(changes[path] != _REBOUND_PINS[path] for path in changes):
+        raise ValueError("current source rebound exact changed paths")
+    edge = spec.get("edge_harness", {}).get("files", {})
+    rows = spec.get("workflow", {}).get("documentation_sync", {}).get("code_index", {}).get("edge_sources", {}).get("files", [])
+    if not isinstance(edge, dict) or not isinstance(rows, list):
+        raise ValueError("current source rebound source index")
+    for path, sha in changes.items():
+        if edge.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+            raise ValueError("current source rebound edge source")
+        matches = [row for row in rows if isinstance(row, dict) and row.get("path") == path]
+        if len(matches) != 1 or matches[0].get("source_sha256") != sha:
+            raise ValueError("current source rebound documentation index")
+    current = copy.deepcopy(historical)
+    def update_bindings(bindings):
+        if not isinstance(bindings, list):
+            raise ValueError("current source rebound list")
+        present = set()
+        for item in bindings:
+            if not isinstance(item, dict) or set(item) != {"path", "sha256"}:
+                raise ValueError("current source rebound binding")
+            path = item["path"]
+            if path in changes:
+                if path in present or item["sha256"] == changes[path]:
+                    raise ValueError("current source rebound not a distinct prior pin")
+                present.add(path)
+                item["sha256"] = changes[path]
+        if present != set(changes):
+            raise ValueError("current source rebound missing path")
+    if family == "member":
+        update_bindings(current["verification"]["source_bindings"])
+    elif family in ("auth", "current_page"):
+        update_bindings(current["source_bindings"])
+    elif family == "read_view":
+        update_bindings(current["verification"]["source_bindings"])
+        for path, sha in changes.items():
+            if path not in current["runtime_test_bindings"] or current["runtime_test_bindings"][path] == sha:
+                raise ValueError("current source rebound runtime path")
+            current["runtime_test_bindings"][path] = sha
+    else:
+        for path, sha in changes.items():
+            if path not in current or current[path] == sha:
+                raise ValueError("current source rebound REQ-27 path")
+            current[path] = sha
+    return current
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC_PATH="docs/current/service_spec.json"
@@ -1012,9 +1139,13 @@ def validate_professional_guide_snapshot(paths,read,spec):
 
 def school_reference_test_registration(spec):
     """Only the independently pinned additive reference suite leaves the read-view set."""
-    verification=spec.get('university_scoring_contract',{}).get('scoped_reference_contract',{}).get('verification')
+    contract=spec.get('university_scoring_contract',{}).get('scoped_reference_contract',{})
+    verification=contract.get('verification_current_source_rebound_20261113_v2')
+    if verification is None:verification=contract.get('verification_current_source_rebound_20261113')
+    if verification is None:verification=contract.get('verification')
     if verification is None:return set(),[]
     from run_edge_tests import school_reference_registration,EdgeFailure
+    if not isinstance(verification,dict):return set(),['School reference source/test registration invalid']
     bindings=verification.get('source_bindings')
     if not isinstance(bindings,list):return set(),['School reference source/test registration invalid']
     try:
@@ -1061,6 +1192,7 @@ def member_shortlist_registration(spec,source_hashes=None):
         if set(MEMBER_SHORTLIST_ROUTES)&set(by_id)or set(MEMBER_SHORTLIST_TESTS)&set(indexed):return None,[error]
         return None,[]
     try:
+        registered=select_current_source_rebound(spec,"member",registered)
         if (not isinstance(registered,dict)or registered.get("format")!="jungsi.member-shortlist-source-registration/v1"or
             registered.get("status")!="SOURCE_REGISTERED_NOT_ACTIVATED"or
             registered.get("operation_ids")!=list(MEMBER_SHORTLIST_ROUTES)or
@@ -1443,6 +1575,290 @@ def service_wildcard_registration(spec, source_hashes=None):
         return None, [error]
 
 
+def current_page_route_test_registration(spec):
+    """Bind the disabled current-page suite separately from the 656-test foundation."""
+    error="Current-page route exact source/test registration invalid"
+    files=spec.get("edge_harness",{}).get("files",{})
+    contract=spec.get("current_public_supply_contract",{}).get("current_page_route_verification")
+    test="tests/edge/test_current_page_routing.synthetic.ts"
+    if contract is None:return (set(),[error]) if test in files else (set(),[])
+    try:
+        from run_edge_tests import current_page_route_registration,EdgeFailure
+        contract=select_current_source_rebound(spec,"current_page",contract)
+        bindings=contract.get("source_bindings")
+        if not isinstance(bindings,list):raise ValueError("bindings")
+        hashes={b["path"]:b["sha256"] for b in bindings}
+        registered=current_page_route_registration(spec,hashes)
+        indexed={p:v.get("declarations",{}).get("source_sha256") for p,v in files.items()}
+        for row in spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{}).get("files",[]):
+            if isinstance(row,dict) and isinstance(row.get("path"),str):indexed[row["path"]]=row.get("source_sha256")
+        if (registered is None or test not in files or
+            any(path in indexed and indexed[path]!=sha for path,sha in hashes.items())):raise ValueError("source")
+        return set(registered["test_paths"]),[]
+    except (EdgeFailure,KeyError,TypeError,ValueError):return set(),[error]
+
+
+REFERENCE_DB_TEST_PATHS = (
+    'tests/edge/test_cancellable_db_read.ts',
+    'tests/edge/test_chunked_reference_integration.synthetic.ts',
+    'tests/edge/test_chunked_reference_projection.synthetic.ts',
+    'tests/edge/test_chunked_runtime_wiring.synthetic.ts',
+    'tests/edge/test_existing_reference_candidate_scope.ts',
+    'tests/edge/test_legacy_mixed_followup.ts',
+    'tests/edge/test_native_reference_cdf_projection.ts',
+    'tests/edge/test_native_reference_db_tail.ts',
+    'tests/edge/test_native_tail_fail_closed.followup.synthetic.ts',
+    'tests/edge/test_published_reference_candidate_scope.ts',
+    'tests/edge/test_published_reference_runtime.ts',
+    'tests/edge/test_published_reference_tail_issuer.ts',
+    'tests/edge/test_reference_attendance.synthetic.ts',
+    'tests/edge/test_reference_attendance_http.synthetic.ts',
+    'tests/edge/test_reference_candidate_access.ts',
+    'tests/edge/test_reference_candidate_scope.ts',
+    'tests/edge/test_reference_candidates.ts',
+    'tests/edge/test_reference_db_head_latency.synthetic.ts',
+    'tests/edge/test_reference_group_merge.synthetic.ts',
+    'tests/edge/test_reference_percentile.ts',
+    'tests/edge/test_reference_percentile_postgres.ts',
+    'tests/edge/test_reference_projection_transition.followup.synthetic.ts',
+    'tests/edge/test_reference_report_evidence_verifier.ts',
+    'tests/edge/test_reference_report_projection.ts',
+    'tests/edge/test_reference_report_revision_read.ts',
+    'tests/edge/test_reference_tail_prefetch.followup.synthetic.ts',
+    'tests/edge/test_reference_tail_selection.ts',
+    'tests/edge/test_reference_tail_storage.ts',
+    'tests/edge/test_runtime_controls_abort.ts',
+    'tests/edge/test_runtime_head_receipt.ts',
+    'tests/edge/test_runtime_reference_wiring.ts',
+    'tests/edge/test_saved_reference_tail_source.ts',
+    'tests/edge/test_saved_tail_version_cache.repro.synthetic.ts',
+    'tests/edge/test_school_reference_science_filtered.synthetic.ts',
+)
+REFERENCE_DB_CASE_IDENTITY_SHA256 = 'e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1'
+REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256 = '5a61fd9f6265ced0b3e598a4d79a6a24b1d2c8620cf89871b6b122a3fd03fb4e'
+
+
+def reference_db_registration(spec, source_hashes=None):
+    """Exact additive reference DB/report suite; never asserts runtime activation."""
+    error = "Reference DB exact source/test registration invalid"
+    backend = spec.get("backend_platform_contract", {})
+    ext = backend.get("reference_db_test_extension") if isinstance(backend, dict) else None
+    files = spec.get("edge_harness", {}).get("files", {})
+    if ext is None:
+        present = any(p in files for p in REFERENCE_DB_TEST_PATHS) if isinstance(files, dict) else False
+        if source_hashes is not None:
+            present = present or any(p in source_hashes for p in (*REFERENCE_DB_TEST_PATHS, "tests/test_reference_db_suite_registration.py"))
+        return None, [error] if present else []
+    try:
+        fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count", "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+        if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.reference-db-tests/v1" or
+            ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(REFERENCE_DB_TEST_PATHS) or
+            type(ext["test_count"]) is not int or ext["test_count"] != 199 or
+            type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
+            ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
+            type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
+            raise ValueError("suite state")
+        cases = ext["case_names_by_path"]
+        if not isinstance(cases, dict) or set(cases) != set(REFERENCE_DB_TEST_PATHS): raise ValueError("case paths")
+        pairs=[]
+        for path in REFERENCE_DB_TEST_PATHS:
+            values=cases[path]
+            if not isinstance(values,list) or not values or values!=sorted(values) or len(set(values))!=len(values) or any(not isinstance(v,str) or not v for v in values): raise ValueError("case names")
+            pairs.extend((path,v) for v in values)
+        # Keep the former 178 case identities independently verifiable.
+        added_paths = ('tests/edge/test_reference_attendance.synthetic.ts', 'tests/edge/test_reference_attendance_http.synthetic.ts', 'tests/edge/test_reference_group_merge.synthetic.ts', 'tests/edge/test_reference_db_head_latency.synthetic.ts')
+        previous = {p:list(v) for p,v in cases.items() if p not in added_paths}
+        previous['tests/edge/test_reference_percentile.ts'] = [v for v in previous['tests/edge/test_reference_percentile.ts'] if v != 'attendance remains required for reused and direct reference percentile paths']
+        previous['tests/edge/test_reference_percentile_postgres.ts'] = [v for v in previous['tests/edge/test_reference_percentile_postgres.ts'] if v != 'reference DB receipt separately identifies expiry and a replaced head check']
+        old_digest = hashlib.sha256(json.dumps(previous,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+        if sum(map(len,previous.values())) != 178 or old_digest != REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256: raise ValueError("previous case identity")
+        digest=hashlib.sha256(json.dumps(cases,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
+        if len(pairs)!=199 or len(set(pairs))!=199 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
+        guard=ext["regression_test"]
+        if (not isinstance(guard,dict) or set(guard)!={"path","sha256"} or guard["path"]!="tests/test_reference_db_suite_registration.py" or
+            not re.fullmatch(r"[0-9a-f]{64}",str(guard["sha256"])) or source_hashes is not None and source_hashes.get(guard["path"])!=guard["sha256"]): raise ValueError("guard")
+        rows=ext["source_bindings"]
+        if (not isinstance(rows,list) or len(rows)!=len(REFERENCE_DB_TEST_PATHS) or
+            any(not isinstance(row,dict) or set(row)!={"path","sha256"} for row in rows) or
+            [row["path"] for row in rows]!=list(REFERENCE_DB_TEST_PATHS)): raise ValueError("bindings")
+        cfg=spec["edge_harness"]
+        for row in rows:
+            path,h=row["path"],row["sha256"];item=cfg["files"].get(path,{})
+            if (item.get("layer")!="verification" or path in cfg.get("tests",[]) or not re.fullmatch(r"[0-9a-f]{64}",str(h)) or
+                item.get("declarations",{}).get("source_sha256")!=h or source_hashes is not None and source_hashes.get(path)!=h): raise ValueError("source hash")
+        school=spec.get("university_scoring_contract",{}).get("scoped_reference_contract",{}).get("verification",{}).get("test_paths",[])
+        if set(REFERENCE_DB_TEST_PATHS) & (set(school) | set(RECOVERY_TEST_PATHS) | set(SERVICE_AUX_TEST_PATHS) | set(SERVICE_STAGED_TEST_PATHS) | set(SERVICE_WILDCARD_TEST_PATHS)): raise ValueError("suite overlap")
+        return ext, []
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return None, [error]
+
+
+
+AUTH_503_TEST_PATH = "tests/edge/test_auth_exchange_observation.synthetic.ts"
+AUTH_503_SOURCE_PATHS = ('supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts', 'supabase/functions/_shared/jungsi/infrastructure/supabase_auth.ts', 'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts', 'tests/edge/test_auth_exchange_observation.synthetic.ts')
+AUTH_503_CASE_NAMES = ('auth diagnostic records status and preserves result without logging input', 'non-200 status is distinct from fast transport failure', 'observer errors never change successful results', 'a successful operation with no recorded status is not labeled HTTP success', 'five-second deadline is retained and classified as timeout', 'opt-in native auth diagnostic preserves 503 and does not read a profile', 'opt-in profile diagnostic preserves fail-closed profile behavior', 'auth rejection statuses remain null and diagnostic identifies only the request', 'invalid auth JSON fails closed and invalid profile shape remains null', 'slow diagnostic sink never blocks authentication result', 'received bearer denial remains rejected when body cancellation crosses deadline', 'profile timeout remains unverified and is classified separately', 'cancelled HTTP request aborts auth exchange without being reported as timeout', 'request cancellation reaches native auth and own profile transport', 'already cancelled request never starts the auth operation', 'request abort during a diagnostic observer cannot return native receipts', 'request abort remains first cause even if the local deadline also fires', 'request abort does not wait indefinitely for rejected response body cleanup', 'known bearer denial stays denied when body cleanup exceeds the existing deadline', 'known bearer denial is preserved when response cleanup rejects', 'caller abort takes priority when denied response cleanup rejects', 'caller abort bounds a fetch that ignores its signal', 'caller abort bounds a successful response body that ignores cancellation', 'caller abort bounds cleanup of an oversized declared response', 'late successful auth fetch cannot authenticate after caller abort', 'deadline bounds a fetch that ignores cancellation and reports timeout', 'late transport rejection after request abort is observed')
+
+def auth_503_registration(spec, source_hashes=None):
+    """Register only the separately receipted synthetic authentication suite."""
+    error = "AUTH-503 exact synthetic registration invalid"
+    try:
+        files = spec.get("edge_harness", {}).get("files", {})
+        tests = spec.get("edge_harness", {}).get("tests", [])
+        live = spec.get("supabase_deployment_contract", {}).get("live_execution", {})
+        if not isinstance(live, dict): raise ValueError("live execution")
+        present = "auth_503_cancel_followup_20261112" in live
+        followup = live.get("auth_503_cancel_followup_20261112")
+        if present and not isinstance(followup, dict): raise ValueError("followup")
+        suite = followup.get("synthetic_suite") if present else None
+        if suite is not None: suite=select_current_source_rebound(spec,"auth",suite)
+        if not isinstance(files, dict) or not isinstance(tests, list): raise ValueError("harness")
+        if not present and suite is None and AUTH_503_TEST_PATH not in files: return None, []
+        expected = {"format", "status", "baseline_foundation_count", "test_paths", "test_count", "case_names_by_path", "source_bindings", "native_acceptance", "activation_status", "operating_writes"}
+        if not isinstance(suite, dict) or set(suite) != expected: raise ValueError("shape")
+        if (suite["format"] != "jungsi.auth-503-synthetic-suite/v1" or
+            suite["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+            type(suite["baseline_foundation_count"]) is not int or suite["baseline_foundation_count"] != 656 or
+            suite["test_paths"] != [AUTH_503_TEST_PATH] or
+            type(suite["test_count"]) is not int or suite["test_count"] != len(AUTH_503_CASE_NAMES) or
+            suite["case_names_by_path"] != {AUTH_503_TEST_PATH: list(AUTH_503_CASE_NAMES)} or
+            suite["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            suite["activation_status"] != "NOT_RUN" or type(suite["operating_writes"]) is not int or suite["operating_writes"] != 0 or
+            AUTH_503_TEST_PATH in tests or files.get(AUTH_503_TEST_PATH, {}).get("layer") != "verification"):
+            raise ValueError("boundary")
+        bindings=suite["source_bindings"]
+        if not isinstance(bindings,list) or len(bindings)!=len(AUTH_503_SOURCE_PATHS): raise ValueError("bindings")
+        if any(not isinstance(b,dict) or set(b)!={"path","sha256"} for b in bindings): raise ValueError("binding shape")
+        if {b["path"] for b in bindings} != set(AUTH_503_SOURCE_PATHS): raise ValueError("binding scope")
+        indexed={p:r.get("declarations",{}).get("source_sha256") for p,r in files.items() if isinstance(r,dict)}
+        code=spec.get("workflow",{}).get("documentation_sync",{}).get("code_index",{}).get("edge_sources",{}).get("files",[])
+        if not isinstance(code,list): raise ValueError("index")
+        indexed.update({r["path"]:r.get("source_sha256") for r in code if isinstance(r,dict) and isinstance(r.get("path"),str)})
+        for binding in bindings:
+            path,sha=binding["path"],binding["sha256"]
+            if not isinstance(sha,str) or not re.fullmatch(r"[a-f0-9]{64}",sha) or indexed.get(path)!=sha: raise ValueError("index binding")
+            if source_hashes is not None and source_hashes.get(path)!=sha: raise ValueError("snapshot binding")
+        return suite, []
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return None, [error]
+
+
+AUTH_503_RUNTIME_TEST_PATH = "tests/edge/test_runtime_composition.ts"
+AUTH_503_RUNTIME_BASELINE_NAMES_SHA256 = "60070225139890938692563a8afe0cbe42344a87023764ed041c9c3f53123824"
+AUTH_503_RUNTIME_CASE_NAMES = (
+    "synthetic /me auth failure correlates response and safe observations",
+    "synthetic /me entitlement failure is distinguishable after successful auth",
+    "synthetic concurrent /me failures ignore client request ids and stay separate",
+    "HTTP request abort reaches native authentication and cannot return success",
+    "abort from synchronous auth observer cannot return a session",
+)
+
+def auth_503_runtime_registration(spec, source_hashes=None):
+    """Bind five additive runtime cases while retaining the existing foundation."""
+    error = "AUTH-503 runtime integration registration invalid"
+    try:
+        live = spec.get("supabase_deployment_contract", {}).get("live_execution", {})
+        if not isinstance(live, dict): raise ValueError("live execution")
+        if "auth_503_cancel_followup_20261112" not in live: return None, []
+        followup = live.get("auth_503_cancel_followup_20261112")
+        if not isinstance(followup, dict): raise ValueError("followup")
+        auth, auth_errors = auth_503_registration(spec, source_hashes)
+        if auth_errors or auth is None: raise ValueError("auth suite")
+        # Historic 27-only auth registrations remain valid. If five runtime
+        # cases exist without this addition, the frozen 656-case JUnit gate fails.
+        if "runtime_integration_suite" not in followup: return None, []
+        suite = followup.get("runtime_integration_suite")
+        expected = {"format", "status", "baseline_foundation_count", "baseline_runtime_count",
+                    "baseline_runtime_names_sha256", "test_path", "test_count", "case_names",
+                    "test_source_sha256", "native_acceptance", "activation_status", "operating_writes"}
+        if not isinstance(suite, dict) or set(suite) != expected: raise ValueError("shape")
+        if (suite["format"] != "jungsi.auth-503-runtime-integration/v1" or
+            suite["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+            type(suite["baseline_foundation_count"]) is not int or suite["baseline_foundation_count"] != 656 or
+            type(suite["baseline_runtime_count"]) is not int or suite["baseline_runtime_count"] != 25 or
+            suite["baseline_runtime_names_sha256"] != AUTH_503_RUNTIME_BASELINE_NAMES_SHA256 or
+            suite["test_path"] != AUTH_503_RUNTIME_TEST_PATH or
+            type(suite["test_count"]) is not int or suite["test_count"] != len(AUTH_503_RUNTIME_CASE_NAMES) or
+            suite["case_names"] != list(AUTH_503_RUNTIME_CASE_NAMES) or
+            suite["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            suite["activation_status"] != "NOT_RUN" or type(suite["operating_writes"]) is not int or suite["operating_writes"] != 0):
+            raise ValueError("boundary")
+        cfg = spec.get("edge_harness", {})
+        files, tests = cfg.get("files"), cfg.get("tests")
+        sha = suite["test_source_sha256"]
+        if (not isinstance(files, dict) or not isinstance(tests, list) or
+            tests.count(AUTH_503_RUNTIME_TEST_PATH) != 1 or type(cfg.get("unit_count")) is not int or
+            cfg["unit_count"] != 656 or len(tests) != 44 or not isinstance(sha, str) or
+            not re.fullmatch(r"[a-f0-9]{64}", sha) or
+            files.get(AUTH_503_RUNTIME_TEST_PATH, {}).get("declarations", {}).get("source_sha256") != sha):
+            raise ValueError("foundation binding")
+        entries = spec.get("workflow", {}).get("documentation_sync", {}).get("code_index", {}).get("edge_sources", {}).get("files", [])
+        if not isinstance(entries, list): raise ValueError("source index")
+        matched = [item for item in entries if isinstance(item, dict) and item.get("path") == AUTH_503_RUNTIME_TEST_PATH]
+        if len(matched) > 1 or matched and matched[0].get("source_sha256") != sha: raise ValueError("source index binding")
+        if source_hashes is not None and source_hashes.get(AUTH_503_RUNTIME_TEST_PATH) != sha: raise ValueError("snapshot binding")
+        auth_names = {name for names in auth["case_names_by_path"].values() for name in names}
+        if auth_names.intersection(AUTH_503_RUNTIME_CASE_NAMES): raise ValueError("overlapping auth cases")
+        return suite, []
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None, [error]
+
+UNIVERSITY_CANCELLATION_TEST = 'tests/edge/test_university_analysis_cancellation.ts'
+UNIVERSITY_CANCELLATION_SOURCE = 'supabase/functions/_shared/jungsi/application/university_analysis.ts'
+UNIVERSITY_CANCELLATION_SOURCE_SHA256 = '234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638'
+UNIVERSITY_CANCELLATION_TEST_SHA256 = '11d35bfd08fd9e4a062aac1dcb1410e711282e4e987a4f40f113ffc13c0defb0'
+UNIVERSITY_CANCELLATION_BASELINE_TEST = 'tests/edge/test_university_analysis.ts'
+UNIVERSITY_CANCELLATION_BASELINE_SHA256 = 'cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976'
+UNIVERSITY_CANCELLATION_NAMES = (
+    'cancelled analysis does not start reference prefetch',
+    'cancelled cached analysis does not start no-op receipt write',
+    'cancelled calculation does not start the next expensive dependency',
+    'cancelled replay does not deliver a saved result or modify its receipt',
+    'cancelled request never enters the scoring batch provider',
+    'cancelled university work does not start a later offering or write a partial report',
+)
+UNIVERSITY_CANCELLATION_CASE_SHA256 = 'ab86f3311570dd14604d5e82d37e64e4b3cfe9f35333bd745e6462fd011fe11c'
+
+
+def university_cancellation_test_registration(spec, source_hashes=None):
+    """Register the six extra cases separately; registration does not imply execution."""
+    error = 'University cancellation exact separate source/test registration invalid'
+    backend = spec.get('backend_platform_contract', {})
+    ext = backend.get('university_cancellation_test_extension') if isinstance(backend, dict) else None
+    if ext is None:return None, []
+    try:
+        fields={'format','status','test_paths','case_names_by_path','case_identity_sha256','test_count',
+                'baseline_foundation_count','baseline_test_sha256','source_bindings',
+                'native_acceptance','activation_status','operating_writes'}
+        cases={UNIVERSITY_CANCELLATION_TEST:list(UNIVERSITY_CANCELLATION_NAMES)}
+        digest=hashlib.sha256(json.dumps(cases,ensure_ascii=True,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        if (not isinstance(ext,dict) or set(ext)!=fields or
+            ext['format']!='jungsi.university-cancellation-tests/v1' or
+            ext['status']!='SOURCE_REGISTERED_NOT_EXECUTED' or
+            ext['test_paths']!=[UNIVERSITY_CANCELLATION_TEST] or ext['case_names_by_path']!=cases or
+            ext['case_identity_sha256']!=UNIVERSITY_CANCELLATION_CASE_SHA256 or digest!=UNIVERSITY_CANCELLATION_CASE_SHA256 or
+            type(ext['test_count']) is not int or ext['test_count']!=6 or
+            type(ext['baseline_foundation_count']) is not int or ext['baseline_foundation_count']!=656 or
+            ext['baseline_test_sha256']!=UNIVERSITY_CANCELLATION_BASELINE_SHA256 or
+            ext['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE' or ext['activation_status']!='NOT_RUN' or
+            type(ext['operating_writes']) is not int or ext['operating_writes']!=0):raise ValueError('suite state')
+        expected=[{'path':UNIVERSITY_CANCELLATION_SOURCE,'sha256':UNIVERSITY_CANCELLATION_SOURCE_SHA256},
+                  {'path':UNIVERSITY_CANCELLATION_TEST,'sha256':UNIVERSITY_CANCELLATION_TEST_SHA256}]
+        if ext['source_bindings']!=expected:raise ValueError('suite bindings')
+        cfg=spec['edge_harness'];files=cfg['files']
+        if (cfg['unit_count']!=656 or UNIVERSITY_CANCELLATION_BASELINE_TEST not in cfg['tests'] or
+            UNIVERSITY_CANCELLATION_TEST in cfg['tests'] or files[UNIVERSITY_CANCELLATION_TEST]['layer']!='verification' or
+            files[UNIVERSITY_CANCELLATION_BASELINE_TEST]['declarations']['source_sha256']!=UNIVERSITY_CANCELLATION_BASELINE_SHA256):
+            raise ValueError('foundation separation')
+        for b in expected:
+            p,h=b['path'],b['sha256']
+            if files[p]['declarations']['source_sha256']!=h or source_hashes is not None and source_hashes.get(p)!=h:
+                raise ValueError('current source binding')
+        implementations=[x for x in spec['implementation'] if x.get('path')==UNIVERSITY_CANCELLATION_TEST]
+        if len(implementations)!=1 or implementations[0].get('layer')!='verification':raise ValueError('test registration')
+        return ext, []
+    except (KeyError,TypeError,ValueError,AttributeError):return None,[error]
+
+
 def validate_read_view_extension(spec):
     """Only these exact three source-bound reads may extend the preserved 22+3.
 
@@ -1460,6 +1876,9 @@ def validate_read_view_extension(spec):
     reference_tests,reference_errors=school_reference_test_registration(spec)
     separate_tests-=reference_tests
     professional_errors+=reference_errors
+    cancellation,cancellation_errors=university_cancellation_test_registration(spec)
+    if cancellation is not None:separate_tests-=set(cancellation['test_paths'])
+    professional_errors+=cancellation_errors
     member,member_errors=member_shortlist_registration(spec)
     if member is not None:separate_tests-=set(MEMBER_SHORTLIST_TESTS)
     professional_errors+=member_errors
@@ -1475,8 +1894,23 @@ def validate_read_view_extension(spec):
     wildcard, wildcard_errors=service_wildcard_registration(spec)
     if wildcard is not None:separate_tests-=set(wildcard["test_paths"])
     professional_errors+=wildcard_errors
+    reference_db, reference_db_errors = reference_db_registration(spec)
+    if reference_db is not None: separate_tests -= set(reference_db["test_paths"])
+    professional_errors += reference_db_errors
+    auth_503, auth_503_errors=auth_503_registration(spec)
+    if auth_503 is not None:separate_tests-=set(auth_503["test_paths"])
+    professional_errors+=auth_503_errors
+    _auth_runtime, auth_runtime_errors=auth_503_runtime_registration(spec)
+    professional_errors+=auth_runtime_errors
+    page_tests,page_errors=current_page_route_test_registration(spec)
+    separate_tests-=page_tests
+    professional_errors+=page_errors
     if c is None:return professional_errors+(["Read-view unregistered separate test source"]if separate_tests else [])
     if not isinstance(c,dict):return professional_errors+["Read-view extension contract invalid"]
+    try:
+        c=select_current_source_rebound(spec,"read_view",c)
+    except (KeyError,TypeError,ValueError,AttributeError):
+        return professional_errors+["Read-view current source rebound invalid"]
     errors=professional_errors
     def exact_list(value,expected):
         return isinstance(value,list) and all(isinstance(x,str)for x in value) and len(value)==len(expected) and set(value)==set(expected)
@@ -1592,7 +2026,14 @@ def policy_baseline_source_matches(spec,path,digest,indexed):
     if not isinstance(c,dict) or c.get("baseline_commit")!="63337281332fcfb441f7b6c9638035061cee0636":return False
     prior=c.get("prior_source_bindings",{})
     if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
-    return prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path)
+    if prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path): return True
+    # The previous editor entrypoint is a fixed historical source, not a new deployment.
+    history=spec.get("workflow",{}).get("development_harness",{}).get("reference_db_entrypoint_history_20261110",{})
+    return (path=="supabase/functions/jungsi-api/index.ts" and digest=="ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2" and
+        isinstance(history,dict) and history.get("format")=="jungsi.reference-db-entrypoint-history/v1" and
+        history.get("base_commit")=="fc52ae2559d488db78a929b33d46f01fdad592d6" and history.get("path")==path and
+        history.get("previous_source_sha256")==digest and history.get("candidate_source_sha256")==indexed.get(path) and
+        history.get("status")=="SOURCE_CANDIDATE_NOT_DEPLOYMENT_EVIDENCE")
 NATIVE_GUARD_HISTORY_SHA256="93236619b0293ac768c2968542bdc4e515bd5155417da728b765db9179e58b42"
 NATIVE_GUARD_SOURCE_PATH="supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
 
@@ -1754,6 +2195,11 @@ def validate_score_input_policy(spec):
     indexed={p:v.get("declarations",{}).get("source_sha256") for p,v in spec.get("edge_harness",{}).get("files",{}).items()}
     if (verification.get("baseline_edge_unit_count")!=590 or verification.get("new_policy_test_path")!="tests/edge/test_score_input_policy.ts" or verification.get("new_policy_test_count")!=31 or spec.get("edge_harness",{}).get("unit_count")!=(656 if spec.get("catalog_payload_scope_contract") else 644 if spec.get("service_performance_contract") else 624) or verification.get("extension_route_case_count")!=3 or set(bindings)!=expected_paths or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in bindings.items())):errors.append("REQ-27 current descendant source/test registration drift")
     extension=c.get("extension_implementation_bindings",{});evidence=c.get("extension_runtime_test_bindings",{})
+    try:
+        evidence=select_current_source_rebound(spec,"req27",evidence)
+    except (KeyError,TypeError,ValueError,AttributeError):
+        errors.append("REQ-27 current source rebound invalid")
+        return errors
     expected_service="supabase/functions/_shared/jungsi/application/score_input_service.ts"
     expected_evidence={"supabase/functions/_shared/jungsi/application/api_dispatch.ts","supabase/functions/_shared/jungsi/infrastructure/api_http.ts","supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts","tests/edge/test_score_input_policy.ts","tests/edge/public_api_contract_fixture.ts","tests/edge/synthetic_api_contract.ts"}
     if (not isinstance(extension,dict) or set(extension)!=set(SCORE_POLICY_ROUTES) or any(not isinstance(binding,dict) or set(binding)!={"path","source_sha256","symbol"} or binding.get("path")!=expected_service or binding.get("symbol")!="ScoreInputService.execute" or not re.fullmatch(r"[a-f0-9]{64}",str(binding.get("source_sha256",""))) or binding.get("source_sha256")!=indexed.get(expected_service) for binding in extension.values()) or not isinstance(evidence,dict) or set(evidence)!=expected_evidence or any(not re.fullmatch(r"[a-f0-9]{64}",str(value)) or value!=indexed.get(path) for path,value in evidence.items())):errors.append("REQ-27 extension implementation/runtime/test source binding drift")
@@ -3015,6 +3461,45 @@ def validate_backend_safe_observation_plan(spec):
     return []
 
 
+AUX_SOURCE_REBOUND_PINS = {
+    'dev010_runtime_assembly': ('e886758ac6552015ea3529891516b79e60214d4bffdfbd053bbee164677fb11b',
+      'supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts', '1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773'),
+    'native_seed': ('951c4d2124d9257d9380dae00e9b257c76e7971cdb419250c4e7d1c21f54916a',
+      'scripts/run_edge_tests.py', '99ce40c01a8eb195e2ac9bdd2e37543382d6aabdd6e223fb8c8e2be2d4bfcd72'),
+}
+
+def select_aux_current_rebound(spec,family,historical):
+    """Bound current byte pin without altering prior source/test evidence."""
+    if 'current_aux_source_rebounds_20261113' not in spec:return historical
+    sibling=spec['current_aux_source_rebounds_20261113']
+    try:
+        fields={'format','status','activation_status','native_acceptance','operating_writes','families'}
+        if (not isinstance(sibling,dict) or set(sibling)!=fields or
+            sibling['format']!='jungsi.current-aux-source-rebounds/v1' or
+            sibling['status']!='SOURCE_REGISTERED_NOT_EXECUTED' or sibling['activation_status']!='NOT_RUN' or
+            sibling['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE' or
+            type(sibling['operating_writes']) is not int or sibling['operating_writes']!=0 or
+            not isinstance(sibling['families'],dict) or set(sibling['families'])!=set(AUX_SOURCE_REBOUND_PINS)):
+            raise ValueError('auxiliary envelope')
+        pin,path,current=AUX_SOURCE_REBOUND_PINS[family];entry=sibling['families'][family]
+        actual=hashlib.sha256(json.dumps(historical,ensure_ascii=True,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        if (actual!=pin or not isinstance(entry,dict) or set(entry)!={'historical_sha256','changed_source_bindings'} or
+            entry['historical_sha256']!=pin or entry['changed_source_bindings']!={path:current}):
+            raise ValueError('auxiliary source binding')
+        selected=copy.deepcopy(historical)
+        if family=='dev010_runtime_assembly':
+            row=selected['bindings']['composition']
+            if row.get('path')!=path:raise ValueError('assembly source')
+            row['source_sha256']=current
+        else:
+            rows=[r for r in selected['source_bindings'] if isinstance(r,dict) and r.get('path')==path]
+            if len(rows)!=1:raise ValueError('native seed source')
+            rows[0]['sha256']=current
+        return selected
+    except (KeyError,TypeError,ValueError,AttributeError):
+        raise ValueError('auxiliary current source rebound invalid')
+
+
 def validate_live_execution(spec):
     """Reject route drift or operating PASS without scoped, hash-bound evidence."""
     c=spec.get('supabase_deployment_contract',{}).get('live_execution')
@@ -3038,6 +3523,9 @@ def validate_live_execution(spec):
     post_owner=post_scope.get('owner_registration')
     post_owner=post_owner if isinstance(post_owner,dict)else {}
     assembly=c.get('runtime_assembly')
+    try:assembly=select_aux_current_rebound(spec,'dev010_runtime_assembly',assembly)
+    except ValueError:
+        errors.append('DEV-010 runtime assembly current source rebound invalid');assembly={}
     if assembly is None:
         if tuple(int(v)for v in spec['version'].split('.')) >= (1,9,57):
             errors.append('DEV-010 runtime assembly missing')
@@ -3799,6 +4287,35 @@ def validate_professional_source_registration(spec,source_hashes=None):
     present={p for p in source_hashes or {} if professional_source_path(p) or p==PROFESSIONAL_MIGRATION}
     if not isinstance(contract,dict):
         return ['Professional source contract missing'] if present else []
+    # This unpublished scope candidate has an independent current binding.
+    # Never re-label the historic professional source/test registration as
+    # having exercised it. Every other professional source remains exact.
+    candidate_path=PROFESSIONAL_APP+'student_cache_scope_candidate.ts'
+    candidate=contract.get('student_cache_scope_review_extension')
+    candidate_present=candidate_path in present
+    if candidate is None:
+        if candidate_present:return ['Professional student cache review extension invalid']
+    else:
+        try:
+            fields={'format','status','path','sha256','native_acceptance','activation_status','operating_writes'}
+            if (not isinstance(candidate,dict) or set(candidate)!=fields or
+                candidate['format']!='jungsi.professional-student-cache-review-source/v1' or
+                candidate['status']!='SOURCE_CANDIDATE_REVIEW_ONLY' or candidate['path']!=candidate_path or
+                not isinstance(candidate['sha256'],str) or re.fullmatch('[0-9a-f]{64}',candidate['sha256']) is None or
+                candidate['native_acceptance']!='NOT_VERIFIED_BY_SOURCE_SUITE' or
+                candidate['activation_status']!='NOT_RUN' or type(candidate['operating_writes']) is not int or
+                candidate['operating_writes']!=0):raise ValueError('candidate metadata')
+            rows=[x for x in spec.get('implementation',[]) if isinstance(x,dict) and x.get('path')==candidate_path]
+            index=spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])
+            indexed=[x for x in index if isinstance(x,dict) and x.get('path')==candidate_path]
+            if (len(rows)!=1 or rows[0].get('layer')!='application' or 'REQ-31' not in rows[0].get('requirements',[]) or
+                rows[0].get('status')!='SOURCE_CANDIDATE_REVIEW_ONLY' or len(indexed)!=1 or
+                indexed[0].get('source_sha256')!=candidate['sha256']):raise ValueError('candidate source index')
+            if source_hashes is not None and (not candidate_present or source_hashes.get(candidate_path)!=candidate['sha256']):
+                raise ValueError('candidate snapshot')
+        except (KeyError,TypeError,ValueError,AttributeError):
+            return ['Professional student cache review extension invalid']
+    present.discard(candidate_path)
     registration=contract.get('source_registration')
     operations=contract.get('candidate_operations',[])
     if registration is None:
@@ -4747,6 +5264,12 @@ def generated_files(spec,read=None):
             encoded=json.dumps(payload,ensure_ascii=False,separators=(',',':'))
             literal=chr(39)+encoded.replace(chr(92),chr(92)*2).replace(chr(39),chr(92)+chr(39)).replace(chr(0x2028),chr(92)+'u2028').replace(chr(0x2029),chr(92)+'u2029')+chr(39)
             files[PROFESSIONAL_GENERATED]=professional_typescript_contract(literal)
+    attendance=spec.get("university_scoring_contract",{}).get("scoped_reference_contract",{}).get("attendance_confirmation_contract")
+    if attendance:
+        section="\n\n## 참고 산식 응시 자기 확인\n\n"+attendance["documentation"]+"\n"
+        for key in ("planning","routing","architecture","workflow","development_sync","university_scoring","university_percentile","api_dto","presentation_handoff"):
+            target=spec["current_documents"].get(key)
+            if target in files:files[target]+=section
     return {p:t.encode("utf-8") for p,t in files.items()}
 
 def validate_forecast_contract(spec):
@@ -5101,8 +5624,9 @@ def native_seed_candidate_errors(paths,read,spec):
     error="Native seed candidate source/test registration invalid"
     names=set(paths);ext=spec.get("backend_platform_contract",{}).get("native_seed_candidate_extension")
     test="tests/test_native_seed_opt_in.py";guard="tests/test_native_seed_binding.py"
-    if ext is None:return [error] if test in names or guard in names else []
+    if ext is None:return [error] if test in names or guard in names or "current_aux_source_rebounds_20261113" in spec else []
     try:
+        ext=select_aux_current_rebound(spec,"native_seed",ext)
         required={"format","status","source_bindings","tests","network_isolation","activation"}
         if not isinstance(ext,dict) or set(ext)!=required or ext["format"]!="jungsi.native-seed-candidate/v1" or ext["status"]!="SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["network_isolation"]!="NOT_VERIFIED" or ext["activation"]!="NOT_RUN":raise ValueError("state")
         expected_sources={"scripts/check_edge_contract.py","scripts/run_edge_tests.py"};expected_tests={test,guard}
@@ -5180,13 +5704,13 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
 SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
 
 SERVICE_CANDIDATE_GROUPS = {
-    "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"], 80, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "p1_review": (["tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs", "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs", "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs", "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs", "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs"], 108, ["node:assert/strict", "node:fs", "node:zlib"]),
     "service_end": (["tests/service_end/" + name for name in (
         "test_service_end_current_review.synthetic.ts", "test_service_end_entrypoints.synthetic.ts",
         "test_service_end_error_schema.synthetic.ts", "test_service_end_http.synthetic.ts",
         "test_service_end_official_display.synthetic.ts", "test_service_end_professional.synthetic.ts",
         "test_service_end_runtime.synthetic.ts", "test_official_display_final_expiry.synthetic.ts")], 125, []),
-    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT], 79, ["node:assert/strict", "node:fs", "node:zlib"]),
+    "service_p1": (['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT], 81, ["node:assert/strict", "node:fs", "node:zlib"]),
     "search503": (["tests/search503/" + name for name in (
         "test_combined_search503_end.synthetic.v5.mjs", "test_search503_stream_limits.synthetic.v4.mjs",
         "test_search503_reader_unlock.synthetic.v3.mjs", "test_search503_final_error.synthetic.v2.mjs",
@@ -5238,7 +5762,7 @@ def service_candidate_suite_errors(paths, read, spec):
                 ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["runtime_scope"] != "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED" or
                 ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
                 type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0): raise ValueError("suite status")
-        expected_files = {"manifest": "tests/review_suite_manifest.json", "wrapper": "tests/test_service_candidate_suites.py",
+        expected_files = {"manifest": "tests/review_suite_manifest.20261113_fmt.current.json", "wrapper": "tests/test_service_candidate_suites.py",
                           "regression_test": "tests/test_service_candidate_registry.py"}
         for key, path in expected_files.items():
             item = ext[key]
@@ -5354,6 +5878,10 @@ def validate_content(paths,read,spec):
     if fixture_guard in names: wildcard_hashes[fixture_guard] = hashlib.sha256(read(fixture_guard)).hexdigest()
     _, wildcard_errors = service_wildcard_registration(spec, wildcard_hashes)
     errors.extend(wildcard_errors)
+    reference_db_names = (*REFERENCE_DB_TEST_PATHS, "tests/test_reference_db_suite_registration.py")
+    reference_db_hashes = {p:hashlib.sha256(read(p)).hexdigest() for p in reference_db_names if p in names}
+    _, reference_db_errors = reference_db_registration(spec, reference_db_hashes)
+    errors.extend(reference_db_errors)
     errors.extend(service_candidate_suite_errors(paths,read,spec))
     errors.extend(native_seed_candidate_errors(paths,read,spec))
     errors.extend(service_history_report_preservation_errors(paths,read,spec))

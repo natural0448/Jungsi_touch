@@ -3,7 +3,11 @@ import { AccessError } from "./access.ts";
 import { type CatalogDataPort, CatalogService } from "./catalog.ts";
 import { OverallAnalysisService, type OverallDataPort } from "./overall_analysis.ts";
 import { evaluateOffering } from "./offering_analysis.ts";
-import { candidateGroups, type UniversityAnalysisDataPort } from "./university_analysis.ts";
+import {
+  candidateGroups,
+  productionCandidateRows,
+  type UniversityAnalysisDataPort,
+} from "./university_analysis.ts";
 import { buildWildcardCandidateReview } from "./wildcard_candidate_review.ts";
 import {
   materializeWildcardReview,
@@ -158,6 +162,7 @@ export class ProfessionalApprovedAnalysis implements ApprovedAnalysisPort {
             : row[key] === value
         );
       }
+      rows = [...await productionCandidateRows(data, rows)];
     } else throw new AccessError("route_not_found", 404);
     if (
       rows.length > this.maximumOfferings ||

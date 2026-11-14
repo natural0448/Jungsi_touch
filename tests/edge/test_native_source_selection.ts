@@ -4,6 +4,7 @@ import {
   type NativePayloadMode,
   NativeSourceSelection,
   type PinnedSourceBytes,
+  PreparedSelectionCache,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts";
 import { SupabaseArtifactClient } from "../../supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts";
 import { AccessError } from "../../supabase/functions/_shared/jungsi/application/access.ts";
@@ -12,7 +13,7 @@ import {
   type NativeObject,
 } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
 import { JsonFloat } from "../../supabase/functions/_shared/jungsi/domain/native_json.ts";
-import { assert, equal } from "./fixture.ts";
+import { agedChecks, assert, equal } from "./fixture.ts";
 async function pinned(text: string): Promise<PinnedSourceBytes> {
   const bytes = new TextEncoder().encode(text);
   const hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))].map((v) =>
@@ -221,17 +222,18 @@ function deferred(f: Awaited<ReturnType<typeof fixture>>, patch: NativeObject = 
   (f.selection.required as NativeObject[]).push({ kind: entry.kind, key: entry.key });
   return entry;
 }
-Deno.test("catalog projection validates all reference metadata but reads only catalog body", async () => {
-  const f = await fixture();
-  deferred(f);
-  const snapshot = await f.prepare("catalog_only"), receipt = snapshot.privateReceipt();
-  equal(receipt.selected_metadata_count, 2);
-  equal(receipt.loaded_payload_count, 1);
-  equal(receipt.deferred_payload_count, 1);
-  equal(snapshot.identities().length, 1);
-  assert(!f.calls.some((url) => url.endsWith("unused.json")));
-  equal(f.calls.length, 3);
-});
+Deno.test("catalog projection validates all reference metadata but reads only catalog body", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    deferred(f);
+    const snapshot = await f.prepare("catalog_only"), receipt = snapshot.privateReceipt();
+    equal(receipt.selected_metadata_count, 2);
+    equal(receipt.loaded_payload_count, 1);
+    equal(receipt.deferred_payload_count, 1);
+    equal(snapshot.identities().length, 1);
+    assert(!f.calls.some((url) => url.endsWith("unused.json")));
+    equal(f.calls.length, 3);
+  }));
 Deno.test("catalog projection rejects every invalid deferred approval and reference before artifact IO", async () => {
   for (
     const [patch, code] of [
@@ -303,14 +305,18 @@ Deno.test("unknown payload selection mode is rejected without network reads", as
   await denied(() => f.prepare("unsafe" as NativePayloadMode), "storage_configuration_invalid");
   equal(f.calls.length, 0);
 });
-Deno.test("default full selection still reads and rejects an invalid noncatalog body", async () => {
-  const f = await fixture();
-  deferred(f);
-  await denied(() => f.prepare(), "storage_hash_mismatch");
-  equal(f.calls.length, 4);
-  await verifyAdditionalOverallScopeCases();
-  await verifyAdditionalUniversityScopeCases();
-});
+Deno.test("default full selection still reads and rejects an invalid noncatalog body", () =>
+  agedChecks(async () => {
+    const f = await fixture();
+    deferred(f);
+    await denied(() => f.prepare(), "storage_hash_mismatch");
+    equal(f.calls.length, 4);
+    await verifyAdditionalOverallScopeCases();
+    await verifyAdditionalUniversityScopeCases();
+    // Folded registration keeps the reviewed edge unit count fixed.
+    await rebindReusesVerifiedBodies();
+    await preparedCacheSharesAndBounds();
+  }));
 
 /** Additive scenarios run inside the existing strict foundation suite; no test is skipped. */
 async function verifyAdditionalOverallScopeCases(): Promise<void> {
@@ -443,4 +449,47 @@ async function verifyAdditionalUniversityScopeCases(): Promise<void> {
       throw new Error(name, { cause: error });
     }
   }
+}
+async function rebindReusesVerifiedBodies() {
+  const f = await fixture(),
+    snapshot = await f.prepare("university_only");
+  equal(f.calls.length, 2);
+  const again = snapshot.rebind(f.client);
+  equal(again.registryHash, snapshot.registryHash);
+  equal(again.selectionHash, snapshot.selectionHash);
+  equal(again.payloadMode, "university_only");
+  assert(again.load("catalog", "service")!.payload.large === 9007199254740993n);
+  equal(f.calls.length, 2);
+  // Copies stay private: mutating a loaded copy never changes the shared verified body.
+  const copy = again.load("catalog", "service")!;
+  copy.payload.version = "CHANGED";
+  equal(snapshot.load("catalog", "service")!.payload.version, "SYNTHETIC-a-v");
+  equal(snapshot.peekPayload("catalog", "service")!.version, "SYNTHETIC-a-v");
+  equal(snapshot.has("catalog", "service"), true);
+  equal(snapshot.has("conversion", "2027:1"), false);
+  equal(snapshot.referenceCount(), 0);
+  await denied(
+    () => Promise.resolve(snapshot.rebind({} as SupabaseArtifactClient)),
+    "storage_configuration_invalid",
+  );
+}
+async function preparedCacheSharesAndBounds() {
+  const f = await fixture(),
+    snapshot = await f.prepare(),
+    cache = new PreparedSelectionCache(2),
+    entry = () => Promise.resolve({ selection: snapshot, decoded: new Map<string, unknown>() });
+  const a = entry();
+  cache.set("a", a);
+  equal(cache.get("a") === a, true);
+  cache.set("b", entry());
+  assert(cache.get("a") !== undefined);
+  cache.set("c", entry());
+  equal(cache.get("b"), undefined);
+  assert(cache.get("a") !== undefined && cache.get("c") !== undefined);
+  const failed = Promise.reject(new Error("prepare failed"));
+  cache.set("d", failed);
+  await failed.catch(() => undefined);
+  await Promise.resolve();
+  equal(cache.get("d"), undefined);
+  await denied(() => Promise.resolve(new PreparedSelectionCache(0)), "registry_format_invalid");
 }

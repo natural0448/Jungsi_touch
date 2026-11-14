@@ -1,5 +1,6 @@
 /** Existing app-role tables: owner predicates, append-only revisions and replay. */
 import { AccessError } from "../application/access.ts";
+import { assertReferenceEvidenceTransition } from "../application/legacy_reference_transition.ts";
 import type {
   PlatformRepositoryPort,
   ProfileWrite,
@@ -38,6 +39,19 @@ const REPORT_SELECT = `SELECT r.report_id,r.owner_id,v.profile_id,r.revision::te
  FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v
  ON (r.report_id,r.revision,r.owner_id)=(v.report_id,v.revision,v.owner_id)`;
 export const REPORT_READ_SQL = REPORT_SELECT + " WHERE r.report_id=$1 AND r.owner_id=$2";
+/** Owner-scoped immutable historical revision. The runtime role must remain append-only. */
+export const REPORT_READ_REVISION_SQL = `WITH guard AS MATERIALIZED (
+ SELECT c.oid FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+ WHERE n.nspname='jungsi_backend' AND c.relname='report_revisions' AND c.relkind='r' AND c.relrowsecurity
+ AND NOT pg_catalog.has_any_column_privilege(current_user,c.oid,'UPDATE')
+ AND NOT pg_catalog.has_table_privilege(current_user,c.oid,'DELETE,TRUNCATE,TRIGGER')
+ AND NOT pg_catalog.has_any_column_privilege('anon',c.oid,'SELECT')
+ AND NOT pg_catalog.has_any_column_privilege('authenticated',c.oid,'SELECT')
+) SELECT v.report_id,v.owner_id,v.profile_id,v.revision::text,v.body::text,${
+  TIME("v.created_at")
+} FROM jungsi_backend.report_revisions v JOIN jungsi_backend.reports r
+ ON (v.report_id,v.owner_id)=(r.report_id,r.owner_id) CROSS JOIN guard
+ WHERE v.report_id=$1 AND v.owner_id=$2 AND v.revision=$3::bigint AND v.revision<=r.revision`;
 export const REPORT_ACCESS_SQL = `SELECT r.owner_id,p.confirmed FROM jungsi_backend.reports r
  JOIN jungsi_backend.profiles p ON (r.profile_id,r.owner_id)=(p.profile_id,p.owner_id)
  WHERE r.report_id=$1 AND r.owner_id=$2`;
@@ -291,6 +305,26 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
     identifier(rid);
     return await this.sql.read(owner, (tx) => this.getReportInTransaction(tx, owner, rid));
   }
+  async getReportRevision(
+    owner: string,
+    rid: string,
+    revision: number,
+    signal?: AbortSignal,
+  ): Promise<StoredReport | null> {
+    ownerId(owner);
+    identifier(rid);
+    positiveRevision(revision);
+    return await this.sql.read(owner, async (tx) => {
+      const row = one(
+        await tx.query(REPORT_READ_REVISION_SQL, [rid, owner, String(revision)], signal),
+        6,
+      );
+      if (!row) return null;
+      const report = reportRow(row, owner, this.maxRecordBytes);
+      if (report.report_id !== rid || report.revision !== revision) invalid();
+      return report;
+    }, signal);
+  }
   async getReportInTransaction(
     tx: NativeSqlTransaction,
     owner: string,
@@ -373,6 +407,14 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
       let rid = input.reportId, version = 1;
       if (rid === null) {
         rid = this.newId("report-");
+        await assertReferenceEvidenceTransition(
+          null,
+          sqlObjectText(bodyText, this.maxRecordBytes),
+          owner,
+          rid,
+          profileId,
+          version,
+        );
         await tx.query(REPORT_INSERT_SQL, [rid, owner, profileId, "1", now]);
       } else {
         const row = one(await tx.query(REPORT_REVISION_SQL, [rid, owner]), 1);
@@ -388,6 +430,18 @@ export class SupabasePlatformRepository implements PlatformRepositoryPort {
           return result;
         }
         version = positiveRevision(current + 1);
+        const previousRow = one(await tx.query(REPORT_READ_SQL, [rid, owner]), 6);
+        if (!previousRow) invalid();
+        const previous = reportRow(previousRow, owner, this.maxRecordBytes);
+        if (previous.revision !== current) invalid();
+        await assertReferenceEvidenceTransition(
+          previous,
+          sqlObjectText(bodyText, this.maxRecordBytes),
+          owner,
+          rid,
+          profileId,
+          version,
+        );
         await tx.query(REPORT_UPDATE_SQL, [String(version), profileId, now, rid, owner]);
       }
       const result: StoredReport = {

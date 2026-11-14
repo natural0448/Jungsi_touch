@@ -25,8 +25,8 @@ import {
 } from "./current_public_catalog_sql.ts";
 import { CurrentPublicMetadataKeyIndex } from "./current_public_key_index.ts";
 import { currentPublicKeyObjectReader } from "./current_public_key_storage.ts";
+import { CurrentPublicSearchScopedService } from "./current_public_scoped_service.ts";
 import {
-  ObservedCurrentPublicCatalogService,
   observeKeySelection,
   SearchDiagnostic,
   type ServerOnlySink,
@@ -46,17 +46,20 @@ function createBoundCatalogService(
   const trace = new SearchDiagnostic(context.searchDiagnostic);
   let verified: ReturnType<typeof verifyPublicCatalogDescriptor> | undefined,
     cipher: CurrentPublicCatalogCursor | undefined,
+    secret: Uint8Array | undefined,
+    approvedBinding: ApprovedRuntimeBinding | undefined,
     reader: CurrentPublicCatalogSql | undefined;
-  const key = () => {
-    if (cipher) return cipher;
-    const hex = env.get("JUNGSI_DISPLAY_CURSOR_KEY_HEX");
-    if (typeof hex !== "string" || !/^[a-f0-9]{64}$/i.test(hex)) {
-      throw new AccessError("security_policy_unavailable", 503);
+  const keyBytes = () => {
+    if (!secret) {
+      const hex = env.get("JUNGSI_DISPLAY_CURSOR_KEY_HEX");
+      if (typeof hex !== "string" || !/^[a-f0-9]{64}$/i.test(hex)) {
+        throw new AccessError("security_policy_unavailable", 503);
+      }
+      secret = Uint8Array.from(hex.match(/../g)!, (x) => parseInt(x, 16));
     }
-    return cipher = new CurrentPublicCatalogCursor(
-      Uint8Array.from(hex.match(/../g)!, (x) => parseInt(x, 16)),
-    );
+    return new Uint8Array(secret);
   };
+  const key = () => cipher ??= new CurrentPublicCatalogCursor(keyBytes());
   const load = () =>
     verified ??= (async () => {
       const binding = await context.binding();
@@ -85,6 +88,7 @@ function createBoundCatalogService(
         result.descriptor.consumer_binding_sha256 !== binding.descriptorSha256
       ) throw new AccessError("current_catalog_publication_unapproved", 503);
       key();
+      approvedBinding = binding;
       return result;
     })();
   const port = async () => {
@@ -122,7 +126,20 @@ function createBoundCatalogService(
     seal: (...args) => key().seal(...args),
     open: (...args) => key().open(...args),
   };
-  return new ObservedCurrentPublicCatalogService(data, current, clock, cursor, trace);
+  const existing = async () => {
+    const verified = await load();
+    if (!approvedBinding) throw new AccessError("security_policy_unavailable", 503);
+    return { ...verified, runtime: approvedBinding };
+  };
+  return new CurrentPublicSearchScopedService(
+    data,
+    current,
+    clock,
+    cursor,
+    trace,
+    keyBytes,
+    existing,
+  );
 }
 
 export function createCombinedPolicyCatalogService(

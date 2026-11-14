@@ -214,6 +214,22 @@ class OverallAnalysisServiceTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code, "invalid_request")
         self.assertEqual(self.provider.calls, [])
 
+    def test_second_language_is_grade_only_and_absent_means_not_taken(self):
+        self.assertIsNone(self.call()["second_language"])
+        self.request["second_language"] = None
+        self.assertIsNone(self.call()["second_language"])
+        self.request["second_language"] = {"subject": "일본어Ⅰ", "grade": 2}
+        result = self.call()
+        self.assertEqual(result["second_language"], {"subject": "일본어Ⅰ", "grade": 2})
+        self.assertEqual(result["total_standard_score"], 30)
+        self.assertNotIn("일본어Ⅰ", [row["subject"] for row in result["subjects"]])
+        for bad in ({"subject": "일본어Ⅰ", "grade": 0}, {"subject": "일본어Ⅰ", "grade": 10},
+                    {"subject": "일본어Ⅰ", "grade": True}, {"subject": "일본어", "grade": 2},
+                    {"subject": "일본어Ⅰ"}, {"subject": "일본어Ⅰ", "grade": 2, "standard_score": 60}, 2):
+            with self.subTest(bad=bad):
+                self.request["second_language"] = bad
+                self.error("invalid_second_language", 422)
+
     def test_missing_version_and_path_shaped_exam_id_are_rejected(self):
         del self.request["pack_version"]
         self.error("invalid_request", 422)
@@ -265,7 +281,7 @@ class OverallAnalysisServiceTests(unittest.TestCase):
         self.approve_model()
         result = self.call()
         self.assertEqual(set(result), {"format", "exam", "pack_version", "score_basis", "total_standard_score",
-                                      "subjects", "absolute_grades", "overall"})
+                                      "subjects", "absolute_grades", "second_language", "overall"})
         raw = json.dumps(result)
         for internal in ("source_ref", "source_name", "sha256", "weights", "frequencies", "denominator",
                          "above_count", "exact_top_fraction", "university_analysis", "owner_id", "subject_id"):

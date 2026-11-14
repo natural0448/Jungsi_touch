@@ -29,12 +29,16 @@ import {
   NativeRankDistribution,
   type RankBundle,
 } from "../domain/year_equating.ts";
-import { cloneNativeJson, type NativeObject } from "../domain/json_value.ts";
+import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, type NativeJson } from "../domain/native_json.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { type NativeRuntimeKind, NativeSourceSelection } from "./native_source_selection.ts";
 import { decodeSchoolReferencePayload } from "./school_reference_source.ts";
 import type { SchoolReferenceFunction } from "../application/school_reference_scoring.ts";
+import type {
+  AuthorizedSavedTailBytesPort,
+  AuthorizedSavedTailPin,
+} from "./saved_reference_tail_source.ts";
 function fail(code: string, http = 503): never {
   throw new AccessError(code, http);
 }
@@ -88,7 +92,7 @@ function ranks(value: unknown): RankBundle {
 }
 /** Server-owned current approval; implementations must re-read the active head, not a warm cache. */
 export interface NativeSelectionHeadPort {
-  current(): Promise<{
+  current(signal?: AbortSignal): Promise<{
     readonly status: string;
     readonly registrySha256: string;
     readonly selectionSha256: string;
@@ -109,16 +113,23 @@ export class NativeDataProvider
     UniversityScoringDataPort,
     UniversityPercentileDataPort,
     OfferingAnalysisDataPort {
-  private readonly cache = new Map<string, unknown>();
+  private readonly cache: Map<string, unknown>;
   private readonly freshness?: NativeSelectionFreshness;
   private referenceKeys?: ReadonlyMap<string, string | null>;
   private scoringBatchActive = false;
   private scoringBatchReady = false;
+  private scoringBatchSignal?: AbortSignal;
   constructor(
     private readonly selection: NativeSourceSelection,
     freshness?: NativeSelectionFreshness,
+    sharedDecoded?: Map<string, unknown>,
   ) {
     if (!(selection instanceof NativeSourceSelection)) fail("storage_configuration_invalid");
+    if (sharedDecoded !== undefined && !(sharedDecoded instanceof Map)) {
+      fail("storage_configuration_invalid");
+    }
+    // Decoded releases are frozen and keyed by registry/selection hash, so an isolate may share them.
+    this.cache = sharedDecoded ?? new Map();
     if (freshness !== undefined) {
       if (
         !freshness || typeof freshness.heads?.current !== "function" ||
@@ -129,7 +140,8 @@ export class NativeDataProvider
       this.freshness = Object.freeze({ ...freshness });
     }
   }
-  async assertCurrentSelection(required = false): Promise<void> {
+  async assertCurrentSelection(required = false, signal?: AbortSignal): Promise<void> {
+    if (signal?.aborted) fail("artifact_not_approved");
     const f = this.freshness;
     // Existing offline decoders remain usable; serving a selected release requires preflight below.
     if (f === undefined) {
@@ -137,9 +149,10 @@ export class NativeDataProvider
       return;
     }
     try {
-      const head = await f.heads.current(), now = f.clock.nowUtc();
+      const head = await f.heads.current(signal), now = f.clock.nowUtc();
+      if (signal?.aborted) fail("artifact_not_approved");
       if (
-        !head || head.status !== "approved" || typeof now !== "bigint" ||
+        signal?.aborted || !head || head.status !== "approved" || typeof now !== "bigint" ||
         head.registrySha256 !== this.selection.registryHash ||
         head.selectionSha256 !== this.selection.selectionHash ||
         head.approvalReferenceSha256 !== f.approvalReferenceSha256 ||
@@ -152,9 +165,11 @@ export class NativeDataProvider
       fail("artifact_not_approved");
     }
   }
-  private async assertDecodeSelection(): Promise<void> {
+  private async assertDecodeSelection(signal?: AbortSignal): Promise<void> {
+    signal ??= this.scoringBatchSignal;
+    if (signal?.aborted) fail("artifact_not_approved");
     if (!this.scoringBatchActive) {
-      await this.assertCurrentSelection();
+      await this.assertCurrentSelection(false, signal);
       return;
     }
     if (!this.scoringBatchReady) fail("analysis_release_invalid");
@@ -165,31 +180,108 @@ export class NativeDataProvider
     }
   }
   /** One request's bounded calculation phase only. Final freshness precedes report writes. */
-  async withScoringBatch<T>(work: () => Promise<T>): Promise<T> {
+  async withScoringBatch<T>(work: () => Promise<T>, signal?: AbortSignal): Promise<T> {
     if (this.scoringBatchActive) fail("analysis_release_invalid");
     this.scoringBatchActive = true;
+    this.scoringBatchSignal = signal;
     try {
-      await this.assertCurrentSelection();
+      await this.assertCurrentSelection(false, signal);
       this.scoringBatchReady = true;
       const value = await work();
       this.scoringBatchReady = false;
-      await this.assertCurrentSelection();
+      await this.assertCurrentSelection(false, signal);
       return value;
     } finally {
       this.scoringBatchReady = false;
       this.scoringBatchActive = false;
+      this.scoringBatchSignal = undefined;
     }
   }
   load(kind: NativeRuntimeKind, key: string): NativeObject | null {
     return this.selection.load(kind, key)?.payload ?? null;
+  }
+  /** Server-only selected metadata. This does not grant user/report access. */
+  async referenceSelection(signal: AbortSignal): Promise<
+    Readonly<{
+      registrySha256: string;
+      selectionSha256: string;
+      approvalReferenceSha256: string;
+      tails: readonly { key: string; entry: NativeObject }[];
+      compatibilities: readonly { key: string; entry: NativeObject }[];
+    }>
+  > {
+    if (!signal || signal.aborted || !this.freshness) fail("artifact_not_approved");
+    await this.assertCurrentSelection(true, signal);
+    const tails = this.selection.referenceTailEntries(),
+      compatibilities = this.selection.referenceCompatibilityMetadata();
+    await this.assertCurrentSelection(true, signal);
+    return Object.freeze({
+      registrySha256: this.selection.registryHash,
+      selectionSha256: this.selection.selectionHash,
+      approvalReferenceSha256: this.freshness.approvalReferenceSha256,
+      tails: Object.freeze(tails),
+      compatibilities: Object.freeze(compatibilities),
+    });
+  }
+  /** Exact selected exam-pack pin, after the normal approved payload was loaded and verified.
+   * The source compatibility issuer compares bytes, not only a version string. */
+  async referenceExamPin(
+    examId: string,
+    signal: AbortSignal,
+  ): Promise<Readonly<{ key: string; sha256: string; version: string }> | null> {
+    if (!signal || signal.aborted || typeof examId !== "string" || !examId.trim()) {
+      fail("artifact_not_approved");
+    }
+    await this.assertCurrentSelection(true, signal);
+    const selected = this.selection.reference("exam_pack", examId);
+    if (!selected) {
+      await this.assertCurrentSelection(true, signal);
+      return null;
+    }
+    const loaded = this.selection.load("exam_pack", examId);
+    if (
+      !loaded || selected.kind !== "exam_pack" || selected.key !== examId ||
+      typeof selected.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(selected.sha256) ||
+      typeof selected.version !== "string" || !selected.version ||
+      loaded.entry.sha256 !== selected.sha256 || loaded.entry.version !== selected.version ||
+      selected.status !== "approved" || selected.engine_approved !== true ||
+      selected.production_allowed !== true
+    ) fail("artifact_not_approved");
+    await this.assertCurrentSelection(true, signal);
+    return Object.freeze({ key: examId, sha256: selected.sha256, version: selected.version });
+  }
+  async loadReferenceTail(
+    key: string,
+    signal: AbortSignal,
+  ): Promise<{ entry: NativeObject; bytes: Uint8Array } | null> {
+    if (!signal || signal.aborted) fail("artifact_not_approved");
+    await this.assertCurrentSelection(true, signal);
+    const value = await this.selection.loadReferenceTail(key, signal);
+    await this.assertCurrentSelection(true, signal);
+    return value;
+  }
+  async loadReferenceCompatibility(
+    key: string,
+    signal: AbortSignal,
+  ): Promise<{ entry: NativeObject; payload: NativeObject } | null> {
+    if (!signal || signal.aborted) fail("artifact_not_approved");
+    await this.assertCurrentSelection(true, signal);
+    const value = await this.selection.loadReferenceCompatibility(key, signal);
+    await this.assertCurrentSelection(true, signal);
+    return value;
+  }
+  /** True only when a production conversion release is selected for this offering (no body load). */
+  hasProductionConversion(offeringId: string): Promise<boolean> {
+    return Promise.resolve(this.selection.has("conversion", offeringId));
   }
   private async decode<T>(
     kind: NativeRuntimeKind,
     key: string,
     code: string,
     build: (raw: NativeObject, entry: NativeObject) => T,
+    signal?: AbortSignal,
   ): Promise<T | null> {
-    await this.assertDecodeSelection();
+    await this.assertDecodeSelection(signal);
     const identity = JSON.stringify([
       this.selection.registryHash,
       this.selection.selectionHash,
@@ -198,17 +290,17 @@ export class NativeDataProvider
     ]);
     if (this.cache.has(identity)) {
       const cached = this.cache.get(identity) as T;
-      await this.assertDecodeSelection();
+      await this.assertDecodeSelection(signal);
       return cached;
     }
     const selected = this.selection.load(kind, key);
     if (selected === null) {
-      await this.assertDecodeSelection();
+      await this.assertDecodeSelection(signal);
       return null;
     }
     try {
       const result = build(selected.payload, selected.entry);
-      await this.assertDecodeSelection();
+      await this.assertDecodeSelection(signal);
       this.cache.set(identity, result);
       return result;
     } catch (error) {
@@ -614,13 +706,13 @@ export class NativeDataProvider
       fail("analysis_release_invalid");
     }
   }
-  getExamPack(examId: string): Promise<NativeExamPack | null> {
+  getExamPack(examId: string, signal?: AbortSignal): Promise<NativeExamPack | null> {
     return new Promise((resolve) =>
       resolve(this.decode("exam_pack", examId, "artifact_exam_mismatch", (raw) => {
         const pack = new NativeExamPack(raw);
         if (pack.examId !== examId) fail("artifact_exam_mismatch");
         return pack;
-      }))
+      }, signal))
     );
   }
   getTotalModel(examId: string, packVersion: string): Promise<TotalModelBinding | null> {
@@ -701,11 +793,24 @@ export class NativeDataProvider
       }))
     );
   }
-  private async referenceGroup(key: string) {
-    await this.assertDecodeSelection();
-    const selected = await this.selection.loadReference(key);
+  private async referenceGroup(key: string, signal?: AbortSignal) {
+    signal ??= this.scoringBatchSignal;
+    await this.assertDecodeSelection(signal);
+    // Same request-scoped decode cache as decode(): skip the per-call rule-body copy once decoded.
+    const decodedId = JSON.stringify([
+      this.selection.registryHash,
+      this.selection.selectionHash,
+      "reference_conversion",
+      key,
+    ]);
+    if (this.cache.has(decodedId)) {
+      const cached = this.cache.get(decodedId) as ReturnType<typeof decodeSchoolReferencePayload>;
+      await this.assertDecodeSelection(signal);
+      return cached;
+    }
+    const selected = await this.selection.loadReference(key, signal);
     if (!selected) {
-      await this.assertDecodeSelection();
+      await this.assertDecodeSelection(signal);
       return null;
     }
     return this.decode(
@@ -740,9 +845,57 @@ export class NativeDataProvider
         ) fail("reference_rule_context_mismatch");
         return decoded;
       },
+      signal,
     );
   }
-  async getReference(offeringId: string): Promise<SchoolReferenceFunction | null> {
+  /** One current selected conversion artifact per admitted batch, never one physical load
+   * per offering. Callers must independently prove current Guide/source/score-axis authority.
+   * A key absent from this exact selected artifact or ambiguous across selected artifacts is pending. */
+  async getReferenceBatchFromSelectedArtifact(
+    artifactKey: string,
+    offeringIds: readonly string[],
+    signal: AbortSignal,
+  ): Promise<
+    readonly Readonly<{ offeringId: string; reference: SchoolReferenceFunction | null }>[]
+  > {
+    if (
+      signal?.aborted || typeof artifactKey !== "string" ||
+      !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$/.test(artifactKey) ||
+      !Array.isArray(offeringIds) || offeringIds.length < 1 || offeringIds.length > 64 ||
+      offeringIds.some((id) => typeof id !== "string" || !/^2027:[1-9][0-9]{0,18}$/.test(id)) ||
+      new Set(offeringIds).size !== offeringIds.length
+    ) fail("reference_offering_context_mismatch");
+    await this.assertCurrentSelection(false, signal);
+    const index = new Map<string, string | null>();
+    for (const { key, entry } of this.selection.referenceMetadata()) {
+      const context = object(entry.reference_context);
+      if (!Array.isArray(context.offering_ids)) fail("reference_rule_context_mismatch");
+      for (const raw of context.offering_ids) {
+        const id = text(raw);
+        if (offeringIds.includes(id)) index.set(id, index.has(id) ? null : key);
+      }
+    }
+    const selectedIds = offeringIds.filter((id) => index.get(id) === artifactKey);
+    const group = selectedIds.length ? await this.referenceGroup(artifactKey, signal) : null;
+    if (signal.aborted) fail("reference_tail_unavailable");
+    const result = offeringIds.map((offeringId) => {
+      if (index.get(offeringId) !== artifactKey || !group) {
+        return Object.freeze({ offeringId, reference: null });
+      }
+      const bindings = group.bindings.filter((b) => b.offering_pk === offeringId);
+      if (bindings.length !== 1) fail("reference_offering_context_mismatch");
+      const reference: SchoolReferenceFunction = Object.freeze({ ...group, binding: bindings[0] });
+      return Object.freeze({ offeringId, reference });
+    });
+    await this.assertCurrentSelection(false, signal);
+    return Object.freeze(result);
+  }
+  async getReference(
+    offeringId: string,
+    signal?: AbortSignal,
+  ): Promise<SchoolReferenceFunction | null> {
+    signal ??= this.scoringBatchSignal;
+    if (signal?.aborted) fail("reference_tail_unavailable");
     if (!this.referenceKeys) {
       const index = new Map<string, string | null>();
       for (const { key, entry } of this.selection.referenceMetadata()) {
@@ -756,11 +909,132 @@ export class NativeDataProvider
     const key = this.referenceKeys.get(offeringId);
     if (key === null) fail("reference_offering_ambiguous");
     if (key === undefined) return null;
-    const group = await this.referenceGroup(key);
+    const group = await this.referenceGroup(key, signal);
+    if (signal?.aborted) fail("reference_tail_unavailable");
     if (!group) return null;
     const binding = group.bindings.find((b) => b.offering_pk === offeringId);
     if (!binding) fail("reference_offering_context_mismatch");
     return Object.freeze({ ...group, binding });
+  }
+  private referenceTailKeys?: ReadonlyMap<string, NativeObject | null>;
+  private referenceTailIndex(): ReadonlyMap<string, NativeObject | null> {
+    if (!this.referenceTailKeys) {
+      const index = new Map<string, NativeObject | null>();
+      for (const entry of this.selection.referenceTailMetadata()) {
+        for (const value of object(entry.reference_context).offering_ids as unknown[]) {
+          const id = text(value);
+          index.set(id, index.has(id) ? null : Object.freeze(entry));
+        }
+      }
+      this.referenceTailKeys = index;
+    }
+    return this.referenceTailKeys;
+  }
+  hasReferenceTail(offeringId: string): boolean {
+    return !!this.referenceTailIndex().get(offeringId);
+  }
+  /** Exact selected saved-tail universe for one exam; empty when none is approved. */
+  referenceTailOfferings(academicYear: number, examId: string): readonly string[] {
+    const ids: string[] = [];
+    for (const [id, entry] of this.referenceTailIndex()) {
+      if (entry === null) fail("reference_offering_ambiguous");
+      const c = object(entry.reference_context);
+      if (c.academic_year === academicYear && c.exam_id === examId) ids.push(id);
+    }
+    return Object.freeze(ids.sort());
+  }
+  /** Analysis-cache pin: changes whenever the approved saved-tail selection changes. */
+  async referenceTailPins(): Promise<string | null> {
+    const rows = this.selection.referenceTailMetadata();
+    if (!rows.length) return null;
+    return await nativeJsonSha256({
+      registry: this.selection.registryHash,
+      selection: this.selection.selectionHash,
+      tails: rows.map((e) => [e.key, e.sha256]).sort(),
+    } as NativeObject);
+  }
+  /**
+   * Server authority for saved reference tails. Selection comes only from the approved
+   * registry/selection/head chain of this request; every use rechecks the fresh head.
+   */
+  referenceTailAuthority(): AuthorizedSavedTailBytesPort {
+    const contextOf = (entry: NativeObject): NativeObject => {
+      const c = { ...object(entry.reference_context) };
+      delete c.offering_ids;
+      return c;
+    };
+    return Object.freeze({
+      select: async (
+        offeringId: string,
+        signal?: AbortSignal,
+      ): Promise<AuthorizedSavedTailPin | null> => {
+        if (signal?.aborted) fail("reference_tail_unavailable");
+        const entry = this.referenceTailIndex().get(offeringId);
+        if (entry === null) fail("reference_offering_ambiguous");
+        if (entry === undefined) return null;
+        const reference = await this.getReference(offeringId, signal);
+        if (signal?.aborted) fail("reference_tail_unavailable");
+        const context = contextOf(entry);
+        if (!reference) return null;
+        if (
+          reference.binding.rule_version !== context.rule_version ||
+          reference.academicYear !== context.academic_year ||
+          reference.examId !== context.exam_id ||
+          reference.packVersion !== context.source_pack_version ||
+          reference.examType !== context.exam_type ||
+          reference.scoreScaleId !== context.score_scale_id
+        ) fail("reference_tail_context_mismatch");
+        const binding: NativeObject = { offering_id: offeringId };
+        for (const k of [...CONVERSION_CONTEXT_FIELDS, "rule_version"]) {
+          binding[k] = (reference.binding[k] ?? null) as NativeJson;
+        }
+        return {
+          key: text(entry.key),
+          sha256: text(entry.sha256),
+          bytes: Number(entry.bytes),
+          maxBytes: Number(entry.bytes),
+          releaseSha256: this.selection.registryHash,
+          selectionSha256: this.selection.selectionHash,
+          compatibilitySha256: this.selection.selectionHash,
+          binding,
+          context,
+          evidence: cloneNativeJson(object(entry.reference_evidence)),
+        };
+      },
+      read: async (key: string, maximumBytes: number, signal: AbortSignal) => {
+        const bytes = await this.selection.referenceTailBytes(key, signal);
+        if (bytes.length > maximumBytes) fail("storage_artifact_too_large");
+        return bytes;
+      },
+      assertCurrent: async (_pin: AuthorizedSavedTailPin, signal: AbortSignal) => {
+        if (signal.aborted) fail("reference_tail_unavailable");
+        await this.assertCurrentSelection(true, signal);
+        if (signal.aborted) fail("reference_tail_unavailable");
+      },
+      assertCompatible: async (
+        pin: AuthorizedSavedTailPin,
+        identity: Readonly<NativeObject>,
+        signal: AbortSignal,
+      ) => {
+        const c = pin.context;
+        if (
+          identity.offering_id !== pin.binding.offering_id ||
+          [
+            "academic_year",
+            "exam_id",
+            "exam_type",
+            "source_pack_version",
+            "rule_version",
+            "score_scale_id",
+          ].some((k) => identity[k] !== c[k])
+        ) fail("reference_tail_context_mismatch");
+        const pack = await this.getExamPack(text(c.exam_id), signal);
+        if (signal.aborted) fail("reference_tail_unavailable");
+        if (!pack || pack.examId !== c.exam_id || pack.packVersion !== c.source_pack_version) {
+          fail("reference_exam_context_mismatch");
+        }
+      },
+    });
   }
   getPercentile(offeringId: string): Promise<UniversityPercentileRelease | null> {
     return new Promise((resolve) =>

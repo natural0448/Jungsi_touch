@@ -15,7 +15,7 @@ export function legacyReadViewRegistration<T extends ApiRoutePolicy>(
 ) {
   if (
     policies.length !== 30 || new Set(policies.map((p) => p.id)).size !== 30 ||
-    policies.some((p) => !REGISTERED_API_OPERATION_IDS.includes(p.id))
+    policies.some((p) => !(REGISTERED_API_OPERATION_IDS as readonly string[]).includes(p.id))
   ) throw new AccessError("security_policy_unavailable", 503);
   for (const id of MEMBER_SHORTLIST_OPERATION_IDS) {
     const p = policies.find((p) => p.id === id)!;
@@ -32,7 +32,7 @@ export function legacyReadViewRegistration<T extends ApiRoutePolicy>(
     responseSchemas.operations.length !== 30 ||
     new Set(responseSchemas.operations.map((o: Row) => o.id)).size !== 30 ||
     responseSchemas.operations.some((o: Row) =>
-      !REGISTERED_API_OPERATION_IDS.includes(o.id as ApiRoutePolicy["id"])
+      !(REGISTERED_API_OPERATION_IDS as readonly string[]).includes(o.id as ApiRoutePolicy["id"])
     )
   ) throw new AccessError("security_policy_unavailable", 503);
   responseSchemas.operations = responseSchemas.operations.filter((o: Row) =>

@@ -5,7 +5,11 @@ import { CATALOG_OPERATIONS, CatalogService } from "../application/catalog.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import { RepositoryUsageReplays } from "../application/usage_service.ts";
 import { NativeDataProvider } from "./native_data_provider.ts";
-import { NativeSourceSelection } from "./native_source_selection.ts";
+import {
+  NativeSourceSelection,
+  type PreparedSelectionCache,
+  type PreparedSelectionEntry,
+} from "./native_source_selection.ts";
 import { SupabaseArtifactClient, type VerifiedArtifactCache } from "./supabase_artifacts.ts";
 import { SupabaseScoreInputRepository } from "./score_input_postgres.ts";
 import { SupabasePlatformRepository } from "./platform_postgres.ts";
@@ -20,6 +24,7 @@ import {
   type RuntimeEnvironment,
 } from "./runtime_settings.ts";
 import { SupabaseSqlTransport } from "./transaction_sql.ts";
+import { ExistingReferencePercentileDbReader } from "./reference_percentile_postgres.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { NativeExamPack } from "../domain/exam_pack.ts";
 import type { NativeObject } from "../domain/json_value.ts";
@@ -54,6 +59,7 @@ export class NativeRuntimeRequest {
   private forecastsValue?: Promise<SupabaseForecastRepository>;
   private budgetValue?: Promise<RuntimeRequestBudget>;
   private dataValue?: Promise<NativeDataProvider>;
+  private referenceDbValue?: Promise<ExistingReferencePercentileDbReader>;
   private scoresValue?: Promise<SupabaseScoreInputRepository>;
   private snapshotValue?: Promise<HistorySnapshotSource>;
   private snapshotOwner?: string;
@@ -67,6 +73,7 @@ export class NativeRuntimeRequest {
     private readonly fetcher: typeof fetch = fetch,
     private readonly artifactCache?: VerifiedArtifactCache,
     private readonly ifNoneMatch: string | null = null,
+    private readonly preparedSelections?: PreparedSelectionCache,
   ) {}
   binding(): Promise<ApprovedRuntimeBinding> {
     this.bindingValue ??= (async () => {
@@ -90,6 +97,20 @@ export class NativeRuntimeRequest {
       );
     })();
     return this.controlsValue;
+  }
+  /** Uses the same SQL transport and read budget as the enclosing request. */
+  referencePercentileDbReader(): Promise<ExistingReferencePercentileDbReader> {
+    this.referenceDbValue ??= (async () => {
+      const [binding, controls] = await Promise.all([this.binding(), this.controls()]);
+      return new ExistingReferencePercentileDbReader(
+        this.sql(),
+        controls,
+        Math.min(65536, binding.repositoryLimits.maxRecordBytes, binding.readLimits.maxBytes),
+        Math.min(8388608, binding.storage.limits.maxArtifactBytes),
+        binding.readLimits.maxBytes,
+      );
+    })();
+    return this.referenceDbValue;
   }
   platform(): Promise<SupabasePlatformRepository> {
     this.platformValue ??= (async () => {
@@ -349,42 +370,96 @@ export class NativeRuntimeRequest {
       const universityOnly = ["university.analyze", "candidates.build"].some((id) =>
         id === this.operation
       );
-      const snapshot = await NativeSourceSelection.prepare(
-        new SupabaseArtifactClient(
-          { projectUrl: binding.projectUrl, ...binding.storage },
-          controls.fetcher,
-          this.artifactCache
-            ? {
-              cache: this.artifactCache,
-              onReuse: (bytes) => controls.reuseArtifact(bytes),
-            }
-            : undefined,
-        ),
-        {
-          bytes: registry,
-          sha256: binding.references.registry.sha256,
-          maxBytes: binding.references.registry.bytes,
-        },
-        {
-          bytes: selection,
-          sha256: binding.references.selection.sha256,
-          maxBytes: binding.references.selection.bytes,
-        },
-        catalogOnly
-          ? "catalog_only"
-          : universityOnly
-          ? "university_only"
-          : this.operation === "overall.analyze" || this.operation === "score-profile.create"
-          ? "overall_only"
-          : "all",
+      const mode = catalogOnly
+        ? "catalog_only"
+        : universityOnly
+        ? "university_only"
+        : this.operation === "overall.analyze" || this.operation === "score-profile.create"
+        ? "overall_only"
+        : "all";
+      const client = new SupabaseArtifactClient(
+        { projectUrl: binding.projectUrl, ...binding.storage },
+        controls.fetcher,
+        this.artifactCache
+          ? {
+            cache: this.artifactCache,
+            onReuse: (bytes) => controls.reuseArtifact(bytes),
+          }
+          : undefined,
       );
-      const data = new NativeDataProvider(snapshot, {
-        heads: controls,
-        clock: this.clock,
-        approvalReferenceSha256: binding.approvalReferenceSha256,
-        expiresAtUtc: binding.expiresAtUtc,
-      });
-      await data.preflight();
+      // Same exact pins → reuse the verified selection and decoded releases inside this isolate.
+      const preparedKey = JSON.stringify([
+        binding.references.registry.sha256,
+        binding.references.selection.sha256,
+        binding.approvalReferenceSha256,
+        String(binding.expiresAtUtc),
+        mode,
+      ]);
+      let prepared: PreparedSelectionEntry | null = null;
+      const inFlight = this.preparedSelections?.get(preparedKey);
+      if (inFlight) {
+        try {
+          prepared = await inFlight;
+        } catch {
+          prepared = null; // The owner request failed; prepare independently below.
+        }
+      }
+      let share: { resolve(v: PreparedSelectionEntry): void; reject(e: unknown): void } | null =
+        null;
+      if (!prepared && !inFlight && this.preparedSelections) {
+        let resolve!: (v: PreparedSelectionEntry) => void, reject!: (e: unknown) => void;
+        const promise = new Promise<PreparedSelectionEntry>((a, b) => {
+          resolve = a;
+          reject = b;
+        });
+        this.preparedSelections.set(preparedKey, promise);
+        share = { resolve, reject };
+      }
+      let snapshotOut!: NativeSourceSelection, dataOut!: NativeDataProvider;
+      try {
+        const snapshot = prepared
+          ? prepared.selection.rebind(client)
+          : await NativeSourceSelection.prepare(
+            client,
+            {
+              bytes: registry,
+              sha256: binding.references.registry.sha256,
+              maxBytes: binding.references.registry.bytes,
+            },
+            {
+              bytes: selection,
+              sha256: binding.references.selection.sha256,
+              maxBytes: binding.references.selection.bytes,
+            },
+            mode,
+          );
+        if (
+          prepared &&
+          (snapshot.registryHash !== binding.references.registry.sha256 ||
+            snapshot.selectionHash !== binding.references.selection.sha256)
+        ) fail();
+        const decoded = prepared?.decoded ?? new Map<string, unknown>();
+        const data = new NativeDataProvider(snapshot, {
+          heads: controls,
+          clock: this.clock,
+          approvalReferenceSha256: binding.approvalReferenceSha256,
+          expiresAtUtc: binding.expiresAtUtc,
+        }, decoded);
+        if (prepared) {
+          // Bodies were fully preflighted for these exact pins; still require a fresh approved head.
+          await data.assertCurrentSelection(true);
+        } else {
+          await data.preflight();
+          share?.resolve({ selection: snapshot, decoded });
+          share = null;
+        }
+        snapshotOut = snapshot;
+        dataOut = data;
+      } catch (e) {
+        share?.reject(e);
+        throw e;
+      }
+      const snapshot = snapshotOut, data = dataOut;
       const policy = (await this.budget()).policy;
       for (const exam of policy.exams.values()) {
         if (catalogOnly) {
@@ -405,7 +480,8 @@ export class NativeRuntimeRequest {
             pack.academicYear !== exam.academicYear
           ) fail();
           if (this.operation === "candidates.build") {
-            const catalog = snapshot.load("catalog", "service")?.payload;
+            // Read-only count over the already verified body; no ~1 MiB copy per request.
+            const catalog = snapshot.peekPayload("catalog", "service");
             if (
               !catalog || !Array.isArray(catalog.offerings) ||
               BigInt(
@@ -439,15 +515,34 @@ export class NativeRuntimeRequest {
     })();
     return this.dataValue;
   }
-  async assertCurrent(): Promise<void> {
+  /** Capture the original request-bound control read; delivery must never refresh it. */
+  async referenceCurrentReceipt(signal: AbortSignal): Promise<Readonly<{ assertCurrent(): void }>> {
+    if (!this.controlsValue || signal.aborted) fail();
+    const controls = await this.controls(), receipt = controls.currentReceipt(signal);
+    const budget = this.budgetValue ? await this.budget() : undefined;
+    return Object.freeze({
+      assertCurrent: () => {
+        // Shared budget policy remains mandatory even if optional reference proof has expired.
+        budget?.policy.assertLive();
+        receipt.assertCurrent();
+      },
+    });
+  }
+  async assertCurrent(signal?: AbortSignal): Promise<void> {
+    if (signal?.aborted) fail();
     if (this.bindingValue) {
       const controls = await this.controls();
-      await controls.current();
+      // The request or narrower candidate scope abort reaches the bounded head fetch.
+      await controls.current(signal);
+      if (signal?.aborted) fail();
     }
+    if (signal?.aborted) fail();
     if (this.budgetValue) (await this.budget()).policy.assertLive();
+    if (signal?.aborted) fail();
     if (this.snapshotValue) {
       const source = await this.snapshotValue;
       await source.assertCurrent(await source.current());
+      if (signal?.aborted) fail();
     }
   }
 }

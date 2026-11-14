@@ -1,3 +1,4 @@
+import type { AttendanceConfirmation } from "./reference_attendance.ts";
 /** Same-exam university scoring; no curve dependency, inferred report scores or research promotion. */
 import { AccessError } from "./access.ts";
 import { validateScoreInput } from "./overall_analysis.ts";
@@ -7,6 +8,7 @@ import { type NativeExamAnalysis, NativeExamPack } from "../domain/exam_pack.ts"
 import { type SchoolScoreInputs, schoolScoreInputs } from "./school_score_inputs.ts";
 import {
   type SchoolReferenceFunction,
+  type SchoolReferenceResult,
   type SchoolReferenceScoringPort,
   SchoolReferenceScoringService,
 } from "./school_reference_scoring.ts";
@@ -66,7 +68,7 @@ export interface UniversityScoringDataPort {
   getExamPack(examId: string): Promise<NativeExamPack | null>;
   getConversion(offeringId: string): Promise<UniversityConversionRelease | null>;
   getReference?(offeringId: string): Promise<SchoolReferenceFunction | null>;
-  withScoringBatch?<T>(work: () => Promise<T>): Promise<T>;
+  withScoringBatch?<T>(work: () => Promise<T>, signal?: AbortSignal): Promise<T>;
 }
 export interface ScoringState {
   readonly academic_year: number;
@@ -86,6 +88,18 @@ export interface ScoringState {
   readonly context: Readonly<NativeObject>;
   readonly required_input_fields: readonly string[];
   readonly explanations: readonly NativeObject[];
+}
+const REFERENCE_CALCULATIONS = new WeakMap<
+  ScoringResult,
+  Readonly<{ reference: SchoolReferenceResult; input: SchoolScoreInputs; scoresKey: string }>
+>();
+/** The exact reference calculation that produced this result object, if any. */
+export function referenceCalculationOf(
+  result: ScoringResult,
+):
+  | Readonly<{ reference: SchoolReferenceResult; input: SchoolScoreInputs; scoresKey: string }>
+  | null {
+  return REFERENCE_CALCULATIONS.get(result) ?? null;
 }
 export class ScoringResult {
   readonly state: Readonly<ScoringState>;
@@ -167,7 +181,7 @@ export class UniversityScoringService {
         ? new SchoolReferenceScoringService({ getReference: data.getReference.bind(data) })
         : undefined);
   }
-  async batch<T>(work: () => Promise<T>): Promise<T> {
+  async batch<T>(work: () => Promise<T>, signal?: AbortSignal): Promise<T> {
     if (this.preparedInBatch) throw new AccessError("analysis_release_invalid", 503);
     const run = async () => {
       this.preparedInBatch = new Map();
@@ -177,11 +191,12 @@ export class UniversityScoringService {
         this.preparedInBatch = undefined;
       }
     };
-    return this.data.withScoringBatch ? await this.data.withScoringBatch(run) : await run();
+    return this.data.withScoringBatch ? await this.data.withScoringBatch(run, signal) : await run();
   }
   async calculate(
     offering: Readonly<NativeObject>,
     profile: Pick<StoredProfile, "profile_id" | "scores">,
+    attendance?: AttendanceConfirmation | null,
   ): Promise<ScoringResult> {
     const scores = profile.scores;
     let result = new ScoringResult({
@@ -231,10 +246,12 @@ export class UniversityScoringService {
       check(exam.academic_year === offering.academic_year, "year_bridge_required");
       const loaded = await this.data.getConversion(offering.offering_id as string);
       if (loaded === null && this.reference) {
-        const input = facts.input;
+        const input = attendance
+          ? { ...facts.input, attendanceConfirmation: attendance }
+          : facts.input;
         const reference = await this.reference.calculate(offering, input);
         if (reference.reasonCode === "reference_conversion_missing") return result;
-        return result.with({
+        const referenced = result.with({
           reason_code: reference.reasonCode,
           converted_score: reference.convertedScore,
           // A reference calculation never becomes a production-ready ScoringResult.
@@ -248,10 +265,24 @@ export class UniversityScoringService {
           reported_sources: input.reportedSources,
           context: {
             reference_status: reference.status,
+            ...(reference.requiredAttendance
+              ? { required_attendance: [...reference.requiredAttendance] }
+              : {}),
             score_scale_id: reference.scoreScaleId,
             calculation_review_scope: "same_exam_mathematical_reference",
           },
         });
+        // Same request: the reference-percentile step reuses this exact result instead of
+        // recomputing it (identity-keyed, never serialized or shared across requests).
+        REFERENCE_CALCULATIONS.set(
+          referenced,
+          Object.freeze({
+            reference,
+            input,
+            scoresKey: nativeJsonText([profile.profile_id, scores], true),
+          }),
+        );
+        return referenced;
       }
       check(loaded !== null && typeof loaded === "object", "conversion_release_missing");
       const bundle = {

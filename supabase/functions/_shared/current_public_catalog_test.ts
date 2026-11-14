@@ -1,3 +1,9 @@
+import { CurrentPublicSearchScopedService } from "./current_public_scoped_service.ts";
+import { SearchDiagnostic } from "./search_failure_diagnostic.ts";
+import { type ApiHttpPorts, createApiHandler } from "./jungsi/infrastructure/api_http.ts";
+import { RelayBoundary } from "./jungsi/infrastructure/auth_relay.ts";
+import { RequestLimitError } from "./jungsi/application/request_budget.ts";
+import { canonicalApiPolicies } from "../../../tests/edge/public_api_contract_fixture.ts";
 /** Synthetic only. No network/DB/env permissions or original admission values. */
 import { AccessError } from "./jungsi/application/access.ts";
 import type { ApiExecution } from "./jungsi/application/api_dispatch.ts";
@@ -8,6 +14,18 @@ import { utcInstant } from "./jungsi/domain/time.ts";
 import { publicJsonText, PublicResponseProjection } from "./jungsi/application/public_response.ts";
 import { SyntheticUniversityData } from "../../../tests/edge/synthetic_university.ts";
 import { UniversityScoringService } from "./jungsi/application/university_scoring.ts";
+import {
+  type MyScore,
+  myScore,
+  scoreMapPin,
+  ScoreMapService,
+  type ScoreMapStore,
+} from "./jungsi/application/score_map.ts";
+import {
+  SCORE_MAP_INSERT_SQL,
+  SCORE_MAP_PROFILE_SQL,
+  SCORE_MAP_READ_SQL,
+} from "./jungsi/infrastructure/score_map_postgres.ts";
 import routeCatalog from "../../../src/jungsi_touch/application/route_catalog.json" with {
   type: "json",
 };
@@ -559,7 +577,7 @@ Deno.test("current public separate history and recruitment schemas preserve orig
     extended = currentPublicResponseSchemas(schemas) as typeof schemas;
   equal(JSON.stringify(schemas), before);
   for (const op of schemas.operations) {
-    if (!["history.search", "recruitment.read"].includes(op.id)) {
+    if (!["history.search", "recruitment.read", "offerings.search"].includes(op.id)) {
       equal(extended.operations.find((x) => x.id === op.id), op);
     }
   }
@@ -1131,3 +1149,308 @@ import {
     });
   });
 }
+
+const SCORE_OWNER = "00000000-0000-4000-8000-000000000001";
+function scoreMapFixture(options: { profile?: boolean; fail?: boolean } = {}) {
+  const synthetic = new SyntheticUniversityData();
+  const saved = new Map<string, MyScore>(), inserts: number[] = [];
+  const store: ScoreMapStore = {
+    latestProfile: (owner) => {
+      if (options.fail) return Promise.reject(new Error("synthetic storage failure"));
+      equal(owner, SCORE_OWNER);
+      return Promise.resolve(options.profile === false ? null : synthetic.profile());
+    },
+    read: (_owner, profileId, pin, ids) => {
+      equal(profileId, "SYNTHETIC-profile");
+      assert(/^[a-f0-9]{64}$/.test(pin));
+      return Promise.resolve(
+        new Map(ids.filter((id) => saved.has(id)).map((id) => [id, saved.get(id)!])),
+      );
+    },
+    insert: (_owner, _profileId, _pin, rows) => {
+      inserts.push(rows.length);
+      for (const row of rows) saved.set(row.offering_id, myScore(row));
+      return Promise.resolve();
+    },
+  };
+  const data = Object.assign(synthetic, {
+    getCatalog: () =>
+      Promise.resolve({
+        version: "synthetic",
+        status: "approved",
+        asOfUtc: 0n,
+        offerings: [synthetic.offering],
+        history: [],
+      } as CatalogRelease),
+  });
+  const pin = () =>
+    scoreMapPin({ registry: { sha256: "a".repeat(64) }, selection: { sha256: "b".repeat(64) } });
+  const items = [
+    { offering_id: "SYNTHETIC-A-2027", department: "가상분석" },
+    { offering_id: "SYNTHETIC-B-2027", department: "가상검색전용" },
+  ];
+  return { synthetic, saved, inserts, store, data, pin, items };
+}
+Deno.test("score map attaches the same score as analysis, stores it once and reuses it", async () => {
+  const f = scoreMapFixture();
+  const clock = { nowUtc: () => utcInstant("2026-11-10T00:00:00Z") };
+  const first = await new ScoreMapService(f.store, f.data, f.pin, clock).attach(
+    SCORE_OWNER,
+    f.items,
+  );
+  equal(first.state, "complete");
+  const expected = (await new UniversityScoringService(new SyntheticUniversityData()).calculate(
+    f.synthetic.offering,
+    f.synthetic.profile(),
+  )).state.converted_score;
+  assert(expected !== null);
+  const a = first.items[0].my_score as NativeObject, b = first.items[1].my_score as NativeObject;
+  equal(a.status, "ready");
+  equal(a.converted_score, expected);
+  equal(a.reason_code, null);
+  equal(b.status, "pending");
+  equal(b.reason_code, "analysis_catalog_missing");
+  equal(first.items[1].department, "가상검색전용");
+  equal(f.inserts, [1]);
+  const conversions = f.synthetic.calls.filter((c) => c === "conversion").length;
+  const second = await new ScoreMapService(f.store, f.data, f.pin, clock).attach(
+    SCORE_OWNER,
+    f.items,
+  );
+  equal(second.state, "complete");
+  equal((second.items[0].my_score as NativeObject).converted_score, expected);
+  equal(f.synthetic.calls.filter((c) => c === "conversion").length, conversions);
+  equal(f.inserts, [1]);
+});
+Deno.test("score map never fails a search: no profile, storage failure and budget stay explicit", async () => {
+  const clock = { nowUtc: () => utcInstant("2026-11-10T00:00:00Z") };
+  const none = scoreMapFixture({ profile: false });
+  const a = await new ScoreMapService(none.store, none.data, none.pin, clock).attach(
+    SCORE_OWNER,
+    none.items,
+  );
+  equal(a.state, "no_profile");
+  assert(a.items.every((item) => item.my_score === null));
+  const broken = scoreMapFixture({ fail: true });
+  const b = await new ScoreMapService(broken.store, broken.data, broken.pin, clock).attach(
+    SCORE_OWNER,
+    broken.items,
+  );
+  equal(b.state, "unavailable");
+  equal(b.items.map((item) => item.offering_id), ["SYNTHETIC-A-2027", "SYNTHETIC-B-2027"]);
+  assert(b.items.every((item) => item.my_score === null));
+  // Runtime loading failures (catalog-only payloads) stay 계산 중 and are never stored.
+  const loading = scoreMapFixture();
+  loading.data.getExamPack = () =>
+    Promise.reject(new AccessError("runtime_dependency_not_loaded", 503));
+  const d = await new ScoreMapService(loading.store, loading.data, loading.pin, clock).attach(
+    SCORE_OWNER,
+    loading.items,
+  );
+  equal(d.state, "partial");
+  equal(d.items[0].my_score, null);
+  equal(loading.inserts, []);
+  const limited = scoreMapFixture();
+  const c = await new ScoreMapService(limited.store, limited.data, limited.pin, clock, {
+    maxComputePerRequest: 0,
+    computeBudgetMs: 3000,
+  }).attach(SCORE_OWNER, limited.items);
+  equal(c.state, "partial");
+  equal(c.items[0].my_score, null);
+  equal(limited.inserts, []);
+});
+Deno.test("score map rows are closed, owner-scoped and pinned to registry plus selection", async () => {
+  for (const sql of [SCORE_MAP_PROFILE_SQL, SCORE_MAP_READ_SQL]) {
+    assert(sql.includes("owner_id=$1"));
+  }
+  assert(SCORE_MAP_INSERT_SQL.includes("ON CONFLICT DO NOTHING"));
+  assert(!/UPDATE|DELETE/.test(SCORE_MAP_INSERT_SQL));
+  const pin = await scoreMapPin({
+    registry: { sha256: "a".repeat(64) },
+    selection: { sha256: "b".repeat(64) },
+  });
+  equal(
+    pin,
+    await scoreMapPin({
+      registry: { sha256: "a".repeat(64) },
+      selection: { sha256: "b".repeat(64) },
+    }),
+  );
+  assert(
+    pin !==
+      await scoreMapPin({
+        registry: { sha256: "a".repeat(64) },
+        selection: { sha256: "c".repeat(64) },
+      }),
+  );
+  let rejected = 0;
+  for (
+    const bad of [
+      { status: "ready", converted_score: "1.5", official_max_score: null, reason_code: "x" },
+      { status: "pending", converted_score: "1.5", official_max_score: null, reason_code: null },
+      { status: "reference", converted_score: "1e3", official_max_score: null, reason_code: null },
+      { status: "admit", converted_score: "1", official_max_score: null, reason_code: null },
+    ]
+  ) {
+    try {
+      myScore(bad);
+    } catch {
+      rejected++;
+    }
+  }
+  equal(rejected, 4);
+});
+Deno.test("offerings.search projection carries my_score only through the current public schema", () => {
+  const extended = new PublicResponseProjection(
+    currentPublicResponseSchemas(schemas) as typeof schemas,
+    routeCatalog.operations,
+  );
+  const offering = {
+    offering_id: "2027:SYNTHETIC-PK",
+    academic_year: 2027,
+    university_id: "999",
+    university_name: "가상대학교",
+    campus: null,
+    department: "가상학과",
+    track: null,
+    group: "가",
+    region: null,
+    wildcard_group: null,
+  };
+  const page = {
+    status: "ready",
+    reason_code: null,
+    matching_offering_count: null,
+    matching_school_count: null,
+    catalog_version: "synthetic",
+    as_of: "2026-11-10T00:00:00.000000Z",
+    next_cursor: null,
+  };
+  const scored = {
+    ...page,
+    items: [{
+      ...offering,
+      my_score: {
+        status: "reference",
+        converted_score: "641.5",
+        official_max_score: "950",
+        reason_code: "reference_conversion_not_production_approved",
+      },
+    }, { ...offering, offering_id: "2027:SYNTHETIC-PK2", my_score: null }],
+    my_score_state: "complete",
+  };
+  const out = extended.project("offerings.search", "paid", scored) as NativeObject;
+  equal(out.my_score_state, "complete");
+  equal(((out.items as NativeObject[])[0].my_score as NativeObject).converted_score, "641.5");
+  const plain = extended.project("offerings.search", "paid", {
+    ...page,
+    items: [offering],
+  }) as NativeObject;
+  equal((plain.items as NativeObject[])[0].offering_id, "2027:SYNTHETIC-PK");
+});
+
+function failClosedScoreFixture() {
+  const f = fixture();
+  let scoreFactories = 0;
+  const service = new CurrentPublicSearchScopedService(
+    { getCatalog: () => Promise.resolve(null) },
+    f.current,
+    { nowUtc: () => NOW },
+    new CurrentPublicCatalogCursor(new Uint8Array(32).fill(7)),
+    new SearchDiagnostic(),
+    () => new Uint8Array(32).fill(7),
+    () => Promise.reject(new Error("no cursor expected")),
+    () => {
+      scoreFactories++;
+      throw new Error("score map must not start");
+    },
+  );
+  return { f, service, scoreFactories: () => scoreFactories };
+}
+Deno.test("disabled score map preserves search and does not touch a missing 011 table", async () => {
+  const f = failClosedScoreFixture();
+  const expected = await f.f.service.execute(request("offerings.search"));
+  const actual = await f.service.execute(request("offerings.search"));
+  equal(actual.my_score_state, "unavailable");
+  const rows = actual.items as NativeObject[], original = expected.items as NativeObject[];
+  equal(rows.length, original.length);
+  equal(rows.map(({ my_score: _, ...item }) => item), original);
+  assert(rows.every((item) => item.my_score === null));
+  equal(f.scoreFactories(), 0);
+});
+function failClosedHttp(budgetMode: "allow" | "deny" | "abort") {
+  const f = failClosedScoreFixture(), relay = "SYNTHETIC-RELAY-" + "x".repeat(32);
+  let business = 0;
+  const never = () => Promise.reject(new Error("unexpected port access"));
+  const ports: ApiHttpPorts = {
+    relay: new RelayBoundary(relay),
+    clock: { nowUtc: () => NOW },
+    sessions: {
+      verifyUserBearer: () =>
+        Promise.resolve({
+          subjectId: "00000000-0000-0000-0000-000000000001",
+          expiresAtUtc: NOW + 1_000_000n,
+          accountStatus: "active",
+        }),
+    },
+    passes: {
+      readCurrent: (subjectId, evaluatedAtUtc) =>
+        Promise.resolve({
+          authority: "public.jeongsi_passes",
+          metadataVerified: true,
+          subjectId,
+          evaluatedAtUtc,
+          paidUntilUtc: NOW + 1_000_000n,
+        }),
+    },
+    reports: { lookupAccess: never },
+    authorities: { readCurrent: never },
+    resources: { readScope: never },
+    projection: new PublicResponseProjection(
+      currentPublicResponseSchemas(schemas),
+      routeCatalog.operations,
+    ),
+    budget: {
+      async run(_r, work) {
+        if (budgetMode === "deny") throw new RequestLimitError("rate_limit_exceeded", 7);
+        if (budgetMode === "abort") throw new AccessError("security_policy_unavailable", 503);
+        return await work();
+      },
+    },
+    business: {
+      async execute(r) {
+        business++;
+        return await f.service.execute(r);
+      },
+    },
+  };
+  const handler = createApiHandler(canonicalApiPolicies(), ports);
+  const raw = new Request("https://synthetic.invalid/api/v1/offerings/search?academic_year=2024", {
+    headers: { Authorization: "Bearer SYNTHETIC", "X-Jungsi-Relay-Token": relay },
+  });
+  return { ...f, handler, raw, business: () => business };
+}
+Deno.test("HTTP search returns existing rows with score unavailable without any score map access", async () => {
+  const f = failClosedHttp("allow"), response = await f.handler(f.raw);
+  equal(response.status, 200);
+  const body = await response.json();
+  equal(body.my_score_state, "unavailable");
+  assert(body.items.length > 0 && body.items.every((row: NativeObject) => row.my_score === null));
+  equal(f.scoreFactories(), 0);
+  equal(f.business(), 1);
+});
+Deno.test("HTTP budget or canceled admission failures are not turned into successful searches", async () => {
+  for (const [mode, status] of [["deny", 429], ["abort", 503]] as const) {
+    const f = failClosedHttp(mode), response = await f.handler(f.raw);
+    equal(response.status, status);
+    equal(f.business(), 0);
+    equal(f.scoreFactories(), 0);
+  }
+});
+
+Deno.test("an already aborted request never starts optional score work", async () => {
+  const f = failClosedHttp("allow"), controller = new AbortController();
+  controller.abort();
+  await f.handler(new Request(f.raw, { signal: controller.signal }));
+  equal(f.scoreFactories(), 0);
+});

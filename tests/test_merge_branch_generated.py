@@ -72,6 +72,25 @@ class ThreeWay(IsolatedGitEnvironment):
  def test_strict_approved_generator_pin(self):
   with self.assertRaisesRegex(m.Stop,'unapproved_generator'):m.load_generator(Path('.'),{m.GEN:{0:('100644','a'*40)},m.AUDIT:{0:('100644','b'*40)}},None,'c'*40,'b'*40,{k:'e'*40 for k in m.DEPS})
 
+class DestinationPaths(IsolatedGitEnvironment):
+ def setUp(self):
+  super().setUp()
+  import uuid
+  self.repo=P.parent.parent/'outputs/merge_destination_tests'/uuid.uuid4().hex
+  self.repo.mkdir(parents=True,exist_ok=False)
+ def test_missing_outputs_has_actionable_message_and_can_be_created(self):
+  with self.assertRaisesRegex(m.Stop,'outputs_missing: create the outputs folder'):
+   m.check_destination(self.repo,'outputs/preview')
+  self.assertFalse((self.repo/'outputs').exists())
+  (self.repo/'outputs').mkdir()
+  self.assertEqual(m.check_destination(self.repo,'outputs/preview'),self.repo/'outputs/preview')
+ def test_existing_non_directory_is_preserved(self):
+  target=self.repo/'outputs';target.write_bytes(b'preserve')
+  with self.assertRaisesRegex(m.Stop,'outputs_not_regular'):
+   m.check_destination(self.repo,'outputs/preview')
+  self.assertEqual(target.read_bytes(),b'preserve')
+
+
 class PreviewIntegration(IsolatedGitEnvironment):
  def run_case(self,unknown=False,mutated=False,dirty=False,untracked=False):
   h='a'*40;parent='b'*40;g='c'*40;au='d'*40;ids=['1'*40,'2'*40,'3'*40,'4'*40,'5'*40,'6'*40,'7'*40]
@@ -101,6 +120,8 @@ class PreviewIntegration(IsolatedGitEnvironment):
     self.assertEqual(outputs,{});self.assertFalse(hasattr(dest,'created'));return
    result=m.preview(P.parent,'unused',h,parent,g,au,{k:'e'*40 for k in m.DEPS})
   spec=json.loads(outputs['candidate/'+m.SPEC]);self.assertEqual([x['summary'] for x in spec['change_notes']],['kept','ours','theirs']);self.assertEqual(result['generated_count'],3);self.assertEqual(outputs['worktree/docs/clean.md'],b'clean')
+  audit_spec=importlib.util.spec_from_file_location('audit_for_merge_test',P.parent/'audit_documentation_sync.py');actual_audit=importlib.util.module_from_spec(audit_spec);audit_spec.loader.exec_module(actual_audit)
+  self.assertEqual(outputs['candidate/'+m.SPEC],actual_audit.spec_bytes(spec))
   self.assertEqual(outputs['stages/2/docs/generated.md'],b'our generated');self.assertEqual(outputs['stages/3/docs/generated.md'],b'their generated')
   self.assertEqual(result['state'],'REVIEW_ONLY');self.assertIn('normal_git_hooks',result['not_run']);self.assertNotIn('apps/web/unsafe.ts',result['conflicted_paths'])
  def test_preview_composes_and_preserves_stages(self):self.run_case()
@@ -241,5 +262,16 @@ class StageBinding(IsolatedGitEnvironment):
   with self.assertRaisesRegex(m.Stop,'tree_diff_invalid'):self.run_guard({'diff':b'M\0missing-terminator'})
  def test_multiple_or_missing_merge_configuration_not_inferred(self):
   self.assertIn('historical merge invocation not established',self.run_guard()['scope'])
+
+class GitRewriteScoreFormat(unittest.TestCase):
+ def test_zero_padded_git_scores_are_accepted(self):
+  self.assertEqual(m.parse_tree_changes(b'M066\0other\0',False),[('M066',('other',))])
+  self.assertEqual(m.parse_tree_changes(b'R001\0old\0new\0',True),[('R001',('old','new'))])
+ def test_invalid_scores_and_disallowed_rename_remain_rejected(self):
+  for raw,allow in ((b'M101\0x\0',False),(b'M0000\0x\0',False),(b'R001\0a\0b\0',False),(b'R001\0a\0',True)):
+   with self.subTest(raw=raw),self.assertRaises(m.Stop):m.parse_tree_changes(raw,allow)
+ def test_scored_rename_cannot_move_canonical_spec(self):
+  raw=b'R001\0'+m.SPEC.encode()+b'\0other\0'
+  with self.assertRaisesRegex(m.Stop,'spec_path_changed_or_renamed'):m.parse_tree_changes(raw,True)
 
 if __name__=='__main__':unittest.main(verbosity=2)

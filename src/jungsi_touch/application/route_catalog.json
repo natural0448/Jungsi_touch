@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.149",
-  "source_sha256": "71783dff022c43cad7ea88ccf92c1cc098dc1932600019980783030422d9cc3e",
+  "spec_version": "1.9.176",
+  "source_sha256": "9100ed8344a18216511155d7765efb829552e7effb2363291737e3c6561f25bf",
   "pages": [
     {
       "id": "PAGE-01",
@@ -440,14 +440,15 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다.",
+      "response_scope": "본인 대학 환산·지원 검토·유불리·근거·보류 사유 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다. 2026-11-13 취소 전파 소스 후보: replay·noOp 기록 전후, 배치 진입·모집행 반복·환산/누백의 지정 경계에서 취소를 감지하면 security_policy_unavailable 503으로 중단한다. 완료된 쓰기의 롤백이나 진행 중 I/O의 물리 종료는 보장하지 않는다. 정확 후보의 기능 검수·CI·운영 적용은 NOT_RUN이다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "http_contract": {
         "body": [
           "expected_version: positive integer",
-          "offering_ids: 서로 다른 등록 ID 1~100개"
+          "offering_ids: 서로 다른 등록 ID 1~100개",
+          "attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null"
         ],
         "query": [],
         "response": "report (analyses 갱신)",
@@ -498,13 +499,14 @@
         "REQ-12",
         "REQ-15"
       ],
-      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다.",
+      "response_scope": "본인 기본 학교와 실제 학과별 범위·와일드카드 (독립 conversion 상태/점수와 후속 assessment 상태를 구분) (독립 percentile 누백·동점·자료 기준과 후속 판단 상태를 구분) (조건부 내부 방법 조회·분모/분자 범위는 누백 공급의 비활성 제안이며, 미연결 결과는 pending/HOLD; 기존 DTO·성공값·지원판정 의미 유지) 서버 이행 분류는 검증된 기존 모집행 성공값을 보존하고 비공개 정확 조건부 대상에만 적용한다. 신규 분류/사유 코드는 서버 연결·스키마 검증 전 운영 구현 완료로 표시하지 않는다. 새 와일드카드 선택은 본인 소유 리포트의 승인된 자료·정책과 정확 revision에 결속해 목록과 상태를 함께 투영하는 서버 후보이며, 검증되지 않은 구 필드는 숨기고 과거 replay와 목록을 유지한다. 승인 공급자와 writer 증거가 없어 기본 비활성이다. 이 후보를 장래 활성화하면 새 report revision의 candidates JSON에 비공개 선택 초안을 저장할 수 있으므로 기존 writer·불변 선택 증거·복구 계약과 별도 검토가 필요하다. 현재 구성에서는 저장하지 않는다. 본인 응시 영역의 필수 확인이 부족하면 해당 참고 계산을 보류하고 기존 정당 결과와 다른 대학은 유지한다. 2026-11-11 기획 목표(미구현): 기존 정본 입결·누백과 기본 PK를 사용해 학생 성적대의 대학 경계 후보를 먼저 선택한다. 학과별 전수 판단을 선행하지 않으며 동일 시험·모집단에서 학교별 환산 유불리를 비교한다. 와일드카드도 같은 경계를 적용하고 추정·판정보류·확정 상태를 분리한다. 상세 경계 정책·결과 완전성·서버 연결 및 실제 배포는 확인 중이다. 2026-11-13 취소 전파 소스 후보: replay·noOp 기록 전후, 배치 진입·모집행 반복·환산/누백의 지정 경계에서 취소를 감지하면 security_policy_unavailable 503으로 중단한다. 완료된 쓰기의 롤백이나 진행 중 I/O의 물리 종료는 보장하지 않는다. 정확 후보의 기능 검수·CI·운영 적용은 NOT_RUN이다.",
       "implementation_status": "native_edge_REQ27_candidate_python_current_hold",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
       "http_contract": {
         "body": [
-          "expected_version: positive integer"
+          "expected_version: positive integer",
+          "attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null"
         ],
         "query": [],
         "response": "report (analyses/candidates 갱신)",
@@ -690,7 +692,7 @@
         "REQ-25",
         "REQ-26"
       ],
-      "response_scope": "본인 현재 활성 회원 상태",
+      "response_scope": "본인 현재 활성 회원 상태; 관리자 예외의 비식별 내부 관측은 미배포 후보이며 외부 DTO·권한 조건은 유지한다. OPS-503-AUTH-CANCEL-20261112: 인증·본인 확인의 취소 전파와 비밀 없는 지연 진단을 서버 후보로 적용하되 기존 401/403·5초·보안 규칙을 유지한다. 실제 503 원인·배포·운영 해결은 미확인이다.",
       "implementation_status": "implemented_synthetic_HTTP_contract_verified_live_readiness_pending",
       "workflow_service": "jungsi_touch.application.platform.PlatformService.execute",
       "http_adapter": "jungsi_touch.infrastructure.http_api.create_app",
@@ -1771,7 +1773,8 @@
     ],
     "optional_inputs": [
       "english_grade",
-      "korean_history_grade"
+      "korean_history_grade",
+      "second_language"
     ],
     "input_rules": [
       "exam_id·pack_version은 등록 ID 토큰이며 파일 경로가 아니다",
@@ -1779,7 +1782,8 @@
       "inquiry는 서로 다른 두 과목의 subject·standard_score와 선택적 percentile·grade다.",
       "점수·등급·선택과목 검증은 기존 시험 엔진에 위임",
       "학생 ID·유료 플래그·자료 경로·research·승인 상태·동점 정책 입력은 거부",
-      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다."
+      "percentile은 0~100 정수, grade는 1~9 정수다. bool·소수·null·알 수 없는 필드는 거절한다. 같은 시험 공식 매핑과 충돌하면 reported_percentile_conflict/reported_grade_conflict로 422다. 누적값에서 성적표 백분위를 생성하지 않는다.",
+      "second_language는 null(미응시) 또는 subject·grade 두 필드다. subject는 제2외국어/한문 9과목(독일어Ⅰ·프랑스어Ⅰ·스페인어Ⅰ·중국어Ⅰ·일본어Ⅰ·러시아어Ⅰ·아랍어Ⅰ·베트남어Ⅰ·한문Ⅰ) 중 하나, grade는 1~9 정수다. 없거나 null이면 미응시이며 이 필드 전에 저장된 성적도 미응시로 읽는다. 절대평가 등급이라 총점·과목 결과·누적 위치에 넣지 않는다(2026-11-12 최종관리자 결정)."
     ],
     "response_fields": [
       "format",
@@ -1789,6 +1793,7 @@
       "total_standard_score",
       "subjects",
       "absolute_grades",
+      "second_language",
       "overall"
     ],
     "exam_fields": [
@@ -1992,11 +1997,11 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/overall_analysis.ts",
-            "sha256": "3e017844c5542caea0eb86dd943bbb1f5dfe89d58146d07b47e774cb6369d3e7"
+            "sha256": "0c5950512acd3db7f71a5379635137112b9dd4309eda74874929a84771102481"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
+            "sha256": "0c5f961dfaf7d07251630b40a6579c04b71c6513808bb0454b879b916ddecec3"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_compat.ts",
@@ -2239,11 +2244,15 @@
           "overall은 저장된 본인의 기존 학생 DTO다.",
           "유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.",
           "미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.",
-          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다."
+          "정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.",
+          "유료 소유자 리포트의 선택적 reference_attendance_requirements는 승인된 참고 산식의 자기 확인 필요 영역과 프로필·시험·팩 버전만 전달하며 실제 응시 증빙이나 전형 자격 판정이 아니다."
         ],
         "optional_role_fields": {
           "standard": [
             "read_only_snapshot"
+          ],
+          "paid": [
+            "reference_attendance_requirements"
           ]
         }
       },
@@ -2960,7 +2969,8 @@
           "q.qualification_receipt_sha256, review-only descriptor.receipt의 원본 bytes/SHA와 approvals는 같은 service core 바이트 SHA를 가리킨다. jungsi.p1-writer-field-qualification-receipt/v1 rich writer proof는 별도 감사 근거로 보존하고 core 지문을 참조한다. audit 파일을 core로 다시 라벨링하거나 양 형식을 느슨하게 함께 수용하지 않는다.",
           "기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.",
           "Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.",
-          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required."
+          "Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.",
+          "2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다."
         ],
         "field_qualification_contract": {
           "format": "jungsi.history-field-qualification-read/v1",
@@ -3762,7 +3772,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-          "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
+          "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -3870,7 +3880,7 @@
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
-          "sha256": "dd7b81549fabc6382ff996ea4daa12dcb2c745ad89337c7627d0fd2e07683ee0"
+          "sha256": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98"
         },
         {
           "path": "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts",
@@ -3898,25 +3908,27 @@
       "format": "jungsi.service-candidate-suites/v1",
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
-        "path": "tests/review_suite_manifest.json",
-        "sha256": "9edf17b8ee73179070121142802790e693533e5e0ec7313dd66321f500ca2b95"
+        "path": "tests/review_suite_manifest.20261113_fmt.current.json",
+        "sha256": "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "6e3586fbb43fedb7fc199443a928f4277a163c5f5bea069f7734062f0c0b5934"
+        "sha256": "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "837725ab0d1b4df9a55e937896fbead3d88f908451af6931dfef50f489b4eb72"
+        "sha256": "3f714f9e9d9d438a84a47afc18c28367eafd9bc6dbca4e2e3b7b2457a153074e"
       },
       "groups": {
         "p1_review": {
           "roots": [
             "tests/p1_review/test_p1_r27_portable_v2_gate.synthetic.v3.mjs",
             "tests/p1_review/test_p1_r27_release_gate.synthetic.mjs",
-            "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs"
+            "tests/p1_review/test_p1_r27_source_concurrency.synthetic.mjs",
+            "tests/p1_review/test_p1_multipart_input_preflight.synthetic.mjs",
+            "tests/p1_review/test_p1_admission_guidance_single.review-only.synthetic.mjs"
           ],
-          "test_count": 80
+          "test_count": 108
         },
         "service_end": {
           "roots": [
@@ -3950,7 +3962,7 @@
             "tests/service_p1/test_p1_r27_http_order.synthetic.ts",
             "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
           ],
-          "test_count": 79
+          "test_count": 81
         }
       },
       "runtime_scope": "DENO_2_9_7_PORTABLE_CI_NOT_VERIFIED",
@@ -4088,11 +4100,11 @@
       "source_bindings": [
         {
           "path": "scripts/check_edge_contract.py",
-          "sha256": "882f6bbda8054dd3f0cbb4743027e6e99d2255d270fad00219be0c2cddc4e09f"
+          "sha256": "ee123870172124a28f4f0aa3f6ee4517e49e6747d33fdd27580137777a93392e"
         },
         {
           "path": "scripts/run_edge_tests.py",
-          "sha256": "813a602e237814ec4cb5d088986949dde915a81d13b3d04a1a2c34025c51cecb"
+          "sha256": "2991a52964fe544a887c30eb852c708d93474f32e11aefcf91d528dd917979da"
         }
       ],
       "tests": [
@@ -4265,7 +4277,7 @@
         },
         {
           "path": "tests/edge/test_wildcard_off_baseline.synthetic.ts",
-          "sha256": "d726cb87e434e655942b985e3e0695e87918fb25650fb776e3d160d2da9af885"
+          "sha256": "45050b28af44a89cc844883abe8c7104f87cafeeab39154253fca9ad719e4e41"
         },
         {
           "path": "tests/edge/test_wildcard_personal_http.synthetic.ts",
@@ -4290,6 +4302,576 @@
       "fixture_graph_guard": {
         "path": "tests/test_professional_fixture_graph.py",
         "sha256": "533c74359590144b8258f49fb2ec1bc115f5d70951abb22e6bf68bc5f8c8a7fa"
+      }
+    },
+    "reference_db_test_extension": {
+      "format": "jungsi.reference-db-tests/v1",
+      "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
+      "test_paths": [
+        "tests/edge/test_cancellable_db_read.ts",
+        "tests/edge/test_chunked_reference_integration.synthetic.ts",
+        "tests/edge/test_chunked_reference_projection.synthetic.ts",
+        "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
+        "tests/edge/test_existing_reference_candidate_scope.ts",
+        "tests/edge/test_legacy_mixed_followup.ts",
+        "tests/edge/test_native_reference_cdf_projection.ts",
+        "tests/edge/test_native_reference_db_tail.ts",
+        "tests/edge/test_native_tail_fail_closed.followup.synthetic.ts",
+        "tests/edge/test_published_reference_candidate_scope.ts",
+        "tests/edge/test_published_reference_runtime.ts",
+        "tests/edge/test_published_reference_tail_issuer.ts",
+        "tests/edge/test_reference_attendance.synthetic.ts",
+        "tests/edge/test_reference_attendance_http.synthetic.ts",
+        "tests/edge/test_reference_candidate_access.ts",
+        "tests/edge/test_reference_candidate_scope.ts",
+        "tests/edge/test_reference_candidates.ts",
+        "tests/edge/test_reference_db_head_latency.synthetic.ts",
+        "tests/edge/test_reference_group_merge.synthetic.ts",
+        "tests/edge/test_reference_percentile.ts",
+        "tests/edge/test_reference_percentile_postgres.ts",
+        "tests/edge/test_reference_projection_transition.followup.synthetic.ts",
+        "tests/edge/test_reference_report_evidence_verifier.ts",
+        "tests/edge/test_reference_report_projection.ts",
+        "tests/edge/test_reference_report_revision_read.ts",
+        "tests/edge/test_reference_tail_prefetch.followup.synthetic.ts",
+        "tests/edge/test_reference_tail_selection.ts",
+        "tests/edge/test_reference_tail_storage.ts",
+        "tests/edge/test_runtime_controls_abort.ts",
+        "tests/edge/test_runtime_head_receipt.ts",
+        "tests/edge/test_runtime_reference_wiring.ts",
+        "tests/edge/test_saved_reference_tail_source.ts",
+        "tests/edge/test_saved_tail_version_cache.repro.synthetic.ts",
+        "tests/edge/test_school_reference_science_filtered.synthetic.ts"
+      ],
+      "case_names_by_path": {
+        "tests/edge/test_cancellable_db_read.ts": [
+          "SQL transport passes request signal to every read-only setup and role query",
+          "already cancelled SQL is still awaited and cannot succeed",
+          "cancelled SQL sends one driver cancellation and waits for query to settle",
+          "external SQL reserves from the same request and byte budget"
+        ],
+        "tests/edge/test_chunked_reference_integration.synthetic.ts": [
+          "abort stops an in-flight chunk read using the scoped signal",
+          "chunk and existing v1 reader share one request object budget",
+          "chunk byte and offering binding limits fail before unbudgeted read",
+          "chunk issuer is passed the selected parent index and rejects wrong provenance",
+          "chunk selection reuses canonical scope signal through issuer and cancellation",
+          "chunk selector absence preserves the existing v1 service",
+          "chunk selector reaches existing reference service and reuses exact conversion",
+          "chunk service fails closed on compatibility and revoked head",
+          "scoped provider factory shares one enforced budget across both encodings",
+          "separate offerings have separate bound chunk projections under shared budget"
+        ],
+        "tests/edge/test_chunked_reference_projection.synthetic.ts": [
+          "a point reads only index and its one chunk",
+          "binding, head, compatibility, abort and budget remain mandatory",
+          "chunk native types and distinct ascending scores are enforced",
+          "chunked values preserve points, ties, gaps and bounds",
+          "index structural guards reject invalid ranges, mass, size and release",
+          "outside support reads only the index",
+          "tampered chunk is rejected despite unchanged length"
+        ],
+        "tests/edge/test_chunked_runtime_wiring.synthetic.ts": [
+          "runtime wrapper forwards chunk selection and rechecks lease and scoped signal"
+        ],
+        "tests/edge/test_existing_reference_candidate_scope.ts": [
+          "existing scope awaits physically cancelled head reads",
+          "existing scope rejects a changed selection, duplicate or over-limit IDs",
+          "existing selected scope reuses same year and PK without new receipt"
+        ],
+        "tests/edge/test_legacy_mixed_followup.ts": [
+          "mixed evidence preserves unchanged legacy after store and rejects proof removal",
+          "mixed saved report checks real legacy and immutable-new authorities"
+        ],
+        "tests/edge/test_native_reference_cdf_projection.ts": [
+          "native CDF independently binds source rule and calculator version",
+          "native CDF refuses duplicate score, zero weight and incorrect total",
+          "native CDF refuses wrong hash, model pack, scope or support cap",
+          "native sparse index preserves exact ties at every block boundary",
+          "native streaming CDF uses whole cohort denominator and inclusive ties",
+          "native streaming checks cancellation during large input"
+        ],
+        "tests/edge/test_native_reference_db_tail.ts": [
+          "DB adapter uses selected source rule independently from calculator version",
+          "DB head check rejects changed release after current receipt expires",
+          "DB reference adapter rejects unverified model compatibility and aborted delivery",
+          "existing DB CDF rejects a selected exam pack with a different content hash",
+          "existing DB reference adapter binds physical PK and calculates with verified source",
+          "missing selection is pending and mismatched CDF fails without reading source"
+        ],
+        "tests/edge/test_native_tail_fail_closed.followup.synthetic.ts": [
+          "a selected native tail rejects a missing calculator rule and a mismatched CDF hash"
+        ],
+        "tests/edge/test_published_reference_candidate_scope.ts": [
+          "candidate cancellation waits for started head read to acknowledge abort",
+          "candidate scope refuses other exam, current head, offering or budget",
+          "candidate scope returns only same-exam selected IDs under existing budget"
+        ],
+        "tests/edge/test_published_reference_runtime.ts": [
+          "published runtime opens existing DB CDF under selected identity and rechecks DB receipt",
+          "runtime assembles selected reference, owner scope and exact provenance under one lease",
+          "runtime refuses scope that exceeds existing policy limit",
+          "runtime reuses the approved selection for 4P when no separate scope receipt exists",
+          "unpublished reference selection leaves existing service unaltered"
+        ],
+        "tests/edge/test_published_reference_tail_issuer.ts": [
+          "existing selection without a physical PK stays unavailable without inventing a link",
+          "existing year:PK selection can reuse the already verified reference binding",
+          "issuer binds current selected tail, report offering and exact exam compatibility",
+          "issuer refuses forged pins, mismatched object sizes and cancelled operations",
+          "issuer refuses missing, duplicate or unselected offering",
+          "issuer rejects changed head or approval before reading",
+          "issuer rejects pack, context, score axis, proof and recipient mismatches",
+          "native DB exact-pack fallback rejects changed exam and partial compatibility metadata",
+          "native DB exact-pack fallback uses existing selected proof without a new compatibility receipt",
+          "same signal reuses receipt while separate scopes recheck it",
+          "selected calculator binds original rule independently from calculator version",
+          "selected offering list is removed from the exact saved scoring context"
+        ],
+        "tests/edge/test_reference_attendance.synthetic.ts": [
+          "confirmation cannot transfer across profile, exam or selected pack",
+          "legacy rules without required attendance retain previous behavior",
+          "selected rule requires each explicitly confirmed area for reference only",
+          "untrusted or malformed attendance data never enables calculation"
+        ],
+        "tests/edge/test_reference_attendance_http.synthetic.ts": [
+          "4-page attendance hold retains old reference while a different university is newly computed",
+          "reference attendance flows through owned analysis and preserves saved prior",
+          "reference attendance is accepted through the existing authenticated HTTP request",
+          "reference attendance needs appear as owner-only status without overwriting a prior result",
+          "unconfirmed attendance preserves prior 4-page reference groups while ordinary candidates continue",
+          "v6 carries original reference evidence across unchanged candidate rebuild",
+          "v6 does not carry stale or inconsistent reference groups",
+          "v6 handles actual request lease and control receipt expiry without hiding other failures",
+          "v6 reproduction: reference expiry can fail both report delivery stages",
+          "v6 retains matching saved reference group when a new scope is unavailable"
+        ],
+        "tests/edge/test_reference_candidate_access.ts": [
+          "reference scope denies unconfirmed report, unapproved catalog, lost lease or revoked release",
+          "reference scope rechecks report revision and authority after selection",
+          "reference scope rejects free session and expired paid rights",
+          "reference scope rejects unverified read and different budget admission",
+          "reference scope rejects wrong owner, revision, profile, exam, year, basis and catalog",
+          "reference scope reuses owned confirmed report, paid session and current catalog"
+        ],
+        "tests/edge/test_reference_candidate_scope.ts": [
+          "reference candidate calculation waits for provider cancellation when aborted",
+          "reference candidate cannot settle while cancelled calculation remains in flight",
+          "reference candidate scope fails if the verified current selection changes",
+          "reference candidate scope freezes independently selected IDs",
+          "reference candidate scope is absent unless a trusted issuer is injected",
+          "reference candidate scope rejects duplicates and scope beyond the budgeted cap",
+          "reference candidate scope rejects invalid authority pins",
+          "reference candidate scope requires an existing live admission and signal",
+          "reference candidate scope waits for physical cancellation after request abort"
+        ],
+        "tests/edge/test_reference_candidates.ts": [
+          "reference candidates exclude invalid, ineligible, unverified and out-of-range data",
+          "reference candidates remain protected personal report components",
+          "reference candidates remain unranked and never become an admission decision"
+        ],
+        "tests/edge/test_reference_db_head_latency.synthetic.ts": [
+          "a changed head is rejected on refresh and cannot yield a receipt",
+          "head query at 1499ms may pass but at 1500ms expires from read start"
+        ],
+        "tests/edge/test_reference_group_merge.synthetic.ts": [
+          "changed university metadata holds only that group and duplicate IDs fail closed",
+          "old and other universities' new reference groups coexist without replacing old values",
+          "old reference row is preserved even when same offering is recalculated"
+        ],
+        "tests/edge/test_reference_percentile.ts": [
+          "3P keeps a successful row when another selected saved source fails",
+          "attendance remains required for reused and direct reference percentile paths",
+          "changed same-profile inputs cannot replay a prior reference conversion",
+          "mismatched or failed reference provenance cannot certify the result",
+          "missing tail and out of support stay pending",
+          "native DB is consulted only when the saved and chunked sources are unselected",
+          "native DB reference reaches the same university percentile service without changing production status",
+          "production or mismatched profiles cannot enter reference path",
+          "public offering ID does not assume the physical source PK has the same representation",
+          "reference percentile reuses exact tail and does not grant production readiness",
+          "reference provenance is stored privately only for the successful exact result",
+          "same pack version without independent compatibility proof stays pending",
+          "saved source errors never fall through to a native DB source",
+          "saved tail is preferred over a separately available native DB adapter",
+          "selection freshness is rechecked after the tail query",
+          "stale selection and altered offering binding stay pending",
+          "verified reference inputs are reused within a request and selections are still rechecked",
+          "wrong offering, rule, exam or pack cannot use a tail"
+        ],
+        "tests/edge/test_reference_percentile_postgres.ts": [
+          "DB reader rejects duplicate PK, unapproved metadata and bad method hash",
+          "DB source rejects changed gzip bytes and does not raise existing byte budget",
+          "current DB source reads by year and physical PK and verifies original gzip and source SHA",
+          "missing PK stays missing and cancelled request cannot read source",
+          "reference DB receipt separately identifies expiry and a replaced head check"
+        ],
+        "tests/edge/test_reference_projection_transition.followup.synthetic.ts": [
+          "a report changed after routing cannot use the old authority",
+          "expired or revoked receipt blocks settled legacy delivery without new I/O",
+          "invalid or null evidence never falls back to the existing authority",
+          "only absence of evidence selects the existing authority",
+          "ownership read failure or proof verification error never falls back"
+        ],
+        "tests/edge/test_reference_report_evidence_verifier.ts": [
+          "candidate group cannot substitute another offering or reference value",
+          "reference assessment and candidate require exact owner revision and currently selected source",
+          "report proof accepts only the matching currently verified DB or storage source",
+          "revocation, other owner and request cancellation cannot validate evidence",
+          "tampered current value or issued proof is withheld"
+        ],
+        "tests/edge/test_reference_report_projection.ts": [
+          "a recomputed group hash cannot hide a changed reference value",
+          "after settlement reference receipt uses no external I/O and expires at reuse limit",
+          "free saved access is restricted to existing component rights",
+          "old or tampered reports never gain reference disclosure from a hash alone",
+          "proof cannot change while the independent verifier is running",
+          "reference delivery fails closed on later source revocation",
+          "reference export binds proof to the exact owned report inside the print snapshot",
+          "reference projection rejects mismatched owner, revision and report identity",
+          "reference report projection admits independently verified stored values only",
+          "reference runtime composes stored report authority inside the same budget lease"
+        ],
+        "tests/edge/test_reference_report_revision_read.ts": [
+          "historical reader rejects different owner, wrong revision, invalid input and duplicate rows",
+          "historical report is selected by authenticated owner and exact revision in read-only role"
+        ],
+        "tests/edge/test_reference_tail_prefetch.followup.synthetic.ts": [
+          "a selected-source failure is propagated after active workers settle",
+          "abort waits for in-flight workers and does not start another selected read",
+          "factory prefetch uses the same source, scope and at most four concurrent workers",
+          "one 3P selection failure does not stop other rows or disappear on retry"
+        ],
+        "tests/edge/test_reference_tail_selection.ts": [
+          "catalog-only request does not load private tail or compatibility bodies",
+          "current selected exam pin binds verified bytes and rejects stale head",
+          "reference selection requires actual current head and rejects revocation",
+          "reference selection returns detached metadata rather than mutable originals",
+          "reference source is closed without freshness authority or after cancellation",
+          "selected reference sources remain lazy and bind exact registry+selection",
+          "unselected reference tail cannot be read from the registry"
+        ],
+        "tests/edge/test_reference_tail_storage.ts": [
+          "aborted request performs no Storage access",
+          "compatibility receipt is reference-only and validates original bytes",
+          "compatibility receipt physical fetch observes scope cancellation",
+          "completed bucket metadata can be reused across live signals",
+          "reference tail bytes preserve exact payload and use existing bounded storage fetch",
+          "reference tail enforces length configured limit and private bucket; binder verifies hash and version",
+          "reference tail metadata rejects promotion, missing review, archive and bad scope",
+          "scope abort cancels and awaits an already-open response stream",
+          "scope abort reaches pending physical fetch before the operation settles",
+          "selected metadata recognizes reference-only tail without making it production approved"
+        ],
+        "tests/edge/test_runtime_controls_abort.ts": [
+          "completed head may be reused across independently cancellable scopes",
+          "head scope abort cancels already-open stream before settlement",
+          "head scope abort reaches physical fetch and rejected pin is not reused"
+        ],
+        "tests/edge/test_runtime_head_receipt.ts": [
+          "cached head receipt expires from original physical start, not reuse time",
+          "expired binding prevents a formerly valid receipt",
+          "receipt is tied to each live signal and the unchanged physical read start"
+        ],
+        "tests/edge/test_runtime_reference_wiring.ts": [
+          "candidate deadline aborts the physical head check before budget callback returns",
+          "head checks reuse the same signal within one scope but not across scopes",
+          "reference factory cannot run with an unrelated budget admission or return a partial issuer",
+          "reference head check receives the same abort signal and stops before settlement",
+          "reference proof is denied after head revocation, cancellation or failed settlement",
+          "reference wiring is usable only inside the real budget callback and after successful settlement",
+          "reference wiring rejects another request, admission, owner and stale lease",
+          "settled reference delivery rechecks the original receipt without I/O"
+        ],
+        "tests/edge/test_saved_reference_tail_source.ts": [
+          "36 candidate reads reuse one scope signal while different scopes remain isolated",
+          "36 tail selections reuse completed bounded head metadata across live scopes",
+          "an unissued saved tail exposes no provenance method",
+          "budgeted synthetic storage fetch physically ends before aborted candidate scope settles",
+          "current selection issuer reaches exact saved-tail provenance through real adapter",
+          "lease and tail share one actual head scope for all 36 selections",
+          "saved tail provenance requires current compatible selection and exact issuer pins",
+          "saved-tail provider does not serve data after abort",
+          "saved-tail provider enforces request byte budget before reading",
+          "saved-tail provider enforces request cache object count",
+          "saved-tail provider forwards scope abort to selection and reads",
+          "saved-tail provider rechecks revoked head and compatibility",
+          "saved-tail provider rejects a wrong hash or wrong offering binding",
+          "saved-tail provider rejects differing metadata for the same object key",
+          "saved-tail provider shares immutable bytes only within its admitted request"
+        ],
+        "tests/edge/test_saved_tail_version_cache.repro.synthetic.ts": [
+          "cached tail cannot accept a second selection with a different version"
+        ],
+        "tests/edge/test_school_reference_science_filtered.synthetic.ts": [
+          "filtered operation is limited to best inquiry and caller cannot supply its derived value",
+          "filtered reference requires science and preserves an observed zero",
+          "filtered reference selects maximum among eligible science inquiries",
+          "filtered reference still rejects duplicate, incomplete, invalid, and unsupported inquiry inputs",
+          "filtered reference uses science only for mixed inquiries in either order",
+          "unfiltered maximum retains existing behavior for a different reference domain"
+        ]
+      },
+      "case_identity_sha256": "e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1",
+      "test_count": 199,
+      "baseline_foundation_count": 656,
+      "source_bindings": [
+        {
+          "path": "tests/edge/test_cancellable_db_read.ts",
+          "sha256": "e2e344e0d3ce5d24777897fa69d70ee63835b2058ea82b823ef29674613549fa"
+        },
+        {
+          "path": "tests/edge/test_chunked_reference_integration.synthetic.ts",
+          "sha256": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074"
+        },
+        {
+          "path": "tests/edge/test_chunked_reference_projection.synthetic.ts",
+          "sha256": "5a7115cb44a8a5216fa4423f0573d356128d130faeae40ca2d5faa6afb186fa9"
+        },
+        {
+          "path": "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
+          "sha256": "96673fec9c99683bebc4f29a4821075b2b26385f36f2668c7c6631885f474bb2"
+        },
+        {
+          "path": "tests/edge/test_existing_reference_candidate_scope.ts",
+          "sha256": "e5ca0a7c408013a0629c10414fc6063b94d258ce3d55d19b135a80adf3c92feb"
+        },
+        {
+          "path": "tests/edge/test_legacy_mixed_followup.ts",
+          "sha256": "9a466c3619fa98d3e95f07c93c333ac156c79d22a210b5905cc9225d296e635e"
+        },
+        {
+          "path": "tests/edge/test_native_reference_cdf_projection.ts",
+          "sha256": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5"
+        },
+        {
+          "path": "tests/edge/test_native_reference_db_tail.ts",
+          "sha256": "e419961ed501b64286a0fcd0019bb2b02031e954a440f883517b41df84d95b32"
+        },
+        {
+          "path": "tests/edge/test_native_tail_fail_closed.followup.synthetic.ts",
+          "sha256": "3157b3146f3f3a034970c0b60774510f0d5015d56858c65eaac4473b19991f00"
+        },
+        {
+          "path": "tests/edge/test_published_reference_candidate_scope.ts",
+          "sha256": "712a68010da9c583ce271049a9ed0bcaaea1b51109a2155de8fb0f1443c0092b"
+        },
+        {
+          "path": "tests/edge/test_published_reference_runtime.ts",
+          "sha256": "0c61ceea7fd0b7968fec5cbcbf6332853f39cf2aa404421f79aaf8de8c66ab4e"
+        },
+        {
+          "path": "tests/edge/test_published_reference_tail_issuer.ts",
+          "sha256": "e6e35c2fa0b6579d5b9be6f136bf799f8566025778bc922e1d80ea3f264f6fc8"
+        },
+        {
+          "path": "tests/edge/test_reference_attendance.synthetic.ts",
+          "sha256": "d886f10da052eced9cb367651cf7c8e4a5912e5ca2381885f616ee77fadc709c"
+        },
+        {
+          "path": "tests/edge/test_reference_attendance_http.synthetic.ts",
+          "sha256": "af7fbc29d33794b13245148e6976ad92523f51314f66582a7ce51d22518b0eb5"
+        },
+        {
+          "path": "tests/edge/test_reference_candidate_access.ts",
+          "sha256": "bac03b5afb5a20e8cfe2313a298c6fba808d7cdeefa73aa7c4f199951d2baad8"
+        },
+        {
+          "path": "tests/edge/test_reference_candidate_scope.ts",
+          "sha256": "b9175213b2ed963e22f000824450a483a86fbdf90259bd2394fd54a3f7be0fd7"
+        },
+        {
+          "path": "tests/edge/test_reference_candidates.ts",
+          "sha256": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8"
+        },
+        {
+          "path": "tests/edge/test_reference_db_head_latency.synthetic.ts",
+          "sha256": "7475a4903613ef424377ea9e02d5376155e93c09cd0aca9bff146c921360d27a"
+        },
+        {
+          "path": "tests/edge/test_reference_group_merge.synthetic.ts",
+          "sha256": "dc1076a49bc7afbdec07c68193988b8458cbf177b6620dd7fc70c5731eb659ef"
+        },
+        {
+          "path": "tests/edge/test_reference_percentile.ts",
+          "sha256": "5286928e9a28a7550634c2d22345183ab8b6c4c3ebf55e0629c4b1f1b227a418"
+        },
+        {
+          "path": "tests/edge/test_reference_percentile_postgres.ts",
+          "sha256": "8dfcbaf989bce80f738b0f56ee511bc51251a93f59228e640da415910fef4578"
+        },
+        {
+          "path": "tests/edge/test_reference_projection_transition.followup.synthetic.ts",
+          "sha256": "d9b30112e666a07e619f28e2b517d5a692a593a216a53f5f00b5bc21d69c28a4"
+        },
+        {
+          "path": "tests/edge/test_reference_report_evidence_verifier.ts",
+          "sha256": "5bf177d01710f275df0063e46088b97a2cef4bd93084f23a5bd7e08b6e1e6c25"
+        },
+        {
+          "path": "tests/edge/test_reference_report_projection.ts",
+          "sha256": "283804b1db3da8b32a595c60a623a629eb4fdad65dfbff2522c34ad95aef6b53"
+        },
+        {
+          "path": "tests/edge/test_reference_report_revision_read.ts",
+          "sha256": "177140e53b4635d2be31f67c1308285b452fbc0c7c78556b8123a67ac6ece59f"
+        },
+        {
+          "path": "tests/edge/test_reference_tail_prefetch.followup.synthetic.ts",
+          "sha256": "909acf1c05d7c937cbd82fcd6e19affd39d91e8f881b6ea29f7a699bfa1600c7"
+        },
+        {
+          "path": "tests/edge/test_reference_tail_selection.ts",
+          "sha256": "1dd7607650896db3bdc5b1682bd902fb5813cf3daf20d5c1587eaa7ce3609d7b"
+        },
+        {
+          "path": "tests/edge/test_reference_tail_storage.ts",
+          "sha256": "33da457ca6faedfface04741fbd27902542e8b8c2d719941eef5c322e8df03e8"
+        },
+        {
+          "path": "tests/edge/test_runtime_controls_abort.ts",
+          "sha256": "53c1707e2b4e0ca3b397e2d4afec561a8a8d63983c576934659966b91d0c4858"
+        },
+        {
+          "path": "tests/edge/test_runtime_head_receipt.ts",
+          "sha256": "7a269a85827a902573457c380f267a2f053007c30baa9dbc06f832bf92824567"
+        },
+        {
+          "path": "tests/edge/test_runtime_reference_wiring.ts",
+          "sha256": "3e1ded0f6bdb918eb5003fd38a1c25f81bafe9ea147d5b7997c86565df70ebc9"
+        },
+        {
+          "path": "tests/edge/test_saved_reference_tail_source.ts",
+          "sha256": "273909d53c53b69edaac84df9981f42210cb2293157c54acc68a417646a1395d"
+        },
+        {
+          "path": "tests/edge/test_saved_tail_version_cache.repro.synthetic.ts",
+          "sha256": "f6ec8853edb065fc607ebcb9527a91a173fd9f100cdae62e7d2f6e0a2b8726ce"
+        },
+        {
+          "path": "tests/edge/test_school_reference_science_filtered.synthetic.ts",
+          "sha256": "c0b193287e8c31c0d605e9f9483c70a778844449d3a2af23bb077f22130b6afb"
+        }
+      ],
+      "regression_test": {
+        "path": "tests/test_reference_db_suite_registration.py",
+        "sha256": "e7fb91e5538ffc6133d023a18dc9d0c231bf9378794ee9244956ed3fc200f468"
+      },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "score_map_source_extension": {
+      "format": "jungsi.score-map-source-extension/v1",
+      "status": "SOURCE_PREPARED_NOT_ACTIVATED",
+      "schema_source": "database/migrations/011_score_maps.prepared.sql",
+      "schema_version": "score_maps_2026",
+      "legacy_ledgers_modified": false,
+      "new_role_or_account_rights": false,
+      "runtime_privileges": [
+        "SELECT",
+        "INSERT"
+      ],
+      "operating_DB_writes": 0,
+      "test_path": "supabase/functions/_shared/current_public_catalog_test.ts",
+      "source_bindings": [
+        {
+          "path": "database/migrations/011_score_maps.prepared.sql",
+          "sha256": "dfc800c660310f896a1c9f2d244c9ef25dde17c15ca2747e61e6821393916080"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/application/score_map.ts",
+          "sha256": "10b78c18184a6d89bade692ff7d2f00059a1d41dc2c957be8709db29cba13e40"
+        },
+        {
+          "path": "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts",
+          "sha256": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f"
+        }
+      ],
+      "attendance_cache_review_20261110": {
+        "status": "SYNTHETIC_ONLY_DB_RUNTIME_NOT_RUN",
+        "policy": "기존 확정 점수만 캐시에서 재사용하고 참고·대기 값은 현재 정책으로 다시 계산한다. 새 참고·대기는 저장하지 않는다. 과거 행은 보존하며 같은 키의 과거 행에 따른 재계산·실제 부하는 미검증이다.",
+        "test_path": "supabase/functions/_shared/score_map_attendance_test.ts",
+        "test_count": 6,
+        "test_case_names": [
+          "approved cached score stays available to its owner only",
+          "cached reference cannot bypass required self reported attendance",
+          "historical pending never masks newly ready score and is not modified",
+          "reference results count toward unchanged per request calculation limit",
+          "reference without attendance requirement remains visible after verification",
+          "transient pending is not inserted and can become approved ready"
+        ]
+      },
+      "preview_admission_guard_20261110": {
+        "status": "SEARCH_PREVIEW_HELD_EXISTING_ANALYSIS_UNCHANGED",
+        "reason": "catalog_only 선택에서 시험팩·산식이 제공되지 않으며 검색 미리보기의 추가 계산·SQL 취소가 기존 분석 예산에 결속됐는지 미확인이다.",
+        "behavior": "운영 결합 검색 공장은 점수표 공급자를 연결하지 않아 추가 계산·점수표 DB 접근과 새 my_score 필드 없이 기존 검색 응답을 유지한다. 점수표 소스와 직접 합성 검사는 보류 후보로 보존한다. 본인 분석과 4페이지 후보는 변경하지 않는다.",
+        "test_path": "supabase/functions/_shared/current_public_catalog_test.ts",
+        "test_cases": [
+          "HTTP budget or canceled admission failures are not turned into successful searches",
+          "HTTP search returns existing rows with score unavailable without any score map access",
+          "an already aborted request never starts optional score work",
+          "disabled score map preserves search and does not touch a missing 011 table"
+        ],
+        "runtime_and_011_status": "NOT_VERIFIED",
+        "factory_regression_test": "tests/cursor_contract_review/combined_policy_catalog_runtime.test.ts"
+      },
+      "owner_v2_reconciliation_20261110": {
+        "source_commit": "ab11432efcd61b7290e766e17241d61441554907",
+        "status": "REVIEW_ONLY_SEARCH_PREVIEW_HELD",
+        "preserved": "v2 캐시 지문과 일시 런타임 오류 재시도, 기존 참고·대기 캐시 재검증을 함께 보존한다.",
+        "scope": "검색 미리보기 추가 계산은 기존 예산·취소 결속 전 unavailable이며, 그동안 검색은 catalog_only 자료 범위를 유지한다. 기존 3·4페이지 분석은 변경하지 않는다."
+      }
+    },
+    "university_cancellation_test_extension": {
+      "format": "jungsi.university-cancellation-tests/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "test_paths": [
+        "tests/edge/test_university_analysis_cancellation.ts"
+      ],
+      "case_names_by_path": {
+        "tests/edge/test_university_analysis_cancellation.ts": [
+          "cancelled analysis does not start reference prefetch",
+          "cancelled cached analysis does not start no-op receipt write",
+          "cancelled calculation does not start the next expensive dependency",
+          "cancelled replay does not deliver a saved result or modify its receipt",
+          "cancelled request never enters the scoring batch provider",
+          "cancelled university work does not start a later offering or write a partial report"
+        ]
+      },
+      "case_identity_sha256": "ab86f3311570dd14604d5e82d37e64e4b3cfe9f35333bd745e6462fd011fe11c",
+      "test_count": 6,
+      "baseline_foundation_count": 656,
+      "baseline_test_sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976",
+      "source_bindings": [
+        {
+          "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+          "sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+        },
+        {
+          "path": "tests/edge/test_university_analysis_cancellation.ts",
+          "sha256": "11d35bfd08fd9e4a062aac1dcb1410e711282e4e987a4f40f113ffc13c0defb0"
+        }
+      ],
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "reference_safety_synthetic_test_extension": {
+      "format": "jungsi.reference-safety-synthetic-suite/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "activation_status": "NOT_RUN",
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "operating_writes": 0,
+      "test_count": 18,
+      "test_paths": [
+        "supabase/functions/_shared/jungsi/application/identity_fence.synthetic_test.ts",
+        "supabase/functions/_shared/jungsi/application/reference_quiescence_fence.synthetic_test.ts",
+        "supabase/functions/_shared/jungsi/application/named_owner_port.synthetic_test.ts"
+      ],
+      "manifest": {
+        "path": "tests/reference_safety_suite_manifest.20261113_fmt.current.json",
+        "sha256": "08a8d4689214f5eeb7890b8623f1eab7ff52e2d06eb80d1fafa9c16403e8e018"
       }
     }
   },
@@ -4506,25 +5088,27 @@
       "verification": {
         "format": "jungsi.school-reference-synthetic-verification/v1",
         "baseline_foundation_count": 656,
-        "test_count": 46,
+        "test_count": 97,
         "test_paths": [
           "tests/edge/test_school_reference_scoring.ts",
           "tests/edge/test_school_reference_provider.ts",
           "tests/edge/test_history_metric_alias.ts",
-          "tests/edge/test_saved_reference_projection.ts"
+          "tests/edge/test_saved_reference_projection.ts",
+          "tests/edge/test_scope_signal_followup.synthetic.ts",
+          "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts"
         ],
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog_test.ts",
-            "sha256": "af1707b0f84b84025e8e6a139fad2c4bec20ed33b8f477ce880fa776456025b0"
+            "sha256": "82f9c94d4c13bd24f3298933551c38a3280ad54ca221c1127c122c0a473f1da7"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
@@ -4535,20 +5119,28 @@
             "sha256": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a"
           },
           {
+            "path": "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts",
+            "sha256": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
+            "sha256": "f4521eb38d114dd2b60563937b3a6c6fb1ed0d4330565c4a1e6115508624ed23"
+          },
+          {
             "path": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
-            "sha256": "b7df1e1859b6f485dd672d4d0299792bada03d245baa5e650fa4f36cf5b702b4"
+            "sha256": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts",
-            "sha256": "4f95a22edbdc24b5174094144bc49332582c47178f54c678ade74e1318bd56de"
+            "sha256": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
-            "sha256": "3d294305b2217a664e10c254853d6502ce0601bc9ac116a281d3b68a88ddeee5"
+            "sha256": "6e65033070ea1d568a0e6c54064399d8c4a6b31500145151c5a14a672cf74ee8"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
-            "sha256": "7782fd76cc8757181212bd9b034893d4c359119c63315eddafebddedbfe2c249"
+            "sha256": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201"
           },
           {
             "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
@@ -4556,35 +5148,55 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
-            "sha256": "96841feb03db3a3ee5a88de6ceb759910d5f024654809e77b2172b3256169466"
+            "sha256": "e862dba20a9c52f56728fa7e4fcd590a12aac8a5fa6059a098db7fd239a9946a"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
-            "sha256": "f0329e3d1dc216eb9313432b745b54b1f6d4dfb1398e003789308f67e30f970f"
+            "sha256": "0c5f961dfaf7d07251630b40a6579c04b71c6513808bb0454b879b916ddecec3"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
-            "sha256": "3c9ef09bfa6ba1885545c632621da8eb13d776e311e47066a590df9097e23523"
+            "sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts",
+            "sha256": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "93ae8db8bd20127fe3207601ecb3d0573b1d557cd5122a83a3ba7fa599d05309"
+            "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
-            "sha256": "ba71cdd75e74264a12d98d96e2751d6c080c0cd20fb18501063e4d9124dd876b"
+            "sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
+            "sha256": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
-            "sha256": "c52e402a66b2034f4d2a08d2033226e11d4cedb33597e1d91f9bd7a8ed60aade"
+            "sha256": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
-            "sha256": "320637d2558750e3bade1bd3ecbfaa15bb427ad0b9970441f813e2843759afa0"
+            "sha256": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed"
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "227dc89330ea7bae939134dbf0b165365201831c9327b6476d166e8c6abf6973"
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
+          },
+          {
+            "path": "tests/edge/reference_candidate_scope_cases.ts",
+            "sha256": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c"
+          },
+          {
+            "path": "tests/edge/saved_reference_tail_source_cases.ts",
+            "sha256": "7fed940626b329581c84d8759e78aab303f4881518179d8ac9c7035184ce7682"
           },
           {
             "path": "tests/edge/synthetic_school_reference.ts",
@@ -4596,26 +5208,403 @@
           },
           {
             "path": "tests/edge/test_saved_reference_projection.ts",
-            "sha256": "3598b2c3bdd087fdc603b7734c41be170d7751600c7ff4e0a3ff0601fa87c888"
+            "sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19"
+          },
+          {
+            "path": "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts",
+            "sha256": "7366d7c14c4d5eb880a8f34e13cf51d8aaa6bd3fefc3653a50f586db12b284c8"
           },
           {
             "path": "tests/edge/test_school_reference_provider.ts",
-            "sha256": "503cf88c2eee0b902b4d70b78377f6628f65606b96796f0c1e2bbd836ccf1001"
+            "sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8"
           },
           {
             "path": "tests/edge/test_school_reference_scoring.ts",
-            "sha256": "23dcf09ff4f6474b0327d986213562b28b607393e022084cf158f6bd99c38424"
+            "sha256": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d"
+          },
+          {
+            "path": "tests/edge/test_scope_signal_followup.synthetic.ts",
+            "sha256": "bdea6b4ae2914cc16e83da90fc8c5d61617d0d5f42a8e26938967cc5565daa45"
           },
           {
             "path": "tests/edge/test_university_analysis.ts",
-            "sha256": "2adb91666412a2ae1e9c12721e4ea66773fd3f94eec4ac727b2cb7b44ae79e36"
+            "sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976"
           }
         ],
         "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
         "activation_status": "NOT_RUN",
         "operating_writes": 0
       },
-      "serving_composition": "NativeRuntimeApi uses runtimeAnalysisDataPort to forward getReference and withScoringBatch; current unqualified selections suppress reference lookup alongside production conversion."
+      "serving_composition": "NativeRuntimeApi uses runtimeAnalysisDataPort to forward getReference and withScoringBatch; current unqualified selections suppress reference lookup alongside production conversion.",
+      "attendance_confirmation_contract": {
+        "format": "jungsi.reference-attendance-self-confirmation/v1",
+        "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_DEPLOYED",
+        "requirements": [
+          "REQ-05",
+          "REQ-06",
+          "REQ-22",
+          "REQ-24",
+          "REQ-25",
+          "REQ-26",
+          "REQ-27"
+        ],
+        "operations": [
+          "university.analyze",
+          "candidates.build"
+        ],
+        "read_and_export": [
+          "report.read",
+          "report.export"
+        ],
+        "scope": "서버가 선택·해시·승인한 학교별 참고 산식에 선언된 필수 응시 영역에만 적용한다. 공식 산출·다른 대학·기존 저장 결과는 보존한다.",
+        "request": {
+          "field": "attendance_confirmation",
+          "optional": true,
+          "identity_fields": [
+            "profile_id",
+            "exam_id",
+            "pack_version"
+          ],
+          "area_fields": [
+            "korean",
+            "math",
+            "english",
+            "korean_history",
+            "inquiry_1",
+            "inquiry_2"
+          ],
+          "values": "boolean 또는 null; 생략·false·null은 미확인",
+          "identity": "인증 소유 리포트의 확정된 불변 프로필·시험·팩과 서버에서 비교한다.",
+          "lifetime": "요청 단위 자기 확인; 답변을 기존 성적 프로필에 저장하지 않는다."
+        },
+        "response": {
+          "field": "reference_attendance_requirements",
+          "role": "paid own report only",
+          "fields": [
+            "status",
+            "profile_id",
+            "exam_id",
+            "pack_version",
+            "confirmation_kind",
+            "offerings"
+          ],
+          "status": "confirmation_required",
+          "confirmation_kind": "self_reported",
+          "reason_code": "reference_attendance_confirmation_required"
+        },
+        "trusted_metadata": "검증된 선택 산식 패키지 domain.required_attendance의 열거 영역만 적용한다. 필드 없는 기존 산식은 기존 동작을 유지하며, 적용 대상의 실제 선택 패키지에 조건이 있음을 확인하기 전 활성화하지 않는다.",
+        "remaining": [
+          "고려대 R01/R02의 운영 선택 산식·필수 영역과 시험팩/CDF·호환 영수증 확인",
+          "실제 DB 프로필 불변성 및 앱 역할의 변경 권한 확인",
+          "정본·생성 문서·정식 테스트 등록·정상 훅·최종 SHA CI·실DB/화면 검수"
+        ],
+        "production_ready": false,
+        "documentation": "기존 성적은 변경하지 않고 승인된 참고 산식의 필수 응시 영역에 한해 자기 확인을 요청한다. 요청은 소유 프로필 ID·시험 ID·시험팩 버전에 결속하며 누락·거짓·미확인은 해당 참고 계산만 보류한다. 유료 본인 리포트의 확인 필요 상태는 reference_attendance_requirements로 분리한다. 기존 결과와 다른 대학은 유지하고 실제 선택 자료·프로필 불변성·운영 배포는 확인 전이다."
+      },
+      "verification_current_source_rebound_20261113": {
+        "format": "jungsi.school-reference-current-source-rebound/v1",
+        "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+        "historical_verification_sha256": "9e1d9cee2e51a77b3b7142de3ed4980f887fffabae110478ec4795ff7364e296",
+        "baseline_foundation_count": 656,
+        "test_count": 97,
+        "test_paths": [
+          "tests/edge/test_school_reference_scoring.ts",
+          "tests/edge/test_school_reference_provider.ts",
+          "tests/edge/test_history_metric_alias.ts",
+          "tests/edge/test_saved_reference_projection.ts",
+          "tests/edge/test_scope_signal_followup.synthetic.ts",
+          "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts"
+        ],
+        "source_bindings": [
+          {
+            "path": "src/jungsi_touch/application/public_response_schemas.json",
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog.ts",
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog_test.ts",
+            "sha256": "82f9c94d4c13bd24f3298933551c38a3280ad54ca221c1127c122c0a473f1da7"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
+            "sha256": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/offering_analysis.ts",
+            "sha256": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts",
+            "sha256": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
+            "sha256": "f4521eb38d114dd2b60563937b3a6c6fb1ed0d4330565c4a1e6115508624ed23"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
+            "sha256": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts",
+            "sha256": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
+            "sha256": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+            "sha256": "0df832cb190512a5db35fd85275d51cae321770c6bcdc7a7f14b7e8ee512d8da"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+            "sha256": "e862dba20a9c52f56728fa7e4fcd590a12aac8a5fa6059a098db7fd239a9946a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+            "sha256": "0c5f961dfaf7d07251630b40a6579c04b71c6513808bb0454b879b916ddecec3"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
+            "sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts",
+            "sha256": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+            "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+            "sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
+            "sha256": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
+            "sha256": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+            "sha256": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed"
+          },
+          {
+            "path": "tests/edge/public_api_contract_fixture.ts",
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
+          },
+          {
+            "path": "tests/edge/reference_candidate_scope_cases.ts",
+            "sha256": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c"
+          },
+          {
+            "path": "tests/edge/saved_reference_tail_source_cases.ts",
+            "sha256": "7fed940626b329581c84d8759e78aab303f4881518179d8ac9c7035184ce7682"
+          },
+          {
+            "path": "tests/edge/synthetic_school_reference.ts",
+            "sha256": "9c41048895b253ad6b37d57d6c672ed259e17191304e4a83f0145d7e06d981c7"
+          },
+          {
+            "path": "tests/edge/test_history_metric_alias.ts",
+            "sha256": "de00f450020427da2e484c64aab347a6145d9b63ddb7ffc154bc913d53c412be"
+          },
+          {
+            "path": "tests/edge/test_saved_reference_projection.ts",
+            "sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19"
+          },
+          {
+            "path": "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts",
+            "sha256": "7366d7c14c4d5eb880a8f34e13cf51d8aaa6bd3fefc3653a50f586db12b284c8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_provider.ts",
+            "sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_scoring.ts",
+            "sha256": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d"
+          },
+          {
+            "path": "tests/edge/test_scope_signal_followup.synthetic.ts",
+            "sha256": "bdea6b4ae2914cc16e83da90fc8c5d61617d0d5f42a8e26938967cc5565daa45"
+          },
+          {
+            "path": "tests/edge/test_university_analysis.ts",
+            "sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976"
+          }
+        ],
+        "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+        "activation_status": "NOT_RUN",
+        "operating_writes": 0
+      },
+      "verification_current_source_rebound_20261113_v2": {
+        "format": "jungsi.school-reference-current-source-rebound/v2",
+        "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+        "historical_verification_sha256": "9e1d9cee2e51a77b3b7142de3ed4980f887fffabae110478ec4795ff7364e296",
+        "baseline_foundation_count": 656,
+        "test_count": 97,
+        "test_paths": [
+          "tests/edge/test_school_reference_scoring.ts",
+          "tests/edge/test_school_reference_provider.ts",
+          "tests/edge/test_history_metric_alias.ts",
+          "tests/edge/test_saved_reference_projection.ts",
+          "tests/edge/test_scope_signal_followup.synthetic.ts",
+          "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts"
+        ],
+        "source_bindings": [
+          {
+            "path": "src/jungsi_touch/application/public_response_schemas.json",
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog.ts",
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
+          },
+          {
+            "path": "supabase/functions/_shared/current_public_catalog_test.ts",
+            "sha256": "82f9c94d4c13bd24f3298933551c38a3280ad54ca221c1127c122c0a473f1da7"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/history_metric_alias.ts",
+            "sha256": "2fba3870d82e7ca1514c1b84fef44c741ed23bdf53b869281a4f7e81d1c70c7d"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/offering_analysis.ts",
+            "sha256": "9f18b188101095e6503f39a1e99db12c017877b0cb5bcf27f7b98d4abb5fc76a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts",
+            "sha256": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
+            "sha256": "f4521eb38d114dd2b60563937b3a6c6fb1ed0d4330565c4a1e6115508624ed23"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
+            "sha256": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts",
+            "sha256": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+            "sha256": "234df307771d354ad0122d411b16782d743619ffeaaac829a2eb69dfc2d62638"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/application/university_scoring.ts",
+            "sha256": "8cb3e294fd20b7b8778f9032082a6a984ab2b46bf1c8a4f8804b8c9d189df201"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts",
+            "sha256": "0df832cb190512a5db35fd85275d51cae321770c6bcdc7a7f14b7e8ee512d8da"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+            "sha256": "e862dba20a9c52f56728fa7e4fcd590a12aac8a5fa6059a098db7fd239a9946a"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+            "sha256": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
+            "sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_authority.ts",
+            "sha256": "c5e2df0aca6b5e7558bc471206acedd2b209c63e7689875cf90e5c47fd9088dd"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+            "sha256": "1af7e8e57871a38ec61b29a3bbb2c254348d4bad6215ca5b58f4afb0bb504773"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts",
+            "sha256": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
+            "sha256": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
+            "sha256": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394"
+          },
+          {
+            "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+            "sha256": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed"
+          },
+          {
+            "path": "tests/edge/public_api_contract_fixture.ts",
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
+          },
+          {
+            "path": "tests/edge/reference_candidate_scope_cases.ts",
+            "sha256": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c"
+          },
+          {
+            "path": "tests/edge/saved_reference_tail_source_cases.ts",
+            "sha256": "7fed940626b329581c84d8759e78aab303f4881518179d8ac9c7035184ce7682"
+          },
+          {
+            "path": "tests/edge/synthetic_school_reference.ts",
+            "sha256": "9c41048895b253ad6b37d57d6c672ed259e17191304e4a83f0145d7e06d981c7"
+          },
+          {
+            "path": "tests/edge/test_history_metric_alias.ts",
+            "sha256": "de00f450020427da2e484c64aab347a6145d9b63ddb7ffc154bc913d53c412be"
+          },
+          {
+            "path": "tests/edge/test_saved_reference_projection.ts",
+            "sha256": "a59d2f610c97e04e9e8018408e0cba0682514aa2af156c4d130d3bb38fdd7b19"
+          },
+          {
+            "path": "tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts",
+            "sha256": "7366d7c14c4d5eb880a8f34e13cf51d8aaa6bd3fefc3653a50f586db12b284c8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_provider.ts",
+            "sha256": "0e78e34cac2410a46c72bfc99b0ff0383f645c3fa63b332471571f3dbb06c8a8"
+          },
+          {
+            "path": "tests/edge/test_school_reference_scoring.ts",
+            "sha256": "d48db0e0486531c1e96a49821770a951c83720a745e26d65ae9d39b295d5b34d"
+          },
+          {
+            "path": "tests/edge/test_scope_signal_followup.synthetic.ts",
+            "sha256": "bdea6b4ae2914cc16e83da90fc8c5d61617d0d5f42a8e26938967cc5565daa45"
+          },
+          {
+            "path": "tests/edge/test_university_analysis.ts",
+            "sha256": "cf68033eb61fa5fee88044be20778fc5092e877e624ace3fe9ea74d98d632976"
+          }
+        ],
+        "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+        "activation_status": "NOT_RUN",
+        "operating_writes": 0
+      }
     },
     "member_json_storage_contract": {
       "format": "jungsi.member-json-result-storage-contract/v1",
@@ -4944,19 +5933,19 @@
         "source_bindings": [
           {
             "path": "src/jungsi_touch/application/public_response_schemas.json",
-            "sha256": "89138419ab060d10ce581eca037b4e7b4c6d1f9ca319fa0c2882424b01130e5a"
+            "sha256": "b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
           },
           {
             "path": "supabase/functions/_shared/combined_policy_catalog_runtime.ts",
-            "sha256": "1348f10c385795acf573d33f22ace63eb8365aa44ccfdccfa32d6031c95ab2f9"
+            "sha256": "ee81b7d2781bc16d6b2a630f44e4d38c999ed05b9457a1f5eb96fb1331e59c53"
           },
           {
             "path": "supabase/functions/_shared/current_public_catalog.ts",
-            "sha256": "1df427660f09705b674903f69f9322560a30b274d5eca788496afaf1e198debc"
+            "sha256": "2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/api_dispatch.ts",
-            "sha256": "0ef599db025f26cd923bba8bd5464ff09fb8ea5a08bc7dfc09eb0bd75313ce38"
+            "sha256": "838c2be22310b34fa2adbe9002407aacac122427c80d15581db77dea9e7002d0"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/catalog.ts",
@@ -4972,19 +5961,19 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/member_shortlist_schema.ts",
-            "sha256": "04695f7b26c862a109c88036eab345b7bf8b94fd8f78dbcaee20dc5e06a5de54"
+            "sha256": "bf24dfd519f07c99651299bd5d3ace8a1cbd1e0ccab6bbadaf0e919013faa934"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/profile_reports.ts",
-            "sha256": "190a4d6746cfcc77dc36f000e8d0eec9338b4a7950543c9f903b5af0b961b29d"
+            "sha256": "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c"
           },
           {
             "path": "supabase/functions/_shared/jungsi/application/request_budget.ts",
-            "sha256": "e208ac4a8e4d15dcacf0a98b5a84f852b00470a9983085e638725243132c52f2"
+            "sha256": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts",
-            "sha256": "6fe695a27a87ddc45eb9041cc0827373df3cc1a05696a1a1d3c2394954521149"
+            "sha256": "2253b3e702077d533d9c4352e5e12c78a21a856c046a41808ea2ca2278f30612"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts",
@@ -5000,19 +5989,19 @@
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts",
-            "sha256": "4dc06e6f32096ac07705a97d0444d05a90d930062597e495d2975ae121774fda"
+            "sha256": "ea759428864199a905659576f199024ace3cad7de46596670bfad615c0ade21d"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts",
-            "sha256": "cccfa8ebe2597062d94bdf6534f5e4ca5adaecf39208f47ae2f1dec9c06b9591"
+            "sha256": "18dd19edc44f32644f55e83dab232ef7f0fd015f22b232a57021185aabdafb98"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
-            "sha256": "93ae8db8bd20127fe3207601ecb3d0573b1d557cd5122a83a3ba7fa599d05309"
+            "sha256": "eca8b0f4ad63862f414577c73b7c632291acb6a8618ee92ec65759e1dbbb6969"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
-            "sha256": "333ed7f1ae42d4eb120cf445c847ee40f26f5b45f3701d8157419d8af34a3f0f"
+            "sha256": "980e999be6211345d061e3faf87ad7b4698eeab718895ab8c16024f25f008cd2"
           },
           {
             "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts",
@@ -5020,7 +6009,7 @@
           },
           {
             "path": "supabase/functions/jungsi-api/member_shortlist_entry.ts",
-            "sha256": "34f896869bd107bd5c49bf16235fa9df193cc226be0c8f3b4c74964c6052630f"
+            "sha256": "df81933938c61921ed570828b87efb4cd7bef08d0f5ee0169de2b51048099f82"
           },
           {
             "path": "tests/edge/member_shortlist_fixture.ts",
@@ -5028,11 +6017,11 @@
           },
           {
             "path": "tests/edge/public_api_contract_fixture.ts",
-            "sha256": "227dc89330ea7bae939134dbf0b165365201831c9327b6476d166e8c6abf6973"
+            "sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471"
           },
           {
             "path": "tests/edge/synthetic_history_qualification.ts",
-            "sha256": "251d03982c8e8dd2319091e89394969c341a2b5978fb1c893be0f50ce8c7fa8b"
+            "sha256": "06ef1a589b272e1fd402accb2b342dff187caddc9f12f934240848541e769935"
           },
           {
             "path": "tests/edge/test_member_json_results.ts",
@@ -5092,7 +6081,8 @@
       "기존 research/reviewed/source_verified/internal_review_only 자료를 구조 검사나 저장 형식 검증만으로 approved로 바꾸지 않는다. 실제 자료 부족과 코드 구현 완료는 별도로 기록한다.",
       "사용자 제공 공식 주변분포·기존 참고곡선/표본을 이용한 자체 추정 공동분포와 환산곡선 제작을 이어간다. 보정·holdout·민감도와 검증 범위를 갖춘 estimated_weights로 발행하며 추정 가중치를 실제 전국 도수라고 표시하지 않는다.",
       "기본 전체 집단 외에는 신규 봉투의 승인된 comparison_population만 허용한다. 실제 규칙 필수 입력·학년도/시험/pack/rule/curve/population/검증 영수증 버전을 결속하고 오류 시 누백만 pending이다. 레거시 보정 성공은 기존 전체 집단 계약을 유지한다.",
-      "기본 전체/레거시는 whole_complete를 유지한다. required_rule_inputs_present는 비교집단 계약·별도 고정 영수증을 함께 검증한 새 독립 릴리스만 허용한다. 모집단이 다른 총점/학교 누백의 advantage는 기존 동일 모집단 검사에 따라 보류한다."
+      "기본 전체/레거시는 whole_complete를 유지한다. required_rule_inputs_present는 비교집단 계약·별도 고정 영수증을 함께 검증한 새 독립 릴리스만 허용한다. 모집단이 다른 총점/학교 누백의 advantage는 기존 동일 모집단 검사에 따라 보류한다.",
+      "참고 환산·참고 누백은 시험/학년도·모형·산식/버전·점수축·모집행 기본 PK·동점·분모 및 자료판을 함께 검증한다. 과거 입결 기준값, 학생별 참고 누백과 정식 지원 판정은 다른 값이다."
     ],
     "provider_contract": {
       "port": "PlatformDataProvider.get_percentile(offering_id) → UniversityPercentileRelease | None; 애플리케이션 소유 포트이며 get_conversion/get_analysis와 독립한다.",
@@ -5139,7 +6129,11 @@
       "scoped_transition_classifier": "이행 계약/구현 미확인: 서버 전용 범위 분류기는 승인된 학년도·시험·자료판·정확 모집행·규칙/조건 버전·현재 release 결속으로 legacy_verified, snu_scoped, conditional_minimum, unknown을 구분한다. 검증된 기존 모집행은 legacy_verified 경로와 성공 결과를 유지한다. 비공개 정확 대상 명부에 결속된 새 조건부 모집행에만 가드를 적용하며 학교명·연도 전체·학과 문자열 유추로 넓히지 않는다. 요청자가 분류·method·검증 flag를 지정하지 못한다.",
       "scoped_transition_fail_closed": "서버 명부/버전·head·범위 근거가 없거나 불일치한 affected 모집행은 unknown/pending으로 보류한다. 알려진 조건부 대상에서 scoped 공급자 부재·잘못된 학생 입력·미모델 조건·오류를 기존 무조건 view/다른 CDF로 fallback하지 않는다. 분류 근거 부재를 비대상으로 간주하지 않으며, 동시에 무관한 검증 완료 모집행을 일괄 보류하지 않는다. 기존 검증 baseline 결속도 확인할 수 없는 행만 해당 결과를 보류한다.",
       "scoped_transition_activation": "분류기/저장소 포트·조건부 함수/CDF 연결·native 분모/분자 및 시험/산식 문맥·실제 앱 역할 실행과 재귀 응답 필터를 같은 소스/정확 SHA에서 검증한 후 affected 모집행별 연결 상태를 갱신한다. 정본 등록, DB 설치/실제 재조회, 서버 이식, 배포는 별도 단계다. 현재 기획 등록은 분류기·새 수치·DB/권한/엔진/운영 배포를 활성화하지 않는다.",
-      "scoped_transition_safe_reasons": "조건부 경로의 공개 pending 사유는 명시 목록 percentile_scope_unavailable, percentile_scope_invalid, percentile_scoped_provider_missing, percentile_scoped_provider_invalid, percentile_scoped_context_mismatch, percentile_scoped_release_mismatch, percentile_scoped_result_invalid, percentile_scope_release_mismatch, percentile_scoped_provider_unavailable, scoped_comparison_pending만 최소 후보로 등록한다. 공개 safe_code 스키마/동일 원본 enum 및 알려지지 않은 코드 거부 회귀를 책임 서비스 브랜치에서 함께 구현한다. 자유 문자열·예외 원문·DB/자료/개인 식별자·수치/비밀을 허용하지 않으며 기존 역할·소유권·relay/예산·필드 projection을 완화하지 않는다. 허용목록 코드의 부재를 임의 503 은폐로 우회하지 않는다. 현재 구현·운영 적용은 NOT_RUN이다."
+      "scoped_transition_safe_reasons": "조건부 경로의 공개 pending 사유는 명시 목록 percentile_scope_unavailable, percentile_scope_invalid, percentile_scoped_provider_missing, percentile_scoped_provider_invalid, percentile_scoped_context_mismatch, percentile_scoped_release_mismatch, percentile_scoped_result_invalid, percentile_scope_release_mismatch, percentile_scoped_provider_unavailable, scoped_comparison_pending만 최소 후보로 등록한다. 공개 safe_code 스키마/동일 원본 enum 및 알려지지 않은 코드 거부 회귀를 책임 서비스 브랜치에서 함께 구현한다. 자유 문자열·예외 원문·DB/자료/개인 식별자·수치/비밀을 허용하지 않으며 기존 역할·소유권·relay/예산·필드 projection을 완화하지 않는다. 허용목록 코드의 부재를 임의 503 은폐로 우회하지 않는다. 현재 구현·운영 적용은 NOT_RUN이다.",
+      "reference_tail_20261109": "진행 중: 같은 학년도·시험·기본 PK·산식·점수축의 기존 참고 분포를 재사용한다. 서비스 fc52ae2의 정확한 GitHub CI는 성공했으며, 11월 9일 23:19경 운영 함수에서 선읽기와 참고 범위 분리 코드 일부를 확인했다. 전체 배포 SHA는 미확인이다. 참고 범위 철회 시 부분 행 제거와 공식 계산 우선, 독립 scope 취소 및 기존 결과 보존은 병합 작업본의 합성 회귀에서 확인했으며 실제 DB·운영 검수는 미완료다. 참고 누백을 확정 합격판정으로 취급하지 않는다. develop 기록: 진행 중: 같은 학년도·시험·기본 PK·산식·점수축·고정 모형의 기존 참고 곡선을 재사용한다. 서비스 브랜치 ff124ba022e7b4b6a207334366db4c15001209c3과 화면 브랜치 b33ca5ee2daee1263e08067accf138fd54a959fe의 GitHub CI는 성공했다. 운영 함수 전체 Git SHA와 선택 범위는 미확인이며 운영 코드에서 ff124의 병렬 선읽기는 보이지 않았다. 한 계정의 3·4페이지에 일부 참고 결과가 표시됐지만 4페이지 재계산 1건은 percentile_provider HTTP 503이었다. 지원판단·기본 후보·와일드카드는 보류다. 후보의 취소 신호와 병렬 읽기 검수는 로컬이며 실제 네트워크 강제 종료·예산 임대·저장 후 재시도 및 운영 배포는 NOT_RUN이다. 2026-11-10 추가: 서비스 브랜치 ab11432의 GitHub push CI가 성공했다. 운영 배포 SHA와 선택된 시험팩·산식·CDF는 아직 미확인이다. 새 점수 미리보기의 선택자료·계산비용·취소 결속 검토는 진행 중이며 기획팀 통합 후보는 미배포다.",
+      "reference_db_current_20261109": "진행 중: 기존 Supabase의 reference-percentile 현재 head와 같은 학년도·기본 물리 모집단위 PK로 방법과 원본 CDF를 직접 조회한다. 이미 확인된 DB 정본과 검수 근거를 재사용하며 학교 ID로 다시 묶거나 정본 자료를 별도 재수집·중복 적재하지 않는다. 공개 모집단위 ID와 물리 PK를 구별하고 다중 행은 보류한다. 읽기 전용 권한, head·방법·압축 및 원본 SHA, 시험팩·고정 모형·점수축·분모·동점 규칙을 확인한다. 기존 요청 횟수·바이트·시간·메모리와 객체 크기 제한을 유지하고 DB 요청 취소와 완료 대기를 전파한다. 정산 후 head 확인은 원래 실제 조회 시작시각 기준의 짧은 무 I/O 영수증을 사용한다. 로컬 후보, 실 DB 조회, 정확한 커밋 CI, Owner 배포와 실제 화면 검수는 별도 상태로 기록하며 참고 누백을 확정 합격판정으로 취급하지 않는다.",
+      "reference_db_verification_status_20261109": "고려대 2027 가정교육과 R01·R02 각각의 기본 PK·방법·CDF 원본을 앱 DB 역할로 읽고 보관 원본 해시와 일치함을 확인했다. 입력 시험팩 보강 전후 기존 내용과 백분위 표의 관계도 로컬 대조했다. 이는 읽기·자료 검수이며 선택된 운영 시험팩과 계산기·CDF·호환 영수증 결속, 실제 Edge 요청과 운영 적용 증거는 아니다. 기존 결과·권한·예산을 유지하고 자료 재수집·CDF 중복 업로드·임의 PK 병합·추가 비용 없이 진행한다. develop 기록: 고려대 2027 교과우수 모집단위의 기본 PK·방법·CDF 원본을 앱 DB 역할로 읽고 로컬 원본 해시와 일치함을 확인했다. 이는 해당 범위의 읽기 전용 DB 검수이며 실제 Edge의 선택된 계산기·시험팩·실제 API와 운영 적용 증거는 아니다. 선택된 계산기의 원산식 ID와 참고 계산기 버전을 각각 검증하는 로컬 후보는 기존 선택 evidence 형식에 새 필드를 넣지 않는다. R13 관련 Deno 161건과 기존 R01 CDF의 모의 선택·모의 DB 어댑터 검산 9건을 통과했으며 2026년 대체 변환표와 9월 모의평가 모형의 참고값이다. 기존 결과·권한·예산을 유지하고 원본 재수집·CDF 중복 업로드·임의 PK 병합·추가 비용 없이 진행한다. 고려대 가정교육과 R01·R02 기본 PK의 기존 CDF를 앱 DB 역할 읽기와 원본 해시로 한정 확인했다. 이는 실제 운영 선택 증거가 아니다.",
+      "search_preview_review_20261110": "검색 점수표는 계산 예산·SQL 취소 결속 미확인으로 계속 보류한다. 운영 결합 검색 공장에서 공급자를 연결하지 않아 기존 검색 DTO를 유지하는 소스 후보이며 실제 배포와 화면 검수는 미실행이다."
     },
     "public_result_contract": {
       "location": "본인 유료 report.analyses[offering_id].percentile",
@@ -5258,7 +6252,8 @@
       "누백 0%를 빈 값으로 숨기지 않고 ready 상태와 함께 표시한다. pending은 사유와 대기를 표시한다. 개인점수·누백의 가상 사례는 실제 대학 자료와 분리한다.",
       "같은 모집단/시험/학년도/동점 처리와 승인 총점 기준이 확보돼야 전체 누백과 대학 누백의 차이로 유불리를 표시한다. 준비되지 않으면 유불리만 대기한다.",
       "로컬 기획 미리보기는 ignored outputs에서 최신 develop의 실제 애플리케이션 가상 응답을 이용한다. 운영 apps/web 구현은 feature/presentation-foundation의 별도 화면 담당 소유다.",
-      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다."
+      "population_scope=whole_complete는 전체 국수탐2, required_rule_inputs_present는 대학 반영에 필요한 성적을 모두 보유한 명시적 비교집단이다. 두 범위를 구분해 표시하고 분모가 다르면 전체 누백과 차이를 유불리로 제시하지 않는다.",
+      "진행 중인 3페이지 참고 환산/누백과 4페이지 참고 후보는 정식 환산·합격 판단과 분리해 참고 추정으로 표시한다. 근거 없는 합격 확률이나 여유·핵심·도전·와일드카드 판정은 만들지 않는다."
     ],
     "acceptance_gates": [
       "승인된 정확한 환산점수/곡선만으로 conversion.ready + percentile.ready + assessment.pending이 반환된다. 전체 모형/입결/예상선/판단/자격 부재·오류 격리를 API까지 검수한다.",
@@ -5314,7 +6309,24 @@
         "production_ready": false
       }
     },
-    "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4"
+    "planning_commit": "9ff8a1278d8aa8b6dbb3870af3293c240f34e8d4",
+    "reference_db_integration_20261110": {
+      "status": "LOCAL_CANDIDATE_SYNTHETIC_ONLY",
+      "operations": [
+        "university.analyze",
+        "candidates.build",
+        "report.read",
+        "report.export"
+      ],
+      "source": "reuse_existing_selected_reference_and_same_year_basic_pk",
+      "existing_results": "preserve_owned_saved_legacy_and_new_results",
+      "scoped_reads": "per_request_budget_and_cancellation_preserved",
+      "reference_label": "estimate_only_not_admission_probability",
+      "attendance": "required_sources_without_verified_attendance_remain_pending",
+      "runtime_selection": "NOT_VERIFIED",
+      "actual_db_http_and_deployment": "NOT_RUN",
+      "added_cost": "NONE_PLANNED"
+    }
   },
   "estimated_population_contract": {
     "format": "jungsi.estimated-population-contract/v1",
@@ -5458,7 +6470,7 @@
     "atomic_unit": "학년도·대학·캠퍼스·모집단위·전형·모집군이 결속된 offering_id. 학교는 필터·권한 범위이며 학과로 동일 판단을 복사하지 않는다.",
     "input_rules": [
       "서버 승인 입력·정책 ID와 version을 결속한다. 클라이언트에서 원자료·원점수·모형 상태·작성자·승인자·회원 역할을 신뢰하지 않는다.",
-      "2024~2026 동일 입결 지표의 원값과 비교값을 분리한다. 동일 지표 정의·단위·공통 척도·모집단과 승인된 4개년 모집행 연결/연도 변환 영수증이 필요하다.",
+      "2024~2026 동일 입결 지표의 원값과 비교값을 분리한다. 해당 학년도의 지표 정의·단위·공통 척도·모집단과 기존에 검증된 PK 관계 및 필요한 연도 변환 근거를 사용하며, 서비스 연결을 위해 4개년을 다시 대조하지 않는다.",
       "대학 환산 원점수와 표준점수를 연도 간 직접 회귀하지 않는다. 70%컷 한 점을 학생용 과목 보정 함수에 넣지 않는다.",
       "예상70%와 판단용 합격권은 각각 별도의 승인 근거/자료 요건이다. 한쪽 미준비 시 준비된 결과를 유지한다. 70%만으로 최저점·합격확률을 생성하지 않는다.",
       "각 정책의 min_years, 허용 비교 척도, 출력 단위/범위/표시 정밀도, 기준/폭/가중치와 검산 근거를 명시한다. 합성 수치를 운영 기본값으로 사용하지 않는다.",
@@ -5877,6 +6889,18 @@
       "전국 대학 산출 정확도·예측 성능 검증",
       "외부 프런트 담당의 새 context/version/base_result, 후보 분할, 이유 코드 소비 수정 및 브라우저 검증",
       "확정 서비스·DB 구현 adc684be2e9d22f8edad766d044b81894676036d의 PR #13 develop 통합. 현재 open/draft이며 운영 배포 완료가 아니다."
+    ],
+    "school_boundary_selection_plan_20261111": [
+      "기획 목표이며 구현·운영 적용 전: 학생 성적대의 입학 경계 대학을 기존 입결과 누백으로 먼저 추린 후 대학별 환산 유불리 순으로 비교한다. 와일드카드에도 같은 대학 경계를 사용한다.",
+      "학과별 전수 판정을 전체 목록의 선행 조건으로 삼지 않는다. 모집단위의 실제 전형·모집군·지원 자격·산식 차이는 경계 근거와 필요한 상세로 구분한다.",
+      "기존 정본 head·학년도·모집행 기본 PK·입결 지표·자료형·출처·검수 근거를 재사용한다. 기존 연결을 위해 신규 수집·4개년 재매칭·원문 전국 전수검사·중복 적재를 하지 않는다.",
+      "대학별 원 환산점수를 서로 직접 비교하지 않는다. 같은 시험·고정 모집단·분모·동점 정책에서 전체 상위누백과 대학 환산 후 상위누백의 차이를 계산한다. 상위누백은 낮을수록 상위다.",
+      "같은 대학의 전형별 산식 차이와 복수 비교축을 보존한다. 학교 대표값과 학생 주변 경계의 수치 폭은 기존 자료·정책을 확인하며 임의로 설정하지 않는다.",
+      "고정 경계 폭이 확인되지 않은 경우에도 기존 승인 범위 안에 비교 가능한 경계 자료가 있으면, 기존 후보 수·조회 예산 내에서 학생 위치에 가까운 대학을 먼저 뽑는 참고 방식을 검토한다. 임의의 점수 폭을 신설하지 않으며 자료 범위와 추정 상태를 함께 표시한다.",
+      "과거 입결 추세와 올해 모집 변화는 기존 공통 척도·검증된 연도 관계와 정책에 따른다. 미확인 영향을 임의 점수로 추가하지 않는다.",
+      "참고 분포·추정 누백과 승인된 실제 지원 판단을 구분하며 미확인 경계나 비교 불가 데이터는 해당 항목만 보류한다. 일부 대학의 결측으로 다른 대학의 성공 결과를 지우지 않고 결과 범위·완전성을 표시한다.",
+      "기존 인증·본인 소유권·이용권·공유 예산·취소·멱등·성공 리포트와 데이터 보호를 유지한다. 사용자 선택과 과거 성공값을 초기화하지 않는다.",
+      "개발팀의 함수 후보와 합성 시험, 자료팀의 정본 확인, GitHub CI, 실제 서버 연결·Owner 배포와 운영 화면 재계산은 각각의 결과로 구분한다."
     ]
   },
   "presentation_connection_contract": {
@@ -6694,7 +7718,8 @@
       "coverage": "all actual Edge, Python and other entrypoints, policy and bindings; no assertion until each verified",
       "actual_registration": "NOT_RUN",
       "actual_deployment": "NOT_RUN"
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "management_pages": [
     {
@@ -12327,7 +13352,7 @@
       "rules": [
         "원자료/source 등록의 draft/승인 필드만 바꿔 runtime 자료로 승격하지 않는다. 새로운 native 후보·출처 계보·독립 값 대조·자료 의미/권한·실행 승인 근거·불변 저장 대상·선택 신뢰 SHA를 각각 확인한다.",
         "기존 catalog/service 선택은 하나의 활성 catalog다. 학교별 파일 다중 선택·자동 병합이 있다고 가정하지 않는다. 후속 판은 검수한 이전 발행 학교를 누적 포함해 하나의 새 불변 판으로 만들고 변경·제외·보류 사유를 명부에 남긴다.",
-        "학교별 4개년 정리·모집행 연결 근거를 재사용한다. 입결 일부 학년도만 검수됐다면 포함 학년도/지표·미대조 범위를 명시하고 그 학교의 4개년 전체 입결 또는 모집표 전수검수 완료라고 하지 않는다.",
+        "기존 정본의 PK와 검증된 학년도별 모집행 연결 근거를 재사용한다. 이미 정리된 자료의 화면 연결에 4개년 재검수를 요구하지 않는다. 입결 일부 학년도만 검수됐다면 포함 학년도/지표·미대조 범위를 명시하고 그 학교의 전체 입결 또는 모집표 전수검수 완료라고 하지 않는다.",
         "매 판마다 버전·bytes/SHA256·대학/모집행/학년도/지표 포함 범위·검수 중/자료 없음/미공개/실기 제외 사유·원본→native 계보·독립 검수·승인 담당을 고정한다. 실제 수치는 비공개 자료 계층에 둔다.",
         "공식 A/R/Q/C 의미 대응은 metric_name 하나로 확정하지 않는다. 정의·단위·발표 상태·출처·동일 통계 분모/단계를 검수한다. 후보 미포함·원문 미전사·미검수·공식 미발표 확인·실제0을 구분한다. 후보에서 읽지 않았거나 대응이 없다는 이유로 공식 발표 없음으로 확정하지 않으며 미확인 A를 이름으로 추측해 주입하지 않는다.",
         "미포함 대학은 기존 search가 ready/items=[]로 응답할 수 있고 개별 존재하지 않는 offering은 404다. 이를 pending 자동변환이라고 약속하지 않는다. 화면은 현재 발행본의 검색 범위와 미발행/검수 중 가능성을 설명한다. 신규 coverage DTO/API는 별도 CR이다.",
@@ -12459,7 +13484,8 @@
         "candidate_boundary": "Unapproved private snapshot, canonical DB, approved immutable edition and browser acceptance are distinct states.",
         "activation": "Owner review, normal source gates and compatible DTO/provenance acceptance required before deployment."
       }
-    }
+    },
+    "current_recruitment_scope_ref": "P1_display_snapshot_contract.active_recruitment_scope_20261103"
   },
   "security_contract": {
     "format": "jungsi.external-access-security/v1",

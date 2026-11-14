@@ -12,6 +12,9 @@ function numeric(v: unknown): boolean {
 export function personalAssessment(v: unknown): boolean {
   if (!resultObject(v)) return false;
   return numeric(v.converted_score) ||
+    resultObject(v.reference_percentile) &&
+      v.reference_percentile.status === "reference_estimated" &&
+      numeric(v.reference_percentile.estimated_upper_cumulative_percent_all_examinees) ||
     resultObject(v.conversion) && v.conversion.status === "ready" &&
       numeric(v.conversion.converted_score) ||
     resultObject(v.percentile) && v.percentile.status === "ready" &&
@@ -19,15 +22,17 @@ export function personalAssessment(v: unknown): boolean {
 }
 function candidateNumbers(v: unknown): boolean {
   if (!resultObject(v)) return false;
-  for (const key of ["basic_university_groups", "wildcards"]) {
+  for (const key of ["basic_university_groups", "wildcards", "reference_university_groups"]) {
     const rows = v[key];
     if (!Array.isArray(rows)) continue;
     for (const row of rows) {
       if (!resultObject(row)) continue;
-      if (personalAssessment(row.assessment)) return true;
+      if (personalAssessment(row.assessment) || personalAssessment(row)) return true;
       if (
         Array.isArray(row.offerings) &&
-        row.offerings.some((x) => resultObject(x) && personalAssessment(x.assessment))
+        row.offerings.some((x) =>
+          resultObject(x) && (personalAssessment(x.assessment) || personalAssessment(x))
+        )
       ) return true;
     }
   }

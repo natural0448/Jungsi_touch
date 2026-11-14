@@ -1,3 +1,20 @@
+/** Runs with a substituted monotonic clock for request-local head/bucket reuse. */
+export async function withMonotonic(now: () => number, run: () => Promise<void>): Promise<void> {
+  const own = Object.getOwnPropertyDescriptor(performance, "now");
+  Object.defineProperty(performance, "now", { configurable: true, value: now });
+  try {
+    await run();
+  } finally {
+    if (own) Object.defineProperty(performance, "now", own);
+    else delete (performance as { now?: unknown }).now;
+  }
+}
+/** Ages request-local head/bucket reuse (1.5 s) past its window on every clock read: each check is fresh. */
+export function agedChecks(run: () => Promise<void>): Promise<void> {
+  const real = performance.now.bind(performance);
+  let step = 0;
+  return withMonotonic(() => real() + ++step * 1_501, run);
+}
 /** Invented values only; never an admission source or runtime native publication. */
 export function syntheticFixture() {
   const rule = {

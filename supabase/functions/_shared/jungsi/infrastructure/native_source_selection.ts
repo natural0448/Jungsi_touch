@@ -11,6 +11,8 @@ export const NATIVE_RUNTIME_KINDS = [
   "catalog",
   "conversion",
   "reference_conversion",
+  "reference_tail",
+  "reference_compatibility",
   "percentile",
   "estimate_receipt",
   "analysis",
@@ -68,9 +70,47 @@ async function pinned(raw: PinnedSourceBytes): Promise<{ body: NativeObject; has
     fail();
   }
 }
+/**
+ * Isolate-level reuse of a verified selection (and its decoded releases) for the same exact
+ * registry/selection/approval/expiry pins. Freshness is still checked per request by the provider.
+ */
+export interface PreparedSelectionEntry {
+  readonly selection: NativeSourceSelection;
+  readonly decoded: Map<string, unknown>;
+}
+/**
+ * Holds the in-flight or completed preparation per exact pin key, so concurrent cold requests in one
+ * isolate share a single prepare+preflight. A failed preparation is removed and never served.
+ */
+export class PreparedSelectionCache {
+  private readonly rows = new Map<string, Promise<PreparedSelectionEntry>>();
+  constructor(private readonly maxEntries = 4) {
+    if (!Number.isSafeInteger(maxEntries) || maxEntries < 1 || maxEntries > 8) fail();
+  }
+  get(key: string): Promise<PreparedSelectionEntry> | undefined {
+    const row = this.rows.get(key);
+    if (row) {
+      this.rows.delete(key);
+      this.rows.set(key, row);
+    }
+    return row;
+  }
+  set(key: string, row: Promise<PreparedSelectionEntry>): void {
+    row.catch(() => this.remove(key, row));
+    this.rows.delete(key);
+    this.rows.set(key, row);
+    while (this.rows.size > this.maxEntries) this.rows.delete(this.rows.keys().next().value!);
+  }
+  remove(key: string, row: Promise<PreparedSelectionEntry>): void {
+    if (this.rows.get(key) === row) this.rows.delete(key);
+  }
+}
 export class NativeSourceSelection {
   private readonly artifacts: Map<string, SelectedNativeArtifact>;
-  private readonly referenceLoads = new Map<string, Promise<SelectedNativeArtifact | null>>();
+  private readonly referenceLoads = new Map<
+    string,
+    { signal?: AbortSignal; value: Promise<SelectedNativeArtifact | null> }
+  >();
   private readonly references: ReadonlyMap<string, NativeObject>;
   private constructor(
     artifacts: ReadonlyMap<string, SelectedNativeArtifact>,
@@ -79,12 +119,13 @@ export class NativeSourceSelection {
     selected: ReadonlyMap<string, NativeObject>,
     readonly payloadMode: NativePayloadMode,
     private readonly client: SupabaseArtifactClient,
+    shared = false,
   ) {
-    this.references = new Map([...selected].map(([id, entry]) => [id, cloneNativeJson(entry)]));
-    this.artifacts = new Map([...artifacts].map(([id, row]) => [id, {
-      entry: cloneNativeJson(row.entry),
-      payload: cloneNativeJson(row.payload),
-    }]));
+    // prepare()/rebind() are the only callers and hands over freshly parsed/copied objects nobody else holds,
+    // so a second deep copy here only costs CPU (catalog ~1 MiB per request).
+    this.references = shared ? selected : new Map(selected);
+    // rebind() shares the verified, never-mutated artifact map so loaded rule bodies are reused.
+    this.artifacts = shared ? artifacts as Map<string, SelectedNativeArtifact> : new Map(artifacts);
     Object.freeze(this);
   }
   static async prepare(
@@ -129,14 +170,21 @@ export class NativeSourceSelection {
       const entry = entries.get(id);
       if (!entry) fail("runtime_dependency_missing");
       if (entry.kind === "reference_conversion") client.validateReferenceCalculation(entry);
-      else client.validateSelectedReference(entry);
+      else if (entry.kind === "reference_tail") client.validateReferenceTail(entry);
+      else if (entry.kind === "reference_compatibility") {
+        client.validateReferenceCompatibility(entry);
+      } else client.validateSelectedReference(entry);
       if (entry.source_timezone != null && typeof entry.source_timezone !== "string") {
         fail("artifact_time_invalid");
       }
       chosen.set(id, entry);
     }
     if (
-      [...chosen.values()].some((e) => e.kind === "reference_conversion") ||
+      [...chosen.values()].some((e) =>
+        ["reference_conversion", "reference_tail", "reference_compatibility"].includes(
+          String(e.kind),
+        )
+      ) ||
       payloadMode === "catalog_only" && [...chosen.values()].some((e) => e.kind !== "catalog") ||
       payloadMode === "overall_only" &&
         [...chosen.values()].some((e) =>
@@ -150,7 +198,11 @@ export class NativeSourceSelection {
     const artifacts = new Map<string, SelectedNativeArtifact>();
     for (const [id, entry] of chosen) {
       // Metadata and approval remain complete; reference bodies are selected by trusted PK routing.
-      if (entry.kind === "reference_conversion") continue;
+      if (
+        ["reference_conversion", "reference_tail", "reference_compatibility"].includes(
+          String(entry.kind),
+        )
+      ) continue;
       if (payloadMode === "catalog_only" && entry.kind !== "catalog") continue;
       if (payloadMode === "university_only" && entry.kind === "total_model") continue;
       if (
@@ -186,31 +238,124 @@ export class NativeSourceSelection {
       client,
     );
   }
+  /** Same verified selection served through a new request's storage client. */
+  rebind(client: SupabaseArtifactClient): NativeSourceSelection {
+    if (!(client instanceof SupabaseArtifactClient)) fail("storage_configuration_invalid");
+    return new NativeSourceSelection(
+      this.artifacts,
+      this.registryHash,
+      this.selectionHash,
+      this.references,
+      this.payloadMode,
+      client,
+      true,
+    );
+  }
+  /** Count without copying every reference entry. */
+  referenceCount(): number {
+    let n = 0;
+    for (const e of this.references.values()) if (e.kind === "reference_conversion") n++;
+    return n;
+  }
+  /** Exact selected identity check without copying (used for production-conversion routing). */
+  has(kind: NativeRuntimeKind, key: string): boolean {
+    return this.references.has(identity(kind, key));
+  }
+  /**
+   * Read-only view of an already loaded payload for bounded internal checks. Callers MUST NOT mutate
+   * or retain it; use load() when a mutable copy is needed.
+   */
+  peekPayload(kind: NativeRuntimeKind, key: string): Readonly<NativeObject> | null {
+    const id = identity(kind, key), row = this.artifacts.get(id);
+    if (!row && this.references.has(id)) fail("runtime_dependency_not_loaded");
+    return row ? row.payload : null;
+  }
   referenceMetadata(): readonly { key: string; entry: NativeObject }[] {
     return [...this.references.values()].filter((e) => e.kind === "reference_conversion")
       .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
   }
-  async loadReference(key: string): Promise<SelectedNativeArtifact | null> {
+  /** Selected saved-tail metadata copies; bodies are read per request by the tail adapter. */
+  referenceTailMetadata(): readonly NativeObject[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_tail")
+      .map((e) => cloneNativeJson(e));
+  }
+  async referenceTailBytes(key: string, signal: AbortSignal): Promise<Uint8Array> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const selected = this.references.get(identity("reference_tail", key));
+    if (!selected) fail("runtime_dependency_missing");
+    return await this.client.referenceTailBytes(selected, signal);
+  }
+  /** Selected metadata only; current head, identity and owner authority are not implied. */
+  referenceTailEntries(): readonly { key: string; entry: NativeObject }[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_tail")
+      .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
+  }
+  referenceCompatibilityMetadata(): readonly { key: string; entry: NativeObject }[] {
+    return [...this.references.values()].filter((e) => e.kind === "reference_compatibility")
+      .map((e) => ({ key: e.key as string, entry: cloneNativeJson(e) }));
+  }
+  /** On-demand exact bytes from an approved reference entry; caller verifies current head both sides. */
+  async loadReferenceTail(
+    key: string,
+    signal: AbortSignal,
+  ): Promise<{ entry: NativeObject; bytes: Uint8Array } | null> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const entry = this.references.get(identity("reference_tail", key));
+    if (!entry) return null;
+    const bytes = await this.client.referenceTailBytes(entry, signal);
+    return { entry: cloneNativeJson(entry), bytes };
+  }
+  /** Separate selected evidence bytes; semantic compatibility still belongs to the issuer. */
+  async loadReferenceCompatibility(
+    key: string,
+    signal: AbortSignal,
+  ): Promise<SelectedNativeArtifact | null> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const entry = this.references.get(identity("reference_compatibility", key));
+    if (!entry) return null;
+    const verified = await this.client.referenceCompatibilityArtifact(entry, signal);
+    return { entry: cloneNativeJson(entry), payload: cloneNativeJson(verified.payload) };
+  }
+  async loadReference(key: string, signal?: AbortSignal): Promise<SelectedNativeArtifact | null> {
+    if (signal?.aborted) fail("storage_unavailable");
     if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
       fail("runtime_dependency_not_loaded");
     }
     const id = identity("reference_conversion", key), entry = this.references.get(id);
     if (!entry) return null;
-    if (!this.referenceLoads.has(id)) {
-      this.referenceLoads.set(
-        id,
-        (async () => {
-          const verified = await this.client.referenceCalculationArtifact(entry);
-          const value = {
-            entry: cloneNativeJson(entry),
-            payload: cloneNativeJson(verified.payload),
-          };
-          this.artifacts.set(id, value);
-          return value;
-        })(),
-      );
+    const loaded = this.artifacts.get(id);
+    if (loaded) {
+      return { entry: cloneNativeJson(loaded.entry), payload: cloneNativeJson(loaded.payload) };
     }
-    const value = await this.referenceLoads.get(id)!;
+    let pending = this.referenceLoads.get(id);
+    if (!pending || pending.signal !== signal) {
+      const value = (async () => {
+        const verified = await this.client.referenceCalculationArtifact(entry, signal);
+        if (signal?.aborted) fail("storage_unavailable");
+        const result = {
+          entry: cloneNativeJson(entry),
+          payload: cloneNativeJson(verified.payload),
+        };
+        this.artifacts.set(id, result);
+        return result;
+      })();
+      pending = { signal, value };
+      this.referenceLoads.set(id, pending);
+      const started = pending;
+      void value.then(() => {
+        if (this.referenceLoads.get(id) === started) this.referenceLoads.delete(id);
+      }, () => {
+        if (this.referenceLoads.get(id) === started) this.referenceLoads.delete(id);
+      });
+    }
+    const value = await pending.value;
+    if (signal?.aborted) fail("storage_unavailable");
     return value
       ? { entry: cloneNativeJson(value.entry), payload: cloneNativeJson(value.payload) }
       : null;
@@ -241,10 +386,10 @@ export class NativeSourceSelection {
       selection_sha256: this.selectionHash,
       production_ready: false,
       engine_acceptance: "NOT_VERIFIED_BY_RAW_SOURCE_SELECTION",
-      ...(this.referenceMetadata().length
+      ...(this.referenceCount()
         ? {
           reference_calculation_payloads: "ON_DEMAND_REQUEST_SCOPED_RULE_KEY_CACHE",
-          selected_reference_metadata_count: this.referenceMetadata().length,
+          selected_reference_metadata_count: this.referenceCount(),
           loaded_reference_payload_count:
             [...this.artifacts.values()].filter((v) => v.entry.kind === "reference_conversion")
               .length,

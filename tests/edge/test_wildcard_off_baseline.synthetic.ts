@@ -262,5 +262,5 @@ Deno.test("default-off member response and replay match pinned baseline bytes", 
   console.log(
     "SYNTHETIC_OFF_BODY_SHA256=" + hash + ";bytes=" + new TextEncoder().encode(first).length,
   );
-  assert(hash === "15b1243691c8b3cdc3f5da96e4162eb6a5473482f585f68b5b13145b0c63ba72");
+  assert(hash === "ade212b64f932e871ab8ef1e1f5762c0314d29d77fc4f206484ab23be56f2772");
 });

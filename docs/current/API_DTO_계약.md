@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.149이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.176이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -19,8 +19,8 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | report.read | GET /api/v1/reports/{report_id} | 없음 | 없음 | report; backend_platform_contract.dto_schemas.report | False |
 | offerings.search | GET /api/v1/offerings/search | 없음 | academic_year (2024~2027 선택), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=offering); backend_platform_contract.dto_schemas.catalog_search | False |
 | offering.read | GET /api/v1/offerings/{offering_id} | 없음 | 없음 | {status, reason_code, offering, catalog_version}; backend_platform_contract.dto_schemas.offering_detail | False |
-| university.analyze | POST /api/v1/reports/{report_id}/university-results | expected_version: positive integer; offering_ids: 서로 다른 등록 ID 1~100개 | 없음 | report (analyses 갱신); backend_platform_contract.dto_schemas.report | True |
-| candidates.build | POST /api/v1/reports/{report_id}/candidates | expected_version: positive integer | 없음 | report (analyses/candidates 갱신); backend_platform_contract.dto_schemas.report | True |
+| university.analyze | POST /api/v1/reports/{report_id}/university-results | expected_version: positive integer; offering_ids: 서로 다른 등록 ID 1~100개; attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null | 없음 | report (analyses 갱신); backend_platform_contract.dto_schemas.report | True |
+| candidates.build | POST /api/v1/reports/{report_id}/candidates | expected_version: positive integer; attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null | 없음 | report (analyses/candidates 갱신); backend_platform_contract.dto_schemas.report | True |
 | shortlist.update | PUT /api/v1/reports/{report_id}/shortlist/{offering_id} | selected: boolean; expected_version: positive integer | 없음 | report (shortlist 갱신); backend_platform_contract.dto_schemas.report | True |
 | report.export | GET /api/v1/reports/{report_id}/print | 없음 | year (optional explicit member shortlist print group; required with expected_report_version/shortlist_revision), expected_report_version (required positive integer with explicit member shortlist print group), shortlist_revision (required nonnegative integer with explicit member shortlist print group), legacy_source_report_id (optional paired with legacy_source_report_version only at shortlist_revision0), legacy_source_report_version (optional positive integer paired with legacy_source_report_id only at shortlist_revision0) | snapshot; backend_platform_contract.dto_schemas.snapshot | False |
 | statistics.read | GET /api/v1/reports/{report_id}/offerings/{offering_id}/live-statistics | 없음 | 없음 | statistics; backend_platform_contract.dto_schemas.statistics | False |
@@ -82,6 +82,7 @@ format: jungsi.persisted-report/v1
 - 유료 요청은 기존 paid_fields를 유지한다. 만료·무이용권 본인 read/export는 승인된 저장 출처가 있는 결과만 닫힌 read_only_snapshot으로 읽으며 새 계산은 하지 않는다.
 - 미확인 legacy 출처는 유료 결과를 임의 확장하거나 first-use 날짜를 추정하지 않는다.
 - 정정 새 프로필은 기존 리포트를 덮어쓰지 않고 새 리포트 ID로 보존한다. 동일 계산 버전은 새 점수/리비전 없이 재사용한다.
+- 유료 소유자 리포트의 선택적 reference_attendance_requirements는 승인된 참고 산식의 자기 확인 필요 영역과 프로필·시험·팩 버전만 전달하며 실제 응시 증빙이나 전형 자격 판정이 아니다.
 
 ### catalog_search
 
@@ -334,6 +335,7 @@ format: jungsi.history-snapshot/v1
 - 기존 승인 권위·예상 이전 manifest·원셀·선택 variant/독립 검수에서 core를 먼저 고정한 뒤 q·새 parts·새 manifest·별도 assembly/review를 작성한다. core에는 미래 parts/manifest 해시를 넣지 않는다. 기존 권위/원자료 범위가 같으면 이 wire 정렬을 이유로 사용자에게 새 승인을 요구하거나 로컬 준비를 Owner 회신까지 중단하지 않는다.
 - Optional row-level historical_cutoff_references stores each historical estimate once by exact observation/year/school/PK. It never changes an original cut, q, value, status, unit or identity; serving requires the byte-pinned independent-review descriptor bound to the same manifest/source/scope.
 - Optional only for pinned partial R27 v2 scope: status=partial with source_rows, included_rows, excluded_rows and review_pending_rows; head and every body part must match the same verified index. A partial-aware consumer receipt and request admission are required.
+- 2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다.
 
 ### own_report_list
 
@@ -436,7 +438,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=71783dff022c43cad7ea88ccf92c1cc098dc1932600019980783030422d9cc3e -->
+<!-- jungsi:generated spec_sha256=9100ed8344a18216511155d7765efb829552e7effb2363291737e3c6561f25bf -->
 
 
 ## 회원별 관심대학 JSON API
@@ -500,7 +502,7 @@ CR-CURRENT-NATIONAL-PUBLIC-20261019-01 / ADOPTED_SOURCE_IMPLEMENTED_NORMAL_SOURC
 
 적용 경로: /admissions/results, /admissions/possibilities. 기존 작업: history.search, offerings.search, offering.read, recruitment.read. P1 standard/paid without a personal score; P3 offerings/search/detail remains paid, existing active+aal2 admin exception and ownership/auth/relay rules unchanged
 
-All currently available eligible national canonical rows, not only an approved school subset; preserve active_service=false and actual-practical exclusions. All searchable does not mean a single unbounded response or automatic bulk retrieval.
+For member-facing discovery, all currently eligible 2027 nationwide offerings with confirmed actual recruitment; historical-only offerings are not independent member results. Keep prior-year observations as verified references to those current offerings and preserve all source/admin review data. Apply existing practical exclusions and explicit user exceptions. National scope is not a school subset or unbounded response.
 
 No DB production_allowed/engine_approved/source release flag rewrite; authorise the explicit read provider and public projection separately. Missing unpublished fields remain distinct from source eligibility.
 
@@ -560,14 +562,14 @@ P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURC
 
 | 항목 | 계약 |
 | --- | --- |
-| 원천·단위 | DATA_ACTIVE_ADMISSION_CURRENT_v1.json / jungsi_data_ingest.admission_results_current; trusted local current caches and school source evidence reused; no request-path full view aggregate one display row per academic_year:original_PK_string with verified identity/year links; observations without a verified PK keep original null and their existing opaque observation address in an explicitly counted mapping_pending domain; never fabricate an offering PK or inferred 2027 ID |
+| 원천·단위 | DATA_ACTIVE_ADMISSION_CURRENT_v1.json / jungsi_data_ingest.admission_results_current; trusted local current caches and school source evidence reused; no request-path full view aggregate; 2027 current recruiting anchors and verified year links come from the approved current official guide and confirmed rollover state Internal historical observations retain their original academic_year:PK and verified identity/year links. Member-facing offering groups require an eligible, currently recruiting 2027 anchor. Historical-only or unresolved mappings stay in data/admin review and are not independent public cards; never invent an offering PK or 2027 identity. |
 | 고정 칸 | recruitment_count_with_stage, competition_ratio, additional_admission_count, final_additional_admission_rank, final_50_percent_cut, final_70_percent_cut |
 | 추정 열 | Estimated applicant/rejected counts remain frontend display-only under the approved compatible valid-input rules. Never substitute final reserve rank for additional admitted headcount. |
 | manifest | Deterministic semantic version/content SHA, rule version/SHA, input current-head binding, payload bytes/encoding/decompressed size, actual school/row/year counts and creation time. Shared source/basis/cohort definitions are references, not repeated audit bodies. Separate source observations, mapped display rows and unmapped held observations; reconcile all included/excluded selections to the declared source head. Measure gzip/decompressed sizes; a proposed estimate is not a physical bound or acceptance result. |
 | 읽기 API | Two explicit read-only operations: small current head and a version-bound gzip/full or bounded-part body. Final routes/DTO/bounds are registered with implementation. No direct browser Storage permission. |
 | 갱신·신뢰 | New current head/rules produce one cross-reviewed immutable snapshot; identical content reuses existing bytes. Stable trust anchor, publisher scope, expected-head CAS and rollback must be defined; never remove pins to trust arbitrary mutable content. |
 | 공유 서버 cache | Only approved public projection is reusable in the authenticated server BFF/KV by snapshot SHA/rules/scope. Verify user session on every page/cache hit; never store report/profile/score/JWT/relay/private model/cursor or authorization decisions in shared cache. HTTP/browser responses keep no-store. Bounded head revalidation; head/auth/scope failure is not indefinite stale authorization. Actual authenticated head/body API calls retain request/result accounting; a BFF/KV hit with no API call is not charged a fictional full-body API read. Existing personal/engine logical cache accounting stays unchanged. No cache_delivery intent or client quota waiver flag is introduced. FE-CONC-01~04의 화면 소스는 불변 KV 키와 native SQLite 조정자(JT_P1_COORDINATOR/P1SnapshotCoordinator)로 준비한다. head/progress/ready를 KV 잠금으로 처리하지 않고, 복수 인스턴스의 head 재확인·관리자 단일 준비·만료 fence를 원자적으로 조정한다. 최종 색인 작성 직후 최신 head를 다시 확인하며 live/synthetic 조정 상태는 서버 고정 이름으로 분리한다. 필수 KV·조정 바인딩이 없는 실연결/배포는 실패로 표시하고, 명시 synthetic+development/test에서만 같은 상태 기계의 메모리 저장소를 허용한다. 동시 합성36건과 기존 전체 후보의 로컬 재생은 통과했지만 native 자원 생성·worker packaging·실제 배포·운영 혼합 부하는 NOT_RUN이다. CPU 멀티스레딩이나 이용자 무대기를 확정하지 않는다. 사용자 P1-DO-ONLY-20261021에 따라 해당 조정자만 예외 허용됐으며, 실제 계정의 비용 검수·자원 등록·배포·정문 인수는 별도 영수증 전까지 NOT_RUN이다. 회원 표시 getUser 전환과 방문 기록 헤더 조건 보완의 소스 검토를 수용하되 영역 표지나 정상 관측만으로 중계 인증을 완료 처리하지 않는다. 학교가 여러 입력 조각에 걸쳐 있으면 기존 단계당 원문6조각·학교완료12개·고유 fragment읽기20개 한도 안에서 여러 fenced step으로 조립한다. 미완성 학교 rows는 현재 발행본/세대에 결속한 불변 KV key에만 두며 조정 progress에는 학교ID·다음조각 offset·키·이전쓰기prefix·step 메타데이터만 둔다. offset 범위·이전 fence/step·발행본·세대·원래 fragment 순서를 검증하며 완성 전에는 school_keys/학교완료수·ready에 노출하지 않는다. 부분 KV 전파지연·head변경·만료 writer는 fail closed/새 fence 재개로 처리하고 원문 재읽기나 한도 확대·새 자원을 요구하지 않는다. 이 후속의 실제 모듈/SQLite 합성62 및 최소 framework ambient 경계 strict noEmit 통과는 운영 배포나 실제 후보 전수 검수 완료를 뜻하지 않는다. 별도 Root 비공개 전체후보 모듈 재생 PASS는 동결 source hash와 최종 commit blob 동일성에만 결속하며 Worker 용량·실제 인증·배포 인수를 대신하지 않는다. 숫자 전달 PASS는 원래 pending_metadata와 unit=null을 ready로 승격하거나 보류를 해소한 검수가 아니다. 별도 필드별 출처 자격 refs의 계약/DTO 연동/검수와 새 판 운영 인수는 본 조립 수정에 포함하지 않는다. |
-| 목록·검색 | Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot. |
+| 목록·검색 | Snapshot-backed page/search covers its entire manifest domain with server-side university paging and exact filtered counts. Legacy history.search retains its original bounded cursor and six-page UI behavior until the new path is live; no claim that a partial600 metric result is a whole snapshot. 2027 실제 모집 대상 판정을 검색·정렬·건수·페이지 계산 전에 적용한다. |
 | 성능 목표 | Frontend target first page within2s and local search within1s; separate cold version acquisition from warm server-cache page/search timing. These are acceptance targets, not measured PASS. |
 
 정규화·선택 규칙:
@@ -588,6 +590,7 @@ P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURC
 - 별도 발표 통계의 실제 비율은 1~100 정수 또는 null이다. 평균·최저 등 비백분위 통계는 null을 보존하고 원래 통계 라벨로 표시한다. 새 DTO의 닫힌 필드·개별 항목 수·전체 bytes/행 경계는 계속 검증한다.
 - 기존 수집된 예비순위와 최종 발표 범위의 근거를 관측별로 확인한다. 날짜·URL metadata 결측만으로 이미 확인된 숫자를 지우지 않으며, 최종 예비번호 자격 미확정·다른 차수/전형 충돌은 원문 독립 검수 후에만 해소한다. 순위를 인원으로 치환하지 않는다.
 - 2026-11-01 화면 정책: 최종 합격 예비번호 단일 열, 추가합격 인원은 내부에서 보존한다. 같은 뜻으로 검증된 원문 표현만 해당 관측에 연결한다. 기존 발행물 전체에 별칭이 소급 적용됐다고 추정하지 않는다.
+- 2027 모집행 r27_source의 applicant_eligibility와 selection_method는 선택 필드다. 단일 조립에서 개별 Owner 검토가 없으면 해당 필드만 pending이며 text·source_url·source_as_of는 null이다. 원문 문서·문구 SHA는 공개 DTO에서 제외하고 이전 불변 snapshot은 보존한다. 합성 4건은 서비스 후보 검증이며 실제 Owner 연결·DB/Storage 발행·배포·화면 인수는 NOT_RUN이다.
 
 인수 기준:
 
@@ -598,6 +601,14 @@ P1-DISPLAY-SNAPSHOT-01 / BASELINE_OWNER_ACTIVATION_RECEIVED_NEW_STATISTICS_SOURC
 - JWT/relay/ownership/current role, public-cache segregation, response allowlist/no-store, physical bounds and new operation negative cases
 - Exact candidate source/normal hooks/CI; private final artifact proof; Owner upload/readback/settings; fresh deployed BFF/browser observations remain distinct
 - 최종 합격 예비번호 단일 열·행 정렬, 실제 인원 only·null·0·명시 근거 없는 사유·기존 추정 탈락 산식과 동일 report/source ID를 합성·운영에서 각각 검증한다.
+- 2027 실제 모집행은 과거 자료 유무와 무관하게 전국 검색·목록에 나타난다.
+- 2024~2026만 있는 단독 모집행은 1·3·4페이지 회원 화면에 노출되지 않지만 정본과 관리자 검수에는 보존된다.
+- 검증된 2027 연계 과거 입결은 원래 학년도·전형·군·코호트·통계·단위와 출처를 유지한다.
+- 실제 모집 없음이 확인된 최종 0명과 이월 발생 전 모집 자체가 불명확한 조건부 전용 행은 비노출한다. 모집 사실이 확인된 최초 0은 최초 단계로 보존하고, 최종 인원과 미확정 이월이 함께 제시되면 해당 값·관계 행만 HOLD한다. 이후 모집이 공식 확인되면 새 Guide head와 이에 대응하는 snapshot head를 각각 검증해 반영한다.
+- 모집 사실만 확인되고 인원이 미확인인 행은 확인 중으로 표시하며 0과 구분한다.
+- 연결이 불명확한 과거 행은 현재 행의 잘못된 값으로 붙이지 않으며 2027 현재 모집행 자체는 유지한다.
+- 필터를 페이지와 건수 계산 전에 적용하고 1·3·4페이지 결과 범위와 PK/권한을 일치시킨다.
+- 해당 head 변경 전후 재준비·재사용, 입력 1·101·6,081 합성 및 허용 범위 실DB 실행계획/응답속도, 실제 Owner 설정과 화면 인수를 각각 확인한다.
 
 ADMIN-VERIFY-QUOTA-01 / SOURCE_IMPLEMENTED_SYNTHETIC_VERIFIED_OPERATING_POLICY_NOT_REGISTERED. Fresh same-Bearer Supabase Auth verification, own profiles role=admin/status=active and aal2; server internal origin only, revalidated each request. No client admin flag or cached privilege.
 
@@ -731,7 +742,7 @@ Root 독립 live 재실행: Fresh installed-source identity PASS. Login and the 
 | 화면·경로 | /admissions/results / history.snapshot.head, history.snapshot.read |
 | 부분 범위 | Partial R27 v2 scope exposes only independently reviewed eligible_non_practical rows; excluded and held rows are counted, not included. Both head and every body part carry matching partial coverage. Full and partial global receipts require an in-process sealed source-bound candidate/index and exact ordered rows. |
 | 권한·소비자 | Separate server-controlled descriptor and dedicated relay credential, plus independently pinned partial-aware consumer receipt; missing or invalid optional settings leave v1 available and v2 fail-closed. |
-| 원문·미확정 | preserve absent, explicit null, zero, original literal, uncertainty and conditional rollover separately; never infer final or initial from unknown stage keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row Reviewed links v2 requires separately approved exact source and target scope field states (confirmed_value or confirmed_null) and an evidence-pinned trusted descriptor. A missing or unknown field never becomes confirmed null. Historical matching uses the exact target identity and a unique mapped historical row; cross-school and competing grants remain held. Legacy v1 matching remains unchanged. These assertions do not authenticate the issuer or establish actual evidence. V2 must bind source head, previous publication and source head, scope, and authority digest through a separately trusted descriptor; compose rejects a head or scope mismatch. Hash matches do not authenticate an issuer. |
+| 원문·미확정 | preserve absent, explicit null, zero, original literal, uncertainty and conditional rollover separately; never infer final or initial from unknown stage keep standalone 2027 rows, link past years only where authorized scope and evidence match; unresolved history does not drop the 2027 row Reviewed links v2 requires separately approved exact source and target scope field states (confirmed_value or confirmed_null) and an evidence-pinned trusted descriptor. A missing or unknown field never becomes confirmed null. Historical matching uses the exact target identity and a unique mapped historical row; Unverified cross-school and competing grants remain held; verified institutional code transitions may use their existing trusted, identity-specific evidence. Legacy v1 matching remains unchanged. These assertions do not authenticate the issuer or establish actual evidence. V2 must bind source head, previous publication and source head, scope, and authority digest through a separately trusted descriptor; compose rejects a head or scope mismatch. Hash matches do not authenticate an issuer. 2026-11-03 사용자 결정: 이미 수집·표준화·적재한 현재 정본의 기본 PK를 우선 사용한다. Guide 물리 PK는 (release_id, academic_year, offering_pk)이고 같은 유효 자료판의 모집행은 학년도와 기존 offering_pk로 찾는다. 기존 release/head와 중복·충돌을 확인하며 학교 ID별로 자료를 다시 모으거나 새 식별자를 만들지 않는다. 학년도 간에는 기존 정본의 검증된 PK 관계를 사용하고, 학교·캠퍼스·전형·군은 저장된 속성과 관계 근거에 따라 확인한다. 검증된 학교 코드 변경·통합 관계는 코드가 다르다는 이유만으로 일괄 차단하지 않으며, 근거 없는 다른 관측의 병합은 금지한다. 관측 및 누백 테이블의 기존 물리키와 각 관측 ID는 따로 보존한다. 현재 개발 후보이며 실제 라우팅·배포 완료가 아니다. |
 | DB 대조 | 현재 정본 head·writer·동일 스냅샷·앱 역할/RLS·전체 출처와 미반환/중복을 대조하고 실행계획·실측 부하를 검증한다. 미확인 값은 보류한다. |
 | 승인 현재성 | 서버가 실제 사용자·중계 신원 및 공유 원자적 예산을 유지하고 발행판·원천·범위·소비자·만료·취소와 revision을 일관되게 확인한다. 확인 경로 미구현은 v2 전달을 차단한다. |
 | 연결·화면 | 검토된 연도별 연결만 묶는다. 보류·미확인 연결, 복수 전형·모집군, 조건부 이월과 발표 단계를 구분하고 모집인원을 임의로 채우지 않는다. |
@@ -829,3 +840,7 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
 21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다. 2026-10-23 통합 요청: 학년도+모집단위 번호별 정본 규칙의 서버 내부 읽기 포트를 추가하고, 검증된 lineage에만 전년 비교를 결속한다. 영역별 비율·영어/한국사·가산점·탐구 선택조건과 원문/자격을 보존한다. 상담 근거의 실제 모집단/정책 버전·정밀도·충원 인원/예비번호·한해 컷 폭/3개년 변동의 의미를 구분한다. 최신 Owner008 설치 보고는 이전 준비 이력과 별도 수용하며 전체 UPDATE version 트리거를 유지한다. 전문가용 계산 한도는 실제 런타임 카탈로그 범위를 먼저 확인하고 개인용·공유 물리 통제를 보존한다. 새 포트 실DB/설정·전문가용/JWT/OTP/BFF·배포 인수는 각각 NOT_RUN이다.
+
+## 참고 산식 응시 자기 확인
+
+기존 성적은 변경하지 않고 승인된 참고 산식의 필수 응시 영역에 한해 자기 확인을 요청한다. 요청은 소유 프로필 ID·시험 ID·시험팩 버전에 결속하며 누락·거짓·미확인은 해당 참고 계산만 보류한다. 유료 본인 리포트의 확인 필요 상태는 reference_attendance_requirements로 분리한다. 기존 결과와 다른 대학은 유지하고 실제 선택 자료·프로필 불변성·운영 배포는 확인 전이다.
