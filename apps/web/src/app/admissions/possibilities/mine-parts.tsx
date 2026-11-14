@@ -117,7 +117,7 @@ export async function MineDetail({ p, o }: { p: P; o: OfferingDto }) {
   const m = await p;
   const report = mineReport(m);
   if (!m.ok) return <p className="wait">내 분석을 불러오지 못했습니다. 화면 위쪽 안내를 확인해 주세요.</p>;
-  return <Detail o={o} a={cellOf(m, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} />;
+  return <Detail o={o} a={cellOf(m, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} />;
 }
 
 export function DetailWait() {

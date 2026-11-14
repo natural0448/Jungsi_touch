@@ -184,3 +184,9 @@
 .et .sr-line .num{font-weight:800;color:var(--deep)}
 .et .sr-line.hold{color:var(--muted)}
 .et .sr-line .sr-elig{display:block;color:var(--muted);font-size:12px}
+/* 지원 자격 조건(2026-11-15): 요강 조건 줄과 내 입력 비교 표시 */
+.et .ps .card .conds{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:4px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.et .ps .card .conds b{color:var(--deep);font-weight:800;margin-right:4px}
+.et .ps .card .conds .cm{display:inline-block;margin-left:6px;padding:0 6px;border-radius:var(--r-sm);font-size:12px;font-weight:700;border:1px solid var(--line)}
+.et .ps .card .conds .cm.match{color:var(--safe);border-color:var(--safe)}
+.et .ps .card .conds .cm.differ{color:var(--reach);border-color:var(--reach)}

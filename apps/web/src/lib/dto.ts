@@ -237,6 +237,15 @@ export interface HistoricalMetricDto {
   source_as_of: string | null; // YYYY-MM-DD
 }
 
+/** eligibility_conditions — 모집단위의 필수 응시 영역·지정 과목(서버 public_response_schemas 와 같은 모양) */
+export interface EligibilityConditionsDto {
+  required_areas: string[] | null; // [] 이면 별도 지정 없음
+  math_choices: string[] | null; // 목록이면 그 과목 중 하나
+  math_note: string | null; // 요강 문구 그대로
+  inquiry_domains: string[] | null; // 사회·과학·직업
+  inquiry_note: string | null; // 요강 문구 그대로
+}
+
 /** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
 export interface AssessmentDto {
   offering_id: string;
@@ -273,6 +282,8 @@ export interface AssessmentDto {
   reference_percentile?: ReferencePercentileDto | null;
   // 학교 반영 백분위(참고, 2026-11-14). 허가된 2027 모집단위만, 읽을 때 서버가 계산해 붙인다
   school_reflected?: SchoolReflectedDto | null;
+  // 지원 자격 조건(유료 report.read, 2026-11-15). 요강 정본에서 확정된 필드만 온다. 판정은 eligibility_status 그대로
+  eligibility_conditions?: EligibilityConditionsDto | null;
 }
 
 /** 학교 반영 백분위(참고). value 는 0~100, 영어·한국사·가산점 제외 */

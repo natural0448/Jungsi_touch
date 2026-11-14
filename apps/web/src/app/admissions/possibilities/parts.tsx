@@ -2,7 +2,8 @@ import Link from "@/components/link";
 import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
-import type { AssessmentDto, OfferingDto } from "@/lib/dto";
+import type { AssessmentDto, OfferingDto, SubjectResultDto } from "@/lib/dto";
+import { CONDITION_MARK_TEXT, conditionLines } from "@/lib/eligibility-conditions";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
 import { SchoolReflectedLine } from "@/components/school-reflected";
@@ -12,7 +13,7 @@ import { IssueItem } from "./recruit-parts";
  * 펼친 줄: 2027 모집 정보(extras 자리, recruit-parts.tsx) + 환산·학교 누백·지원 판단·유불리 + 근거(assessment).
  * 환산·누백·판단은 서로 따로 준비된다(1.7.0). 판단이 보류여도 성공한 환산·누백은 숨기지 않는다.
  */
-export function Detail({ o, a, extras, picked }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean }) {
+export function Detail({ o, a, extras, picked, subjects }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[] }) {
   const p2 = page("PAGE-02").path;
   // 2027 모집 정보·발행 기준은 펼친 뒤 따로 받아 채운다(extras.tsx) — 펼치기를 기다리게 하지 않는다
   const recruit = extras;
@@ -48,7 +49,7 @@ export function Detail({ o, a, extras, picked }: { o: OfferingDto; a: Cell; extr
       <div className="four">
         <ConversionCard a={a} />
         <PercentileCard a={a} />
-        <DecisionCard a={a} />
+        <DecisionCard a={a} subjects={subjects} />
         <AdvantageCard a={a} />
       </div>
       <SchoolReflectedLine a={a} />
@@ -174,8 +175,25 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
 /** 자격 확인이 필요한 모집단위에서 학생이 할 일(2026-11-15 대표님 결정 문구) */
 const DECISION_CONFIRM =
   "이 모집단위는 지원 자격(필수 응시 영역·지정 과목)을 모집요강에서 직접 확인해야 합니다. 자격이 맞다면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하세요.";
+const DECISION_CONDITIONS =
+  "요강에 적힌 지원 조건과 내 입력을 견줘 보세요. 맞으면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하고, 졸업 연도 등 그 밖의 자격은 모집요강에서 확인하세요.";
 
-function DecisionCard({ a }: { a: AssessmentDto }) {
+function Conditions({ a, subjects }: { a: AssessmentDto; subjects?: SubjectResultDto[] }) {
+  const lines = conditionLines(a, subjects);
+  if (!lines.length) return null;
+  return (
+    <ul className="conds">
+      {lines.map((l) => (
+        <li key={l.label}>
+          <b>{l.label}</b> {l.text}
+          {l.mark && <span className={`cm ${l.mark}`}>{CONDITION_MARK_TEXT[l.mark]}</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectResultDto[] }) {
   const d = a.decision_components;
   return (
     <section className="card" aria-label="지원가능성">
@@ -184,7 +202,14 @@ function DecisionCard({ a }: { a: AssessmentDto }) {
         <CategoryBadge a={a} />
       </div>
       {a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
-        <p>{DECISION_CONFIRM}</p>
+        conditionLines(a, subjects).length ? (
+          <>
+            <Conditions a={a} subjects={subjects} />
+            <p>{DECISION_CONDITIONS}</p>
+          </>
+        ) : (
+          <p>{DECISION_CONFIRM}</p>
+        )
       ) : a.status !== "ready" ? (
         <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
       ) : (
