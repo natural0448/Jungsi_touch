@@ -2880,6 +2880,10 @@
         "reference_percentile": {
           "ref": "reference_percentile",
           "nullable": true
+        },
+        "school_reflected": {
+          "ref": "school_reflected",
+          "nullable": true
         }
       },
       "required": [
@@ -2900,7 +2904,8 @@
         "conversion",
         "percentile",
         "recommendation_reasons",
-        "reference_percentile"
+        "reference_percentile",
+        "school_reflected"
       ]
     },
     "candidate_item": {
@@ -7171,6 +7176,61 @@
         "pack_version",
         "confirmation_kind",
         "offerings"
+      ],
+      "optional": []
+    },
+    "school_reflected": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "reference",
+            "pending"
+          ]
+        },
+        "value": {
+          "type": "number",
+          "nullable": true
+        },
+        "reason_code": {
+          "type": "string",
+          "nullable": true,
+          "enum": [
+            "rule_invalid",
+            "korean_missing",
+            "math_missing",
+            "inquiry_missing",
+            "inquiry_two_subjects_required",
+            "score_invalid"
+          ]
+        },
+        "eligibility_note": {
+          "type": "boolean",
+          "nullable": false
+        },
+        "excluded": {
+          "type": "array",
+          "nullable": false,
+          "items": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "english",
+              "korean_history",
+              "bonus"
+            ]
+          }
+        }
+      },
+      "required": [
+        "status",
+        "value",
+        "reason_code",
+        "eligibility_note",
+        "excluded"
       ],
       "optional": []
     }

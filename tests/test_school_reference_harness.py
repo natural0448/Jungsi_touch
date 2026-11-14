@@ -84,6 +84,11 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
             if saved is not None:
                 catalog = 'supabase/functions/_shared/current_public_catalog.ts'
                 expected_bindings[catalog] = saved['source_bindings'][catalog]
+                # 2026-11-14 school reflected: schema, its generated fixture and artifact reader.
+                for path in ('src/jungsi_touch/application/public_response_schemas.json',
+                             'tests/edge/public_api_contract_fixture.ts',
+                             'supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts'):
+                    expected_bindings[path] = saved['source_bindings'][path]
             for row in selected['source_bindings']:
                 if row['path'] in expected_bindings:
                     row['sha256'] = expected_bindings[row['path']]

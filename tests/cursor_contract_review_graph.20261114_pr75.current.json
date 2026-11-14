@@ -44,7 +44,7 @@
         "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
         "supabase/functions/_shared/jungsi/application/platform_repository.ts": "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c",
+        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "7aebeb831e5dfcc0edef5a8c0b69355e2a9fc204518184d660b5083293f71f9e",
         "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
         "supabase/functions/_shared/jungsi/application/reference_attendance.ts": "6189893c385e02a70f48f8f43a2bea6165bd7a69f93e4a3ae9918f87d7628c2d",
         "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45",
@@ -54,6 +54,8 @@
         "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
         "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
         "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801",
+        "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": "350005e0571ac088009849f1f9f726ef280141c871fabcf84faf20cdb34ef70c",
+        "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
         "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931",
         "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c",
         "supabase/functions/_shared/jungsi/application/score_map.ts": "10b78c18184a6d89bade692ff7d2f00059a1d41dc2c957be8709db29cba13e40",
@@ -93,7 +95,7 @@
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
         "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
-        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed",
+        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
         "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "69808bb554eaf03f0b40603725795ab4ca4e0460261fae8ff9fb1dec4312a8e5",
         "supabase/functions/_shared/search_failure_diagnostic.ts": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",
         "tests/cursor_contract_review/combined_policy_catalog_runtime.original.ts": "6d412ee5c14376ec436a420cfed5cbb0bb50dd9d44144668d5c9331ca5489b26",
@@ -1797,6 +1799,16 @@
         ],
         [
           "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+          "./school_reflected_projection.ts",
+          [
+            [
+              "code",
+              "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/profile_reports.ts",
           "./score_input_ports.ts",
           [
             [
@@ -2201,6 +2213,56 @@
           [
             [
               "type",
+              "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "../domain/exam_pack.ts",
+          [
+            [
+              "type",
+              "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "../domain/json_value.ts",
+          [
+            [
+              "type",
+              "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "../domain/native_json.ts",
+          [
+            [
+              "code",
+              "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "./school_reflected_reference.ts",
+          [
+            [
+              "code",
+              "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "./school_score_inputs.ts",
+          [
+            [
+              "code",
               "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
             ]
           ]
@@ -4342,7 +4404,7 @@
         "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
         "supabase/functions/_shared/jungsi/application/platform_repository.ts": "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c",
+        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "7aebeb831e5dfcc0edef5a8c0b69355e2a9fc204518184d660b5083293f71f9e",
         "supabase/functions/_shared/jungsi/application/reference_attendance.ts": "6189893c385e02a70f48f8f43a2bea6165bd7a69f93e4a3ae9918f87d7628c2d",
         "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45",
         "supabase/functions/_shared/jungsi/application/reference_candidates.ts": "b033073a8cf4b9adf440ba575724854226daddd6c40d64d5dae371bf2ce90702",
@@ -4351,6 +4413,8 @@
         "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
         "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
         "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801",
+        "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": "350005e0571ac088009849f1f9f726ef280141c871fabcf84faf20cdb34ef70c",
+        "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
         "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931",
         "supabase/functions/_shared/jungsi/application/score_input_ports.ts": "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c",
         "supabase/functions/_shared/jungsi/application/session_service.ts": "e156d9d46d0255869289274c1b829578f6fff96893ed31b7f87f68553830f3de",
@@ -4387,7 +4451,7 @@
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts": "ff459d8cf6b1c0711b04bada5066b4ef01825dd4a6c5678b1a1e88f4c21ffe99",
         "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts": "b1ca87261edb42ed5d47f564d8389c46799bdab4d13dc4038f31081d07c66b4b",
-        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed",
+        "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
         "supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts": "69808bb554eaf03f0b40603725795ab4ca4e0460261fae8ff9fb1dec4312a8e5",
         "tests/cursor_contract_review/current_public_bound_cursor.test.ts": "3e99046987366f3dd7f91e35078604430d8338d1d27be8dd862ba790cacfacfa"
       },
@@ -5818,6 +5882,16 @@
         ],
         [
           "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+          "./school_reflected_projection.ts",
+          [
+            [
+              "code",
+              "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/profile_reports.ts",
           "./score_input_ports.ts",
           [
             [
@@ -6182,6 +6256,56 @@
           [
             [
               "type",
+              "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "../domain/exam_pack.ts",
+          [
+            [
+              "type",
+              "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "../domain/json_value.ts",
+          [
+            [
+              "type",
+              "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "../domain/native_json.ts",
+          [
+            [
+              "code",
+              "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "./school_reflected_reference.ts",
+          [
+            [
+              "code",
+              "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+            ]
+          ]
+        ],
+        [
+          "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts",
+          "./school_score_inputs.ts",
+          [
+            [
+              "code",
               "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
             ]
           ]

@@ -356,6 +356,10 @@ def before_member_school_overlay(current):
             c._PUBLIC_CATALOG: school[c._PUBLIC_CATALOG],
             c._COMBINED_CATALOG: member[c._COMBINED_CATALOG],
             c._SCORE_INPUT: stage_pins[c._SCORE_INPUT],
+            # 2026-11-14 school reflected overlay paths (historical school/member pins).
+            c._ARTIFACTS: school[c._ARTIFACTS],
+            c._SCHEMA_FIXTURE: school[c._SCHEMA_FIXTURE],
+            c._PROFILE_REPORTS: member[c._PROFILE_REPORTS],
         })
         policy['native_SQL_preparation_evidence'].pop('guard_saved_report_source_candidate_20261113')
     files = spec['edge_harness']['files']

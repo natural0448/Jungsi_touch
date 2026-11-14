@@ -77,6 +77,7 @@ _MX = "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
 _MS = "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
 _MF = "tests/edge/member_shortlist_fixture.ts"
 _MRUN = "scripts/run_edge_tests.py"
+_MSCAN = "scripts/check_edge_contract.py"
 
 # Separate source-only continuation. The old overlay and all verification
 # receipts remain byte-for-byte unchanged; this marker never represents a run.
@@ -102,9 +103,20 @@ SAVED_REPORT_OTHER_EDGE_SOURCES = frozenset({
     "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts",
     "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts",
     "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+    "supabase/functions/_shared/jungsi/application/profile_reports.ts",
 })
-SAVED_REPORT_SCRIPT_PATHS = frozenset({"scripts/check_project_consistency.py", _MRUN})
-SAVED_REPORT_OVERLAY_PATHS = SAVED_REPORT_EDGE_PATHS | SAVED_REPORT_OTHER_EDGE_SOURCES | SAVED_REPORT_SCRIPT_PATHS
+SAVED_REPORT_SCRIPT_PATHS = frozenset({"scripts/check_project_consistency.py", _MRUN, _MSCAN})
+# Public response schema bytes: no code-index row; pinned by bytes only (school reflected DTO, 2026-11-14).
+_SCHEMA = "src/jungsi_touch/application/public_response_schemas.json"
+_ARTIFACTS = "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+_PROFILE_REPORTS = "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+SAVED_REPORT_DATA_PATHS = frozenset({_SCHEMA})
+# Generated schema fixture: harness declaration only, no code-index row.
+_SCHEMA_FIXTURE = "tests/edge/public_api_contract_fixture.ts"
+SAVED_REPORT_HARNESS_PATHS = frozenset({_SCHEMA_FIXTURE})
+SAVED_REPORT_OVERLAY_PATHS = (SAVED_REPORT_EDGE_PATHS | SAVED_REPORT_OTHER_EDGE_SOURCES |
+    SAVED_REPORT_SCRIPT_PATHS | SAVED_REPORT_DATA_PATHS | SAVED_REPORT_HARNESS_PATHS)
 
 SAVED_REPORT_RECEIPT_BASELINES = {'current_public': '06f1e26e0719cabc45ece3dab98e82c0df5db9d3739906f2a47933117e3be0c5', 'own_2027': '1297aa820a4dd9573552fad416291af5024a7be8de439f3d77f738ab6545bcee', 'snapshot_batch': 'ceedf2c8ce46ee394bedb422f63b445c8d5a434e732802e1f7d1ba4a2a461c14', 'current_page_projection': '7497e7c5afcd69bdc80cecc8781a755415efa3dda4f1f597f63d1c371beef647', 'p1_selection': 'baae156bbc3786fd45e09730e4c662ee44d99b38c0ce4b8ebc2e44883c325db7'}
 SAVED_REPORT_RECEIPT_PATHS = {'current_public': ('supabase/functions/_shared/current_public_catalog.ts', 'supabase/functions/_shared/current_public_catalog_sql.ts'), 'own_2027': ('supabase/functions/_shared/current_public_catalog.ts',), 'snapshot_batch': ('supabase/functions/_shared/current_public_catalog.ts',), 'current_page_projection': ('supabase/functions/_shared/current_public_catalog.ts', 'supabase/functions/_shared/current_public_catalog_sql.ts'), 'p1_selection': ('supabase/functions/_shared/current_public_catalog.ts',)}
@@ -166,6 +178,12 @@ def saved_report_overlay(spec, source_hashes=None):
             if path in SAVED_REPORT_SCRIPT_PATHS:
                 if py.get(path) != sha:
                     raise ValueError("saved report overlay script index")
+            elif path in SAVED_REPORT_DATA_PATHS:
+                if path in py or path in edge:
+                    raise ValueError("saved report overlay data index")
+            elif path in SAVED_REPORT_HARNESS_PATHS:
+                if path in py or path in edge or                     harness.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+                    raise ValueError("saved report overlay harness-only index")
             else:
                 if edge.get(path) != sha:
                     raise ValueError("saved report overlay code index")
@@ -275,7 +293,7 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
     if family == "member":
         bind_list(value["verification"]["source_bindings"],
                   {_MC, _MX, _MS, _MF} |
-                  ({_MB, _MJSON, _PUBLIC_CATALOG, _COMBINED_CATALOG} if saved is not None else set()))
+                  ({_MB, _MJSON, _PUBLIC_CATALOG, _COMBINED_CATALOG, _SCHEMA, _PROFILE_REPORTS, _SCHEMA_FIXTURE} if saved is not None else set()))
     elif family in ("auth", "current_page"):
         bind_list(value["source_bindings"], {_MC} | ({_MB} if saved is not None and family == "current_page" else set()))
     elif family == "read_view":
@@ -287,8 +305,11 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
         if _MC not in value:
             raise ValueError("overlay REQ-27 runtime")
         value[_MC] = pins[_MC]
+        if saved is not None and _SCHEMA_FIXTURE in value:
+            value[_SCHEMA_FIXTURE] = pins[_SCHEMA_FIXTURE]
     elif family == "school":
-        bind_list(value["source_bindings"], {_MU, _MC, _MX} | ({_PUBLIC_CATALOG} if saved is not None else set()))
+        bind_list(value["source_bindings"], {_MU, _MC, _MX} |
+                  ({_PUBLIC_CATALOG, _SCHEMA, _ARTIFACTS, _SCHEMA_FIXTURE} if saved is not None else set()))
     elif family == "cancellation":
         bind_list(value["source_bindings"], {_MU})
     elif family == "stage":
@@ -298,7 +319,8 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
             raise ValueError("overlay DEV-010 runtime")
         value["bindings"]["composition"]["source_sha256"] = pins[_MC]
     elif family == "native_seed":
-        bind_list(value["source_bindings"], {_MRUN})
+        # 11-14: the public schema pin moved check_edge_contract.py; bind its current bytes too.
+        bind_list(value["source_bindings"], {_MRUN} | ({_MSCAN} if saved is not None else set()))
     else:
         raise ValueError("overlay unknown family")
     return value
@@ -5965,6 +5987,9 @@ def foundation_graph_extension_errors(paths,read,spec):
                 candidate["operating_writes"] != 0 or ext["files"][path]["sha256"] != expected_candidate["previous_source_sha256"]):
                 raise ValueError("historical/current graph boundary")
             effective[path]=candidate["current_source_sha256"]
+            # Sealed schema pin stays historical; the saved-report overlay carries current bytes.
+            if pins is not None and _SCHEMA in pins:
+                effective[_SCHEMA]=pins[_SCHEMA]
         for path in expected:
             row=ext["files"][path]
             if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=effective.get(path,row["sha256"]):raise ValueError("binding")
@@ -6119,8 +6144,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "7dbaa25f6eb154a172fdbedf993cd031929affd4521e521969d1c8200ed2cf44"),
-                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "5602cbc0638313c5e3cbd903e7b1007a0b9c7e14668792d23ab93ff4b3a1225a"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "84401b9603b6c2fc0c4ee300f8f989f5befa66a9129a44fa30887c23e527799d"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "412b18d242f81a16740d5d63ec7a3e5c79b656ee88b3ce5dc0da4f2597885e23"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
                 item = overlay[key]
@@ -6189,7 +6214,7 @@ def service_candidate_suite_errors(paths, read, spec):
             fixtures["budget_admission"] = frozenset({"tests/edge/fixture.ts"})
         reflected = backend.get("school_reflected_reference_source_registration_20261114_v1")
         if reflected is not None:
-            expected_reflected = {'format': 'jungsi.school-reflected-reference-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/school_reflected_reference.ts', 'source_sha256': 'e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231', 'test_path': 'tests/school_reflected/test_school_reflected_reference.synthetic.ts', 'test_sha256': '15df0ff2aa6fd6d7ba3b48744ce65881b86a5262940c6a20ddcd179e3228180a', 'case_count': 6, 'case_names': ['two inquiry subjects share the inquiry weight and English is excluded', 'best inquiry subject by percentile or by standard score', 'real zero is kept and unreflected areas are not required', 'missing reflected inputs wait instead of becoming zero', 'invalid rules and scores are rejected', 'eligibility note travels with the reference value'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
+            expected_reflected = {'format': 'jungsi.school-reflected-reference-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/school_reflected_reference.ts', 'source_sha256': 'e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231', 'test_path': 'tests/school_reflected/test_school_reflected_reference.synthetic.ts', 'test_sha256': 'afb19e2454db35720074cc216851e278b4e3cc7d38d1839f17f520f42f7da7bb', 'case_count': 10, 'case_names': ['two inquiry subjects share the inquiry weight and English is excluded', 'best inquiry subject by percentile or by standard score', 'real zero is kept and unreflected areas are not required', 'missing reflected inputs wait instead of becoming zero', 'invalid rules and scores are rejected', 'eligibility note travels with the reference value', 'allowlist parses and rejects malformed rows', 'setting is optional and strict', 'attach adds values to analyses and nested candidate items only for allowed 2027 offerings', 'public schema keeps the field and rejects a wrong shape'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
             if reflected != expected_reflected:
                 raise ValueError("school reflected registration")
             if reflected["test_path"] not in names or reflected["source_path"] not in names:
@@ -6197,9 +6222,9 @@ def service_candidate_suite_errors(paths, read, spec):
             source_text = read(reflected["test_path"]).decode("utf8")
             declarations = ['Deno.test("' + value + '",' for value in reflected["case_names"]]
             positions = [source_text.find(value) for value in declarations]
-            if source_text.count("Deno.test(") != 6 or min(positions) < 0 or positions != sorted(set(positions)):
+            if source_text.count("Deno.test(") != 10 or min(positions) < 0 or positions != sorted(set(positions)):
                 raise ValueError("school reflected case identities")
-            groups["school_reflected"] = ([reflected["test_path"]], 6, [])
+            groups["school_reflected"] = ([reflected["test_path"]], 10, [])
             manual_reads["school_reflected"] = []
             fixtures["school_reflected"] = frozenset({"tests/edge/fixture.ts"})
         if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:

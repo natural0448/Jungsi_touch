@@ -1,3 +1,17 @@
+import schemas from "../../src/jungsi_touch/application/public_response_schemas.json" with {
+  type: "json",
+};
+import { PublicResponseProjection } from "../../supabase/functions/_shared/jungsi/application/public_response.ts";
+import {
+  attachSchoolReflected,
+  schoolReflectedDto,
+} from "../../supabase/functions/_shared/jungsi/application/school_reflected_projection.ts";
+import {
+  parseSchoolReflectedAllowlist,
+  schoolReflectedEntry,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts";
+import type { NativeObject } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
+
 import {
   type ReflectedReferenceRule,
   type ReflectedStudentScores,
@@ -91,4 +105,131 @@ Deno.test("invalid rules and scores are rejected", () => {
 Deno.test("eligibility note travels with the reference value", () => {
   const r = schoolReflectedReference(rule({ eligibilityNote: true }), scores());
   assert(r.status === "reference" && r.eligibilityNote === true);
+});
+
+function eq(a: unknown, b: unknown) {
+  const x = JSON.stringify(a), y = JSON.stringify(b);
+  if (x !== y) throw new Error(x + " !== " + y);
+}
+const payload = {
+  format: "jungsi.school-reflected-reference-allowlist/v1",
+  version: "v1",
+  academic_year: 2027,
+  rows: [["1000000001", 25, 30, 25, "2", 0], ["1000000002", 40, 0, 0, "n", 1]],
+} as unknown as NativeObject;
+
+Deno.test("allowlist parses and rejects malformed rows", () => {
+  const rules = parseSchoolReflectedAllowlist(payload, "v1");
+  eq(rules.size, 2);
+  eq(rules.get("1000000002")?.inquiryMode, "none");
+  for (
+    const bad of [
+      { ...payload, version: "v2" },
+      { ...payload, rows: [["x", 1, 1, 1, "2", 0]] },
+      { ...payload, rows: [["1000000001", 1, 1, 1, "q", 0]] },
+      { ...payload, rows: [["1000000001", 1, 1, 1, "2", 0], ["1000000001", 1, 1, 1, "2", 0]] },
+    ]
+  ) {
+    let threw = false;
+    try {
+      parseSchoolReflectedAllowlist(bad as unknown as NativeObject, "v1");
+    } catch {
+      threw = true;
+    }
+    eq(threw, true);
+  }
+});
+
+Deno.test("setting is optional and strict", () => {
+  const env = (v?: string) => ({
+    get: (k: string) => k === "JUNGSI_SCHOOL_REFLECTED_ALLOWLIST" ? v : undefined,
+  });
+  eq(schoolReflectedEntry(env()), null);
+  eq(schoolReflectedEntry(env("{}")), null);
+  const ok = JSON.stringify({
+    bucket: "b",
+    object_key: "p/a.json",
+    bytes: 10,
+    sha256: "a".repeat(64),
+    version: "v1",
+  });
+  eq(schoolReflectedEntry(env(ok))?.version, "v1");
+  eq(schoolReflectedEntry(env(ok.replace('"v1"}', '"v1","x":1}'))), null);
+});
+
+Deno.test("attach adds values to analyses and nested candidate items only for allowed 2027 offerings", () => {
+  const rules = parseSchoolReflectedAllowlist(payload, "v1");
+  const result: NativeObject = {
+    analyses: {
+      "2027:1000000001": { offering_id: "2027:1000000001" },
+      "2027:1000000009": { offering_id: "2027:1000000009" },
+      "2026:1000000001": { offering_id: "2026:1000000001" },
+    },
+    candidates: {
+      basic_university_groups: [{
+        items: [{ offering: {}, assessment: { offering_id: "2027:1000000002" } }],
+      }],
+    },
+  };
+  const student = {
+    korean: { percentile: 90, standard: 130 },
+    math: { percentile: 80, standard: 135 },
+    inquiry: [{ percentile: 70, standard: 60 }, { percentile: 60, standard: 66 }],
+  };
+  attachSchoolReflected(result, rules, student);
+  const a = result.analyses as Record<string, NativeObject>;
+  eq(
+    (a["2027:1000000001"].school_reflected as NativeObject).value,
+    (90 * 25 + 80 * 30 + 65 * 25) / 80,
+  );
+  eq("school_reflected" in a["2027:1000000009"], false);
+  eq("school_reflected" in a["2026:1000000001"], false);
+  const item = ((result.candidates as NativeObject).basic_university_groups as NativeObject[])[0];
+  const c = ((item.items as NativeObject[])[0].assessment as NativeObject)
+    .school_reflected as NativeObject;
+  eq([c.status, c.value, c.eligibility_note], ["reference", 90, true]);
+});
+
+Deno.test("public schema keeps the field and rejects a wrong shape", () => {
+  const s = (schemas as unknown as { schemas: NativeObject }).schemas;
+  const ops = [{ id: "x", contract_ref: "X" }];
+  const projection = new PublicResponseProjection({
+    format: "jungsi.public-response-schemas/v1",
+    schemas: s,
+    operations: [{
+      ...ops[0],
+      roots: {
+        standard: { ref: "school_reflected", nullable: false },
+        paid: { ref: "school_reflected", nullable: false },
+      },
+    }],
+    auxiliary_roots: {
+      error: { ref: "school_reflected", nullable: false },
+      readiness: { ref: "school_reflected", nullable: false },
+    },
+  } as unknown as NativeObject, ops);
+  const ok = schoolReflectedDto({
+    status: "reference",
+    offeringId: "o",
+    value: 81.25,
+    excluded: ["english", "korean_history", "bonus"],
+    eligibilityNote: false,
+  });
+  eq(projection.project("x", "paid", ok), ok);
+  const pending = schoolReflectedDto({
+    status: "pending",
+    offeringId: "o",
+    reason: "korean_missing",
+  });
+  eq(projection.project("x", "paid", pending), pending);
+  let threw = false;
+  try {
+    projection.project("x", "paid", { ...ok, status: "maybe" });
+  } catch {
+    threw = true;
+  }
+  eq(threw, true);
+  // assessment 정의에도 선택 필드로 등록됨
+  const a = s.assessment as NativeObject;
+  eq((a.optional as string[]).includes("school_reflected"), true);
 });

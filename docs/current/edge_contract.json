@@ -93995,6 +93995,11 @@
             "src": "supabase/functions/_shared/jungsi/application/ports.ts"
           },
           {
+            "importedName": "SchoolReflectedRulesPort",
+            "originalName": "SchoolReflectedRulesPort",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
             "importedName": "SessionSnapshot",
             "originalName": "SessionSnapshot",
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
@@ -94015,6 +94020,11 @@
             "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
           },
           {
+            "importedName": "attachSchoolReflected",
+            "originalName": "attachSchoolReflected",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
             "importedName": "authorizeReport",
             "jsDoc": {
               "doc": "Persisted profile/overall/report workflows. All data and writes use application ports."
@@ -94033,6 +94043,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           },
           {
+            "importedName": "reflectedStudentScores",
+            "originalName": "reflectedStudentScores",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
             "importedName": "requirePaidSession",
             "originalName": "requirePaidSession",
             "src": "supabase/functions/_shared/jungsi/application/session_service.ts"
@@ -94048,7 +94063,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c",
+        "source_sha256": "7aebeb831e5dfcc0edef5a8c0b69355e2a9fc204518184d660b5083293f71f9e",
         "symbols": [
           {
             "declarations": [
@@ -94303,7 +94318,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    data: OverallDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n  )",
+                      "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly data: OverallDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly reflected: SchoolReflectedRulesPort | null = null,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -94325,9 +94340,11 @@
                           }
                         },
                         {
+                          "accessibility": "private",
                           "kind": "identifier",
                           "name": "data",
                           "optional": false,
+                          "readonly": true,
                           "tsType": {
                             "kind": "typeRef",
                             "repr": "OverallDataPort",
@@ -94380,6 +94397,39 @@
                           },
                           "readonly": true,
                           "right": "[UNSUPPORTED]"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "reflected",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "SchoolReflectedRulesPort",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "SchoolReflectedRulesPort",
+                                      "specifier": "./school_reflected_projection.ts"
+                                    },
+                                    "typeName": "SchoolReflectedRulesPort"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "readonly": true,
+                          "right": "null"
                         }
                       ]
                     }
@@ -94399,6 +94449,82 @@
                     }
                   ],
                   "methods": [
+                    {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "session",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "SessionSnapshot",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "SessionSnapshot",
+                                  "specifier": "./session_service.ts"
+                                },
+                                "typeName": "SessionSnapshot"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "record",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "StoredReport",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "StoredReport",
+                                  "specifier": "./platform_repository.ts"
+                                },
+                                "typeName": "StoredReport"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "result",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "void",
+                                "value": "void"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "withSchoolReflected"
+                    },
                     {
                       "accessibility": "private",
                       "functionDef": {
@@ -94985,6 +95111,16 @@
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/application/ports.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./school_reflected_projection.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
             }
           ]
         },
@@ -110478,6 +110614,755 @@
         "SchoolReferenceScoringPort",
         "SchoolReferenceScoringService",
         "projectReferenceInputs"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "NativeExamPack",
+            "originalName": "NativeExamPack",
+            "src": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "ReflectedReferenceResult",
+            "originalName": "ReflectedReferenceResult",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "ReflectedReferenceRule",
+            "originalName": "ReflectedReferenceRule",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "ReflectedStudentScores",
+            "originalName": "ReflectedStudentScores",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "ReflectedSubjectScore",
+            "originalName": "ReflectedSubjectScore",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "schoolReflectedReference",
+            "originalName": "schoolReflectedReference",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "schoolScoreInputs",
+            "jsDoc": {
+              "doc": "학교 반영 참고백분위를 report.read 응답의 각 분석·후보 항목에 덧붙인다(2026-11-14).\n\n값은 저장하지 않고 읽을 때 계산한다. 필요한 자료(허가 목록·성적 프로필·시험 자료집)가\n하나라도 없거나 실패하면 아무 필드도 붙이지 않고 기존 응답을 그대로 돌려준다."
+            },
+            "originalName": "schoolScoreInputs",
+            "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
+          }
+        ],
+        "source_sha256": "350005e0571ac088009849f1f9f726ef280141c871fabcf84faf20cdb34ef70c",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "rules",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ReadonlyMap",
+                                  "value": {
+                                    "typeName": "ReadonlyMap",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      },
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "ReflectedReferenceRule",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "ReflectedReferenceRule",
+                                            "specifier": "./school_reflected_reference.ts"
+                                          },
+                                          "typeName": "ReflectedReferenceRule"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "SchoolReflectedRulesPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(result: ReflectedReferenceResult)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "result",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReflectedReferenceResult",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReflectedReferenceResult",
+                            "specifier": "./school_reflected_reference.ts"
+                          },
+                          "typeName": "ReflectedReferenceResult"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "schoolReflectedDto"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  pack: NativeExamPack,\n  scores: NativeObject,\n  profileVersion: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "pack",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeExamPack",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeExamPack",
+                            "specifier": "../domain/exam_pack.ts"
+                          },
+                          "typeName": "NativeExamPack"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "scores",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "profileVersion",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "ReflectedStudentScores",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReflectedStudentScores",
+                            "specifier": "./school_reflected_reference.ts"
+                          },
+                          "typeName": "ReflectedStudentScores"
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "reflectedStudentScores"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  result: NativeObject,\n  rules: ReadonlyMap<string, ReflectedReferenceRule>,\n  student: ReflectedStudentScores,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "result",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rules",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlyMap",
+                        "value": {
+                          "typeName": "ReadonlyMap",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReflectedReferenceRule",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ReflectedReferenceRule",
+                                  "specifier": "./school_reflected_reference.ts"
+                                },
+                                "typeName": "ReflectedReferenceRule"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "student",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReflectedStudentScores",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReflectedStudentScores",
+                            "specifier": "./school_reflected_reference.ts"
+                          },
+                          "typeName": "ReflectedStudentScores"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "attachSchoolReflected"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "2027",
+                    "value": {
+                      "kind": "number",
+                      "number": 2027.0
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "YEAR"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const"
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PREFIX"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "8",
+                    "value": {
+                      "kind": "number",
+                      "number": 8.0
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MAX_DEPTH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typePredicate",
+                    "repr": "v is NativeObject",
+                    "value": {
+                      "param": {
+                        "name": "v",
+                        "type": "identifier"
+                      },
+                      "type": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "object"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "num"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(values: NativeObject, area: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "values",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "area",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "ReflectedSubjectScore",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "ReflectedSubjectScore",
+                        "specifier": "./school_reflected_reference.ts"
+                      },
+                      "typeName": "ReflectedSubjectScore"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "subject"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  assessment: unknown,\n  rules: ReadonlyMap<string, ReflectedReferenceRule>,\n  student: ReflectedStudentScores,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "assessment",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rules",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlyMap",
+                        "value": {
+                          "typeName": "ReadonlyMap",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReflectedReferenceRule",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ReflectedReferenceRule",
+                                  "specifier": "./school_reflected_reference.ts"
+                                },
+                                "typeName": "ReflectedReferenceRule"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "student",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReflectedStudentScores",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReflectedStudentScores",
+                            "specifier": "./school_reflected_reference.ts"
+                          },
+                          "typeName": "ReflectedStudentScores"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "attach"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  node: unknown,\n  rules: ReadonlyMap<string, ReflectedReferenceRule>,\n  student: ReflectedStudentScores,\n  depth: number,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "node",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "rules",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlyMap",
+                        "value": {
+                          "typeName": "ReadonlyMap",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "ReflectedReferenceRule",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "ReflectedReferenceRule",
+                                  "specifier": "./school_reflected_reference.ts"
+                                },
+                                "typeName": "ReflectedReferenceRule"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "student",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReflectedStudentScores",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "ReflectedStudentScores",
+                            "specifier": "./school_reflected_reference.ts"
+                          },
+                          "typeName": "ReflectedStudentScores"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "depth",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "walkCandidates"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../domain/exam_pack.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/exam_pack.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./school_reflected_reference.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./school_score_inputs.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "application",
+      "symbols": [
+        "SchoolReflectedRulesPort",
+        "attachSchoolReflected",
+        "reflectedStudentScores",
+        "schoolReflectedDto"
       ]
     },
     "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": {
@@ -216498,9 +217383,19 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts"
           },
           {
+            "importedName": "StorageSchoolReflectedRules",
+            "originalName": "StorageSchoolReflectedRules",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
+          },
+          {
             "importedName": "StudentReferenceProviderInputs",
             "originalName": "StudentReferenceProviderInputs",
             "src": "supabase/functions/_shared/jungsi/infrastructure/student_reference_batch_provider_candidate.ts"
+          },
+          {
+            "importedName": "SupabaseArtifactClient",
+            "originalName": "SupabaseArtifactClient",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
           },
           {
             "importedName": "SupabaseForecastAuthorities",
@@ -216673,6 +217568,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts"
           },
           {
+            "importedName": "schoolReflectedEntry",
+            "originalName": "schoolReflectedEntry",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
+          },
+          {
             "importedName": "scoreMapPin",
             "originalName": "scoreMapPin",
             "src": "supabase/functions/_shared/jungsi/application/score_map.ts"
@@ -216688,7 +217588,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "17ad7b02685acb9cbcc8745a1113329d63f7542922efa17fb12d26a932856aef",
+        "source_sha256": "654bdcda6830199b79cfe3a238b5aedb172a1cfb71a7c7cbf8a272b2691e16e2",
         "symbols": [
           {
             "declarations": [
@@ -220828,6 +221728,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./school_reflected_allowlist.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
             }
           ]
         },
@@ -229719,6 +230629,650 @@
         "SchoolReferenceBytesPort",
         "SchoolReferenceSelection",
         "decodeSchoolReferencePayload"
+      ]
+    },
+    "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts": {
+      "declarations": {
+        "imports": [
+          {
+            "importedName": "JsonFloat",
+            "originalName": "JsonFloat",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          },
+          {
+            "importedName": "NativeObject",
+            "originalName": "NativeObject",
+            "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+          },
+          {
+            "importedName": "ReflectedInquiryMode",
+            "jsDoc": {
+              "doc": "학교 반영 참고백분위 허가 목록(2027, 대표님 결정 2026-11-14) 읽기.\n\n목록은 Git에 넣지 않는다. 비공개 Storage 파일로 두고, 비밀 설정\nJUNGSI_SCHOOL_REFLECTED_ALLOWLIST({bucket, object_key, bytes, sha256, version})로\n지문을 고정한다. 설정이 없거나 형식이 틀리면 기능을 끈다(null)."
+            },
+            "originalName": "ReflectedInquiryMode",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "ReflectedReferenceRule",
+            "jsDoc": {
+              "doc": "학교 반영 참고백분위 허가 목록(2027, 대표님 결정 2026-11-14) 읽기.\n\n목록은 Git에 넣지 않는다. 비공개 Storage 파일로 두고, 비밀 설정\nJUNGSI_SCHOOL_REFLECTED_ALLOWLIST({bucket, object_key, bytes, sha256, version})로\n지문을 고정한다. 설정이 없거나 형식이 틀리면 기능을 끈다(null)."
+            },
+            "originalName": "ReflectedReferenceRule",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+          },
+          {
+            "importedName": "RuntimeEnvironment",
+            "originalName": "RuntimeEnvironment",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+          },
+          {
+            "importedName": "SchoolReflectedRulesPort",
+            "originalName": "SchoolReflectedRulesPort",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
+            "importedName": "SupabaseArtifactClient",
+            "originalName": "SupabaseArtifactClient",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+          },
+          {
+            "importedName": "parseNativeJson",
+            "originalName": "parseNativeJson",
+            "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+          }
+        ],
+        "source_sha256": "0620a7db17c433fdc0bc3d1e22c3b98787094c96914d9bc5f5d68e19e66ba167",
+        "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "JUNGSI_SCHOOL_REFLECTED_ALLOWLIST",
+                    "value": {
+                      "kind": "string",
+                      "string": "JUNGSI_SCHOOL_REFLECTED_ALLOWLIST"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SCHOOL_REFLECTED_SETTING"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(env: RuntimeEnvironment)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "env",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RuntimeEnvironment",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RuntimeEnvironment",
+                            "specifier": "./runtime_settings.ts"
+                          },
+                          "typeName": "RuntimeEnvironment"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "schoolReflectedEntry"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  payload: Readonly<NativeObject>,\n  version: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "payload",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "version",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "ReadonlyMap",
+                    "value": {
+                      "typeName": "ReadonlyMap",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "ReflectedReferenceRule",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "ReflectedReferenceRule",
+                              "specifier": "../application/school_reflected_reference.ts"
+                            },
+                            "typeName": "ReflectedReferenceRule"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "parseSchoolReflectedAllowlist"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(\n    private readonly entry: Readonly<NativeObject> | null,\n    private readonly client: () => Promise<SupabaseArtifactClient>,\n  )",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "entry",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "NativeObject",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeObject",
+                                          "specifier": "../domain/json_value.ts"
+                                        },
+                                        "typeName": "NativeObject"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "client",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [],
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "SupabaseArtifactClient",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "SupabaseArtifactClient",
+                                          "specifier": "./supabase_artifacts.ts"
+                                        },
+                                        "typeName": "SupabaseArtifactClient"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "implements": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "SchoolReflectedRulesPort",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "SchoolReflectedRulesPort",
+                          "specifier": "../application/school_reflected_projection.ts"
+                        },
+                        "typeName": "SchoolReflectedRulesPort"
+                      }
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ReadonlyMap",
+                                    "value": {
+                                      "typeName": "ReadonlyMap",
+                                      "typeParams": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        },
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "ReflectedReferenceRule",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "ReflectedReferenceRule",
+                                              "specifier": "../application/school_reflected_reference.ts"
+                                            },
+                                            "typeName": "ReflectedReferenceRule"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "rules"
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "StorageSchoolReflectedRules"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "jungsi.school-reflected-reference-allowlist/v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "jungsi.school-reflected-reference-allowlist/v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "FORMAT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Readonly",
+                    "value": {
+                      "typeName": "Readonly",
+                      "typeParams": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Record",
+                          "value": {
+                            "typeName": "Record",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "ReflectedInquiryMode",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "ReflectedInquiryMode",
+                                    "specifier": "../application/school_reflected_reference.ts"
+                                  },
+                                  "typeName": "ReflectedInquiryMode"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MODES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "^[0-9]{6,20}$",
+                    "value": {
+                      "typeName": "RegExp"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "PK"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "20000",
+                    "value": {
+                      "kind": "number",
+                      "number": 20000.0
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MAX_ROWS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(raw: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "raw",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "weight"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Map",
+                    "value": {
+                      "typeName": "Map",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "ReadonlyMap",
+                                "value": {
+                                  "typeName": "ReadonlyMap",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "ReflectedReferenceRule",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "ReflectedReferenceRule",
+                                          "specifier": "../application/school_reflected_reference.ts"
+                                        },
+                                        "typeName": "ReflectedReferenceRule"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "cache"
+          }
+        ]
+      },
+      "dependencies": [
+        {
+          "dynamic": false,
+          "specifier": "../application/school_reflected_projection.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../application/school_reflected_reference.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/json_value.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../domain/native_json.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/native_json.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./runtime_settings.ts",
+          "targets": [
+            {
+              "kind": "type",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/runtime_settings.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./supabase_artifacts.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+            }
+          ]
+        }
+      ],
+      "layer": "data_infrastructure",
+      "symbols": [
+        "SCHOOL_REFLECTED_SETTING",
+        "StorageSchoolReflectedRules",
+        "parseSchoolReflectedAllowlist",
+        "schoolReflectedEntry"
       ]
     },
     "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": {
@@ -246047,7 +247601,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "f1e95068e6429a00d6418655c9abced61c67707a0184ab37d210c740057437ed",
+        "source_sha256": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
         "symbols": [
           {
             "declarations": [
@@ -247354,6 +248908,61 @@
                       },
                       "kind": "method",
                       "name": "artifact"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "raw",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "NativeObject",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "NativeObject",
+                                        "specifier": "../domain/json_value.ts"
+                                      },
+                                      "typeName": "NativeObject"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "VerifiedStorageArtifact",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "VerifiedStorageArtifact"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "pinnedArtifact"
                     },
                     {
                       "functionDef": {
@@ -254144,7 +255753,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "0a097462e43d730da1432cd9d1769e9a14b41b30a06ad56dff2c4b8b412e6471",
+        "source_sha256": "4e02c710465e9802d5f5041bb7fab7bd79f6ee5fba3da02798999aa6ab9af40b",
         "symbols": [
           {
             "declarations": [

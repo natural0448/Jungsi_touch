@@ -145,7 +145,7 @@ def verify_graph_literals(root,graph,paths):
         if not set(literal)<=resolved:raise EdgeFailure("dynamic_graph_incomplete:"+path)
 # Only this public JSON artifact and this indexed coexisting TS are graph exceptions.
 PUBLIC_SCHEMA_PATH="src/jungsi_touch/application/public_response_schemas.json"
-PUBLIC_SCHEMA_SHA256="b1b8d67f9075708abd1d7b56f74496ec5a6de3d4a8c53da1a0113e0e2cfaaea4"
+PUBLIC_SCHEMA_SHA256="ec4fa5d02b6104aa7d227e36f9fc988884af53572d28f9ff4455c6181998f1ad"
 CURRENT_CATALOG_PATH="supabase/functions/_shared/current_public_catalog.ts"
 PROFESSIONAL_FIXTURE_PATH="supabase/functions/_shared/professional_support.ts"
 # Independent approved pin: a source, manifest and index changed together must not widen the graph.

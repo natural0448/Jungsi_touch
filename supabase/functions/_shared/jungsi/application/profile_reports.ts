@@ -10,6 +10,11 @@ import type {
 } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
 import { requirePaidSession, sessionDto, type SessionSnapshot } from "./session_service.ts";
+import {
+  attachSchoolReflected,
+  reflectedStudentScores,
+  type SchoolReflectedRulesPort,
+} from "./school_reflected_projection.ts";
 import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat } from "../domain/native_json.ts";
 import { utcText } from "../domain/time.ts";
@@ -125,11 +130,37 @@ export class ProfileReportService implements ApiBusinessPort {
   private readonly overall: OverallAnalysisService;
   constructor(
     private readonly repository: PlatformRepositoryPort,
-    data: OverallDataPort,
+    private readonly data: OverallDataPort,
     private readonly clock: RequestClockPort,
     private readonly policyMode: ScoreWorkflowMode = { mode: "rights", workflow: null },
+    /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */
+    private readonly reflected: SchoolReflectedRulesPort | null = null,
   ) {
     this.overall = new OverallAnalysisService(data);
+  }
+  /** 읽을 때만 계산해 덧붙인다. 어떤 실패도 기존 응답을 막지 않는다 */
+  private async withSchoolReflected(
+    session: SessionSnapshot,
+    record: StoredReport,
+    result: NativeObject,
+  ): Promise<void> {
+    if (!this.reflected || session.tier !== "paid") return;
+    try {
+      const rules = await this.reflected.rules();
+      if (!rules || !rules.size) return;
+      const profile = await this.repository.getProfile(session.user.subjectId, record.profile_id);
+      if (!profile || profile.owner_id !== session.user.subjectId || !object(profile.scores)) {
+        return;
+      }
+      const examId = profile.scores.exam_id;
+      if (typeof examId !== "string") return;
+      const pack = await this.data.getExamPack(examId);
+      if (!pack) return;
+      const student = reflectedStudentScores(pack, profile.scores, profile.profile_id);
+      if (student) attachSchoolReflected(result, rules, student);
+    } catch {
+      // 참고값은 부가 정보다. 실패하면 붙이지 않는다
+    }
   }
   private fresh(session: SessionSnapshot): bigint {
     if (
@@ -177,7 +208,9 @@ export class ProfileReportService implements ApiBusinessPort {
       const scope = workflow && session.tier !== "paid"
         ? await workflow.snapshotScope(session.user.subjectId, record.report_id, record.revision)
         : undefined;
-      const now = this.fresh(session), result = reportDto(session, record, scope);
+      const result = reportDto(session, record, scope);
+      if (op === "report.read") await this.withSchoolReflected(session, record, result);
+      const now = this.fresh(session);
       return op === "report.read" ? result : {
         format: "jungsi.counseling-snapshot/v1",
         status: "ready",

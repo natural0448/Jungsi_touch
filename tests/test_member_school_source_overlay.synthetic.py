@@ -32,6 +32,12 @@ def make():
             check._PUBLIC_CATALOG: member_pins[check._PUBLIC_CATALOG],
             check._COMBINED_CATALOG: member_pins[check._COMBINED_CATALOG],
             check._SCORE_INPUT: stage_pins[check._SCORE_INPUT],
+            # 2026-11-14 school reflected overlay paths (historical member pins).
+            check._ARTIFACTS: {r["path"]: r["sha256"] for r in spec["university_scoring_contract"]
+                ["scoped_reference_contract"]["verification_current_source_rebound_20261113_v2"]
+                ["source_bindings"]}[check._ARTIFACTS],
+            check._PROFILE_REPORTS: member_pins[check._PROFILE_REPORTS],
+            check._SCHEMA_FIXTURE: member_pins[check._SCHEMA_FIXTURE],
         }
         edge_sources = spec["workflow"]["documentation_sync"]["code_index"]["edge_sources"]
         for row in edge_sources["files"]:

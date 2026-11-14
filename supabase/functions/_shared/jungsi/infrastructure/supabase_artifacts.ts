@@ -549,6 +549,17 @@ export class SupabaseArtifactClient {
     const entry = cloneNativeJson(object(raw)), key = this.validateSelectedReference(entry);
     return await this.fetchArtifact(entry, key);
   }
+  /**
+   * 연결 설정과 따로 지문을 고정한 비공개 파일(학교 반영 참고백분위 허가 목록 등).
+   * 같은 버킷·접두사·크기 한도·지문 검사를 그대로 쓴다
+   */
+  async pinnedArtifact(raw: Readonly<NativeObject>): Promise<VerifiedStorageArtifact> {
+    const entry = cloneNativeJson(object(raw)), key = this.validateReference(entry);
+    if ((entry.bytes as number | bigint) > this.settings.limits.maxArtifactBytes) {
+      fail("storage_artifact_too_large");
+    }
+    return await this.fetchArtifact(entry, key);
+  }
   async referenceCalculationArtifact(
     raw: Readonly<NativeObject>,
     signal?: AbortSignal,
