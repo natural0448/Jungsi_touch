@@ -93965,6 +93965,11 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           },
           {
+            "importedName": "EligibilityConditionsPort",
+            "originalName": "EligibilityConditionsPort",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
             "importedName": "JsonFloat",
             "originalName": "JsonFloat",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -94020,6 +94025,11 @@
             "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
           },
           {
+            "importedName": "attachEligibilityConditions",
+            "originalName": "attachEligibilityConditions",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
             "importedName": "attachSchoolReflected",
             "originalName": "attachSchoolReflected",
             "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
@@ -94063,7 +94073,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "7aebeb831e5dfcc0edef5a8c0b69355e2a9fc204518184d660b5083293f71f9e",
+        "source_sha256": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
         "symbols": [
           {
             "declarations": [
@@ -94318,7 +94328,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly data: OverallDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly reflected: SchoolReflectedRulesPort | null = null,\n  )",
+                      "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly data: OverallDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly reflected: SchoolReflectedRulesPort | null = null,\n    /** 선택: 지원 자격 조건 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly eligibility: EligibilityConditionsPort | null = null,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -94418,6 +94428,39 @@
                                       "specifier": "./school_reflected_projection.ts"
                                     },
                                     "typeName": "SchoolReflectedRulesPort"
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "readonly": true,
+                          "right": "null"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "eligibility",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "EligibilityConditionsPort",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "EligibilityConditionsPort",
+                                      "specifier": "./school_reflected_projection.ts"
+                                    },
+                                    "typeName": "EligibilityConditionsPort"
                                   }
                                 },
                                 {
@@ -110668,7 +110711,7 @@
             "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
           }
         ],
-        "source_sha256": "350005e0571ac088009849f1f9f726ef280141c871fabcf84faf20cdb34ef70c",
+        "source_sha256": "e6d75464855cf0b7cf65062e64d2c35b28647d145143b8297a6f79a08b1c12ea",
         "symbols": [
           {
             "declarations": [
@@ -110733,6 +110776,203 @@
               }
             ],
             "name": "SchoolReflectedRulesPort"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "properties": [
+                    {
+                      "name": "requiredAreas",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "mathChoices",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "mathNote",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "inquiryDomains",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "keyword",
+                                  "repr": "string",
+                                  "value": "string"
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "inquiryNote",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "EligibilityConditions"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "methods": [
+                    {
+                      "kind": "method",
+                      "name": "conditions",
+                      "parameter_source": "()",
+                      "params": [],
+                      "returnType": {
+                        "kind": "typeRef",
+                        "repr": "Promise",
+                        "value": {
+                          "typeName": "Promise",
+                          "typeParams": [
+                            {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ReadonlyMap",
+                                  "value": {
+                                    "typeName": "ReadonlyMap",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      },
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "EligibilityConditions",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "local"
+                                          },
+                                          "typeName": "EligibilityConditions"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "kind": "interface"
+              }
+            ],
+            "name": "EligibilityConditionsPort"
           },
           {
             "declarations": [
@@ -110858,6 +111098,114 @@
               }
             ],
             "name": "reflectedStudentScores"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(c: EligibilityConditions)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "c",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "EligibilityConditions",
+                        "value": {
+                          "resolution": {
+                            "kind": "local"
+                          },
+                          "typeName": "EligibilityConditions"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "NativeObject",
+                    "value": {
+                      "resolution": {
+                        "kind": "import",
+                        "name": "NativeObject",
+                        "specifier": "../domain/json_value.ts"
+                      },
+                      "typeName": "NativeObject"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "eligibilityConditionsDto"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  result: NativeObject,\n  conditions: ReadonlyMap<string, EligibilityConditions>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "result",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "NativeObject",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "NativeObject",
+                            "specifier": "../domain/json_value.ts"
+                          },
+                          "typeName": "NativeObject"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "conditions",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlyMap",
+                        "value": {
+                          "typeName": "ReadonlyMap",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "EligibilityConditions",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "EligibilityConditions"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "attachEligibilityConditions"
           },
           {
             "declarations": [
@@ -111302,6 +111650,65 @@
               }
             ],
             "name": "walkCandidates"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  assessment: unknown,\n  conditions: ReadonlyMap<string, EligibilityConditions>,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "assessment",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "conditions",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlyMap",
+                        "value": {
+                          "typeName": "ReadonlyMap",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "EligibilityConditions",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "EligibilityConditions"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "void",
+                    "value": "void"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "attachConditions"
           }
         ]
       },
@@ -217383,6 +217790,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts"
           },
           {
+            "importedName": "StorageEligibilityConditions",
+            "originalName": "StorageEligibilityConditions",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
+          },
+          {
             "importedName": "StorageSchoolReflectedRules",
             "originalName": "StorageSchoolReflectedRules",
             "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
@@ -217456,6 +217868,11 @@
             "importedName": "createApiHandler",
             "originalName": "createApiHandler",
             "src": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts"
+          },
+          {
+            "importedName": "eligibilityConditionsEntry",
+            "originalName": "eligibilityConditionsEntry",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
           },
           {
             "importedName": "handleOwnedStudentReferenceBatch",
@@ -217588,7 +218005,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "654bdcda6830199b79cfe3a238b5aedb172a1cfb71a7c7cbf8a272b2691e16e2",
+        "source_sha256": "dc4dc48dc4295e16e32be6635b3c29bf3b1a67977c524826d650154fba4cef88",
         "symbols": [
           {
             "declarations": [
@@ -230635,6 +231052,16 @@
       "declarations": {
         "imports": [
           {
+            "importedName": "EligibilityConditions",
+            "originalName": "EligibilityConditions",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
+            "importedName": "EligibilityConditionsPort",
+            "originalName": "EligibilityConditionsPort",
+            "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+          },
+          {
             "importedName": "JsonFloat",
             "originalName": "JsonFloat",
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
@@ -230681,7 +231108,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "0620a7db17c433fdc0bc3d1e22c3b98787094c96914d9bc5f5d68e19e66ba167",
+        "source_sha256": "69c8ee408308bec20a58a02bb5e966e7c8d9c9b70821eedf255206f1f8b508eb",
         "symbols": [
           {
             "declarations": [
@@ -230702,6 +231129,26 @@
               }
             ],
             "name": "SCHOOL_REFLECTED_SETTING"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "JUNGSI_ELIGIBILITY_CONDITIONS",
+                    "value": {
+                      "kind": "string",
+                      "string": "JUNGSI_ELIGIBILITY_CONDITIONS"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ELIGIBILITY_CONDITIONS_SETTING"
           },
           {
             "declarations": [
@@ -230765,6 +231212,69 @@
               }
             ],
             "name": "schoolReflectedEntry"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(env: RuntimeEnvironment)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "env",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RuntimeEnvironment",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RuntimeEnvironment",
+                            "specifier": "./runtime_settings.ts"
+                          },
+                          "typeName": "RuntimeEnvironment"
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "eligibilityConditionsEntry"
           },
           {
             "declarations": [
@@ -230842,6 +231352,246 @@
               }
             ],
             "name": "parseSchoolReflectedAllowlist"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  payload: Readonly<NativeObject>,\n  version: string,\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "payload",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "version",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "ReadonlyMap",
+                    "value": {
+                      "typeName": "ReadonlyMap",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "EligibilityConditions",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "EligibilityConditions",
+                              "specifier": "../application/school_reflected_projection.ts"
+                            },
+                            "typeName": "EligibilityConditions"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "parseEligibilityConditions"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "constructors": [
+                    {
+                      "hasBody": true,
+                      "name": "constructor",
+                      "parameter_source": "(\n    private readonly entry: Readonly<NativeObject> | null,\n    private readonly client: () => Promise<SupabaseArtifactClient>,\n  )",
+                      "params": [
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "entry",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "union",
+                            "value": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Readonly",
+                                "value": {
+                                  "typeName": "Readonly",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "NativeObject",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "NativeObject",
+                                          "specifier": "../domain/json_value.ts"
+                                        },
+                                        "typeName": "NativeObject"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "null",
+                                "value": "null"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "client",
+                          "optional": false,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "fnOrConstructor",
+                            "value": {
+                              "constructor": false,
+                              "params": [],
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "Promise",
+                                "value": {
+                                  "typeName": "Promise",
+                                  "typeParams": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "SupabaseArtifactClient",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "SupabaseArtifactClient",
+                                          "specifier": "./supabase_artifacts.ts"
+                                        },
+                                        "typeName": "SupabaseArtifactClient"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "implements": [
+                    {
+                      "kind": "typeRef",
+                      "repr": "EligibilityConditionsPort",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "EligibilityConditionsPort",
+                          "specifier": "../application/school_reflected_projection.ts"
+                        },
+                        "typeName": "EligibilityConditionsPort"
+                      }
+                    }
+                  ],
+                  "methods": [
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ReadonlyMap",
+                                    "value": {
+                                      "typeName": "ReadonlyMap",
+                                      "typeParams": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        },
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "EligibilityConditions",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "EligibilityConditions",
+                                              "specifier": "../application/school_reflected_projection.ts"
+                                            },
+                                            "typeName": "EligibilityConditions"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "conditions"
+                    }
+                  ]
+                },
+                "kind": "class"
+              }
+            ],
+            "name": "StorageEligibilityConditions"
           },
           {
             "declarations": [
@@ -231118,6 +231868,79 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
+                  "parameter_source": "(env: RuntimeEnvironment, name: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "env",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "RuntimeEnvironment",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "RuntimeEnvironment",
+                            "specifier": "./runtime_settings.ts"
+                          },
+                          "typeName": "RuntimeEnvironment"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "name",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "Readonly",
+                        "value": {
+                          "typeName": "Readonly",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "pinnedEntry"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
                   "parameter_source": "(raw: unknown)",
                   "params": [
                     {
@@ -231141,6 +231964,281 @@
               }
             ],
             "name": "weight"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "jungsi.eligibility-conditions/v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "jungsi.eligibility-conditions/v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "ELIGIBILITY_FORMAT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Set",
+                    "value": {
+                      "typeName": "Set"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "AREAS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Set",
+                    "value": {
+                      "typeName": "Set"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MATH"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Set",
+                    "value": {
+                      "typeName": "Set"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "DOMAINS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown, allowed: ReadonlySet<string>, empty: boolean)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "allowed",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "ReadonlySet",
+                        "value": {
+                          "typeName": "ReadonlySet",
+                          "typeParams": [
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "empty",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "boolean",
+                        "value": "boolean"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "names"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown, notes: readonly string[])",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "notes",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "note"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Map",
+                    "value": {
+                      "typeName": "Map",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "ReadonlyMap",
+                                "value": {
+                                  "typeName": "ReadonlyMap",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "EligibilityConditions",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "EligibilityConditions",
+                                          "specifier": "../application/school_reflected_projection.ts"
+                                        },
+                                        "typeName": "EligibilityConditions"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "eligibilityCache"
           },
           {
             "declarations": [
@@ -255753,7 +256851,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "4e02c710465e9802d5f5041bb7fab7bd79f6ee5fba3da02798999aa6ab9af40b",
+        "source_sha256": "dfb93cb34281d5d718573deb11c60dde3004d4cce99ff80e8bece0e2d4cd4803",
         "symbols": [
           {
             "declarations": [

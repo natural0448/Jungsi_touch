@@ -9,7 +9,11 @@ import type {
   ReflectedInquiryMode,
   ReflectedReferenceRule,
 } from "../application/school_reflected_reference.ts";
-import type { SchoolReflectedRulesPort } from "../application/school_reflected_projection.ts";
+import type {
+  EligibilityConditions,
+  EligibilityConditionsPort,
+  SchoolReflectedRulesPort,
+} from "../application/school_reflected_projection.ts";
 import { type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
 import { SupabaseArtifactClient } from "./supabase_artifacts.ts";
@@ -26,9 +30,19 @@ const MODES: Readonly<Record<string, ReflectedInquiryMode>> = Object.freeze({
 const PK = /^[0-9]{6,20}$/;
 const MAX_ROWS = 20000;
 
+/** 지원 자격 조건 목록(2027, 대표님 결정 2026-11-15)의 비밀 설정 이름 */
+export const ELIGIBILITY_CONDITIONS_SETTING = "JUNGSI_ELIGIBILITY_CONDITIONS";
+
 /** 비밀 설정 하나를 읽어 검증한다. 틀리면 null(기능 꺼짐) */
 export function schoolReflectedEntry(env: RuntimeEnvironment): Readonly<NativeObject> | null {
-  const raw = env.get(SCHOOL_REFLECTED_SETTING);
+  return pinnedEntry(env, SCHOOL_REFLECTED_SETTING);
+}
+/** 지원 자격 조건 목록의 비밀 설정. 형식은 학교 반영 허가 목록과 같다 */
+export function eligibilityConditionsEntry(env: RuntimeEnvironment): Readonly<NativeObject> | null {
+  return pinnedEntry(env, ELIGIBILITY_CONDITIONS_SETTING);
+}
+function pinnedEntry(env: RuntimeEnvironment, name: string): Readonly<NativeObject> | null {
+  const raw = env.get(name);
   if (typeof raw !== "string" || !raw.trim()) return null;
   try {
     const v = parseNativeJson(raw) as NativeObject;
@@ -86,6 +100,87 @@ export function parseSchoolReflectedAllowlist(
     );
   }
   return out;
+}
+
+const ELIGIBILITY_FORMAT = "jungsi.eligibility-conditions/v1";
+const AREAS = new Set(["국어", "수학", "영어", "탐구", "한국사", "제2외국어/한문"]);
+const MATH = new Set(["확률과통계", "미적분", "기하"]);
+const DOMAINS = new Set(["사회", "과학", "직업"]);
+function names(v: unknown, allowed: ReadonlySet<string>, empty: boolean): readonly string[] | null {
+  if (v === null) return null;
+  if (
+    !Array.isArray(v) || (!empty && !v.length) || v.length > 8 ||
+    v.some((x) => typeof x !== "string" || !allowed.has(x)) || new Set(v).size !== v.length
+  ) throw new Error("eligibility_conditions_invalid");
+  return Object.freeze([...v as string[]]);
+}
+function note(v: unknown, notes: readonly string[]): string | null {
+  if (v === null) return null;
+  if (typeof v !== "number" || !Number.isSafeInteger(v) || v < 0 || v >= notes.length) {
+    throw new Error("eligibility_conditions_invalid");
+  }
+  return notes[v];
+}
+/** 검증된 파일 내용을 모집행 PK별 조건으로 바꾼다. 하나라도 틀리면 전체를 버린다 */
+export function parseEligibilityConditions(
+  payload: Readonly<NativeObject>,
+  version: string,
+): ReadonlyMap<string, EligibilityConditions> {
+  const notes = payload.notes;
+  if (
+    payload.format !== ELIGIBILITY_FORMAT || payload.academic_year !== 2027 ||
+    payload.version !== version || !Array.isArray(notes) || notes.length > MAX_ROWS ||
+    notes.some((n) => typeof n !== "string" || !n || n.length > 300) ||
+    !Array.isArray(payload.rows) || !payload.rows.length || payload.rows.length > MAX_ROWS
+  ) throw new Error("eligibility_conditions_invalid");
+  const text = notes as string[];
+  const out = new Map<string, EligibilityConditions>();
+  for (const row of payload.rows) {
+    if (!Array.isArray(row) || row.length !== 6) throw new Error("eligibility_conditions_invalid");
+    const [pk, areas, math, mathNote, domains, inquiryNote] = row as unknown[];
+    if (typeof pk !== "string" || !PK.test(pk) || out.has(pk)) {
+      throw new Error("eligibility_conditions_invalid");
+    }
+    out.set(
+      pk,
+      Object.freeze({
+        requiredAreas: names(areas, AREAS, true),
+        mathChoices: names(math, MATH, false),
+        mathNote: note(mathNote, text),
+        inquiryDomains: names(domains, DOMAINS, false),
+        inquiryNote: note(inquiryNote, text),
+      }),
+    );
+  }
+  return out;
+}
+
+const eligibilityCache = new Map<string, Promise<ReadonlyMap<string, EligibilityConditions>>>();
+
+export class StorageEligibilityConditions implements EligibilityConditionsPort {
+  constructor(
+    private readonly entry: Readonly<NativeObject> | null,
+    private readonly client: () => Promise<SupabaseArtifactClient>,
+  ) {}
+  async conditions(): Promise<ReadonlyMap<string, EligibilityConditions> | null> {
+    const entry = this.entry;
+    if (!entry) return null;
+    const key = entry.sha256 as string;
+    let pending = eligibilityCache.get(key);
+    if (!pending) {
+      pending = (async () => {
+        const artifact = await (await this.client()).pinnedArtifact(entry);
+        return parseEligibilityConditions(artifact.payload, entry.version as string);
+      })();
+      eligibilityCache.set(key, pending);
+      pending.catch(() => eligibilityCache.delete(key));
+    }
+    try {
+      return await pending;
+    } catch {
+      return null;
+    }
+  }
 }
 
 /** 격리 실행 단위(isolate) 안에서 같은 지문의 목록은 한 번만 읽는다 */

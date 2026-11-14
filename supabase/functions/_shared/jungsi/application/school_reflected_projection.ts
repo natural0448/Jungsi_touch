@@ -21,6 +21,21 @@ export interface SchoolReflectedRulesPort {
   rules(): Promise<ReadonlyMap<string, ReflectedReferenceRule> | null>;
 }
 
+/**
+ * 모집단위(2027 모집행 PK)별 지원 자격 조건(대표님 결정 2026-11-15).
+ * 요강 정본에서 데이터팀이 불확실로 표시하지 않은 필드만 담는다. 없는 필드는 null이다.
+ */
+export interface EligibilityConditions {
+  readonly requiredAreas: readonly string[] | null;
+  readonly mathChoices: readonly string[] | null;
+  readonly mathNote: string | null;
+  readonly inquiryDomains: readonly string[] | null;
+  readonly inquiryNote: string | null;
+}
+export interface EligibilityConditionsPort {
+  conditions(): Promise<ReadonlyMap<string, EligibilityConditions> | null>;
+}
+
 const YEAR = 2027, PREFIX = YEAR + ":", MAX_DEPTH = 8;
 
 function object(v: unknown): v is NativeObject {
@@ -107,6 +122,35 @@ function walkCandidates(
     return;
   }
   for (const value of Object.values(node)) walkCandidates(value, rules, student, depth + 1);
+}
+
+/** 공개 응답 형식(public_response_schemas.json의 eligibility_conditions) */
+export function eligibilityConditionsDto(c: EligibilityConditions): NativeObject {
+  return {
+    required_areas: c.requiredAreas === null ? null : [...c.requiredAreas],
+    math_choices: c.mathChoices === null ? null : [...c.mathChoices],
+    math_note: c.mathNote,
+    inquiry_domains: c.inquiryDomains === null ? null : [...c.inquiryDomains],
+    inquiry_note: c.inquiryNote,
+  };
+}
+function attachConditions(
+  assessment: unknown,
+  conditions: ReadonlyMap<string, EligibilityConditions>,
+): void {
+  if (!object(assessment) || typeof assessment.offering_id !== "string") return;
+  const id = assessment.offering_id;
+  if (!id.startsWith(PREFIX)) return;
+  const found = conditions.get(id.slice(PREFIX.length));
+  if (found) assessment.eligibility_conditions = eligibilityConditionsDto(found);
+}
+/** report.read 결과(유료 등급)의 분석 항목에 지원 자격 조건을 붙인다. 판정(eligibility_status)은 바꾸지 않는다 */
+export function attachEligibilityConditions(
+  result: NativeObject,
+  conditions: ReadonlyMap<string, EligibilityConditions>,
+): void {
+  if (!object(result.analyses)) return;
+  for (const assessment of Object.values(result.analyses)) attachConditions(assessment, conditions);
 }
 
 /** report.read 결과(유료 등급)의 analyses·candidates 항목에 값을 붙인다. 원본 저장 결과는 바꾸지 않는다 */

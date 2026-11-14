@@ -172,7 +172,7 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         module = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(module)
         with patch.object(module, "load_manifest", side_effect=FileNotFoundError("synthetic missing runtime")):
-            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46", "test_budget_admission_deno_6", "test_school_reflected_deno_10"):
+            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46", "test_budget_admission_deno_6", "test_school_reflected_deno_12"):
                 result = unittest.TestResult()
                 module.ReviewSuites(name).run(result)
                 self.assertFalse(result.wasSuccessful())

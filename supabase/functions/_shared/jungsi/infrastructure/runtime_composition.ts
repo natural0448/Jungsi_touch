@@ -108,7 +108,12 @@ import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./mana
 import { type NativeDataProvider, NativeForecastInputs } from "./native_data_provider.ts";
 import { PublicJeongsiPassesReader } from "./public_passes.ts";
 import { SupabaseArtifactClient, VerifiedArtifactCache } from "./supabase_artifacts.ts";
-import { schoolReflectedEntry, StorageSchoolReflectedRules } from "./school_reflected_allowlist.ts";
+import {
+  eligibilityConditionsEntry,
+  schoolReflectedEntry,
+  StorageEligibilityConditions,
+  StorageSchoolReflectedRules,
+} from "./school_reflected_allowlist.ts";
 import { PreparedSelectionCache } from "./native_source_selection.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
 import { PinnedSavedReferenceTailSource } from "./saved_reference_tail_source.ts";
@@ -999,18 +1004,30 @@ export class NativeRuntimeApi {
           return refs;
         },
       };
-      // 학교 반영 참고백분위(선택 설정). 설정이 없으면 기존 응답 그대로
+      // 학교 반영 참고백분위·지원 자격 조건(선택 설정). 설정이 없으면 기존 응답 그대로
+      const pinnedClient = async () => {
+        const [binding, controls] = await Promise.all([context.binding(), context.controls()]);
+        return new SupabaseArtifactClient(
+          { projectUrl: binding.projectUrl, ...binding.storage },
+          controls.fetcher,
+        );
+      };
       const reflected = new StorageSchoolReflectedRules(
         schoolReflectedEntry(this.config.environment),
-        async () => {
-          const [binding, controls] = await Promise.all([context.binding(), context.controls()]);
-          return new SupabaseArtifactClient(
-            { projectUrl: binding.projectUrl, ...binding.storage },
-            controls.fetcher,
-          );
-        },
+        pinnedClient,
       );
-      const profiles = new ProfileReportService(platform, data, this.clock, mode, reflected);
+      const eligibility = new StorageEligibilityConditions(
+        eligibilityConditionsEntry(this.config.environment),
+        pinnedClient,
+      );
+      const profiles = new ProfileReportService(
+        platform,
+        data,
+        this.clock,
+        mode,
+        reflected,
+        eligibility,
+      );
       const actions = new ReportActionService(platform, catalog, this.clock);
       const universities = new UniversityAnalysisService(
         platform,

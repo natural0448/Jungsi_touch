@@ -1095,7 +1095,7 @@ P1CG_PINNED_TYPE_IMPORTS = {
     "supabase/functions/_shared/jungsi/application/platform_repository.ts": (
         "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639", ["./score_input_ports.ts"]),
     "supabase/functions/_shared/jungsi/application/profile_reports.ts": (
-        "7aebeb831e5dfcc0edef5a8c0b69355e2a9fc204518184d660b5083293f71f9e",
+        "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
         ["./score_input_ports.ts", "./score_input_ports.ts"]),
     "supabase/functions/_shared/jungsi/application/score_input_ports.ts": (
         "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c", ["./session_service.ts"] * 6),

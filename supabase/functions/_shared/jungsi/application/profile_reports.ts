@@ -11,7 +11,9 @@ import type {
 import type { RequestClockPort } from "./ports.ts";
 import { requirePaidSession, sessionDto, type SessionSnapshot } from "./session_service.ts";
 import {
+  attachEligibilityConditions,
   attachSchoolReflected,
+  type EligibilityConditionsPort,
   reflectedStudentScores,
   type SchoolReflectedRulesPort,
 } from "./school_reflected_projection.ts";
@@ -135,6 +137,8 @@ export class ProfileReportService implements ApiBusinessPort {
     private readonly policyMode: ScoreWorkflowMode = { mode: "rights", workflow: null },
     /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */
     private readonly reflected: SchoolReflectedRulesPort | null = null,
+    /** 선택: 지원 자격 조건 목록. 없으면 응답에 아무것도 붙이지 않는다 */
+    private readonly eligibility: EligibilityConditionsPort | null = null,
   ) {
     this.overall = new OverallAnalysisService(data);
   }
@@ -144,7 +148,16 @@ export class ProfileReportService implements ApiBusinessPort {
     record: StoredReport,
     result: NativeObject,
   ): Promise<void> {
-    if (!this.reflected || session.tier !== "paid") return;
+    if (session.tier !== "paid") return;
+    if (this.eligibility) {
+      try {
+        const conditions = await this.eligibility.conditions();
+        if (conditions && conditions.size) attachEligibilityConditions(result, conditions);
+      } catch {
+        // 조건 표시는 부가 정보다. 실패하면 붙이지 않는다
+      }
+    }
+    if (!this.reflected) return;
     try {
       const rules = await this.reflected.rules();
       if (!rules || !rules.size) return;

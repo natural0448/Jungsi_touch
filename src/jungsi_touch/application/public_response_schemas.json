@@ -2884,6 +2884,10 @@
         "school_reflected": {
           "ref": "school_reflected",
           "nullable": true
+        },
+        "eligibility_conditions": {
+          "ref": "eligibility_conditions",
+          "nullable": true
         }
       },
       "required": [
@@ -2905,7 +2909,8 @@
         "percentile",
         "recommendation_reasons",
         "reference_percentile",
-        "school_reflected"
+        "school_reflected",
+        "eligibility_conditions"
       ]
     },
     "candidate_item": {
@@ -7231,6 +7236,70 @@
         "reason_code",
         "eligibility_note",
         "excluded"
+      ],
+      "optional": []
+    },
+    "eligibility_conditions": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "required_areas": {
+          "type": "array",
+          "nullable": true,
+          "items": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "국어",
+              "수학",
+              "영어",
+              "탐구",
+              "한국사",
+              "제2외국어/한문"
+            ]
+          }
+        },
+        "math_choices": {
+          "type": "array",
+          "nullable": true,
+          "items": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "확률과통계",
+              "미적분",
+              "기하"
+            ]
+          }
+        },
+        "math_note": {
+          "type": "string",
+          "nullable": true
+        },
+        "inquiry_domains": {
+          "type": "array",
+          "nullable": true,
+          "items": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "사회",
+              "과학",
+              "직업"
+            ]
+          }
+        },
+        "inquiry_note": {
+          "type": "string",
+          "nullable": true
+        }
+      },
+      "required": [
+        "required_areas",
+        "math_choices",
+        "math_note",
+        "inquiry_domains",
+        "inquiry_note"
       ],
       "optional": []
     }
