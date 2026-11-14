@@ -31,7 +31,7 @@ const REASON: Record<string, string> = {
   target_distribution_missing: "그해 비교 분포가 아직 없습니다.",
   total_model_missing: "전체 위치를 계산할 자료가 아직 연결되지 않았습니다. 기다린다고 계산되는 것은 아니니, 같은 성적을 다시 저장하지 않으셔도 됩니다.",
   year_bridge_required: "지난해 결과를 올해 성적과 비교할 자료가 아직 없습니다.",
-  reference_conversion_not_production_approved: "학교별 수능 반영분으로 계산한 참고 점수입니다. 최종 전형 총점과 지원 가능성은 확인 중입니다.",
+  reference_conversion_not_production_approved: "이 대학의 수능 반영 방식(영역 비율·점수 종류)대로 계산한 내 점수입니다. 같은 대학 안의 다른 학과와 비교할 때 쓰세요.",
   reference_conversion_unavailable: "이 모집단위의 참고 환산 자료를 확인하고 있습니다.",
   reference_conversion_missing: "이 모집단위의 참고 환산 자료를 연결하고 있습니다.",
   reference_exam_context_mismatch: "입력한 시험과 학교 참고 환산 자료가 일치하지 않습니다.",
@@ -43,7 +43,7 @@ const REASON: Record<string, string> = {
   reference_inquiry_incomplete: "탐구 성적 자료를 연결하고 있습니다.",
   conversion_release_missing: "이 모집단위의 참고 환산 자료를 연결하고 있습니다.",
   // 화면 전용: 참고 점수만 계산되고 지원 판단 기준은 아직 없을 때(assessment.reason_code 가 참고 코드로 올 때)
-  reference_decision_pending: "참고 점수만 계산했습니다. 이 모집단위의 지원 판단 기준은 아직 확인 중입니다.",
+  reference_decision_pending: "점수 위치로 비교하고, 지원 자격은 모집요강에서 직접 확인하세요.",
   reference_score_outside_domain: "이 환산식의 확인된 계산 범위를 벗어나 참고 점수를 표시하지 않았습니다.",
   conversion_not_ready: "환산 결과가 준비되지 않아 이 대학 위치를 계산하지 않았습니다.",
   offering_analysis_pending: "올해 모집 정보와 대학 분석 자료를 맞춰 보는 중이라 후보를 아직 만들지 않았습니다.",

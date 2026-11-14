@@ -171,6 +171,10 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
 }
 
 /** 판단 구간·예상선 같은 내부 기준 수치는 보이지 않는다(최종 관리자 지시 2026-10-07). 뜻풀이와 조정 여부만 적는다 */
+/** 자격 확인이 필요한 모집단위에서 학생이 할 일(2026-11-15 대표님 결정 문구) */
+const DECISION_CONFIRM =
+  "이 모집단위는 지원 자격(필수 응시 영역·지정 과목)을 모집요강에서 직접 확인해야 합니다. 자격이 맞다면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하세요.";
+
 function DecisionCard({ a }: { a: AssessmentDto }) {
   const d = a.decision_components;
   return (
@@ -179,7 +183,9 @@ function DecisionCard({ a }: { a: AssessmentDto }) {
       <div>
         <CategoryBadge a={a} />
       </div>
-      {a.status !== "ready" ? (
+      {a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
+        <p>{DECISION_CONFIRM}</p>
+      ) : a.status !== "ready" ? (
         <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
       ) : (
         <>
@@ -191,10 +197,14 @@ function DecisionCard({ a }: { a: AssessmentDto }) {
           )}
         </>
       )}
-      <span className="note">지원가능성은 합격 확률이 아닙니다.</span>
+      {a.status === "ready" && <span className="note">지난 입시결과와 비교해 나눈 구간입니다.</span>}
     </section>
   );
 }
+
+/** 유불리를 내지 못한 모집단위의 안내(2026-11-15 대표님 결정 문구) */
+const ADVANTAGE_HOLD =
+  "이 대학의 반영 방식이 내 성적에 유리한지 보여 주는 칸입니다. 이 모집단위는 비교 자료가 모자라 표시하지 않았습니다. 아래 학교 반영 백분위로 대신 가늠할 수 있습니다.";
 
 function AdvantageCard({ a }: { a: AssessmentDto }) {
   const v = a.advantage;
@@ -209,7 +219,7 @@ function AdvantageCard({ a }: { a: AssessmentDto }) {
             ? "지원 자격을 충족하지 않아 유불리를 계산하지 않았습니다."
             : otherPop
               ? "이 대학 위치는 반영 성적을 모두 가진 응시자만 비교한 것이라, 전체 응시자 위치와 비교하는 학생 범위가 다릅니다. 그래서 두 위치의 차이를 유불리로 보여 드리지 않습니다."
-              : reasonText(decisionReasonCode(a)) || "비교할 수 있는 분포와 환산 자료를 확인하고 있습니다."}
+              : ADVANTAGE_HOLD}
         </p>
       </section>
     );

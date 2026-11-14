@@ -1,12 +1,14 @@
 import type { CandidatesDto, ReferencePercentileDto, ReferenceUniversityGroupDto } from "./dto";
 
 /**
- * 참고 누백(추정) — 9월 모의평가 응시자 전체 중 학생의 대학별 환산점수가 위에서 몇 %쯤인지 추정한 참고값.
- * 합격 가능성·지원 판정·여유/핵심/도전이 아니다(부담당자 확정 문구 2026-11-09).
+ * 누적 백분위(추정) — 학생의 대학별 환산점수가 응시자 전체 중 위에서 몇 %쯤인지 추정한 값.
+ * 문구는 학생이 이 값으로 무엇을 판단하는지 알려 준다(2026-11-15 대표님 결정, 11-09 문구 대체).
+ * 기준 시험(모의평가·가채점·성적표)은 고정 문구로 적지 않는다.
  */
-export const REFERENCE_PERCENTILE_TITLE = "참고 누백(추정)";
-export const REFERENCE_PERCENTILE_NOTE = "9월 모의평가 기준 대학별 환산점수의 추정 위치입니다. 합격 가능성이나 실제 지원자 중 순위가 아닙니다.";
-export const REFERENCE_GROUPS_TITLE = "참고 누백으로 본 대학 (순위·판정 아님)";
+export const REFERENCE_PERCENTILE_TITLE = "누적 백분위(추정)";
+export const REFERENCE_PERCENTILE_NOTE =
+  "이 대학 방식으로 계산한 내 점수가 응시자 중 상위 몇 %인지 추정한 값입니다. 환산점수와 달리 해마다 난이도가 달라도 같은 기준으로 비교할 수 있어, 지난해 합격자 누적 백분위와 견줘 지원 여부를 판단할 때 씁니다.";
+export const REFERENCE_GROUPS_TITLE = "누적 백분위(추정)로 본 대학";
 
 const DECIMAL = /^\d+(\.\d+)?$/;
 
