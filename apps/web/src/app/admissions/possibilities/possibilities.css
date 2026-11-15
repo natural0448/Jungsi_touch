@@ -193,3 +193,13 @@
 /* 연도별 근거(2026-11-15): 합격선과 내 누적 백분위 차이 */
 .et .years .m.gap.above{color:var(--safe);font-weight:700}
 .et .years .m.gap.below{color:var(--reach);font-weight:700}
+
+/* 연도별 근거: 합격선과 내 위치 짝(2026-11-16). 좁은 화면에서는 줄바꿈 */
+.et .ps .years .cl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content max-content minmax(0,1fr);gap:3px 12px;align-items:baseline}
+.et .ps .years .cl li{display:contents}
+.et .ps .years .cl-m{color:var(--ink-2)}
+.et .ps .years .cl-v{color:var(--ink);text-align:right;white-space:nowrap}
+.et .ps .years .cl-g{color:var(--ink-2)}
+.et .ps .years .cl-g.above{color:var(--safe);font-weight:700}
+.et .ps .years .cl-g.below{color:var(--reach);font-weight:700}
+@media (max-width:560px){.et .ps .years .cl{grid-template-columns:max-content minmax(0,1fr)}.et .ps .years .cl-g{grid-column:1 / -1;padding-left:8px;margin-bottom:4px}}

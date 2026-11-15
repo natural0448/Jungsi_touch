@@ -391,8 +391,7 @@ function Years({ a }: { a: AssessmentDto }) {
           <tr>
             <th scope="col">학년도</th>
             <th scope="col">대학 발표 입시결과</th>
-            <th scope="col" className="r">합격선 누적 백분위(추정)</th>
-            <th scope="col">내 누적 백분위와 차이</th>
+            <th scope="col">합격선 누적 백분위(추정) → 내 위치</th>
           </tr>
         </thead>
         <tbody>
@@ -414,26 +413,20 @@ function Years({ a }: { a: AssessmentDto }) {
                     ))
                   )}
                 </td>
-                <td className="r">
+                <td>
                   {lines.length === 0 ? (
                     <span className="na">자료 없음</span>
                   ) : (
-                    lines.map((l, i) => (
-                      <span key={i} className="m">
-                        {l.metric} <b className="num">상위 {l.cutoff}%</b>
-                      </span>
-                    ))
-                  )}
-                </td>
-                <td>
-                  {lines.length === 0 ? (
-                    <span className="na">─</span>
-                  ) : (
-                    lines.map((l, i) => (
-                      <span key={i} className={`m gap ${l.side ?? ""}`}>
-                        {l.gap ?? <span className="na">내 누적 백분위 없음</span>}
-                      </span>
-                    ))
+                    // 합격선 하나와 그 합격선 대비 내 위치를 한 줄로 짝지어 보인다(2026-11-16 대표님 요청)
+                    <ul className="cl">
+                      {lines.map((l, i) => (
+                        <li key={i}>
+                          <span className="cl-m">{l.metric}</span>
+                          <b className="num cl-v">상위 {l.cutoff}%</b>
+                          <span className={`cl-g ${l.side ?? ""}`}>{l.gap ? `→ ${l.gap}` : <span className="na">내 누적 백분위 없음</span>}</span>
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </td>
               </tr>
