@@ -12,7 +12,7 @@ export type { Cell, Row, School } from "./p1-shape";
  * Credentials and request-scoped I/O promises never enter shared state. Authenticate at each page/action.
  * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
  */
-const FORMAT = 5;
+const FORMAT = 4;
 const R27_SNAPSHOT_SCHEMA = "jungsi.history-snapshot/v2";
 const PARTS_PER_STEP = 6;
 /** Equals the warm lease (120s): no step can outlive it, so a check this fresh cannot lapse before the step commits. */
