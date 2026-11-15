@@ -36,6 +36,20 @@ export interface EligibilityConditionsPort {
   conditions(): Promise<ReadonlyMap<string, EligibilityConditions> | null>;
 }
 
+/**
+ * 2027 모집단위의 지난 학년도 합격선 누적 백분위(R9 명부, 대표님 결정 2026-11-15).
+ * 1페이지 정리본의 합격선 관측값을 담당자 명부로 고른 것만 담는다. 값은 정확한 소수 문자열이다.
+ */
+export interface YearCutoff {
+  readonly academicYear: number;
+  readonly observationId: string;
+  readonly publishedMetric: string;
+  readonly cutoffTopPercent: string;
+}
+export interface YearCutoffsPort {
+  cutoffs(): Promise<ReadonlyMap<string, readonly YearCutoff[]> | null>;
+}
+
 const YEAR = 2027, PREFIX = YEAR + ":", MAX_DEPTH = 8;
 
 function object(v: unknown): v is NativeObject {
@@ -144,6 +158,30 @@ function attachConditions(
   const found = conditions.get(id.slice(PREFIX.length));
   if (found) assessment.eligibility_conditions = eligibilityConditionsDto(found);
 }
+/** 공개 응답 형식(public_response_schemas.json의 year_cutoff) */
+export function yearCutoffDto(c: YearCutoff): NativeObject {
+  return {
+    academic_year: c.academicYear,
+    published_metric: c.publishedMetric,
+    cutoff_top_percent: c.cutoffTopPercent,
+    observation_id: c.observationId,
+  };
+}
+/** report.read 결과(유료 등급)의 분석 항목에 지난 학년도 합격선 누적 백분위를 붙인다. 판정은 바꾸지 않는다 */
+export function attachYearCutoffs(
+  result: NativeObject,
+  cutoffs: ReadonlyMap<string, readonly YearCutoff[]>,
+): void {
+  if (!object(result.analyses)) return;
+  for (const assessment of Object.values(result.analyses)) {
+    if (!object(assessment) || typeof assessment.offering_id !== "string") continue;
+    const id = assessment.offering_id;
+    if (!id.startsWith(PREFIX)) continue;
+    const found = cutoffs.get(id.slice(PREFIX.length));
+    if (found && found.length) assessment.year_cutoffs = found.map(yearCutoffDto);
+  }
+}
+
 /** report.read 결과(유료 등급)의 분석 항목에 지원 자격 조건을 붙인다. 판정(eligibility_status)은 바꾸지 않는다 */
 export function attachEligibilityConditions(
   result: NativeObject,

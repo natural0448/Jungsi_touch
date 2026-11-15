@@ -2888,6 +2888,14 @@
         "eligibility_conditions": {
           "ref": "eligibility_conditions",
           "nullable": true
+        },
+        "year_cutoffs": {
+          "type": "array",
+          "nullable": true,
+          "items": {
+            "ref": "year_cutoff",
+            "nullable": false
+          }
         }
       },
       "required": [
@@ -2910,7 +2918,8 @@
         "recommendation_reasons",
         "reference_percentile",
         "school_reflected",
-        "eligibility_conditions"
+        "eligibility_conditions",
+        "year_cutoffs"
       ]
     },
     "candidate_item": {
@@ -7300,6 +7309,42 @@
         "math_note",
         "inquiry_domains",
         "inquiry_note"
+      ],
+      "optional": []
+    },
+    "year_cutoff": {
+      "type": "object",
+      "nullable": false,
+      "properties": {
+        "academic_year": {
+          "type": "integer",
+          "nullable": false,
+          "enum": [
+            2024,
+            2025,
+            2026
+          ]
+        },
+        "published_metric": {
+          "type": "string",
+          "nullable": false
+        },
+        "cutoff_top_percent": {
+          "type": "string",
+          "nullable": false,
+          "pattern": "100(?:\\.0+)?|[0-9]{1,2}(?:\\.[0-9]{1,6})?"
+        },
+        "observation_id": {
+          "type": "string",
+          "nullable": false,
+          "pattern": "(?:observation|admission):[a-f0-9]{64}"
+        }
+      },
+      "required": [
+        "academic_year",
+        "published_metric",
+        "cutoff_top_percent",
+        "observation_id"
       ],
       "optional": []
     }

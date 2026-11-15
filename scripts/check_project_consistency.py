@@ -6144,8 +6144,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "3a07855a5190e49b32fc426a9341b29c375d07f072ff0cffb5df35007f8a237d"),
-                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "e7bd8d0e7e94de5a190bea201ac1778a00a696ea35299adcc052149b65c04222"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "d97d4d05719098f4cce84189a365c036dd9cd6beb18265dcfe50884e390998e5"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "cba76e662a0a6a6e990e2fc6799c43fa7262d91ebabb1889d1540d961ec455d1"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
                 item = overlay[key]
@@ -6214,7 +6214,7 @@ def service_candidate_suite_errors(paths, read, spec):
             fixtures["budget_admission"] = frozenset({"tests/edge/fixture.ts"})
         reflected = backend.get("school_reflected_reference_source_registration_20261114_v1")
         if reflected is not None:
-            expected_reflected = {'format': 'jungsi.school-reflected-reference-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/school_reflected_reference.ts', 'source_sha256': 'e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231', 'test_path': 'tests/school_reflected/test_school_reflected_reference.synthetic.ts', 'test_sha256': 'b0d98b611f735cb913ddef39e0105f04a7c4740b3bb4dbce824529c6a3de2dff', 'case_count': 13, 'case_names': ['two inquiry subjects share the inquiry weight and English is excluded', 'best inquiry subject by percentile or by standard score', 'real zero is kept and unreflected areas are not required', 'missing reflected inputs wait instead of becoming zero', 'invalid rules and scores are rejected', 'eligibility note travels with the reference value', 'allowlist parses and rejects malformed rows', 'setting is optional and strict', 'attach adds values to analyses and nested candidate items only for allowed 2027 offerings', 'public schema keeps the field and rejects a wrong shape', 'eligibility conditions parse, attach to 2027 analyses only and reject malformed rows', 'public schema accepts eligibility_conditions and rejects unknown subject names', 'member saved results 015 reader switch keeps the reviewed SQL unless fn_v2'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
+            expected_reflected = {'format': 'jungsi.school-reflected-reference-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/school_reflected_reference.ts', 'source_sha256': 'e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231', 'test_path': 'tests/school_reflected/test_school_reflected_reference.synthetic.ts', 'test_sha256': '0779654fcc5dab00f0284c33576cabd9188dd4808eb190b8da61c24a6eaf47f0', 'case_count': 15, 'case_names': ['two inquiry subjects share the inquiry weight and English is excluded', 'best inquiry subject by percentile or by standard score', 'real zero is kept and unreflected areas are not required', 'missing reflected inputs wait instead of becoming zero', 'invalid rules and scores are rejected', 'eligibility note travels with the reference value', 'allowlist parses and rejects malformed rows', 'setting is optional and strict', 'attach adds values to analyses and nested candidate items only for allowed 2027 offerings', 'public schema keeps the field and rejects a wrong shape', 'eligibility conditions parse, attach to 2027 analyses only and reject malformed rows', 'public schema accepts eligibility_conditions and rejects unknown subject names', 'year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows', 'public schema accepts year_cutoffs and rejects a malformed percent', 'member saved results 015 reader switch keeps the reviewed SQL unless fn_v2'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
             if reflected != expected_reflected:
                 raise ValueError("school reflected registration")
             if reflected["test_path"] not in names or reflected["source_path"] not in names:
@@ -6222,9 +6222,9 @@ def service_candidate_suite_errors(paths, read, spec):
             source_text = read(reflected["test_path"]).decode("utf8")
             declarations = ['Deno.test("' + value + '",' for value in reflected["case_names"]]
             positions = [source_text.find(value) for value in declarations]
-            if source_text.count("Deno.test(") != 13 or min(positions) < 0 or positions != sorted(set(positions)):
+            if source_text.count("Deno.test(") != 15 or min(positions) < 0 or positions != sorted(set(positions)):
                 raise ValueError("school reflected case identities")
-            groups["school_reflected"] = ([reflected["test_path"]], 13, [])
+            groups["school_reflected"] = ([reflected["test_path"]], 15, [])
             manual_reads["school_reflected"] = []
             fixtures["school_reflected"] = frozenset({"tests/edge/fixture.ts"})
         if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:

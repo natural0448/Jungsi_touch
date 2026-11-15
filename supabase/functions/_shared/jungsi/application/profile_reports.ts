@@ -13,9 +13,11 @@ import { requirePaidSession, sessionDto, type SessionSnapshot } from "./session_
 import {
   attachEligibilityConditions,
   attachSchoolReflected,
+  attachYearCutoffs,
   type EligibilityConditionsPort,
   reflectedStudentScores,
   type SchoolReflectedRulesPort,
+  type YearCutoffsPort,
 } from "./school_reflected_projection.ts";
 import { cloneNativeJson, nativeJsonSha256, type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat } from "../domain/native_json.ts";
@@ -139,6 +141,8 @@ export class ProfileReportService implements ApiBusinessPort {
     private readonly reflected: SchoolReflectedRulesPort | null = null,
     /** 선택: 지원 자격 조건 목록. 없으면 응답에 아무것도 붙이지 않는다 */
     private readonly eligibility: EligibilityConditionsPort | null = null,
+    /** 선택: 지난 학년도 합격선 누적 백분위 목록. 없으면 응답에 아무것도 붙이지 않는다 */
+    private readonly yearCutoffs: YearCutoffsPort | null = null,
   ) {
     this.overall = new OverallAnalysisService(data);
   }
@@ -155,6 +159,14 @@ export class ProfileReportService implements ApiBusinessPort {
         if (conditions && conditions.size) attachEligibilityConditions(result, conditions);
       } catch {
         // 조건 표시는 부가 정보다. 실패하면 붙이지 않는다
+      }
+    }
+    if (this.yearCutoffs) {
+      try {
+        const cutoffs = await this.yearCutoffs.cutoffs();
+        if (cutoffs && cutoffs.size) attachYearCutoffs(result, cutoffs);
+      } catch {
+        // 연도별 합격선은 부가 정보다. 실패하면 붙이지 않는다
       }
     }
     if (!this.reflected) return;

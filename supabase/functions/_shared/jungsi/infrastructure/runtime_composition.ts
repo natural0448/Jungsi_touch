@@ -113,6 +113,8 @@ import {
   schoolReflectedEntry,
   StorageEligibilityConditions,
   StorageSchoolReflectedRules,
+  StorageYearCutoffs,
+  yearCutoffsEntry,
 } from "./school_reflected_allowlist.ts";
 import { PreparedSelectionCache } from "./native_source_selection.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
@@ -1023,6 +1025,10 @@ export class NativeRuntimeApi {
         eligibilityConditionsEntry(this.config.environment),
         pinnedClient,
       );
+      const yearCutoffs = new StorageYearCutoffs(
+        yearCutoffsEntry(this.config.environment),
+        pinnedClient,
+      );
       const profiles = new ProfileReportService(
         platform,
         data,
@@ -1030,6 +1036,7 @@ export class NativeRuntimeApi {
         mode,
         reflected,
         eligibility,
+        yearCutoffs,
       );
       const actions = new ReportActionService(platform, catalog, this.clock);
       const universities = new UniversityAnalysisService(

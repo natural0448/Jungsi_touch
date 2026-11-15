@@ -18,9 +18,9 @@ HISTORICAL_MANIFEST = "tests/review_suite_manifest.20261113_fmt.current.json"
 HISTORICAL_MANIFEST_SHA256 = "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
 MANIFEST_NAME = "tests/review_suite_manifest.20261114_budget_candidate.json"
 MANIFEST = ROOT / MANIFEST_NAME
-MANIFEST_SHA256 = "3a07855a5190e49b32fc426a9341b29c375d07f072ff0cffb5df35007f8a237d"
+MANIFEST_SHA256 = "d97d4d05719098f4cce84189a365c036dd9cd6beb18265dcfe50884e390998e5"
 ADDITIVE_MANIFEST = "tests/student_pk_additive_manifest.20261113_source_candidate.json"
-ADDITIVE_SHA256 = "e7bd8d0e7e94de5a190bea201ac1778a00a696ea35299adcc052149b65c04222"
+ADDITIVE_SHA256 = "cba76e662a0a6a6e990e2fc6799c43fa7262d91ebabb1889d1540d961ec455d1"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -35,7 +35,7 @@ SERVICE_CANDIDATE_SHARED_FIXTURES = {
     "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
 }
 
-SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
+SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
 
 SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
 SERVICE_P1_ROOTS = ['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT]
@@ -342,18 +342,18 @@ def verify_additive_suite(data):
 
 
 class ReviewSuites(unittest.TestCase):
-    def test_school_reflected_deno_13(self):
+    def test_school_reflected_deno_15(self):
         data = load_manifest()
         roots = ["tests/school_reflected/test_school_reflected_reference.synthetic.ts"]
-        verify_suite(data, "school_reflected", roots, [], 13)
+        verify_suite(data, "school_reflected", roots, [], 15)
         args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
                 "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
                 "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *roots]
         output = invoke(args, 90)
         matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
-        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (13, 0, 0, 0):
+        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (15, 0, 0, 0):
             raise AssertionError("school reflected result/count mismatch: " + output[-1000:])
-        verify_suite(data, "school_reflected", roots, [], 13)
+        verify_suite(data, "school_reflected", roots, [], 15)
 
     def test_budget_admission_deno_6(self):
         data = load_manifest()

@@ -5,14 +5,18 @@ import { PublicResponseProjection } from "../../supabase/functions/_shared/jungs
 import {
   attachEligibilityConditions,
   attachSchoolReflected,
+  attachYearCutoffs,
   eligibilityConditionsDto,
   schoolReflectedDto,
+  yearCutoffDto,
 } from "../../supabase/functions/_shared/jungsi/application/school_reflected_projection.ts";
 import {
   eligibilityConditionsEntry,
   parseEligibilityConditions,
   parseSchoolReflectedAllowlist,
+  parseYearCutoffs,
   schoolReflectedEntry,
+  yearCutoffsEntry,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts";
 import type { NativeObject } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
 
@@ -404,6 +408,154 @@ Deno.test("public schema accepts eligibility_conditions and rejects unknown subj
   assert(
     ((s.assessment as NativeObject).optional as string[]).includes(
       "eligibility_conditions",
+    ),
+  );
+});
+
+Deno.test("year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows", () => {
+  const payload = {
+    format: "jungsi.year-cutoff-references/v1",
+    version: "year-cutoffs-2027.v1",
+    academic_year: 2027,
+    metrics: ["최종등록자 70%컷", "최종컷"],
+    rows: [["1000000001", [[
+      2025,
+      "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      1,
+      "8.25",
+    ], [
+      2026,
+      "observation:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      0,
+      "5.7",
+    ]]]],
+  } as unknown as NativeObject;
+  const map = parseYearCutoffs(payload, "year-cutoffs-2027.v1");
+  equal(map.get("1000000001")!.map((c) => c.academicYear).join(), "2026,2025");
+  const result = {
+    analyses: {
+      "2027:1000000001": { offering_id: "2027:1000000001" },
+      "2027:1000000009": { offering_id: "2027:1000000009" },
+      "2026:1000000001": { offering_id: "2026:1000000001" },
+    },
+  } as unknown as NativeObject;
+  attachYearCutoffs(result, map);
+  const a = result.analyses as Record<string, NativeObject>;
+  equal(
+    JSON.stringify(a["2027:1000000001"].year_cutoffs),
+    JSON.stringify([
+      {
+        academic_year: 2026,
+        published_metric: "최종등록자 70%컷",
+        cutoff_top_percent: "5.7",
+        observation_id:
+          "observation:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      },
+      {
+        academic_year: 2025,
+        published_metric: "최종컷",
+        cutoff_top_percent: "8.25",
+        observation_id:
+          "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      },
+    ]),
+  );
+  equal("year_cutoffs" in a["2027:1000000009"], false);
+  equal("year_cutoffs" in a["2026:1000000001"], false);
+  for (
+    const items of [
+      [[
+        2027,
+        "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        0,
+        "5.7",
+      ]],
+      [[2026, "observation:short", 0, "5.7"]],
+      [[
+        2026,
+        "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        5,
+        "5.7",
+      ]],
+      [[
+        2026,
+        "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        0,
+        "101",
+      ]],
+      [[
+        2026,
+        "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        0,
+        5.7,
+      ]],
+      [[
+        2026,
+        "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        0,
+        "5.7",
+      ], [
+        2025,
+        "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        1,
+        "6",
+      ]],
+    ]
+  ) {
+    let threw = false;
+    try {
+      parseYearCutoffs(
+        {
+          ...payload,
+          rows: [["1000000001", items]],
+        } as unknown as NativeObject,
+        "year-cutoffs-2027.v1",
+      );
+    } catch {
+      threw = true;
+    }
+    assert(threw);
+  }
+  const env = (v?: string) => ({
+    get: (k: string) => (k === "JUNGSI_YEAR_CUTOFF_REFERENCES" ? v : undefined),
+  });
+  equal(yearCutoffsEntry(env() as never), null);
+  equal(yearCutoffsEntry(env("[]") as never), null);
+});
+
+Deno.test("public schema accepts year_cutoffs and rejects a malformed percent", () => {
+  const s = (schemas as unknown as { schemas: NativeObject }).schemas;
+  const ops = [{ id: "x", contract_ref: "X" }];
+  const root = { ref: "year_cutoff", nullable: false };
+  const projection = new PublicResponseProjection(
+    {
+      format: "jungsi.public-response-schemas/v1",
+      schemas: s,
+      operations: [{ ...ops[0], roots: { standard: root, paid: root } }],
+      auxiliary_roots: { error: root, readiness: root },
+    } as unknown as NativeObject,
+    ops,
+  );
+  const ok = yearCutoffDto({
+    academicYear: 2026,
+    observationId: "observation:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    publishedMetric: "최종컷",
+    cutoffTopPercent: "5.7",
+  });
+  equal(
+    JSON.stringify(projection.project("x", "paid", ok)),
+    JSON.stringify(ok),
+  );
+  let threw = false;
+  try {
+    projection.project("x", "paid", { ...ok, cutoff_top_percent: "5.7%" });
+  } catch {
+    threw = true;
+  }
+  assert(threw);
+  assert(
+    ((s.assessment as NativeObject).optional as string[]).includes(
+      "year_cutoffs",
     ),
   );
 });

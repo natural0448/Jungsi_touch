@@ -34,11 +34,14 @@ BEGIN
      OR pg_catalog.pg_has_role('jungsi_backend_app', 'postgres', 'MEMBER')
      -- The app role must not inherit or switch into any other role.
      OR EXISTS (SELECT 1 FROM pg_catalog.pg_auth_members WHERE member = runtime_role)
-     -- Others may hold only the creator's ADMIN-only entry on the app role
-     -- (PostgreSQL 16+ adds it at CREATE ROLE): no INHERIT, no SET, so no
-     -- one acts with the app role's privileges through membership.
-     OR EXISTS (SELECT 1 FROM pg_catalog.pg_auth_members
-                WHERE roleid = runtime_role AND (inherit_option OR set_option))
+     -- Only the observed creator entry may exist on the app role: member
+     -- 'postgres', ADMIN only (PostgreSQL 16+ adds it at CREATE ROLE), no
+     -- INHERIT, no SET. ADMIN can grant the role onward, so any other member,
+     -- or this member with INHERIT/SET, stops for an explicit review.
+     OR EXISTS (SELECT 1 FROM pg_catalog.pg_auth_members m
+                WHERE m.roleid = runtime_role
+                  AND (m.member <> (SELECT oid FROM pg_catalog.pg_roles WHERE rolname = 'postgres')
+                       OR m.inherit_option OR m.set_option))
      OR NOT pg_catalog.has_schema_privilege('jungsi_backend_app', 'jungsi_backend', 'USAGE') THEN
     RAISE EXCEPTION 'existing application role is not verified';
   END IF;

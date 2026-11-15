@@ -13,6 +13,8 @@ import type {
   EligibilityConditions,
   EligibilityConditionsPort,
   SchoolReflectedRulesPort,
+  YearCutoff,
+  YearCutoffsPort,
 } from "../application/school_reflected_projection.ts";
 import { type NativeObject } from "../domain/json_value.ts";
 import { JsonFloat, parseNativeJson } from "../domain/native_json.ts";
@@ -32,6 +34,13 @@ const MAX_ROWS = 20000;
 
 /** 지원 자격 조건 목록(2027, 대표님 결정 2026-11-15)의 비밀 설정 이름 */
 export const ELIGIBILITY_CONDITIONS_SETTING = "JUNGSI_ELIGIBILITY_CONDITIONS";
+
+/** 연도별 합격선 누적 백분위 목록(R9 명부, 대표님 결정 2026-11-15)의 비밀 설정 이름 */
+export const YEAR_CUTOFFS_SETTING = "JUNGSI_YEAR_CUTOFF_REFERENCES";
+/** 연도별 합격선 누적 백분위 목록의 비밀 설정. 형식은 학교 반영 허가 목록과 같다 */
+export function yearCutoffsEntry(env: RuntimeEnvironment): Readonly<NativeObject> | null {
+  return pinnedEntry(env, YEAR_CUTOFFS_SETTING);
+}
 
 /** 비밀 설정 하나를 읽어 검증한다. 틀리면 null(기능 꺼짐) */
 export function schoolReflectedEntry(env: RuntimeEnvironment): Readonly<NativeObject> | null {
@@ -174,6 +183,88 @@ export class StorageEligibilityConditions implements EligibilityConditionsPort {
       })();
       eligibilityCache.set(key, pending);
       pending.catch(() => eligibilityCache.delete(key));
+    }
+    try {
+      return await pending;
+    } catch {
+      return null;
+    }
+  }
+}
+
+const YEAR_CUTOFFS_FORMAT = "jungsi.year-cutoff-references/v1";
+const OBSERVATION = /^(?:observation|admission):[a-f0-9]{64}$/;
+const PERCENT = /^(?:100(?:\.0+)?|[0-9]{1,2}(?:\.[0-9]{1,6})?)$/;
+/**
+ * 검증된 파일 내용을 2027 모집행 PK별 학년도 합격선 목록으로 바꾼다. 하나라도 틀리면 전체를 버린다.
+ * 행: [2027 PK, [[학년도, 관측값 ID, 발표 지표 번호, 합격선 누적 백분위 문자열], ...]](한 모집행 최대 24개:
+ * 학년도 3개 × 발표 지표 여러 개, 담당자 R9 명부 v5 최대 19개)
+ */
+export function parseYearCutoffs(
+  payload: Readonly<NativeObject>,
+  version: string,
+): ReadonlyMap<string, readonly YearCutoff[]> {
+  const labels = payload.metrics;
+  if (
+    payload.format !== YEAR_CUTOFFS_FORMAT || payload.academic_year !== 2027 ||
+    payload.version !== version || !Array.isArray(labels) || !labels.length ||
+    labels.length > 200 || labels.some((n) => typeof n !== "string" || !n || n.length > 60) ||
+    !Array.isArray(payload.rows) || !payload.rows.length || payload.rows.length > MAX_ROWS
+  ) throw new Error("year_cutoffs_invalid");
+  const text = labels as string[];
+  const out = new Map<string, readonly YearCutoff[]>();
+  for (const row of payload.rows) {
+    if (!Array.isArray(row) || row.length !== 2) throw new Error("year_cutoffs_invalid");
+    const [pk, items] = row as unknown[];
+    if (
+      typeof pk !== "string" || !PK.test(pk) || out.has(pk) || !Array.isArray(items) ||
+      !items.length || items.length > 24
+    ) throw new Error("year_cutoffs_invalid");
+    const seen = new Set<string>();
+    const list: YearCutoff[] = [];
+    for (const item of items) {
+      if (!Array.isArray(item) || item.length !== 4) throw new Error("year_cutoffs_invalid");
+      const [year, observation, label, value] = item as unknown[];
+      if (
+        typeof year !== "number" || ![2024, 2025, 2026].includes(year) ||
+        typeof observation !== "string" || !OBSERVATION.test(observation) ||
+        seen.has(observation) ||
+        typeof label !== "number" || !Number.isSafeInteger(label) || label < 0 ||
+        label >= text.length || typeof value !== "string" || !PERCENT.test(value)
+      ) throw new Error("year_cutoffs_invalid");
+      seen.add(observation);
+      list.push(Object.freeze({
+        academicYear: year,
+        observationId: observation,
+        publishedMetric: text[label],
+        cutoffTopPercent: value,
+      }));
+    }
+    list.sort((a, b) => b.academicYear - a.academicYear);
+    out.set(pk, Object.freeze(list));
+  }
+  return out;
+}
+
+const yearCache = new Map<string, Promise<ReadonlyMap<string, readonly YearCutoff[]>>>();
+
+export class StorageYearCutoffs implements YearCutoffsPort {
+  constructor(
+    private readonly entry: Readonly<NativeObject> | null,
+    private readonly client: () => Promise<SupabaseArtifactClient>,
+  ) {}
+  async cutoffs(): Promise<ReadonlyMap<string, readonly YearCutoff[]> | null> {
+    const entry = this.entry;
+    if (!entry) return null;
+    const key = entry.sha256 as string;
+    let pending = yearCache.get(key);
+    if (!pending) {
+      pending = (async () => {
+        const artifact = await (await this.client()).pinnedArtifact(entry);
+        return parseYearCutoffs(artifact.payload, entry.version as string);
+      })();
+      yearCache.set(key, pending);
+      pending.catch(() => yearCache.delete(key));
     }
     try {
       return await pending;

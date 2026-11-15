@@ -13,12 +13,12 @@ SOURCE_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_revi
 BRIDGE_PATH = "tests/test_catalog_descriptor_review.py"
 EXPECTED_CASES = 21
 GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json"
-GRAPH_MANIFEST_SHA256 = "79403f8d91e1cb235fe4a0328cee816a0274468fef20ffd741dd62ad44aff35e"
+GRAPH_MANIFEST_SHA256 = "71584ebe98e99a1b2e12a86faffe973b3ea9fb8caeeae1240354534b224aaad2"
 BASE_COMMIT = "125d112edcf8100d201487c9157a0d5c702c58e8"
 SCANNER_PATH = "scripts/check_edge_contract.py"
-SCANNER_SHA256 = "eecdb9aa12c9290bce4c8dd8e1a94b4dd14659a692ce1c457b147c6c9dc61d75"
+SCANNER_SHA256 = "65bf77334a3d7d439d18c78184b25f92615d18a26893a37654c5864d841672cd"
 SUPPORT_PATH = "tests/test_service_candidate_suites.py"
-SUPPORT_SHA256 = "f871592c17f9f9780baab09f2e91d39f91e9391f548b3b7348aac01a685897b8"
+SUPPORT_SHA256 = "f7402a9b8e4484629ee6194da28e8cbc9cc5b273949b5818e80992b141aa064b"
 
 
 DESCRIPTOR_HISTORY_SHA256 = "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0"

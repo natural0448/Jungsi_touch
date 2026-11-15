@@ -13575,7 +13575,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "eecdb9aa12c9290bce4c8dd8e1a94b4dd14659a692ce1c457b147c6c9dc61d75",
+            "source_sha256": "65bf77334a3d7d439d18c78184b25f92615d18a26893a37654c5864d841672cd",
             "symbols": [
               {
                 "kind": "class",
@@ -13740,7 +13740,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "7633f8bc09d9494a020676cd7266ae5542dd88958512753398a31db8af394f48",
+            "source_sha256": "520f87e5c7789fc450f30090ba366ebbe964e7a1dc247aa52faf91114cdf2dfa",
             "symbols": [
               {
                 "kind": "class",
@@ -15159,7 +15159,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "a23b9d42618e1c808a781e93df4079abe4a68105a89899404a9b4b8873df0c5d",
+            "source_sha256": "0c0b3e0f3276499ffd8c06a14812630caab03c912073bc03ce59a44b683df25f",
             "symbols": [
               {
                 "kind": "function",
@@ -23196,7 +23196,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+              "source_sha256": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
               "declared_exports": [
                 "PROFILE_REPORT_OPERATIONS",
                 "ProfileReportService",
@@ -23644,7 +23644,7 @@
               "requirements": [
                 "REQ-27"
               ],
-              "source_sha256": "e6d75464855cf0b7cf65062e64d2c35b28647d145143b8297a6f79a08b1c12ea",
+              "source_sha256": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
               "declared_exports": [
                 "SchoolReflectedRulesPort",
                 "attachSchoolReflected",
@@ -26026,7 +26026,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
+              "source_sha256": "510fc0fc6875d6ea9341c6dceb0eb8ddc7cef1d980b9e3bffecb29bbeeaf1416",
               "declared_exports": [
                 "REFERENCE_TAIL_REQUEST_OBJECTS",
                 "REFERENCE_TAIL_REQUEST_BYTES",
@@ -26294,7 +26294,7 @@
               "requirements": [
                 "REQ-27"
               ],
-              "source_sha256": "69c8ee408308bec20a58a02bb5e966e7c8d9c9b70821eedf255206f1f8b508eb",
+              "source_sha256": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
               "declared_exports": [
                 "SCHOOL_REFLECTED_SETTING",
                 "StorageSchoolReflectedRules",
@@ -34804,19 +34804,19 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "3a07855a5190e49b32fc426a9341b29c375d07f072ff0cffb5df35007f8a237d"
+        "sha256": "d97d4d05719098f4cce84189a365c036dd9cd6beb18265dcfe50884e390998e5"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "e7bd8d0e7e94de5a190bea201ac1778a00a696ea35299adcc052149b65c04222"
+        "sha256": "cba76e662a0a6a6e990e2fc6799c43fa7262d91ebabb1889d1540d961ec455d1"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "f871592c17f9f9780baab09f2e91d39f91e9391f548b3b7348aac01a685897b8"
+        "sha256": "f7402a9b8e4484629ee6194da28e8cbc9cc5b273949b5818e80992b141aa064b"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "e23a5d8f709bc45e4817ba4faa75929567eb9f4b371d53973c1288c054d3ae1f"
+        "sha256": "8660bccb5bf5071b3bbf78c09c801444fd7a8d282496f2d601b930ec0c507d7b"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -34848,8 +34848,8 @@
       "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
       "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
-      "test_sha256": "b0d98b611f735cb913ddef39e0105f04a7c4740b3bb4dbce824529c6a3de2dff",
-      "case_count": 13,
+      "test_sha256": "0779654fcc5dab00f0284c33576cabd9188dd4808eb190b8da61c24a6eaf47f0",
+      "case_count": 15,
       "case_names": [
         "two inquiry subjects share the inquiry weight and English is excluded",
         "best inquiry subject by percentile or by standard score",
@@ -34863,6 +34863,8 @@
         "public schema keeps the field and rejects a wrong shape",
         "eligibility conditions parse, attach to 2027 analyses only and reject malformed rows",
         "public schema accepts eligibility_conditions and rejects unknown subject names",
+        "year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows",
+        "public schema accepts year_cutoffs and rejects a malformed percent",
         "member saved results 015 reader switch keeps the reviewed SQL unless fn_v2"
       ],
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
@@ -113495,6 +113497,11 @@
               "src": "supabase/functions/_shared/jungsi/application/platform_repository.ts"
             },
             {
+              "importedName": "YearCutoffsPort",
+              "originalName": "YearCutoffsPort",
+              "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            },
+            {
               "importedName": "attachEligibilityConditions",
               "originalName": "attachEligibilityConditions",
               "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
@@ -113502,6 +113509,11 @@
             {
               "importedName": "attachSchoolReflected",
               "originalName": "attachSchoolReflected",
+              "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            },
+            {
+              "importedName": "attachYearCutoffs",
+              "originalName": "attachYearCutoffs",
               "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
             },
             {
@@ -113543,7 +113555,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+          "source_sha256": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
           "symbols": [
             {
               "declarations": [
@@ -113798,7 +113810,7 @@
                       {
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly data: OverallDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly reflected: SchoolReflectedRulesPort | null = null,\n    /** 선택: 지원 자격 조건 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly eligibility: EligibilityConditionsPort | null = null,\n  )",
+                        "parameter_source": "(\n    private readonly repository: PlatformRepositoryPort,\n    private readonly data: OverallDataPort,\n    private readonly clock: RequestClockPort,\n    private readonly policyMode: ScoreWorkflowMode = { mode: \"rights\", workflow: null },\n    /** 선택: 학교 반영 참고백분위 허가 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly reflected: SchoolReflectedRulesPort | null = null,\n    /** 선택: 지원 자격 조건 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly eligibility: EligibilityConditionsPort | null = null,\n    /** 선택: 지난 학년도 합격선 누적 백분위 목록. 없으면 응답에 아무것도 붙이지 않는다 */\n    private readonly yearCutoffs: YearCutoffsPort | null = null,\n  )",
                         "params": [
                           {
                             "accessibility": "private",
@@ -113931,6 +113943,39 @@
                                         "specifier": "./school_reflected_projection.ts"
                                       },
                                       "typeName": "EligibilityConditionsPort"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "readonly": true,
+                            "right": "null"
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "yearCutoffs",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "YearCutoffsPort",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "YearCutoffsPort",
+                                        "specifier": "./school_reflected_projection.ts"
+                                      },
+                                      "typeName": "YearCutoffsPort"
                                     }
                                   },
                                   {
@@ -211342,6 +211387,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
             },
             {
+              "importedName": "StorageYearCutoffs",
+              "originalName": "StorageYearCutoffs",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
+            },
+            {
               "importedName": "StudentReferenceProviderInputs",
               "originalName": "StudentReferenceProviderInputs",
               "src": "supabase/functions/_shared/jungsi/infrastructure/student_reference_batch_provider_candidate.ts"
@@ -211545,9 +211595,14 @@
               "importedName": "utcText",
               "originalName": "utcText",
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+            },
+            {
+              "importedName": "yearCutoffsEntry",
+              "originalName": "yearCutoffsEntry",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
             }
           ],
-          "source_sha256": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
+          "source_sha256": "510fc0fc6875d6ea9341c6dceb0eb8ddc7cef1d980b9e3bffecb29bbeeaf1416",
           "symbols": [
             {
               "declarations": [
@@ -237993,7 +238048,7 @@
               "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             }
           ],
-          "source_sha256": "dfb93cb34281d5d718573deb11c60dde3004d4cce99ff80e8bece0e2d4cd4803",
+          "source_sha256": "7bd0ab00fea762a81be72ca347c4143c81fdc5fc777445ad18283879d2c02e75",
           "symbols": [
             {
               "declarations": [
@@ -360626,7 +360681,7 @@
               "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
             }
           ],
-          "source_sha256": "e6d75464855cf0b7cf65062e64d2c35b28647d145143b8297a6f79a08b1c12ea",
+          "source_sha256": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
           "symbols": [
             {
               "declarations": [
@@ -360894,6 +360949,126 @@
                 {
                   "declarationKind": "export",
                   "def": {
+                    "properties": [
+                      {
+                        "name": "academicYear",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "name": "observationId",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "publishedMetric",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "name": "cutoffTopPercent",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "YearCutoff"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "cutoffs",
+                        "parameter_source": "()",
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ReadonlyMap",
+                                    "value": {
+                                      "typeName": "ReadonlyMap",
+                                      "typeParams": [
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        },
+                                        {
+                                          "kind": "typeOperator",
+                                          "value": {
+                                            "operator": "readonly",
+                                            "tsType": {
+                                              "kind": "array",
+                                              "value": {
+                                                "kind": "typeRef",
+                                                "repr": "YearCutoff",
+                                                "value": {
+                                                  "resolution": {
+                                                    "kind": "local"
+                                                  },
+                                                  "typeName": "YearCutoff"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "YearCutoffsPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
                     "hasBody": true,
                     "parameter_source": "(result: ReflectedReferenceResult)",
                     "params": [
@@ -361055,6 +361230,123 @@
                 }
               ],
               "name": "eligibilityConditionsDto"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(c: YearCutoff)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "c",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "YearCutoff",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "YearCutoff"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "yearCutoffDto"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  result: NativeObject,\n  cutoffs: ReadonlyMap<string, readonly YearCutoff[]>,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "result",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "NativeObject",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "NativeObject",
+                              "specifier": "../domain/json_value.ts"
+                            },
+                            "typeName": "NativeObject"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "cutoffs",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "ReadonlyMap",
+                          "value": {
+                            "typeName": "ReadonlyMap",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "typeRef",
+                                      "repr": "YearCutoff",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "YearCutoff"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "void",
+                      "value": "void"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "attachYearCutoffs"
             },
             {
               "declarations": [
@@ -361742,12 +362034,22 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
             },
             {
+              "importedName": "YearCutoff",
+              "originalName": "YearCutoff",
+              "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            },
+            {
+              "importedName": "YearCutoffsPort",
+              "originalName": "YearCutoffsPort",
+              "src": "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts"
+            },
+            {
               "importedName": "parseNativeJson",
               "originalName": "parseNativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "69c8ee408308bec20a58a02bb5e966e7c8d9c9b70821eedf255206f1f8b508eb",
+          "source_sha256": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
           "symbols": [
             {
               "declarations": [
@@ -361788,6 +362090,89 @@
                 }
               ],
               "name": "ELIGIBILITY_CONDITIONS_SETTING"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "JUNGSI_YEAR_CUTOFF_REFERENCES",
+                      "value": {
+                        "kind": "string",
+                        "string": "JUNGSI_YEAR_CUTOFF_REFERENCES"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "YEAR_CUTOFFS_SETTING"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(env: RuntimeEnvironment)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "env",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "RuntimeEnvironment",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "RuntimeEnvironment",
+                              "specifier": "./runtime_settings.ts"
+                            },
+                            "typeName": "RuntimeEnvironment"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "yearCutoffsEntry"
             },
             {
               "declarations": [
@@ -362231,6 +362616,264 @@
                 }
               ],
               "name": "StorageEligibilityConditions"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  payload: Readonly<NativeObject>,\n  version: string,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "payload",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Readonly",
+                          "value": {
+                            "typeName": "Readonly",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "version",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "ReadonlyMap",
+                      "value": {
+                        "typeName": "ReadonlyMap",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "typeOperator",
+                            "value": {
+                              "operator": "readonly",
+                              "tsType": {
+                                "kind": "array",
+                                "value": {
+                                  "kind": "typeRef",
+                                  "repr": "YearCutoff",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "import",
+                                      "name": "YearCutoff",
+                                      "specifier": "../application/school_reflected_projection.ts"
+                                    },
+                                    "typeName": "YearCutoff"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "parseYearCutoffs"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    private readonly entry: Readonly<NativeObject> | null,\n    private readonly client: () => Promise<SupabaseArtifactClient>,\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "entry",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "union",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Readonly",
+                                  "value": {
+                                    "typeName": "Readonly",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "NativeObject",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "NativeObject",
+                                            "specifier": "../domain/json_value.ts"
+                                          },
+                                          "typeName": "NativeObject"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "null",
+                                  "value": "null"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "client",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "Promise",
+                                  "value": {
+                                    "typeName": "Promise",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "SupabaseArtifactClient",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "SupabaseArtifactClient",
+                                            "specifier": "./supabase_artifacts.ts"
+                                          },
+                                          "typeName": "SupabaseArtifactClient"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "implements": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "YearCutoffsPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "YearCutoffsPort",
+                            "specifier": "../application/school_reflected_projection.ts"
+                          },
+                          "typeName": "YearCutoffsPort"
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "ReadonlyMap",
+                                      "value": {
+                                        "typeName": "ReadonlyMap",
+                                        "typeParams": [
+                                          {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          },
+                                          {
+                                            "kind": "typeOperator",
+                                            "value": {
+                                              "operator": "readonly",
+                                              "tsType": {
+                                                "kind": "array",
+                                                "value": {
+                                                  "kind": "typeRef",
+                                                  "repr": "YearCutoff",
+                                                  "value": {
+                                                    "resolution": {
+                                                      "kind": "import",
+                                                      "name": "YearCutoff",
+                                                      "specifier": "../application/school_reflected_projection.ts"
+                                                    },
+                                                    "typeName": "YearCutoff"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "null",
+                                      "value": "null"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "cutoffs"
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "StorageYearCutoffs"
             },
             {
               "declarations": [
@@ -362886,6 +363529,134 @@
                   "def": {
                     "kind": "const",
                     "tsType": {
+                      "kind": "literal",
+                      "repr": "jungsi.year-cutoff-references/v1",
+                      "value": {
+                        "kind": "string",
+                        "string": "jungsi.year-cutoff-references/v1"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "YEAR_CUTOFFS_FORMAT"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^(?:observation|admission):[a-f0-9]{64}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "OBSERVATION"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^(?:100(?:\\.0+)?|[0-9]{1,2}(?:\\.[0-9]{1,6})?)$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "PERCENT"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "Map",
+                      "value": {
+                        "typeName": "Map",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "ReadonlyMap",
+                                  "value": {
+                                    "typeName": "ReadonlyMap",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      },
+                                      {
+                                        "kind": "typeOperator",
+                                        "value": {
+                                          "operator": "readonly",
+                                          "tsType": {
+                                            "kind": "array",
+                                            "value": {
+                                              "kind": "typeRef",
+                                              "repr": "YearCutoff",
+                                              "value": {
+                                                "resolution": {
+                                                  "kind": "import",
+                                                  "name": "YearCutoff",
+                                                  "specifier": "../application/school_reflected_projection.ts"
+                                                },
+                                                "typeName": "YearCutoff"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "yearCache"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
                       "kind": "typeRef",
                       "repr": "Map",
                       "value": {
@@ -363440,7 +364211,7 @@
       "supabase/functions/_shared/jungsi/application/professional_service.ts": "2e5326e5730a2bc9fd2d7680f61a511a4a438710c9e6a674c35dfccc4048bcf2",
       "supabase/functions/_shared/jungsi/application/professional_student_cache_scope_candidate.ts": "5013ab6124af412aa6d9d817346f4ab5e3cb8f66bda489e200c42ec96757a760",
       "supabase/functions/_shared/jungsi/application/professional_usage.ts": "17865603f5b127ff8a4422984f12d323460774a91a91dc3407b4f53aa5ebb323",
-      "supabase/functions/_shared/jungsi/application/profile_reports.ts": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+      "supabase/functions/_shared/jungsi/application/profile_reports.ts": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
       "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
       "supabase/functions/_shared/jungsi/application/r27_standalone.ts": "56ab82fb8b01abd8efc5db305e2e03b615d8182eb6b77a8dd0ddef799f284963",
       "supabase/functions/_shared/jungsi/application/recruitment_final_qualification.ts": "0481232414ef418dae02e26ae5a4a30708f199904136671e3ba16ec2c078ca40",
@@ -363459,7 +364230,7 @@
       "supabase/functions/_shared/jungsi/application/research_offering.ts": "61bce98d94da99f0dbccb0ab918fcafc8f36bbe553a04f25347d6e6930a30dda",
       "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
       "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801",
-      "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": "e6d75464855cf0b7cf65062e64d2c35b28647d145143b8297a6f79a08b1c12ea",
+      "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
       "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931",
       "supabase/functions/_shared/jungsi/application/scope_adapter_synthetic_fixture.ts": "a555c0c725845ed52ad97f934fb03a94ddb84b87cf591c0237b4f61c2edaae37",
@@ -363555,7 +364326,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_factory.ts": "81a3f8abe39ea77da8c9f77b478864cf2f8ddfdafa98f184f05e990bacf943ed",
       "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "510fc0fc6875d6ea9341c6dceb0eb8ddc7cef1d980b9e3bffecb29bbeeaf1416",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "41b0c39c581fb0f8300cedd7ffacaf73d1161d5a3ef39e67e8f3cb72bb9b796c",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
@@ -363564,7 +364335,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11",
       "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts": "de75ae9445513699af0bd6aa0ce4004b2aea6b6daf0c65e195906b34ec5c7d88",
       "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394",
-      "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts": "69c8ee408308bec20a58a02bb5e966e7c8d9c9b70821eedf255206f1f8b508eb",
+      "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
       "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f",
       "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts": "6cc9fa76e48fe325851a2239e4009c30e28acf32401230fecd96cebe3f6608cd",
@@ -363585,7 +364356,7 @@
       "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
       "tests/edge/member_shortlist_fixture.ts": "b3b191000d0b88307dcf86fe269eb13de35ebf6f290ff498ed79a2a0ea917fd3",
       "tests/edge/parity_driver.ts": "8121d1f2d181b4efe5f4c826d5ac2e8b348522ddd5e89fe272517ac7c03ecb9a",
-      "tests/edge/public_api_contract_fixture.ts": "dfb93cb34281d5d718573deb11c60dde3004d4cce99ff80e8bece0e2d4cd4803",
+      "tests/edge/public_api_contract_fixture.ts": "7bd0ab00fea762a81be72ca347c4143c81fdc5fc777445ad18283879d2c02e75",
       "tests/edge/reference_candidate_scope_cases.ts": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c",
       "tests/edge/reference_candidates_cases.ts": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8",
       "tests/edge/reference_percentile_cases.ts": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
@@ -365627,8 +366398,8 @@
       "historical_sha256": "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0",
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
-      "graph_manifest_sha256": "79403f8d91e1cb235fe4a0328cee816a0274468fef20ffd741dd62ad44aff35e",
-      "bridge_sha256": "6027b103b44eef577d0fa803454842b383ca45ff7e94dd88f8600af2c1551928"
+      "graph_manifest_sha256": "71584ebe98e99a1b2e12a86faffe973b3ea9fb8caeeae1240354534b224aaad2",
+      "bridge_sha256": "3aaed39f952318bac7567210aeb00cd2f32ca7389b3fc7441071ac3ab1e63017"
     }
   },
   "P1_display_snapshot_contract": {
@@ -369493,7 +370264,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "50a9c5ad49fb5bcc89c8f086eafd1e5cc261aad081aae06ca7df946a4dacf363",
+    "manifest_sha256": "9ba6cbdab8ec0c49e0d5251cc6b1e6458466002461dcfd04d1be4387e3937cd0",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -369504,7 +370275,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.20261114_pr75.current.json",
-    "manifest_sha256": "2a5dd7395abdc18708d24d21aa005146a549b95cd0b6457f6607513d9d816b8a",
+    "manifest_sha256": "ea54d6fa7595296801b4bb9200c24451212f7d338bdd5bdefa84659ed064c266",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
@@ -369665,10 +370436,10 @@
     "operating_writes": 0,
     "previous_overlay_sha256": "cb253a886da3519d18c72897439bd10844067f5b79ea29a6a3ae730501b9ae0f",
     "source_bindings": {
-      "scripts/check_edge_contract.py": "eecdb9aa12c9290bce4c8dd8e1a94b4dd14659a692ce1c457b147c6c9dc61d75",
-      "scripts/check_project_consistency.py": "7633f8bc09d9494a020676cd7266ae5542dd88958512753398a31db8af394f48",
-      "scripts/run_edge_tests.py": "a23b9d42618e1c808a781e93df4079abe4a68105a89899404a9b4b8873df0c5d",
-      "src/jungsi_touch/application/public_response_schemas.json": "a8c6af49bb651820c8fd28d74cdc373770b7017075aded36943b79e1869012bd",
+      "scripts/check_edge_contract.py": "65bf77334a3d7d439d18c78184b25f92615d18a26893a37654c5864d841672cd",
+      "scripts/check_project_consistency.py": "520f87e5c7789fc450f30090ba366ebbe964e7a1dc247aa52faf91114cdf2dfa",
+      "scripts/run_edge_tests.py": "0c0b3e0f3276499ffd8c06a14812630caab03c912073bc03ce59a44b683df25f",
+      "src/jungsi_touch/application/public_response_schemas.json": "63be7eb106a8d7d02d68f36a81ccce413019abfe3f567fe25028e5e4ef146a79",
       "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
       "supabase/functions/_shared/current_public_catalog.ts": "4378af0e17ecdb23db47e50c7205876939bc5ad1557f04656100d481d505b1c9",
       "supabase/functions/_shared/current_public_catalog_sql.ts": "2e7bbd9e4b341a7bcf6b622fd406da5866d08561750c9d9fd8a232af4280e729",
@@ -369677,18 +370448,18 @@
       "supabase/functions/_shared/jungsi/application/member_json_results.ts": "a65bd96a7e4db58b4d6ab5ad311d8f1da681884c185be93d22cb407ed24f4516",
       "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts": "0f32c57ca93a838bc8d3c73b0b9d4b5be90b35508ab4c3b7b738e838a3862db0",
       "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": "f4a1bf7629508cc2c726c40514412a128f14e9c330878b2be354e77d175be16e",
-      "supabase/functions/_shared/jungsi/application/profile_reports.ts": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+      "supabase/functions/_shared/jungsi/application/profile_reports.ts": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
       "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
       "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0",
       "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "4e7d15aaef970b4d17af377c0243d7d43362b9646637990f1d2d14b495815a5b",
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "510fc0fc6875d6ea9341c6dceb0eb8ddc7cef1d980b9e3bffecb29bbeeaf1416",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "41b0c39c581fb0f8300cedd7ffacaf73d1161d5a3ef39e67e8f3cb72bb9b796c",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
       "supabase/functions/_shared/search_failure_diagnostic.ts": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",
-      "tests/edge/public_api_contract_fixture.ts": "dfb93cb34281d5d718573deb11c60dde3004d4cce99ff80e8bece0e2d4cd4803"
+      "tests/edge/public_api_contract_fixture.ts": "7bd0ab00fea762a81be72ca347c4143c81fdc5fc777445ad18283879d2c02e75"
     },
     "receipt_bindings": {
       "current_public": {

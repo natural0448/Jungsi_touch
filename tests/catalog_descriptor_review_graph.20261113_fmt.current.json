@@ -21,7 +21,7 @@
         "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
         "supabase/functions/_shared/jungsi/application/platform_repository.ts": "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
         "supabase/functions/_shared/jungsi/application/reference_attendance.ts": "6189893c385e02a70f48f8f43a2bea6165bd7a69f93e4a3ae9918f87d7628c2d",
         "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45",
         "supabase/functions/_shared/jungsi/application/reference_candidates.ts": "b033073a8cf4b9adf440ba575724854226daddd6c40d64d5dae371bf2ce90702",
@@ -2261,7 +2261,7 @@
         "supabase/functions/_shared/jungsi/application/paid_result_components.ts": "8ae8bf24b1d821511e9c394e7584146178139fb4d8beee42ecbed799e075f3e8",
         "supabase/functions/_shared/jungsi/application/platform_repository.ts": "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639",
         "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
-        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+        "supabase/functions/_shared/jungsi/application/profile_reports.ts": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
         "supabase/functions/_shared/jungsi/application/reference_attendance.ts": "6189893c385e02a70f48f8f43a2bea6165bd7a69f93e4a3ae9918f87d7628c2d",
         "supabase/functions/_shared/jungsi/application/reference_candidate_scope.ts": "084729d93322647b33080cfd05d2e5c18dc254833e76a478b50ed05a57c01c45",
         "supabase/functions/_shared/jungsi/application/reference_candidates.ts": "b033073a8cf4b9adf440ba575724854226daddd6c40d64d5dae371bf2ce90702",
@@ -4817,7 +4817,7 @@
     },
     "supabase/functions/_shared/jungsi/application/profile_reports.ts": {
       "classification": "PINNED_TYPE_ONLY",
-      "sha256": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
+      "sha256": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
       "specifiers": [
         "./score_input_ports.ts",
         "./score_input_ports.ts"
