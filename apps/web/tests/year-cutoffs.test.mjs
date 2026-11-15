@@ -39,3 +39,8 @@ test("lines group by year, newest first, and use the unrounded reference value",
   assert.deepEqual(yearCutoffLines({}), []);
   assert.equal(yearCutoffLines({ year_cutoffs: [c(2026, "5")] })[0].lines[0].gap, null);
 });
+
+test("my exact reference percentile with more than six decimals is still compared (11-16 production)", () => {
+  assert.equal(cutoffLine(c(2026, "21.881343"), "5.712345678901234").gap, "내가 16.2%p 위");
+  assert.equal(cutoffLine(c(2026, "5.7123465"), "5.71234549").side, "same");
+});

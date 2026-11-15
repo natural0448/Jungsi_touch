@@ -4,13 +4,16 @@ import type { AssessmentDto, YearCutoffDto } from "./dto";
  * 연도별 근거(대표님 결정 2026-11-15): 지난 학년도 합격선의 누적 백분위와 내 누적 백분위를 견준다.
  * 둘 다 '전체 응시자 중 위에서 몇 %'라서 해가 달라도 같은 기준이다. 숫자는 문자열 정수로 계산한다.
  */
-const DEC = /^(\d{1,3})(?:\.(\d{1,6}))?$/;
+// 내 누적 백분위는 서버가 정확한 소수(6자리 넘음)로 보낸다. 6자리까지 반올림해 견준다(11-16 운영: 6자리 초과를 버려 '내 누적 백분위 없음'으로 나옴)
+const DEC = /^(\d{1,3})(?:\.(\d+))?$/;
 const SCALE = BigInt(1000000), ZERO = BigInt(0), TEN = BigInt(10), TWO = BigInt(2), HUNDRED = BigInt(100);
 
 function micro(s: string | null | undefined): bigint | null {
   const m = typeof s === "string" ? DEC.exec(s.trim()) : null;
   if (!m) return null;
-  return BigInt(m[1]) * SCALE + BigInt((m[2] ?? "").padEnd(6, "0"));
+  const frac = m[2] ?? "";
+  const up = frac.length > 6 && frac[6] >= "5" ? BigInt(1) : ZERO;
+  return BigInt(m[1]) * SCALE + BigInt(frac.slice(0, 6).padEnd(6, "0")) + up;
 }
 /** 소수 첫째 자리(둘째 자리에서 반올림) */
 function round1(v: bigint): string {
