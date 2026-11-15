@@ -88,6 +88,8 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
   const years = [...byYear.keys()].sort((a, b) => b - a);
   // 모집인원 단계·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
   const pending = latest.pk === null;
+  // 과거 입결 참고 관측: 서버가 이 모집단위에 실제로 붙인 행이 있을 때만 열을 보인다. 대학 발표값·합격 판정이 아니다
+  const hasRef = rows.some((r) => (r.hr?.length ?? 0) > 0);
   // 표기 변형('같은 모집단위인지 확인 중') 안내는 보이지 않는다(2026-11-05 사용자 결정). 다른 이름의 행에는 발표명을 계속 적는다
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
   return (
@@ -105,6 +107,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
               <th scope="col" className="r derived">추정 탈락자</th>
               <th scope="col" className="r">대학 발표 성적 ①</th>
               <th scope="col" className="r">대학 발표 성적 ②</th>
+              {hasRef && <th scope="col" className="r derived">추정 상위 누백(참고)</th>}
             </tr>
           </thead>
           <tbody>
@@ -135,6 +138,13 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     </td>
                     <td className="r"><Stat s={ps[0]} /></td>
                     <td className="r"><Stat s={ps[1]} /></td>
+                    {hasRef && (
+                      <td className="r derived">
+                        {(r.hr ?? []).map((v, k) => (
+                          <span key={k} className="rs-ref"><b className="num">{v}</b><small> %</small></span>
+                        ))}
+                      </td>
+                    )}
                   </tr>
                 );
               }),
@@ -142,6 +152,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
           </tbody>
         </table>
       </ScrollHint>
+      {hasRef && <p className="rs-idnote">추정 상위 누백(참고)은 그해 합격선을 전체 응시자 기준 상위 누적 백분위로 추정한 참고값입니다. 대학이 발표한 값이 아니고 운영 승인 전 자료이며, 합격 여부를 뜻하지 않습니다.</p>}
     </div>
   );
 }

@@ -53,6 +53,11 @@ export type Row = {
   scope27?: string;
   /** 학교 묶음의 확인된 표시 키. 근거가 없는 연도는 별도 키를 유지한다. */
   gk?: string;
+  /**
+   * 서버가 이 행에 붙여 검증한 과거 입결 참고 관측(historical_cutoff_references)의 값만(원문 문자열, %).
+   * 추정상위누백(전체응시자), 운영 승인 전 참고값. 대학 발표 50·70%컷과 섞지 않는다(담당자 인계 2026-11-15).
+   */
+  hr?: string[];
 };
 /** 과거 발표 연도의 전형·군·캠퍼스를 원문 그대로 구분한다. */
 export function historyConditions(row:Pick<Row,"c"|"t"|"g">):string {

@@ -20,6 +20,8 @@ import { FILTERS, hrefWith, parseQuery } from "./query";
 import { bestDelta, SchoolCard } from "./school-card";
 import { WildcardDeck } from "./wildcard";
 import { ReferenceGroups } from "./reference-groups";
+import { ConvertedPendingList } from "./converted-pending";
+import { convertedPending } from "@/lib/converted-pending";
 import { referenceGroups } from "@/lib/reference-percentile";
 import "./favorable.css";
 
@@ -112,6 +114,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   const wildcards = c?.wildcards ?? [];
   const refGroups = referenceGroups(c);
   const pendingCount = c?.pending_offerings.length ?? 0;
+  // 판단 보류 중 환산은 끝난 곳(분석 기준만 없음)은 따로 보인다. 판정·순위를 만들지 않는다
+  const converted = convertedPending(report);
   const outsideCount = c?.outside_offerings?.length ?? 0;
   const ineligibleCount = c?.ineligible_offerings?.length ?? 0;
   // 담기 표시는 리포트의 shortlist 로 바로 그린다. 집계(live-statistics)와 담은 학교 이름(offering.read)은 학교 목록을
@@ -200,6 +204,11 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
               <p className="fv-note">
                 판단이 끝난 모집단위 중 지원 검토 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
               </p>
+            )}
+            {converted.length > 0 && (
+              <Suspense fallback={null}>
+                <ConvertedPendingList src={src} caller={caller} items={converted} />
+              </Suspense>
             )}
             {pendingCount > 0 && (
               <p className="fv-note">

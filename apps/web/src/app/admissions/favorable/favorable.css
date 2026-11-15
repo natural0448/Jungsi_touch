@@ -218,3 +218,9 @@
 .et .sc-row .sr-line b{color:var(--deep);font-weight:700}
 .et .sc-row .sr-line .num{font-weight:800;color:var(--deep)}
 .et .sc-row .sr-line .sr-elig{color:var(--muted)}
+
+/* 환산 완료·판정 대기(2026-11-15 담당자 인계): 판정 목록과 섞지 않는 별도 묶음 */
+.fv .fv-cp{display:grid;gap:8px;padding-block:12px;border-top:1px solid var(--line)}
+.fv .fv-cp h3{font-size:15px;margin:0}
+.fv .fv-cp ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.fv .fv-cp li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:14px}

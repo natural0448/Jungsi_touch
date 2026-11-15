@@ -704,3 +704,17 @@ test("schoolUnitRows answers many units in one read with the same rule as unitRo
   assert.deepEqual(all["pk:alone"].map(r => r.y), [2024]); assert.deepEqual(all["pk:missing"], []);
   assert.deepEqual(all[unitKey(rows.find(r => r.pk === "k27a"))].map(r => r.y).sort(), [2025, 2026, 2027]);
 });
+
+test("server-validated historical reference observations keep only their value text and never fill a published cut", async t => {
+  const ref = (value, extra = {}) => ({ format: "jungsi.historical-cutoff-reference/v1", observation_id: `observation:${"e".repeat(64)}`,
+    academic_year: 2026, school_id: "u1", offering_pk: "pk1", value, unit: "%", status: "model_estimated",
+    label: "추정상위누백(전체응시자)", scope: "historical_admission_cutoff", method_id: `estimated-whole-cohort-percentile:${"a".repeat(64)}`,
+    release_id: `reference-percentile:${"b".repeat(64)}`, display_role: "independent_observation", statistic_label: null,
+    reference_status: "CALCULATED_WHOLE_COHORT_MODEL_ESTIMATE", engine_approved: false, production_allowed: false, ...extra });
+  const w = await world(t, { parts: 1, row: { historical_cutoff_references: [ref("12.345678"), ref("9.5", { production_allowed: true }), ref("8.1", { academic_year: 2024 })] } });
+  const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
+  const row = result.schools[0].rows[0];
+  assert.deepEqual(row.hr, ["12.345678"]);
+  assert.equal(row.c50.v, null); assert.equal(row.c70.v, null);
+  assert.equal(JSON.stringify(result).includes(`observation:${"e".repeat(64)}`), false);
+});

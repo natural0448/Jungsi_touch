@@ -12,7 +12,7 @@ export type { Cell, Row, School } from "./p1-shape";
  * Credentials and request-scoped I/O promises never enter shared state. Authenticate at each page/action.
  * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
  */
-const FORMAT = 4;
+const FORMAT = 5;
 const R27_SNAPSHOT_SCHEMA = "jungsi.history-snapshot/v2";
 const PARTS_PER_STEP = 6;
 /** Equals the warm lease (120s): no step can outlive it, so a check this fresh cannot lapse before the step commits. */
@@ -202,7 +202,23 @@ function compact(r: Obj): Row {
       e: Array.isArray(alt.entries) ? (alt.entries as unknown[]).map((e) => cell(e, "cut")) : [],
     },
     ...r27Of(r),
+    ...historicalRefsOf(r),
   };
+}
+/**
+ * 서버 검증(history_reference_estimates.ts)을 통과한 참고 관측만 옮긴다. 값 원문만 남기고 관측 ID 는 화면 자료에 넣지 않는다.
+ * 모양이 다르면 버린다(뜻을 지어내지 않는다).
+ */
+function historicalRefsOf(r: Obj): Pick<Row, "hr"> {
+  const list = r.historical_cutoff_references;
+  if (!Array.isArray(list)) return {};
+  const values = (list as Obj[]).filter(e => e && typeof e === "object" &&
+    e.format === "jungsi.historical-cutoff-reference/v1" && e.unit === "%" && e.status === "model_estimated" &&
+    e.display_role === "independent_observation" && e.production_allowed === false && e.engine_approved === false &&
+    int(e.academic_year) === int(r.academic_year))
+    .map(e => (e.value instanceof Raw ? e.value.text : str(e.value)))
+    .filter((v): v is string => typeof v === "string" && v.trim() !== "");
+  return values.length ? { hr: values } : {};
 }
 /** 2027 모집행의 r27_source 만 옮긴다. 모집인원·조건 원문은 그대로, 과거 연결은 서버가 검토 확인한 것만 */
 function r27Of(r: Obj): Pick<Row, "q27" | "hl" | "scope27" | "ae27"> {
