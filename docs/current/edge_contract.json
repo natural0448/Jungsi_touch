@@ -173885,7 +173885,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
           }
         ],
-        "source_sha256": "6e17d43242286b3d589252987982ebe3cd556acf77288ac36db01595210e4bc0",
+        "source_sha256": "860aecf47be44493049437e09e19dec3d9387ca840c0666dffca19752776917a",
         "symbols": [
           {
             "declarations": [
@@ -174071,6 +174071,117 @@
               {
                 "declarationKind": "export",
                 "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "SELECT report_id,report_revision,profile_id,exam_id,\n pack_version,analyses,body,scores,confirmed,profile_created_at,revision_created_at\n FROM jungsi_backend.read_member_saved_results_v2($1,$2,$3::text::jsonb,$4,$5::bigint)",
+                    "value": {
+                      "kind": "template",
+                      "tsTypes": [
+                        {
+                          "kind": "literal",
+                          "repr": "SELECT report_id,report_revision,profile_id,exam_id,\n pack_version,analyses,body,scores,confirmed,profile_created_at,revision_created_at\n FROM jungsi_backend.read_member_saved_results_v2($1,$2,$3::text::jsonb,$4,$5::bigint)",
+                          "value": {
+                            "kind": "string",
+                            "string": "SELECT report_id,report_revision,profile_id,exam_id,\n pack_version,analyses,body,scores,confirmed,profile_created_at,revision_created_at\n FROM jungsi_backend.read_member_saved_results_v2($1,$2,$3::text::jsonb,$4,$5::bigint)"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "MEMBER_RESULTS_FN_SQL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "literal",
+                        "repr": "sql",
+                        "value": {
+                          "kind": "string",
+                          "string": "sql"
+                        }
+                      },
+                      {
+                        "kind": "literal",
+                        "repr": "fn_v2",
+                        "value": {
+                          "kind": "string",
+                          "string": "fn_v2"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "MemberResultsReader"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(value: string | null | undefined)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "value",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "null",
+                            "value": "null"
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "undefined",
+                            "value": "undefined"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "MemberResultsReader",
+                    "value": {
+                      "resolution": {
+                        "kind": "local"
+                      },
+                      "typeName": "MemberResultsReader"
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "memberResultsReader"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
                   "hasBody": true,
                   "isAsync": true,
                   "parameter_source": "(\n  tx: NativeSqlTransaction,\n  owner: string,\n  year: number,\n)",
@@ -174142,7 +174253,7 @@
                     {
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly sql: SupabaseSqlTransport,\n    private readonly maxBytes: number,\n    private readonly maxItems: number,\n    private readonly schoolResults: Pick<MemberSchoolResultsStorage, \"read\"> | null = null,\n  )",
+                      "parameter_source": "(\n    private readonly sql: SupabaseSqlTransport,\n    private readonly maxBytes: number,\n    private readonly maxItems: number,\n    private readonly schoolResults: Pick<MemberSchoolResultsStorage, \"read\"> | null = null,\n    private readonly reader: MemberResultsReader = \"sql\",\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -174236,6 +174347,27 @@
                           },
                           "readonly": true,
                           "right": "null"
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "assign",
+                          "left": {
+                            "kind": "identifier",
+                            "name": "reader",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "MemberResultsReader",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "MemberResultsReader"
+                              }
+                            }
+                          },
+                          "readonly": true,
+                          "right": "sql"
                         }
                       ]
                     }
@@ -222325,6 +222457,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts"
           },
           {
+            "importedName": "MemberResultsReader",
+            "originalName": "MemberResultsReader",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
+          },
+          {
             "importedName": "MemberSchoolResultsStorage",
             "originalName": "MemberSchoolResultsStorage",
             "src": "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts"
@@ -222470,6 +222607,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
           },
           {
+            "importedName": "memberResultsReader",
+            "originalName": "memberResultsReader",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
+          },
+          {
             "importedName": "nativeJsonText",
             "originalName": "nativeJsonText",
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -222495,7 +222637,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
           }
         ],
-        "source_sha256": "ccc5f8580391db2ecd616c0f5d206caecfa43cacca52d72c284fc73b13da630a",
+        "source_sha256": "eaf4f4e7375c13cb7c862050934c7b9422218f1e63491d6ce82a700408378cb6",
         "symbols": [
           {
             "declarations": [
@@ -222967,6 +223109,27 @@
                       },
                       "kind": "method",
                       "name": "assertMemberShortlistScope"
+                    },
+                    {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "params": [],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "MemberResultsReader",
+                          "value": {
+                            "resolution": {
+                              "kind": "import",
+                              "name": "MemberResultsReader",
+                              "specifier": "./member_shortlist_postgres.ts"
+                            },
+                            "typeName": "MemberResultsReader"
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "memberResultsReader"
                     },
                     {
                       "functionDef": {

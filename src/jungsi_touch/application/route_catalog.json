@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "e77f6176b7c51895c5adb7c8fd61b703a62be4f034002a0ad5feb470b27716c3",
+  "source_sha256": "afe9287b456d82ec4c33a70eb1b62f464d341271924decfb6f605c2fe8d00f6a",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4929,7 +4929,7 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "488a32d0da1503e7e28a39abba11a5fc6129d87e525bcce20b0132c2ea56e889"
+        "sha256": "9c60ae663cd1bf4c709fda775c42fe790e774f4a1a6f424e462b6d3e1ed92fd6"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -4937,11 +4937,11 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "af342034f37dbcf41856b33e99d2b5d98e40688ef849c8e4c0ee3101383b62bb"
+        "sha256": "8881acca88cca0967198239783850a513307a20ede3bc525304480a9348d337b"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "81aa41f114a2c36ff602bdf90feaa950d8882855815743dbf12bdfb5338f1b43"
+        "sha256": "e23a5d8f709bc45e4817ba4faa75929567eb9f4b371d53973c1288c054d3ae1f"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -4973,8 +4973,8 @@
       "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
       "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
-      "test_sha256": "07b2bc436bf4fe4b938f45799f83610c6a3deea22716673ba7a1d1a0c982081c",
-      "case_count": 12,
+      "test_sha256": "2b853603c4fe30e2fd3152f58200c51c18b1e36fcdd065e6e547fbaf5f0ff4cc",
+      "case_count": 13,
       "case_names": [
         "two inquiry subjects share the inquiry weight and English is excluded",
         "best inquiry subject by percentile or by standard score",
@@ -4987,7 +4987,8 @@
         "attach adds values to analyses and nested candidate items only for allowed 2027 offerings",
         "public schema keeps the field and rejects a wrong shape",
         "eligibility conditions parse, attach to 2027 analyses only and reject malformed rows",
-        "public schema accepts eligibility_conditions and rejects unknown subject names"
+        "public schema accepts eligibility_conditions and rejects unknown subject names",
+        "member saved results 015 reader switch keeps the reviewed SQL unless fn_v2"
       ],
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",

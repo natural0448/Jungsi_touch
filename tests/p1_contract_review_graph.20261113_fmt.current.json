@@ -4704,7 +4704,7 @@
         "supabase/functions/_shared/jungsi/infrastructure/jsonb_value.ts": "c106b4ac8f93fbd3cc803f3db218dc7a707398e38ac4dac3727f95711b79916a",
         "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
         "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
-        "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "6e17d43242286b3d589252987982ebe3cd556acf77288ac36db01595210e4bc0",
+        "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "860aecf47be44493049437e09e19dec3d9387ca840c0666dffca19752776917a",
         "supabase/functions/_shared/jungsi/infrastructure/platform_postgres.ts": "ea759428864199a905659576f199024ace3cad7de46596670bfad615c0ade21d",
         "supabase/functions/_shared/jungsi/infrastructure/public_passes.ts": "0278c63f6efdb88f8bce0ae8aaf5e8fe875ff29b3ab78af90a3e79afde9c2176",
         "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",

@@ -73,6 +73,15 @@ export const MEMBER_RESULTS_SQL = `SELECT r.report_id,v.revision::text,v.profile
  AND ($4::text IS NOT NULL OR EXISTS(SELECT 1 FROM jungsi_backend.score_input_states s
  WHERE s.owner_id=$1 AND s.current_profile_id=v.profile_id))
  ORDER BY r.updated_at DESC,r.report_id COLLATE "C" DESC LIMIT 1`;
+/** 015 reader: the DB re-checks the JWT subject and returns the same 11 columns. */
+export const MEMBER_RESULTS_FN_SQL = `SELECT report_id,report_revision,profile_id,exam_id,
+ pack_version,analyses,body,scores,confirmed,profile_created_at,revision_created_at
+ FROM jungsi_backend.read_member_saved_results_v2($1,$2,$3::text::jsonb,$4,$5::bigint)`;
+/** "fn_v2" only after 015 is registered; anything else keeps the reviewed SQL. */
+export type MemberResultsReader = "sql" | "fn_v2";
+export function memberResultsReader(value: string | null | undefined): MemberResultsReader {
+  return value === "fn_v2" ? "fn_v2" : "sql";
+}
 function invalid(): never {
   throw new AccessError("storage_result_invalid", 503);
 }
@@ -114,6 +123,7 @@ export class SupabaseMemberShortlistLegacy
     private readonly maxBytes: number,
     private readonly maxItems: number,
     private readonly schoolResults: Pick<MemberSchoolResultsStorage, "read"> | null = null,
+    private readonly reader: MemberResultsReader = "sql",
   ) {}
 
   /** References stay private; immutable objects are fetched after the SQL read. */
@@ -306,7 +316,7 @@ export class SupabaseMemberShortlistLegacy
     if (ids.length > this.maxItems || ids.some((x) => id(x) !== x)) invalid();
     const result = await this.sql.read(owner, async (tx) => {
       const r = one(
-        await tx.query(MEMBER_RESULTS_SQL, [
+        await tx.query(this.reader === "fn_v2" ? MEMBER_RESULTS_FN_SQL : MEMBER_RESULTS_SQL, [
           owner,
           String(year),
           JSON.stringify(ids),

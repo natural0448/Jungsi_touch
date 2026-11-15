@@ -22,6 +22,13 @@ import {
   schoolReflectedReference,
 } from "../../supabase/functions/_shared/jungsi/application/school_reflected_reference.ts";
 import { assert, equal } from "../edge/fixture.ts";
+import {
+  MEMBER_RESULTS_FN_SQL,
+  MEMBER_RESULTS_SQL,
+  memberResultsReader,
+  SupabaseMemberShortlistLegacy,
+} from "../../supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts";
+import type { SupabaseSqlTransport } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
 
 const rule = (
   over: Partial<ReflectedReferenceRule> = {},
@@ -183,8 +190,7 @@ Deno.test("allowlist parses and rejects malformed rows", () => {
 
 Deno.test("setting is optional and strict", () => {
   const env = (v?: string) => ({
-    get: (k: string) =>
-      k === "JUNGSI_SCHOOL_REFLECTED_ALLOWLIST" ? v : undefined,
+    get: (k: string) => k === "JUNGSI_SCHOOL_REFLECTED_ALLOWLIST" ? v : undefined,
   });
   eq(schoolReflectedEntry(env()), null);
   eq(schoolReflectedEntry(env("{}")), null);
@@ -397,4 +403,40 @@ Deno.test("public schema accepts eligibility_conditions and rejects unknown subj
       "eligibility_conditions",
     ),
   );
+});
+
+Deno.test("member saved results 015 reader switch keeps the reviewed SQL unless fn_v2", async () => {
+  equal(memberResultsReader("fn_v2"), "fn_v2");
+  for (const v of [undefined, null, "", "sql", "FN_V2", " fn_v2", "fn_v2 "]) {
+    equal(memberResultsReader(v), "sql");
+  }
+  assert(
+    MEMBER_RESULTS_FN_SQL.includes(
+      "jungsi_backend.read_member_saved_results_v2($1,$2,$3::text::jsonb,$4,$5::bigint)",
+    ),
+  );
+  const owner = "aaaaaaaa-0000-4000-8000-000000000001";
+  const seen: { owner: string; sql: string; args: readonly unknown[] }[] = [];
+  const transport = {
+    read: (o: string, work: (tx: unknown) => Promise<unknown>) =>
+      work({
+        query: (sql: string, args: readonly unknown[] = []) => {
+          seen.push({ owner: o, sql, args });
+          return Promise.resolve([]);
+        },
+      }),
+  } as unknown as SupabaseSqlTransport;
+  for (const reader of ["sql", "fn_v2"] as const) {
+    const legacy = new SupabaseMemberShortlistLegacy(transport, 1048576, 100, null, reader);
+    equal(await legacy.read(owner, 2027, ["SYNTHETIC-a"], "SYNTHETIC-r", 3), null);
+  }
+  equal(seen.length, 2);
+  equal(seen[0].sql, MEMBER_RESULTS_SQL);
+  equal(seen[1].sql, MEMBER_RESULTS_FN_SQL);
+  equal(JSON.stringify(seen[1].args), JSON.stringify(seen[0].args));
+  equal(
+    JSON.stringify(seen[0].args),
+    JSON.stringify([owner, "2027", '["SYNTHETIC-a"]', "SYNTHETIC-r", "3"]),
+  );
+  equal(seen[1].owner, owner);
 });

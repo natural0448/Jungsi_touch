@@ -47,6 +47,8 @@ import { MemberJsonResults } from "../application/member_json_results.ts";
 import { MemberJsonStorage } from "./member_json_storage.ts";
 import { MemberSchoolResultsStorage } from "./member_school_results_storage.ts";
 import {
+  type MemberResultsReader,
+  memberResultsReader,
   SupabaseMemberShortlist,
   SupabaseMemberShortlistLegacy,
 } from "./member_shortlist_postgres.ts";
@@ -173,6 +175,10 @@ export class NativeRuntimeRequest {
     const b = await this.binding();
     if (!b.memberJson) throw new AccessError("operation_scope_not_approved", 503);
   }
+  /** 015 switch: only the exact value "fn_v2" selects the DB function reader. */
+  private memberResultsReader(): MemberResultsReader {
+    return memberResultsReader(this.env.get("JUNGSI_MEMBER_RESULTS_READER"));
+  }
   /** The same owner/revision-bound reader used by the member shortlist. */
   async memberResults(): Promise<MemberJsonResults> {
     await this.assertMemberShortlistScope();
@@ -192,6 +198,7 @@ export class NativeRuntimeRequest {
         b.repositoryLimits.maxRecordBytes,
         m.maxItems,
         schoolResults,
+        this.memberResultsReader(),
       ),
       Math.min(m.maxItems, 100),
     );
@@ -221,6 +228,7 @@ export class NativeRuntimeRequest {
         maxItems: Math.min(m.maxItems, 100),
         timeoutMs: b.storage.limits.requestTimeoutMs,
       }, controls.fetcher),
+      this.memberResultsReader(),
     );
     const approvedYears = new Set(
       [...(await this.budget()).policy.exams.values()].map((e) => e.academicYear),
