@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "afe9287b456d82ec4c33a70eb1b62f464d341271924decfb6f605c2fe8d00f6a",
+  "source_sha256": "f42dd81afecc78b93577e6eee4ef23db24f2bbd6f4f1f10f659959163acb16c8",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4929,7 +4929,7 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "9c60ae663cd1bf4c709fda775c42fe790e774f4a1a6f424e462b6d3e1ed92fd6"
+        "sha256": "3a07855a5190e49b32fc426a9341b29c375d07f072ff0cffb5df35007f8a237d"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -4937,7 +4937,7 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "8881acca88cca0967198239783850a513307a20ede3bc525304480a9348d337b"
+        "sha256": "f871592c17f9f9780baab09f2e91d39f91e9391f548b3b7348aac01a685897b8"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4973,7 +4973,7 @@
       "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
       "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
-      "test_sha256": "2b853603c4fe30e2fd3152f58200c51c18b1e36fcdd065e6e547fbaf5f0ff4cc",
+      "test_sha256": "b0d98b611f735cb913ddef39e0105f04a7c4740b3bb4dbce824529c6a3de2dff",
       "case_count": 13,
       "case_names": [
         "two inquiry subjects share the inquiry weight and English is excluded",

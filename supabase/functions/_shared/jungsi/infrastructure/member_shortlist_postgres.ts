@@ -25,6 +25,7 @@ import type {
   MemberSchoolResultsStorage,
 } from "./member_school_results_storage.ts";
 import type { StoredReport } from "../application/platform_repository.ts";
+import { utcInstant, utcText } from "../domain/time.ts";
 
 export const MEMBER_PUBLICATION_SQL = `SELECT result::text FROM jungsi_backend.requests
  WHERE owner_id=$1 AND operation='member-shortlist.publication'
@@ -82,6 +83,18 @@ export type MemberResultsReader = "sql" | "fn_v2";
 export function memberResultsReader(value: string | null | undefined): MemberResultsReader {
   return value === "fn_v2" ? "fn_v2" : "sql";
 }
+/** 015b statistics rows: reduced bodies; other members appear only as one-way keys. */
+export const MEMBER_STATISTICS_FN_SQL = `SELECT report_id,owner_key,profile_id,report_revision,
+ body,revision_created_at FROM jungsi_backend.read_member_statistics_rows_v1($1)`;
+const OWNER_KEY = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+/** statistics.read before 015b: every member's current report, as REPORT_SELECT, but
+ * non-UUID owners (synthetic fixtures, never service members) are skipped instead of
+ * failing the whole aggregate. */
+export const ACTIVE_REPORTS_SQL = `SELECT r.report_id,r.owner_id,v.profile_id,r.revision::text,
+ v.body::text,to_char(v.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')
+ FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v
+ ON (r.report_id,r.revision,r.owner_id)=(v.report_id,v.revision,v.owner_id)
+ WHERE r.owner_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'`;
 function invalid(): never {
   throw new AccessError("storage_result_invalid", 503);
 }
@@ -543,5 +556,41 @@ export class SupabaseMemberShortlist implements MemberShortlistPort {
       : await this.objects.read(owner, year, published);
     await input.assertCurrent();
     return { document: value, sha256: published.sha256 };
+  }
+}
+/** statistics.read rows: the 015b function for "fn_v2", otherwise ACTIVE_REPORTS_SQL. */
+export class SupabaseMemberStatisticsRows {
+  constructor(
+    private readonly sql: SupabaseSqlTransport,
+    private readonly maxBytes: number,
+    private readonly source: MemberResultsReader = "fn_v2",
+  ) {}
+  async activeReports(verifiedRequestor: string): Promise<readonly StoredReport[]> {
+    if (typeof verifiedRequestor !== "string" || !OWNER_KEY.test(verifiedRequestor)) {
+      throw new AccessError("storage_identity_invalid", 503);
+    }
+    return await this.sql.read(verifiedRequestor, async (tx) => {
+      const rows = this.source === "fn_v2"
+        ? await tx.query(MEMBER_STATISTICS_FN_SQL, [verifiedRequestor])
+        : await tx.query(ACTIVE_REPORTS_SQL);
+      if (!Array.isArray(rows) || rows.some((r) => !Array.isArray(r) || r.length !== 6)) invalid();
+      return rows.map((r): StoredReport => {
+        if (typeof r[1] !== "string" || !OWNER_KEY.test(r[1])) invalid();
+        let updated: string;
+        try {
+          updated = utcText(utcInstant(sqlUtcText(r[5])));
+        } catch {
+          return invalid();
+        }
+        return {
+          report_id: id(r[0]),
+          owner_id: r[1],
+          profile_id: id(r[2]),
+          revision: rev(r[3]),
+          body: sqlObjectText(r[4], this.maxBytes),
+          updated_at: updated,
+        };
+      });
+    });
   }
 }

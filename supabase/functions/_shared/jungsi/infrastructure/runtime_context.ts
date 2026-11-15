@@ -51,6 +51,7 @@ import {
   memberResultsReader,
   SupabaseMemberShortlist,
   SupabaseMemberShortlistLegacy,
+  SupabaseMemberStatisticsRows,
 } from "./member_shortlist_postgres.ts";
 function fail(): never {
   throw new AccessError("security_policy_unavailable", 503);
@@ -178,6 +179,15 @@ export class NativeRuntimeRequest {
   /** 015 switch: only the exact value "fn_v2" selects the DB function reader. */
   private memberResultsReader(): MemberResultsReader {
     return memberResultsReader(this.env.get("JUNGSI_MEMBER_RESULTS_READER"));
+  }
+  /** statistics.read rows: 015b function when the reader setting is fn_v2, else the UUID-only query. */
+  async activeReportsSource(): Promise<Pick<SupabasePlatformRepository, "activeReports">> {
+    const binding = await this.binding();
+    return new SupabaseMemberStatisticsRows(
+      this.sql(),
+      binding.repositoryLimits.maxRecordBytes,
+      memberResultsReader(this.env.get("JUNGSI_MEMBER_RESULTS_READER")),
+    );
   }
   /** The same owner/revision-bound reader used by the member shortlist. */
   async memberResults(): Promise<MemberJsonResults> {

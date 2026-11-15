@@ -13740,7 +13740,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "4543bb8cc3830528f7b40cd49b0a26f907022a9d81700c79113ad52800f7d7d2",
+            "source_sha256": "7633f8bc09d9494a020676cd7266ae5542dd88958512753398a31db8af394f48",
             "symbols": [
               {
                 "kind": "class",
@@ -25170,7 +25170,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "860aecf47be44493049437e09e19dec3d9387ca840c0666dffca19752776917a",
+              "source_sha256": "4e7d15aaef970b4d17af377c0243d7d43362b9646637990f1d2d14b495815a5b",
               "declared_exports": [
                 "MEMBER_LEGACY_EXACT_SQL",
                 "MEMBER_LEGACY_LOCK_SQL",
@@ -26026,7 +26026,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "dc4dc48dc4295e16e32be6635b3c29bf3b1a67977c524826d650154fba4cef88",
+              "source_sha256": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
               "declared_exports": [
                 "REFERENCE_TAIL_REQUEST_OBJECTS",
                 "REFERENCE_TAIL_REQUEST_BYTES",
@@ -26078,7 +26078,7 @@
                 "REQ-27",
                 "REQ-30"
               ],
-              "source_sha256": "eaf4f4e7375c13cb7c862050934c7b9422218f1e63491d6ce82a700408378cb6",
+              "source_sha256": "41b0c39c581fb0f8300cedd7ffacaf73d1161d5a3ef39e67e8f3cb72bb9b796c",
               "declared_exports": [
                 "NativeRuntimeRequest"
               ]
@@ -34804,7 +34804,7 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "9c60ae663cd1bf4c709fda775c42fe790e774f4a1a6f424e462b6d3e1ed92fd6"
+        "sha256": "3a07855a5190e49b32fc426a9341b29c375d07f072ff0cffb5df35007f8a237d"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -34812,7 +34812,7 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "8881acca88cca0967198239783850a513307a20ede3bc525304480a9348d337b"
+        "sha256": "f871592c17f9f9780baab09f2e91d39f91e9391f548b3b7348aac01a685897b8"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -34848,7 +34848,7 @@
       "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
       "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
-      "test_sha256": "2b853603c4fe30e2fd3152f58200c51c18b1e36fcdd065e6e547fbaf5f0ff4cc",
+      "test_sha256": "b0d98b611f735cb913ddef39e0105f04a7c4740b3bb4dbce824529c6a3de2dff",
       "case_count": 13,
       "case_names": [
         "two inquiry subjects share the inquiry weight and English is excluded",
@@ -175949,9 +175949,19 @@
               "importedName": "sqlUtcText",
               "originalName": "sqlUtcText",
               "src": "supabase/functions/_shared/jungsi/infrastructure/sql_values.ts"
+            },
+            {
+              "importedName": "utcInstant",
+              "originalName": "utcInstant",
+              "src": "supabase/functions/_shared/jungsi/domain/time.ts"
+            },
+            {
+              "importedName": "utcText",
+              "originalName": "utcText",
+              "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "860aecf47be44493049437e09e19dec3d9387ca840c0666dffca19752776917a",
+          "source_sha256": "4e7d15aaef970b4d17af377c0243d7d43362b9646637990f1d2d14b495815a5b",
           "symbols": [
             {
               "declarations": [
@@ -176242,6 +176252,64 @@
                 }
               ],
               "name": "memberResultsReader"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "SELECT report_id,owner_key,profile_id,report_revision,\n body,revision_created_at FROM jungsi_backend.read_member_statistics_rows_v1($1)",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "kind": "literal",
+                            "repr": "SELECT report_id,owner_key,profile_id,report_revision,\n body,revision_created_at FROM jungsi_backend.read_member_statistics_rows_v1($1)",
+                            "value": {
+                              "kind": "string",
+                              "string": "SELECT report_id,owner_key,profile_id,report_revision,\n body,revision_created_at FROM jungsi_backend.read_member_statistics_rows_v1($1)"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "MEMBER_STATISTICS_FN_SQL"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "literal",
+                      "repr": "SELECT r.report_id,r.owner_id,v.profile_id,r.revision::text,\n v.body::text,to_char(v.created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')\n FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v\n ON (r.report_id,r.revision,r.owner_id)=(v.report_id,v.revision,v.owner_id)\n WHERE r.owner_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'",
+                      "value": {
+                        "kind": "template",
+                        "tsTypes": [
+                          {
+                            "kind": "literal",
+                            "repr": "SELECT r.report_id,r.owner_id,v.profile_id,r.revision::text,\n v.body::text,to_char(v.created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')\n FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v\n ON (r.report_id,r.revision,r.owner_id)=(v.report_id,v.revision,v.owner_id)\n WHERE r.owner_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'",
+                            "value": {
+                              "kind": "string",
+                              "string": "SELECT r.report_id,r.owner_id,v.profile_id,r.revision::text,\n v.body::text,to_char(v.created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')\n FROM jungsi_backend.reports r JOIN jungsi_backend.report_revisions v\n ON (r.report_id,r.revision,r.owner_id)=(v.report_id,v.revision,v.owner_id)\n WHERE r.owner_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "ACTIVE_REPORTS_SQL"
             },
             {
               "declarations": [
@@ -177617,6 +177685,130 @@
             {
               "declarations": [
                 {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    private readonly sql: SupabaseSqlTransport,\n    private readonly maxBytes: number,\n    private readonly source: MemberResultsReader = \"fn_v2\",\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "sql",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "SupabaseSqlTransport",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "SupabaseSqlTransport",
+                                  "specifier": "./transaction_sql.ts"
+                                },
+                                "typeName": "SupabaseSqlTransport"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "maxBytes",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "assign",
+                            "left": {
+                              "kind": "identifier",
+                              "name": "source",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "MemberResultsReader",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "MemberResultsReader"
+                                }
+                              }
+                            },
+                            "readonly": true,
+                            "right": "fn_v2"
+                          }
+                        ]
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "verifiedRequestor",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeOperator",
+                                  "value": {
+                                    "operator": "readonly",
+                                    "tsType": {
+                                      "kind": "array",
+                                      "value": {
+                                        "kind": "typeRef",
+                                        "repr": "StoredReport",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "StoredReport",
+                                            "specifier": "../application/platform_repository.ts"
+                                          },
+                                          "typeName": "StoredReport"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "activeReports"
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "SupabaseMemberStatisticsRows"
+            },
+            {
+              "declarations": [
+                {
                   "declarationKind": "private",
                   "def": {
                     "kind": "const",
@@ -177700,6 +177892,25 @@
                 }
               ],
               "name": "OWN_JOIN"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                      "value": {
+                        "typeName": "RegExp"
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "OWNER_KEY"
             },
             {
               "declarations": [
@@ -177909,6 +178120,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../domain/time.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/time.ts"
               }
             ]
           },
@@ -211326,7 +211547,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "dc4dc48dc4295e16e32be6635b3c29bf3b1a67977c524826d650154fba4cef88",
+          "source_sha256": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
           "symbols": [
             {
               "declarations": [
@@ -215756,6 +215977,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
             },
             {
+              "importedName": "SupabaseMemberStatisticsRows",
+              "originalName": "SupabaseMemberStatisticsRows",
+              "src": "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
+            },
+            {
               "importedName": "SupabaseOwnReportList",
               "originalName": "SupabaseOwnReportList",
               "src": "supabase/functions/_shared/jungsi/infrastructure/own_report_list_postgres.ts"
@@ -215826,7 +216052,7 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/history_snapshot_source.ts"
             }
           ],
-          "source_sha256": "eaf4f4e7375c13cb7c862050934c7b9422218f1e63491d6ce82a700408378cb6",
+          "source_sha256": "41b0c39c581fb0f8300cedd7ffacaf73d1161d5a3ef39e67e8f3cb72bb9b796c",
           "symbols": [
             {
               "declarations": [
@@ -216319,6 +216545,53 @@
                         },
                         "kind": "method",
                         "name": "memberResultsReader"
+                      },
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Pick",
+                                  "value": {
+                                    "typeName": "Pick",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "SupabasePlatformRepository",
+                                        "value": {
+                                          "resolution": {
+                                            "kind": "import",
+                                            "name": "SupabasePlatformRepository",
+                                            "specifier": "./platform_postgres.ts"
+                                          },
+                                          "typeName": "SupabasePlatformRepository"
+                                        }
+                                      },
+                                      {
+                                        "kind": "literal",
+                                        "repr": "activeReports",
+                                        "value": {
+                                          "kind": "string",
+                                          "string": "activeReports"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "activeReportsSource"
                       },
                       {
                         "functionDef": {
@@ -363248,7 +363521,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/member_json_storage.ts": "2724ccaba547730d3fe8249ddea22847698c42007cbb4681606a6811ee3ddae3",
       "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
       "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0",
-      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "860aecf47be44493049437e09e19dec3d9387ca840c0666dffca19752776917a",
+      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "4e7d15aaef970b4d17af377c0243d7d43362b9646637990f1d2d14b495815a5b",
       "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e",
       "supabase/functions/_shared/jungsi/infrastructure/native_reference_db_tail.ts": "b85cb358c51544883f2a0da37b8447d94ec057a379d1fa2150c9baa562284ad4",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",
@@ -363282,8 +363555,8 @@
       "supabase/functions/_shared/jungsi/infrastructure/reference_runtime_factory.ts": "81a3f8abe39ea77da8c9f77b478864cf2f8ddfdafa98f184f05e990bacf943ed",
       "supabase/functions/_shared/jungsi/infrastructure/reference_tail_prefetch.ts": "aa99b585138c0d51ae4426fa2fe1dcfde25f007c0690925ab15df58ab362dc96",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "dc4dc48dc4295e16e32be6635b3c29bf3b1a67977c524826d650154fba4cef88",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "eaf4f4e7375c13cb7c862050934c7b9422218f1e63491d6ce82a700408378cb6",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "41b0c39c581fb0f8300cedd7ffacaf73d1161d5a3ef39e67e8f3cb72bb9b796c",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_controls.ts": "0d36500bcbf31018261b24225039bfda091405de5b4c503824ed1bf617cbd3e2",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_lease.ts": "5aa80a82773824974750276f302d09a6fb5df193f3e64377e0c1a79fbd3f1a47",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts": "3649df74405f11751176e8ee01b2f7b561dd7a37c118cd7c1cc16008792dd103",
@@ -365355,7 +365628,7 @@
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
       "graph_manifest_sha256": "79403f8d91e1cb235fe4a0328cee816a0274468fef20ffd741dd62ad44aff35e",
-      "bridge_sha256": "5902f99bbead099aeb06531004971511d09985b148aaaafa17befe774d0a099c"
+      "bridge_sha256": "6027b103b44eef577d0fa803454842b383ca45ff7e94dd88f8600af2c1551928"
     }
   },
   "P1_display_snapshot_contract": {
@@ -369220,7 +369493,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "93e0253c0de992de1f96e0bee80be2cfebae0c3585f157e2df294a81da181081",
+    "manifest_sha256": "50a9c5ad49fb5bcc89c8f086eafd1e5cc261aad081aae06ca7df946a4dacf363",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -369393,7 +369666,7 @@
     "previous_overlay_sha256": "cb253a886da3519d18c72897439bd10844067f5b79ea29a6a3ae730501b9ae0f",
     "source_bindings": {
       "scripts/check_edge_contract.py": "eecdb9aa12c9290bce4c8dd8e1a94b4dd14659a692ce1c457b147c6c9dc61d75",
-      "scripts/check_project_consistency.py": "4543bb8cc3830528f7b40cd49b0a26f907022a9d81700c79113ad52800f7d7d2",
+      "scripts/check_project_consistency.py": "7633f8bc09d9494a020676cd7266ae5542dd88958512753398a31db8af394f48",
       "scripts/run_edge_tests.py": "a23b9d42618e1c808a781e93df4079abe4a68105a89899404a9b4b8873df0c5d",
       "src/jungsi_touch/application/public_response_schemas.json": "a8c6af49bb651820c8fd28d74cdc373770b7017075aded36943b79e1869012bd",
       "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
@@ -369407,11 +369680,11 @@
       "supabase/functions/_shared/jungsi/application/profile_reports.ts": "69693c092f0bef7a8be8247339dd0631fa35af14361970a7a66dad3fa2f8c6ab",
       "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
       "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0",
-      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "860aecf47be44493049437e09e19dec3d9387ca840c0666dffca19752776917a",
+      "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "4e7d15aaef970b4d17af377c0243d7d43362b9646637990f1d2d14b495815a5b",
       "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts": "b42168665aba5afa86bbb1fe2de18e0c8a280374f48fbbdc2ba06584cbbe2c5d",
       "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts": "5e288b82e9a9befc3e80a950f7c3090196dcb608c20b2ac9eb83c25a27d1e4d7",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "dc4dc48dc4295e16e32be6635b3c29bf3b1a67977c524826d650154fba4cef88",
-      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "eaf4f4e7375c13cb7c862050934c7b9422218f1e63491d6ce82a700408378cb6",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts": "a176447aac1a41ea9386072e83562bdca1b07be4195ee57e7bd798482e89fcfa",
+      "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts": "41b0c39c581fb0f8300cedd7ffacaf73d1161d5a3ef39e67e8f3cb72bb9b796c",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
       "supabase/functions/_shared/search_failure_diagnostic.ts": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",

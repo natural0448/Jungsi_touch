@@ -23,10 +23,13 @@ import {
 } from "../../supabase/functions/_shared/jungsi/application/school_reflected_reference.ts";
 import { assert, equal } from "../edge/fixture.ts";
 import {
+  ACTIVE_REPORTS_SQL,
   MEMBER_RESULTS_FN_SQL,
   MEMBER_RESULTS_SQL,
+  MEMBER_STATISTICS_FN_SQL,
   memberResultsReader,
   SupabaseMemberShortlistLegacy,
+  SupabaseMemberStatisticsRows,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts";
 import type { SupabaseSqlTransport } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
 
@@ -439,4 +442,45 @@ Deno.test("member saved results 015 reader switch keeps the reviewed SQL unless 
     JSON.stringify([owner, "2027", '["SYNTHETIC-a"]', "SYNTHETIC-r", "3"]),
   );
   equal(seen[1].owner, owner);
+  // statistics.read: the old aggregate skips non-UUID synthetic owners; the 015b rows
+  // keep the member's own ID and accept only UUID-shaped keys for others.
+  assert(ACTIVE_REPORTS_SQL.includes("WHERE r.owner_id ~ '^[0-9a-f]{8}-"));
+  assert(MEMBER_STATISTICS_FN_SQL.includes("jungsi_backend.read_member_statistics_rows_v1($1)"));
+  const other = "0f0e0d0c-0b0a-4908-8706-050403020100";
+  const row = (key: string) => [
+    "SYNTHETIC-r",
+    key,
+    "SYNTHETIC-p",
+    "2",
+    '{"analyses":{},"shortlist":{}}',
+    "2026-11-15T00:00:00.000001Z",
+  ];
+  const stats = (rows: unknown[][]) =>
+    new SupabaseMemberStatisticsRows({
+      read: (o: string, work: (tx: unknown) => Promise<unknown>) => {
+        equal(o, owner);
+        return work({
+          query: (sql: string, args: readonly unknown[]) => {
+            equal(sql, MEMBER_STATISTICS_FN_SQL);
+            equal(JSON.stringify(args), JSON.stringify([owner]));
+            return Promise.resolve(rows);
+          },
+        });
+      },
+    } as unknown as SupabaseSqlTransport, 1048576);
+  const got = await stats([row(owner), row(other)]).activeReports(owner);
+  equal(
+    JSON.stringify(got.map((r) => [r.owner_id, r.revision, r.updated_at])),
+    JSON.stringify([
+      [owner, 2, "2026-11-15T00:00:00.000001Z"],
+      [other, 2, "2026-11-15T00:00:00.000001Z"],
+    ]),
+  );
+  let refused = false;
+  try {
+    await stats([row("SYNTHETIC_LEGACY_OWNER")]).activeReports(owner);
+  } catch {
+    refused = true;
+  }
+  assert(refused);
 });

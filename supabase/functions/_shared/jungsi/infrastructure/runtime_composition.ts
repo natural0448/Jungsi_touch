@@ -864,7 +864,10 @@ export class NativeRuntimeApi {
           return value;
         },
         activeReports: async (...a) =>
-          await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
+          await phase(
+            "active_reports",
+            async () => (await context.activeReportsSource()).activeReports(...a),
+          ),
       };
       const data = runtimeAnalysisDataPort(context, phase, request.signal, true);
       const catalogContext = {
