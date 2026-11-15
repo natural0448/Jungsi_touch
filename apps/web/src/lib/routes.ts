@@ -14,13 +14,26 @@ export interface PageRoute {
   member_tiers: MemberTier[];
 }
 
-export const PAGES: PageRoute[] = catalog.pages.map((p) => ({
-  id: p.id,
-  number: p.number,
-  label: p.label,
-  path: p.path,
-  member_tiers: p.member_tiers as MemberTier[],
-}));
+/**
+ * 소비자 화면의 표시 순서(대표님 결정 2026-11-15): '유리한 대학 찾기'(PAGE-04)가 성적대·유리한 성적 구성으로
+ * 검토할 대학을 추천하고, '전체 대학·학과 가능성 보기'(PAGE-03)에서 학과마다 검토한다. 그래서 탭·화면 번호는
+ * 이 순서로 매긴다. 화면 ID·주소·회원 범위는 경로 계약 그대로다(명세의 화면 번호 정리는 따로 한다).
+ */
+const DISPLAY_ORDER = ["PAGE-01", "PAGE-02", "PAGE-04", "PAGE-03"] as const;
+const byId = new Map(catalog.pages.map((p) => [p.id, p]));
+if (catalog.pages.length !== DISPLAY_ORDER.length || DISPLAY_ORDER.some((id) => !byId.has(id))) {
+  throw new Error("경로 계약의 소비자 화면과 표시 순서가 다릅니다");
+}
+export const PAGES: PageRoute[] = DISPLAY_ORDER.map((id, i) => {
+  const p = byId.get(id)!;
+  return {
+    id: p.id,
+    number: i + 1,
+    label: p.label,
+    path: p.path,
+    member_tiers: p.member_tiers as MemberTier[],
+  };
+});
 
 export const ROOT_REDIRECT = catalog.redirects.find((r) => r.path === "/")?.target ?? "/admissions/results";
 

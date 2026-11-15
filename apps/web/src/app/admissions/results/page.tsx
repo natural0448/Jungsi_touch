@@ -39,7 +39,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
       kicker={`PAGE ${route.number}`}
       title={route.label}
       desc="성적 입력 없이, 대학이 발표한 3개 학년도 입시결과를 전국 대학 단위로 한 번에 확인하세요."
-      side={<Link className="btn" href={page("PAGE-03").path}>내 성적으로 가능성 보기</Link>}
+      side={<Link className="btn" href={page("PAGE-04").path}>내 성적으로 유리한 대학 찾기</Link>}
     />
   );
 

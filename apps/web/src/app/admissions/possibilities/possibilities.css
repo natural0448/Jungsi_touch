@@ -1,4 +1,4 @@
-/* 3페이지 · 전체 대학·학과 가능성 보기 (시안 2026-10-03) */
+/* 전체 대학·학과 가능성 보기(화면 번호 4 — 2026-11-15 순서 교체, 화면 ID는 PAGE-03) (시안 2026-10-03) */
 .et .ps{display:grid;gap:16px;padding-bottom:24px}
 
 
@@ -190,3 +190,6 @@
 .et .ps .card .conds .cm{display:inline-block;margin-left:6px;padding:0 6px;border-radius:var(--r-sm);font-size:12px;font-weight:700;border:1px solid var(--line)}
 .et .ps .card .conds .cm.match{color:var(--safe);border-color:var(--safe)}
 .et .ps .card .conds .cm.differ{color:var(--reach);border-color:var(--reach)}
+/* 연도별 근거(2026-11-15): 합격선과 내 누적 백분위 차이 */
+.et .years .m.gap.above{color:var(--safe);font-weight:700}
+.et .years .m.gap.below{color:var(--reach);font-weight:700}

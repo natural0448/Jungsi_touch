@@ -34,7 +34,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
       desc="전체 성적에서 출발해 환산에 유리한 학교를 찾고, 학교 안에서 학과마다 지원 범위를 따로 확인하세요."
-      side={<Link prefetch={false} className="btn" href={p3.path}>대학·학과 직접 검색</Link>}
+      side={<Link prefetch={false} className="btn" href={p3.path}>추천 밖 대학·학과도 직접 검토</Link>}
     />
   );
 

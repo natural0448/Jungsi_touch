@@ -246,6 +246,14 @@ export interface EligibilityConditionsDto {
   inquiry_note: string | null; // 요강 문구 그대로
 }
 
+/** year_cutoff — 지난 학년도 합격선 하나(서버 public_response_schemas 와 같은 모양) */
+export interface YearCutoffDto {
+  academic_year: number;
+  published_metric: string; // 대학 발표 지표 이름(예: 최종등록자 70%컷)
+  cutoff_top_percent: string; // 그 합격선의 누적 백분위(전체 응시자 추정, 위에서 %)
+  observation_id: string;
+}
+
 /** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
 export interface AssessmentDto {
   offering_id: string;
@@ -284,6 +292,8 @@ export interface AssessmentDto {
   school_reflected?: SchoolReflectedDto | null;
   // 지원 자격 조건(유료 report.read, 2026-11-15). 요강 정본에서 확정된 필드만 온다. 판정은 eligibility_status 그대로
   eligibility_conditions?: EligibilityConditionsDto | null;
+  // 지난 학년도 합격선 누적 백분위(유료 report.read, R9 명부, 2026-11-15). 담당자 명부에 있는 모집단위만 온다
+  year_cutoffs?: YearCutoffDto[] | null;
 }
 
 /** 학교 반영 백분위(참고). value 는 0~100, 영어·한국사·가산점 제외 */

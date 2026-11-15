@@ -4,6 +4,7 @@ import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto, SubjectResultDto } from "@/lib/dto";
 import { CONDITION_MARK_TEXT, conditionLines } from "@/lib/eligibility-conditions";
+import { yearCutoffLines } from "@/lib/year-cutoffs";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
 import { SchoolReflectedLine } from "@/components/school-reflected";
@@ -373,12 +374,15 @@ function AdoptedEvidence({ a }: { a: AssessmentDto }) {
   );
 }
 
-/** 연도별: 그해 기준으로 옮긴 내 환산점수와 대학 발표 지표를 나란히. 화면이 둘을 비교해 판정하지 않는다 */
+/**
+ * 연도별 근거(대표님 결정 2026-11-15): 학년도별 대학 발표 입시결과, 그 합격선의 누적 백분위(추정),
+ * 내 누적 백분위와의 차이. 누적 백분위끼리는 해가 달라도 같은 기준이라 바로 견준다.
+ */
 function Years({ a }: { a: AssessmentDto }) {
   const metrics = a.decision_evidence?.historical_metrics ?? [];
-  const years = a.years;
-  const all = Array.from(new Set([...years.map((y) => y.academic_year), ...metrics.map((m) => m.academic_year)])).sort((x, y) => y - x);
-  if (all.length === 0) return null;
+  const cut = yearCutoffLines(a);
+  const past = (y: number) => y >= 2024 && y <= 2026;
+  const all = Array.from(new Set([2026, 2025, 2024, ...metrics.map((m) => m.academic_year).filter(past), ...cut.map((c) => c.year)])).sort((x, y) => y - x);
   return (
     <div className="years">
       <table>
@@ -386,23 +390,21 @@ function Years({ a }: { a: AssessmentDto }) {
         <thead>
           <tr>
             <th scope="col">학년도</th>
-            <th scope="col" className="r">내 환산점수</th>
-            <th scope="col">기준</th>
-            <th scope="col">대학 발표 지표</th>
+            <th scope="col">대학 발표 입시결과</th>
+            <th scope="col" className="r">합격선 누적 백분위(추정)</th>
+            <th scope="col">내 누적 백분위와 차이</th>
           </tr>
         </thead>
         <tbody>
           {all.map((yr) => {
-            const y = years.find((x) => x.academic_year === yr);
             const ms = metrics.filter((m) => m.academic_year === yr);
+            const lines = cut.find((c) => c.year === yr)?.lines ?? [];
             return (
               <tr key={yr}>
                 <th scope="row" className="num">{yr}</th>
-                <td className="r num">{y?.converted_score ?? <span className="na">─</span>}</td>
-                <td>{y ? (y.status === "ready" ? scoreBasisLabel(y.score_basis) : <span className="na">{reasonText(y.reason_code) || "보류"}</span>) : <span className="na">─</span>}</td>
                 <td>
                   {ms.length === 0 ? (
-                    <span className="na">{yr === 2027 ? "올해는 아직 결과 없음" : "자료 없음"}</span>
+                    <span className="na">자료 없음</span>
                   ) : (
                     ms.map((m) => (
                       <span key={m.metric_name} className="m">
@@ -412,12 +414,36 @@ function Years({ a }: { a: AssessmentDto }) {
                     ))
                   )}
                 </td>
+                <td className="r">
+                  {lines.length === 0 ? (
+                    <span className="na">자료 없음</span>
+                  ) : (
+                    lines.map((l, i) => (
+                      <span key={i} className="m">
+                        {l.metric} <b className="num">상위 {l.cutoff}%</b>
+                      </span>
+                    ))
+                  )}
+                </td>
+                <td>
+                  {lines.length === 0 ? (
+                    <span className="na">─</span>
+                  ) : (
+                    lines.map((l, i) => (
+                      <span key={i} className={`m gap ${l.side ?? ""}`}>
+                        {l.gap ?? <span className="na">내 누적 백분위 없음</span>}
+                      </span>
+                    ))
+                  )}
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-      <span className="note">올해 행은 지금 입력한 시험 기준, 지난 해는 그해 성적으로 옮긴 추정입니다. 대학 발표 지표는 대학마다 기준이 달라 내 점수와 그대로 비교하지 않습니다.</span>
+      <span className="note">
+        합격선 누적 백분위는 대학이 발표한 입시결과를 전체 응시자 기준 위치로 옮겨 추정한 참고값이고(운영 승인 전), 내 누적 백분위도 같은 기준입니다. ‘발표 지표 확인 중’은 그 값이 어떤 합격선(70%컷·평균 등)인지 아직 확인하지 못한 것입니다. 내가 합격선보다 위에 있을수록 그해 기준으로 여유가 있다는 뜻이니, 여러 해의 차이를 함께 보고 판단하세요.
+      </span>
     </div>
   );
 }
