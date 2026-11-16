@@ -103,10 +103,6 @@ function isCurrentRecruitment(r: Row, scopes: ReadonlyMap<string, number>): bool
 function hasCurrentRecruitment(rows: readonly Row[], scopes: ReadonlyMap<string, number>): boolean {
   return rows.some(r => isCurrentRecruitment(r, scopes));
 }
-/** An unlinked past group stays distinct; it never supplies a 2027 anchor. */
-function isHistoricalOnly(rows: readonly Row[]): boolean {
-  return rows.length > 0 && rows.every(r => r.y >= 2024 && r.y < 2027);
-}
 export type Ready = {
   snapshot_id: string; publication_sha256: string; source_head_sha256: string;
   /** Older v1 cached ready records may omit this field. */
@@ -418,7 +414,8 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
         let rawPending = 0, visiblePending = 0, visibleUnits = 0;
         for (const [k, rs] of by) {
           if (k.startsWith("ob:")) rawPending++;
-          if (isR27 && !hasCurrentRecruitment(rs, scopes) && !isHistoricalOnly(rs)) continue;
+          // 2027 모집행 중심 목록(대표님 결정 2026-11-16): 2027 모집행에 연결되지 않은 과거 전용 묶음은 목록에 따로 두지 않는다(원본 캐시에는 보존)
+          if (isR27 && !hasCurrentRecruitment(rs, scopes)) continue;
           if (k.startsWith("ob:")) visiblePending++;
           visibleUnits++;
           const conditionRows = isR27 ? rs.filter(r => isCurrentRecruitment(r, scopes)) : rs;
@@ -569,13 +566,13 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
   return (await schoolUnitRows(ready, schoolId, [key]))[key] ?? [];
 }
-/** 한 학교의 여러 모집단위를 한 번에. 독립 과거 행은 그대로 두고 미검증 2027 행은 제외한다. */
+/** 한 학교의 여러 모집단위를 한 번에. 2027 모집행에 연결된 묶음만 돌려준다(과거 전용·미검증 2027 묶음은 빈 목록). */
 export async function schoolUnitRows(ready: Ready, schoolId: string, keys: readonly string[]): Promise<Record<string, Row[]>> {
   const allRows = await school(ready, schoolId);
   const isR27 = ready.schema_version === R27_SNAPSHOT_SCHEMA, scopes = isR27 ? currentScopeCounts(allRows) : new Map<string, number>();
   const wanted = new Set(keys), by = new Map<string, Row[]>();
   for (const r of allRows) { const k = unitKey(r); if (wanted.has(k)) by.set(k, [...(by.get(k) ?? []), r]); }
   const out: Record<string, Row[]> = {};
-  for (const k of wanted) { const rows = by.get(k) ?? []; out[k] = isR27 && !hasCurrentRecruitment(rows, scopes) && !isHistoricalOnly(rows) ? [] : rows; }
+  for (const k of wanted) { const rows = by.get(k) ?? []; out[k] = isR27 && !hasCurrentRecruitment(rows, scopes) ? [] : rows; }
   return out;
 }

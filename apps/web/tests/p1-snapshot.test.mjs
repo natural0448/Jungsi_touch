@@ -461,13 +461,13 @@ test("a v2 partial publication keeps 2027 quotas verbatim and groups only server
   const result = await w.module.searchSnapshot(ready, {}), rows = result.schools[0].rows;
   const { unitKey, r27Summary } = await import("../src/lib/p1-shape.ts");
   const keyOf = pk => unitKey(rows.find(r => r.pk === pk));
-  // Reviewed history remains attached; ambiguous and past-only groups stay separate.
+  // Reviewed history remains attached; groups without a 2027 offering are not listed (2026-11-16 decision).
   assert.match(keyOf("k27a"), /^r27:[0-9]+$/);
   assert.equal(keyOf("p26a"), keyOf("k27a")); assert.equal(keyOf("p25a"), keyOf("k27a"));
-  assert.ok(rows.some(r => r.pk === "shared")); assert.ok(rows.some(r => r.pk === "alone"));
-  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:shared")).map(r => r.y), [2026]);
-  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:alone")).map(r => r.y), [2024]);
-  assert.equal(result.total_units, 5);
+  assert.ok(!rows.some(r => r.pk === "shared")); assert.ok(!rows.some(r => r.pk === "alone"));
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:shared"), []);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:alone"), []);
+  assert.equal(result.total_units, 3);
   // The original history also remains in the immutable school cache.
   const savedIndex = JSON.parse(w.cache.get(ready.index_key));
   const savedRows = JSON.parse(w.cache.get(savedIndex.school_keys.TEST0));
@@ -513,9 +513,9 @@ test("an unreviewed same-PK 2027 row remains separate through cache and search",
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   const { unitKey } = await import("../src/lib/p1-shape.ts");
   const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027);
-  assert.equal(rows.some(r => r.y === 2026), true);
-  assert.equal(result.total_units, 2);
-  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:same")).map(r => r.y), [2026]);
+  assert.equal(rows.some(r => r.y === 2026), false);
+  assert.equal(result.total_units, 1);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:same"), []);
   assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
 });
 
@@ -525,32 +525,32 @@ test("ambiguous historical identity is not linked through cache and search", asy
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   const { unitKey } = await import("../src/lib/p1-shape.ts");
   const rows = result.schools[0].rows, newest = rows.find(r => r.y === 2027), historical = rows.filter(r => r.y === 2026);
-  assert.equal(historical.length, 2);
-  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:duplicate")).map(r => r.y), [2026, 2026]);
+  assert.equal(historical.length, 0);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:duplicate"), []);
   const savedIndex = JSON.parse(w.cache.get(ready.index_key));
   const savedRows = JSON.parse(w.cache.get(savedIndex.school_keys.TEST0));
   assert.equal(savedRows.filter(r => r.y === 2026).length, 2);
   assert.deepEqual((await w.module.unitRows(ready, "TEST0", unitKey(newest))).map(r => r.y), [2027]);
 });
 
-test("v2 keeps missing quotas and shows past-only groups separately without changing raw counts", async t => {
+test("v2 keeps missing quotas and hides past-only groups without changing raw counts", async t => {
   const w = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
     rowsOf: (_i, u) => [r27Row(u, "current", { quota_value: null, quota_stage: null }), pastRow(u, 2026, "old"), { ...pastRow(u, 2024, null), observation_key: "past-observation" }] });
   const ready = await w.prepare(), result = await w.module.searchSnapshot(ready, {});
   assert.equal(ready.schema_version, "jungsi.history-snapshot/v2");
   assert.equal(ready.counts.rows, 3); assert.equal(ready.counts.mapping_pending_rows, 1);
-  assert.equal(result.total_units, 2); assert.equal(result.total_pending, 1);
-  assert.equal(result.schools[0].rows.length, 3);
+  assert.equal(result.total_units, 1); assert.equal(result.total_pending, 0);
+  assert.equal(result.schools[0].rows.length, 1);
   assert.equal(result.schools[0].rows[0].q27.v, null);
-  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "pk:old")).map(r => r.y), [2026]);
-  assert.deepEqual((await w.module.unitRows(ready, "TEST0", "ob:past-observation")).map(r => r.y), [2024]);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "pk:old"), []);
+  assert.deepEqual(await w.module.unitRows(ready, "TEST0", "ob:past-observation"), []);
 });
 
-test("v2 with only past rows shows them as historical results", async t => {
+test("v2 with only past rows lists no 2027 offering (2026-11-16 decision)", async t => {
   const v2 = await world(t, { parts: 1, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage }, rowsOf: (_i, u) => [pastRow(u, 2026, "old")] });
   const ready = await v2.prepare(), result = await v2.module.searchSnapshot(ready, {});
-  assert.equal(result.total_schools, 1); assert.equal(result.total_units, 1);
-  assert.deepEqual((await v2.module.unitRows(ready, "TEST0", "pk:old")).map(r => r.y), [2026]);
+  assert.equal(result.total_units, 0);
+  assert.deepEqual(await v2.module.unitRows(ready, "TEST0", "pk:old"), []);
 });
 
 test("duplicate 2027 scope keys do not surface as separate member offerings", async t => {
@@ -570,16 +570,15 @@ test("duplicate 2027 scope keys do not surface as separate member offerings", as
   assert.equal(JSON.parse(w.cache.get(savedIndex.school_keys.TEST0)).length, 3);
 });
 
-test("v2 pagination and search include separately identified historical schools", async t => {
+test("v2 pagination and search leave out schools with only past results", async t => {
   const w = await world(t, { parts: 22, schools: 22, schema: "jungsi.history-snapshot/v2", headExtra: { r27_scope_coverage: coverage }, body: { r27_scope_coverage: coverage },
     rowsOf: (i, u) => i < 21 ? [{ ...r27Row(u, `current-${i}`, { quota_value: i + 1, quota_stage: "initial" }), department: `current-${i}` }] : [{ ...pastRow(u, 2026, "old"), department: "past-only" }] });
   const ready = await w.prepare();
   const first = await w.module.searchSnapshot(ready, { page: 1 }), second = await w.module.searchSnapshot(ready, { page: 2 });
   assert.equal(ready.counts.schools, 22);
-  assert.equal(first.total_schools, 22); assert.equal(first.total_units, 22); assert.equal(first.pages, 2);
-  assert.equal(first.schools.length, 20); assert.equal(second.schools.length, 2);
-  assert.equal(new Set([...first.schools, ...second.schools].map(x => x.school.id)).size, 22);
-  assert.equal((await w.module.searchSnapshot(ready, { unit: "past-only" })).total_units, 1);
+  assert.equal(first.total_units, 21); assert.equal(first.pages, 2);
+  assert.equal(first.schools.length, 20); assert.equal(second.schools.length, first.total_schools - 20);
+  assert.equal((await w.module.searchSnapshot(ready, { unit: "past-only" })).total_units, 0);
   assert.equal((await w.module.searchSnapshot(ready, { unit: "current-20" })).total_units, 1);
 });
 
@@ -701,7 +700,7 @@ test("schoolUnitRows answers many units in one read with the same rule as unitRo
   const all = await w.module.schoolUnitRows(ready, "TEST0", keys);
   assert.deepEqual(Object.keys(all).sort(), [...keys].sort());
   for (const k of keys) assert.deepEqual(all[k], await w.module.unitRows(ready, "TEST0", k));
-  assert.deepEqual(all["pk:alone"].map(r => r.y), [2024]); assert.deepEqual(all["pk:missing"], []);
+  assert.deepEqual(all["pk:alone"], []); assert.deepEqual(all["pk:missing"], []);
   assert.deepEqual(all[unitKey(rows.find(r => r.pk === "k27a"))].map(r => r.y).sort(), [2025, 2026, 2027]);
 });
 
