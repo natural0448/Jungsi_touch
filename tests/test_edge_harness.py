@@ -363,6 +363,9 @@ def before_member_school_overlay(current):
             # 2026-11-16 reference upper bound overlay paths (historical school pins).
             c._REF_PCT: school[c._REF_PCT],
             c._SAVED_TAIL: school[c._SAVED_TAIL],
+            # 2026-11-17 55PK chunked curve overlay paths (historical school pins).
+            c._NDP: school[c._NDP],
+            c._NSS: school[c._NSS],
         })
         policy['native_SQL_preparation_evidence'].pop('guard_saved_report_source_candidate_20261113')
     files = spec['edge_harness']['files']

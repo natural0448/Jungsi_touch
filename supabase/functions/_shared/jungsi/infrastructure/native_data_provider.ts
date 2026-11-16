@@ -957,49 +957,92 @@ export class NativeDataProvider
    * Server authority for saved reference tails. Selection comes only from the approved
    * registry/selection/head chain of this request; every use rechecks the fresh head.
    */
-  referenceTailAuthority(): AuthorizedSavedTailBytesPort {
+  referenceTailAuthority(): AuthorizedSavedTailBytesPort & {
+    /** Chunked index entries only (catalog tail_layout "chunked_index_v1"). */
+    selectChunked(offeringId: string, signal: AbortSignal): Promise<AuthorizedSavedTailPin | null>;
+    readChunk(
+      parent: AuthorizedSavedTailPin,
+      indexBytes: Uint8Array,
+      key: string,
+      bytes: number,
+      signal: AbortSignal,
+    ): Promise<Uint8Array>;
+  } {
     const contextOf = (entry: NativeObject): NativeObject => {
       const c = { ...object(entry.reference_context) };
       delete c.offering_ids;
       return c;
     };
+    const isChunked = (entry: NativeObject) => entry.tail_layout === "chunked_index_v1";
+    const pinOf = async (
+      offeringId: string,
+      chunked: boolean,
+      signal?: AbortSignal,
+    ): Promise<AuthorizedSavedTailPin | null> => {
+      if (signal?.aborted) fail("reference_tail_unavailable");
+      const entry = this.referenceTailIndex().get(offeringId);
+      if (entry === null) fail("reference_offering_ambiguous");
+      if (entry === undefined || isChunked(entry) !== chunked) return null;
+      const reference = await this.getReference(offeringId, signal);
+      if (signal?.aborted) fail("reference_tail_unavailable");
+      const context = contextOf(entry);
+      if (!reference) return null;
+      if (
+        reference.binding.rule_version !== context.rule_version ||
+        reference.academicYear !== context.academic_year ||
+        reference.examId !== context.exam_id ||
+        reference.packVersion !== context.source_pack_version ||
+        reference.examType !== context.exam_type ||
+        reference.scoreScaleId !== context.score_scale_id
+      ) fail("reference_tail_context_mismatch");
+      const binding: NativeObject = { offering_id: offeringId };
+      for (const k of [...CONVERSION_CONTEXT_FIELDS, "rule_version"]) {
+        binding[k] = (reference.binding[k] ?? null) as NativeJson;
+      }
+      return {
+        key: text(entry.key),
+        sha256: text(entry.sha256),
+        bytes: Number(entry.bytes),
+        maxBytes: Number(entry.bytes),
+        releaseSha256: this.selection.registryHash,
+        selectionSha256: this.selection.selectionHash,
+        compatibilitySha256: this.selection.selectionHash,
+        binding,
+        context,
+        evidence: cloneNativeJson(object(entry.reference_evidence)),
+      };
+    };
     return Object.freeze({
-      select: async (
-        offeringId: string,
-        signal?: AbortSignal,
-      ): Promise<AuthorizedSavedTailPin | null> => {
-        if (signal?.aborted) fail("reference_tail_unavailable");
-        const entry = this.referenceTailIndex().get(offeringId);
-        if (entry === null) fail("reference_offering_ambiguous");
-        if (entry === undefined) return null;
-        const reference = await this.getReference(offeringId, signal);
-        if (signal?.aborted) fail("reference_tail_unavailable");
-        const context = contextOf(entry);
-        if (!reference) return null;
-        if (
-          reference.binding.rule_version !== context.rule_version ||
-          reference.academicYear !== context.academic_year ||
-          reference.examId !== context.exam_id ||
-          reference.packVersion !== context.source_pack_version ||
-          reference.examType !== context.exam_type ||
-          reference.scoreScaleId !== context.score_scale_id
-        ) fail("reference_tail_context_mismatch");
-        const binding: NativeObject = { offering_id: offeringId };
-        for (const k of [...CONVERSION_CONTEXT_FIELDS, "rule_version"]) {
-          binding[k] = (reference.binding[k] ?? null) as NativeJson;
+      select: (offeringId: string, signal?: AbortSignal) => pinOf(offeringId, false, signal),
+      selectChunked: (offeringId: string, signal: AbortSignal) => pinOf(offeringId, true, signal),
+      /** Only a piece listed (key and exact length) in the pinned index bytes is read. */
+      readChunk: async (
+        parent: AuthorizedSavedTailPin,
+        indexBytes: Uint8Array,
+        key: string,
+        bytes: number,
+        signal: AbortSignal,
+      ) => {
+        if (signal.aborted) fail("reference_tail_unavailable");
+        const digest = [
+          ...new Uint8Array(await crypto.subtle.digest("SHA-256", Uint8Array.from(indexBytes))),
+        ]
+          .map((v) => v.toString(16).padStart(2, "0")).join("");
+        if (digest !== parent.sha256 || indexBytes.length !== parent.bytes) {
+          fail("reference_tail_pin_invalid");
         }
-        return {
-          key: text(entry.key),
-          sha256: text(entry.sha256),
-          bytes: Number(entry.bytes),
-          maxBytes: Number(entry.bytes),
-          releaseSha256: this.selection.registryHash,
-          selectionSha256: this.selection.selectionHash,
-          compatibilitySha256: this.selection.selectionHash,
-          binding,
-          context,
-          evidence: cloneNativeJson(object(entry.reference_evidence)),
-        };
+        const index = object(
+          JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(indexBytes)),
+        );
+        const listed = Array.isArray(index.chunks) &&
+          index.chunks.some((c) =>
+            c !== null && typeof c === "object" && (c as NativeObject).key === key &&
+            (c as NativeObject).bytes === bytes
+          );
+        if (!listed) fail("reference_tail_pin_invalid");
+        const chunk = await this.selection.referenceTailChunkBytes(parent.key, key, bytes, signal);
+        if (signal.aborted) fail("reference_tail_unavailable");
+        return chunk;
       },
       read: async (key: string, maximumBytes: number, signal: AbortSignal) => {
         const bytes = await this.selection.referenceTailBytes(key, signal);

@@ -392,7 +392,16 @@ def select_runner_current_rebound(spec, family, historical):
         selected=copy.deepcopy(historical);rows=selected['source_bindings']
         matches=[r for r in rows if isinstance(r,dict) and r.get('path')==path]
         if len(matches)!=1:raise ValueError('exact source occurrence')
-        matches[0]['sha256']=current
+        # A later authenticated current-source overlay (e.g. 55PK chunked reader, 2026-11-17)
+        # supersedes this family's current pin; the historical receipt stays unchanged.
+        saved=None
+        if family=='whole_population':
+            from check_project_consistency import saved_report_overlay
+            try:
+                saved=saved_report_overlay(spec)
+            except ValueError:
+                saved=None
+        matches[0]['sha256']=saved[path] if saved is not None and path in saved else current
         return selected
     except (KeyError,TypeError,ValueError,AttributeError):
         raise EdgeFailure('runner_current_source_rebound_invalid')

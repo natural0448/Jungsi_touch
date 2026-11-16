@@ -1,5 +1,6 @@
 // deno-lint-ignore-file require-await
 import { assert } from "./fixture.ts";
+import { NativeDataProvider } from "../../supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts";
 import type {
   ApiExecution,
   ApiExecutionBoundary,
@@ -143,4 +144,41 @@ Deno.test("runtime wrapper forwards chunk selection and rechecks lease and scope
     await rejects(() => found.assertCurrent(scope.signal));
     await rejects(() => ports.tail.getChunkedReferenceTail!("synthetic", scope.signal));
   });
+});
+
+Deno.test("catalog issuer reads only a piece listed with its exact length in the pinned index (2026-11-17)", async () => {
+  const index = new TextEncoder().encode(
+    JSON.stringify({ chunks: [{ key: "p/a.json", bytes: 3 }, { key: "p/b.json", bytes: 5 }] }),
+  );
+  const sha = [...new Uint8Array(await crypto.subtle.digest("SHA-256", index))]
+    .map((v) => v.toString(16).padStart(2, "0")).join("");
+  const reads: string[] = [];
+  const fake = {
+    selection: {
+      referenceTailChunkBytes: async (_parent: string, key: string, bytes: number) => {
+        reads.push(key);
+        return new Uint8Array(bytes);
+      },
+    },
+  };
+  const authority = NativeDataProvider.prototype.referenceTailAuthority.call(fake as never);
+  const parent = { key: "p/index.json", sha256: sha, bytes: index.length } as never;
+  const signal = new AbortController().signal;
+  assert((await authority.readChunk(parent, index, "p/b.json", 5, signal)).length === 5);
+  for (
+    const [key, bytes, body] of [
+      ["p/c.json", 5, index],
+      ["p/b.json", 4, index],
+      ["p/b.json", 5, new TextEncoder().encode("{}")],
+    ] as const
+  ) {
+    let threw = false;
+    try {
+      await authority.readChunk(parent, body, key, bytes, signal);
+    } catch {
+      threw = true;
+    }
+    assert(threw);
+  }
+  assert(JSON.stringify(reads) === JSON.stringify(["p/b.json"]));
 });

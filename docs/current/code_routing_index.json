@@ -676,7 +676,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "a8c089d747973f13d3162029b3c8868a80e03542f94193a79da673f4886945b5",
+      "source_sha256": "f8975a926b8a34f4f8ddf1667837a18b7e92c855d751a253898a006525e2153a",
       "symbols": [
         {
           "kind": "class",
@@ -2095,7 +2095,7 @@
       "layer": "planning_tool",
       "status": "shared_management_or_synthetic_CLI",
       "requirements": [],
-      "source_sha256": "0c0b3e0f3276499ffd8c06a14812630caab03c912073bc03ce59a44b683df25f",
+      "source_sha256": "4cb0315ea147abf617c66dae3086acacf7851e8b71d2538c049579bf680a0f6d",
       "symbols": [
         {
           "kind": "function",
@@ -11142,7 +11142,7 @@
           "REQ-26",
           "REQ-27"
         ],
-        "source_sha256": "2064a491f5c13cd96a364f19f6faee9f470350db8d26342fb6cc995634ccb670",
+        "source_sha256": "dc35f44a05d25d79999bce25b8bbc0ccfd260cf34c4771898071e7a582140654",
         "declared_exports": [
           "ChunkedReferenceTailProjection"
         ]
@@ -12148,7 +12148,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e",
+        "source_sha256": "fe8e4a900cadc45a271b81aecfd63bd4fc25dd57e1b27ecf0c40f8ba45282ed7",
         "declared_exports": [
           "NativeSelectionHeadPort",
           "NativeSelectionFreshness",
@@ -12206,7 +12206,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",
+        "source_sha256": "0f9264d06f028d8d607e01f48813577f16e81cd65d294c48b7995ca66600450e",
         "declared_exports": [
           "NATIVE_RUNTIME_KINDS",
           "NativePayloadMode",
@@ -12962,7 +12962,7 @@
           "REQ-27",
           "REQ-30"
         ],
-        "source_sha256": "510fc0fc6875d6ea9341c6dceb0eb8ddc7cef1d980b9e3bffecb29bbeeaf1416",
+        "source_sha256": "1e4c3250b7bdfed318b628d745ba4c486e72a5c402d1bb0bc8ba10b345d0c2a3",
         "declared_exports": [
           "REFERENCE_TAIL_REQUEST_OBJECTS",
           "REFERENCE_TAIL_REQUEST_BYTES",
@@ -13545,7 +13545,7 @@
           "REQ-25",
           "REQ-26"
         ],
-        "source_sha256": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
+        "source_sha256": "37d7accce4c7a6b0ab9519c4771a7031b5aae5d01a2d51f5a7e50d314ddadb07",
         "declared_exports": [
           "REFERENCE_TAIL_CONTEXT_KEYS",
           "REFERENCE_TAIL_EVIDENCE_KEYS",

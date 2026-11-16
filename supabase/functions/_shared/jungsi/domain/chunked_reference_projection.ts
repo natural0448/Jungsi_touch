@@ -264,7 +264,9 @@ export class ChunkedReferenceTailProjection {
         above,
       };
     });
-    check(count <= 125000, "reference_tail_invalid");
+    // 조각은 각각 100,000행 이하이고 질의마다 필요한 조각 하나만 읽는다(요청 바이트 예산이 상한).
+    // 전체 합계 행 수로 막지 않는다(55PK 큰 곡선 266,974~290,638행, 대표님 지시 2026-11-17).
+    check(count <= 32 * 100000, "reference_tail_invalid");
     let above = 0n;
     for (let i = chunks.length - 1; i >= 0; i--) {
       check(

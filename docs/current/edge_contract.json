@@ -138929,7 +138929,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "2064a491f5c13cd96a364f19f6faee9f470350db8d26342fb6cc995634ccb670",
+        "source_sha256": "dc35f44a05d25d79999bce25b8bbc0ccfd260cf34c4771898071e7a582140654",
         "symbols": [
           {
             "declarations": [
@@ -176715,7 +176715,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "abbc67d7a86fe0e8269252c384e7dc0ae6659e22c4be74fecb22cdbd43126f2e",
+        "source_sha256": "fe8e4a900cadc45a271b81aecfd63bd4fc25dd57e1b27ecf0c40f8ba45282ed7",
         "symbols": [
           {
             "declarations": [
@@ -178473,16 +178473,172 @@
                         "hasBody": true,
                         "params": [],
                         "returnType": {
-                          "kind": "typeRef",
-                          "repr": "AuthorizedSavedTailBytesPort",
-                          "value": {
-                            "resolution": {
-                              "kind": "import",
-                              "name": "AuthorizedSavedTailBytesPort",
-                              "specifier": "./saved_reference_tail_source.ts"
+                          "kind": "intersection",
+                          "value": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "AuthorizedSavedTailBytesPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "AuthorizedSavedTailBytesPort",
+                                  "specifier": "./saved_reference_tail_source.ts"
+                                },
+                                "typeName": "AuthorizedSavedTailBytesPort"
+                              }
                             },
-                            "typeName": "AuthorizedSavedTailBytesPort"
-                          }
+                            {
+                              "kind": "typeLiteral",
+                              "value": {
+                                "methods": [
+                                  {
+                                    "kind": "method",
+                                    "name": "selectChunked",
+                                    "parameter_source": "(offeringId: string, signal: AbortSignal)",
+                                    "params": [
+                                      {
+                                        "kind": "identifier",
+                                        "name": "offeringId",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      },
+                                      {
+                                        "kind": "identifier",
+                                        "name": "signal",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "AbortSignal",
+                                          "value": {
+                                            "typeName": "AbortSignal"
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "returnType": {
+                                      "kind": "typeRef",
+                                      "repr": "Promise",
+                                      "value": {
+                                        "typeName": "Promise",
+                                        "typeParams": [
+                                          {
+                                            "kind": "union",
+                                            "value": [
+                                              {
+                                                "kind": "typeRef",
+                                                "repr": "AuthorizedSavedTailPin",
+                                                "value": {
+                                                  "resolution": {
+                                                    "kind": "import",
+                                                    "name": "AuthorizedSavedTailPin",
+                                                    "specifier": "./saved_reference_tail_source.ts"
+                                                  },
+                                                  "typeName": "AuthorizedSavedTailPin"
+                                                }
+                                              },
+                                              {
+                                                "kind": "keyword",
+                                                "repr": "null",
+                                                "value": "null"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "kind": "method",
+                                    "name": "readChunk",
+                                    "parameter_source": "(\n      parent: AuthorizedSavedTailPin,\n      indexBytes: Uint8Array,\n      key: string,\n      bytes: number,\n      signal: AbortSignal,\n    )",
+                                    "params": [
+                                      {
+                                        "kind": "identifier",
+                                        "name": "parent",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "AuthorizedSavedTailPin",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "AuthorizedSavedTailPin",
+                                              "specifier": "./saved_reference_tail_source.ts"
+                                            },
+                                            "typeName": "AuthorizedSavedTailPin"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "kind": "identifier",
+                                        "name": "indexBytes",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "Uint8Array",
+                                          "value": {
+                                            "typeName": "Uint8Array"
+                                          }
+                                        }
+                                      },
+                                      {
+                                        "kind": "identifier",
+                                        "name": "key",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "string",
+                                          "value": "string"
+                                        }
+                                      },
+                                      {
+                                        "kind": "identifier",
+                                        "name": "bytes",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "keyword",
+                                          "repr": "number",
+                                          "value": "number"
+                                        }
+                                      },
+                                      {
+                                        "kind": "identifier",
+                                        "name": "signal",
+                                        "optional": false,
+                                        "tsType": {
+                                          "kind": "typeRef",
+                                          "repr": "AbortSignal",
+                                          "value": {
+                                            "typeName": "AbortSignal"
+                                          }
+                                        }
+                                      }
+                                    ],
+                                    "returnType": {
+                                      "kind": "typeRef",
+                                      "repr": "Promise",
+                                      "value": {
+                                        "typeName": "Promise",
+                                        "typeParams": [
+                                          {
+                                            "kind": "typeRef",
+                                            "repr": "Uint8Array",
+                                            "value": {
+                                              "typeName": "Uint8Array"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         }
                       },
                       "kind": "method",
@@ -181309,7 +181465,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "9c32bcc926c81570de1a92b018a300a5a52acc41df62691afffaab455c218c89",
+        "source_sha256": "0f9264d06f028d8d607e01f48813577f16e81cd65d294c48b7995ca66600450e",
         "symbols": [
           {
             "declarations": [
@@ -182387,6 +182543,74 @@
                       },
                       "kind": "method",
                       "name": "referenceTailBytes"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "parentKey",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "chunkKey",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Uint8Array",
+                                "value": {
+                                  "typeName": "Uint8Array"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "referenceTailChunkBytes"
                     },
                     {
                       "functionDef": {
@@ -218370,6 +218594,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/personal_owner_published_cache_evidence_candidate.v3.ts"
           },
           {
+            "importedName": "PinnedChunkedReferenceTailSource",
+            "originalName": "PinnedChunkedReferenceTailSource",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts"
+          },
+          {
             "importedName": "PinnedSavedReferenceTailSource",
             "originalName": "PinnedSavedReferenceTailSource",
             "src": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts"
@@ -218513,6 +218742,11 @@
             "importedName": "SavedScoreTransientUnavailable",
             "originalName": "SavedScoreTransientUnavailable",
             "src": "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts"
+          },
+          {
+            "importedName": "SavedTailRequestBudget",
+            "originalName": "SavedTailRequestBudget",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts"
           },
           {
             "importedName": "ScoreInputService",
@@ -218758,7 +218992,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts"
           }
         ],
-        "source_sha256": "510fc0fc6875d6ea9341c6dceb0eb8ddc7cef1d980b9e3bffecb29bbeeaf1416",
+        "source_sha256": "1e4c3250b7bdfed318b628d745ba4c486e72a5c402d1bb0bc8ba10b345d0c2a3",
         "symbols": [
           {
             "declarations": [
@@ -222688,6 +222922,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "./chunked_reference_tail_source.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts"
             }
           ]
         },
@@ -250142,7 +250386,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
+        "source_sha256": "37d7accce4c7a6b0ab9519c4771a7031b5aae5d01a2d51f5a7e50d314ddadb07",
         "symbols": [
           {
             "declarations": [
@@ -250346,6 +250590,26 @@
               }
             ],
             "name": "REFERENCE_TAIL_MAX_BYTES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "chunked_index_v1",
+                    "value": {
+                      "kind": "string",
+                      "string": "chunked_index_v1"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "REFERENCE_TAIL_CHUNKED_LAYOUT"
           },
           {
             "declarations": [
@@ -251182,6 +251446,90 @@
                       },
                       "kind": "method",
                       "name": "referenceTailBytes"
+                    },
+                    {
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "raw",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Readonly",
+                              "value": {
+                                "typeName": "Readonly",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "NativeObject",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "NativeObject",
+                                        "specifier": "../domain/json_value.ts"
+                                      },
+                                      "typeName": "NativeObject"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "chunkKey",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Uint8Array",
+                                "value": {
+                                  "typeName": "Uint8Array"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "referenceTailChunkBytes"
                     },
                     {
                       "accessibility": "private",
@@ -267497,7 +267845,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "5a7115cb44a8a5216fa4423f0573d356128d130faeae40ca2d5faa6afb186fa9",
+        "source_sha256": "d9a1056a66a45fde79352dc02b62b85ba43b292af7eccadf91fe6dc6e6a875b5",
         "symbols": [
           {
             "declarations": [
@@ -267914,6 +268262,11 @@
             "src": "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts"
           },
           {
+            "importedName": "NativeDataProvider",
+            "originalName": "NativeDataProvider",
+            "src": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
+          },
+          {
             "importedName": "NativeRuntimeRequest",
             "originalName": "NativeRuntimeRequest",
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
@@ -267939,7 +268292,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/runtime_reference_ports.ts"
           }
         ],
-        "source_sha256": "96673fec9c99683bebc4f29a4821075b2b26385f36f2668c7c6631885f474bb2",
+        "source_sha256": "30c9ba86d433c1c17cf9a925680add2a907e6aa275287c5b374d86f57371595a",
         "symbols": [
           {
             "declarations": [
@@ -268031,6 +268384,16 @@
             {
               "kind": "type",
               "path": "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
             }
           ]
         },

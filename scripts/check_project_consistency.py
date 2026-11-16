@@ -91,6 +91,9 @@ _PUBLIC_SQL = "supabase/functions/_shared/current_public_catalog_sql.ts"
 _COMBINED_CATALOG = "supabase/functions/_shared/combined_policy_catalog_runtime.ts"
 SAVED_REPORT_EDGE_PATHS = frozenset({
     _MJSON, _MS, _MC, _MX, _MB, _SCORE_INPUT,
+    # 55PK 분할 곡선(2026-11-17): 카탈로그 분할 곡선 선택·조각 읽기
+    "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
     "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
     "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts",
 })
@@ -117,6 +120,9 @@ _PROFILE_REPORTS = "supabase/functions/_shared/jungsi/application/profile_report
 # 참고 누백 상한(2026-11-16): 학교 참고 묶음이 고정한 두 파일의 새 지문
 _REF_PCT = "supabase/functions/_shared/jungsi/application/reference_percentile.ts"
 _SAVED_TAIL = "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
+# 55PK 분할 곡선(2026-11-17): 학교 참고 묶음이 고정한 두 파일의 새 지문
+_NDP = "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
+_NSS = "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
 SAVED_REPORT_DATA_PATHS = frozenset({_SCHEMA})
 # Generated schema fixture: harness declaration only, no code-index row.
 _SCHEMA_FIXTURE = "tests/edge/public_api_contract_fixture.ts"
@@ -315,7 +321,7 @@ def apply_member_school_overlay(spec, family, selected, source_hashes=None):
             value[_SCHEMA_FIXTURE] = pins[_SCHEMA_FIXTURE]
     elif family == "school":
         bind_list(value["source_bindings"], {_MU, _MC, _MX} |
-                  ({_PUBLIC_CATALOG, _SCHEMA, _ARTIFACTS, _SCHEMA_FIXTURE, _REF_PCT, _SAVED_TAIL} if saved is not None else set()))
+                  ({_PUBLIC_CATALOG, _SCHEMA, _ARTIFACTS, _SCHEMA_FIXTURE, _REF_PCT, _SAVED_TAIL, _NDP, _NSS} if saved is not None else set()))
     elif family == "cancellation":
         bind_list(value["source_bindings"], {_MU})
     elif family == "stage":
@@ -1922,7 +1928,7 @@ REFERENCE_DB_TEST_PATHS = (
     'tests/edge/test_saved_tail_version_cache.repro.synthetic.ts',
     'tests/edge/test_school_reference_science_filtered.synthetic.ts',
 )
-REFERENCE_DB_CASE_IDENTITY_SHA256 = 'e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1'
+REFERENCE_DB_CASE_IDENTITY_SHA256 = '0f672c1b80b059c2cdf3bdfb0f01b7647edbbb726d78d3eee3160f265ba9c1bc'
 REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256 = '5a61fd9f6265ced0b3e598a4d79a6a24b1d2c8620cf89871b6b122a3fd03fb4e'
 
 
@@ -1941,7 +1947,7 @@ def reference_db_registration(spec, source_hashes=None):
         fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count", "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
         if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.reference-db-tests/v1" or
             ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(REFERENCE_DB_TEST_PATHS) or
-            type(ext["test_count"]) is not int or ext["test_count"] != 199 or
+            type(ext["test_count"]) is not int or ext["test_count"] != 201 or
             type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
             ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
             type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
@@ -1958,10 +1964,13 @@ def reference_db_registration(spec, source_hashes=None):
         previous = {p:list(v) for p,v in cases.items() if p not in added_paths}
         previous['tests/edge/test_reference_percentile.ts'] = [v for v in previous['tests/edge/test_reference_percentile.ts'] if v != 'attendance remains required for reused and direct reference percentile paths']
         previous['tests/edge/test_reference_percentile_postgres.ts'] = [v for v in previous['tests/edge/test_reference_percentile_postgres.ts'] if v != 'reference DB receipt separately identifies expiry and a replaced head check']
+        # 2026-11-17 55PK chunked curve reader: two new cases in existing files
+        previous['tests/edge/test_chunked_reference_projection.synthetic.ts'] = [v for v in previous['tests/edge/test_chunked_reference_projection.synthetic.ts'] if v != 'pieces may total more than 125,000 rows; only the needed piece is read (2026-11-17)']
+        previous['tests/edge/test_chunked_runtime_wiring.synthetic.ts'] = [v for v in previous['tests/edge/test_chunked_runtime_wiring.synthetic.ts'] if v != 'catalog issuer reads only a piece listed with its exact length in the pinned index (2026-11-17)']
         old_digest = hashlib.sha256(json.dumps(previous,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
         if sum(map(len,previous.values())) != 178 or old_digest != REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256: raise ValueError("previous case identity")
         digest=hashlib.sha256(json.dumps(cases,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
-        if len(pairs)!=199 or len(set(pairs))!=199 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
+        if len(pairs)!=201 or len(set(pairs))!=201 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
         guard=ext["regression_test"]
         if (not isinstance(guard,dict) or set(guard)!={"path","sha256"} or guard["path"]!="tests/test_reference_db_suite_registration.py" or
             not re.fullmatch(r"[0-9a-f]{64}",str(guard["sha256"])) or source_hashes is not None and source_hashes.get(guard["path"])!=guard["sha256"]): raise ValueError("guard")
@@ -6150,8 +6159,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "86b133d7466f4333be982e923c00fe34b61adc5ff153d8cb1b78bda143de879a"),
-                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "5c0a812ff92e9777240143f23f8df12e49148b2b0e39c2be2bc512cf723a94ed"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "1845fe03efd7e4e1074bbb17b846f914d686d4b02f471a1c21156a495da124da"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "a0b1c09e668f624bc6c81d5cc3d5a0a64e86a3cbeae974c3c7e12dce8a50b7da"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
                 item = overlay[key]

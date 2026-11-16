@@ -118,7 +118,11 @@ import {
 } from "./school_reflected_allowlist.ts";
 import { PreparedSelectionCache } from "./native_source_selection.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
-import { PinnedSavedReferenceTailSource } from "./saved_reference_tail_source.ts";
+import {
+  PinnedSavedReferenceTailSource,
+  SavedTailRequestBudget,
+} from "./saved_reference_tail_source.ts";
+import { PinnedChunkedReferenceTailSource } from "./chunked_reference_tail_source.ts";
 import {
   referenceCandidateScopePort,
   referenceProjectionAuthorityPort,
@@ -435,6 +439,25 @@ export function runtimeAnalysisDataPort(
         REFERENCE_TAIL_REQUEST_BYTES,
       );
     })();
+  // 분할 곡선(카탈로그 tail_layout=chunked_index_v1): 색인을 읽고 학생 점수가 든 조각 하나만 읽는다
+  let chunkedTails: Promise<PinnedChunkedReferenceTailSource | null> | undefined;
+  const chunkedSource = () =>
+    chunkedTails ??= (async () => {
+      const data = (await context.data()) as TailCapable;
+      if (typeof data.referenceTailAuthority !== "function") return null;
+      const authority = data.referenceTailAuthority();
+      if (typeof (authority as { selectChunked?: unknown }).selectChunked !== "function") {
+        return null;
+      }
+      return new PinnedChunkedReferenceTailSource(
+        authority as ConstructorParameters<typeof PinnedChunkedReferenceTailSource>[0],
+        signal!,
+        REFERENCE_TAIL_REQUEST_OBJECTS,
+        REFERENCE_TAIL_REQUEST_BYTES,
+        (scopeSignal?: AbortSignal) => scopeSignal ?? signal!,
+        new SavedTailRequestBudget(REFERENCE_TAIL_REQUEST_OBJECTS, REFERENCE_TAIL_REQUEST_BYTES),
+      );
+    })();
   return {
     ...(signal
       ? {
@@ -444,6 +467,13 @@ export function runtimeAnalysisDataPort(
               await phase("percentile_provider", async () => {
                 const source = await tailSource();
                 return source ? await source.getReferenceTail(offeringId, scopeSignal) : null;
+              }),
+            getChunkedReferenceTail: async (offeringId: string, scopeSignal?: AbortSignal) =>
+              await phase("percentile_provider", async () => {
+                const source = await chunkedSource();
+                return source
+                  ? await source.getChunkedReferenceTail(offeringId, scopeSignal)
+                  : null;
               }),
             prefetchReferenceTails: async (
               offeringIds: readonly string[],

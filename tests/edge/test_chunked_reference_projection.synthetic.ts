@@ -248,3 +248,71 @@ Deno.test("chunk native types and distinct ascending scores are enforced", async
     await rejects(() => p.query(new Rational(1n), f.context));
   }
 });
+
+Deno.test("pieces may total more than 125,000 rows; only the needed piece is read (2026-11-17)", async () => {
+  const base = await fixture();
+  const context = base.context,
+    contextSha = JSON.parse(new TextDecoder().decode(base.root)).context_sha256;
+  const objects = new Map<string, Uint8Array>(), descriptors: any[] = [];
+  const sizes = [60000, 60000, 10000];
+  let start = 1;
+  const pieces = sizes.map((n) => {
+    const rows = Array.from({ length: n }, (_, i) => [start + i * 2, "1"]);
+    start += n * 2;
+    return rows;
+  });
+  let above = sizes.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < pieces.length; i++) {
+    const key = "synthetic/big" + i;
+    const raw = bytes({
+      format: "jungsi.saved-reference-tail-chunk/v1",
+      version: "SYNTHETIC-v1",
+      ordinal: i,
+      context_sha256: contextSha,
+      score_denominator: 10,
+      frequencies: pieces[i] as any,
+    });
+    objects.set(key, raw);
+    above -= pieces[i].length;
+    descriptors.push({
+      ordinal: i,
+      key,
+      sha256: await hash(raw),
+      bytes: raw.length,
+      row_count: pieces[i].length,
+      min_score_numerator: pieces[i][0][0],
+      max_score_numerator: pieces[i][pieces[i].length - 1][0],
+      weight_units: String(pieces[i].length),
+      strict_above_units: String(above),
+    });
+  }
+  const index = JSON.parse(new TextDecoder().decode(base.root));
+  index.chunks = descriptors;
+  index.projection.eligible_weight_units = "130000";
+  index.projection.whole_mass_decimal = "200000";
+  index.projection.whole_mass_numerator = "200000";
+  const root = bytes(index);
+  objects.set("synthetic/index", root);
+  const f = {
+    ...base,
+    root,
+    objects,
+    pin: { ...base.pin, sha256: await hash(root), bytes: root.length },
+  };
+  const a = authority(f as any);
+  const p = await a.open();
+  const id = {
+    academic_year: context.academic_year,
+    exam_id: context.exam_id,
+    exam_type: context.exam_type,
+    source_pack_version: context.source_pack_version,
+    rule_version: context.rule_version,
+    score_scale_id: context.score_scale_id,
+  };
+  // 첫 조각 마지막 점수(119999)와 둘째 조각 첫 점수(120001) 사이 → 둘째 조각, 70,000 이상
+  const between = await p.query(new Rational(120000n, 10n), id as any);
+  eq(pct(between), "35.000000000000");
+  eq(between?.estimated_upper_cumulative_percent_upper_bound, "70.000000000000");
+  eq(a.reads.filter((k) => k.startsWith("synthetic/big")), ["synthetic/big1"]);
+  eq(await p.query(new Rational(0n, 10n), id as any), null);
+});

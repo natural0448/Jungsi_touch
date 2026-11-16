@@ -42,7 +42,7 @@ def make():
         # 2026-11-16 reference upper bound overlay paths (historical school pins).
         school_pins = {r["path"]: r["sha256"] for r in spec["university_scoring_contract"]
             ["scoped_reference_contract"]["verification_current_source_rebound_20261113_v2"]["source_bindings"]}
-        previous_pins.update({p: school_pins[p] for p in (check._REF_PCT, check._SAVED_TAIL)})
+        previous_pins.update({p: school_pins[p] for p in (check._REF_PCT, check._SAVED_TAIL, check._NDP, check._NSS)})
         edge_sources = spec["workflow"]["documentation_sync"]["code_index"]["edge_sources"]
         for row in edge_sources["files"]:
             if row["path"] in previous_pins:

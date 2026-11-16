@@ -47,6 +47,8 @@ export const REFERENCE_TAIL_EVIDENCE_KEYS = [
   "source_csv_sha256",
 ].sort().join(",");
 export const REFERENCE_TAIL_MAX_BYTES = 8388608;
+/** Selected index object whose pieces live beside it; each piece is pinned by the index hash. */
+export const REFERENCE_TAIL_CHUNKED_LAYOUT = "chunked_index_v1";
 function fail(code: string): never {
   throw new AccessError(code, 503);
 }
@@ -338,6 +340,9 @@ export class SupabaseArtifactClient {
       fail("artifact_not_approved");
     }
     if (entry.archive_only !== false) fail("storage_archive_only");
+    if (entry.tail_layout !== undefined && entry.tail_layout !== REFERENCE_TAIL_CHUNKED_LAYOUT) {
+      fail("storage_reference_invalid");
+    }
     const context = object(entry.reference_context), evidence = object(entry.reference_evidence);
     if (
       Object.keys(context).sort().join(",") !== REFERENCE_TAIL_CONTEXT_KEYS ||
@@ -406,6 +411,30 @@ export class SupabaseArtifactClient {
     if (signal?.aborted) fail("storage_unavailable");
     const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
       key.split("/").map(encodeURIComponent).join("/");
+    const content = await this.get(path, bytes, signal);
+    if (content.length !== bytes) fail("storage_size_mismatch");
+    return content;
+  }
+  /** One piece of a selected chunked index. The caller has already matched key, length and
+   * hash against the index bytes pinned by this entry; the piece must sit in the index folder. */
+  async referenceTailChunkBytes(
+    raw: Readonly<NativeObject>,
+    chunkKey: string,
+    bytes: number,
+    signal?: AbortSignal,
+  ): Promise<Uint8Array> {
+    const entry = cloneNativeJson(object(raw)), key = this.validateReferenceTail(entry);
+    if (entry.tail_layout !== REFERENCE_TAIL_CHUNKED_LAYOUT) fail("storage_reference_invalid");
+    const piece = objectKey(chunkKey), folder = key.slice(0, key.lastIndexOf("/") + 1);
+    if (
+      !folder || !piece.startsWith(folder) || piece === key ||
+      !piece.startsWith(this.settings.objectPrefix) || !Number.isSafeInteger(bytes) || bytes < 1 ||
+      bytes > REFERENCE_TAIL_MAX_BYTES || bytes > this.settings.limits.maxArtifactBytes
+    ) fail("storage_reference_invalid");
+    await this.assertBucket(bytes, signal);
+    if (signal?.aborted) fail("storage_unavailable");
+    const path = "object/authenticated/" + encodeURIComponent(this.settings.bucket) + "/" +
+      piece.split("/").map(encodeURIComponent).join("/");
     const content = await this.get(path, bytes, signal);
     if (content.length !== bytes) fail("storage_size_mismatch");
     return content;

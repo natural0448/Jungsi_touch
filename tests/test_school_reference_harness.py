@@ -90,7 +90,10 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
                              'supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts',
                              # 2026-11-16 reference upper bound.
                              'supabase/functions/_shared/jungsi/application/reference_percentile.ts',
-                             'supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts'):
+                             'supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts',
+                             # 2026-11-17 55PK chunked curve reader.
+                             'supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts',
+                             'supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts'):
                     expected_bindings[path] = saved['source_bindings'][path]
             for row in selected['source_bindings']:
                 if row['path'] in expected_bindings:
