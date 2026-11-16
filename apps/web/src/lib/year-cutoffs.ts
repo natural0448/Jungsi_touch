@@ -70,9 +70,14 @@ export function yearCutoffLines(a: AssessmentDto): { year: number; lines: Cutoff
   const mine = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_all_examinees : null;
   const mineUpper = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_upper_bound ?? null : null;
   const by = new Map<number, CutoffLine[]>();
+  // 같은 발표가 관측 두 개로 들어온 경우(학년도·지표·값이 모두 같음) 한 줄만 보인다(2026-11-16)
+  const seen = new Set<string>();
   for (const c of a.year_cutoffs ?? []) {
     const line = cutoffLine(c, mine, mineUpper);
     if (!line) continue;
+    const key = `${c.academic_year}|${line.metric}|${line.scope ?? ""}|${c.cutoff_top_percent}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     by.set(c.academic_year, [...(by.get(c.academic_year) ?? []), line]);
   }
   return [...by.entries()].sort((x, y) => y[0] - x[0]).map(([year, lines]) => ({ year, lines }));

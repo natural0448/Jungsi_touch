@@ -65,3 +65,10 @@ test("a combined-track release is tagged and mean score components get their own
   assert.equal(cutoffLine({ ...c(2024, "9", "평균"), score_component: "selection_total" }, null).metric, "전형 총점 평균");
   assert.equal(cutoffLine(c(2024, "9", "평균"), null).scope, null);
 });
+
+test("the same release recorded as two observations shows once (2026-11-16)", () => {
+  const O2 = "observation:" + "b".repeat(64);
+  const a = { reference_percentile: null, year_cutoffs: [c(2024, "8.93349", "70%컷"), { ...c(2024, "8.93349", "70%컷"), observation_id: O2 }, c(2024, "9.1", "70%컷")] };
+  const lines = yearCutoffLines(a);
+  assert.equal(lines[0].lines.length, 2);
+});
