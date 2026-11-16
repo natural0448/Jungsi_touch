@@ -45,6 +45,10 @@ export interface YearCutoff {
   readonly observationId: string;
   readonly publishedMetric: string;
   readonly cutoffTopPercent: string;
+  /** 전형 통합 발표(예: 일반학생·지역인재를 합쳐 발표) */
+  readonly publishedScope?: "combined_tracks" | string;
+  /** 평균의 점수 성분(수능 환산점수 평균 / 전형 총점 평균) */
+  readonly scoreComponent?: "csat_converted" | "selection_total" | string;
 }
 export interface YearCutoffsPort {
   cutoffs(): Promise<ReadonlyMap<string, readonly YearCutoff[]> | null>;
@@ -53,7 +57,8 @@ export interface YearCutoffsPort {
 const YEAR = 2027, PREFIX = YEAR + ":", MAX_DEPTH = 8;
 
 function object(v: unknown): v is NativeObject {
-  return v !== null && typeof v === "object" && !Array.isArray(v) && !(v instanceof JsonFloat);
+  return v !== null && typeof v === "object" && !Array.isArray(v) &&
+    !(v instanceof JsonFloat);
 }
 function num(v: unknown): number | null {
   if (typeof v === "number" && Number.isFinite(v)) return v;
@@ -71,7 +76,9 @@ function subject(values: NativeObject, area: string): ReflectedSubjectScore {
   };
 }
 /** 공개 응답 형식(public_response_schemas.json의 school_reflected) */
-export function schoolReflectedDto(result: ReflectedReferenceResult): NativeObject {
+export function schoolReflectedDto(
+  result: ReflectedReferenceResult,
+): NativeObject {
   return result.status === "reference"
     ? {
       status: "reference",
@@ -97,7 +104,8 @@ export function reflectedStudentScores(
 ): ReflectedStudentScores | null {
   const analyzed = pack.analyze(scores);
   if (analyzed.exam.academic_year !== YEAR) return null;
-  const values = schoolScoreInputs(pack, analyzed, scores, profileVersion).values as NativeObject;
+  const values = schoolScoreInputs(pack, analyzed, scores, profileVersion)
+    .values as NativeObject;
   return {
     korean: subject(values, "korean"),
     math: subject(values, "math"),
@@ -135,11 +143,15 @@ function walkCandidates(
     attach(node.assessment, rules, student);
     return;
   }
-  for (const value of Object.values(node)) walkCandidates(value, rules, student, depth + 1);
+  for (const value of Object.values(node)) {
+    walkCandidates(value, rules, student, depth + 1);
+  }
 }
 
 /** 공개 응답 형식(public_response_schemas.json의 eligibility_conditions) */
-export function eligibilityConditionsDto(c: EligibilityConditions): NativeObject {
+export function eligibilityConditionsDto(
+  c: EligibilityConditions,
+): NativeObject {
   return {
     required_areas: c.requiredAreas === null ? null : [...c.requiredAreas],
     math_choices: c.mathChoices === null ? null : [...c.mathChoices],
@@ -156,7 +168,9 @@ function attachConditions(
   const id = assessment.offering_id;
   if (!id.startsWith(PREFIX)) return;
   const found = conditions.get(id.slice(PREFIX.length));
-  if (found) assessment.eligibility_conditions = eligibilityConditionsDto(found);
+  if (found) {
+    assessment.eligibility_conditions = eligibilityConditionsDto(found);
+  }
 }
 /** 공개 응답 형식(public_response_schemas.json의 year_cutoff) */
 export function yearCutoffDto(c: YearCutoff): NativeObject {
@@ -165,6 +179,8 @@ export function yearCutoffDto(c: YearCutoff): NativeObject {
     published_metric: c.publishedMetric,
     cutoff_top_percent: c.cutoffTopPercent,
     observation_id: c.observationId,
+    ...(c.publishedScope ? { published_scope: c.publishedScope } : {}),
+    ...(c.scoreComponent ? { score_component: c.scoreComponent } : {}),
   };
 }
 /** report.read 결과(유료 등급)의 분석 항목에 지난 학년도 합격선 누적 백분위를 붙인다. 판정은 바꾸지 않는다 */
@@ -174,11 +190,15 @@ export function attachYearCutoffs(
 ): void {
   if (!object(result.analyses)) return;
   for (const assessment of Object.values(result.analyses)) {
-    if (!object(assessment) || typeof assessment.offering_id !== "string") continue;
+    if (!object(assessment) || typeof assessment.offering_id !== "string") {
+      continue;
+    }
     const id = assessment.offering_id;
     if (!id.startsWith(PREFIX)) continue;
     const found = cutoffs.get(id.slice(PREFIX.length));
-    if (found && found.length) assessment.year_cutoffs = found.map(yearCutoffDto);
+    if (found && found.length) {
+      assessment.year_cutoffs = found.map(yearCutoffDto);
+    }
   }
 }
 
@@ -188,7 +208,9 @@ export function attachEligibilityConditions(
   conditions: ReadonlyMap<string, EligibilityConditions>,
 ): void {
   if (!object(result.analyses)) return;
-  for (const assessment of Object.values(result.analyses)) attachConditions(assessment, conditions);
+  for (const assessment of Object.values(result.analyses)) {
+    attachConditions(assessment, conditions);
+  }
 }
 
 /** report.read 결과(유료 등급)의 analyses·candidates 항목에 값을 붙인다. 원본 저장 결과는 바꾸지 않는다 */
@@ -198,7 +220,11 @@ export function attachSchoolReflected(
   student: ReflectedStudentScores,
 ): void {
   if (object(result.analyses)) {
-    for (const assessment of Object.values(result.analyses)) attach(assessment, rules, student);
+    for (const assessment of Object.values(result.analyses)) {
+      attach(assessment, rules, student);
+    }
   }
-  if (result.candidates !== undefined) walkCandidates(result.candidates, rules, student, 0);
+  if (result.candidates !== undefined) {
+    walkCandidates(result.candidates, rules, student, 0);
+  }
 }

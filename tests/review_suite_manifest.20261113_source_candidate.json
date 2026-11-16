@@ -18,7 +18,7 @@
       ],
       "expected_count": 108,
       "files": {
-        "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+        "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
         "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",
         "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -5035,7 +5035,7 @@
             ]
           ],
           "files": {
-            "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+            "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
             "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -6819,7 +6819,7 @@
             ]
           ],
           "files": {
-            "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+            "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
             "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",
             "supabase/functions/_shared/jungsi/application/catalog.ts": "813d2d8de519b370c3db4037b78ff165e314be170d16f8d598904ba85512c0c3",
@@ -6986,7 +6986,7 @@
       ],
       "expected_count": 48,
       "files": {
-        "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+        "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
         "src/jungsi_touch/application/route_catalog.json": "GENERATED_BY_SPEC_VIA_COMMON_GATE",
         "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
         "supabase/functions/_shared/current_public_bound_cursor.ts": "36bf1a4d8307e38351b335f62330fd3bba6a900888b4a47d87ecab233ddeb14c",
@@ -18187,7 +18187,7 @@
             ]
           ],
           "files": {
-            "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+            "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
             "src/jungsi_touch/application/route_catalog.json": "GENERATED_BY_SPEC_VIA_COMMON_GATE",
             "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
             "supabase/functions/_shared/current_public_bound_cursor.ts": "36bf1a4d8307e38351b335f62330fd3bba6a900888b4a47d87ecab233ddeb14c",
@@ -23499,7 +23499,7 @@
       "allowed_builtins": [],
       "expected_count": 125,
       "files": {
-        "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+        "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
         "src/jungsi_touch/application/route_catalog.json": "GENERATED_BY_SPEC_VIA_COMMON_GATE",
         "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
         "supabase/functions/_shared/current_admission_display.ts": "c1f85c6180ed635bd6dff5b1fa95bd4323687c5ab4488d53db2b068fe3b3b498",
@@ -35788,7 +35788,7 @@
             ]
           ],
           "files": {
-            "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+            "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
             "src/jungsi_touch/application/route_catalog.json": "GENERATED_BY_SPEC_VIA_COMMON_GATE",
             "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
             "supabase/functions/_shared/current_public_bound_cursor.ts": "36bf1a4d8307e38351b335f62330fd3bba6a900888b4a47d87ecab233ddeb14c",
@@ -36116,7 +36116,7 @@
             ]
           ],
           "files": {
-            "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+            "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
             "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/ports.ts": "704ba474085f404a87f45bbca688a06b2c8690c77d88dddd0e6b9ae9300813d7",
             "supabase/functions/_shared/jungsi/application/public_response.ts": "edf327c465fc71ad52660c23da9bcb33db92ddb8a67768c76183fdeb0a7e9552",
@@ -43762,7 +43762,7 @@
             ]
           ],
           "files": {
-            "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+            "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
             "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
             "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
             "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",
@@ -54200,7 +54200,7 @@
       ],
       "expected_count": 81,
       "files": {
-        "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+        "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
         "supabase/functions/_shared/jungsi/application/access.ts": "ee8245d53908331c0531e53c9f6178587c0030c18524ee20e363e1222fa1b15c",
         "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts": "5eaab17c6c358b363b0f2e26dbb21e723f3a4ec1af2db271bef6210ad70a3c09",
         "supabase/functions/_shared/jungsi/application/api_dispatch.ts": "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901",

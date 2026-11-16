@@ -13575,7 +13575,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "e4e05b45e10acb9669f7fe9358b5e673b21b2b783d3e972ecd4dca596303ec6a",
+            "source_sha256": "406161ad3925ea3096a4e710070ffac828a151486b45a4d6ff7183073b728f1e",
             "symbols": [
               {
                 "kind": "class",
@@ -13740,7 +13740,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "6843a7ffe68d2eabee684e951c2d8526d3af18de244a79d55dcf001b62dbbf87",
+            "source_sha256": "a8c089d747973f13d3162029b3c8868a80e03542f94193a79da673f4886945b5",
             "symbols": [
               {
                 "kind": "class",
@@ -23644,7 +23644,7 @@
               "requirements": [
                 "REQ-27"
               ],
-              "source_sha256": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
+              "source_sha256": "df9ad74190ce7cfcf22a178aca1eb341ed9712fd7b52f299a15d34c72f9ae4ac",
               "declared_exports": [
                 "SchoolReflectedRulesPort",
                 "attachSchoolReflected",
@@ -26294,7 +26294,7 @@
               "requirements": [
                 "REQ-27"
               ],
-              "source_sha256": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
+              "source_sha256": "94c8899ac4a8f423822c6d88c371332c5810b722cc72a6ff6e42307b8c476396",
               "declared_exports": [
                 "SCHOOL_REFLECTED_SETTING",
                 "StorageSchoolReflectedRules",
@@ -34804,19 +34804,19 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "3a04c736b417c502624dc35cb1318e56bf2a2f72bdcce2aa9d0ab8778789cd88"
+        "sha256": "86b133d7466f4333be982e923c00fe34b61adc5ff153d8cb1b78bda143de879a"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "8f41c3d47e7c941b772a4e02d6c3b33a48cf4ff1d78c6ba0d763f4fd3a174e07"
+        "sha256": "5c0a812ff92e9777240143f23f8df12e49148b2b0e39c2be2bc512cf723a94ed"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "db3725b9c81ba27ecd1c6f47bc03f4b8044369875b2cf8a7ecfd5946eb62ad09"
+        "sha256": "7dc0aa3f0cd1a1277c1eb1457d9b4c39617f9f802c6888506d0d8775a0c87442"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "17f9c02ec071800314c393eb0beb73e77f3d9268edcc991ffcda456b67876c25"
+        "sha256": "f8eb86d365e57c5b69ea68a8c80a393669ed9f11a423d1465c772b484f5bb82f"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -34848,8 +34848,8 @@
       "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
       "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
-      "test_sha256": "61ad7ed8bbaf08bdfa3411529f14f72700d8765231cf3e21c0c3c2fc83d84e06",
-      "case_count": 18,
+      "test_sha256": "4bb971e5d2b43366573e4d984b91a5e052c631e1cd585f00060b1afb97098891",
+      "case_count": 19,
       "case_names": [
         "two inquiry subjects share the inquiry weight and English is excluded",
         "best inquiry subject by percentile or by standard score",
@@ -34864,6 +34864,7 @@
         "eligibility conditions parse, attach to 2027 analyses only and reject malformed rows",
         "public schema accepts eligibility_conditions and rejects unknown subject names",
         "year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows",
+        "year cutoff tags mark a combined-track release and the mean score component",
         "public schema accepts year_cutoffs and rejects a malformed percent",
         "reference percentile upper bound adds unscored mass above and equals the lower bound without it",
         "reference candidates pass only a valid upper bound",
@@ -238107,7 +238108,7 @@
               "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
             }
           ],
-          "source_sha256": "80f61d5ec474171b8b7fee559d4556bc2f18d69133786b8df41be8700bffb0e5",
+          "source_sha256": "7348626b356c4898a9fea9fecd5dbacd767ed1d5e71057122a4caa6482a13f63",
           "symbols": [
             {
               "declarations": [
@@ -360740,7 +360741,7 @@
               "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
             }
           ],
-          "source_sha256": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
+          "source_sha256": "df9ad74190ce7cfcf22a178aca1eb341ed9712fd7b52f299a15d34c72f9ae4ac",
           "symbols": [
             {
               "declarations": [
@@ -361044,6 +361045,60 @@
                           "repr": "string",
                           "value": "string"
                         }
+                      },
+                      {
+                        "name": "publishedScope",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "combined_tracks",
+                              "value": {
+                                "kind": "string",
+                                "string": "combined_tracks"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "name": "scoreComponent",
+                        "optional": true,
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "union",
+                          "value": [
+                            {
+                              "kind": "literal",
+                              "repr": "csat_converted",
+                              "value": {
+                                "kind": "string",
+                                "string": "csat_converted"
+                              }
+                            },
+                            {
+                              "kind": "literal",
+                              "repr": "selection_total",
+                              "value": {
+                                "kind": "string",
+                                "string": "selection_total"
+                              }
+                            },
+                            {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          ]
+                        }
                       }
                     ]
                   },
@@ -361129,7 +361184,7 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(result: ReflectedReferenceResult)",
+                    "parameter_source": "(\n  result: ReflectedReferenceResult,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -361254,7 +361309,7 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(c: EligibilityConditions)",
+                    "parameter_source": "(\n  c: EligibilityConditions,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -362108,7 +362163,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
+          "source_sha256": "94c8899ac4a8f423822c6d88c371332c5810b722cc72a6ff6e42307b8c476396",
           "symbols": [
             {
               "declarations": [
@@ -362176,7 +362231,7 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(env: RuntimeEnvironment)",
+                    "parameter_source": "(\n  env: RuntimeEnvironment,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -362239,7 +362294,7 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(env: RuntimeEnvironment)",
+                    "parameter_source": "(\n  env: RuntimeEnvironment,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -362302,7 +362357,7 @@
                   "declarationKind": "export",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(env: RuntimeEnvironment)",
+                    "parameter_source": "(\n  env: RuntimeEnvironment,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -363209,7 +363264,7 @@
                   "declarationKind": "private",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(env: RuntimeEnvironment, name: string)",
+                    "parameter_source": "(\n  env: RuntimeEnvironment,\n  name: string,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -363389,7 +363444,7 @@
                   "declarationKind": "private",
                   "def": {
                     "hasBody": true,
-                    "parameter_source": "(v: unknown, allowed: ReadonlySet<string>, empty: boolean)",
+                    "parameter_source": "(\n  v: unknown,\n  allowed: ReadonlySet<string>,\n  empty: boolean,\n)",
                     "params": [
                       {
                         "kind": "identifier",
@@ -363600,6 +363655,134 @@
                 }
               ],
               "name": "YEAR_CUTOFFS_FORMAT"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "literal",
+                        "repr": "combined_tracks",
+                        "value": {
+                          "kind": "string",
+                          "string": "combined_tracks"
+                        }
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "SCOPES"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "kind": "const",
+                    "tsType": {
+                      "kind": "array",
+                      "value": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "csat_converted",
+                            "value": {
+                              "kind": "string",
+                              "string": "csat_converted"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "selection_total",
+                            "value": {
+                              "kind": "string",
+                              "string": "selection_total"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "variable"
+                }
+              ],
+              "name": "COMPONENTS"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  tags: unknown,\n  key: string,\n  allowed: readonly string[],\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "tags",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "key",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "allowed",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeOperator",
+                          "value": {
+                            "operator": "readonly",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "keyword",
+                          "repr": "null",
+                          "value": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "yearCutoffTag"
             },
             {
               "declarations": [
@@ -364289,7 +364472,7 @@
       "supabase/functions/_shared/jungsi/application/research_offering.ts": "61bce98d94da99f0dbccb0ab918fcafc8f36bbe553a04f25347d6e6930a30dda",
       "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
       "supabase/functions/_shared/jungsi/application/school_reference_scoring.ts": "fcb3cb5b28c71e9a774f7b409c1e09023dfeacf8d6ec9fda011ccfafd6504801",
-      "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
+      "supabase/functions/_shared/jungsi/application/school_reflected_projection.ts": "df9ad74190ce7cfcf22a178aca1eb341ed9712fd7b52f299a15d34c72f9ae4ac",
       "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "supabase/functions/_shared/jungsi/application/school_score_inputs.ts": "b5eeb7ed85901ea1e4a20060e8487aa4fd9def94760959f244813073b7bd0931",
       "supabase/functions/_shared/jungsi/application/scope_adapter_synthetic_fixture.ts": "a555c0c725845ed52ad97f934fb03a94ddb84b87cf591c0237b4f61c2edaae37",
@@ -364394,7 +364577,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts": "72df2646604199f8a79cc0486097107caa50b4318ac98799cbeae74a2467fc11",
       "supabase/functions/_shared/jungsi/infrastructure/saved_report_projection_authority.ts": "de75ae9445513699af0bd6aa0ce4004b2aea6b6daf0c65e195906b34ec5c7d88",
       "supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts": "f91d012f10fd9384feec1aa89164349707457bfdf34e52d6ba492afeaf532394",
-      "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
+      "supabase/functions/_shared/jungsi/infrastructure/school_reflected_allowlist.ts": "94c8899ac4a8f423822c6d88c371332c5810b722cc72a6ff6e42307b8c476396",
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
       "supabase/functions/_shared/jungsi/infrastructure/score_map_postgres.ts": "962908d12c3ed6981caeea2d42f28a0db2653b503e57f94cfbbc284707946a6f",
       "supabase/functions/_shared/jungsi/infrastructure/search503_correlation.ts": "6cc9fa76e48fe325851a2239e4009c30e28acf32401230fecd96cebe3f6608cd",
@@ -364415,7 +364598,7 @@
       "tests/edge/fixture.ts": "93767000b1efba42fd0e6530d22bfacfd6710f065c73ffae72c1f7d914ea93e0",
       "tests/edge/member_shortlist_fixture.ts": "b3b191000d0b88307dcf86fe269eb13de35ebf6f290ff498ed79a2a0ea917fd3",
       "tests/edge/parity_driver.ts": "8121d1f2d181b4efe5f4c826d5ac2e8b348522ddd5e89fe272517ac7c03ecb9a",
-      "tests/edge/public_api_contract_fixture.ts": "80f61d5ec474171b8b7fee559d4556bc2f18d69133786b8df41be8700bffb0e5",
+      "tests/edge/public_api_contract_fixture.ts": "7348626b356c4898a9fea9fecd5dbacd767ed1d5e71057122a4caa6482a13f63",
       "tests/edge/reference_candidate_scope_cases.ts": "d0e9ca2b9b3726cb36691aed0a221a700b69ff82120ffb2647e6f1d8bf06555c",
       "tests/edge/reference_candidates_cases.ts": "ce43686c9f3ff7e9b336166e59e9a141e61af0768cf11bfe948cfb59e1812bc8",
       "tests/edge/reference_percentile_cases.ts": "352b537d5744eb79ba6ac72bbea34b6d83619e132f68f8d6a740b345e2b92a77",
@@ -366457,8 +366640,8 @@
       "historical_sha256": "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0",
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
-      "graph_manifest_sha256": "6fcb287c2c3167c463bc7a312c6c8aee737fa1bce3c7c8b72914123a48d0642c",
-      "bridge_sha256": "82d31c0e712ab0904a100105cd6037fcb10efea3e67137d9e229717248370931"
+      "graph_manifest_sha256": "1a85e543ac70b21fac111aead05839361750764cf2139e294894e0be9275af88",
+      "bridge_sha256": "b6914710ad91184643c70eb819947635f4c402f07c4fed0db3e4263b35115d98"
     }
   },
   "P1_display_snapshot_contract": {
@@ -370323,7 +370506,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "39db141184d6cadbdda4cc62a3a89ab801e4e437954c9d15ab6de281d92398cf",
+    "manifest_sha256": "b3949857bc6142482fdeae372951b5338376a74a6dc8650cbb7cdace935e656b",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -370334,7 +370517,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.20261114_pr75.current.json",
-    "manifest_sha256": "aff4deb4ba8b8e7be189ba92020da78ccbd4141327069b7e1067d55fcc6e6a40",
+    "manifest_sha256": "e6d38a76fe1838a443a2e08bd2b3388185553805d2f2188b410fa29dc8a670c9",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
@@ -370495,10 +370678,10 @@
     "operating_writes": 0,
     "previous_overlay_sha256": "cb253a886da3519d18c72897439bd10844067f5b79ea29a6a3ae730501b9ae0f",
     "source_bindings": {
-      "scripts/check_edge_contract.py": "e4e05b45e10acb9669f7fe9358b5e673b21b2b783d3e972ecd4dca596303ec6a",
-      "scripts/check_project_consistency.py": "6843a7ffe68d2eabee684e951c2d8526d3af18de244a79d55dcf001b62dbbf87",
+      "scripts/check_edge_contract.py": "406161ad3925ea3096a4e710070ffac828a151486b45a4d6ff7183073b728f1e",
+      "scripts/check_project_consistency.py": "a8c089d747973f13d3162029b3c8868a80e03542f94193a79da673f4886945b5",
       "scripts/run_edge_tests.py": "0c0b3e0f3276499ffd8c06a14812630caab03c912073bc03ce59a44b683df25f",
-      "src/jungsi_touch/application/public_response_schemas.json": "b1460664df0784171a23ca7ef502aaa244f10efa845bfb08fd2999c297048914",
+      "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
       "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
       "supabase/functions/_shared/current_public_catalog.ts": "4378af0e17ecdb23db47e50c7205876939bc5ad1557f04656100d481d505b1c9",
       "supabase/functions/_shared/current_public_catalog_sql.ts": "2e7bbd9e4b341a7bcf6b622fd406da5866d08561750c9d9fd8a232af4280e729",
@@ -370520,7 +370703,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts": "defda2b7ce441f2fbd51369d5562d566f0af0ea923c03eefe7750a7cb8ff03dd",
       "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts": "db4c782cb4b599090a773b0aa3a8dfb952e69e280b1ce30874bd2155da8fdbeb",
       "supabase/functions/_shared/search_failure_diagnostic.ts": "1d9504947d5cfd040e44a3d7ca67ce1513e42ac4870221f605c2b117e7c41c22",
-      "tests/edge/public_api_contract_fixture.ts": "80f61d5ec474171b8b7fee559d4556bc2f18d69133786b8df41be8700bffb0e5"
+      "tests/edge/public_api_contract_fixture.ts": "7348626b356c4898a9fea9fecd5dbacd767ed1d5e71057122a4caa6482a13f63"
     },
     "receipt_bindings": {
       "current_public": {

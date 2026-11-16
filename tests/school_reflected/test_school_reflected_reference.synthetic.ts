@@ -527,6 +527,58 @@ Deno.test("year cutoffs parse newest year first, attach to 2027 analyses only an
   equal(yearCutoffsEntry(env("[]") as never), null);
 });
 
+Deno.test("year cutoff tags mark a combined-track release and the mean score component", () => {
+  const id = (c: string) => "observation:" + c.repeat(64);
+  const base = {
+    format: "jungsi.year-cutoff-references/v1",
+    version: "year-cutoffs-2027.v4",
+    academic_year: 2027,
+    metrics: ["평균", "70%컷"],
+  };
+  const map = parseYearCutoffs(
+    {
+      ...base,
+      rows: [["1000000001", [
+        [2025, id("a"), 1, "8.25", { published_scope: "combined_tracks" }],
+        [2024, id("b"), 0, "9", { score_component: "csat_converted" }],
+        [2024, id("c"), 0, "9.5", { score_component: "selection_total" }],
+        [2026, id("d"), 1, "7"],
+      ]]],
+    } as unknown as NativeObject,
+    "year-cutoffs-2027.v4",
+  );
+  const dto = map.get("1000000001")!.map(yearCutoffDto);
+  equal(dto[0].published_scope, undefined);
+  equal("score_component" in dto[0], false);
+  equal(dto[1].published_scope, "combined_tracks");
+  equal(dto.filter((d) => d.score_component === "csat_converted").length, 1);
+  equal(dto.filter((d) => d.score_component === "selection_total").length, 1);
+  for (
+    const tags of [
+      {},
+      null,
+      [],
+      { published_scope: "general" },
+      { score_component: "mean" },
+      { other: "x" },
+    ]
+  ) {
+    let threw = false;
+    try {
+      parseYearCutoffs(
+        {
+          ...base,
+          rows: [["1000000001", [[2025, id("a"), 1, "8.25", tags]]]],
+        } as never,
+        "year-cutoffs-2027.v4",
+      );
+    } catch {
+      threw = true;
+    }
+    assert(threw, JSON.stringify(tags));
+  }
+});
+
 Deno.test("public schema accepts year_cutoffs and rejects a malformed percent", () => {
   const s = (schemas as unknown as { schemas: NativeObject }).schemas;
   const ops = [{ id: "x", contract_ref: "X" }];
@@ -625,7 +677,9 @@ async function tailCurve(whole: [string, string, string]) {
     ],
   };
   const bytes = new TextEncoder().encode(nativeJsonText(p));
-  const sha256 = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
+  const sha256 = [
+    ...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)),
+  ]
     .map((x) => x.toString(16).padStart(2, "0")).join("");
   return await SavedReferenceTailProjection.bind(bytes, {
     sha256,
@@ -694,7 +748,9 @@ Deno.test("reference candidates pass only a valid upper bound", () => {
     x.reference_percentile as NativeObject
   );
   equal(rows[0].estimated_upper_cumulative_percent_upper_bound, "14.8");
-  for (const r of rows.slice(1)) assert(!("estimated_upper_cumulative_percent_upper_bound" in r));
+  for (const r of rows.slice(1)) {
+    assert(!("estimated_upper_cumulative_percent_upper_bound" in r));
+  }
 });
 
 Deno.test("public schema accepts the reference upper bound and rejects a malformed one", () => {
@@ -720,7 +776,10 @@ Deno.test("public schema accepts the reference upper bound and rejects a malform
     production_allowed: false,
     actual_admission_full_total_approved: false,
   };
-  equal(JSON.stringify(projection.project("x", "paid", ok)), JSON.stringify(ok));
+  equal(
+    JSON.stringify(projection.project("x", "paid", ok)),
+    JSON.stringify(ok),
+  );
   let threw = false;
   try {
     projection.project("x", "paid", {
@@ -755,8 +814,17 @@ Deno.test("member saved results 015 reader switch keeps the reviewed SQL unless 
       }),
   } as unknown as SupabaseSqlTransport;
   for (const reader of ["sql", "fn_v2"] as const) {
-    const legacy = new SupabaseMemberShortlistLegacy(transport, 1048576, 100, null, reader);
-    equal(await legacy.read(owner, 2027, ["SYNTHETIC-a"], "SYNTHETIC-r", 3), null);
+    const legacy = new SupabaseMemberShortlistLegacy(
+      transport,
+      1048576,
+      100,
+      null,
+      reader,
+    );
+    equal(
+      await legacy.read(owner, 2027, ["SYNTHETIC-a"], "SYNTHETIC-r", 3),
+      null,
+    );
   }
   equal(seen.length, 2);
   equal(seen[0].sql, MEMBER_RESULTS_SQL);
@@ -770,7 +838,11 @@ Deno.test("member saved results 015 reader switch keeps the reviewed SQL unless 
   // statistics.read: the old aggregate skips non-UUID synthetic owners; the 015b rows
   // keep the member's own ID and accept only UUID-shaped keys for others.
   assert(ACTIVE_REPORTS_SQL.includes("WHERE r.owner_id ~ '^[0-9a-f]{8}-"));
-  assert(MEMBER_STATISTICS_FN_SQL.includes("jungsi_backend.read_member_statistics_rows_v1($1)"));
+  assert(
+    MEMBER_STATISTICS_FN_SQL.includes(
+      "jungsi_backend.read_member_statistics_rows_v1($1)",
+    ),
+  );
   const other = "0f0e0d0c-0b0a-4908-8706-050403020100";
   const row = (key: string) => [
     "SYNTHETIC-r",

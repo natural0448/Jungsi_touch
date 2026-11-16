@@ -7343,6 +7343,21 @@
           "type": "string",
           "nullable": false,
           "pattern": "(?:observation|admission):[a-f0-9]{64}"
+        },
+        "published_scope": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "combined_tracks"
+          ]
+        },
+        "score_component": {
+          "type": "string",
+          "nullable": false,
+          "enum": [
+            "csat_converted",
+            "selection_total"
+          ]
         }
       },
       "required": [
@@ -7351,7 +7366,10 @@
         "cutoff_top_percent",
         "observation_id"
       ],
-      "optional": []
+      "optional": [
+        "published_scope",
+        "score_component"
+      ]
     }
   },
   "auxiliary_roots": {

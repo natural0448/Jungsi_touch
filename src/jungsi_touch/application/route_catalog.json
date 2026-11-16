@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "6f267475da0eca992cc0ec1c9fbad8158765c545e3d37c79abfc97d76041fd46",
+  "source_sha256": "960814efa2c7f026522a3bad8a6149cbd61f59f995a2123d7f12181f8153f06e",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4929,19 +4929,19 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "3a04c736b417c502624dc35cb1318e56bf2a2f72bdcce2aa9d0ab8778789cd88"
+        "sha256": "86b133d7466f4333be982e923c00fe34b61adc5ff153d8cb1b78bda143de879a"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "8f41c3d47e7c941b772a4e02d6c3b33a48cf4ff1d78c6ba0d763f4fd3a174e07"
+        "sha256": "5c0a812ff92e9777240143f23f8df12e49148b2b0e39c2be2bc512cf723a94ed"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "db3725b9c81ba27ecd1c6f47bc03f4b8044369875b2cf8a7ecfd5946eb62ad09"
+        "sha256": "7dc0aa3f0cd1a1277c1eb1457d9b4c39617f9f802c6888506d0d8775a0c87442"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
-        "sha256": "17f9c02ec071800314c393eb0beb73e77f3d9268edcc991ffcda456b67876c25"
+        "sha256": "f8eb86d365e57c5b69ea68a8c80a393669ed9f11a423d1465c772b484f5bb82f"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -4973,8 +4973,8 @@
       "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
       "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
       "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
-      "test_sha256": "61ad7ed8bbaf08bdfa3411529f14f72700d8765231cf3e21c0c3c2fc83d84e06",
-      "case_count": 18,
+      "test_sha256": "4bb971e5d2b43366573e4d984b91a5e052c631e1cd585f00060b1afb97098891",
+      "case_count": 19,
       "case_names": [
         "two inquiry subjects share the inquiry weight and English is excluded",
         "best inquiry subject by percentile or by standard score",
@@ -4989,6 +4989,7 @@
         "eligibility conditions parse, attach to 2027 analyses only and reject malformed rows",
         "public schema accepts eligibility_conditions and rejects unknown subject names",
         "year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows",
+        "year cutoff tags mark a combined-track release and the mean score component",
         "public schema accepts year_cutoffs and rejects a malformed percent",
         "reference percentile upper bound adds unscored mass above and equals the lower bound without it",
         "reference candidates pass only a valid upper bound",

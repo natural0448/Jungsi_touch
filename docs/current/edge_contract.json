@@ -110794,7 +110794,7 @@
             "src": "supabase/functions/_shared/jungsi/application/school_score_inputs.ts"
           }
         ],
-        "source_sha256": "1b52111387a40ad42ec02bfa7de032b10d072041ca6ea1f9e70cff79cf0935e8",
+        "source_sha256": "df9ad74190ce7cfcf22a178aca1eb341ed9712fd7b52f299a15d34c72f9ae4ac",
         "symbols": [
           {
             "declarations": [
@@ -111098,6 +111098,60 @@
                         "repr": "string",
                         "value": "string"
                       }
+                    },
+                    {
+                      "name": "publishedScope",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "combined_tracks",
+                            "value": {
+                              "kind": "string",
+                              "string": "combined_tracks"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "name": "scoreComponent",
+                      "optional": true,
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "union",
+                        "value": [
+                          {
+                            "kind": "literal",
+                            "repr": "csat_converted",
+                            "value": {
+                              "kind": "string",
+                              "string": "csat_converted"
+                            }
+                          },
+                          {
+                            "kind": "literal",
+                            "repr": "selection_total",
+                            "value": {
+                              "kind": "string",
+                              "string": "selection_total"
+                            }
+                          },
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          }
+                        ]
+                      }
                     }
                   ]
                 },
@@ -111183,7 +111237,7 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(result: ReflectedReferenceResult)",
+                  "parameter_source": "(\n  result: ReflectedReferenceResult,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -111308,7 +111362,7 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(c: EligibilityConditions)",
+                  "parameter_source": "(\n  c: EligibilityConditions,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -231900,7 +231954,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "d42e0711a46f49bb707a42339e59fd78e1560b5301adb597c8b0d4c2184cdf19",
+        "source_sha256": "94c8899ac4a8f423822c6d88c371332c5810b722cc72a6ff6e42307b8c476396",
         "symbols": [
           {
             "declarations": [
@@ -231968,7 +232022,7 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(env: RuntimeEnvironment)",
+                  "parameter_source": "(\n  env: RuntimeEnvironment,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -232031,7 +232085,7 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(env: RuntimeEnvironment)",
+                  "parameter_source": "(\n  env: RuntimeEnvironment,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -232094,7 +232148,7 @@
                 "declarationKind": "export",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(env: RuntimeEnvironment)",
+                  "parameter_source": "(\n  env: RuntimeEnvironment,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -233001,7 +233055,7 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(env: RuntimeEnvironment, name: string)",
+                  "parameter_source": "(\n  env: RuntimeEnvironment,\n  name: string,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -233181,7 +233235,7 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(v: unknown, allowed: ReadonlySet<string>, empty: boolean)",
+                  "parameter_source": "(\n  v: unknown,\n  allowed: ReadonlySet<string>,\n  empty: boolean,\n)",
                   "params": [
                     {
                       "kind": "identifier",
@@ -233392,6 +233446,134 @@
               }
             ],
             "name": "YEAR_CUTOFFS_FORMAT"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "literal",
+                      "repr": "combined_tracks",
+                      "value": {
+                        "kind": "string",
+                        "string": "combined_tracks"
+                      }
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SCOPES"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "array",
+                    "value": {
+                      "kind": "union",
+                      "value": [
+                        {
+                          "kind": "literal",
+                          "repr": "csat_converted",
+                          "value": {
+                            "kind": "string",
+                            "string": "csat_converted"
+                          }
+                        },
+                        {
+                          "kind": "literal",
+                          "repr": "selection_total",
+                          "value": {
+                            "kind": "string",
+                            "string": "selection_total"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "COMPONENTS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(\n  tags: unknown,\n  key: string,\n  allowed: readonly string[],\n)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "tags",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "key",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "allowed",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "typeOperator",
+                        "value": {
+                          "operator": "readonly",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "union",
+                    "value": [
+                      {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      },
+                      {
+                        "kind": "keyword",
+                        "repr": "null",
+                        "value": "null"
+                      }
+                    ]
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "yearCutoffTag"
           },
           {
             "declarations": [
@@ -258112,7 +258294,7 @@
             "src": "supabase/functions/_shared/jungsi/application/api_dispatch.ts"
           }
         ],
-        "source_sha256": "80f61d5ec474171b8b7fee559d4556bc2f18d69133786b8df41be8700bffb0e5",
+        "source_sha256": "7348626b356c4898a9fea9fecd5dbacd767ed1d5e71057122a4caa6482a13f63",
         "symbols": [
           {
             "declarations": [
