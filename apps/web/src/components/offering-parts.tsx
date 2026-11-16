@@ -1,4 +1,5 @@
-import type { AssessmentDto, Category, ReasonDto, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, Category, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
+import { referenceAdvantage } from "@/lib/reference-advantage";
 import { pctText, seoulDate } from "@/lib/format";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
@@ -105,8 +106,21 @@ export function StatusCell({ a }: { a: Cell }) {
 }
 
 /** 환산 유불리: 같은 비교집단에서 보정 총점 기준 위치 − 대학 환산 기준 위치(%p). 양수면 유리 */
-export function AdvantageCell({ a }: { a: Cell }) {
+export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
+  if (a && !a.advantage) {
+    // 서버 유불리가 없을 때만 대학 참고 누백으로 참고 유불리를 보인다(R16, 2026-11-16)
+    const ref = referenceAdvantage(a.reference_percentile, overall);
+    if (ref) {
+      const width = Math.min(50, (Math.abs(ref.mid) / 0.6) * 50);
+      return (
+        <span className="adv">
+          <span className="bar" aria-hidden="true">{ref.tone !== "even" && <i className={ref.tone} style={{ width: `${width}%` }} />}</span>
+          <span className={`v num ${ref.tone}`}>{ref.text}%p <small className="ref">참고</small></span>
+        </span>
+      );
+    }
+  }
   if (!a || !a.advantage) return <span className="need">판단 보류</span>;
   const n = Number(a.advantage.delta_pp);
   const tone = a.advantage.status === "neutral" || Math.abs(n) < 0.1 ? "even" : n > 0 ? "up" : "down";

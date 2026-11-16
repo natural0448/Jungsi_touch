@@ -2,7 +2,8 @@ import Link from "@/components/link";
 import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
-import type { AssessmentDto, OfferingDto, SubjectResultDto } from "@/lib/dto";
+import type { AssessmentDto, OfferingDto, OverallResultDto, SubjectResultDto } from "@/lib/dto";
+import { referenceAdvantage } from "@/lib/reference-advantage";
 import { CONDITION_MARK_TEXT, conditionLines } from "@/lib/eligibility-conditions";
 import { yearCutoffLines } from "@/lib/year-cutoffs";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
@@ -14,7 +15,7 @@ import { IssueItem } from "./recruit-parts";
  * 펼친 줄: 2027 모집 정보(extras 자리, recruit-parts.tsx) + 환산·학교 누백·지원 판단·유불리 + 근거(assessment).
  * 환산·누백·판단은 서로 따로 준비된다(1.7.0). 판단이 보류여도 성공한 환산·누백은 숨기지 않는다.
  */
-export function Detail({ o, a, extras, picked, subjects }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[] }) {
+export function Detail({ o, a, extras, picked, subjects, overall }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null }) {
   const p2 = page("PAGE-02").path;
   // 2027 모집 정보·발행 기준은 펼친 뒤 따로 받아 채운다(extras.tsx) — 펼치기를 기다리게 하지 않는다
   const recruit = extras;
@@ -51,7 +52,7 @@ export function Detail({ o, a, extras, picked, subjects }: { o: OfferingDto; a: 
         <ConversionCard a={a} />
         <PercentileCard a={a} />
         <DecisionCard a={a} subjects={subjects} />
-        <AdvantageCard a={a} />
+        <AdvantageCard a={a} overall={overall} />
       </div>
       <SchoolReflectedLine a={a} />
       {(a.recommendation_reasons?.length ?? 0) > 0 && (
@@ -232,8 +233,25 @@ function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectRes
 const ADVANTAGE_HOLD =
   "이 대학의 반영 방식이 내 성적에 유리한지 보여 주는 칸입니다. 이 모집단위는 비교 자료가 모자라 표시하지 않았습니다. 아래 학교 반영 백분위로 대신 가늠할 수 있습니다.";
 
-function AdvantageCard({ a }: { a: AssessmentDto }) {
+function AdvantageCard({ a, overall }: { a: AssessmentDto; overall?: OverallResultDto | null }) {
   const v = a.advantage;
+  const ref = v ? null : referenceAdvantage(a.reference_percentile, overall);
+  if (ref) {
+    return (
+      <section className="card" aria-label="환산 유불리">
+        <h3>환산 유불리 <span className="tag">참고</span></h3>
+        <div className={`big num ${ref.tone}`}>{ref.text}<small>%p</small></div>
+        <p>
+          {ref.tone === "up"
+            ? "이 대학 방식으로 계산하면 전체 성적 기준보다 위치가 이만큼 올라갑니다."
+            : ref.tone === "down"
+              ? "이 대학 방식으로 계산하면 전체 성적 기준보다 위치가 이만큼 내려갑니다."
+              : "이 대학 방식으로 계산해도 전체 성적 기준과 위치가 거의 같거나, 범위가 0을 걸쳐 유불리를 단정할 수 없습니다."}
+        </p>
+        <span className="note">전체 상위 누백에서 이 대학 방식 누적 백분위(추정)를 뺀 값입니다(운영 승인 전 참고). 둘 중 하나가 범위면 범위로 보입니다. 지원 여부 판단과는 별개입니다.</span>
+      </section>
+    );
+  }
   if (!v) {
     const otherPop = a.percentile?.population_scope === "required_rule_inputs_present";
     return (

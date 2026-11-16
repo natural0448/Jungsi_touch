@@ -101,7 +101,7 @@ export async function MineCells({ p, id }: { p: P; id: string }) {
     <>
       <span className="c-score r"><ScoreCell a={a} /></span>
       <span className="c-st"><StatusCell a={a} /></span>
-      <span className="c-adv r"><AdvantageCell a={a} /></span>
+      <span className="c-adv r"><AdvantageCell a={a} overall={report?.overall?.overall} /></span>
       <span className="c-pick">{report && <PickButton id={id} on={pickedIds(report).has(id)} />}</span>
     </>
   );
@@ -117,7 +117,7 @@ export async function MineDetail({ p, o }: { p: P; o: OfferingDto }) {
   const m = await p;
   const report = mineReport(m);
   if (!m.ok) return <p className="wait">내 분석을 불러오지 못했습니다. 화면 위쪽 안내를 확인해 주세요.</p>;
-  return <Detail o={o} a={cellOf(m, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} />;
+  return <Detail o={o} a={cellOf(m, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} />;
 }
 
 export function DetailWait() {
