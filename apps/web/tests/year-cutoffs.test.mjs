@@ -44,3 +44,15 @@ test("my exact reference percentile with more than six decimals is still compare
   assert.equal(cutoffLine(c(2026, "21.881343"), "5.712345678901234").gap, "내가 16.2%p 위");
   assert.equal(cutoffLine(c(2026, "5.7123465"), "5.71234549").side, "same");
 });
+
+test("my reference percentile as a range gives a range gap, or 'similar' when it straddles the cutoff (2026-11-16)", () => {
+  assert.equal(cutoffLine(c(2026, "20"), "12.3", "14.8").gap, "내가 5.2~7.7%p 위");
+  assert.equal(cutoffLine(c(2026, "10"), "12.3", "14.8").gap, "내가 2.3~4.8%p 아래");
+  const s = cutoffLine(c(2026, "13"), "12.3", "14.8");
+  assert.equal(s.side, "same");
+  assert.equal(s.gap, "합격선과 비슷한 위치(내 범위가 걸침)");
+  assert.equal(cutoffLine(c(2026, "20"), "12.3", "12.3").gap, "내가 7.7%p 위"); // 상한이 하한과 같으면 한 값
+  assert.equal(cutoffLine(c(2026, "20"), "12.3", null).gap, "내가 7.7%p 위");
+  const a = { reference_percentile: { status: "reference_estimated", estimated_upper_cumulative_percent_all_examinees: "12.3", estimated_upper_cumulative_percent_upper_bound: "14.8" }, year_cutoffs: [c(2026, "20")] };
+  assert.equal(yearCutoffLines(a)[0].lines[0].gap, "내가 5.2~7.7%p 위");
+});

@@ -1,7 +1,7 @@
 /*
   1페이지 펼친 표의 추정 2열(snapshot-table.tsx). 발표 칸은 덮지 않고 이 두 칸만 계산한다.
   추정 총 지원자 = 모집인원×경쟁률 반올림(2026-10-22 사용자 확인, 경쟁률은 보이는 둘째 자리 값),
-  추정 탈락자 = 추정 총 지원자 − (모집인원 + 최종 합격 예비번호)(2026-11-02 사용자 결정).
+  추정 탈락자 = 추정 총 지원자 − (모집인원 + 충원인원)(2026-11-16 대표님 결정: 최종 합격 예비번호 = 충원인원, 한 열).
 */
 import { ratioText } from "./format";
 import { rankDisplayModel } from "./p1-field-qualification";
@@ -31,18 +31,32 @@ const rankInt = (c: Cell): { n: number; cell: Cell } | null => {
   const s = cell.v.trim();
   return /^\d{1,9}$/.test(s) ? { n: Number(s), cell } : null;
 };
-/* 추정 총 지원자 = 모집인원×경쟁률(2026-10-22 사용자 확인), 추정 탈락자 = 그 값 − (모집인원 + 최종 합격 예비번호)(2026-11-02 사용자 결정) */
-export function derived(r: Row): { applicants: number | null; dropped: number | null; heldA: boolean; heldD: boolean } {
-  const cap = personInt(r.rc);
+/**
+ * 충원인원(2026-11-16 대표님 결정): 최종 합격 예비번호와 충원인원은 같은 것으로 보고 한 열에 숫자로 넣는다.
+ * 원문 명칭이 달라도 정수면 쓴다. 예비번호(서비스 자격 확인 포함)가 있으면 그것을, 없으면 충원인원 원문값을 쓴다.
+ */
+export function fillCount(r: Pick<Row, "rk" | "ad">): number | null {
   const rank = rankInt(r.rk);
+  if (rank) return rank.n;
+  for (const c of [r.rk, r.ad]) {
+    const s = c?.v?.trim() ?? "";
+    if (/^\d{1,9}$/.test(s)) return Number(s);
+  }
+  return null;
+}
+/* 추정 총 지원자 = 모집인원×경쟁률(2026-10-22 사용자 확인), 추정 탈락자 = 그 값 − (모집인원 + 충원인원)(2026-11-16 대표님 결정) */
+export function derived(r: Row): { applicants: number | null; dropped: number | null; fill: number | null; heldA: boolean; heldD: boolean } {
+  const cap = personInt(r.rc);
+  const rankCell = rankInt(r.rk)?.cell ?? null;
+  const fill = fillCount(r);
   const ratio = ratioOf(r.cr);
   const isHeld = (c: Cell) => c.s !== "verified_official" && c.s.startsWith("pending");
-  if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, heldA: false, heldD: false };
+  if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, fill, heldA: false, heldD: false };
   // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s)
   const applicants = Math.floor((2 * cap * ratio.n + ratio.s) / (2 * ratio.s));
   const heldA = isHeld(r.rc) || isHeld(r.cr);
-  if (rank === null) return { applicants, dropped: null, heldA, heldD: false };
-  const d = applicants - (cap + rank.n);
-  return { applicants, dropped: d >= 0 ? d : null, heldA, heldD: heldA || isHeld(rank.cell) };
+  if (fill === null) return { applicants, dropped: null, fill, heldA, heldD: false };
+  const d = applicants - (cap + fill);
+  return { applicants, dropped: d >= 0 ? d : null, fill, heldA, heldD: heldA || (rankCell !== null && isHeld(rankCell)) };
 }
 

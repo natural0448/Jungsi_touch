@@ -54,3 +54,15 @@ test("no field, null or empty array hides the area", () => {
   assert.deepEqual(referenceGroups({ reference_university_groups: null }), []);
   assert.deepEqual(referenceGroups({ reference_university_groups: [] }), []);
 });
+
+test("range: lower floors and upper ceils to one decimal, single value when no upper bound (2026-11-16)", () => {
+  const r = (lo, hi) => ({ ...rp(lo), ...(hi === undefined ? {} : { estimated_upper_cumulative_percent_upper_bound: hi }) });
+  assert.equal(referencePercentText(r("12.36", "14.81")), "12.3~14.9");
+  assert.equal(referencePercentText(r("12.36", "12.36")), "12.4"); // 같으면 한 값(반올림)
+  assert.equal(referencePercentText(r("12.36")), "12.4"); // 옛 결과: 상한 없음
+  assert.equal(referencePercentText(r("12.30", "12.30000")), "12.3");
+  assert.equal(referencePercentText(r("12.31", "12.32")), "12.3~12.4");
+  assert.equal(referencePercentText(r("49.999833333889", "100.000000000000")), "49.9~100.0");
+  assert.equal(referencePercentText(r("12.3", "x")), "12.3"); // 상한이 숫자가 아니면 한 값
+  assert.equal(referencePercentText(r("12.3", "11")), "12.3"); // 상한이 하한보다 작으면 한 값
+});

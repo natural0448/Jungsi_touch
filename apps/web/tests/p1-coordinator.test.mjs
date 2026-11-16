@@ -198,3 +198,41 @@ test("oversized internal command is bounded before parse and never persists", as
   const response = await new P1SnapshotCoordinator({ storage: { sql: { exec: () => ({ toArray: () => [] }) }, transactionSync: fn => fn() } }).fetch(new Request("https://internal/command", { method: "POST", body: " ".repeat(262145) }));
   assert.equal(response.status, 409); assert.equal((await response.json()).error.code, "p1_coordinator_request_too_large"); assert.equal(f.raw(), null);
 }));
+
+test("rebuild keeps serving the previous ready (standby) until the new generation commits (2026-11-16)", async () => fixture(async f => {
+  const h = await seed(f.client);
+  const c1 = await f.client.claimWarm(H); assert.equal(c1.state, "claimed");
+  const r1 = ready(h, c1.token);
+  await f.client.commitWarm(c1.token, { phase: "ready" }, r1);
+  assert.equal((await f.client.inspect()).ready.index_key, r1.index_key);
+  // 다시 만들기: 이전 준비본은 대기본으로 계속 보인다
+  const v = await f.client.rebuildWarm(H);
+  assert.equal(v.ready.index_key, r1.index_key);
+  const c2 = await f.client.claimWarm(H); assert.equal(c2.state, "claimed"); assert.notEqual(c2.token.generation, c1.token.generation);
+  assert.equal(c2.view.ready.index_key, r1.index_key);
+  // 진행 중에는 다시 시작할 수 없다
+  await denied(f.client.rebuildWarm(H), "p1_rebuild_busy");
+  await f.client.commitWarm(c2.token, { phase: "parts" }, null);
+  assert.equal((await f.client.inspect()).ready.index_key, r1.index_key);
+  const c3 = await f.client.claimWarm(H); assert.equal(c3.state, "claimed");
+  const r2 = ready(h, c3.token);
+  await f.client.commitWarm(c3.token, { phase: "ready" }, r2);
+  assert.equal((await f.client.inspect()).ready.index_key, r2.index_key);
+  // 완료되면 대기본 칸이 저장 형식에서 사라진다(옛 코드로 되돌려도 읽힌다)
+  assert.equal(JSON.parse(f.raw()).standby, undefined);
+  assert.equal((await f.client.claimWarm(H)).state, "ready");
+}));
+
+test("rebuild: a new head drops the standby; a stale publication or no ready is harmless (2026-11-16)", async () => fixture(async f => {
+  const h = await seed(f.client);
+  await denied(f.client.rebuildWarm("d".repeat(64)), "p1_publication_changed");
+  assert.equal((await f.client.rebuildWarm(H)).ready, null); // 준비본이 없으면 아무것도 하지 않는다
+  const c1 = await f.client.claimWarm(H); await f.client.commitWarm(c1.token, { phase: "ready" }, ready(h, c1.token));
+  await f.client.rebuildWarm(H);
+  f.advance(600000);
+  const hc = await f.client.claimHead(); assert.equal(hc.state, "claimed");
+  await f.client.commitHead(hc.token, head({ publication_sha256: "e".repeat(64) }));
+  const view = await f.client.inspect();
+  assert.equal(view.ready, null);
+  assert.equal(JSON.parse(f.raw()).standby, undefined);
+}));

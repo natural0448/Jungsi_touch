@@ -29,27 +29,40 @@ export interface CutoffLine {
   side: "above" | "below" | "same" | null;
 }
 
-/** 합격선 하나와 내 누적 백분위(같은 기준)를 견준 줄 */
-export function cutoffLine(c: YearCutoffDto, mine: string | null): CutoffLine | null {
+/**
+ * 합격선 하나와 내 누적 백분위(같은 기준)를 견준 줄.
+ * 내 값이 범위(하한~상한, 대표님 결정 2026-11-16)면 차이도 범위로 보인다. 범위가 합격선에 걸치면 '비슷한 위치'.
+ */
+export function cutoffLine(c: YearCutoffDto, mine: string | null, mineUpper: string | null = null): CutoffLine | null {
   const cut = micro(c.cutoff_top_percent);
   if (cut === null || cut > HUNDRED * SCALE) return null;
   const me = micro(mine);
-  if (me === null) return { metric: c.published_metric, cutoff: round1(cut), gap: null, side: null };
-  const d = cut - me;
-  const diff = round1(d < ZERO ? -d : d);
-  if (diff === "0.0") return { metric: c.published_metric, cutoff: round1(cut), gap: "합격선과 같은 위치", side: "same" };
-  return d > ZERO
-    ? { metric: c.published_metric, cutoff: round1(cut), gap: `내가 ${diff}%p 위`, side: "above" }
-    : { metric: c.published_metric, cutoff: round1(cut), gap: `내가 ${diff}%p 아래`, side: "below" };
+  const base = { metric: c.published_metric, cutoff: round1(cut) };
+  if (me === null) return { ...base, gap: null, side: null };
+  const up = micro(mineUpper);
+  const hi = up !== null && up > me ? up : me;
+  // 차이 = 합격선 - 내 값. 내 값이 클수록(아래쪽) 차이가 작다
+  const far = cut - me, near = cut - hi;
+  const abs = (v: bigint) => (v < ZERO ? -v : v);
+  if (near > ZERO || far < ZERO) {
+    const above = near > ZERO;
+    const a = round1(above ? near : abs(far)), b = round1(above ? far : abs(near));
+    if (a === "0.0" && b === "0.0") return { ...base, gap: "합격선과 같은 위치", side: "same" };
+    const text = a === b ? a : `${a}~${b}`;
+    return { ...base, gap: `내가 ${text}%p ${above ? "위" : "아래"}`, side: above ? "above" : "below" };
+  }
+  if (hi === me) return { ...base, gap: "합격선과 같은 위치", side: "same" };
+  return { ...base, gap: `합격선과 비슷한 위치(내 범위가 걸침)`, side: "same" };
 }
 
 /** 학년도별 합격선 줄(최신 학년도부터). 자료가 없으면 빈 배열 */
 export function yearCutoffLines(a: AssessmentDto): { year: number; lines: CutoffLine[] }[] {
   const r = a.reference_percentile;
   const mine = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_all_examinees : null;
+  const mineUpper = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_upper_bound ?? null : null;
   const by = new Map<number, CutoffLine[]>();
   for (const c of a.year_cutoffs ?? []) {
-    const line = cutoffLine(c, mine);
+    const line = cutoffLine(c, mine, mineUpper);
     if (!line) continue;
     by.set(c.academic_year, [...(by.get(c.academic_year) ?? []), line]);
   }

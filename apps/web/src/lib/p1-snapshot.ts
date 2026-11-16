@@ -478,6 +478,21 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
   }
 }
 
+/**
+ * 관리자 '정리본 다시 만들기'(2026-11-16). 같은 판(발행판)의 정리본을 처음부터 다시 만든다 — 화면 정리본 형식이 바뀌어
+ * 새 칸을 채워야 할 때 새 발행판을 내지 않고 쓴다. 다시 만드는 동안 1페이지는 이전 준비본(대기본)을 그대로 쓴다.
+ * 시작만 한다. 이어서 준비 단계(warmStep)를 끝까지 부른다.
+ */
+export async function rebuildStart(src: JungsiSource, caller: Caller): Promise<WarmStatus> {
+  try {
+    const { coordinator } = await services(src.kind);
+    const view = await checkedHead(src, caller, coordinator, undefined, WARM_HEAD_MARGIN_MS);
+    if (!view?.head) return running(initialProgress({ snapshot_id: "checking", publication_sha256: "" } as SnapshotHeadDto), 0, 1000);
+    await coordinator.rebuildWarm(view.head.publication_sha256);
+    return running(initialProgress(view.head), view.head.parts.length);
+  } catch (error) { return servicesFailure(error); }
+}
+
 /** Admin status only; an unfresh actor never exposes the stored ready as current. */
 /** 관리 화면용. stale: 현재판 확인 기한(10분)이 지나 아직 다시 확인하지 않은 상태 — 준비본이 없는 것과 구분한다(10-24 Root 관측).
  * 오래된 판을 준비 완료로 인정하지는 않는다(ready 는 그대로 null). */

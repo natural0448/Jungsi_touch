@@ -17,16 +17,21 @@ const cell = (v, u, s = "verified_official") => ({ v, s, r: null, u, l: null });
 const none = cell(null, null, "unpublished");
 const row = (rc, cr, rk, ad = none) => ({ rc, cr, rk, ad });
 
-test("estimated drop-outs are applicants minus (quota + final waitlist rank)", () => {
+test("estimated drop-outs are applicants minus (quota + fill count) (2026-11-16)", () => {
   // 10명 × 5.1 = 51, 51 − (10 + 10) = 31
   assert.deepEqual(derived(row(cell("10", "명"), cell("5.0999999999999996", "대1"), cell("10", "번"))),
-    { applicants: 51, dropped: 31, heldA: false, heldD: false });
+    { applicants: 51, dropped: 31, fill: 10, heldA: false, heldD: false });
 });
 
-test("the drop-out cell needs a published rank; the actual-admission count is not used", () => {
+test("the fill count (충원인원) is the waitlist rank or, without it, the published count under any name (2026-11-16)", () => {
   const d = derived(row(cell("86", "명"), cell("3.3", "대1"), none, cell("20", "명")));
   assert.equal(d.applicants, 284);
-  assert.equal(d.dropped, null);
+  assert.equal(d.fill, 20);
+  assert.equal(d.dropped, 284 - 86 - 20);
+  // 예비번호가 있으면 예비번호를 쓴다
+  assert.equal(derived(row(cell("86", "명"), cell("3.3", "대1"), cell("15", "번"), cell("20", "명"))).fill, 15);
+  // 단위가 없거나 다른 명칭이어도 정수면 쓴다
+  assert.equal(derived(row(cell("86", "명"), cell("3.3", "대1"), none, cell("7", null))).fill, 7);
 });
 
 test("a rank larger than the remaining applicants leaves the cell empty instead of negative", () => {
@@ -39,7 +44,8 @@ test("a pending rank keeps its value in the calculation and marks the result as 
   assert.equal(d.heldD, true);
 });
 
-test("ranks without the 번 unit or with non-integer text are not used", () => {
-  for (const rk of [cell("12", "명"), cell("12.5", "번"), cell("확인 중", "번")])
+test("an integer in the rank cell is used whatever its unit; non-integer text is not used (2026-11-16)", () => {
+  assert.equal(derived(row(cell("22", "명"), cell("5.8", "대1"), cell("12", "명"))).dropped, 128 - 22 - 12);
+  for (const rk of [cell("12.5", "번"), cell("확인 중", "번")])
     assert.equal(derived(row(cell("22", "명"), cell("5.8", "대1"), rk)).dropped, null);
 });

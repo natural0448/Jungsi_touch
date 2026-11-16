@@ -1,20 +1,20 @@
 import { asOfDate, ratioText } from "@/lib/format";
 import { derived } from "@/lib/p1-derived";
-import { rankDisplayModel } from "@/lib/p1-field-qualification";
 import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 import { ScrollHint } from "./scroll-hint";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
-  모집인원 · 경쟁률 · 추정 총 지원자 · 최종 합격 예비번호 · 추정 탈락자 · 대학 발표 성적 ①·②.
-  충원인원(실제 추가 합격자 수, 명)은 열로 보이지 않는다(2026-11-02 사용자 결정). 정리본 자료는 그대로 보존한다.
+  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 대학 발표 성적 ①·②.
+  충원인원(2026-11-16 대표님 결정): 최종 합격 예비번호 = 충원인원으로 보고 한 열에 숫자로 넣는다. 원문 명칭이 달라도 넣고,
+  '의미 확인 중' 같은 꼬리표는 붙이지 않는다. 추정 탈락자는 이 숫자로 계산한다. 1페이지에 추정 상위 누백(참고)은 보이지 않는다(같은 날).
   값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
   발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
   고르는 규칙은 lib/p1-published-stats.ts). ① 은 50%컷 자리, ② 는 70%컷 자리로 통계마다 칸이 고정된다(같은 날 정정). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
   '확인 중' 꼬리표·확인 사유는 보이지 않는다(2026-11-04 사용자 결정, 자료의 status·reason 은 보존). 예비번호는 '번'.
   추정 2열만 계산하고 발표 칸을 덮지 않는다: 추정 총 지원자 = 모집인원×경쟁률(반올림),
-  추정 탈락자 = 추정 총 지원자 − (모집인원 + 최종 합격 예비번호)(2026-11-02 사용자 결정, 이전 산식의 충원인원 대신).
+  추정 탈락자 = 추정 총 지원자 − (모집인원 + 충원인원)(2026-11-16 대표님 결정, 11-02 예비번호 산식 대체).
   추정 탈락자는 표에 보이는 예비번호(정수, '번')가 있을 때만 계산한다.
   휴대폰처럼 표가 넘치면 학년도 열을 왼쪽에 고정하고 옆으로 넘기라는 안내를 보인다(scroll-hint.tsx, 2026-11-02).
 */
@@ -55,11 +55,6 @@ function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
   );
 }
 
-/** 예비번호 한 칸: 서비스 자격이 확인된 값은 숫자('번')로만 보인다. 자격 확인 문구는 그리지 않는다(2026-11-05 사용자 결정) */
-function RankValue({ c }: { c: Cell }) {
-  return <Value c={rankDisplayModel(c).cell} />;
-}
-
 /** 발표 성적 한 칸: 통계 이름 + 값. 대상 집단은 쓰지 않고, 학생부 등급일 때만 기준을 붙인다(2026-10-28 사용자 결정) */
 function Stat({ s }: { s: PublishedStat | undefined }) {
   // 값이 없으면 사유는 자료에 보존하고 화면 셀은 비운다.
@@ -89,7 +84,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
   // 모집인원 단계·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
   const pending = latest.pk === null;
   // 과거 입결 참고 관측: 서버가 이 모집단위에 실제로 붙인 행이 있을 때만 열을 보인다. 대학 발표값·합격 판정이 아니다
-  const hasRef = rows.some((r) => (r.hr?.length ?? 0) > 0);
+  // 추정 상위 누백(참고)은 1페이지에 보이지 않는다(2026-11-16 대표님 결정). 정리본 자료(hr)는 보존한다
   // 표기 변형('같은 모집단위인지 확인 중') 안내는 보이지 않는다(2026-11-05 사용자 결정). 다른 이름의 행에는 발표명을 계속 적는다
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
   return (
@@ -103,11 +98,10 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
               <th scope="col" className="r">모집인원</th>
               <th scope="col" className="r">경쟁률</th>
               <th scope="col" className="r derived">추정 총 지원자</th>
-              <th scope="col" className="r">최종 합격 예비번호</th>
+              <th scope="col" className="r">충원인원</th>
               <th scope="col" className="r derived">추정 탈락자</th>
               <th scope="col" className="r">대학 발표 성적 ①</th>
               <th scope="col" className="r">대학 발표 성적 ②</th>
-              {hasRef && <th scope="col" className="r derived">추정 상위 누백(참고)</th>}
             </tr>
           </thead>
           <tbody>
@@ -132,19 +126,12 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     <td className="r derived">
                       {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
-                    <td className="r"><RankValue c={r.rk} /></td>
+                    <td className="r">{dv.fill === null ? null : <><b className="num">{dv.fill}</b><small> 명</small></>}</td>
                     <td className="r derived">
                       {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>
                     <td className="r"><Stat s={ps[0]} /></td>
                     <td className="r"><Stat s={ps[1]} /></td>
-                    {hasRef && (
-                      <td className="r derived">
-                        {(r.hr ?? []).map((v, k) => (
-                          <span key={k} className="rs-ref"><b className="num">{v}</b><small> %</small></span>
-                        ))}
-                      </td>
-                    )}
                   </tr>
                 );
               }),
@@ -152,7 +139,6 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
           </tbody>
         </table>
       </ScrollHint>
-      {hasRef && <p className="rs-idnote">추정 상위 누백(참고)은 그해 합격선을 전체 응시자 기준 상위 누적 백분위로 추정한 참고값입니다. 대학이 발표한 값이 아니고 운영 승인 전 자료이며, 합격 여부를 뜻하지 않습니다.</p>}
     </div>
   );
 }

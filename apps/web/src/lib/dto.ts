@@ -309,6 +309,8 @@ export interface SchoolReflectedDto {
 export interface ReferencePercentileDto {
   status: "reference_estimated";
   estimated_upper_cumulative_percent_all_examinees: string; // 정확한 소수 문자열, 화면은 소수 첫째 자리
+  /** 상한(점수를 낼 수 없는 응시자를 모두 위로 둔 값). 없거나 하한과 같으면 한 값으로 보인다(대표님 결정 2026-11-16) */
+  estimated_upper_cumulative_percent_upper_bound?: string;
   metric: string;
   denominator_kind: string;
   calculation_review_scope: string;

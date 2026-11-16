@@ -13,6 +13,7 @@ const STEP_TIMEOUT_MS = 90_000;
 /** 같은 단계에서 연달아 실패(시간 초과·동시 처리 제한·일시 장애)해도 다시 하는 횟수. 넘으면 멈추고 사유를 보인다 */
 const MAX_RETRIES = 3;
 const STEP_URL = "/jeongsi/management/p1-snapshot/step"; // basePath(/jeongsi)는 fetch 에 자동으로 붙지 않는다
+const REBUILD_URL = "/jeongsi/management/p1-snapshot/rebuild";
 
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
@@ -84,6 +85,23 @@ export function WarmRunner() {
     setBusy(false);
   };
 
+  /** 정리본 다시 만들기(2026-11-16): 같은 판을 처음부터 다시 만든다. 그동안 1페이지는 이전 정리본을 그대로 쓴다 */
+  const rebuild = async () => {
+    setBusy(true);
+    setNote("다시 만들기를 시작합니다. 끝날 때까지 1페이지는 지금 정리본을 그대로 보여 줍니다.");
+    setLast(null);
+    let r: StepResult;
+    try {
+      const res = await fetch(REBUILD_URL, { method: "POST", headers: { "x-p1-rebuild": "1" }, cache: "no-store", credentials: "same-origin" });
+      const body = (await res.json().catch(() => null)) as StepResult | null;
+      r = body && typeof body === "object" && "ok" in body ? body : { ok: false, code: `http_${res.status}`, retryable: false };
+    } catch {
+      r = { ok: false, code: "request_failed", retryable: false };
+    }
+    if (!r.ok) { setNote(null); setLast(r); setBusy(false); return; }
+    await run();
+  };
+
   const halt = () => {
     stop.current = true;
     live.current?.abort(); // 기다리던 요청도 바로 끊는다. 받은 부분은 서버에 보관돼 다시 누르면 이어서 한다
@@ -96,6 +114,11 @@ export function WarmRunner() {
         <button type="button" className="btn p" onClick={run} disabled={busy}>
           {busy ? "준비하는 중…" : "현재판 정리본 준비(받기·검증·저장)"}
         </button>
+        {!busy && (
+          <button type="button" className="btn" onClick={rebuild} title="같은 판의 정리본을 처음부터 다시 만듭니다. 화면 정리 방식이 바뀌어 새 칸을 채울 때 씁니다.">
+            정리본 다시 만들기
+          </button>
+        )}
         {busy && (
           <button type="button" className="btn" onClick={halt}>
             멈추기
