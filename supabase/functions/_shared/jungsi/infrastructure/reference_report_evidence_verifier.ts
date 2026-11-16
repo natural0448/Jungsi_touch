@@ -219,9 +219,13 @@ export class ImmutableReferenceReportVerifier {
         ) return false;
         const candidateRef = item.reference_percentile,
           assessmentRef = assessment.reference_percentile;
+        const compared =
+          Object.hasOwn(candidateRef, "estimated_upper_cumulative_percent_upper_bound")
+            ? [...keys, "estimated_upper_cumulative_percent_upper_bound"]
+            : keys;
         if (
-          Object.keys(candidateRef).sort().join(",") !== [...keys].sort().join(",") ||
-          keys.some((k) => candidateRef[k] !== assessmentRef[k])
+          Object.keys(candidateRef).sort().join(",") !== [...compared].sort().join(",") ||
+          compared.some((k) => candidateRef[k] !== assessmentRef[k])
         ) return false;
         actual.push(id);
       }

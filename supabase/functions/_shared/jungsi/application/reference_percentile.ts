@@ -221,6 +221,13 @@ export class ReferencePercentileService {
         metric: result.metric,
         estimated_upper_cumulative_percent_all_examinees:
           result.estimated_upper_cumulative_percent_all_examinees,
+        // 상한(점수를 낼 수 없는 질량을 모두 위로 둔 값). 옛 결과에는 없다
+        ...(typeof result.estimated_upper_cumulative_percent_upper_bound === "string"
+          ? {
+            estimated_upper_cumulative_percent_upper_bound:
+              result.estimated_upper_cumulative_percent_upper_bound,
+          }
+          : {}),
         denominator_kind: result.denominator_kind,
         calculation_review_scope: result.calculation_review_scope,
         production_allowed: false,

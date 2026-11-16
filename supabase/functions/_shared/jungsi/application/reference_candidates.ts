@@ -6,6 +6,15 @@ import { type NativeObject } from "../domain/json_value.ts";
 function object(v: unknown): v is NativeObject {
   return v !== null && typeof v === "object" && !Array.isArray(v);
 }
+/** 상한은 숫자 문자열이고 하한 이상·100 이하일 때만 넘긴다(아니면 뺀다) */
+function upperOk(n: string, u: unknown): boolean {
+  if (typeof u !== "string" || !/^(?:0|[1-9][0-9]*)(?:[.][0-9]+)?$/.test(u)) return false;
+  try {
+    return exact(u).compare(exact(n)) >= 0 && exact(u).compare(exact(100)) <= 0;
+  } catch {
+    return false;
+  }
+}
 /** This does not fetch rows, create eligibility, rank applicants or authorize delivery. */
 export function referenceCandidateGroups(
   rows: readonly NativeObject[],
@@ -24,7 +33,9 @@ export function referenceCandidateGroups(
       a.conversion.reason_code !== "reference_conversion_not_production_approved" ||
       !object(a.reference_percentile)
     ) continue;
-    const p = a.reference_percentile, n = p.estimated_upper_cumulative_percent_all_examinees;
+    const p = a.reference_percentile,
+      n = p.estimated_upper_cumulative_percent_all_examinees,
+      u = p.estimated_upper_cumulative_percent_upper_bound;
     if (
       p.status !== "reference_estimated" || p.production_allowed !== false ||
       p.actual_admission_full_total_approved !== false ||
@@ -51,6 +62,7 @@ export function referenceCandidateGroups(
       reference_percentile: {
         status: "reference_estimated",
         estimated_upper_cumulative_percent_all_examinees: n,
+        ...(upperOk(n, u) ? { estimated_upper_cumulative_percent_upper_bound: u as string } : {}),
         metric: p.metric,
         calculation_review_scope: "same_exam_mathematical_reference",
         production_allowed: false,

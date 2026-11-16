@@ -196,7 +196,7 @@ function inclusiveAt(
   check(false, "reference_tail_invalid");
 }
 export class NativeReferenceCdfProjection {
-  private readonly results = new Map<string, string>();
+  private readonly results = new Map<string, readonly [string, string]>();
   private constructor(
     private readonly text: string,
     private readonly start: number,
@@ -339,8 +339,8 @@ export class NativeReferenceCdfProjection {
         score.numerator * this.denominator > this.max * score.denominator
       ) return Promise.resolve(null);
       const key = score.toString();
-      let percent = this.results.get(key);
-      if (percent === undefined) {
+      let pair = this.results.get(key);
+      if (pair === undefined) {
         const inclusive = inclusiveAt(
           this.text,
           this.anchors,
@@ -348,19 +348,23 @@ export class NativeReferenceCdfProjection {
           score,
           this.denominator,
         );
-        percent = displayExact(
-          new Rational(inclusive, 10n ** BigInt(this.scale)).multiply(exact(100)).divide(
-            this.whole,
-          ),
-          12,
+        const mass = new Rational(inclusive, 10n ** BigInt(this.scale));
+        // 대표님 결정(2026-11-16): 점수를 낼 수 없는 질량을 모두 위로 둔 상한도 함께 계산
+        const unscored = this.whole.subtract(
+          new Rational(this.eligible, 10n ** BigInt(this.scale)),
         );
-        if (this.results.size < 64) this.results.set(key, percent);
+        pair = [
+          displayExact(mass.multiply(exact(100)).divide(this.whole), 12),
+          displayExact(mass.add(unscored).multiply(exact(100)).divide(this.whole), 12),
+        ] as const;
+        if (this.results.size < 64) this.results.set(key, pair);
       }
       live(signal);
       return Promise.resolve({
         status: "reference_estimated",
         metric: "estimated_upper_cumulative_percent_all_examinees",
-        estimated_upper_cumulative_percent_all_examinees: percent,
+        estimated_upper_cumulative_percent_all_examinees: pair[0],
+        estimated_upper_cumulative_percent_upper_bound: pair[1],
         derived_method_id: this.methodId,
         denominator_kind: "same_year_original_model_whole_exact_mass",
         reference_curve_id: this.curveId,

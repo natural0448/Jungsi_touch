@@ -36,6 +36,10 @@ import {
   SupabaseMemberStatisticsRows,
 } from "../../supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts";
 import type { SupabaseSqlTransport } from "../../supabase/functions/_shared/jungsi/infrastructure/transaction_sql.ts";
+import { exact } from "../../supabase/functions/_shared/jungsi/domain/exact.ts";
+import { nativeJsonText } from "../../supabase/functions/_shared/jungsi/domain/json_value.ts";
+import { SavedReferenceTailProjection } from "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts";
+import { referenceCandidateGroups } from "../../supabase/functions/_shared/jungsi/application/reference_candidates.ts";
 
 const rule = (
   over: Partial<ReflectedReferenceRule> = {},
@@ -558,6 +562,175 @@ Deno.test("public schema accepts year_cutoffs and rejects a malformed percent", 
       "year_cutoffs",
     ),
   );
+});
+
+// 참고 누백 상한(대표님 결정 2026-11-16): 점수를 낼 수 없는 질량(전체-점수 정의)을 모두 위로 둔 값.
+const tailContext: NativeObject = {
+  academic_year: 2027,
+  exam_id: "SYNTHETIC-mock",
+  exam_type: "september_mock",
+  source_pack_version: "SYNTHETIC-pack",
+  model_version: "SYNTHETIC-model",
+  profile_sha256: "a".repeat(64),
+  rule_version: "SYNTHETIC-rule",
+  score_scale_id: "SYNTHETIC-native",
+  reference_curve_id: "SYNTHETIC-curve",
+  weight_encoding: "SYNTHETIC_EXPLICIT_ENCODING",
+  source_scenario_field_present: false,
+  source_scenario_value: null,
+  resolved_model_scenario: "SYNTHETIC-fixed",
+};
+const tailEvidence: NativeObject = Object.fromEntries(
+  [
+    "source_csv_sha256",
+    "source_cdf_sha256",
+    "definition_sha256",
+    "shared_proof_sha256",
+    "binder_sha256",
+    "independent_sha256",
+  ]
+    .map((k) => [k, "b".repeat(64)]),
+);
+async function tailCurve(whole: [string, string, string]) {
+  const p: NativeObject = {
+    format: "jungsi.saved-reference-tail-projection/v1",
+    version: "SYNTHETIC-tail.v1",
+    context: tailContext,
+    evidence: tailEvidence,
+    projection: {
+      derived_method_id: "estimated-whole-cohort-percentile:" + "d".repeat(64),
+      weight_decimal_scale: 1,
+      eligible_weight_units: "15",
+      whole_mass_decimal: whole[0],
+      whole_mass_numerator: whole[1],
+      whole_mass_denominator: whole[2],
+      production_allowed: false,
+      actual_admission_full_total_approved: false,
+    },
+    rows: [
+      {
+        score_numerator: "10",
+        score_denominator: "1",
+        strict_weight_units: "5",
+        tie_weight_units: "10",
+        inclusive_weight_units: "15",
+      },
+      {
+        score_numerator: "20",
+        score_denominator: "1",
+        strict_weight_units: "0",
+        tie_weight_units: "5",
+        inclusive_weight_units: "5",
+      },
+    ],
+  };
+  const bytes = new TextEncoder().encode(nativeJsonText(p));
+  const sha256 = [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
+    .map((x) => x.toString(16).padStart(2, "0")).join("");
+  return await SavedReferenceTailProjection.bind(bytes, {
+    sha256,
+    bytes: bytes.length,
+    maxBytes: 65536,
+    context: tailContext,
+    evidence: tailEvidence,
+  });
+}
+const tailIdentity = {
+  academic_year: 2027,
+  exam_id: "SYNTHETIC-mock",
+  exam_type: "september_mock",
+  source_pack_version: "SYNTHETIC-pack",
+  rule_version: "SYNTHETIC-rule",
+  score_scale_id: "SYNTHETIC-native",
+};
+
+Deno.test("reference percentile upper bound adds unscored mass above and equals the lower bound without it", async () => {
+  // 전체 3.00001, 점수 정의 1.5, 미정의 1.50001
+  const curve = await tailCurve(["3.00001", "300001", "100000"]);
+  const a = curve.query(exact(10), tailIdentity)!;
+  equal(a.estimated_upper_cumulative_percent_all_examinees, "49.999833333889");
+  equal(a.estimated_upper_cumulative_percent_upper_bound, "100.000000000000");
+  const b = curve.query(exact(20), tailIdentity)!;
+  equal(b.estimated_upper_cumulative_percent_all_examinees, "16.666611111296");
+  equal(b.estimated_upper_cumulative_percent_upper_bound, "66.666777777407");
+  const none = await tailCurve(["1.5", "3", "2"]);
+  const c = none.query(exact(20), tailIdentity)!;
+  equal(
+    c.estimated_upper_cumulative_percent_upper_bound,
+    c.estimated_upper_cumulative_percent_all_examinees,
+  );
+});
+
+Deno.test("reference candidates pass only a valid upper bound", () => {
+  const row = (id: string) => ({
+    offering_id: id,
+    university_id: "U1",
+    university_name: "SYNTHETIC",
+  });
+  const analysis = (n: string, u?: string) => ({
+    status: "pending",
+    conversion: { reason_code: "reference_conversion_not_production_approved" },
+    reference_percentile: {
+      status: "reference_estimated",
+      metric: "estimated_upper_cumulative_percent_all_examinees",
+      estimated_upper_cumulative_percent_all_examinees: n,
+      ...(u === undefined ? {} : { estimated_upper_cumulative_percent_upper_bound: u }),
+      calculation_review_scope: "same_exam_mathematical_reference",
+      production_allowed: false,
+      actual_admission_full_total_approved: false,
+    },
+  });
+  const out = referenceCandidateGroups(
+    [row("2027:1"), row("2027:2"), row("2027:3"), row("2027:4")],
+    {
+      "2027:1": analysis("12.3", "14.8"),
+      "2027:2": analysis("12.3", "11"),
+      "2027:3": analysis("12.3", "100.1"),
+      "2027:4": analysis("12.3"),
+    },
+  );
+  const groups = out.university_groups as NativeObject[];
+  const rows = (groups[0].offerings as NativeObject[]).map((x) =>
+    x.reference_percentile as NativeObject
+  );
+  equal(rows[0].estimated_upper_cumulative_percent_upper_bound, "14.8");
+  for (const r of rows.slice(1)) assert(!("estimated_upper_cumulative_percent_upper_bound" in r));
+});
+
+Deno.test("public schema accepts the reference upper bound and rejects a malformed one", () => {
+  const s = (schemas as unknown as { schemas: NativeObject }).schemas;
+  const ops = [{ id: "x", contract_ref: "X" }];
+  const root = { ref: "reference_percentile", nullable: false };
+  const projection = new PublicResponseProjection(
+    {
+      format: "jungsi.public-response-schemas/v1",
+      schemas: s,
+      operations: [{ ...ops[0], roots: { standard: root, paid: root } }],
+      auxiliary_roots: { error: root, readiness: root },
+    } as unknown as NativeObject,
+    ops,
+  );
+  const ok = {
+    status: "reference_estimated",
+    estimated_upper_cumulative_percent_all_examinees: "12.3",
+    estimated_upper_cumulative_percent_upper_bound: "14.8",
+    metric: "estimated_upper_cumulative_percent_all_examinees",
+    denominator_kind: "same_year_original_model_whole_exact_mass",
+    calculation_review_scope: "same_exam_mathematical_reference",
+    production_allowed: false,
+    actual_admission_full_total_approved: false,
+  };
+  equal(JSON.stringify(projection.project("x", "paid", ok)), JSON.stringify(ok));
+  let threw = false;
+  try {
+    projection.project("x", "paid", {
+      ...ok,
+      estimated_upper_cumulative_percent_upper_bound: "14.8%",
+    });
+  } catch {
+    threw = true;
+  }
+  assert(threw);
 });
 
 Deno.test("member saved results 015 reader switch keeps the reviewed SQL unless fn_v2", async () => {

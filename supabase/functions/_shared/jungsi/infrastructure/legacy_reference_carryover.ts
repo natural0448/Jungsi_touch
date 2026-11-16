@@ -219,12 +219,19 @@ export function combineLegacyAndProven(
             const analysis = views.map((v) => object(v.analyses) ? v.analyses[id] : null).find(
               object,
             );
+            const compared = object(row) && object(row.reference_percentile) &&
+                Object.hasOwn(
+                  row.reference_percentile,
+                  "estimated_upper_cumulative_percent_upper_bound",
+                )
+              ? [...fields, "estimated_upper_cumulative_percent_upper_bound"]
+              : fields;
             if (
               !object(row) || !object(row.reference_percentile) || !object(analysis) ||
               !object(analysis.reference_percentile) ||
               Object.keys(row.reference_percentile).sort().join(",") !==
-                [...fields].sort().join(",") ||
-              fields.some((k) =>
+                [...compared].sort().join(",") ||
+              compared.some((k) =>
                 (row.reference_percentile as NativeObject)[k] !==
                   (analysis.reference_percentile as NativeObject)[k]
               ) ||

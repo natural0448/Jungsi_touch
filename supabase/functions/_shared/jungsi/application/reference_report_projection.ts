@@ -179,9 +179,13 @@ export async function resolveReferenceReportProjection(input: {
         }
         const groupReference = entry.reference_percentile,
           savedReference = assessment.reference_percentile;
+        const compared =
+          Object.hasOwn(groupReference, "estimated_upper_cumulative_percent_upper_bound")
+            ? [...fields, "estimated_upper_cumulative_percent_upper_bound"]
+            : fields;
         if (
-          Object.keys(groupReference).sort().join(",") !== [...fields].sort().join(",") ||
-          fields.some((k) => groupReference[k] !== savedReference[k])
+          Object.keys(groupReference).sort().join(",") !== [...compared].sort().join(",") ||
+          compared.some((k) => groupReference[k] !== savedReference[k])
         ) {
           consistent = false;
           break;

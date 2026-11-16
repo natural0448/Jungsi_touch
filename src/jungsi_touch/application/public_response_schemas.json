@@ -7032,6 +7032,10 @@
           "ref": "decimal_or_integer",
           "nullable": true
         },
+        "estimated_upper_cumulative_percent_upper_bound": {
+          "ref": "decimal_or_integer",
+          "nullable": false
+        },
         "metric": {
           "type": "string",
           "nullable": false,
@@ -7078,7 +7082,8 @@
       "optional": [
         "reason_code",
         "metric",
-        "denominator_kind"
+        "denominator_kind",
+        "estimated_upper_cumulative_percent_upper_bound"
       ]
     },
     "reference_candidate_item": {

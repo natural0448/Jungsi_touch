@@ -393,12 +393,18 @@ export class ChunkedReferenceTailProjection {
     }
     check(start < chunk.scores.length, "reference_tail_incomplete");
     const percent = new Rational(chunk.suffix[start]).multiply(exact(100)).divide(this.whole);
+    // 대표님 결정(2026-11-16): 점수를 낼 수 없는 질량을 모두 위로 둔 상한
+    const upper = new Rational(chunk.suffix[start]).add(
+      this.whole.subtract(new Rational(this.eligible)),
+    )
+      .multiply(exact(100)).divide(this.whole);
     await this.port.assertCurrent(this.pin, this.signal);
     check(!this.signal.aborted, "reference_tail_unavailable");
     return {
       status: "reference_estimated",
       metric: "estimated_upper_cumulative_percent_all_examinees",
       estimated_upper_cumulative_percent_all_examinees: displayExact(percent, 12),
+      estimated_upper_cumulative_percent_upper_bound: displayExact(upper, 12),
       derived_method_id: this.methodId,
       denominator_kind: "same_year_original_model_whole_exact_mass",
       reference_curve_id: this.context.reference_curve_id,

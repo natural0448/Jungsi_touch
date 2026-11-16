@@ -18,9 +18,9 @@ HISTORICAL_MANIFEST = "tests/review_suite_manifest.20261113_fmt.current.json"
 HISTORICAL_MANIFEST_SHA256 = "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
 MANIFEST_NAME = "tests/review_suite_manifest.20261114_budget_candidate.json"
 MANIFEST = ROOT / MANIFEST_NAME
-MANIFEST_SHA256 = "d97d4d05719098f4cce84189a365c036dd9cd6beb18265dcfe50884e390998e5"
+MANIFEST_SHA256 = "3a04c736b417c502624dc35cb1318e56bf2a2f72bdcce2aa9d0ab8778789cd88"
 ADDITIVE_MANIFEST = "tests/student_pk_additive_manifest.20261113_source_candidate.json"
-ADDITIVE_SHA256 = "cba76e662a0a6a6e990e2fc6799c43fa7262d91ebabb1889d1540d961ec455d1"
+ADDITIVE_SHA256 = "8f41c3d47e7c941b772a4e02d6c3b33a48cf4ff1d78c6ba0d763f4fd3a174e07"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -342,18 +342,18 @@ def verify_additive_suite(data):
 
 
 class ReviewSuites(unittest.TestCase):
-    def test_school_reflected_deno_15(self):
+    def test_school_reflected_deno_18(self):
         data = load_manifest()
         roots = ["tests/school_reflected/test_school_reflected_reference.synthetic.ts"]
-        verify_suite(data, "school_reflected", roots, [], 15)
+        verify_suite(data, "school_reflected", roots, [], 18)
         args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
                 "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
                 "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *roots]
         output = invoke(args, 90)
         matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
-        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (15, 0, 0, 0):
+        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (18, 0, 0, 0):
             raise AssertionError("school reflected result/count mismatch: " + output[-1000:])
-        verify_suite(data, "school_reflected", roots, [], 15)
+        verify_suite(data, "school_reflected", roots, [], 18)
 
     def test_budget_admission_deno_6(self):
         data = load_manifest()

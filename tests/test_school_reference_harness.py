@@ -87,7 +87,10 @@ class SchoolReferenceHarnessCases(unittest.TestCase):
                 # 2026-11-14 school reflected: schema, its generated fixture and artifact reader.
                 for path in ('src/jungsi_touch/application/public_response_schemas.json',
                              'tests/edge/public_api_contract_fixture.ts',
-                             'supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts'):
+                             'supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts',
+                             # 2026-11-16 reference upper bound.
+                             'supabase/functions/_shared/jungsi/application/reference_percentile.ts',
+                             'supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts'):
                     expected_bindings[path] = saved['source_bindings'][path]
             for row in selected['source_bindings']:
                 if row['path'] in expected_bindings:
