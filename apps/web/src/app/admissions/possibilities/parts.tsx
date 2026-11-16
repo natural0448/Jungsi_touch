@@ -421,7 +421,7 @@ function Years({ a }: { a: AssessmentDto }) {
                     <ul className="cl">
                       {lines.map((l, i) => (
                         <li key={i}>
-                          <span className="cl-m">{l.metric}</span>
+                          <span className="cl-m">{l.metric}{l.scope ? <span className="cl-s"> · {l.scope}</span> : null}</span>
                           <b className="num cl-v">상위 {l.cutoff}%</b>
                           <span className={`cl-g ${l.side ?? ""}`}>{l.gap ? `→ ${l.gap}` : <span className="na">내 누적 백분위 없음</span>}</span>
                         </li>

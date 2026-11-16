@@ -21,8 +21,17 @@ function round1(v: bigint): string {
   return `${tenth / TEN}.${tenth % TEN}`;
 }
 
+const COMPONENT: Record<string, string> = { csat_converted: "수능 환산점수", selection_total: "전형 총점" };
+/** 평균은 점수 성분이 있으면 '수능 환산점수 평균'·'전형 총점 평균'으로 나눠 부른다(두 값을 합치지 않음) */
+function metricName(c: YearCutoffDto): string {
+  const part = c.score_component ? COMPONENT[c.score_component] : undefined;
+  return part ? `${part} ${c.published_metric}` : c.published_metric;
+}
+
 export interface CutoffLine {
   metric: string;
+  /** 전형 통합 발표면 '전형 통합 발표', 아니면 null */
+  scope: string | null;
   cutoff: string; // 소수 첫째 자리
   /** 내 누적 백분위와의 차이 문장. 내 값이 없으면 null */
   gap: string | null;
@@ -37,7 +46,7 @@ export function cutoffLine(c: YearCutoffDto, mine: string | null, mineUpper: str
   const cut = micro(c.cutoff_top_percent);
   if (cut === null || cut > HUNDRED * SCALE) return null;
   const me = micro(mine);
-  const base = { metric: c.published_metric, cutoff: round1(cut) };
+  const base = { metric: metricName(c), scope: c.published_scope === "combined_tracks" ? "전형 통합 발표" : null, cutoff: round1(cut) };
   if (me === null) return { ...base, gap: null, side: null };
   const up = micro(mineUpper);
   const hi = up !== null && up > me ? up : me;

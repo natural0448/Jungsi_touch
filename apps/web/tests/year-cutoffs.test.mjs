@@ -15,14 +15,14 @@ const O = "observation:" + "a".repeat(64);
 const c = (year, v, metric = "최종등록자 70%컷") => ({ academic_year: year, published_metric: metric, cutoff_top_percent: v, observation_id: O });
 
 test("gap uses exact decimals: smaller top percent means above the cutoff", () => {
-  assert.deepEqual(cutoffLine(c(2026, "8.25"), "5.70"), { metric: "최종등록자 70%컷", cutoff: "8.3", gap: "내가 2.6%p 위", side: "above" });
-  assert.deepEqual(cutoffLine(c(2026, "3.1"), "5.7"), { metric: "최종등록자 70%컷", cutoff: "3.1", gap: "내가 2.6%p 아래", side: "below" });
+  assert.deepEqual(cutoffLine(c(2026, "8.25"), "5.70"), { metric: "최종등록자 70%컷", scope: null, cutoff: "8.3", gap: "내가 2.6%p 위", side: "above" });
+  assert.deepEqual(cutoffLine(c(2026, "3.1"), "5.7"), { metric: "최종등록자 70%컷", scope: null, cutoff: "3.1", gap: "내가 2.6%p 아래", side: "below" });
   assert.equal(cutoffLine(c(2026, "5.72"), "5.7").side, "same");
   assert.equal(cutoffLine(c(2026, "0.1"), "0.3").gap, "내가 0.2%p 아래");
 });
 
 test("missing or malformed values", () => {
-  assert.deepEqual(cutoffLine(c(2026, "8.25"), null), { metric: "최종등록자 70%컷", cutoff: "8.3", gap: null, side: null });
+  assert.deepEqual(cutoffLine(c(2026, "8.25"), null), { metric: "최종등록자 70%컷", scope: null, cutoff: "8.3", gap: null, side: null });
   assert.equal(cutoffLine(c(2026, "x"), "5"), null);
   assert.equal(cutoffLine(c(2026, "101"), "5"), null);
 });
@@ -55,4 +55,13 @@ test("my reference percentile as a range gives a range gap, or 'similar' when it
   assert.equal(cutoffLine(c(2026, "20"), "12.3", null).gap, "내가 7.7%p 위");
   const a = { reference_percentile: { status: "reference_estimated", estimated_upper_cumulative_percent_all_examinees: "12.3", estimated_upper_cumulative_percent_upper_bound: "14.8" }, year_cutoffs: [c(2026, "20")] };
   assert.equal(yearCutoffLines(a)[0].lines[0].gap, "내가 5.2~7.7%p 위");
+});
+
+test("a combined-track release is tagged and mean score components get their own names (2026-11-16)", () => {
+  const combined = { ...c(2025, "8.25", "70%컷"), published_scope: "combined_tracks" };
+  assert.equal(cutoffLine(combined, "5.7").scope, "전형 통합 발표");
+  assert.equal(cutoffLine(combined, "5.7").metric, "70%컷");
+  assert.equal(cutoffLine({ ...c(2024, "9", "평균"), score_component: "csat_converted" }, null).metric, "수능 환산점수 평균");
+  assert.equal(cutoffLine({ ...c(2024, "9", "평균"), score_component: "selection_total" }, null).metric, "전형 총점 평균");
+  assert.equal(cutoffLine(c(2024, "9", "평균"), null).scope, null);
 });

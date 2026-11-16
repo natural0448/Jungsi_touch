@@ -252,6 +252,10 @@ export interface YearCutoffDto {
   published_metric: string; // 대학 발표 지표 이름(예: 최종등록자 70%컷)
   cutoff_top_percent: string; // 그 합격선의 누적 백분위(전체 응시자 추정, 위에서 %)
   observation_id: string;
+  /** 전형 통합 발표(예: 일반학생·지역인재를 합쳐 발표, 대표님 결정 2026-11-16) */
+  published_scope?: "combined_tracks";
+  /** 평균의 점수 성분: 수능 환산점수 평균 / 전형 총점 평균 */
+  score_component?: "csat_converted" | "selection_total";
 }
 
 /** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
