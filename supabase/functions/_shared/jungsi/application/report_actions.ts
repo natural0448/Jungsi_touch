@@ -17,6 +17,9 @@ import { exact, Rational } from "../domain/exact.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { unicodeCompare } from "../domain/text.ts";
 export const REPORT_ACTION_OPERATIONS = ["shortlist.update", "statistics.read"] as const;
+/** 한 모집군(가·나·다)에 담을 수 있는 수. 정시 원서는 군마다 하나라 후보를 넓게 쌓지 않게 한다(대표님 결정 2026-11-18).
+ * 이 한도 전에 이미 더 담긴 것은 그대로 두고, 새로 담는 것만 막는다. 빼기는 언제나 된다. */
+export const SHORTLIST_GROUP_LIMIT = 4;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 function object(v: unknown): v is NativeObject {
   return v !== null && typeof v === "object" && !Array.isArray(v) && !(v instanceof JsonFloat);
@@ -109,12 +112,27 @@ export class ReportActionService implements ApiBusinessPort {
     if (record.revision !== expected) throw new AccessError("revision_conflict", 409);
     const release = await this.catalog.catalog();
     if (release === null) throw new AccessError("catalog_release_missing", 503);
-    this.catalog.offering(release, oid);
+    const target = this.catalog.offering(release, oid);
     const updated = cloneNativeJson(record.body),
       shortlist = map(updated.shortlist),
       analyses = map(updated.analyses),
       old = shortlist[oid];
     const noOp = object(old) && old.selected === input.selected;
+    if (!noOp && input.selected) {
+      const groups = new Map<string, NativeJson | undefined>();
+      for (const row of this.catalog.serviceRows(release)) {
+        if (typeof row.offering_id === "string") groups.set(row.offering_id, row.group);
+      }
+      let sameGroup = 0;
+      for (const [id, row] of Object.entries(shortlist)) {
+        if (id !== oid && object(row) && row.selected === true && groups.get(id) === target.group) {
+          sameGroup += 1;
+        }
+      }
+      if (sameGroup >= SHORTLIST_GROUP_LIMIT) {
+        throw new AccessError("shortlist_group_limit_exceeded", 409);
+      }
+    }
     if (!noOp) {
       const assessment = analyses[oid];
       shortlist[oid] = {

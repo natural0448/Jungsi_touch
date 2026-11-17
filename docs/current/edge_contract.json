@@ -107758,7 +107758,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+        "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
         "symbols": [
           {
             "declarations": [
@@ -107795,6 +107795,26 @@
               }
             ],
             "name": "REPORT_ACTION_OPERATIONS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "4",
+                    "value": {
+                      "kind": "number",
+                      "number": 4.0
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "SHORTLIST_GROUP_LIMIT"
           },
           {
             "declarations": [
@@ -255420,7 +255440,7 @@
             "src": "supabase/functions/_shared/jungsi/application/administrator_usage_policy.ts"
           }
         ],
-        "source_sha256": "6f18fff45c14e97d02379cc8ef13c13ee414a605ff287f1807be9c0f980cdd9a",
+        "source_sha256": "fc8484580762d97cbd5214b1bc8c9b4b5bff65102736e6a5163a359790f3b768",
         "symbols": [
           {
             "declarations": [
@@ -255490,6 +255510,56 @@
               }
             ],
             "name": "USAGE_LOCK_SQL"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "literal",
+                    "repr": "60",
+                    "value": {
+                      "kind": "bigInt",
+                      "string": "60"
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "READ_LEASE_SECONDS"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(operation: string)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "operation",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "boolean",
+                    "value": "boolean"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "isReadOperation"
           },
           {
             "declarations": [
@@ -256281,6 +256351,32 @@
               }
             ],
             "name": "MICROSECOND"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "kind": "const",
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "ReadonlySet",
+                    "value": {
+                      "typeName": "ReadonlySet",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "variable"
+              }
+            ],
+            "name": "READ_ONLY_OPERATIONS"
           },
           {
             "declarations": [
@@ -294008,7 +294104,7 @@
             "src": "tests/edge/synthetic_catalog.ts"
           }
         ],
-        "source_sha256": "5aa914b0a1e338a38828aeccaeb0bc522ccf7c31200ad27ad40cec44e01399d0",
+        "source_sha256": "2d0a33f90454cad571fc86f0bcd060cad12e199f25780f6b8f82059f54335dbd",
         "symbols": [
           {
             "declarations": [
@@ -294420,6 +294516,35 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "groupLimitCase"
           }
         ]
       },
@@ -304438,7 +304563,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "51af8bcb618b895867160b2e3e844202175003ca22f87595d6f54be2c76179a0",
+        "source_sha256": "96e058f90ac7f298ad18a8bfa1ecb79f199c3bd3074ce8688340d2100e1ea1c1",
         "symbols": [
           {
             "declarations": [
@@ -304600,7 +304725,7 @@
                 "declarationKind": "private",
                 "def": {
                   "hasBody": true,
-                  "parameter_source": "(\n  options: {\n    used?: Record<string, string>;\n    reserved?: Record<string, string>;\n    version?: boolean;\n    identity?: unknown;\n    counter?: unknown;\n    stale?: unknown[][];\n    leaseState?: string;\n    settledBytes?: string;\n    leaseBody?: unknown;\n    dependencyFailure?: boolean;\n    activeExpiry?: bigint;\n  } = {},\n)",
+                  "parameter_source": "(\n  options: {\n    used?: Record<string, string>;\n    reserved?: Record<string, string>;\n    version?: boolean;\n    identity?: unknown;\n    counter?: unknown;\n    stale?: unknown[][];\n    leaseState?: string;\n    settledBytes?: string;\n    leaseBody?: unknown;\n    dependencyFailure?: boolean;\n    activeExpiry?: bigint;\n    longLease?: boolean;\n  } = {},\n)",
                   "params": [
                     {
                       "kind": "assign",
@@ -304744,6 +304869,15 @@
                                   "repr": "bigint",
                                   "value": "bigint"
                                 }
+                              },
+                              {
+                                "name": "longLease",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "keyword",
+                                  "repr": "boolean",
+                                  "value": "boolean"
+                                }
                               }
                             ]
                           }
@@ -304813,6 +304947,35 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "readLeaseCase"
           }
         ]
       },

@@ -188,7 +188,83 @@ Deno.test("shortlist cannot select a practical excluded offering", async () => {
     404,
   );
   equal(f.repo.reports.get(RID)!.revision, 1);
+  await groupLimitCase();
 });
+/** 같은 모집군 4개 한도: 다섯째 거절, 다른 군은 따로, 빼기는 언제나, 이전 초과분 유지. */
+async function groupLimitCase() {
+  const release = syntheticCatalog(), base = release.offerings[0];
+  const ids = ["e", "f", "g", "h", "i"].map((x) => `SYNTHETIC-${x}`);
+  const wide = {
+    ...release,
+    offerings: [
+      ...release.offerings,
+      ...ids.map((id) => ({ ...base, offering_id: id })),
+    ],
+  };
+  const repo = new SyntheticNativeRepository(), clock = { nowUtc: () => NOW };
+  repo.profiles.set(PID, {
+    profile_id: PID,
+    owner_id: OWNER,
+    scores: {},
+    confirmed: true,
+    created_at: TIME,
+  });
+  const stored = report();
+  const row = (selected: boolean) => ({
+    selected,
+    profile_id: PID,
+    assessment_status: "ready",
+  });
+  stored.body.shortlist = {
+    [OID]: row(false),
+    ...Object.fromEntries(ids.map((id) => [id, row(true)])),
+  };
+  repo.reports.set(RID, stored);
+  const service = new ReportActionService(
+    repo,
+    new CatalogService({ getCatalog: () => syncPromise(() => wide) }, clock),
+    clock,
+  );
+  const call = (
+    oid: string,
+    selected: boolean,
+    version: number,
+    key: string,
+  ) => {
+    const r = input(
+      "shortlist.update",
+      { selected, expected_version: version },
+      true,
+      key,
+    );
+    return service.execute({ ...r, params: { ...r.params, offering_id: oid } });
+  };
+  // 한도 전에 다섯 개가 담겨 있어도 그대로 읽히고, 같은 군에 새로 담는 것만 막힌다
+  await denied(
+    () => call(OID, true, 1, "SYNTHETIC-limit-1"),
+    "shortlist_group_limit_exceeded",
+    409,
+  );
+  equal(repo.reports.get(RID)!.revision, 1);
+  // 다른 군은 따로 센다
+  equal(
+    (await call("SYNTHETIC-b", true, 1, "SYNTHETIC-limit-2")).report_version,
+    2,
+  );
+  // 빼기는 언제나 되고, 하나 뺀 뒤에도 넷이 남아 있으면 아직 못 담는다
+  equal((await call(ids[0], false, 2, "SYNTHETIC-limit-3")).report_version, 3);
+  await denied(
+    () => call(OID, true, 3, "SYNTHETIC-limit-4"),
+    "shortlist_group_limit_exceeded",
+    409,
+  );
+  equal((await call(ids[1], false, 3, "SYNTHETIC-limit-5")).report_version, 4);
+  const done = await call(OID, true, 4, "SYNTHETIC-limit-6");
+  equal(done.report_version, 5);
+  equal(((done.shortlist as NativeObject)[OID] as NativeObject).selected, true);
+  // 이미 담긴 것을 다시 담는 요청은 한도와 무관하게 그대로다
+  equal((await call(ids[2], true, 5, "SYNTHETIC-limit-7")).report_version, 5);
+}
 Deno.test("shortlist without catalog is a pending dependency and does not update report", async () => {
   const f = fixture(),
     catalog = new CatalogService({
