@@ -1,7 +1,8 @@
 "use server";
 
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import { currentSnapshot, schoolUnitRows } from "@/lib/p1-snapshot";
+import { currentSnapshot, loadAdigaFill, schoolUnitRows } from "@/lib/p1-snapshot";
+import { applyAdigaFill } from "@/lib/p1-adiga-fill";
 import type { Row } from "@/lib/p1-shape";
 import { lockFor, page } from "@/lib/routes";
 
@@ -32,7 +33,9 @@ export async function loadSchoolRows(pub: string, schoolId: string, keys: string
     const units = await schoolUnitRows(snap.ready, schoolId, keys);
     // YearTable displays historical results only. The 2027 anchor and its
     // server-only scope/relationship identifiers must remain on the server.
-    for (const k of Object.keys(units)) units[k] = units[k].filter((row) => row.y < 2027);
+    // 빈 50%·70%컷은 화면팀이 대학어디가와 대조한 표로 채운다(2026-11-17 대표님 결정). 표가 없으면 그대로.
+    const fill = await loadAdigaFill();
+    for (const k of Object.keys(units)) units[k] = applyAdigaFill(units[k].filter((row) => row.y < 2027), fill);
     return { ok: true, units };
   } catch (e) {
     if (e instanceof ConnectionError || e instanceof AccessDenied) return { ok: false, code: e.code };

@@ -6,6 +6,7 @@ import { P1CoordinationCore, P1CoordinationError, localP1CoordinatorClient, p1Co
   type CoordinatorState, type CoordinationStore, type CoordinationView, type PublicDocument } from "./p1-coordinator-core";
 import { linkR27, unitKey, type Cell, type R27Coverage, type Row, type School } from "./p1-shape";
 import { projectBackendValidatedRank } from "./p1-field-qualification";
+import { ADIGA_FILL_KEY, parseAdigaFill, type AdigaFill } from "./p1-adiga-fill";
 export type { Cell, Row, School } from "./p1-shape";
 
 /** Only immutable public bundles live in KV. The actor owns head/progress/ready and fences every commit.
@@ -488,6 +489,17 @@ export async function rebuildStart(src: JungsiSource, caller: Caller): Promise<W
     await coordinator.rebuildWarm(view.head.publication_sha256);
     return running(initialProgress(view.head), view.head.parts.length);
   } catch (error) { return servicesFailure(error); }
+}
+
+/** 대학어디가 빈칸 채움 표(2026-11-17 대표님 결정). 읽지 못하면 null — 채우지 않을 뿐 화면은 그대로 보인다. 5분마다 다시 읽는다. */
+let fillCache: { at: number; fill: AdigaFill | null } | null = null;
+export async function loadAdigaFill(): Promise<AdigaFill | null> {
+  if (configuredMode() !== "live") return null;
+  if (fillCache && Date.now() - fillCache.at < 5 * 60 * 1000) return fillCache.fill;
+  let fill: AdigaFill | null = null;
+  try { fill = parseAdigaFill(await (await services("live")).kv.get(ADIGA_FILL_KEY, "text")); } catch { fill = null; }
+  fillCache = { at: Date.now(), fill };
+  return fill;
 }
 
 /** Admin status only; an unfresh actor never exposes the stored ready as current. */
