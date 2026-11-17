@@ -21,7 +21,7 @@ const mocks = new Map([
   ["next/cache", data("export function revalidatePath(...args){globalThis.__reportOpsFixture.revalidations.push(args)}")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });
-const { ensureAnalyses, ensureCandidates, togglePickOn, loadMine, canonicalOfferingIds } = await import(opsUrl);
+const { ensureAnalyses, ensureCandidates, togglePickOn, loadMine, loadMineAfter, rememberCurrentReport, canonicalOfferingIds } = await import(opsUrl);
 const { analyzeNow, buildNow } = await import("../src/app/analysis-actions.ts");
 const { AccessDenied, ConnectionError } = await import(classesUrl);
 
@@ -185,4 +185,28 @@ test("caller failure is mapped by the same action error boundary", async () => {
 });
 test("unexpected port error is not disguised as ready", async () => {
   fixture(report(), { writes: [new Error("synthetic-unexpected")] }); await assert.rejects(buildNow, /synthetic-unexpected/);
+});
+
+test("page 3 gated load: with a hint the report read starts before the gate and the status check waits for it (2026-11-18)", async () => {
+  const f = fixture();
+  await rememberCurrentReport(f.src, caller, "synthetic-report-A");
+  let open; const gate = new Promise((r) => { open = r; });
+  const p = loadMineAfter(f.src, caller, gate);
+  await new Promise((r) => setTimeout(r, 5));
+  assert.equal(reads(f).length, 1); // 힌트 리포트는 이미 읽기 시작
+  open();
+  assert.equal((await p).report_id, "synthetic-report-A");
+  assert.equal(reads(f).length, 1); // 같은 번호면 다시 읽지 않는다
+});
+test("page 3 gated load: a stale hint is discarded and the current report is read; no hint keeps the old order", async () => {
+  const f = fixture(report({ report_id: "synthetic-report-B" }));
+  await rememberCurrentReport(f.src, caller, "synthetic-report-OLD");
+  const r = await loadMineAfter(f.src, caller, Promise.reject(new Error("search failed")).catch(() => {}));
+  assert.equal(r.report_id, "synthetic-report-B");
+  assert.deepEqual(reads(f).map((c) => c.args[1]), ["synthetic-report-OLD", "synthetic-report-B"]);
+  const g = fixture();
+  await rememberCurrentReport(g.src, caller, null);
+  let opened = false; const never = new Promise(() => {});
+  const q = await Promise.race([loadMineAfter(g.src, caller, never).then((x) => { opened = true; return x; }), new Promise((r) => setTimeout(() => r("timeout"), 200))]);
+  assert.equal(opened, true); assert.equal(q.report_id, "synthetic-report-A"); // 힌트가 없으면 gate 를 기다리지 않는다
 });

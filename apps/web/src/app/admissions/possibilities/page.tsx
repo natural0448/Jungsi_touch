@@ -46,10 +46,13 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   // 각자 Suspense 경계 안에서 내 리포트(mine)를 기다린다(mine-parts.tsx). 리포트는 이 요청에서 한 번만 받는다.
   // 화면을 열 때는 저장된 분석만 붙인다. 분석이 없는 행은 버튼을 눌러야 계산한다(담당자 회신 2026-10-25).
   // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
-  const mine = startMine(src, caller);
+  // 리포트 번호 힌트가 있으면 리포트 읽기를 검색과 함께 먼저 보내고, 입력 상태는 검색 뒤에 보낸다(동시 2건 유지, 2026-11-18)
+  const searching = src.searchOfferings(caller, toSearch(cur));
+  searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
+  const mine = startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
   try {
-    res = await src.searchOfferings(caller, toSearch(cur));
+    res = await searching;
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;

@@ -120,8 +120,24 @@ export type MineResult =
   | { ok: false; error: ConnectionError | AccessDenied }
   | { ok: false; fatal: unknown };
 
-export function startMine(src: JungsiSource, caller: Caller): Promise<MineResult> {
-  return loadMine(src, caller).then(
+/**
+ * 3페이지 전용(2026-11-18 대표님 요청: 첫 화면 12초). 계정당 동시 2건을 지키면서 리포트를 먼저 읽는다.
+ * 힌트(지난번 확인한 현재 리포트 번호)가 있으면 그 리포트 읽기를 검색과 함께 바로 보내고(동시 2건),
+ * 입력 상태는 검색(gate)이 끝난 뒤에 보낸다. 그때 함께 도는 것은 리포트 읽기 하나뿐이라 동시 2건을 넘지 않는다.
+ * 어느 리포트를 여는지는 전과 같이 입력 상태의 번호가 정한다(힌트와 다르면 미리 읽은 것은 버린다).
+ * 힌트가 없으면 전과 똑같이 입력 상태 → 리포트 순서다(목록은 늦어지지 않는다).
+ */
+export async function loadMineAfter(src: JungsiSource, caller: Caller, gate: Promise<unknown>): Promise<ReportDto | null> {
+  const eager = await startEagerReport(src, caller);
+  if (!eager.pre) return loadMine(src, caller);
+  await gate.then(() => undefined, () => undefined);
+  const id = await currentReportId(src, caller);
+  await rememberCurrentReport(src, caller, id);
+  return id ? finishEagerReport(src, caller, eager, id) : null;
+}
+
+export function startMine(src: JungsiSource, caller: Caller, gate?: Promise<unknown>): Promise<MineResult> {
+  return (gate ? loadMineAfter(src, caller, gate) : loadMine(src, caller)).then(
     (report): MineResult => ({ ok: true, report }),
     (e): MineResult => (e instanceof ConnectionError || e instanceof AccessDenied ? { ok: false, error: e } : { ok: false, fatal: e }),
   );
