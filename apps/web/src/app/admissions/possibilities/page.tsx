@@ -6,7 +6,9 @@ import Link from "@/components/link";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
+import { BookLoading } from "@/components/book-loading";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
+import { memberName } from "@/lib/member-name";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
@@ -34,13 +36,29 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
 
   const caller = await getCaller();
   const src = source();
+  const naming = memberName(); // 대기 화면 문구용. 서비스 API 와 별개 조회라 함께 보낸다
   const { session, down } = await sessionOrDown(src, caller);
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
   // 화면 표시용 잠금. 서버가 검색을 403 으로 막아도 아래 catch 가 같은 안내를 그린다
   const lock = lockFor(session, route);
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
 
-  const cur = parseQuery(await searchParams);
+  const sp = await searchParams;
+  const name = await naming;
+  // 머리글은 바로 보이고, 검색과 내 분석을 기다리는 본문 자리에는 책 넘김 대기 화면을 둔다(2026-11-18 대표님 요청)
+  return (
+    <>
+      {head}
+      <Suspense fallback={<BookLoading name={name} kind="possibilities" />}>
+        <Body src={src} caller={caller} sp={sp} />
+      </Suspense>
+    </>
+  );
+}
+
+async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp: Awaited<PageProps<"/admissions/possibilities">["searchParams"]> }) {
+  const head = null; // 머리글은 Page 가 이미 그렸다
+  const cur = parseQuery(sp);
   // 검색과 내 리포트를 함께 보내되 기다리는 것은 검색뿐이다(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기).
   // 목록(대학·학과·모집군)은 검색만 오면 그리고, 내 환산점수·지원가능성·담기·분석 버튼·담은 학교 띠는
   // 각자 Suspense 경계 안에서 내 리포트(mine)를 기다린다(mine-parts.tsx). 리포트는 이 요청에서 한 번만 받는다.
@@ -91,7 +109,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
   }
   const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group);
   // 유료 데이터를 그린 화면: 회원 식별 표시 + 조회 기록. 모집단위를 펼쳤으면 대학 분석, 아니면 가능성 목록
-  const view = viewPath(route.path, await searchParams);
+  const view = viewPath(route.path, sp);
 
   return (
     <>

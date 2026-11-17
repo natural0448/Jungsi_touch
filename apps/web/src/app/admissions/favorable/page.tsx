@@ -8,7 +8,8 @@ import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
 import { StreamTray } from "@/components/shortlist-tray-stream";
-import { LoadingNotice } from "@/components/loading-notice";
+import { BookLoading } from "@/components/book-loading";
+import { memberName } from "@/lib/member-name";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
 import { loadMineEager, pickedIds, type ReportState } from "@/lib/report-ops";
@@ -42,17 +43,19 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
 
   const caller = await getCaller();
   const src = source();
+  const naming = memberName(); // 대기 화면 문구용. 서비스 API 와 별개 조회라 함께 보낸다
   const { session, down } = await sessionOrDown(src, caller);
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
   const lock = lockFor(session, route);
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
+  const name = await naming;
 
   // 머리글은 바로 보이고, 내 리포트가 필요한 본문만 기다린다(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기)
   const sp = await searchParams;
   return (
     <>
       {head}
-      <Suspense fallback={<LoadingNotice title="유리한 대학을 불러오고 있습니다" desc="저장된 후보 목록과 와일드카드를 확인하는 중입니다." />}>
+      <Suspense fallback={<BookLoading name={name} kind="favorable" />}>
         <Body src={src} caller={caller} sp={sp} />
       </Suspense>
     </>
