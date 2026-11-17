@@ -72,3 +72,20 @@ test("the same release recorded as two observations shows once (2026-11-16)", ()
   const lines = yearCutoffLines(a);
   assert.equal(lines[0].lines.length, 2);
 });
+
+test("without a school curve, the overall CSAT-sum position is used as a labelled reference (2026-11-17 decision 2-나)", () => {
+  const a = { year_cutoffs: [c(2026, "4.0")], reference_percentile: null };
+  const overall = { status: "estimated", reason_code: null, top_percent: "3.95", exclusive_top_percent: "3.90", inclusive_top_percent: "4.00" };
+  const [{ lines: [l] }] = yearCutoffLines(a, overall);
+  assert.equal(l.basis, "overall");
+  assert.equal(l.side, "same");
+  const [{ lines: [m] }] = yearCutoffLines({ ...a, year_cutoffs: [c(2026, "6.0")] }, { ...overall, exclusive_top_percent: null, inclusive_top_percent: null });
+  assert.deepEqual([m.basis, m.gap], ["overall", "내가 2.1%p 위"]);
+  // 이 학과 곡선 값이 있으면 그 값만 쓰고 참고 꼬리표는 없다
+  const school = { status: "reference_estimated", estimated_upper_cumulative_percent_all_examinees: "5.0" };
+  const [{ lines: [s] }] = yearCutoffLines({ ...a, reference_percentile: school }, overall);
+  assert.deepEqual([s.basis, s.gap], ["school", "내가 1.0%p 아래"]);
+  // 전체 위치가 없거나 대기 상태면 예전처럼 비교하지 않는다
+  const [{ lines: [n] }] = yearCutoffLines(a, { ...overall, status: "pending" });
+  assert.deepEqual([n.basis, n.gap], [undefined, null]);
+});

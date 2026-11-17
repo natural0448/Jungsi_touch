@@ -6,6 +6,7 @@ import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
 import { loadExtras, type Extras } from "./extras-actions";
 import { Published, Recruit, sameRelease } from "./recruit-parts";
+import { P1YearsContext } from "./p1-year-cell";
 
 /**
  * 모집단위 한 줄. 펼치기·접기는 화면에서 바로 한다(서버 왕복 없음) — 환산·누백·판단 카드(detail)는
@@ -38,7 +39,7 @@ export function ItemShell({
   const fetchOnce = () => {
     if (asked.current) return;
     asked.current = true;
-    loadExtras(o.offering_id)
+    loadExtras(o.offering_id, o.university_name)
       .then(setExtras)
       .catch(() => setExtras({ ok: false, code: "request_failed" }));
   };
@@ -95,7 +96,7 @@ export function ItemShell({
               <span>모집 인원<b><span className="wait">불러오지 못했습니다(문의 번호 {extras.code})</span></b></span>
             </div>
           )}
-          {detail}
+          <P1YearsContext.Provider value={extras === null ? undefined : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
         </div>
       )}
     </li>

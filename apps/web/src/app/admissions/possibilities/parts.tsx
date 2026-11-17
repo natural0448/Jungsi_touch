@@ -10,6 +10,7 @@ import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercent
 import { page } from "@/lib/routes";
 import { SchoolReflectedLine } from "@/components/school-reflected";
 import { IssueItem } from "./recruit-parts";
+import { P1YearCell } from "./p1-year-cell";
 
 /**
  * 펼친 줄: 2027 모집 정보(extras 자리, recruit-parts.tsx) + 환산·학교 누백·지원 판단·유불리 + 근거(assessment).
@@ -62,7 +63,7 @@ export function Detail({ o, a, extras, picked, subjects, overall }: { o: Offerin
         </div>
       )}
       <AdoptedEvidence a={a} />
-      <Years a={a} />
+      <Years a={a} overall={overall ?? null} />
       <div className="acts">
         <PickButton id={o.offering_id} on={picked} variant="wide" />
         <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
@@ -396,9 +397,9 @@ function AdoptedEvidence({ a }: { a: AssessmentDto }) {
  * 연도별 근거(대표님 결정 2026-11-15): 학년도별 대학 발표 입시결과, 그 합격선의 누적 백분위(추정),
  * 내 누적 백분위와의 차이. 누적 백분위끼리는 해가 달라도 같은 기준이라 바로 견준다.
  */
-function Years({ a }: { a: AssessmentDto }) {
+function Years({ a, overall }: { a: AssessmentDto; overall: OverallResultDto | null }) {
   const metrics = a.decision_evidence?.historical_metrics ?? [];
-  const cut = yearCutoffLines(a);
+  const cut = yearCutoffLines(a, overall);
   const past = (y: number) => y >= 2024 && y <= 2026;
   const all = Array.from(new Set([2026, 2025, 2024, ...metrics.map((m) => m.academic_year).filter(past), ...cut.map((c) => c.year)])).sort((x, y) => y - x);
   return (
@@ -421,7 +422,8 @@ function Years({ a }: { a: AssessmentDto }) {
                 <th scope="row" className="num">{yr}</th>
                 <td>
                   {ms.length === 0 ? (
-                    <span className="na">자료 없음</span>
+                    // 판정 근거가 없으면 1페이지와 같은 대학 발표 성적을 보인다(2026-11-17 대표님 결정 1-가)
+                    <P1YearCell year={yr} />
                   ) : (
                     ms.map((m) => (
                       <span key={m.metric_name} className="m">
@@ -442,6 +444,7 @@ function Years({ a }: { a: AssessmentDto }) {
                           <span className="cl-m">{l.metric}{l.scope ? <span className="cl-s"> · {l.scope}</span> : null}</span>
                           <b className="num cl-v">상위 {l.cutoff}%</b>
                           <span className={`cl-g ${l.side ?? ""}`}>{l.gap ? `→ ${l.gap}` : <span className="na">내 누적 백분위 없음</span>}</span>
+                          {l.basis === "overall" && <span className="cl-s"> · 참고 · 국·수·탐 표준점수 합 기준</span>}
                         </li>
                       ))}
                     </ul>

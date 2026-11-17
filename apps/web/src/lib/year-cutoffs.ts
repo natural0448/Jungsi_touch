@@ -1,4 +1,4 @@
-import type { AssessmentDto, YearCutoffDto } from "./dto";
+import type { AssessmentDto, OverallResultDto, YearCutoffDto } from "./dto";
 
 /**
  * 연도별 근거(대표님 결정 2026-11-15): 지난 학년도 합격선의 누적 백분위와 내 누적 백분위를 견준다.
@@ -36,6 +36,8 @@ export interface CutoffLine {
   /** 내 누적 백분위와의 차이 문장. 내 값이 없으면 null */
   gap: string | null;
   side: "above" | "below" | "same" | null;
+  /** 내 위치의 잣대. school = 이 학과 환산 기준, overall = 국·수·탐 표준점수 합 전체 위치(참고, 대표님 결정 2026-11-17 2-나) */
+  basis?: "school" | "overall";
 }
 
 /**
@@ -65,16 +67,26 @@ export function cutoffLine(c: YearCutoffDto, mine: string | null, mineUpper: str
 }
 
 /** 학년도별 합격선 줄(최신 학년도부터). 자료가 없으면 빈 배열 */
-export function yearCutoffLines(a: AssessmentDto): { year: number; lines: CutoffLine[] }[] {
+export function yearCutoffLines(a: AssessmentDto, overall: OverallResultDto | null = null): { year: number; lines: CutoffLine[] }[] {
   const r = a.reference_percentile;
-  const mine = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_all_examinees : null;
-  const mineUpper = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_upper_bound ?? null : null;
+  let mine = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_all_examinees : null;
+  let mineUpper = r && r.status === "reference_estimated" ? r.estimated_upper_cumulative_percent_upper_bound ?? null : null;
+  let basis: CutoffLine["basis"] = mine !== null ? "school" : undefined;
+  // 이 학과 환산 기준 내 위치가 없으면 국·수·탐 표준점수 합 전체 위치를 참고로 쓴다(대표님 결정 2026-11-17 2-나).
+  // 전체 위치가 범위(같은 점수 학생 구간)면 범위 그대로 견준다.
+  if (mine === null && overall && (overall.status === "observed" || overall.status === "estimated")) {
+    const lo = overall.exclusive_top_percent ?? overall.top_percent, hi = overall.inclusive_top_percent ?? overall.top_percent;
+    if (lo !== null && lo !== undefined) {
+      mine = lo; mineUpper = hi ?? null; basis = "overall";
+    }
+  }
   const by = new Map<number, CutoffLine[]>();
   // 같은 발표가 관측 두 개로 들어온 경우(학년도·지표·값이 모두 같음) 한 줄만 보인다(2026-11-16)
   const seen = new Set<string>();
   for (const c of a.year_cutoffs ?? []) {
-    const line = cutoffLine(c, mine, mineUpper);
-    if (!line) continue;
+    const found = cutoffLine(c, mine, mineUpper);
+    if (!found) continue;
+    const line: CutoffLine = found.gap !== null && basis ? { ...found, basis } : found;
     const key = `${c.academic_year}|${line.metric}|${line.scope ?? ""}|${c.cutoff_top_percent}`;
     if (seen.has(key)) continue;
     seen.add(key);

@@ -575,6 +575,22 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
   }));
   return { total_schools: order.length, total_units: units, total_pending: pending, page, pages, schools };
 }
+/**
+ * 3페이지 연도별 근거의 '대학 발표 입시결과' 칸(2026-11-17 대표님 결정 1-가): 2027 모집행(pk)과 같은 묶음의
+ * 1페이지 2024~2026 행. 대학 이름으로 학교를 찾고, 그 학교에서 이 2027 행과 같은 표시 키를 가진 과거 행만 돌려준다.
+ */
+export async function pastRowsFor2027(ready: Ready, university: string, pk27: string): Promise<Row[]> {
+  const ix = await index(ready), q = norm(university);
+  const exact = ix.schools.filter(s => s.names.some(n => norm(n) === q));
+  for (const s of exact.length ? exact : ix.schools.filter(s => s.names.some(n => norm(n).includes(q)))) {
+    const rows = await school(ready, s.id);
+    const anchor = rows.find(r => r.y === 2027 && r.pk === pk27);
+    if (!anchor) continue;
+    const key = unitKey(anchor);
+    return rows.filter(r => r.y < 2027 && unitKey(r) === key);
+  }
+  return [];
+}
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
   return (await schoolUnitRows(ready, schoolId, [key]))[key] ?? [];
 }
