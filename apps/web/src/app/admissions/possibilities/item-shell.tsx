@@ -4,7 +4,7 @@ import { Suspense, use, useEffect, useRef, useState, type ReactNode } from "reac
 import { ChevronIcon } from "@/components/icons";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
-import { loadExtras, type Extras } from "./extras-actions";
+import { loadExtras, type Extras, type P1Year } from "./extras-actions";
 import { Published, Recruit, sameRelease } from "./recruit-parts";
 import { P1YearsContext } from "./p1-year-cell";
 
@@ -34,11 +34,17 @@ export function ItemShell({
 }) {
   const [open, setOpen] = useState(initialOpen);
   const [extras, setExtras] = useState<Extras | null>(null); // null = 아직 받는 중
+  // 1페이지 성적만 먼저(따로 fetch). undefined = 받는 중, null = 저장본 없음 → extras.p1 을 쓴다
+  const [p1Fast, setP1Fast] = useState<P1Year[] | null | undefined>(undefined);
   const asked = useRef(false);
   // 처음 펼칠 때 한 번만 받는다(접었다 다시 펴도 다시 부르지 않음)
   const fetchOnce = () => {
     if (asked.current) return;
     asked.current = true;
+    fetch(`/jeongsi/admissions/possibilities/p1-years?offering=${encodeURIComponent(o.offering_id)}&university=${encodeURIComponent(o.university_name)}`)
+      .then((r) => (r.ok ? r.json() : { p1: null }))
+      .then((b: { p1?: P1Year[] | null }) => setP1Fast(Array.isArray(b.p1) ? b.p1 : null))
+      .catch(() => setP1Fast(null));
     loadExtras(o.offering_id, o.university_name)
       .then(setExtras)
       .catch(() => setExtras({ ok: false, code: "request_failed" }));
@@ -96,7 +102,7 @@ export function ItemShell({
               <span>모집 인원<b><span className="wait">불러오지 못했습니다(문의 번호 {extras.code})</span></b></span>
             </div>
           )}
-          <P1YearsContext.Provider value={extras === null ? undefined : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
+          <P1YearsContext.Provider value={p1Fast ? p1Fast : extras === null ? undefined : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
         </div>
       )}
     </li>
