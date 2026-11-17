@@ -40,6 +40,13 @@ function uint(v: unknown): bigint {
   check(n <= MAX, "reference_tail_invalid");
   return n;
 }
+/** 점수 분자만 부호를 허용한다(음수 환산점수, 11-17). 가중치는 uint 그대로. */
+function sint(v: unknown): bigint {
+  check(typeof v === "string" && /^(0|-?[1-9][0-9]{0,18})$/.test(v), "reference_tail_invalid");
+  const n = BigInt(v);
+  check(n >= -MAX && n <= MAX, "reference_tail_invalid");
+  return n;
+}
 function nativeUint(v: unknown): bigint {
   check(
     (typeof v === "number" && Number.isSafeInteger(v)) || typeof v === "bigint",
@@ -69,6 +76,9 @@ function numberEnd(s: string, i: number): number {
   while (j < s.length && s.charCodeAt(j) >= 48 && s.charCodeAt(j) <= 57) j++;
   check(j > i && j - i <= 19 && !(j - i > 1 && s[i] === "0"), "reference_tail_invalid");
   return j;
+}
+function scoreEnd(s: string, i: number): number {
+  return numberEnd(s, s[i] === "-" ? i + 1 : i);
 }
 function quotedEnd(s: string, i: number): number {
   check(s[i] === '"', "reference_tail_invalid");
@@ -130,7 +140,7 @@ async function scan(
     const offset = i;
     check(s[i] === "[", "reference_tail_invalid");
     i = skip(s, i + 1);
-    const nEnd = numberEnd(s, i), n = uint(s.slice(i, nEnd));
+    const nEnd = scoreEnd(s, i), n = sint(s.slice(i, nEnd));
     i = skip(s, nEnd);
     check(s[i] === ",", "reference_tail_invalid");
     i = skip(s, i + 1);
@@ -139,7 +149,7 @@ async function scan(
     check(s[wEnd] === '"', "reference_tail_invalid");
     const w = uint(s.slice(i + 1, wEnd));
     i = skip(s, wEnd + 1);
-    check(s[i] === "]" && w > 0n && n > last, "reference_tail_invalid");
+    check(s[i] === "]" && w > 0n && (count === 0 || n > last), "reference_tail_invalid");
     i = skip(s, i + 1);
     if (!count) first = n;
     last = n;
@@ -177,7 +187,7 @@ function inclusiveAt(
   for (let count = 0; count <= 2048; count++) {
     check(s[i] === "[", "reference_tail_invalid");
     i = skip(s, i + 1);
-    const nEnd = numberEnd(s, i), n = uint(s.slice(i, nEnd));
+    const nEnd = scoreEnd(s, i), n = sint(s.slice(i, nEnd));
     i = skip(s, nEnd);
     check(s[i] === ",", "reference_tail_invalid");
     i = skip(s, i + 1);

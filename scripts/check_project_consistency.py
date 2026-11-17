@@ -6159,8 +6159,8 @@ def service_candidate_suite_errors(paths, read, spec):
                 overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
                 overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
                 raise ValueError("suite overlay status")
-            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "1845fe03efd7e4e1074bbb17b846f914d686d4b02f471a1c21156a495da124da"),
-                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "a0b1c09e668f624bc6c81d5cc3d5a0a64e86a3cbeae974c3c7e12dce8a50b7da"),
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "66f726de97d579ce8277cff4669f7c0ac5fdb0c258b034dfa3b391871edd8316"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "4661837615cbee2a941a568832a007c900640a3b82eef2b15e19db34bfb9a27a"),
                      "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
             for key, (path, fixed) in bound.items():
                 item = overlay[key]

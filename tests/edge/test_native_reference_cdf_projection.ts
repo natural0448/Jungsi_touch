@@ -86,6 +86,46 @@ async function denied(f: () => Promise<unknown>) {
   }
   assert(yes);
 }
+/** 음수 환산점수 축(11-17): 점수만 부호를 받고 가중치는 양수 문자열 그대로 */
+async function signedNativeAxis() {
+  const s = new AbortController().signal;
+  const f = await fixture([[-250, "2"], [0, "3"], [300, "1"]]),
+    p = await NativeReferenceCdfProjection.bind(f.raw, f.pin, f.method, s);
+  const at = async (n: bigint, d = 1n) =>
+    (await p.query(new Rational(n, d), f.identity, s))
+      ?.estimated_upper_cumulative_percent_all_examinees ?? null;
+  equal(await at(-5n, 2n), "60.000000000000");
+  equal(await at(-1n), "40.000000000000");
+  equal(await at(0n), "40.000000000000");
+  equal(await at(1n, 100n), "10.000000000000");
+  equal(await at(3n), "10.000000000000");
+  equal(await at(4n), null);
+  for (
+    const rows of [
+      [[-250, "2"], [-300, "3"], [300, "1"]],
+      [[-250, "-2"], [0, "3"], [300, "1"]],
+      [["-250", "2"], [0, "3"], [300, "1"]],
+    ]
+  ) {
+    const g = await fixture(rows);
+    await denied(async () => {
+      const q = await NativeReferenceCdfProjection.bind(g.raw, g.pin, g.method, s);
+      await q.query(new Rational(0n), g.identity, s);
+    });
+  }
+  const big = await fixture([[0, "2"], [100, "3"], [300, "1"]]);
+  const text = new TextDecoder().decode(big.raw).replace("[[0,", "[[-0,");
+  const raw = new TextEncoder().encode(text);
+  await denied(async () => {
+    const q = await NativeReferenceCdfProjection.bind(
+      raw,
+      { ...big.pin, sourceSha256: await sha(raw), sourceBytes: raw.length },
+      big.method,
+      s,
+    );
+    await q.query(new Rational(0n), big.identity, s);
+  });
+}
 Deno.test("native streaming CDF uses whole cohort denominator and inclusive ties", async () => {
   const f = await fixture(),
     s = new AbortController().signal,
@@ -106,6 +146,7 @@ Deno.test("native streaming CDF uses whole cohort denominator and inclusive ties
     "10.000000000000",
   );
   equal(await p.query(new Rational(4n), f.identity, s), null);
+  await signedNativeAxis();
 });
 Deno.test("native CDF refuses wrong hash, model pack, scope or support cap", async () => {
   for (const kind of ["hash", "model", "limit", "identity"]) {

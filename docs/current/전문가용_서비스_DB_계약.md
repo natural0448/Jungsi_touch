@@ -1298,4 +1298,4 @@ PGlite 메모리 합성 DB 4건 PASS. 기존 011 번호 회피 및 008 함수 �
 ]
 ```
 
-<!-- jungsi:generated spec_sha256=d9d0bee7a2bc2b95e820259d188da8773c5b667d1770fda0598cd527738a1484 -->
+<!-- jungsi:generated spec_sha256=a9ab7abdc0682afe2566a70047287c45bcfd06106dca250031cb96cf4bd2e541 -->

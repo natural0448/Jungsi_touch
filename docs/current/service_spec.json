@@ -13740,7 +13740,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "f8975a926b8a34f4f8ddf1667837a18b7e92c855d751a253898a006525e2153a",
+            "source_sha256": "2ae78a5921916ce5fbf563a1ea931c155a515559e9c5fcb5ab85ad889506ca93",
             "symbols": [
               {
                 "kind": "class",
@@ -24206,7 +24206,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "dc35f44a05d25d79999bce25b8bbc0ccfd260cf34c4771898071e7a582140654",
+              "source_sha256": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
               "declared_exports": [
                 "ChunkedReferenceTailProjection"
               ]
@@ -24377,7 +24377,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "a756912c32825e00f29ff7835d668030394abd5d02da3145b24260014c5fa371",
+              "source_sha256": "c203fb6cb673c7836feb2428907ab9becf51b1a77291fb976bd27f7836598ad6",
               "declared_exports": [
                 "NativeCdfPin",
                 "NativeReferenceCdfProjection"
@@ -24434,7 +24434,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "049383b57965705e5893f8105f3140e104c04881a57285b80943a0f6f7f3b582",
+              "source_sha256": "4f00a8cdb5fbea227b517e4b93b07e4ce2040c0cc2ae73c20bab1e37b4edbb34",
               "declared_exports": [
                 "AuthorizedSavedTailBytesPort",
                 "AuthorizedSavedTailPin",
@@ -34505,7 +34505,7 @@
         },
         {
           "path": "tests/edge/test_chunked_reference_projection.synthetic.ts",
-          "sha256": "d9a1056a66a45fde79352dc02b62b85ba43b292af7eccadf91fe6dc6e6a875b5"
+          "sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417"
         },
         {
           "path": "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
@@ -34521,7 +34521,7 @@
         },
         {
           "path": "tests/edge/test_native_reference_cdf_projection.ts",
-          "sha256": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5"
+          "sha256": "5e245c30a0df8fd48ac87f0e02fb3978f327e3d5a17a8086a0650da7cb8191d8"
         },
         {
           "path": "tests/edge/test_native_reference_db_tail.ts",
@@ -34806,15 +34806,15 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "1845fe03efd7e4e1074bbb17b846f914d686d4b02f471a1c21156a495da124da"
+        "sha256": "66f726de97d579ce8277cff4669f7c0ac5fdb0c258b034dfa3b391871edd8316"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "a0b1c09e668f624bc6c81d5cc3d5a0a64e86a3cbeae974c3c7e12dce8a50b7da"
+        "sha256": "4661837615cbee2a941a568832a007c900640a3b82eef2b15e19db34bfb9a27a"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "2925e74368ccca4935e7c0a7d2f479b4d4406292d7eb5e4700f4f4e6f8a4ef6e"
+        "sha256": "d37ffbd420599d1a0b33df082735667146700e045cf951af3425654737212ac5"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -149813,7 +149813,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "dc35f44a05d25d79999bce25b8bbc0ccfd260cf34c4771898071e7a582140654",
+          "source_sha256": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
           "symbols": [
             {
               "declarations": [
@@ -150535,6 +150535,36 @@
                 }
               ],
               "name": "nativeUint"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "bigint",
+                      "value": "bigint"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "nativeSint"
             },
             {
               "declarations": [
@@ -154694,7 +154724,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "a756912c32825e00f29ff7835d668030394abd5d02da3145b24260014c5fa371",
+          "source_sha256": "c203fb6cb673c7836feb2428907ab9becf51b1a77291fb976bd27f7836598ad6",
           "symbols": [
             {
               "declarations": [
@@ -155568,6 +155598,36 @@
                   "kind": "function"
                 }
               ],
+              "name": "sint"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "bigint",
+                      "value": "bigint"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
               "name": "nativeUint"
             },
             {
@@ -155753,6 +155813,46 @@
                 }
               ],
               "name": "numberEnd"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(s: string, i: number)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "s",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "i",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "number",
+                      "value": "number"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "scoreEnd"
             },
             {
               "declarations": [
@@ -156706,7 +156806,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ],
-          "source_sha256": "049383b57965705e5893f8105f3140e104c04881a57285b80943a0f6f7f3b582",
+          "source_sha256": "4f00a8cdb5fbea227b517e4b93b07e4ce2040c0cc2ae73c20bab1e37b4edbb34",
           "symbols": [
             {
               "declarations": [
@@ -157609,6 +157709,36 @@
                 }
               ],
               "name": "uint"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(v: unknown)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "unknown",
+                          "value": "unknown"
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "bigint",
+                      "value": "bigint"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "sint"
             },
             {
               "declarations": [
@@ -247487,12 +247617,22 @@
               "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
             },
             {
+              "importedName": "SavedReferenceTailProjection",
+              "originalName": "SavedReferenceTailProjection",
+              "src": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
+            },
+            {
+              "importedName": "exact",
+              "originalName": "exact",
+              "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+            },
+            {
               "importedName": "nativeJsonText",
               "originalName": "nativeJsonText",
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ],
-          "source_sha256": "d9a1056a66a45fde79352dc02b62b85ba43b292af7eccadf91fe6dc6e6a875b5",
+          "source_sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417",
           "symbols": [
             {
               "declarations": [
@@ -247852,6 +247992,64 @@
                 }
               ],
               "name": "pct"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "signedSavedTail"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "signedChunks"
             }
           ]
         },
@@ -247883,6 +248081,16 @@
               {
                 "kind": "code",
                 "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+              }
+            ]
+          },
+          {
+            "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+            "targets": [
+              {
+                "kind": "code",
+                "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
               }
             ]
           }
@@ -259686,174 +259894,14 @@
       },
       "tests/edge/test_native_reference_cdf_projection.ts": {
         "declarations": {
-          "symbols": [
-            {
-              "name": "H",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "s",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "string",
-                          "kind": "keyword",
-                          "value": "string"
-                        }
-                      }
-                    ],
-                    "hasBody": true,
-                    "parameter_source": "(s: string)"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "sha",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "b",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "Uint8Array",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "Uint8Array"
-                          }
-                        }
-                      }
-                    ],
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "(b: Uint8Array)"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "fixture",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "assign",
-                        "left": {
-                          "kind": "identifier",
-                          "name": "rows",
-                          "optional": false,
-                          "tsType": {
-                            "kind": "array",
-                            "value": {
-                              "kind": "array",
-                              "value": {
-                                "kind": "parenthesized",
-                                "value": {
-                                  "kind": "union",
-                                  "value": [
-                                    {
-                                      "repr": "number",
-                                      "kind": "keyword",
-                                      "value": "number"
-                                    },
-                                    {
-                                      "repr": "string",
-                                      "kind": "keyword",
-                                      "value": "string"
-                                    }
-                                  ]
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "right": "[UNSUPPORTED]"
-                      }
-                    ],
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "(rows: (number | string)[][] = [[100, \"2\"], [200, \"3\"], [300, \"1\"]])"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "denied",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "f",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "fnOrConstructor",
-                          "value": {
-                            "constructor": false,
-                            "tsType": {
-                              "repr": "Promise",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeParams": [
-                                  {
-                                    "repr": "unknown",
-                                    "kind": "keyword",
-                                    "value": "unknown"
-                                  }
-                                ],
-                                "typeName": "Promise"
-                              }
-                            },
-                            "params": []
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "repr": "Promise",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeParams": [
-                          {
-                            "repr": "void",
-                            "kind": "keyword",
-                            "value": "void"
-                          }
-                        ],
-                        "typeName": "Promise"
-                      }
-                    },
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "(f: () => Promise<unknown>)"
-                  }
-                }
-              ]
-            }
-          ],
           "imports": [
             {
               "importedName": "NativeCdfPin",
-              "originalName": "NativeCdfPin",
-              "src": "supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts",
               "jsDoc": {
                 "doc": "Synthetic native CDF streaming tests; no operating authorization is implied."
-              }
+              },
+              "originalName": "NativeCdfPin",
+              "src": "supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts"
             },
             {
               "importedName": "NativeObject",
@@ -259862,11 +259910,11 @@
             },
             {
               "importedName": "NativeReferenceCdfProjection",
-              "originalName": "NativeReferenceCdfProjection",
-              "src": "supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts",
               "jsDoc": {
                 "doc": "Synthetic native CDF streaming tests; no operating authorization is implied."
-              }
+              },
+              "originalName": "NativeReferenceCdfProjection",
+              "src": "supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts"
             },
             {
               "importedName": "Rational",
@@ -259884,12 +259932,201 @@
               "src": "tests/edge/fixture.ts"
             }
           ],
-          "source_sha256": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5"
+          "source_sha256": "5e245c30a0df8fd48ac87f0e02fb3978f327e3d5a17a8086a0650da7cb8191d8",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(s: string)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "s",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "H"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(b: Uint8Array)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "b",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Uint8Array",
+                          "value": {
+                            "typeName": "Uint8Array"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "sha"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(rows: (number | string)[][] = [[100, \"2\"], [200, \"3\"], [300, \"1\"]])",
+                    "params": [
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "rows",
+                          "optional": false,
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "parenthesized",
+                                "value": {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "number",
+                                      "value": "number"
+                                    },
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "right": "[UNSUPPORTED]"
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "fixture"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(f: () => Promise<unknown>)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "f",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "denied"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "signedNativeAxis"
+            }
+          ]
         },
         "dependencies": [
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts",
             "targets": [
               {
                 "kind": "code",
@@ -259898,8 +260135,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
             "targets": [
               {
                 "kind": "type",
@@ -259908,8 +260145,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts",
             "targets": [
               {
                 "kind": "code",
@@ -259918,8 +260155,8 @@
             ]
           },
           {
-            "specifier": "./fixture.ts",
             "dynamic": false,
+            "specifier": "./fixture.ts",
             "targets": [
               {
                 "kind": "code",
@@ -364860,17 +365097,17 @@
       "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts": "0a295516b4587d3072ff6a6a34a7dac4395dbd86ed3e354beb2cb57575514137",
       "supabase/functions/_shared/jungsi/application/wildcard_selection.ts": "83731a53497e5be55720bf7bd64cd493a19ec9fc291c6bcf110d0397f193dcae",
       "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts": "9e9210da291261207e6bd49969c22c62e9c7ee06c76edafa71bb9105fd4c821d",
-      "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts": "dc35f44a05d25d79999bce25b8bbc0ccfd260cf34c4771898071e7a582140654",
+      "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
       "supabase/functions/_shared/jungsi/domain/conversion.ts": "f17d26ebb957813a3f818bcd2bc1090469c3f190fa99afc15e3d8c6097d43486",
       "supabase/functions/_shared/jungsi/domain/conversion_release.ts": "9d7e0ff22c42deb6abaf90c72582f3bf4c2cf9ad63760ccb8ae8692c6274ad98",
       "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
       "supabase/functions/_shared/jungsi/domain/exam_pack.ts": "0df832cb190512a5db35fd85275d51cae321770c6bcdc7a7f14b7e8ee512d8da",
       "supabase/functions/_shared/jungsi/domain/json_value.ts": "ca4043e6f9f7573051347f4e2f22852e8a7340ad825c790362be91d211145f7a",
       "supabase/functions/_shared/jungsi/domain/native_json.ts": "a99bf16c333fcd1c47de1703b072fd7a3638a56a51d661287303282b4d3ca7a0",
-      "supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts": "a756912c32825e00f29ff7835d668030394abd5d02da3145b24260014c5fa371",
+      "supabase/functions/_shared/jungsi/domain/native_reference_cdf_projection.ts": "c203fb6cb673c7836feb2428907ab9becf51b1a77291fb976bd27f7836598ad6",
       "supabase/functions/_shared/jungsi/domain/percentile.ts": "18e7abec5e173758d78d89d70fdc0d5052aa098a04cba99845f4ec4aeedb7a02",
       "supabase/functions/_shared/jungsi/domain/python_json_digest.ts": "c6f4a96dc3dfeacf4a6bcc27a08c520b1cc8bc969fd2f2240f8389e9256b3a3e",
-      "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "049383b57965705e5893f8105f3140e104c04881a57285b80943a0f6f7f3b582",
+      "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "4f00a8cdb5fbea227b517e4b93b07e4ce2040c0cc2ae73c20bab1e37b4edbb34",
       "supabase/functions/_shared/jungsi/domain/score_input_rights.ts": "5ed4cebc7212ad60925b9ab892e3a65fbe88e731fdc977bcc42754cdb8d0aadf",
       "supabase/functions/_shared/jungsi/domain/text.ts": "da8931fbab3f328fe4dbf89db8dbcfdb5fc55898c44dcdbbf6f8cedb59677fe9",
       "supabase/functions/_shared/jungsi/domain/time.ts": "2b1a2dd1b5d5ec8af5bc4bff60495b24bcb32d55b83abaf301bd97de847997f0",
@@ -364990,7 +365227,7 @@
       "tests/edge/test_cancellable_db_read.ts": "e2e344e0d3ce5d24777897fa69d70ee63835b2058ea82b823ef29674613549fa",
       "tests/edge/test_catalog.ts": "e512307b3ce84612f00b4f04182c4bb59cdabb6b976e13507d16eb8213e7c84b",
       "tests/edge/test_chunked_reference_integration.synthetic.ts": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074",
-      "tests/edge/test_chunked_reference_projection.synthetic.ts": "d9a1056a66a45fde79352dc02b62b85ba43b292af7eccadf91fe6dc6e6a875b5",
+      "tests/edge/test_chunked_reference_projection.synthetic.ts": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417",
       "tests/edge/test_chunked_runtime_wiring.synthetic.ts": "30c9ba86d433c1c17cf9a925680add2a907e6aa275287c5b374d86f57371595a",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
       "tests/edge/test_conversion_release.ts": "60bc6dcdd06a34b2406bf8fa04c865efa6129f82a60f6431260a1813657c53d0",
@@ -365021,7 +365258,7 @@
       "tests/edge/test_member_shortlist_http.ts": "693d14dace3af400eb6e9aab6ab48a277c71cfcfa65a185e33de9768f8a14250",
       "tests/edge/test_native_auth.ts": "c6b1781256e4bea7c075ad4c74575f9537013787a09f28fd863ccd4f895ef872",
       "tests/edge/test_native_data_provider.ts": "864f79ee0574e7376c4137a9a4f0d580e240224c6b60d2119a93c81b092fa91e",
-      "tests/edge/test_native_reference_cdf_projection.ts": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5",
+      "tests/edge/test_native_reference_cdf_projection.ts": "5e245c30a0df8fd48ac87f0e02fb3978f327e3d5a17a8086a0650da7cb8191d8",
       "tests/edge/test_native_reference_db_tail.ts": "e419961ed501b64286a0fcd0019bb2b02031e954a440f883517b41df84d95b32",
       "tests/edge/test_native_source_selection.ts": "555a1814a190e146048ef1e2741d6bad3f41691d0d8c093a63d11533ceb77470",
       "tests/edge/test_native_sql.ts": "1a36c576d0c4b1d7c548ff7bd55c3fbb6837d221fc2a46e2a40a644828561697",
@@ -367005,8 +367242,8 @@
       "historical_sha256": "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0",
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
-      "graph_manifest_sha256": "4d42c2dcd97247c59c31b42154342bba57ebc9fc1801357be35ab3a857f42930",
-      "bridge_sha256": "94636fe7ceb5b2f8159c50d4c49bf9b2051f8fea4ce51290b5d023efcafc541c"
+      "graph_manifest_sha256": "d6d61bb395f69cedf71813868090878487d920995e5477ea6c257ea7971e76fe",
+      "bridge_sha256": "800494cb7b953f021f4093a9359cf28326dfc9285df4e1fd07b03fb914c73757"
     }
   },
   "P1_display_snapshot_contract": {
@@ -370871,7 +371108,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "e70500c2539b9ea3d0568d4806492a405a58875043769d7d33a648c3b679800f",
+    "manifest_sha256": "0f1a61444527138aebe0b50acbe435d7e02ed53fc24a0cc70d0309051e8376d5",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -370882,7 +371119,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.20261114_pr75.current.json",
-    "manifest_sha256": "e1f084ab59bd097890827729e9027480c526ece40b22e8cc8a53ca722a4bc657",
+    "manifest_sha256": "bccf24b697d419d5e7acc6c544982a02b9af1b54af744c2f6d20290f1f113368",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
@@ -371046,7 +371283,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "fe8e4a900cadc45a271b81aecfd63bd4fc25dd57e1b27ecf0c40f8ba45282ed7",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "0f9264d06f028d8d607e01f48813577f16e81cd65d294c48b7995ca66600450e",
       "scripts/check_edge_contract.py": "406161ad3925ea3096a4e710070ffac828a151486b45a4d6ff7183073b728f1e",
-      "scripts/check_project_consistency.py": "f8975a926b8a34f4f8ddf1667837a18b7e92c855d751a253898a006525e2153a",
+      "scripts/check_project_consistency.py": "2ae78a5921916ce5fbf563a1ea931c155a515559e9c5fcb5ab85ad889506ca93",
       "scripts/run_edge_tests.py": "4cb0315ea147abf617c66dae3086acacf7851e8b71d2538c049579bf680a0f6d",
       "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
       "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",
@@ -371059,7 +371296,7 @@
       "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts": "f4a1bf7629508cc2c726c40514412a128f14e9c330878b2be354e77d175be16e",
       "supabase/functions/_shared/jungsi/application/profile_reports.ts": "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
       "supabase/functions/_shared/jungsi/application/reference_percentile.ts": "d4e53bfcaadfa4803f59a77626ad029cd838c9d490feec1c646536b867268d22",
-      "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "049383b57965705e5893f8105f3140e104c04881a57285b80943a0f6f7f3b582",
+      "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts": "4f00a8cdb5fbea227b517e4b93b07e4ce2040c0cc2ae73c20bab1e37b4edbb34",
       "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts": "41c4e5b883c82cd049589d749141636ebd03307fbfbae9c04dbd84774f32c625",
       "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts": "4b6d29149df62695acbe0532fc44a349c4a4ec9f4e46a3142545b5373b5a0ed0",
       "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts": "4e7d15aaef970b4d17af377c0243d7d43362b9646637990f1d2d14b495815a5b",

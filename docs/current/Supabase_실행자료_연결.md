@@ -105,4 +105,4 @@ develop 인수 493232832d663d7fea7b0fbb350de15055cd9ccf · 통합 훅 799 · htt
 
 
 
-<!-- jungsi:generated spec_sha256=d9d0bee7a2bc2b95e820259d188da8773c5b667d1770fda0598cd527738a1484 -->
+<!-- jungsi:generated spec_sha256=a9ab7abdc0682afe2566a70047287c45bcfd06106dca250031cb96cf4bd2e541 -->

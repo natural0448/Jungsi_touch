@@ -64,6 +64,16 @@ function nativeUint(v: unknown): bigint {
   check(n >= 0n && n <= MAX_U64, "reference_tail_invalid");
   return n;
 }
+/** 점수 분자만 부호를 허용한다(음수 환산점수, 11-17). 분모·가중치는 nativeUint/uint 그대로. */
+function nativeSint(v: unknown): bigint {
+  check(
+    (typeof v === "number" && Number.isSafeInteger(v)) || typeof v === "bigint",
+    "reference_tail_invalid",
+  );
+  const n = BigInt(v as number | bigint);
+  check(n >= -MAX_U64 && n <= MAX_U64, "reference_tail_invalid");
+  return n;
+}
 async function hash(raw: Uint8Array): Promise<string> {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-256", Uint8Array.from(raw)))].map((v) =>
     v.toString(16).padStart(2, "0")
@@ -249,7 +259,7 @@ export class ChunkedReferenceTailProjection {
       );
       names.add(x.key);
       count += x.row_count;
-      const lo = nativeUint(x.min_score_numerator), hi = nativeUint(x.max_score_numerator);
+      const lo = nativeSint(x.min_score_numerator), hi = nativeSint(x.max_score_numerator);
       const weight = uint(x.weight_units), above = uint(x.strict_above_units);
       check(lo <= hi && weight > 0n, "reference_tail_invalid");
       return {
@@ -329,7 +339,7 @@ export class ChunkedReferenceTailProjection {
         for (let i = pairs.length - 1; i >= 0; i--) {
           const pair = pairs[i];
           check(Array.isArray(pair) && pair.length === 2, "reference_tail_invalid");
-          const n = nativeUint(pair[0]), tie = uint(pair[1]);
+          const n = nativeSint(pair[0]), tie = uint(pair[1]);
           check(
             (next === null || n < next) && tie > 0n && tie <= this.eligible,
             "reference_tail_invalid",

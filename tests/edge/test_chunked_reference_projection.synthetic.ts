@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-explicit-any require-await
 /** Invented scores and weights only. No production data or deployment. */
 import { ChunkedReferenceTailProjection } from "../../supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts";
-import { Rational } from "../../supabase/functions/_shared/jungsi/domain/exact.ts";
+import { exact, Rational } from "../../supabase/functions/_shared/jungsi/domain/exact.ts";
+import { SavedReferenceTailProjection } from "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts";
 import {
   nativeJsonText,
   type NativeObject,
@@ -170,6 +171,136 @@ function pct(x: NativeObject | null) {
   return x?.estimated_upper_cumulative_percent_all_examinees ?? null;
 }
 
+/** 단일 저장 곡선의 음수 환산점수 축(11-17): 점수 분자만 부호를 받고 분모·가중치는 양수 그대로 */
+async function signedSavedTail() {
+  const doc = (rows: string[][]): NativeObject => ({
+    format: "jungsi.saved-reference-tail-projection/v1",
+    version: "SYNTHETIC-tail.v1",
+    context: {
+      academic_year: 2027,
+      exam_id: "SYNTHETIC-mock",
+      exam_type: "september_mock",
+      source_pack_version: "SYNTHETIC-pack",
+      model_version: "SYNTHETIC-model",
+      profile_sha256: "a".repeat(64),
+      rule_version: "SYNTHETIC-rule",
+      score_scale_id: "SYNTHETIC-native",
+      reference_curve_id: "SYNTHETIC-curve",
+      weight_encoding: "SYNTHETIC_EXPLICIT_ENCODING",
+      source_scenario_field_present: false,
+      source_scenario_value: null,
+      resolved_model_scenario: "SYNTHETIC-fixed",
+    },
+    evidence: Object.fromEntries(
+      [
+        "source_csv_sha256",
+        "source_cdf_sha256",
+        "definition_sha256",
+        "shared_proof_sha256",
+        "binder_sha256",
+        "independent_sha256",
+      ].map((k) => [k, "b".repeat(64)]),
+    ),
+    projection: {
+      derived_method_id: "estimated-whole-cohort-percentile:" + "d".repeat(64),
+      weight_decimal_scale: 1,
+      eligible_weight_units: "15",
+      whole_mass_decimal: "3.00001",
+      whole_mass_numerator: "300001",
+      whole_mass_denominator: "100000",
+      production_allowed: false,
+      actual_admission_full_total_approved: false,
+    },
+    rows: rows.map(([n, d, s, t, i]) => ({
+      score_numerator: n,
+      score_denominator: d,
+      strict_weight_units: s,
+      tie_weight_units: t,
+      inclusive_weight_units: i,
+    })),
+  });
+  const good = [
+    ["-100", "40", "10", "5", "15"],
+    ["0", "40", "5", "5", "10"],
+    ["400", "40", "0", "5", "5"],
+  ];
+  const bind = async (p: NativeObject) => {
+    const raw = new TextEncoder().encode(nativeJsonText(p));
+    return await SavedReferenceTailProjection.bind(raw, {
+      sha256: await hash(raw),
+      bytes: raw.length,
+      maxBytes: 65536,
+      context: p.context as NativeObject,
+      evidence: p.evidence as NativeObject,
+    });
+  };
+  const p = doc(good), curve = await bind(p), ctx = p.context as NativeObject;
+  eq(pct(curve.query(exact("-2.5"), ctx)), "49.999833333889");
+  eq(curve.query(exact("-2.6"), ctx), null);
+  eq(curve.query(exact("-1"), ctx), curve.query(exact(0), ctx));
+  eq(curve.query(exact("-0.001"), ctx), curve.query(exact(0), ctx));
+  eq(pct(curve.query(exact(10), ctx)), "16.666611111296");
+  eq(curve.query(exact("10.001"), ctx), null);
+  for (
+    const [r, c, v] of [
+      [0, 1, "-40"],
+      [0, 0, "-0"],
+      [0, 0, "-0100"],
+      [1, 0, "-200"],
+      [1, 3, "-5"],
+      [2, 2, "-1"],
+    ] as const
+  ) {
+    const rows = good.map((x) => [...x]);
+    rows[r][c] = v;
+    await rejects(() => bind(doc(rows)));
+  }
+}
+/** 음수 환산점수 축(11-17): 조각 경계·점수 분자에 부호를 받고, 같은 축에서 학생 점수와 비교한다 */
+async function signedChunks() {
+  const negIndex = (x: any) => {
+    x.chunks[0].min_score_numerator = -25;
+    x.chunks[0].max_score_numerator = -5;
+    x.chunks[1].min_score_numerator = 30;
+    x.chunks[1].max_score_numerator = 30;
+  };
+  const negParts = (x: any[]) => {
+    x[0] = [[-25, "2"], [-5, "1"]];
+    x[1] = [[30, "2"]];
+  };
+  const f = await fixture(negIndex, negParts), p = await authority(f).open();
+  for (
+    const [n, d, want] of [
+      [-3, 1, null],
+      [-5, 2, "50.000000000000"],
+      [-1, 1, "30.000000000000"],
+      [-1, 2, "30.000000000000"],
+      [0, 1, "20.000000000000"],
+      [3, 1, "20.000000000000"],
+      [31, 10, null],
+    ] as const
+  ) {
+    eq(pct(await p.query(new Rational(BigInt(n), BigInt(d)), f.context)), want);
+  }
+  // 조각 범위 표기와 실제 첫 점수가 다르면 거부, 내림차순 음수도 거부
+  const g = await fixture((x: any) => {
+    negIndex(x);
+    x.chunks[0].min_score_numerator = -24;
+  }, negParts);
+  const q = await authority(g).open();
+  await rejects(() => q.query(new Rational(-1n), g.context));
+  const h = await fixture(negIndex, (x: any[]) => {
+    negParts(x);
+    x[0] = [[-5, "2"], [-25, "1"]];
+  });
+  const r = await authority(h).open();
+  await rejects(() => r.query(new Rational(-5n, 2n), h.context));
+  const k = await fixture((x: any) => {
+    negIndex(x);
+    x.score_denominator = -10;
+  }, negParts);
+  await rejects(() => authority(k).open());
+}
 Deno.test("chunked values preserve points, ties, gaps and bounds", async () => {
   const f = await fixture(), a = authority(f), p = await a.open();
   for (
@@ -186,6 +317,8 @@ Deno.test("chunked values preserve points, ties, gaps and bounds", async () => {
     eq(pct(await p.query(new Rational(BigInt(n), BigInt(d)), f.context)), want);
   }
   eq(a.reads, ["synthetic/index", "synthetic/chunk0", "synthetic/chunk1"]);
+  await signedChunks();
+  await signedSavedTail();
 });
 Deno.test("a point reads only index and its one chunk", async () => {
   const f = await fixture(), a = authority(f), p = await a.open();

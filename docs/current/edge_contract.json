@@ -138929,7 +138929,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "dc35f44a05d25d79999bce25b8bbc0ccfd260cf34c4771898071e7a582140654",
+        "source_sha256": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
         "symbols": [
           {
             "declarations": [
@@ -139651,6 +139651,36 @@
               }
             ],
             "name": "nativeUint"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "nativeSint"
           },
           {
             "declarations": [
@@ -143810,7 +143840,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "a756912c32825e00f29ff7835d668030394abd5d02da3145b24260014c5fa371",
+        "source_sha256": "c203fb6cb673c7836feb2428907ab9becf51b1a77291fb976bd27f7836598ad6",
         "symbols": [
           {
             "declarations": [
@@ -144684,6 +144714,36 @@
                 "kind": "function"
               }
             ],
+            "name": "sint"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
             "name": "nativeUint"
           },
           {
@@ -144869,6 +144929,46 @@
               }
             ],
             "name": "numberEnd"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(s: string, i: number)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "s",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "string",
+                        "value": "string"
+                      }
+                    },
+                    {
+                      "kind": "identifier",
+                      "name": "i",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "number",
+                        "value": "number"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "number",
+                    "value": "number"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "scoreEnd"
           },
           {
             "declarations": [
@@ -145822,7 +145922,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "049383b57965705e5893f8105f3140e104c04881a57285b80943a0f6f7f3b582",
+        "source_sha256": "4f00a8cdb5fbea227b517e4b93b07e4ce2040c0cc2ae73c20bab1e37b4edbb34",
         "symbols": [
           {
             "declarations": [
@@ -146725,6 +146825,36 @@
               }
             ],
             "name": "uint"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "parameter_source": "(v: unknown)",
+                  "params": [
+                    {
+                      "kind": "identifier",
+                      "name": "v",
+                      "optional": false,
+                      "tsType": {
+                        "kind": "keyword",
+                        "repr": "unknown",
+                        "value": "unknown"
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "kind": "keyword",
+                    "repr": "bigint",
+                    "value": "bigint"
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sint"
           },
           {
             "declarations": [
@@ -267840,12 +267970,22 @@
             "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
           },
           {
+            "importedName": "SavedReferenceTailProjection",
+            "originalName": "SavedReferenceTailProjection",
+            "src": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
+          },
+          {
+            "importedName": "exact",
+            "originalName": "exact",
+            "src": "supabase/functions/_shared/jungsi/domain/exact.ts"
+          },
+          {
             "importedName": "nativeJsonText",
             "originalName": "nativeJsonText",
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "d9a1056a66a45fde79352dc02b62b85ba43b292af7eccadf91fe6dc6e6a875b5",
+        "source_sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417",
         "symbols": [
           {
             "declarations": [
@@ -268205,6 +268345,64 @@
               }
             ],
             "name": "pct"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "signedSavedTail"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "signedChunks"
           }
         ]
       },
@@ -268236,6 +268434,16 @@
             {
               "kind": "code",
               "path": "supabase/functions/_shared/jungsi/domain/json_value.ts"
+            }
+          ]
+        },
+        {
+          "dynamic": false,
+          "specifier": "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+          "targets": [
+            {
+              "kind": "code",
+              "path": "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
             }
           ]
         }
@@ -280077,7 +280285,7 @@
             "src": "tests/edge/fixture.ts"
           }
         ],
-        "source_sha256": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5",
+        "source_sha256": "5e245c30a0df8fd48ac87f0e02fb3978f327e3d5a17a8086a0650da7cb8191d8",
         "symbols": [
           {
             "declarations": [
@@ -280236,6 +280444,35 @@
               }
             ],
             "name": "denied"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "signedNativeAxis"
           }
         ]
       },

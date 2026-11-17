@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "d9d0bee7a2bc2b95e820259d188da8773c5b667d1770fda0598cd527738a1484",
+  "source_sha256": "a9ab7abdc0682afe2566a70047287c45bcfd06106dca250031cb96cf4bd2e541",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4630,7 +4630,7 @@
         },
         {
           "path": "tests/edge/test_chunked_reference_projection.synthetic.ts",
-          "sha256": "d9a1056a66a45fde79352dc02b62b85ba43b292af7eccadf91fe6dc6e6a875b5"
+          "sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417"
         },
         {
           "path": "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
@@ -4646,7 +4646,7 @@
         },
         {
           "path": "tests/edge/test_native_reference_cdf_projection.ts",
-          "sha256": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5"
+          "sha256": "5e245c30a0df8fd48ac87f0e02fb3978f327e3d5a17a8086a0650da7cb8191d8"
         },
         {
           "path": "tests/edge/test_native_reference_db_tail.ts",
@@ -4931,15 +4931,15 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "1845fe03efd7e4e1074bbb17b846f914d686d4b02f471a1c21156a495da124da"
+        "sha256": "66f726de97d579ce8277cff4669f7c0ac5fdb0c258b034dfa3b391871edd8316"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "a0b1c09e668f624bc6c81d5cc3d5a0a64e86a3cbeae974c3c7e12dce8a50b7da"
+        "sha256": "4661837615cbee2a941a568832a007c900640a3b82eef2b15e19db34bfb9a27a"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "2925e74368ccca4935e7c0a7d2f479b4d4406292d7eb5e4700f4f4e6f8a4ef6e"
+        "sha256": "d37ffbd420599d1a0b33df082735667146700e045cf951af3425654737212ac5"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",

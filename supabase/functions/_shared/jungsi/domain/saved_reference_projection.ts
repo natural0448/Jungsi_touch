@@ -79,6 +79,11 @@ function uint(v: unknown): bigint {
   check(typeof v === "string" && /^(0|[1-9][0-9]*)$/.test(v), "reference_tail_invalid");
   return BigInt(v);
 }
+/** 점수 분자만 부호를 허용한다(강원대 한국사 감점 등 음수 환산점수, 11-17). 분모·가중치는 uint 그대로. */
+function sint(v: unknown): bigint {
+  check(typeof v === "string" && /^(0|-?[1-9][0-9]*)$/.test(v), "reference_tail_invalid");
+  return BigInt(v);
+}
 // Scores keep their exact numerator/denominator; a Rational is built only for compared rows.
 type Tail = { num: bigint; den: bigint; strict: bigint; tie: bigint; inclusive: bigint };
 const scoreOf = (t: Tail): Rational => new Rational(t.num, t.den);
@@ -194,7 +199,7 @@ export class SavedReferenceTailProjection {
         "tie_weight_units",
         "inclusive_weight_units",
       ]);
-      const num = uint(r.score_numerator),
+      const num = sint(r.score_numerator),
         den = uint(r.score_denominator),
         strict = uint(r.strict_weight_units),
         tie = uint(r.tie_weight_units),
