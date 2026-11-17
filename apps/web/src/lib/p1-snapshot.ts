@@ -514,6 +514,19 @@ export async function warmInfo(): Promise<{ ready: Ready | null; stale: { snapsh
   catch (error) { return servicesFailure(error); }
 }
 
+/**
+ * 3페이지 연도별 근거의 1페이지 성적 칸 전용(표시만). 저장된 준비본이 만료 전이면 서비스 API 머리 확인 없이 쓴다
+ * (2026-11-17 대표님 요청: 펼침이 10~15초 늦음). 머리 확인 기한(10분)이 지난 준비본도 만료 전이면 같은 공개 자료다.
+ * 준비본이 없거나 묶음이 맞지 않으면 null — 칸은 '자료 없음'으로 남는다. 1페이지 자체는 그대로 currentSnapshot 을 쓴다.
+ */
+export async function displayReady(): Promise<Ready | null> {
+  try {
+    const mode = configuredMode(), { coordinator } = await services(mode), view = await coordinator.inspect();
+    if (!view.head || !view.ready) return null;
+    return await readyOf({ ...view, headFresh: true }, mode);
+  } catch { return null; }
+}
+
 /* ── 조회(회원): no shared I/O promises or private results ── */
 const memIndex = new Map<string, Index>(), memSchool = new Map<string, Row[]>();
 export type Current = { state: "ready"; ready: Ready } | { state: "none" | "changed" | "expired" | "checking" };

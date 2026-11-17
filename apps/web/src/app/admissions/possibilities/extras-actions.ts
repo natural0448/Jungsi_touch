@@ -5,7 +5,7 @@ import { logContentView } from "@/lib/content-view";
 import type { ForecastPublicDto, RecruitmentDto } from "@/lib/dto";
 import { applyAdigaFill } from "@/lib/p1-adiga-fill";
 import { publishedStats } from "@/lib/p1-published-stats";
-import { currentSnapshot, loadAdigaFill, pastRowsFor2027 } from "@/lib/p1-snapshot";
+import { displayReady, loadAdigaFill, pastRowsFor2027 } from "@/lib/p1-snapshot";
 import { page } from "@/lib/routes";
 
 /** 1페이지와 같은 학년도별 대학 발표 성적 ①② (3페이지 연도별 근거 칸) */
@@ -18,13 +18,14 @@ export type Extras =
  * 1페이지 정리본에서 이 2027 모집행의 과거 행을 찾아 1페이지와 같은 규칙(①②)으로 고른 성적.
  * 정리본이 준비되지 않았거나 읽지 못하면 null — 연도별 근거 칸은 '자료 없음'으로 남는다.
  */
-async function p1Years(caller: Awaited<ReturnType<typeof getCaller>>, src: ReturnType<typeof source>, offeringId: string, university: string): Promise<P1Year[] | null> {
+async function p1Years(offeringId: string, university: string): Promise<P1Year[] | null> {
   const m = /^2027:([0-9]{1,12})$/.exec(offeringId);
   if (!m || !university) return null;
   try {
-    const snap = await currentSnapshot(src, caller);
-    if (snap.state !== "ready") return null;
-    const rows = applyAdigaFill(await pastRowsFor2027(snap.ready, university, m[1]), await loadAdigaFill());
+    // 서비스 API를 부르지 않고 화면 서버의 저장된 준비본만 읽는다(유료 계정 동시성 2와 겹치지 않음)
+    const [ready, fill] = await Promise.all([displayReady(), loadAdigaFill()]);
+    if (!ready) return null;
+    const rows = applyAdigaFill(await pastRowsFor2027(ready, university, m[1]), fill);
     return rows.map((r) => ({
       year: r.y,
       stats: publishedStats(r).flatMap((s) => (s && s.cell.v ? [{ label: s.label, value: s.cell.v, unit: s.cell.u }] : [])),
@@ -45,9 +46,8 @@ export async function loadExtras(offeringId: string, university = ""): Promise<E
   const caller = await getCaller();
   const src = source();
   try {
-    // 유료 계정의 승인 동시성은 2 — 두 조회만 함께 보낸다. 정리본 확인은 그 뒤에 한다
-    const [rec, pub] = await Promise.all([src.readRecruitment(caller, offeringId), src.readPublishedForecast(caller, offeringId)]);
-    const p1 = await p1Years(caller, src, offeringId, university);
+    // 유료 계정의 승인 동시성은 2 — 서비스 조회는 두 개만 함께 보낸다. 1페이지 성적은 화면 서버 저장본이라 같이 읽는다
+    const [rec, pub, p1] = await Promise.all([src.readRecruitment(caller, offeringId), src.readPublishedForecast(caller, offeringId), p1Years(offeringId, university)]);
     await logContentView("analysis", `${page("PAGE-03").path}?open=${encodeURIComponent(offeringId)}`);
     return { ok: true, rec, pub, p1 };
   } catch (e) {
