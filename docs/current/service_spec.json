@@ -13740,7 +13740,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "2ae78a5921916ce5fbf563a1ea931c155a515559e9c5fcb5ab85ad889506ca93",
+            "source_sha256": "dabe1d7264fe46a99354836ef7912cf34d5cb9dcb3747a6053775420218719a1",
             "symbols": [
               {
                 "kind": "class",
@@ -24206,7 +24206,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
+              "source_sha256": "2bc4dd32302aec34062343ed3f168d00814f8e09492a28da15abaa705615df0f",
               "declared_exports": [
                 "ChunkedReferenceTailProjection"
               ]
@@ -24714,7 +24714,7 @@
                 "REQ-26",
                 "REQ-27"
               ],
-              "source_sha256": "4ff0e7ad1b01e3e9ec02b5c8a00a22a26cb512ad1f9d3dc47f26336ecbfe8b12",
+              "source_sha256": "b3da4ec2449c7b9d0f8bdb8b308b6299245eccf77509a5fc322c7cae17d394b1",
               "declared_exports": [
                 "AuthorizedChunkedTailBytesPort",
                 "PinnedChunkedReferenceTailSource",
@@ -34501,11 +34501,11 @@
         },
         {
           "path": "tests/edge/test_chunked_reference_integration.synthetic.ts",
-          "sha256": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074"
+          "sha256": "ea5d812a9de3935d3101133aa3e64a363b0a576ecb78cc57248294bf10100906"
         },
         {
           "path": "tests/edge/test_chunked_reference_projection.synthetic.ts",
-          "sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417"
+          "sha256": "04be9c9af027a50d978a374eb5e4b80063824ac3267013da113d17f79bd0ef81"
         },
         {
           "path": "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
@@ -34806,15 +34806,15 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "66f726de97d579ce8277cff4669f7c0ac5fdb0c258b034dfa3b391871edd8316"
+        "sha256": "f210640c3523a1ea0ee93fbe7bd02959af0499633c6c0be8a5a53dfbbaa7c6f3"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "4661837615cbee2a941a568832a007c900640a3b82eef2b15e19db34bfb9a27a"
+        "sha256": "25230102a6ede88ca5183f0edbc4919052a35e78f76e41c9acf3eecbabdc3215"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d37ffbd420599d1a0b33df082735667146700e045cf951af3425654737212ac5"
+        "sha256": "92c316937a3d8a921de9a8954d66d7a29588cae167a36624cf513967bfe634e9"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -149813,8 +149813,92 @@
               "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
             }
           ],
-          "source_sha256": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
+          "source_sha256": "2bc4dd32302aec34062343ed3f168d00814f8e09492a28da15abaa705615df0f",
           "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "typeLiteral",
+                      "value": {
+                        "properties": [
+                          {
+                            "name": "scores",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "keyword",
+                                "repr": "bigint",
+                                "value": "bigint"
+                              }
+                            }
+                          },
+                          {
+                            "name": "suffix",
+                            "tsType": {
+                              "kind": "array",
+                              "value": {
+                                "kind": "keyword",
+                                "repr": "bigint",
+                                "value": "bigint"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "Chunk"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "tsType": {
+                      "kind": "typeRef",
+                      "repr": "Map",
+                      "value": {
+                        "typeName": "Map",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "string",
+                            "value": "string"
+                          },
+                          {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Chunk",
+                                  "value": {
+                                    "resolution": {
+                                      "kind": "local"
+                                    },
+                                    "typeName": "Chunk"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "SharedChunkCache"
+            },
             {
               "declarations": [
                 {
@@ -149825,7 +149909,7 @@
                         "accessibility": "private",
                         "hasBody": true,
                         "name": "constructor",
-                        "parameter_source": "(\n    private readonly pin: AuthorizedSavedTailPin,\n    private readonly port: AuthorizedSavedTailBytesPort,\n    private readonly signal: AbortSignal,\n    private readonly context: Readonly<NativeObject>,\n    private readonly contextHash: string,\n    private readonly version: string,\n    private readonly denominator: bigint,\n    private readonly eligible: bigint,\n    private readonly whole: Rational,\n    private readonly methodId: string,\n    private readonly chunks: readonly ChunkMeta[],\n    private readonly maximumCachedBytes: number,\n  )",
+                        "parameter_source": "(\n    private readonly pin: AuthorizedSavedTailPin,\n    private readonly port: AuthorizedSavedTailBytesPort,\n    private readonly signal: AbortSignal,\n    private readonly context: Readonly<NativeObject>,\n    private readonly contextHash: string,\n    private readonly version: string,\n    private readonly denominator: bigint,\n    private readonly eligible: bigint,\n    private readonly whole: Rational,\n    private readonly methodId: string,\n    private readonly chunks: readonly ChunkMeta[],\n    private readonly maximumCachedBytes: number,\n    private readonly shared?: SharedChunkCache,\n  )",
                         "params": [
                           {
                             "accessibility": "private",
@@ -150023,6 +150107,23 @@
                               "repr": "number",
                               "value": "number"
                             }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "shared",
+                            "optional": true,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "SharedChunkCache",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "SharedChunkCache"
+                              }
+                            }
                           }
                         ]
                       }
@@ -150109,6 +150210,21 @@
                                 "kind": "keyword",
                                 "repr": "string",
                                 "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "shared",
+                              "optional": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "SharedChunkCache",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "SharedChunkCache"
+                                }
                               }
                             }
                           ],
@@ -150746,46 +150862,6 @@
                 }
               ],
               "name": "ChunkMeta"
-            },
-            {
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "def": {
-                    "tsType": {
-                      "kind": "typeLiteral",
-                      "value": {
-                        "properties": [
-                          {
-                            "name": "scores",
-                            "tsType": {
-                              "kind": "array",
-                              "value": {
-                                "kind": "keyword",
-                                "repr": "bigint",
-                                "value": "bigint"
-                              }
-                            }
-                          },
-                          {
-                            "name": "suffix",
-                            "tsType": {
-                              "kind": "array",
-                              "value": {
-                                "kind": "keyword",
-                                "repr": "bigint",
-                                "value": "bigint"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "kind": "typeAlias"
-                }
-              ],
-              "name": "Chunk"
             }
           ]
         },
@@ -165800,685 +165876,6 @@
       },
       "supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts": {
         "declarations": {
-          "symbols": [
-            {
-              "name": "AuthorizedChunkedTailBytesPort",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "interface",
-                  "def": {
-                    "extends": [
-                      {
-                        "repr": "AuthorizedSavedTailBytesPort",
-                        "kind": "typeRef",
-                        "value": {
-                          "typeName": "AuthorizedSavedTailBytesPort",
-                          "resolution": {
-                            "kind": "import",
-                            "specifier": "./saved_reference_tail_source.ts",
-                            "name": "AuthorizedSavedTailBytesPort"
-                          }
-                        }
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "name": "selectChunked",
-                        "kind": "method",
-                        "params": [
-                          {
-                            "kind": "identifier",
-                            "name": "offeringId",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "string",
-                              "kind": "keyword",
-                              "value": "string"
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "signal",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "AbortSignal",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "AbortSignal"
-                              }
-                            }
-                          }
-                        ],
-                        "returnType": {
-                          "repr": "Promise",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "kind": "union",
-                                "value": [
-                                  {
-                                    "repr": "AuthorizedSavedTailPin",
-                                    "kind": "typeRef",
-                                    "value": {
-                                      "typeName": "AuthorizedSavedTailPin",
-                                      "resolution": {
-                                        "kind": "import",
-                                        "specifier": "./saved_reference_tail_source.ts",
-                                        "name": "AuthorizedSavedTailPin"
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "repr": "null",
-                                    "kind": "keyword",
-                                    "value": "null"
-                                  }
-                                ]
-                              }
-                            ],
-                            "typeName": "Promise"
-                          }
-                        },
-                        "parameter_source": "(offeringId: string, signal: AbortSignal)"
-                      },
-                      {
-                        "name": "readChunk",
-                        "kind": "method",
-                        "params": [
-                          {
-                            "kind": "identifier",
-                            "name": "parent",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "AuthorizedSavedTailPin",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "AuthorizedSavedTailPin",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./saved_reference_tail_source.ts",
-                                  "name": "AuthorizedSavedTailPin"
-                                }
-                              }
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "indexBytes",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "Uint8Array",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "Uint8Array"
-                              }
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "key",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "string",
-                              "kind": "keyword",
-                              "value": "string"
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "bytes",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "number",
-                              "kind": "keyword",
-                              "value": "number"
-                            }
-                          },
-                          {
-                            "kind": "identifier",
-                            "name": "signal",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "AbortSignal",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "AbortSignal"
-                              }
-                            }
-                          }
-                        ],
-                        "returnType": {
-                          "repr": "Promise",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "repr": "Uint8Array",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "Uint8Array"
-                                }
-                              }
-                            ],
-                            "typeName": "Promise"
-                          }
-                        },
-                        "parameter_source": "(\n    parent: AuthorizedSavedTailPin,\n    indexBytes: Uint8Array,\n    key: string,\n    bytes: number,\n    signal: AbortSignal,\n  )"
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "PinnedChunkedReferenceTailSource",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "class",
-                  "def": {
-                    "constructors": [
-                      {
-                        "hasBody": true,
-                        "name": "constructor",
-                        "params": [
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "source",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "AuthorizedChunkedTailBytesPort",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "AuthorizedChunkedTailBytesPort",
-                                "resolution": {
-                                  "kind": "local"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "signal",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "AbortSignal",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "AbortSignal"
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "maximumCachedObjects",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "number",
-                              "kind": "keyword",
-                              "value": "number"
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "maximumCachedBytes",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "number",
-                              "kind": "keyword",
-                              "value": "number"
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "canonicalSignal",
-                            "optional": false,
-                            "tsType": {
-                              "kind": "fnOrConstructor",
-                              "value": {
-                                "constructor": false,
-                                "tsType": {
-                                  "repr": "AbortSignal",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "AbortSignal"
-                                  }
-                                },
-                                "params": [
-                                  {
-                                    "kind": "identifier",
-                                    "name": "signal",
-                                    "optional": true,
-                                    "tsType": {
-                                      "repr": "AbortSignal",
-                                      "kind": "typeRef",
-                                      "value": {
-                                        "typeName": "AbortSignal"
-                                      }
-                                    }
-                                  }
-                                ]
-                              }
-                            },
-                            "readonly": true
-                          },
-                          {
-                            "accessibility": "private",
-                            "kind": "identifier",
-                            "name": "budget",
-                            "optional": false,
-                            "tsType": {
-                              "repr": "SavedTailRequestBudget",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "SavedTailRequestBudget",
-                                "resolution": {
-                                  "kind": "import",
-                                  "specifier": "./saved_reference_tail_source.ts",
-                                  "name": "SavedTailRequestBudget"
-                                }
-                              }
-                            },
-                            "readonly": true
-                          }
-                        ],
-                        "parameter_source": "(\n    private readonly source: AuthorizedChunkedTailBytesPort,\n    private readonly signal: AbortSignal,\n    private readonly maximumCachedObjects: number,\n    private readonly maximumCachedBytes: number,\n    private readonly canonicalSignal: (signal?: AbortSignal) => AbortSignal,\n    private readonly budget: SavedTailRequestBudget,\n  )"
-                      }
-                    ],
-                    "properties": [
-                      {
-                        "tsType": {
-                          "repr": "WeakMap",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "repr": "AbortSignal",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "AbortSignal"
-                                }
-                              },
-                              {
-                                "repr": "Map",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeParams": [
-                                    {
-                                      "repr": "string",
-                                      "kind": "keyword",
-                                      "value": "string"
-                                    },
-                                    {
-                                      "repr": "Cached",
-                                      "kind": "typeRef",
-                                      "value": {
-                                        "typeName": "Cached",
-                                        "resolution": {
-                                          "kind": "local"
-                                        }
-                                      }
-                                    }
-                                  ],
-                                  "typeName": "Map"
-                                }
-                              }
-                            ],
-                            "typeName": "WeakMap"
-                          }
-                        },
-                        "readonly": true,
-                        "accessibility": "private",
-                        "name": "cached"
-                      },
-                      {
-                        "tsType": {
-                          "repr": "WeakMap",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "repr": "AbortSignal",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "AbortSignal"
-                                }
-                              },
-                              {
-                                "repr": "AbortSignal",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "AbortSignal"
-                                }
-                              }
-                            ],
-                            "typeName": "WeakMap"
-                          }
-                        },
-                        "readonly": true,
-                        "accessibility": "private",
-                        "name": "scopeSignals"
-                      },
-                      {
-                        "tsType": {
-                          "repr": "Map",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeParams": [
-                              {
-                                "repr": "string",
-                                "kind": "keyword",
-                                "value": "string"
-                              },
-                              {
-                                "repr": "string",
-                                "kind": "keyword",
-                                "value": "string"
-                              }
-                            ],
-                            "typeName": "Map"
-                          }
-                        },
-                        "readonly": true,
-                        "accessibility": "private",
-                        "name": "indexSignatures"
-                      }
-                    ],
-                    "methods": [
-                      {
-                        "name": "getChunkedReferenceTail",
-                        "kind": "method",
-                        "functionDef": {
-                          "params": [
-                            {
-                              "kind": "identifier",
-                              "name": "offeringId",
-                              "optional": false,
-                              "tsType": {
-                                "repr": "string",
-                                "kind": "keyword",
-                                "value": "string"
-                              }
-                            },
-                            {
-                              "kind": "identifier",
-                              "name": "candidateSignal",
-                              "optional": true,
-                              "tsType": {
-                                "repr": "AbortSignal",
-                                "kind": "typeRef",
-                                "value": {
-                                  "typeName": "AbortSignal"
-                                }
-                              }
-                            }
-                          ],
-                          "returnType": {
-                            "repr": "Promise",
-                            "kind": "typeRef",
-                            "value": {
-                              "typeParams": [
-                                {
-                                  "kind": "union",
-                                  "value": [
-                                    {
-                                      "repr": "ChunkedReferenceTailSelection",
-                                      "kind": "typeRef",
-                                      "value": {
-                                        "typeName": "ChunkedReferenceTailSelection",
-                                        "resolution": {
-                                          "kind": "import",
-                                          "specifier": "../application/reference_percentile.ts",
-                                          "name": "ChunkedReferenceTailSelection"
-                                        }
-                                      }
-                                    },
-                                    {
-                                      "repr": "null",
-                                      "kind": "keyword",
-                                      "value": "null"
-                                    }
-                                  ]
-                                }
-                              ],
-                              "typeName": "Promise"
-                            }
-                          },
-                          "hasBody": true,
-                          "isAsync": true
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "createScopedReferenceTailSources",
-              "declarations": [
-                {
-                  "declarationKind": "export",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "source",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "AuthorizedChunkedTailBytesPort",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "AuthorizedChunkedTailBytesPort",
-                            "resolution": {
-                              "kind": "local"
-                            }
-                          }
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "signal",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "AbortSignal",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "AbortSignal"
-                          }
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "maximumCachedObjects",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "number",
-                          "kind": "keyword",
-                          "value": "number"
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "maximumCachedBytes",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "number",
-                          "kind": "keyword",
-                          "value": "number"
-                        }
-                      },
-                      {
-                        "kind": "identifier",
-                        "name": "canonicalSignal",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "fnOrConstructor",
-                          "value": {
-                            "constructor": false,
-                            "tsType": {
-                              "repr": "AbortSignal",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeName": "AbortSignal"
-                              }
-                            },
-                            "params": [
-                              {
-                                "kind": "identifier",
-                                "name": "signal",
-                                "optional": true,
-                                "tsType": {
-                                  "repr": "AbortSignal",
-                                  "kind": "typeRef",
-                                  "value": {
-                                    "typeName": "AbortSignal"
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    ],
-                    "hasBody": true,
-                    "parameter_source": "(\n  source: AuthorizedChunkedTailBytesPort,\n  signal: AbortSignal,\n  maximumCachedObjects: number,\n  maximumCachedBytes: number,\n  canonicalSignal: (signal?: AbortSignal) => AbortSignal,\n)"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "Cached",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "typeAlias",
-                  "def": {
-                    "tsType": {
-                      "kind": "typeLiteral",
-                      "value": {
-                        "properties": [
-                          {
-                            "name": "signature",
-                            "readonly": true,
-                            "tsType": {
-                              "repr": "string",
-                              "kind": "keyword",
-                              "value": "string"
-                            }
-                          },
-                          {
-                            "name": "value",
-                            "readonly": true,
-                            "tsType": {
-                              "repr": "Promise",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeParams": [
-                                  {
-                                    "repr": "ChunkedReferenceTailProjection",
-                                    "kind": "typeRef",
-                                    "value": {
-                                      "typeName": "ChunkedReferenceTailProjection",
-                                      "resolution": {
-                                        "kind": "import",
-                                        "specifier": "../domain/chunked_reference_projection.ts",
-                                        "name": "ChunkedReferenceTailProjection"
-                                      }
-                                    }
-                                  }
-                                ],
-                                "typeName": "Promise"
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "name": "unavailable",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [],
-                    "returnType": {
-                      "repr": "never",
-                      "kind": "keyword",
-                      "value": "never"
-                    },
-                    "hasBody": true,
-                    "parameter_source": "()"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "freezeDeep",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "v",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "T",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "T",
-                            "resolution": {
-                              "kind": "typeParam",
-                              "declaringName": "freezeDeep",
-                              "declaringKind": "function"
-                            }
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "repr": "T",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeName": "T",
-                        "resolution": {
-                          "kind": "typeParam",
-                          "declaringName": "freezeDeep",
-                          "declaringKind": "function"
-                        }
-                      }
-                    },
-                    "hasBody": true,
-                    "typeParams": [
-                      {
-                        "name": "T"
-                      }
-                    ],
-                    "parameter_source": "(v: T)"
-                  }
-                }
-              ]
-            }
-          ],
           "imports": [
             {
               "importedName": "AccessError",
@@ -166502,11 +165899,11 @@
             },
             {
               "importedName": "ChunkedReferenceTailSelection",
-              "originalName": "ChunkedReferenceTailSelection",
-              "src": "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
               "jsDoc": {
                 "doc": "Chunked tail provider: all storage authority remains with the injected issuer."
-              }
+              },
+              "originalName": "ChunkedReferenceTailSelection",
+              "src": "supabase/functions/_shared/jungsi/application/reference_percentile.ts"
             },
             {
               "importedName": "NativeObject",
@@ -166524,6 +165921,11 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts"
             },
             {
+              "importedName": "SharedChunkCache",
+              "originalName": "SharedChunkCache",
+              "src": "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts"
+            },
+            {
               "importedName": "cloneNativeJson",
               "originalName": "cloneNativeJson",
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -166539,12 +165941,793 @@
               "src": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts"
             }
           ],
-          "source_sha256": "4ff0e7ad1b01e3e9ec02b5c8a00a22a26cb512ad1f9d3dc47f26336ecbfe8b12"
+          "source_sha256": "b3da4ec2449c7b9d0f8bdb8b308b6299245eccf77509a5fc322c7cae17d394b1",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "extends": [
+                      {
+                        "kind": "typeRef",
+                        "repr": "AuthorizedSavedTailBytesPort",
+                        "value": {
+                          "resolution": {
+                            "kind": "import",
+                            "name": "AuthorizedSavedTailBytesPort",
+                            "specifier": "./saved_reference_tail_source.ts"
+                          },
+                          "typeName": "AuthorizedSavedTailBytesPort"
+                        }
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "kind": "method",
+                        "name": "selectChunked",
+                        "parameter_source": "(offeringId: string, signal: AbortSignal)",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "offeringId",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "union",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "AuthorizedSavedTailPin",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "AuthorizedSavedTailPin",
+                                        "specifier": "./saved_reference_tail_source.ts"
+                                      },
+                                      "typeName": "AuthorizedSavedTailPin"
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "null",
+                                    "value": "null"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "kind": "method",
+                        "name": "readChunk",
+                        "parameter_source": "(\n    parent: AuthorizedSavedTailPin,\n    indexBytes: Uint8Array,\n    key: string,\n    bytes: number,\n    signal: AbortSignal,\n  )",
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "parent",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AuthorizedSavedTailPin",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "AuthorizedSavedTailPin",
+                                  "specifier": "./saved_reference_tail_source.ts"
+                                },
+                                "typeName": "AuthorizedSavedTailPin"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "indexBytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Uint8Array",
+                              "value": {
+                                "typeName": "Uint8Array"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "key",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "bytes",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Uint8Array",
+                                "value": {
+                                  "typeName": "Uint8Array"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "interface"
+                }
+              ],
+              "name": "AuthorizedChunkedTailBytesPort"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "constructors": [
+                      {
+                        "hasBody": true,
+                        "name": "constructor",
+                        "parameter_source": "(\n    private readonly source: AuthorizedChunkedTailBytesPort,\n    private readonly signal: AbortSignal,\n    private readonly maximumCachedObjects: number,\n    private readonly maximumCachedBytes: number,\n    private readonly canonicalSignal: (signal?: AbortSignal) => AbortSignal,\n    private readonly budget: SavedTailRequestBudget,\n  )",
+                        "params": [
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "source",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AuthorizedChunkedTailBytesPort",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "AuthorizedChunkedTailBytesPort"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "signal",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "maximumCachedObjects",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "maximumCachedBytes",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "number",
+                              "value": "number"
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "canonicalSignal",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "fnOrConstructor",
+                              "value": {
+                                "constructor": false,
+                                "params": [
+                                  {
+                                    "kind": "identifier",
+                                    "name": "signal",
+                                    "optional": true,
+                                    "tsType": {
+                                      "kind": "typeRef",
+                                      "repr": "AbortSignal",
+                                      "value": {
+                                        "typeName": "AbortSignal"
+                                      }
+                                    }
+                                  }
+                                ],
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "AbortSignal",
+                                  "value": {
+                                    "typeName": "AbortSignal"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "accessibility": "private",
+                            "kind": "identifier",
+                            "name": "budget",
+                            "optional": false,
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "SavedTailRequestBudget",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "SavedTailRequestBudget",
+                                  "specifier": "./saved_reference_tail_source.ts"
+                                },
+                                "typeName": "SavedTailRequestBudget"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "methods": [
+                      {
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "offeringId",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "candidateSignal",
+                              "optional": true,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "union",
+                                  "value": [
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "ChunkedReferenceTailSelection",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "import",
+                                          "name": "ChunkedReferenceTailSelection",
+                                          "specifier": "../application/reference_percentile.ts"
+                                        },
+                                        "typeName": "ChunkedReferenceTailSelection"
+                                      }
+                                    },
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "null",
+                                      "value": "null"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "getChunkedReferenceTail"
+                      }
+                    ],
+                    "properties": [
+                      {
+                        "accessibility": "private",
+                        "name": "cached",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "WeakMap",
+                          "value": {
+                            "typeName": "WeakMap",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Map",
+                                "value": {
+                                  "typeName": "Map",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeRef",
+                                      "repr": "Cached",
+                                      "value": {
+                                        "resolution": {
+                                          "kind": "local"
+                                        },
+                                        "typeName": "Cached"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "scopeSignals",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "WeakMap",
+                          "value": {
+                            "typeName": "WeakMap",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "indexSignatures",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Map",
+                          "value": {
+                            "typeName": "Map",
+                            "typeParams": [
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              },
+                              {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "indexReads",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "WeakMap",
+                          "value": {
+                            "typeName": "WeakMap",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "Map",
+                                "value": {
+                                  "typeName": "Map",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "typeLiteral",
+                                      "value": {
+                                        "properties": [
+                                          {
+                                            "name": "signature",
+                                            "tsType": {
+                                              "kind": "keyword",
+                                              "repr": "string",
+                                              "value": "string"
+                                            }
+                                          },
+                                          {
+                                            "name": "raw",
+                                            "tsType": {
+                                              "kind": "typeRef",
+                                              "repr": "Promise",
+                                              "value": {
+                                                "typeName": "Promise",
+                                                "typeParams": [
+                                                  {
+                                                    "kind": "typeRef",
+                                                    "repr": "Uint8Array",
+                                                    "value": {
+                                                      "typeName": "Uint8Array"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "accessibility": "private",
+                        "name": "sharedChunks",
+                        "readonly": true,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "WeakMap",
+                          "value": {
+                            "typeName": "WeakMap",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "AbortSignal",
+                                "value": {
+                                  "typeName": "AbortSignal"
+                                }
+                              },
+                              {
+                                "kind": "typeRef",
+                                "repr": "SharedChunkCache",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "SharedChunkCache",
+                                    "specifier": "../domain/chunked_reference_projection.ts"
+                                  },
+                                  "typeName": "SharedChunkCache"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "class"
+                }
+              ],
+              "name": "PinnedChunkedReferenceTailSource"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "export",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(\n  source: AuthorizedChunkedTailBytesPort,\n  signal: AbortSignal,\n  maximumCachedObjects: number,\n  maximumCachedBytes: number,\n  canonicalSignal: (signal?: AbortSignal) => AbortSignal,\n)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "source",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "AuthorizedChunkedTailBytesPort",
+                          "value": {
+                            "resolution": {
+                              "kind": "local"
+                            },
+                            "typeName": "AuthorizedChunkedTailBytesPort"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "signal",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "AbortSignal",
+                          "value": {
+                            "typeName": "AbortSignal"
+                          }
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "maximumCachedObjects",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "maximumCachedBytes",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "keyword",
+                          "repr": "number",
+                          "value": "number"
+                        }
+                      },
+                      {
+                        "kind": "identifier",
+                        "name": "canonicalSignal",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [
+                              {
+                                "kind": "identifier",
+                                "name": "signal",
+                                "optional": true,
+                                "tsType": {
+                                  "kind": "typeRef",
+                                  "repr": "AbortSignal",
+                                  "value": {
+                                    "typeName": "AbortSignal"
+                                  }
+                                }
+                              }
+                            ],
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "createScopedReferenceTailSources"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "tsType": {
+                      "kind": "typeLiteral",
+                      "value": {
+                        "properties": [
+                          {
+                            "name": "signature",
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "name": "value",
+                            "readonly": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "ChunkedReferenceTailProjection",
+                                    "value": {
+                                      "resolution": {
+                                        "kind": "import",
+                                        "name": "ChunkedReferenceTailProjection",
+                                        "specifier": "../domain/chunked_reference_projection.ts"
+                                      },
+                                      "typeName": "ChunkedReferenceTailProjection"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "typeAlias"
+                }
+              ],
+              "name": "Cached"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "keyword",
+                      "repr": "never",
+                      "value": "never"
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "unavailable"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "(v: T)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "v",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "T",
+                          "value": {
+                            "resolution": {
+                              "declaringKind": "function",
+                              "declaringName": "freezeDeep",
+                              "kind": "typeParam"
+                            },
+                            "typeName": "T"
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "T",
+                      "value": {
+                        "resolution": {
+                          "declaringKind": "function",
+                          "declaringName": "freezeDeep",
+                          "kind": "typeParam"
+                        },
+                        "typeName": "T"
+                      }
+                    },
+                    "typeParams": [
+                      {
+                        "name": "T"
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "freezeDeep"
+            }
+          ]
         },
         "dependencies": [
           {
-            "specifier": "../application/access.ts",
             "dynamic": false,
+            "specifier": "../application/access.ts",
             "targets": [
               {
                 "kind": "code",
@@ -166553,8 +166736,8 @@
             ]
           },
           {
-            "specifier": "../application/reference_percentile.ts",
             "dynamic": false,
+            "specifier": "../application/reference_percentile.ts",
             "targets": [
               {
                 "kind": "type",
@@ -166563,8 +166746,8 @@
             ]
           },
           {
-            "specifier": "../domain/chunked_reference_projection.ts",
             "dynamic": false,
+            "specifier": "../domain/chunked_reference_projection.ts",
             "targets": [
               {
                 "kind": "code",
@@ -166573,8 +166756,8 @@
             ]
           },
           {
-            "specifier": "../domain/json_value.ts",
             "dynamic": false,
+            "specifier": "../domain/json_value.ts",
             "targets": [
               {
                 "kind": "code",
@@ -166583,8 +166766,8 @@
             ]
           },
           {
-            "specifier": "./saved_reference_tail_source.ts",
             "dynamic": false,
+            "specifier": "./saved_reference_tail_source.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247214,173 +247397,6 @@
       },
       "tests/edge/test_chunked_reference_integration.synthetic.ts": {
         "declarations": {
-          "symbols": [
-            {
-              "name": "fixture",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [],
-                    "returnType": {
-                      "repr": "NativeObject",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeName": "NativeObject",
-                        "resolution": {
-                          "kind": "import",
-                          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
-                          "name": "NativeObject"
-                        }
-                      }
-                    },
-                    "hasBody": true,
-                    "parameter_source": "()"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "bind",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "assign",
-                        "left": {
-                          "kind": "identifier",
-                          "name": "p",
-                          "optional": false
-                        },
-                        "right": "[UNSUPPORTED]"
-                      }
-                    ],
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "(p = fixture())"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "setup",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [],
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "()"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "hashBytes",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "raw",
-                        "optional": false,
-                        "tsType": {
-                          "repr": "Uint8Array",
-                          "kind": "typeRef",
-                          "value": {
-                            "typeName": "Uint8Array"
-                          }
-                        }
-                      }
-                    ],
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "(raw: Uint8Array)"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "chunkFixture",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [],
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "()"
-                  }
-                }
-              ]
-            },
-            {
-              "name": "rejected",
-              "declarations": [
-                {
-                  "declarationKind": "private",
-                  "kind": "function",
-                  "def": {
-                    "params": [
-                      {
-                        "kind": "identifier",
-                        "name": "fn",
-                        "optional": false,
-                        "tsType": {
-                          "kind": "fnOrConstructor",
-                          "value": {
-                            "constructor": false,
-                            "tsType": {
-                              "repr": "Promise",
-                              "kind": "typeRef",
-                              "value": {
-                                "typeParams": [
-                                  {
-                                    "repr": "unknown",
-                                    "kind": "keyword",
-                                    "value": "unknown"
-                                  }
-                                ],
-                                "typeName": "Promise"
-                              }
-                            },
-                            "params": []
-                          }
-                        }
-                      }
-                    ],
-                    "returnType": {
-                      "repr": "Promise",
-                      "kind": "typeRef",
-                      "value": {
-                        "typeParams": [
-                          {
-                            "repr": "void",
-                            "kind": "keyword",
-                            "value": "void"
-                          }
-                        ],
-                        "typeName": "Promise"
-                      }
-                    },
-                    "hasBody": true,
-                    "isAsync": true,
-                    "parameter_source": "(fn: () => Promise<unknown>)"
-                  }
-                }
-              ]
-            }
-          ],
           "imports": [
             {
               "importedName": "NativeExamPack",
@@ -247468,12 +247484,179 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ],
-          "source_sha256": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074"
+          "source_sha256": "ea5d812a9de3935d3101133aa3e64a363b0a576ecb78cc57248294bf10100906",
+          "symbols": [
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "NativeObject",
+                      "value": {
+                        "resolution": {
+                          "kind": "import",
+                          "name": "NativeObject",
+                          "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts"
+                        },
+                        "typeName": "NativeObject"
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "fixture"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(p = fixture())",
+                    "params": [
+                      {
+                        "kind": "assign",
+                        "left": {
+                          "kind": "identifier",
+                          "name": "p",
+                          "optional": false
+                        },
+                        "right": "[UNSUPPORTED]"
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "bind"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": []
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "setup"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(raw: Uint8Array)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "raw",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "typeRef",
+                          "repr": "Uint8Array",
+                          "value": {
+                            "typeName": "Uint8Array"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "hashBytes"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": []
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "chunkFixture"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "(fn: () => Promise<unknown>)",
+                    "params": [
+                      {
+                        "kind": "identifier",
+                        "name": "fn",
+                        "optional": false,
+                        "tsType": {
+                          "kind": "fnOrConstructor",
+                          "value": {
+                            "constructor": false,
+                            "params": [],
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "Promise",
+                              "value": {
+                                "typeName": "Promise",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "unknown",
+                                    "value": "unknown"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "rejected"
+            }
+          ]
         },
         "dependencies": [
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/application/reference_percentile.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/reference_percentile.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247482,8 +247665,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/school_reference_scoring.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247492,8 +247675,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/application/university_scoring.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/application/university_scoring.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247502,8 +247685,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/exact.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247512,8 +247695,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/exam_pack.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247522,8 +247705,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/json_value.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247532,8 +247715,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247542,8 +247725,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247552,8 +247735,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247562,8 +247745,8 @@
             ]
           },
           {
-            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
             "dynamic": false,
+            "specifier": "../../supabase/functions/_shared/jungsi/infrastructure/school_reference_source.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247572,8 +247755,8 @@
             ]
           },
           {
-            "specifier": "./fixture.ts",
             "dynamic": false,
+            "specifier": "./fixture.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247582,8 +247765,8 @@
             ]
           },
           {
-            "specifier": "./synthetic_school_reference.ts",
             "dynamic": false,
+            "specifier": "./synthetic_school_reference.ts",
             "targets": [
               {
                 "kind": "code",
@@ -247632,7 +247815,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
             }
           ],
-          "source_sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417",
+          "source_sha256": "04be9c9af027a50d978a374eb5e4b80063824ac3267013da113d17f79bd0ef81",
           "symbols": [
             {
               "declarations": [
@@ -247992,6 +248175,35 @@
                 }
               ],
               "name": "pct"
+            },
+            {
+              "declarations": [
+                {
+                  "declarationKind": "private",
+                  "def": {
+                    "hasBody": true,
+                    "isAsync": true,
+                    "parameter_source": "()",
+                    "params": [],
+                    "returnType": {
+                      "kind": "typeRef",
+                      "repr": "Promise",
+                      "value": {
+                        "typeName": "Promise",
+                        "typeParams": [
+                          {
+                            "kind": "keyword",
+                            "repr": "void",
+                            "value": "void"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "kind": "function"
+                }
+              ],
+              "name": "sharedChunkCache"
             },
             {
               "declarations": [
@@ -365097,7 +365309,7 @@
       "supabase/functions/_shared/jungsi/application/wildcard_runtime_gate.ts": "0a295516b4587d3072ff6a6a34a7dac4395dbd86ed3e354beb2cb57575514137",
       "supabase/functions/_shared/jungsi/application/wildcard_selection.ts": "83731a53497e5be55720bf7bd64cd493a19ec9fc291c6bcf110d0397f193dcae",
       "supabase/functions/_shared/jungsi/domain/all_examinees_total_model.ts": "9e9210da291261207e6bd49969c22c62e9c7ee06c76edafa71bb9105fd4c821d",
-      "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
+      "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts": "2bc4dd32302aec34062343ed3f168d00814f8e09492a28da15abaa705615df0f",
       "supabase/functions/_shared/jungsi/domain/conversion.ts": "f17d26ebb957813a3f818bcd2bc1090469c3f190fa99afc15e3d8c6097d43486",
       "supabase/functions/_shared/jungsi/domain/conversion_release.ts": "9d7e0ff22c42deb6abaf90c72582f3bf4c2cf9ad63760ccb8ae8692c6274ad98",
       "supabase/functions/_shared/jungsi/domain/exact.ts": "ae40f4365f6578b7bb3b571da0365b79382594e59c1e841f71adb287ed7eddf5",
@@ -365118,7 +365330,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/auth_exchange_observation.ts": "88b7fa8eeb52eec3507175c5359123d7eaa164c2871eb7d4ed5d15223f3b69d4",
       "supabase/functions/_shared/jungsi/infrastructure/auth_relay.ts": "5a1bb43752a18799f796d466b8fcbbbf1f395ca8e3d3bc68510c0900014a78d6",
       "supabase/functions/_shared/jungsi/infrastructure/cancellable_sql_query.ts": "7666428a4e370d9791752d1a6701122611ac68db146e1af5f12dc998be88f805",
-      "supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts": "4ff0e7ad1b01e3e9ec02b5c8a00a22a26cb512ad1f9d3dc47f26336ecbfe8b12",
+      "supabase/functions/_shared/jungsi/infrastructure/chunked_reference_tail_source.ts": "b3da4ec2449c7b9d0f8bdb8b308b6299245eccf77509a5fc322c7cae17d394b1",
       "supabase/functions/_shared/jungsi/infrastructure/current_guide_physical_rule_batch_candidate.ts": "3d574b9bfc8ad8002f9d5fe1bfeaf5d00c16517fb5e89c2f069ebacc2f9b41fb",
       "supabase/functions/_shared/jungsi/infrastructure/current_guide_rule_postgres.ts": "ebe174637a5db54d37a0facd84767cf199f62eeab4114ff1ae1179368311da3a",
       "supabase/functions/_shared/jungsi/infrastructure/current_guide_unified_batch_candidate.ts": "1b7083bc0c6614aed9a0a7e2bbfec349ebcb8d35a434b19111873b64b3328cbe",
@@ -365226,8 +365438,8 @@
       "tests/edge/test_auth_exchange_observation.synthetic.ts": "63940b4da43cca8d232cba58114868c548eb30e89a2d5e9cda82ae90e598e78c",
       "tests/edge/test_cancellable_db_read.ts": "e2e344e0d3ce5d24777897fa69d70ee63835b2058ea82b823ef29674613549fa",
       "tests/edge/test_catalog.ts": "e512307b3ce84612f00b4f04182c4bb59cdabb6b976e13507d16eb8213e7c84b",
-      "tests/edge/test_chunked_reference_integration.synthetic.ts": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074",
-      "tests/edge/test_chunked_reference_projection.synthetic.ts": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417",
+      "tests/edge/test_chunked_reference_integration.synthetic.ts": "ea5d812a9de3935d3101133aa3e64a363b0a576ecb78cc57248294bf10100906",
+      "tests/edge/test_chunked_reference_projection.synthetic.ts": "04be9c9af027a50d978a374eb5e4b80063824ac3267013da113d17f79bd0ef81",
       "tests/edge/test_chunked_runtime_wiring.synthetic.ts": "30c9ba86d433c1c17cf9a925680add2a907e6aa275287c5b374d86f57371595a",
       "tests/edge/test_combined_operating_admin.ts": "2f95ec71aea7378a804ecbdcb1168cf672cf7cb14b5b936fd4ba562ce19605c5",
       "tests/edge/test_conversion_release.ts": "60bc6dcdd06a34b2406bf8fa04c865efa6129f82a60f6431260a1813657c53d0",
@@ -367242,8 +367454,8 @@
       "historical_sha256": "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0",
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
-      "graph_manifest_sha256": "d6d61bb395f69cedf71813868090878487d920995e5477ea6c257ea7971e76fe",
-      "bridge_sha256": "800494cb7b953f021f4093a9359cf28326dfc9285df4e1fd07b03fb914c73757"
+      "graph_manifest_sha256": "05640c712027db4836d6b7154ac1df0c3d4ef0894eb5072ab2aad9e17a6629e8",
+      "bridge_sha256": "32bfcd5e37e37c271d5efa6487600986a9821bf40d482239529f31b319c84096"
     }
   },
   "P1_display_snapshot_contract": {
@@ -371108,7 +371320,7 @@
     "format": "jungsi.p1-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/p1_contract_review_graph.20261113_fmt.current.json",
-    "manifest_sha256": "0f1a61444527138aebe0b50acbe435d7e02ed53fc24a0cc70d0309051e8376d5",
+    "manifest_sha256": "7c1b7061eed413d7673ad4dd385679cae86f4ff22aea9a2c714af46f9f26160f",
     "regression_test": {
       "path": "tests/test_p1_contract_graph_guard.py",
       "sha256": "fa562d2bd7f07bbaddb7eaf306ffab66e81739eff1f985a8360cb66a6a2f9327"
@@ -371119,7 +371331,7 @@
     "format": "jungsi.cursor-contract-offline-verification/v1",
     "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED",
     "manifest_path": "tests/cursor_contract_review_graph.20261114_pr75.current.json",
-    "manifest_sha256": "bccf24b697d419d5e7acc6c544982a02b9af1b54af744c2f6d20290f1f113368",
+    "manifest_sha256": "44c41f8b9ae09113303922788ade0f5e23c065b9718a85fb18c6f45b83578cdc",
     "regression_test": {
       "path": "tests/test_cursor_contract_graph_guard.py",
       "sha256": "17c9267553967847ed8d48fe37dabea13d778beb3d568f4b6ee24a5f1a97d896"
@@ -371283,7 +371495,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "fe8e4a900cadc45a271b81aecfd63bd4fc25dd57e1b27ecf0c40f8ba45282ed7",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "0f9264d06f028d8d607e01f48813577f16e81cd65d294c48b7995ca66600450e",
       "scripts/check_edge_contract.py": "406161ad3925ea3096a4e710070ffac828a151486b45a4d6ff7183073b728f1e",
-      "scripts/check_project_consistency.py": "2ae78a5921916ce5fbf563a1ea931c155a515559e9c5fcb5ab85ad889506ca93",
+      "scripts/check_project_consistency.py": "dabe1d7264fe46a99354836ef7912cf34d5cb9dcb3747a6053775420218719a1",
       "scripts/run_edge_tests.py": "4cb0315ea147abf617c66dae3086acacf7851e8b71d2538c049579bf680a0f6d",
       "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
       "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",

@@ -138929,8 +138929,92 @@
             "src": "supabase/functions/_shared/jungsi/domain/native_json.ts"
           }
         ],
-        "source_sha256": "616d0972c5b364661c39a8f4460b2da0a64b79d891bda6379e387b69b076e131",
+        "source_sha256": "2bc4dd32302aec34062343ed3f168d00814f8e09492a28da15abaa705615df0f",
         "symbols": [
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "typeLiteral",
+                    "value": {
+                      "properties": [
+                        {
+                          "name": "scores",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            }
+                          }
+                        },
+                        {
+                          "name": "suffix",
+                          "tsType": {
+                            "kind": "array",
+                            "value": {
+                              "kind": "keyword",
+                              "repr": "bigint",
+                              "value": "bigint"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "Chunk"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "export",
+                "def": {
+                  "tsType": {
+                    "kind": "typeRef",
+                    "repr": "Map",
+                    "value": {
+                      "typeName": "Map",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "string",
+                          "value": "string"
+                        },
+                        {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Chunk",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "local"
+                                  },
+                                  "typeName": "Chunk"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "typeAlias"
+              }
+            ],
+            "name": "SharedChunkCache"
+          },
           {
             "declarations": [
               {
@@ -138941,7 +139025,7 @@
                       "accessibility": "private",
                       "hasBody": true,
                       "name": "constructor",
-                      "parameter_source": "(\n    private readonly pin: AuthorizedSavedTailPin,\n    private readonly port: AuthorizedSavedTailBytesPort,\n    private readonly signal: AbortSignal,\n    private readonly context: Readonly<NativeObject>,\n    private readonly contextHash: string,\n    private readonly version: string,\n    private readonly denominator: bigint,\n    private readonly eligible: bigint,\n    private readonly whole: Rational,\n    private readonly methodId: string,\n    private readonly chunks: readonly ChunkMeta[],\n    private readonly maximumCachedBytes: number,\n  )",
+                      "parameter_source": "(\n    private readonly pin: AuthorizedSavedTailPin,\n    private readonly port: AuthorizedSavedTailBytesPort,\n    private readonly signal: AbortSignal,\n    private readonly context: Readonly<NativeObject>,\n    private readonly contextHash: string,\n    private readonly version: string,\n    private readonly denominator: bigint,\n    private readonly eligible: bigint,\n    private readonly whole: Rational,\n    private readonly methodId: string,\n    private readonly chunks: readonly ChunkMeta[],\n    private readonly maximumCachedBytes: number,\n    private readonly shared?: SharedChunkCache,\n  )",
                       "params": [
                         {
                           "accessibility": "private",
@@ -139139,6 +139223,23 @@
                             "repr": "number",
                             "value": "number"
                           }
+                        },
+                        {
+                          "accessibility": "private",
+                          "kind": "identifier",
+                          "name": "shared",
+                          "optional": true,
+                          "readonly": true,
+                          "tsType": {
+                            "kind": "typeRef",
+                            "repr": "SharedChunkCache",
+                            "value": {
+                              "resolution": {
+                                "kind": "local"
+                              },
+                              "typeName": "SharedChunkCache"
+                            }
+                          }
                         }
                       ]
                     }
@@ -139225,6 +139326,21 @@
                               "kind": "keyword",
                               "repr": "string",
                               "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "shared",
+                            "optional": true,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "SharedChunkCache",
+                              "value": {
+                                "resolution": {
+                                  "kind": "local"
+                                },
+                                "typeName": "SharedChunkCache"
+                              }
                             }
                           }
                         ],
@@ -139862,46 +139978,6 @@
               }
             ],
             "name": "ChunkMeta"
-          },
-          {
-            "declarations": [
-              {
-                "declarationKind": "private",
-                "def": {
-                  "tsType": {
-                    "kind": "typeLiteral",
-                    "value": {
-                      "properties": [
-                        {
-                          "name": "scores",
-                          "tsType": {
-                            "kind": "array",
-                            "value": {
-                              "kind": "keyword",
-                              "repr": "bigint",
-                              "value": "bigint"
-                            }
-                          }
-                        },
-                        {
-                          "name": "suffix",
-                          "tsType": {
-                            "kind": "array",
-                            "value": {
-                              "kind": "keyword",
-                              "repr": "bigint",
-                              "value": "bigint"
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-                "kind": "typeAlias"
-              }
-            ],
-            "name": "Chunk"
           }
         ]
       },
@@ -155298,6 +155374,11 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts"
           },
           {
+            "importedName": "SharedChunkCache",
+            "originalName": "SharedChunkCache",
+            "src": "supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts"
+          },
+          {
             "importedName": "cloneNativeJson",
             "originalName": "cloneNativeJson",
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
@@ -155313,7 +155394,7 @@
             "src": "supabase/functions/_shared/jungsi/infrastructure/saved_reference_tail_source.ts"
           }
         ],
-        "source_sha256": "4ff0e7ad1b01e3e9ec02b5c8a00a22a26cb512ad1f9d3dc47f26336ecbfe8b12",
+        "source_sha256": "b3da4ec2449c7b9d0f8bdb8b308b6299245eccf77509a5fc322c7cae17d394b1",
         "symbols": [
           {
             "declarations": [
@@ -155766,6 +155847,108 @@
                               "kind": "keyword",
                               "repr": "string",
                               "value": "string"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "indexReads",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "WeakMap",
+                        "value": {
+                          "typeName": "WeakMap",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "Map",
+                              "value": {
+                                "typeName": "Map",
+                                "typeParams": [
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  },
+                                  {
+                                    "kind": "typeLiteral",
+                                    "value": {
+                                      "properties": [
+                                        {
+                                          "name": "signature",
+                                          "tsType": {
+                                            "kind": "keyword",
+                                            "repr": "string",
+                                            "value": "string"
+                                          }
+                                        },
+                                        {
+                                          "name": "raw",
+                                          "tsType": {
+                                            "kind": "typeRef",
+                                            "repr": "Promise",
+                                            "value": {
+                                              "typeName": "Promise",
+                                              "typeParams": [
+                                                {
+                                                  "kind": "typeRef",
+                                                  "repr": "Uint8Array",
+                                                  "value": {
+                                                    "typeName": "Uint8Array"
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "accessibility": "private",
+                      "name": "sharedChunks",
+                      "readonly": true,
+                      "tsType": {
+                        "kind": "typeRef",
+                        "repr": "WeakMap",
+                        "value": {
+                          "typeName": "WeakMap",
+                          "typeParams": [
+                            {
+                              "kind": "typeRef",
+                              "repr": "AbortSignal",
+                              "value": {
+                                "typeName": "AbortSignal"
+                              }
+                            },
+                            {
+                              "kind": "typeRef",
+                              "repr": "SharedChunkCache",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "SharedChunkCache",
+                                  "specifier": "../domain/chunked_reference_projection.ts"
+                                },
+                                "typeName": "SharedChunkCache"
+                              }
                             }
                           ]
                         }
@@ -267654,7 +267837,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074",
+        "source_sha256": "ea5d812a9de3935d3101133aa3e64a363b0a576ecb78cc57248294bf10100906",
         "symbols": [
           {
             "declarations": [
@@ -267985,7 +268168,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/json_value.ts"
           }
         ],
-        "source_sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417",
+        "source_sha256": "04be9c9af027a50d978a374eb5e4b80063824ac3267013da113d17f79bd0ef81",
         "symbols": [
           {
             "declarations": [
@@ -268345,6 +268528,35 @@
               }
             ],
             "name": "pct"
+          },
+          {
+            "declarations": [
+              {
+                "declarationKind": "private",
+                "def": {
+                  "hasBody": true,
+                  "isAsync": true,
+                  "parameter_source": "()",
+                  "params": [],
+                  "returnType": {
+                    "kind": "typeRef",
+                    "repr": "Promise",
+                    "value": {
+                      "typeName": "Promise",
+                      "typeParams": [
+                        {
+                          "kind": "keyword",
+                          "repr": "void",
+                          "value": "void"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "kind": "function"
+              }
+            ],
+            "name": "sharedChunkCache"
           },
           {
             "declarations": [

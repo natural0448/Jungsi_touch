@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
   "spec_version": "1.9.177",
-  "source_sha256": "a9ab7abdc0682afe2566a70047287c45bcfd06106dca250031cb96cf4bd2e541",
+  "source_sha256": "af3d0886ec16780b3cedf58a59c46d73a47387d33b9eb931cefb49cfbdc58dd1",
   "pages": [
     {
       "id": "PAGE-01",
@@ -4626,11 +4626,11 @@
         },
         {
           "path": "tests/edge/test_chunked_reference_integration.synthetic.ts",
-          "sha256": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074"
+          "sha256": "ea5d812a9de3935d3101133aa3e64a363b0a576ecb78cc57248294bf10100906"
         },
         {
           "path": "tests/edge/test_chunked_reference_projection.synthetic.ts",
-          "sha256": "d5585cca9263d07032fb9734abb02a66cc2872b7d18dd074d277c1e73990d417"
+          "sha256": "04be9c9af027a50d978a374eb5e4b80063824ac3267013da113d17f79bd0ef81"
         },
         {
           "path": "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
@@ -4931,15 +4931,15 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "66f726de97d579ce8277cff4669f7c0ac5fdb0c258b034dfa3b391871edd8316"
+        "sha256": "f210640c3523a1ea0ee93fbe7bd02959af0499633c6c0be8a5a53dfbbaa7c6f3"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
-        "sha256": "4661837615cbee2a941a568832a007c900640a3b82eef2b15e19db34bfb9a27a"
+        "sha256": "25230102a6ede88ca5183f0edbc4919052a35e78f76e41c9acf3eecbabdc3215"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d37ffbd420599d1a0b33df082735667146700e045cf951af3425654737212ac5"
+        "sha256": "92c316937a3d8a921de9a8954d66d7a29588cae167a36624cf513967bfe634e9"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",

@@ -171,6 +171,32 @@ function pct(x: NativeObject | null) {
   return x?.estimated_upper_cumulative_percent_all_examinees ?? null;
 }
 
+/** 2026-11-17 운영 CPU 초과 수정: 같은 조각은 두 투영이 나눠 써 한 번만 읽고, 빠른 해석에서도 소수·안전 범위 밖 정수는 거부 */
+async function sharedChunkCache() {
+  const f = await fixture(), a = authority(f), shared = new Map();
+  const raw = await a.port.read(f.pin.key, f.pin.bytes, a.controller.signal);
+  const open = (id: string) =>
+    ChunkedReferenceTailProjection.bind(
+      raw,
+      { ...f.pin, binding: { offering_id: id } },
+      a.port,
+      a.controller.signal,
+      4 * 1024 * 1024,
+      id,
+      shared,
+    );
+  const p1 = await open("SYNTHETIC-one"), p2 = await open("SYNTHETIC-two");
+  eq(pct(await p1.query(new Rational(4n), f.context)), "20.000000000000");
+  eq(pct(await p2.query(new Rational(4n), f.context)), "20.000000000000");
+  eq(a.reads.filter((k) => k === "synthetic/chunk1").length, 1);
+  for (const bad of [[[10, "2"], [20.5, "1"]], [[10, "2"], [9007199254740993n, "1"]]]) {
+    const g = await fixture(undefined, (x: any[]) => {
+      x[0] = bad;
+    });
+    const q = await authority(g).open();
+    await rejects(() => q.query(new Rational(1n), g.context));
+  }
+}
 /** 단일 저장 곡선의 음수 환산점수 축(11-17): 점수 분자만 부호를 받고 분모·가중치는 양수 그대로 */
 async function signedSavedTail() {
   const doc = (rows: string[][]): NativeObject => ({
@@ -319,6 +345,7 @@ Deno.test("chunked values preserve points, ties, gaps and bounds", async () => {
   eq(a.reads, ["synthetic/index", "synthetic/chunk0", "synthetic/chunk1"]);
   await signedChunks();
   await signedSavedTail();
+  await sharedChunkCache();
 });
 Deno.test("a point reads only index and its one chunk", async () => {
   const f = await fixture(), a = authority(f), p = await a.open();

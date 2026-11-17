@@ -97,7 +97,9 @@ type ChunkMeta = {
   weight: bigint;
   above: bigint;
 };
-type Chunk = { scores: bigint[]; suffix: bigint[] };
+export type Chunk = { scores: bigint[]; suffix: bigint[] };
+/** 한 요청 안에서 같은 조각(SHA·문맥·질량이 같은)을 학과마다 다시 해석하지 않도록 나눠 쓰는 캐시(11-17 CPU 초과 수정). */
+export type SharedChunkCache = Map<string, Promise<Chunk>>;
 /** Open after the existing server selection and authorized, budgeted index read. */
 export class ChunkedReferenceTailProjection {
   private readonly cached = new Map<number, Promise<Chunk>>();
@@ -115,6 +117,7 @@ export class ChunkedReferenceTailProjection {
     private readonly methodId: string,
     private readonly chunks: readonly ChunkMeta[],
     private readonly maximumCachedBytes: number,
+    private readonly shared?: SharedChunkCache,
   ) {
     this.cachedBytes = pin.bytes;
   }
@@ -125,6 +128,7 @@ export class ChunkedReferenceTailProjection {
     signal: AbortSignal,
     maximumCachedBytes: number,
     offeringId: string,
+    shared?: SharedChunkCache,
   ): Promise<ChunkedReferenceTailProjection> {
     check(
       !!selected && !!port && !!signal && !signal.aborted &&
@@ -301,10 +305,31 @@ export class ChunkedReferenceTailProjection {
       a.derived_method_id as string,
       Object.freeze(chunks),
       maximumCachedBytes,
+      shared,
     );
   }
   private async load(m: ChunkMeta): Promise<Chunk> {
     let pending = this.cached.get(m.ordinal);
+    // 같은 바이트(SHA)·문맥·판·질량 경계의 조각은 이미 검증·해석된 결과를 그대로 쓴다
+    const sharedKey = [
+      m.sha256,
+      this.contextHash,
+      this.version,
+      m.count,
+      m.lo,
+      m.hi,
+      m.weight,
+      m.above,
+      this.denominator,
+      this.eligible,
+    ].join(":");
+    if (!pending && this.shared) {
+      const hit = this.shared.get(sharedKey);
+      if (hit) {
+        pending = hit;
+        this.cached.set(m.ordinal, pending);
+      }
+    }
     if (!pending) {
       check(this.cachedBytes + m.bytes <= this.maximumCachedBytes, "reference_tail_unavailable");
       this.cachedBytes += m.bytes;
@@ -317,7 +342,9 @@ export class ChunkedReferenceTailProjection {
             await hash(raw) === m.sha256,
           "reference_tail_pin_invalid",
         );
-        const p = obj(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(raw)), [
+        // 조각은 안전 정수와 10진 문자열만 담는다. 플랫폼 JSON 해석이 훨씬 빠르고, 아래 검사가
+        // 안전 정수가 아닌 수(정밀도 손실)·소수를 모두 거부한다(11-17 CPU 초과 수정).
+        const p = obj(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(raw)), [
           "format",
           "version",
           "ordinal",
@@ -360,6 +387,12 @@ export class ChunkedReferenceTailProjection {
         return { scores, suffix };
       })();
       this.cached.set(m.ordinal, pending);
+      this.shared?.set(sharedKey, pending);
+      // 실패한 해석은 나눠 쓰지 않는다
+      pending.catch(() => {
+        const shared = this.shared;
+        if (shared && shared.get(sharedKey) === pending) shared.delete(sharedKey);
+      });
     }
     return await pending;
   }

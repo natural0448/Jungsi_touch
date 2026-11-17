@@ -466,7 +466,9 @@ Deno.test("separate offerings have separate bound chunk projections under shared
   assert(one && two);
   await one.projection.query(new Rational(50n), { ...f.c, offering_id: "one" });
   await two.projection.query(new Rational(50n), { ...f.c, offering_id: "two" });
-  equal(f.reads.length, 4);
+  // 2026-11-17 운영 CPU 초과 수정: 같은 요청 범위에서는 색인과 해석된 조각을 학과끼리 나눠 쓴다(색인 1 + 조각 1).
+  // 학과별 결속은 그대로 분리되어 다른 학과 식별자로는 질의할 수 없다(아래).
+  equal(f.reads.length, 2);
   await rejected(() => one.projection.query(new Rational(50n), { ...f.c, offering_id: "two" }));
 });
 
