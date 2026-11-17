@@ -181,6 +181,13 @@ export class P1CoordinationCore {
       writePrefix: kind === "warm" ? `p1c:v1:${generation}:f${s.fence}:${nonce}` : null };
   }
   inspect(): CoordinationView { return this.view(coordinatorState(this.store.read()), this.now()); }
+  /** 표시 전용(3페이지 연도별 근거). 10분 머리 확인이 지났어도 만료 전이고 머리와 같은 판인 준비본을 읽기만 한다. 상태는 바꾸지 않는다(11-17). */
+  peek(): CoordinationView {
+    const s = coordinatorState(this.store.read()), now = this.now(), v = this.view(s, now);
+    if (!v.ready && s.head && s.ready && s.ready.value.publication_sha256 === s.head.publication_sha256 && Date.parse(s.head.expires_at) > now)
+      v.ready = structuredClone(s.ready.value);
+    return v;
+  }
   claimHead(afterRevision?: number, minFreshMs = 0): HeadClaim {
     const now = this.now();
     return this.store.atomic<HeadClaim>(raw => {
@@ -289,6 +296,7 @@ export class P1CoordinationCore {
 
 export type CoordinatorCommand =
   | { op: "inspect" }
+  | { op: "peek" }
   | { op: "claimHead"; afterRevision?: number; minFreshMs?: number }
   | { op: "commitHead"; token: CoordinationToken; head: SnapshotHeadDto }
   | { op: "failHead"; token: CoordinationToken }
@@ -326,10 +334,11 @@ function commandToken(value: unknown): CoordinationToken {
 export async function dispatchP1Command(core: P1CoordinationCore, command: unknown): Promise<unknown> {
   if (!command || typeof command !== "object" || Array.isArray(command)) coordinationError("p1_coordinator_request_invalid");
   const b = command as Record<string, unknown>, op = b.op;
-  const fields: Record<string, string[]> = { inspect: ["op"], claimHead: ["op", "afterRevision", "minFreshMs"], commitHead: ["op", "token", "head"], failHead: ["op", "token"], claimWarm: ["op", "publication"], commitWarm: ["op", "token", "progress", "ready"], failWarm: ["op", "token"], rebuildWarm: ["op", "publication"] };
+  const fields: Record<string, string[]> = { inspect: ["op"], peek: ["op"], claimHead: ["op", "afterRevision", "minFreshMs"], commitHead: ["op", "token", "head"], failHead: ["op", "token"], claimWarm: ["op", "publication"], commitWarm: ["op", "token", "progress", "ready"], failWarm: ["op", "token"], rebuildWarm: ["op", "publication"] };
   if (typeof op !== "string" || !Object.hasOwn(fields, op) || Object.keys(b).some(k => !fields[op].includes(k)) || fields[op].some(k => k !== "afterRevision" && k !== "minFreshMs" && !(k in b))) coordinationError("p1_coordinator_request_invalid");
   switch (op) {
     case "inspect": return core.inspect();
+    case "peek": return core.peek();
     case "claimHead": return core.claimHead(b.afterRevision as number | undefined, (b.minFreshMs ?? 0) as number);
     case "commitHead": return core.commitHead(commandToken(b.token), b.head, await digest(b.head));
     case "failHead": return core.failHead(commandToken(b.token));
@@ -361,6 +370,7 @@ export function p1CoordinatorClient(stub: { fetch(request: Request): Promise<Res
   }
   return {
     inspect: () => invoke<CoordinationView>({ op: "inspect" }),
+    peek: () => invoke<CoordinationView>({ op: "peek" }),
     claimHead: (afterRevision?: number, minFreshMs?: number) => invoke<HeadClaim>({ op: "claimHead", ...(afterRevision === undefined ? {} : { afterRevision }), ...(minFreshMs === undefined ? {} : { minFreshMs }) }),
     commitHead: (token: CoordinationToken, head: SnapshotHeadDto) => invoke<CommitResult>({ op: "commitHead", token, head }),
     failHead: (token: CoordinationToken) => invoke<CoordinationView>({ op: "failHead", token }),

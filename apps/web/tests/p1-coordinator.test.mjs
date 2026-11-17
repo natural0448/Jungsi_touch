@@ -138,6 +138,16 @@ test("expired head cannot serve ready or start warm", async () => fixture(async 
   f.advance(600001); assert.equal((await f.client.inspect()).ready, null);
   await denied(f.client.claimWarm(H), "p1_head_check_required");
 }));
+test("peek serves the stored ready after the 10-minute check lapses, never after expiry or a changed head (11-17)", async () => fixture(async f => {
+  const h = await seed(f.client), c = await f.client.claimWarm(H); await f.client.commitWarm(c.token, { phase: "ready" }, ready(h, c.token));
+  f.advance(600001);
+  const stale = await f.client.peek();
+  assert.equal(stale.headFresh, false); assert.equal(stale.ready.publication_sha256, H);
+  assert.equal((await f.client.inspect()).ready, null);
+  await denied(f.client.claimWarm(H), "p1_head_check_required");
+  f.advance(Date.parse(h.expires_at) - Date.now() + 86400000 * 400);
+  assert.equal((await f.client.peek()).ready, null);
+}));
 test("warm margin renews a check near the 10-minute edge so a step cannot lapse mid-commit (11-06 seq18)", async () => fixture(async f => {
   await seed(f.client); f.advance(600000 - 110000);
   // Plain visitors still reuse the check; a warm step asking for 120s left gets one renewal permit.

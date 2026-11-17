@@ -521,7 +521,7 @@ export async function warmInfo(): Promise<{ ready: Ready | null; stale: { snapsh
  */
 export async function displayReady(): Promise<Ready | null> {
   try {
-    const mode = configuredMode(), { coordinator } = await services(mode), view = await coordinator.inspect();
+    const mode = configuredMode(), { coordinator } = await services(mode), view = await coordinator.peek();
     if (!view.head || !view.ready) return null;
     return await readyOf({ ...view, headFresh: true }, mode);
   } catch { return null; }

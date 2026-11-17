@@ -5,7 +5,7 @@ import { logContentView } from "@/lib/content-view";
 import type { ForecastPublicDto, RecruitmentDto } from "@/lib/dto";
 import { applyAdigaFill } from "@/lib/p1-adiga-fill";
 import { publishedStats } from "@/lib/p1-published-stats";
-import { displayReady, loadAdigaFill, pastRowsFor2027 } from "@/lib/p1-snapshot";
+import { currentSnapshot, displayReady, loadAdigaFill, pastRowsFor2027, type Ready } from "@/lib/p1-snapshot";
 import { page } from "@/lib/routes";
 
 /** 1페이지와 같은 학년도별 대학 발표 성적 ①② (3페이지 연도별 근거 칸) */
@@ -18,12 +18,12 @@ export type Extras =
  * 1페이지 정리본에서 이 2027 모집행의 과거 행을 찾아 1페이지와 같은 규칙(①②)으로 고른 성적.
  * 정리본이 준비되지 않았거나 읽지 못하면 null — 연도별 근거 칸은 '자료 없음'으로 남는다.
  */
-async function p1Years(offeringId: string, university: string): Promise<P1Year[] | null> {
+async function p1Years(offeringId: string, university: string, readyOf: () => Promise<Ready | null> = displayReady): Promise<P1Year[] | null> {
   const m = /^2027:([0-9]{1,12})$/.exec(offeringId);
   if (!m || !university) return null;
   try {
     // 서비스 API를 부르지 않고 화면 서버의 저장된 준비본만 읽는다(유료 계정 동시성 2와 겹치지 않음)
-    const [ready, fill] = await Promise.all([displayReady(), loadAdigaFill()]);
+    const [ready, fill] = await Promise.all([readyOf(), loadAdigaFill()]);
     if (!ready) return null;
     const rows = applyAdigaFill(await pastRowsFor2027(ready, university, m[1]), fill);
     return rows.map((r) => ({
@@ -47,7 +47,12 @@ export async function loadExtras(offeringId: string, university = ""): Promise<E
   const src = source();
   try {
     // 유료 계정의 승인 동시성은 2 — 서비스 조회는 두 개만 함께 보낸다. 1페이지 성적은 화면 서버 저장본이라 같이 읽는다
-    const [rec, pub, p1] = await Promise.all([src.readRecruitment(caller, offeringId), src.readPublishedForecast(caller, offeringId), p1Years(offeringId, university)]);
+    const [rec, pub, fast] = await Promise.all([src.readRecruitment(caller, offeringId), src.readPublishedForecast(caller, offeringId), p1Years(offeringId, university)]);
+    // 저장된 준비본이 없을 때만 예전처럼 1페이지와 같은 확인을 거쳐 읽는다(서비스 조회 두 개가 끝난 뒤 — 동시성 2 유지)
+    const p1 = fast ?? await p1Years(offeringId, university, async () => {
+      const snap = await currentSnapshot(src, caller);
+      return snap.state === "ready" ? snap.ready : null;
+    });
     await logContentView("analysis", `${page("PAGE-03").path}?open=${encodeURIComponent(offeringId)}`);
     return { ok: true, rec, pub, p1 };
   } catch (e) {
