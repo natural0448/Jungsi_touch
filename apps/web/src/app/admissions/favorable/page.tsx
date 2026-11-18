@@ -173,6 +173,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           desc="저장한 성적을 그대로 사용해 후보를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
           label="후보 다시 확인"
           busy="다시 확인하는 중…"
+          auto={report.candidates_stale === true}
         />
 
         {/* 좁은 화면에서는 와일드카드가 목록 아래로 내려간다. 있다는 것을 위에서 먼저 알린다 */}

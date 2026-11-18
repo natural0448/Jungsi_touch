@@ -63,6 +63,9 @@ export async function MineRunBoxes({ p, items }: { p: P; items: OfferingDto[] })
   const report = mineReport(await p);
   if (!report) return null;
   const missing = items.filter((o) => !report.analyses?.[o.offering_id]).map((o) => o.offering_id);
+  // 곡선·환산 자료가 바뀐 뒤 옛 분석이 그대로 보이지 않게, 서버가 옛 분석이라고 알려 준 곳이 이 범위에 있으면 자동으로 다시 확인한다
+  const stale = new Set(report.stale_analysis_ids ?? []);
+  const hasStale = items.slice(0, 100).some((o) => stale.has(o.offering_id));
   return (
     <>
       {missing.length > 0 && (
@@ -82,6 +85,7 @@ export async function MineRunBoxes({ p, items }: { p: P; items: OfferingDto[] })
           desc="저장한 성적을 그대로 사용해 이 범위를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
           label="이 범위 다시 확인"
           busy="다시 확인하는 중…"
+          auto={hasStale}
         />
       )}
     </>

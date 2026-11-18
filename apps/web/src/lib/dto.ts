@@ -499,6 +499,10 @@ export interface ReportDto {
   candidates?: CandidatesDto | null;
   shortlist?: Record<string, ShortlistEntryDto>;
   analysis_status?: { status: string; reason_code: string | null };
+  /** 지금 자료판과 다른 판으로 계산돼 저장된 분석의 모집단위(서버 v224~, 읽을 때만 붙는다). 없으면 판단하지 않는다 */
+  stale_analysis_ids?: string[];
+  /** 저장된 후보 목록이 지금 자료판과 다른 판으로 만들어졌는지 */
+  candidates_stale?: boolean;
 }
 
 /** snapshot — report.export. 고정된 revision 의 상담 리포트 */
