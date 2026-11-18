@@ -117,6 +117,8 @@ export interface ProfessionalAuthorityPort {
   ): Promise<ProfessionalAuthority>;
   assertCurrent(authority: ProfessionalAuthority, nowUtc: bigint): Promise<void>;
   members(authority: ProfessionalAuthority): Promise<readonly ProfessionalMembership[]>;
+  /** 기관 관리자에게만 {구성원 번호: 이름}. 이름 함수가 승인되지 않았으면 빈 객체(2026-11-13) */
+  memberNames?(authority: ProfessionalAuthority): Promise<Readonly<Record<string, string>>>;
 }
 export interface OrganizationStudentRepositoryPort {
   /** A request-local frame encloses mutation, audit, final authority check and serialization. */
@@ -194,6 +196,17 @@ export interface StudentReportPort {
     scope: ProfessionalScope,
     report: ProfessionalReport,
     offeringId: string,
+    maximum: number,
+  ): Promise<NativeObject>;
+  /**
+   * 2026-11-13 담은 학교 빼기: 장부를 지우지 않고 remove 기록을 쌓는다(012 bookmark_events).
+   * 선택 기능이다. 없는 저장소(예전 합성 고정본)에서는 빼기 요청을 503 으로 거절한다
+   */
+  removeBookmark?(
+    scope: ProfessionalScope,
+    report: ProfessionalReport,
+    offeringId: string,
+    eventId: string,
     maximum: number,
   ): Promise<NativeObject>;
 }

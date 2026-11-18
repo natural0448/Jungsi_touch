@@ -1,7 +1,10 @@
 /** Chunked tail provider: all storage authority remains with the injected issuer. */
 import type { ChunkedReferenceTailSelection } from "../application/reference_percentile.ts";
 import { AccessError } from "../application/access.ts";
-import { ChunkedReferenceTailProjection } from "../domain/chunked_reference_projection.ts";
+import {
+  ChunkedReferenceTailProjection,
+  type SharedChunkCache,
+} from "../domain/chunked_reference_projection.ts";
 import { cloneNativeJson, nativeJsonText, type NativeObject } from "../domain/json_value.ts";
 import {
   type AuthorizedSavedTailBytesPort,
@@ -42,6 +45,12 @@ export class PinnedChunkedReferenceTailSource {
   private readonly cached = new WeakMap<AbortSignal, Map<string, Cached>>();
   private readonly scopeSignals = new WeakMap<AbortSignal, AbortSignal>();
   private readonly indexSignatures = new Map<string, string>();
+  /** 같은 요청 범위에서는 색인 바이트와 해석된 조각을 학과끼리 나눠 쓴다(2026-11-17 운영 CPU 초과 수정). */
+  private readonly indexReads = new WeakMap<
+    AbortSignal,
+    Map<string, { signature: string; raw: Promise<Uint8Array> }>
+  >();
+  private readonly sharedChunks = new WeakMap<AbortSignal, SharedChunkCache>();
   constructor(
     private readonly source: AuthorizedChunkedTailBytesPort,
     private readonly signal: AbortSignal,
@@ -105,9 +114,27 @@ export class PinnedChunkedReferenceTailSource {
     let prior = scope.get(key);
     if (prior && prior.signature !== signature) unavailable();
     if (!prior) {
-      this.budget.reserve(pin.bytes);
+      let reads = this.indexReads.get(signal);
+      if (!reads) {
+        reads = new Map();
+        this.indexReads.set(signal, reads);
+      }
+      let chunks = this.sharedChunks.get(signal);
+      if (!chunks) {
+        chunks = new Map();
+        this.sharedChunks.set(signal, chunks);
+      }
+      const shared = chunks;
+      let index = reads.get(pin.key);
+      if (index && index.signature !== sharedSignature) unavailable();
+      if (!index) {
+        this.budget.reserve(pin.bytes);
+        index = { signature: sharedSignature, raw: this.source.read(pin.key, pin.bytes, signal) };
+        reads.set(pin.key, index);
+      }
+      const indexRaw = index.raw;
       const value = (async () => {
-        const raw = await this.source.read(pin.key, pin.bytes, signal);
+        const raw = Uint8Array.from(await indexRaw);
         if (signal.aborted) unavailable();
         const guarded: AuthorizedSavedTailBytesPort = {
           select: (id, s) => this.source.select(id, s),
@@ -128,6 +155,7 @@ export class PinnedChunkedReferenceTailSource {
           signal,
           this.maximumCachedBytes,
           offeringId,
+          shared,
         );
       })();
       prior = { signature, value };

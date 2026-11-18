@@ -230,6 +230,10 @@ export class NativeProfessionalRuntime {
               approved.raw.authority_function,
             ) as unknown as ProfessionalAuthorityFunctionBinding,
             (statement, parameters) => store.authorityQuery(user.subjectId, statement, parameters),
+            // 선택 설정: 구성원 이름 함수(013). 설정에 없으면 이름 없이 동작
+            approved.raw.member_names_function === undefined ? null : proObject(
+              approved.raw.member_names_function,
+            ) as unknown as ProfessionalAuthorityFunctionBinding,
           );
           const usageRaw = proObject(approved.raw.usage), costs = usageRaw.operations;
           if (!Array.isArray(costs)) fail();

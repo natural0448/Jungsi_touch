@@ -40,6 +40,13 @@ function uint(v: unknown): bigint {
   check(n <= MAX, "reference_tail_invalid");
   return n;
 }
+/** 점수 분자만 부호를 허용한다(음수 환산점수, 11-17). 가중치는 uint 그대로. */
+function sint(v: unknown): bigint {
+  check(typeof v === "string" && /^(0|-?[1-9][0-9]{0,18})$/.test(v), "reference_tail_invalid");
+  const n = BigInt(v);
+  check(n >= -MAX && n <= MAX, "reference_tail_invalid");
+  return n;
+}
 function nativeUint(v: unknown): bigint {
   check(
     (typeof v === "number" && Number.isSafeInteger(v)) || typeof v === "bigint",
@@ -69,6 +76,9 @@ function numberEnd(s: string, i: number): number {
   while (j < s.length && s.charCodeAt(j) >= 48 && s.charCodeAt(j) <= 57) j++;
   check(j > i && j - i <= 19 && !(j - i > 1 && s[i] === "0"), "reference_tail_invalid");
   return j;
+}
+function scoreEnd(s: string, i: number): number {
+  return numberEnd(s, s[i] === "-" ? i + 1 : i);
 }
 function quotedEnd(s: string, i: number): number {
   check(s[i] === '"', "reference_tail_invalid");
@@ -130,7 +140,7 @@ async function scan(
     const offset = i;
     check(s[i] === "[", "reference_tail_invalid");
     i = skip(s, i + 1);
-    const nEnd = numberEnd(s, i), n = uint(s.slice(i, nEnd));
+    const nEnd = scoreEnd(s, i), n = sint(s.slice(i, nEnd));
     i = skip(s, nEnd);
     check(s[i] === ",", "reference_tail_invalid");
     i = skip(s, i + 1);
@@ -139,7 +149,7 @@ async function scan(
     check(s[wEnd] === '"', "reference_tail_invalid");
     const w = uint(s.slice(i + 1, wEnd));
     i = skip(s, wEnd + 1);
-    check(s[i] === "]" && w > 0n && n > last, "reference_tail_invalid");
+    check(s[i] === "]" && w > 0n && (count === 0 || n > last), "reference_tail_invalid");
     i = skip(s, i + 1);
     if (!count) first = n;
     last = n;
@@ -177,7 +187,7 @@ function inclusiveAt(
   for (let count = 0; count <= 2048; count++) {
     check(s[i] === "[", "reference_tail_invalid");
     i = skip(s, i + 1);
-    const nEnd = numberEnd(s, i), n = uint(s.slice(i, nEnd));
+    const nEnd = scoreEnd(s, i), n = sint(s.slice(i, nEnd));
     i = skip(s, nEnd);
     check(s[i] === ",", "reference_tail_invalid");
     i = skip(s, i + 1);
@@ -196,7 +206,7 @@ function inclusiveAt(
   check(false, "reference_tail_invalid");
 }
 export class NativeReferenceCdfProjection {
-  private readonly results = new Map<string, string>();
+  private readonly results = new Map<string, readonly [string, string]>();
   private constructor(
     private readonly text: string,
     private readonly start: number,
@@ -339,8 +349,8 @@ export class NativeReferenceCdfProjection {
         score.numerator * this.denominator > this.max * score.denominator
       ) return Promise.resolve(null);
       const key = score.toString();
-      let percent = this.results.get(key);
-      if (percent === undefined) {
+      let pair = this.results.get(key);
+      if (pair === undefined) {
         const inclusive = inclusiveAt(
           this.text,
           this.anchors,
@@ -348,19 +358,23 @@ export class NativeReferenceCdfProjection {
           score,
           this.denominator,
         );
-        percent = displayExact(
-          new Rational(inclusive, 10n ** BigInt(this.scale)).multiply(exact(100)).divide(
-            this.whole,
-          ),
-          12,
+        const mass = new Rational(inclusive, 10n ** BigInt(this.scale));
+        // 대표님 결정(2026-11-16): 점수를 낼 수 없는 질량을 모두 위로 둔 상한도 함께 계산
+        const unscored = this.whole.subtract(
+          new Rational(this.eligible, 10n ** BigInt(this.scale)),
         );
-        if (this.results.size < 64) this.results.set(key, percent);
+        pair = [
+          displayExact(mass.multiply(exact(100)).divide(this.whole), 12),
+          displayExact(mass.add(unscored).multiply(exact(100)).divide(this.whole), 12),
+        ] as const;
+        if (this.results.size < 64) this.results.set(key, pair);
       }
       live(signal);
       return Promise.resolve({
         status: "reference_estimated",
         metric: "estimated_upper_cumulative_percent_all_examinees",
-        estimated_upper_cumulative_percent_all_examinees: percent,
+        estimated_upper_cumulative_percent_all_examinees: pair[0],
+        estimated_upper_cumulative_percent_upper_bound: pair[1],
         derived_method_id: this.methodId,
         denominator_kind: "same_year_original_model_whole_exact_mass",
         reference_curve_id: this.curveId,

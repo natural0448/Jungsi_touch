@@ -131,7 +131,7 @@ export class ProfessionalSharedUsage implements ProfessionalUsagePort {
         this.operationBytes.set(name, bytes);
         this.operationCost.set(name, cost);
       }
-      if (this.operationBytes.size !== 21) unavailable();
+      if (this.operationBytes.size !== PROFESSIONAL_CONTRACT.routes.length) unavailable();
     } catch {
       unavailable();
     }

@@ -70,8 +70,12 @@ class ReboundTests(unittest.TestCase):
         hashes = {b["path"]: b["sha256"] for b in page["source_bindings"]}
         self.assertEqual(edge.current_page_route_registration(s,hashes)["test_count"],40)
     def test_absent_marker_preserves_old_failing_bindings(self):
-        self.assertIs(c.select_current_source_rebound(BASE,"auth",historic(BASE,"auth")),historic(BASE,"auth"))
-        self.assertTrue(c.auth_503_registration(BASE)[1])
+        # The newer overlay depends on this marker; a historical fixture omits both.
+        historical=copy.deepcopy(BASE)
+        historical.pop(c.MEMBER_SCHOOL_OVERLAY_FIELD, None)
+        historical.pop(c.SAVED_REPORT_OVERLAY_FIELD, None)
+        self.assertIs(c.select_current_source_rebound(historical,"auth",historic(historical,"auth")),historic(historical,"auth"))
+        self.assertTrue(c.auth_503_registration(historical)[1])
     def test_old_receipt_tamper_and_sha_tamper_rejected(self):
         s=with_marker();hist=historic(s,"auth");hist["test_count"]+=1
         with self.assertRaises(ValueError):c.select_current_source_rebound(s,"auth",hist)
@@ -145,7 +149,8 @@ class ReboundTests(unittest.TestCase):
     def test_req27_selects_only_current_runtime_copy(self):
         s=self.s;old=historic(s,"req27");now=c.select_current_source_rebound(s,"req27",old)
         for path in c._REBOUND_PATHS["req27"]:
-            self.assertNotEqual(old[path],now[path]);self.assertEqual(now[path],c._REBOUND_PINS[path])
+            expected=c.member_school_effective_sha(s,path,c._REBOUND_PINS[path])
+            self.assertNotEqual(old[path],now[path]);self.assertEqual(now[path],expected)
 
 if __name__=="__main__":
     unittest.main(verbosity=2)

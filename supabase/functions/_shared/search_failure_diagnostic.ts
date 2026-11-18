@@ -136,6 +136,10 @@ export function observeCurrentCatalog(
     search: (subject, kind, query, after) =>
       trace.capture("catalog_read", () => base.search(subject, kind, query, after)),
     lookup: (subject, ids, recruitment) => base.lookup(subject, ids, recruitment),
+    ...(base.lookupSavedGuide
+      ? { lookupSavedGuide: (...args: Parameters<NonNullable<CurrentPublicCatalogPort["lookupSavedGuide"]>>) =>
+        base.lookupSavedGuide!(...args) }
+      : {}),
   };
 }
 

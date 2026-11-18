@@ -8,7 +8,7 @@ def loaded():return json.loads((ROOT/"docs/current/service_spec.json").read_byte
 class ReferenceDbRegistrationTests(unittest.TestCase):
  def test_exact_additive_suite(self):
   s=loaded();suite,errors=checker.reference_db_registration(s)
-  self.assertEqual(errors,[]);self.assertEqual(suite["test_count"],199);self.assertEqual(s["edge_harness"]["unit_count"],656)
+  self.assertEqual(errors,[]);self.assertEqual(suite["test_count"],201);self.assertEqual(s["edge_harness"]["unit_count"],656)
  def test_missing_registration_is_rejected(self):
   s=loaded();del s["backend_platform_contract"]["reference_db_test_extension"]
   self.assertTrue(checker.reference_db_registration(s)[1]);self.assertTrue(checker.validate_read_view_extension(s))

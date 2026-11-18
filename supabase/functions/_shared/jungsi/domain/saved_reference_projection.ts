@@ -79,6 +79,11 @@ function uint(v: unknown): bigint {
   check(typeof v === "string" && /^(0|[1-9][0-9]*)$/.test(v), "reference_tail_invalid");
   return BigInt(v);
 }
+/** 점수 분자만 부호를 허용한다(강원대 한국사 감점 등 음수 환산점수, 11-17). 분모·가중치는 uint 그대로. */
+function sint(v: unknown): bigint {
+  check(typeof v === "string" && /^(0|-?[1-9][0-9]*)$/.test(v), "reference_tail_invalid");
+  return BigInt(v);
+}
 // Scores keep their exact numerator/denominator; a Rational is built only for compared rows.
 type Tail = { num: bigint; den: bigint; strict: bigint; tie: bigint; inclusive: bigint };
 const scoreOf = (t: Tail): Rational => new Rational(t.num, t.den);
@@ -194,7 +199,7 @@ export class SavedReferenceTailProjection {
         "tie_weight_units",
         "inclusive_weight_units",
       ]);
-      const num = uint(r.score_numerator),
+      const num = sint(r.score_numerator),
         den = uint(r.score_denominator),
         strict = uint(r.strict_weight_units),
         tie = uint(r.tie_weight_units),
@@ -251,10 +256,16 @@ export class SavedReferenceTailProjection {
     const tail = this.rows[lo],
       mass = new Rational(tail.inclusive, 10n ** BigInt(this.weightScale));
     const percent = mass.multiply(exact(100)).divide(this.whole);
+    // 대표님 결정(2026-11-16): 점수를 낼 수 없는 질량(전체-점수 정의)을 모두 위로 둔 상한도 함께 준다.
+    const unscored = this.whole.subtract(
+      new Rational(this.rows[0].inclusive, 10n ** BigInt(this.weightScale)),
+    );
+    const upper = mass.add(unscored).multiply(exact(100)).divide(this.whole);
     return {
       status: "reference_estimated",
       metric: "estimated_upper_cumulative_percent_all_examinees",
       estimated_upper_cumulative_percent_all_examinees: displayExact(percent, 12),
+      estimated_upper_cumulative_percent_upper_bound: displayExact(upper, 12),
       derived_method_id: this.methodId,
       denominator_kind: "same_year_original_model_whole_exact_mass",
       reference_curve_id: this.context.reference_curve_id,

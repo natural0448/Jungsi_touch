@@ -65,6 +65,7 @@ const SAFE = new Set([
   "professional_access_denied",
   "professional_student_not_found",
   "professional_report_not_found",
+  "professional_bookmark_not_found",
   "professional_profile_not_found",
   "professional_contract_inactive",
   "professional_contract_capacity_changed",
@@ -211,7 +212,7 @@ export function createProfessionalHandler(
       });
     return { route, keys, pattern: new RegExp("^" + parts.join("/") + "$") };
   });
-  if (routes.length !== 21 || new Set(routes.map((r) => r.route.id)).size !== 21) {
+  if (routes.length !== 22 || new Set(routes.map((r) => r.route.id)).size !== 22) {
     throw new AccessError("professional_contract_unavailable", 503);
   }
   return async (request) => {

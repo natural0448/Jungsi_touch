@@ -45,9 +45,13 @@ import { OwnReportCursor } from "./own_report_cursor.ts";
 import { MemberShortlistService } from "../application/member_shortlist.ts";
 import { MemberJsonResults } from "../application/member_json_results.ts";
 import { MemberJsonStorage } from "./member_json_storage.ts";
+import { MemberSchoolResultsStorage } from "./member_school_results_storage.ts";
 import {
+  type MemberResultsReader,
+  memberResultsReader,
   SupabaseMemberShortlist,
   SupabaseMemberShortlistLegacy,
+  SupabaseMemberStatisticsRows,
 } from "./member_shortlist_postgres.ts";
 function fail(): never {
   throw new AccessError("security_policy_unavailable", 503);
@@ -172,6 +176,43 @@ export class NativeRuntimeRequest {
     const b = await this.binding();
     if (!b.memberJson) throw new AccessError("operation_scope_not_approved", 503);
   }
+  /** 015 switch: only the exact value "fn_v2" selects the DB function reader. */
+  private memberResultsReader(): MemberResultsReader {
+    return memberResultsReader(this.env.get("JUNGSI_MEMBER_RESULTS_READER"));
+  }
+  /** statistics.read rows: 015b function when the reader setting is fn_v2, else the UUID-only query. */
+  async activeReportsSource(): Promise<Pick<SupabasePlatformRepository, "activeReports">> {
+    const binding = await this.binding();
+    return new SupabaseMemberStatisticsRows(
+      this.sql(),
+      binding.repositoryLimits.maxRecordBytes,
+      memberResultsReader(this.env.get("JUNGSI_MEMBER_RESULTS_READER")),
+    );
+  }
+  /** The same owner/revision-bound reader used by the member shortlist. */
+  async memberResults(): Promise<MemberJsonResults> {
+    await this.assertMemberShortlistScope();
+    const [b, controls] = await Promise.all([this.binding(), this.controls()]), m = b.memberJson!;
+    const schoolResults = new MemberSchoolResultsStorage({
+      projectUrl: b.projectUrl,
+      bucket: b.storage.bucket,
+      prefix: m.prefix,
+      secretKey: b.storage.secretKey,
+      maxBytes: m.maxObjectBytes,
+      maxItems: Math.min(m.maxItems, 100),
+      timeoutMs: b.storage.limits.requestTimeoutMs,
+    }, controls.fetcher);
+    return new MemberJsonResults(
+      new SupabaseMemberShortlistLegacy(
+        this.sql(),
+        b.repositoryLimits.maxRecordBytes,
+        m.maxItems,
+        schoolResults,
+        this.memberResultsReader(),
+      ),
+      Math.min(m.maxItems, 100),
+    );
+  }
   async memberShortlist(catalog: CatalogService): Promise<MemberShortlistService> {
     await this.assertMemberShortlistScope();
     const [b, controls] = await Promise.all([this.binding(), this.controls()]), m = b.memberJson!;
@@ -188,6 +229,16 @@ export class NativeRuntimeRequest {
       this.sql(),
       b.repositoryLimits.maxRecordBytes,
       m.maxItems,
+      new MemberSchoolResultsStorage({
+        projectUrl: b.projectUrl,
+        bucket: b.storage.bucket,
+        prefix: m.prefix,
+        secretKey: b.storage.secretKey,
+        maxBytes: m.maxObjectBytes,
+        maxItems: Math.min(m.maxItems, 100),
+        timeoutMs: b.storage.limits.requestTimeoutMs,
+      }, controls.fetcher),
+      this.memberResultsReader(),
     );
     const approvedYears = new Set(
       [...(await this.budget()).policy.exams.values()].map((e) => e.academicYear),

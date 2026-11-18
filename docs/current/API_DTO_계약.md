@@ -1,6 +1,6 @@
 # HTTP API와 학생 DTO 계약
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.176이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.177이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 Authorization: Bearer <Supabase access token>. 서버가 /auth/v1/user로 검증한 사용자 UUID와 검증 후 JWT sub/exp를 맞춘다. client/user_metadata의 paid 플래그는 무시하며 DB active/starts_at/expires_at을 UTC 현재 시각과 비교한다.
 
@@ -17,7 +17,7 @@ POST/PUT은 Idempotency-Key 등록 토큰이 필수다. 같은 사용자/작업/
 | score-profile.create | POST /api/v1/score-profiles | scores: 기존 overall_analysis_contract 입력; confirmed: boolean; stage?: mock/provisional/final (서버 승인 단계만) | 없음 | profile; backend_platform_contract.dto_schemas.profile | True |
 | overall.analyze | POST /api/v1/overall-reports | profile_id: 본인이 저장한 현재 입력 프로필; report_id (선택); expected_version (report_id 사용 시 필수) | 없음 | report; backend_platform_contract.dto_schemas.report | True |
 | report.read | GET /api/v1/reports/{report_id} | 없음 | 없음 | report; backend_platform_contract.dto_schemas.report | False |
-| offerings.search | GET /api/v1/offerings/search | 없음 | academic_year (2024~2027 선택), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=offering); backend_platform_contract.dto_schemas.catalog_search | False |
+| offerings.search | GET /api/v1/offerings/search | 없음 | academic_year (2024~2027 선택), exam_id (선택; 본인 저장 점수의 승인 시험 식별자), stage (선택; 해당 시험의 승인된 입력 단계), university_q, department_q, region, group, cursor, limit (1~100; 기본 50) | catalog_search (items=offering; 본인 조회가 허용된 저장 점수 my_score는 선택 필드); backend_platform_contract.dto_schemas.catalog_search | False |
 | offering.read | GET /api/v1/offerings/{offering_id} | 없음 | 없음 | {status, reason_code, offering, catalog_version}; backend_platform_contract.dto_schemas.offering_detail | False |
 | university.analyze | POST /api/v1/reports/{report_id}/university-results | expected_version: positive integer; offering_ids: 서로 다른 등록 ID 1~100개; attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null | 없음 | report (analyses 갱신); backend_platform_contract.dto_schemas.report | True |
 | candidates.build | POST /api/v1/reports/{report_id}/candidates | expected_version: positive integer; attendance_confirmation: 선택적 본인 응시 자기 확인 객체; profile_id·exam_id·pack_version 및 여섯 영역별 true/false/null | 없음 | report (analyses/candidates 갱신); backend_platform_contract.dto_schemas.report | True |
@@ -438,7 +438,7 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542 -->
+<!-- jungsi:generated spec_sha256=44841d564d38eaf17f6190a6d6cb0560fe4c6ec352e345c5641ffeba5aba3202 -->
 
 
 ## 회원별 관심대학 JSON API
@@ -840,6 +840,23 @@ DB 적용: APPLIED_ADDITIVE_SCHEMA_READBACK / 별도 소스 등록: CODE_REGISTE
 | 기획팀 | 공통 계약·라우팅·브랜치/검사 정책; 정상 PR 통합·확정 근거와 NOT_RUN 구분 |
 
 21개 전문가 API와 실제 앱 저장소 소스를 통합했고 007의15개 빈 private 테이블·제약·앱 RLS 및 실제 저장소7항목의 합성 왕복/롤백을 기존 Supabase에서 확인했다. 개인용28/656과 Owner v2를 유지한다. Owner는 허용 application/HTTP/runtime에서 기관 원본·정책/키·최종 BFF/실제JWT·OTP·배포를 독립 진행한다. 원본 SQL/실어댑터·DB/엔진은 기존 담당이다. 실제 기관/학생·계약 임의 생성과 자동 활성화/삭제는 없다. 원본 authority용008은 별도 PREPARED_NOT_APPLIED 후보로 public의 기존 postgres CREATE 범위에 준비했다. set-based 원본 JOIN·계약/회원 version·무시드 승인시험·앱 EXECUTE 한정 및 support/retention 닫힘을 격리24건/바인딩144건/기존기관보안13건으로 확인했다. 실제008 적용·정의SHA/최종바인딩·시험등록·Secrets·실JWT/BFF/배포는 NOT_RUN이며 기존007/개인용28/기관21의 등록과 검증을 유지한다. 2026-10-23 통합 요청: 학년도+모집단위 번호별 정본 규칙의 서버 내부 읽기 포트를 추가하고, 검증된 lineage에만 전년 비교를 결속한다. 영역별 비율·영어/한국사·가산점·탐구 선택조건과 원문/자격을 보존한다. 상담 근거의 실제 모집단/정책 버전·정밀도·충원 인원/예비번호·한해 컷 폭/3개년 변동의 의미를 구분한다. 최신 Owner008 설치 보고는 이전 준비 이력과 별도 수용하며 전체 UPDATE version 트리거를 유지한다. 전문가용 계산 한도는 실제 런타임 카탈로그 범위를 먼저 확인하고 개인용·공유 물리 통제를 보존한다. 새 포트 실DB/설정·전문가용/JWT/OTP/BFF·배포 인수는 각각 NOT_RUN이다.
+
+### 전문가용 담은 학교 빼기 및 구성원 이름 제안
+
+등록된 API는 22개다. 22번째 제안은 `pro.bookmark.remove` · `POST /api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks/remove`이며 현재 SERVER_SOURCE_REGISTERED_RUNTIME_NOT_ACTIVATED이다. 담당 교사에게만 허용하고 요청 키와 BFF CSRF를 요구한다. 다른 기관·비담당 학생은 같은 404, 보관 학생은 409로 처리한다. 기존 담은 기록을 보존하고 같은 리포트의 담기·빼기를 멱등 트랜잭션에서 직렬화한다. 최신 event_seq를 목록과 인쇄에 반영한다.
+
+`pro.member.list`의 선택 필드 `display_name`도 SERVER_SOURCE_REGISTERED_RUNTIME_NOT_ACTIVATED이다. 현재 계약이 유효한 동일 기관의 관리자에게 현재 페이지 구성원 이름만 선택적으로 반환한다. 이메일과 연락처는 제외한다. 이름 확인 실패 시 기존 승인 목록을 이름 없이 제공한다.
+
+| SQL 후보 | SHA-256 | 실행 역할 | 선행 계약 | 적용 상태 |
+| --- | --- | --- | --- | --- |
+| database/migrations/012_professional_bookmark_events.prepared.sql | 5473ad73e5fcef38a90455fab6797bf6f4b1a7a8c9706da04bf7aee0e73dc524 | jungsi_backend_owner | 007_professional_platform | PREPARED_NOT_APPLIED |
+| database/migrations/013_professional_member_names.prepared.sql | 8257e43b04725f8246d06c27960eed1c9a80d71fe110bb98387be2bc3f12988c | postgres | 008_professional_authority | PREPARED_NOT_APPLIED |
+
+데이터팀 운영 DB 읽기 전용 메타데이터 조회에서 존재를 확인한 항목은 `schema_versions: 007_professional_platform`, `jungsi_professional.bookmarks`, `public.jeongsi_pro_authority(uuid,text,text,text,timestamptz)`이다. 조회 당시 존재하지 않은 객체는 `jungsi_professional.bookmark_events`, `public.jeongsi_pro_member_names(uuid,text,text[])`이다. schema_versions에서 008·011·012·013 숫자 패턴에 일치하는 행은 없었다. 다른 이름으로 등록된 버전의 존재 여부는 이 검색 범위에서 확인되지 않았다.
+
+PGlite 메모리 합성 DB 4건 PASS. 기존 011 번호 회피 및 008 함수 정의 보존, 기관 범위·장부 권한, 빼기·다시 담기 순서와 장부 불변, 이름의 현재 계약·관리자·기관 범위. 운영 활성화 NOT_RUN · 배포 NOT_RUN.
+
+화면팀은 서버·화면·설정 후보를 준비한다. Owner는 실제 스키마 등록부에서 012·013 사용 여부와 실행 역할을 확인한 뒤 서버 준비를 검수하고 Supabase에서 승인한 SQL을 적용한다. 화면팀은 적용 후 확인한 함수 정의 지문을 별도 서버 binding에 결속하고 운영을 검수한다.
 
 ## 참고 산식 응시 자기 확인
 

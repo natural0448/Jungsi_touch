@@ -173,8 +173,12 @@ class IncidentRecoveryHarnessTests(unittest.TestCase):
 
         # The old native receipt is immutable; the v5 source has no native acceptance yet.
         candidate = deepcopy(self.spec)
+        # This case checks the pre-overlay continuation rule. The saved-report
+        # overlay freezes the continuation bytes and is covered by its own tests.
+        candidate.pop(check.SAVED_REPORT_OVERLAY_FIELD, None)
         c = candidate["score_input_policy_contract"]
         evidence = c["native_SQL_preparation_evidence"]
+        evidence.pop("guard_saved_report_source_candidate_20261113", None)
         old = evidence["guard"]
         path = check.NATIVE_GUARD_SOURCE_PATH
         self.assertEqual(old["source_path"], path)

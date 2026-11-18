@@ -35,6 +35,18 @@ import { utcInstant, utcText } from "../domain/time.ts";
 import { sqlArrayText, sqlIntegerText, sqlObjectText, sqlUtcText } from "./sql_values.ts";
 import { type NativeSqlTransaction, SupabaseSqlTransport } from "./transaction_sql.ts";
 
+/**
+ * 한 모집단위의 마지막 담기 기록(add/remove). 예전 bookmarks 행은 기준선(순번 0의 add)이고,
+ * 012 bookmark_events 가 있으면 가장 큰 event_seq 가 그것을 덮는다. 매개변수 $1~$4 = 기관·학생·리포트·모집단위
+ */
+const LATEST_BOOKMARK_ACTION = `SELECT action FROM (
+ SELECT 0::bigint AS seq,'add'::text AS action FROM jungsi_professional.bookmarks
+  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4
+ UNION ALL
+ SELECT event_seq,action FROM jungsi_professional.bookmark_events
+  WHERE org_id=$1 AND student_id=$2 AND report_id=$3 AND offering_id=$4
+) e ORDER BY seq DESC LIMIT 1`;
+const randomEventId = () => crypto.randomUUID().replaceAll("-", "");
 const TS = (column: string) =>
   `to_char(${column} AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 const STUDENT_SELECT =
@@ -784,10 +796,19 @@ export class SupabaseProfessionalStore
     const s = this.scoped(scope), report = await this.report(scope, reportId);
     if (!report) throw new AccessError("professional_report_not_found", 404);
     if (!Number.isSafeInteger(maximum) || maximum < 1) fail();
+    // 지금 담긴 상태 = 모집단위마다 가장 큰 event_seq 기록이 add 인 것(012 bookmark_events).
+    // 예전 bookmarks 행은 순번 0의 add 기준선으로 함께 본다(장부를 고치거나 지우지 않음)
     const rows = await this.query(
       scope.authority,
-      `SELECT offering_id,${TS("created_at")} FROM jungsi_professional.bookmarks
- WHERE org_id=$1 AND student_id=$2 AND report_id=$3 ORDER BY offering_id COLLATE "C" LIMIT $4::bigint`,
+      `SELECT offering_id,${TS("created_at")} FROM (
+ SELECT DISTINCT ON (offering_id) offering_id,created_at,action FROM (
+  SELECT offering_id,created_at,'add'::text AS action,0::bigint AS seq FROM jungsi_professional.bookmarks
+   WHERE org_id=$1 AND student_id=$2 AND report_id=$3
+  UNION ALL
+  SELECT offering_id,created_at,action,event_seq FROM jungsi_professional.bookmark_events
+   WHERE org_id=$1 AND student_id=$2 AND report_id=$3
+ ) e ORDER BY offering_id,seq DESC
+) latest WHERE action='add' ORDER BY offering_id COLLATE "C" LIMIT $4::bigint`,
       [s.orgId, s.studentId, reportId, String(maximum + 1)],
     );
     if (rows.length > maximum || rows.some((r) => r.length !== 2)) {
@@ -817,12 +838,44 @@ export class SupabaseProfessionalStore
     if (report.orgId !== s.orgId || report.studentId !== s.studentId) {
       throw new AccessError("professional_report_not_found", 404);
     }
+    // 같은 기관·학생·리포트의 담기/빼기는 한 줄로 세운다(012 준비안 조건)
+    await this.lock(a, "pro-bookmark", s.orgId, s.studentId, report.reportId);
     await this.query(
       a,
       `INSERT INTO jungsi_professional.bookmarks(org_id,student_id,report_id,offering_id,actor_id)
  VALUES($1,$2,$3,$4,$5) ON CONFLICT(org_id,student_id,report_id,offering_id) DO NOTHING`,
       [s.orgId, s.studentId, report.reportId, proId(offeringId), a.user.subjectId],
     );
+    // 뺀 뒤 다시 담으면 add 기록을 쌓는다(마지막 기록이 remove 일 때만)
+    await this.query(
+      a,
+      `INSERT INTO jungsi_professional.bookmark_events(org_id,student_id,report_id,offering_id,event_id,action,actor_id)
+ SELECT $1,$2,$3,$4,$6,'add',$5 WHERE (${LATEST_BOOKMARK_ACTION})='remove'`,
+      [s.orgId, s.studentId, report.reportId, proId(offeringId), a.user.subjectId, randomEventId()],
+    );
+    return await this.bookmarks(scope, report.reportId, maximum);
+  }
+  async removeBookmark(
+    scope: ProfessionalScope,
+    report: ProfessionalReport,
+    offeringId: string,
+    eventId: string,
+    maximum: number,
+  ): Promise<NativeObject> {
+    const s = this.scoped(scope), a = scope.authority;
+    if (report.orgId !== s.orgId || report.studentId !== s.studentId) {
+      throw new AccessError("professional_report_not_found", 404);
+    }
+    // 같은 기관·학생·리포트의 담기/빼기는 한 줄로 세운다(012 준비안 조건)
+    await this.lock(a, "pro-bookmark", s.orgId, s.studentId, report.reportId);
+    // 지금 담겨 있을 때만 remove 기록을 쌓는다. 담겨 있지 않으면 아무것도 쓰지 않고 404
+    const written = await this.query(
+      a,
+      `INSERT INTO jungsi_professional.bookmark_events(org_id,student_id,report_id,offering_id,event_id,action,actor_id)
+ SELECT $1,$2,$3,$4,$6,'remove',$5 WHERE (${LATEST_BOOKMARK_ACTION})='add' RETURNING event_id`,
+      [s.orgId, s.studentId, report.reportId, proId(offeringId), a.user.subjectId, proId(eventId)],
+    );
+    if (written.length !== 1) throw new AccessError("professional_bookmark_not_found", 404);
     return await this.bookmarks(scope, report.reportId, maximum);
   }
   async record(

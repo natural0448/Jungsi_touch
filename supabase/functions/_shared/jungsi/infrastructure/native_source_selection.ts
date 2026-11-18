@@ -287,6 +287,20 @@ export class NativeSourceSelection {
     if (!selected) fail("runtime_dependency_missing");
     return await this.client.referenceTailBytes(selected, signal);
   }
+  /** A piece of a selected chunked index entry; the issuer matched it against the index first. */
+  async referenceTailChunkBytes(
+    parentKey: string,
+    chunkKey: string,
+    bytes: number,
+    signal: AbortSignal,
+  ): Promise<Uint8Array> {
+    if (this.payloadMode === "overall_only" || this.payloadMode === "catalog_only") {
+      fail("runtime_dependency_not_loaded");
+    }
+    const selected = this.references.get(identity("reference_tail", parentKey));
+    if (!selected) fail("runtime_dependency_missing");
+    return await this.client.referenceTailChunkBytes(selected, chunkKey, bytes, signal);
+  }
   /** Selected metadata only; current head, identity and owner authority are not implied. */
   referenceTailEntries(): readonly { key: string; entry: NativeObject }[] {
     return [...this.references.values()].filter((e) => e.kind === "reference_tail")

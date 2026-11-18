@@ -79,6 +79,8 @@ export class ProfessionalProjection {
         role: scalar("string", false, { enum: ["teacher", "org_admin", "viewer"] }),
         status: scalar("string", false, { enum: ["active", "inactive"] }),
         version: integer,
+        // 2026-11-13: 기관 관리자에게만 같은 기관 구성원 이름(이메일 없음). 이름 함수가 없거나 이름이 비면 null
+        display_name: nullableText,
       }),
       pro_session: object({
         organizations: array(ref("pro_organization_item")),

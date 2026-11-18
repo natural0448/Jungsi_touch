@@ -64,6 +64,16 @@ function nativeUint(v: unknown): bigint {
   check(n >= 0n && n <= MAX_U64, "reference_tail_invalid");
   return n;
 }
+/** 점수 분자만 부호를 허용한다(음수 환산점수, 11-17). 분모·가중치는 nativeUint/uint 그대로. */
+function nativeSint(v: unknown): bigint {
+  check(
+    (typeof v === "number" && Number.isSafeInteger(v)) || typeof v === "bigint",
+    "reference_tail_invalid",
+  );
+  const n = BigInt(v as number | bigint);
+  check(n >= -MAX_U64 && n <= MAX_U64, "reference_tail_invalid");
+  return n;
+}
 async function hash(raw: Uint8Array): Promise<string> {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-256", Uint8Array.from(raw)))].map((v) =>
     v.toString(16).padStart(2, "0")
@@ -87,7 +97,9 @@ type ChunkMeta = {
   weight: bigint;
   above: bigint;
 };
-type Chunk = { scores: bigint[]; suffix: bigint[] };
+export type Chunk = { scores: bigint[]; suffix: bigint[] };
+/** 한 요청 안에서 같은 조각(SHA·문맥·질량이 같은)을 학과마다 다시 해석하지 않도록 나눠 쓰는 캐시(11-17 CPU 초과 수정). */
+export type SharedChunkCache = Map<string, Promise<Chunk>>;
 /** Open after the existing server selection and authorized, budgeted index read. */
 export class ChunkedReferenceTailProjection {
   private readonly cached = new Map<number, Promise<Chunk>>();
@@ -105,6 +117,7 @@ export class ChunkedReferenceTailProjection {
     private readonly methodId: string,
     private readonly chunks: readonly ChunkMeta[],
     private readonly maximumCachedBytes: number,
+    private readonly shared?: SharedChunkCache,
   ) {
     this.cachedBytes = pin.bytes;
   }
@@ -115,6 +128,7 @@ export class ChunkedReferenceTailProjection {
     signal: AbortSignal,
     maximumCachedBytes: number,
     offeringId: string,
+    shared?: SharedChunkCache,
   ): Promise<ChunkedReferenceTailProjection> {
     check(
       !!selected && !!port && !!signal && !signal.aborted &&
@@ -249,7 +263,7 @@ export class ChunkedReferenceTailProjection {
       );
       names.add(x.key);
       count += x.row_count;
-      const lo = nativeUint(x.min_score_numerator), hi = nativeUint(x.max_score_numerator);
+      const lo = nativeSint(x.min_score_numerator), hi = nativeSint(x.max_score_numerator);
       const weight = uint(x.weight_units), above = uint(x.strict_above_units);
       check(lo <= hi && weight > 0n, "reference_tail_invalid");
       return {
@@ -264,7 +278,9 @@ export class ChunkedReferenceTailProjection {
         above,
       };
     });
-    check(count <= 125000, "reference_tail_invalid");
+    // 조각은 각각 100,000행 이하이고 질의마다 필요한 조각 하나만 읽는다(요청 바이트 예산이 상한).
+    // 전체 합계 행 수로 막지 않는다(55PK 큰 곡선 266,974~290,638행, 대표님 지시 2026-11-17).
+    check(count <= 32 * 100000, "reference_tail_invalid");
     let above = 0n;
     for (let i = chunks.length - 1; i >= 0; i--) {
       check(
@@ -289,10 +305,31 @@ export class ChunkedReferenceTailProjection {
       a.derived_method_id as string,
       Object.freeze(chunks),
       maximumCachedBytes,
+      shared,
     );
   }
   private async load(m: ChunkMeta): Promise<Chunk> {
     let pending = this.cached.get(m.ordinal);
+    // 같은 바이트(SHA)·문맥·판·질량 경계의 조각은 이미 검증·해석된 결과를 그대로 쓴다
+    const sharedKey = [
+      m.sha256,
+      this.contextHash,
+      this.version,
+      m.count,
+      m.lo,
+      m.hi,
+      m.weight,
+      m.above,
+      this.denominator,
+      this.eligible,
+    ].join(":");
+    if (!pending && this.shared) {
+      const hit = this.shared.get(sharedKey);
+      if (hit) {
+        pending = hit;
+        this.cached.set(m.ordinal, pending);
+      }
+    }
     if (!pending) {
       check(this.cachedBytes + m.bytes <= this.maximumCachedBytes, "reference_tail_unavailable");
       this.cachedBytes += m.bytes;
@@ -305,7 +342,9 @@ export class ChunkedReferenceTailProjection {
             await hash(raw) === m.sha256,
           "reference_tail_pin_invalid",
         );
-        const p = obj(parseNativeJson(new TextDecoder("utf-8", { fatal: true }).decode(raw)), [
+        // 조각은 안전 정수와 10진 문자열만 담는다. 플랫폼 JSON 해석이 훨씬 빠르고, 아래 검사가
+        // 안전 정수가 아닌 수(정밀도 손실)·소수를 모두 거부한다(11-17 CPU 초과 수정).
+        const p = obj(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(raw)), [
           "format",
           "version",
           "ordinal",
@@ -327,7 +366,7 @@ export class ChunkedReferenceTailProjection {
         for (let i = pairs.length - 1; i >= 0; i--) {
           const pair = pairs[i];
           check(Array.isArray(pair) && pair.length === 2, "reference_tail_invalid");
-          const n = nativeUint(pair[0]), tie = uint(pair[1]);
+          const n = nativeSint(pair[0]), tie = uint(pair[1]);
           check(
             (next === null || n < next) && tie > 0n && tie <= this.eligible,
             "reference_tail_invalid",
@@ -348,6 +387,12 @@ export class ChunkedReferenceTailProjection {
         return { scores, suffix };
       })();
       this.cached.set(m.ordinal, pending);
+      this.shared?.set(sharedKey, pending);
+      // 실패한 해석은 나눠 쓰지 않는다
+      pending.catch(() => {
+        const shared = this.shared;
+        if (shared && shared.get(sharedKey) === pending) shared.delete(sharedKey);
+      });
     }
     return await pending;
   }
@@ -393,12 +438,18 @@ export class ChunkedReferenceTailProjection {
     }
     check(start < chunk.scores.length, "reference_tail_incomplete");
     const percent = new Rational(chunk.suffix[start]).multiply(exact(100)).divide(this.whole);
+    // 대표님 결정(2026-11-16): 점수를 낼 수 없는 질량을 모두 위로 둔 상한
+    const upper = new Rational(chunk.suffix[start]).add(
+      this.whole.subtract(new Rational(this.eligible)),
+    )
+      .multiply(exact(100)).divide(this.whole);
     await this.port.assertCurrent(this.pin, this.signal);
     check(!this.signal.aborted, "reference_tail_unavailable");
     return {
       status: "reference_estimated",
       metric: "estimated_upper_cumulative_percent_all_examinees",
       estimated_upper_cumulative_percent_all_examinees: displayExact(percent, 12),
+      estimated_upper_cumulative_percent_upper_bound: displayExact(upper, 12),
       derived_method_id: this.methodId,
       denominator_kind: "same_year_original_model_whole_exact_mass",
       reference_curve_id: this.context.reference_curve_id,

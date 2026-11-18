@@ -24,6 +24,20 @@ export const USAGE_NOW_SQL =
 export const USAGE_VERSION_SQL =
   "SELECT EXISTS(SELECT 1 FROM jungsi_backend.schema_versions WHERE version='005_usage_budget')";
 export const USAGE_LOCK_SQL = "SELECT pg_advisory_xact_lock($1::bigint)";
+/** 조회 작업 임대 시간(초). 승인된 lease_seconds 를 넘지 않는다. */
+export const READ_LEASE_SECONDS = 60n;
+const READ_ONLY_OPERATIONS: ReadonlySet<string> = new Set([
+  "offerings.search",
+  "history.search",
+  "history.snapshot.head",
+  "history.current-page",
+  "report.list-own",
+]);
+/** 읽기만 하는 작업: 이름이 .read 로 끝나거나 위 목록. 쓰기·분석·후보 계산은 포함하지 않는다. */
+export function isReadOperation(operation: string): boolean {
+  return typeof operation === "string" &&
+    (operation.endsWith(".read") || READ_ONLY_OPERATIONS.has(operation));
+}
 export const USAGE_EXPIRED_SQL =
   `SELECT lease_id::text,reserved_demands::text FROM jungsi_backend.usage_budget_leases
  WHERE owner_id=$1 AND policy_version=$2 AND state='active' AND expires_at<=$3::timestamptz FOR UPDATE`;
@@ -362,7 +376,13 @@ export class SupabaseUsageBudgetStore implements UsageBudgetStorePort {
             });
           }
         }
-        const expires = now + this.leaseSeconds * MICROSECOND;
+        // 조회 작업은 자리를 짧게 잡는다(2026-11-18): 플랫폼이 요청을 강제 종료(546)하면 정산이 오지 않아
+        // 임대가 만료될 때까지 그 계정의 요청이 모두 막힌다(운영 01:18 사례, 460초). 조회는 수 초면 끝나므로
+        // 승인된 임대 시간(상한)보다 짧은 READ_LEASE_SECONDS 만 잡는다. 분석·후보 계산 등 나머지는 그대로다.
+        const leaseSeconds = isReadOperation(operation) && this.leaseSeconds > READ_LEASE_SECONDS
+          ? READ_LEASE_SECONDS
+          : this.leaseSeconds;
+        const expires = now + leaseSeconds * MICROSECOND;
         await tx.query(USAGE_LEASE_INSERT_SQL, [
           id,
           owner,

@@ -62,6 +62,8 @@ export class SupabaseProfessionalAuthority implements ProfessionalAuthorityPort 
   constructor(
     private readonly binding: ProfessionalAuthorityFunctionBinding,
     private readonly query: ProfessionalAuthorityQuery,
+    /** 선택: 구성원 이름 함수(013 jeongsi_pro_member_names(uuid,text,text[])). 없으면 이름 없이 동작한다 */
+    private readonly namesBinding: ProfessionalAuthorityFunctionBinding | null = null,
   ) {
     if (
       !binding || binding.status !== "approved" || !IDENTIFIER.test(binding.schema) ||
@@ -236,6 +238,63 @@ export class SupabaseProfessionalAuthority implements ProfessionalAuthorityPort 
     );
     if (this.receipts.get(current)?.fingerprint !== proof.fingerprint) {
       throw new AccessError("professional_authority_changed", 409);
+    }
+  }
+  /**
+   * 기관 관리자에게만 같은 기관 구성원 이름. 함수 지문·주인·권한이 승인 값과 다르거나 읽기에 실패하면
+   * 이름 없이(빈 객체) 돌려준다 — 이름이 없어도 구성원 목록 자체는 막지 않는다
+   */
+  async memberNames(authority: ProfessionalAuthority): Promise<Readonly<Record<string, string>>> {
+    const proof = this.receipts.get(authority), b = this.namesBinding;
+    if (!proof) fail();
+    if (authority.membership?.role !== "org_admin") {
+      throw new AccessError("professional_access_denied", 403);
+    }
+    if (
+      !b || b.status !== "approved" || !IDENTIFIER.test(b.schema) || !IDENTIFIER.test(b.name) ||
+      !IDENTIFIER.test(b.owner) || !/^[a-f0-9]{64}$/.test(b.definitionSha256) ||
+      !Number.isSafeInteger(b.maxResultBytes) || b.maxResultBytes < 1 || b.maxResultBytes > 1048576
+    ) return {};
+    try {
+      const metadata = await this.query(
+        `SELECT pg_get_userbyid(p.proowner),p.provolatile::text,p.proretset,
+ p.prorettype::text,p.proconfig::text,encode(sha256(convert_to(pg_get_functiondef(p.oid),'UTF8')),'hex'),
+ has_function_privilege('anon',p.oid,'EXECUTE'),has_function_privilege('authenticated',p.oid,'EXECUTE'),
+ has_function_privilege('jungsi_backend_app',p.oid,'EXECUTE')
+ FROM pg_proc p WHERE p.oid=to_regprocedure($1)`,
+        [b.schema + "." + b.name + "(uuid,text,text[])"],
+      );
+      const m = metadata[0];
+      if (
+        metadata.length !== 1 || m.length !== 9 || m[0] !== b.owner || m[1] !== "s" ||
+        m[2] !== false || m[3] !== "3802" || m[4] !== "{search_path=pg_catalog}" ||
+        m[5] !== b.definitionSha256 || m[6] !== false || m[7] !== false || m[8] !== true
+      ) return {};
+      // 013 함수는 한 번에 구성원 번호 최대 100개를 받는다. 승인 명단의 번호만 100개씩 나눠 묻는다
+      const ids = [...new Set(proof.members.map((x) => x.memberId))]
+        .filter((id) => /^[0-9]{1,18}$/.test(id));
+      const known = new Set(ids), out: Record<string, string> = {};
+      for (let i = 0; i < ids.length; i += 100) {
+        const result = await this.query(
+          `SELECT "${b.schema}"."${b.name}"($1::uuid,$2::text,
+ ARRAY(SELECT jsonb_array_elements_text($3::jsonb)))::text`,
+          [
+            authority.user.subjectId,
+            authority.contract.orgId,
+            JSON.stringify(ids.slice(i, i + 100)),
+          ],
+        );
+        if (result.length !== 1 || result[0].length !== 1) return {};
+        const row = sqlObjectText(result[0][0], b.maxResultBytes);
+        for (const [id, name] of Object.entries(row)) {
+          if (known.has(id) && typeof name === "string" && name.trim() && name.length <= 40) {
+            out[id] = name.trim();
+          }
+        }
+      }
+      return out;
+    } catch {
+      return {};
     }
   }
   members(authority: ProfessionalAuthority): Promise<readonly ProfessionalMembership[]> {

@@ -16,7 +16,7 @@ import {
   requestWildcardGrant,
   type WildcardRuntimeGate,
 } from "./wildcard_runtime_gate.ts";
-import { CatalogService, offeringDto } from "./catalog.ts";
+import { type CatalogRelease, CatalogService, offeringDto } from "./catalog.ts";
 import { evaluateOffering, type OfferingAnalysisDataPort } from "./offering_analysis.ts";
 import type { PlatformRepositoryPort, StoredProfile, StoredReport } from "./platform_repository.ts";
 import type { RequestClockPort } from "./ports.ts";
@@ -57,6 +57,16 @@ export interface UniversityAnalysisDataPort
    * would otherwise turn a candidates request into a full-catalog reference calculation.
    */
   hasProductionConversion?(offeringId: string): Promise<boolean>;
+}
+/** Stage verified private objects before committing their internal report references.
+ * A null result means the existing member-storage binding is not configured. */
+export interface MemberSchoolResultsWriterPort {
+  stage(
+    owner: string,
+    profile: StoredProfile,
+    report: StoredReport,
+    offerings: readonly NativeObject[],
+  ): Promise<NativeObject[] | null>;
 }
 /** Candidate universe: rows that can produce a production (non-pending) conversion result. */
 export async function productionCandidateRows(
@@ -183,6 +193,7 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       | ReferenceCandidateScopePort
       | (() => Promise<ReferenceCandidateScopePort | null>)
       | null = null,
+    private readonly memberSchoolResults: MemberSchoolResultsWriterPort | null = null,
   ) {
     this.scoring = new UniversityScoringService(data);
     this.percentile = new UniversityPercentileService(data);
@@ -207,6 +218,49 @@ export class UniversityAnalysisService implements ApiBusinessPort {
       !object(report.body.overall)
     ) fail();
     return report;
+  }
+  private async stageMemberResults(
+    owner: string,
+    profile: StoredProfile,
+    record: StoredReport,
+    release: CatalogRelease | null,
+    updated: NativeObject,
+    expected: number,
+    boundary?: ApiExecutionBoundary,
+  ): Promise<boolean> {
+    if (
+      !this.memberSchoolResults || !release || !object(updated.overall) ||
+      !object(updated.overall.exam) || updated.overall.exam.academic_year !== 2027 ||
+      !object(updated.analyses)
+    ) return false;
+    const ids = Object.keys(updated.analyses), wanted = new Set(ids);
+    if (!ids.length) return false;
+    const rows = this.catalog.serviceRows(release).filter((row) =>
+      row.academic_year === 2027 && typeof row.offering_id === "string" &&
+      wanted.has(row.offering_id)
+    );
+    if (rows.length !== ids.length) {
+      // A prior reference must never be replaced by an incomplete selection.
+      if (Object.hasOwn(record.body, "member_school_results_refs")) {
+        fail("catalog_release_invalid", 503);
+      }
+      return false;
+    }
+    if (!Number.isSafeInteger(expected + 1)) fail("security_policy_unavailable", 503);
+    const refs = await this.memberSchoolResults.stage(owner, profile, {
+      ...record,
+      revision: expected + 1,
+      body: updated,
+    }, rows);
+    if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
+    if (refs === null) {
+      if (Object.hasOwn(record.body, "member_school_results_refs")) {
+        fail("operation_scope_not_approved", 503);
+      }
+      return false;
+    }
+    updated.member_school_results_refs = refs;
+    return true;
   }
   async execute(request: ApiExecution, boundary?: ApiExecutionBoundary): Promise<NativeObject> {
     const { operation: op, session, params, body, query } = request;
@@ -423,17 +477,28 @@ export class UniversityAnalysisService implements ApiBusinessPort {
           this.fresh(session);
         }
         if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
+        const cachedBody = cloneNativeJson(record.body);
+        const materialized = !Object.hasOwn(cachedBody, "member_school_results_refs") &&
+          await this.stageMemberResults(
+            session.user.subjectId,
+            profile,
+            record,
+            release,
+            cachedBody,
+            expected,
+            boundary,
+          );
         const result = await this.repository.writeReport({
           owner: session.user.subjectId,
           reportId: record.report_id,
           profileId: record.profile_id,
-          body: record.body,
+          body: materialized ? cachedBody : record.body,
           expected,
           nowUtc: this.fresh(session),
           operation: op as "university.analyze" | "candidates.build",
           key,
           digest,
-          noOp: true,
+          noOp: !materialized,
         });
         if (wildcardGrant) await wildcardGrant.assertCurrent();
         if (boundary?.signal.aborted) fail("security_policy_unavailable", 503);
@@ -954,6 +1019,15 @@ export class UniversityAnalysisService implements ApiBusinessPort {
     } else if (Object.hasOwn(updated, "reference_attendance_requirements")) {
       delete updated.reference_attendance_requirements;
     }
+    await this.stageMemberResults(
+      session.user.subjectId,
+      profile,
+      record,
+      release,
+      updated,
+      expected,
+      boundary,
+    );
     const written = await this.repository.writeReport({
       owner: session.user.subjectId,
       reportId: record.report_id,

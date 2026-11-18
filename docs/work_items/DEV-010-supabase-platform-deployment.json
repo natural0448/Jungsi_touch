@@ -7,7 +7,7 @@
   "branch": "feature/application-pre-data-platform",
   "status": "in_progress",
   "contract_ref": "supabase_deployment_contract",
-  "contract_version": "1.9.176",
+  "contract_version": "1.9.177",
   "requirements": [
     "REQ-12",
     "REQ-14",
@@ -821,7 +821,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
-            "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+            "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
             "symbol": "ReportActionService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -909,7 +909,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
-            "source_sha256": "66ba67f196a5ae4b394ee908276fec4983adda4fa7a65c228ef69dcc3f45447f",
+            "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
             "symbol": "ReportActionService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",

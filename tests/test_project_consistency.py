@@ -2801,6 +2801,8 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         # This synthetic legacy view has no member receipt. Do not attach a
         # current-source sibling whose canonical member receipt it cannot prove.
         spec.pop(checker.CURRENT_SOURCE_REBOUND_FIELD,None)
+        spec.pop(checker.MEMBER_SCHOOL_OVERLAY_FIELD,None)
+        spec.pop(checker.SAVED_REPORT_OVERLAY_FIELD,None)
         if registration is not None:
             spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
             for path in checker.MEMBER_SHORTLIST_TESTS:spec['edge_harness']['files'].pop(path,None)
@@ -2814,6 +2816,8 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
         # synthetic historical registration with synthetic source hashes.
         self.assertEqual([],checker.member_shortlist_registration(spec)[1])
         spec.pop(checker.CURRENT_SOURCE_REBOUND_FIELD,None)
+        spec.pop(checker.MEMBER_SCHOOL_OVERLAY_FIELD,None)
+        spec.pop(checker.SAVED_REPORT_OVERLAY_FIELD,None)
         spec.pop('member_shortlist_contract',None)
         spec['operations']=[r for r in spec['operations']if r['id']not in checker.MEMBER_SHORTLIST_ROUTES]
         base=copy.deepcopy(spec['operations'][0])
@@ -2838,6 +2842,12 @@ class MemberShortlistRegistrationCases(unittest.TestCase):
             self.skipTest('current source rebound is absent from this snapshot')
         self.assertEqual([],checker.member_shortlist_registration(spec)[1])
         spec['member_shortlist_contract']['source_registration']['verification']['test_count']+=1
+        self.assertTrue(checker.member_shortlist_registration(spec)[1])
+    def test_current_member_school_overlay_forgery_is_rejected(self):
+        spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())
+        self.assertEqual([],checker.member_shortlist_registration(spec)[1])
+        overlay=spec[checker.MEMBER_SCHOOL_OVERLAY_FIELD]
+        overlay['operating_writes']=1
         self.assertTrue(checker.member_shortlist_registration(spec)[1])
     def test_default28_has_no_implicit_registration(self):
         spec=json.loads((Path(__file__).resolve().parents[1]/'docs/current/service_spec.json').read_bytes())

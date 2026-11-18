@@ -16,7 +16,51 @@ for path in json.load(sys.stdin):
     spec=importlib.util.spec_from_file_location(name,root/path)
     module=importlib.util.module_from_spec(spec);sys.modules[name]=module;spec.loader.exec_module(module)
     suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(module))
+# Record only pre-selected test/class identifiers, never error or subtest text.
+def selected_identifiers(node, ids, classes, modules):
+    if isinstance(node,unittest.TestSuite):
+        for child in node: selected_identifiers(child,ids,classes,modules)
+    elif isinstance(node,unittest.TestCase):
+        cls=node.__class__.__module__+'.'+node.__class__.__qualname__
+        method=getattr(node,'_testMethodName','')
+        ident=cls+'.'+method
+        if (len(ident)<=240 and method.startswith('test') and
+            callable(getattr(node.__class__,method,None)) and
+            re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*(?:[.][A-Za-z_][A-Za-z_0-9]*)+',ident)):
+            ids.add(ident);classes.add(cls);modules.add(node.__class__.__module__)
+selected_ids=set();selected_classes=set();selected_modules=set()
+selected_identifiers(suite,selected_ids,selected_classes,selected_modules)
 class ProgressResult(unittest.TextTestResult):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.failure_test_ids=[]
+    def recordFailureId(self,test):
+        ident='unknown'
+        holder=getattr(unittest.suite,'_ErrorHolder',None)
+        if holder is not None and type(test) is holder:
+            description=getattr(test,'description','')
+            match=re.fullmatch(r'(setUpClass|tearDownClass) [(]([A-Za-z_][A-Za-z_0-9]*(?:[.][A-Za-z_][A-Za-z_0-9]*)+)[)]',description)
+            if match and match.group(2) in selected_classes:
+                ident=match.group(2)+'.'+match.group(1)
+            else:
+                match=re.fullmatch(r'(setUpModule|tearDownModule) [(]([A-Za-z_][A-Za-z_0-9]*(?:[.][A-Za-z_][A-Za-z_0-9]*)*)[)]',description)
+                if match and match.group(2) in selected_modules:
+                    ident=match.group(2)+'.'+match.group(1)
+        elif isinstance(test,unittest.TestCase):
+            candidate=test.__class__.__module__+'.'+test.__class__.__qualname__+'.'+getattr(test,'_testMethodName','')
+            if candidate in selected_ids: ident=candidate
+        if len(ident)>240: ident='unknown'
+        if ident not in self.failure_test_ids and len(self.failure_test_ids)<10:
+            self.failure_test_ids.append(ident)
+    def addError(self,test,err):
+        self.recordFailureId(test)
+        super().addError(test,err)
+    def addFailure(self,test,err):
+        self.recordFailureId(test)
+        super().addFailure(test,err)
+    def addSubTest(self,test,subtest,err):
+        if err is not None: self.recordFailureId(test)
+        super().addSubTest(test,subtest,err)
     def startTest(self,test):
         super().startTest(test)
         self.started=time.monotonic()
@@ -33,7 +77,7 @@ class ProgressResult(unittest.TextTestResult):
         super().stopTest(test)
 selected_tests=suite.countTestCases()
 result=unittest.TextTestRunner(verbosity=1,resultclass=ProgressResult,failfast=True).run(suite)
-print('JUNGSI_TEST_RESULT='+json.dumps(dict(tests_run=result.testsRun,selected_tests=selected_tests,not_executed=max(0,selected_tests-result.testsRun),failures=len(result.failures),errors=len(result.errors),skipped=len(result.skipped),successful=result.wasSuccessful())))
+print('JUNGSI_TEST_RESULT='+json.dumps(dict(tests_run=result.testsRun,selected_tests=selected_tests,not_executed=max(0,selected_tests-result.testsRun),failures=len(result.failures),errors=len(result.errors),skipped=len(result.skipped),successful=result.wasSuccessful(),failure_test_ids=result.failure_test_ids)))
 sys.exit(0 if result.wasSuccessful() else 1)
 """
 def encode(data):return (json.dumps(data,ensure_ascii=False,sort_keys=True,indent=2)+"\n").encode()

@@ -17,6 +17,9 @@ import { exact, Rational } from "../domain/exact.ts";
 import { utcInstant, utcText } from "../domain/time.ts";
 import { unicodeCompare } from "../domain/text.ts";
 export const REPORT_ACTION_OPERATIONS = ["shortlist.update", "statistics.read"] as const;
+/** 한 모집군(가·나·다)에 담을 수 있는 수. 정시 원서는 군마다 하나라 후보를 넓게 쌓지 않게 한다(대표님 결정 2026-11-18).
+ * 이 한도 전에 이미 더 담긴 것은 그대로 두고, 새로 담는 것만 막는다. 빼기는 언제나 된다. */
+export const SHORTLIST_GROUP_LIMIT = 4;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 function object(v: unknown): v is NativeObject {
   return v !== null && typeof v === "object" && !Array.isArray(v) && !(v instanceof JsonFloat);
@@ -109,12 +112,21 @@ export class ReportActionService implements ApiBusinessPort {
     if (record.revision !== expected) throw new AccessError("revision_conflict", 409);
     const release = await this.catalog.catalog();
     if (release === null) throw new AccessError("catalog_release_missing", 503);
-    this.catalog.offering(release, oid);
+    const target = this.catalog.offering(release, oid);
     const updated = cloneNativeJson(record.body),
       shortlist = map(updated.shortlist),
       analyses = map(updated.analyses),
       old = shortlist[oid];
     const noOp = object(old) && old.selected === input.selected;
+    if (!noOp && input.selected) {
+      const others = Object.entries(shortlist).filter(([id, row]) =>
+        id !== oid && object(row) && row.selected === true
+      ).map(([id]) => id);
+      const groups = await this.groupsOf(session.user.subjectId, release, target, others);
+      if (others.filter((id) => groups.get(id) === target.group).length >= SHORTLIST_GROUP_LIMIT) {
+        throw new AccessError("shortlist_limit_exceeded", 409);
+      }
+    }
     if (!noOp) {
       const assessment = analyses[oid];
       shortlist[oid] = {
@@ -139,6 +151,48 @@ export class ReportActionService implements ApiBusinessPort {
     });
     this.fresh(session);
     return reportDto(session, written);
+  }
+  /** 이미 담긴 모집단위의 모집군. 운영 카탈로그는 요청한 모집단위만 조회하므로(전국 목록을 들고 있지 않다)
+   * 목록에 없는 것은 선택 조회로 읽는다. 지금 카탈로그에서 찾을 수 없는 것은 세지 않는다. */
+  private async groupsOf(
+    owner: string,
+    release: Awaited<ReturnType<CatalogService["catalog"]>> & object,
+    target: NativeObject,
+    ids: readonly string[],
+  ): Promise<Map<string, NativeJson | undefined>> {
+    const groups = new Map<string, NativeJson | undefined>();
+    const wanted = new Set(ids);
+    for (const row of this.catalog.serviceRows(release)) {
+      if (typeof row.offering_id === "string" && wanted.has(row.offering_id)) {
+        groups.set(row.offering_id, row.group);
+      }
+    }
+    const missing = ids.filter((id) => !groups.has(id) && ID.test(id)),
+      year = Number(target.academic_year);
+    if (!missing.length || !Number.isSafeInteger(year)) return groups;
+    const read = async (part: readonly string[]) => {
+      for (const [id, row] of await this.catalog.selectedOfferings(owner, year, part)) {
+        groups.set(id, row.group);
+      }
+    };
+    for (let at = 0; at < missing.length; at += 100) {
+      const part = missing.slice(at, at + 100);
+      try {
+        await read(part);
+      } catch (e) {
+        if (!(e instanceof AccessError)) throw e;
+        if (e.code === "operation_scope_not_approved") return groups;
+        // 묶음 안에 지금 카탈로그에 없는 것이 섞여 있으면 하나씩 읽어 있는 것만 센다
+        for (const id of part) {
+          try {
+            await read([id]);
+          } catch (x) {
+            if (!(x instanceof AccessError)) throw x;
+          }
+        }
+      }
+    }
+    return groups;
   }
   private async statistics(
     session: SessionSnapshot,

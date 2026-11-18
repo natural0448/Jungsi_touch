@@ -76,6 +76,7 @@ function fixture(
     leaseBody?: unknown;
     dependencyFailure?: boolean;
     activeExpiry?: bigint;
+    longLease?: boolean;
   } = {},
 ) {
   const calls: { s: string; p: readonly unknown[] }[] = [], events: string[] = [];
@@ -170,11 +171,12 @@ function fixture(
     async close() {},
   };
   const sql = new SupabaseSqlTransport(pool),
-    store = new SupabaseUsageBudgetStore(sql, {
-      leaseSeconds: 30n,
-      runtimeHardLimitSeconds: 20n,
-      clockMarginSeconds: 5n,
-    });
+    store = new SupabaseUsageBudgetStore(
+      sql,
+      options.longLease
+        ? { leaseSeconds: 460n, runtimeHardLimitSeconds: 400n, clockMarginSeconds: 30n }
+        : { leaseSeconds: 30n, runtimeHardLimitSeconds: 20n, clockMarginSeconds: 5n },
+    );
   return { store, sql, calls, events, now: (v: bigint) => now = v, lease: () => lease };
 }
 async function denied(run: () => Promise<unknown>) {
@@ -187,6 +189,30 @@ async function denied(run: () => Promise<unknown>) {
   assert(e instanceof AccessError);
   equal(e.code, "security_policy_unavailable");
   equal(e.http, 503);
+}
+/** 조회 작업은 60초까지만, 분석·쓰기는 승인된 임대 그대로. */
+async function readLeaseCase() {
+  const cases = [
+    ["recruitment.read", 60n],
+    ["report.read", 60n],
+    ["offerings.search", 60n],
+    ["report.list-own", 60n],
+    ["overall.analyze", 460n],
+    ["university.analyze", 460n],
+    ["candidates.build", 460n],
+    ["shortlist.update", 460n],
+  ] as const;
+  for (const [operation, want] of cases) {
+    const f = fixture({ longLease: true }),
+      r = await f.store.reserve({ ...input(), operation });
+    assert(r.allowed);
+    assert(r.lease.expiresAtUtc === NOW + want * 1000000n, operation);
+  }
+  // 승인된 임대가 이미 60초보다 짧으면 조회도 그 값을 넘지 않는다
+  const short = fixture(),
+    r = await short.store.reserve({ ...input(), operation: "report.read" });
+  assert(r.allowed);
+  assert(r.lease.expiresAtUtc === NOW + 30000000n);
 }
 Deno.test("budget shared reservation locks stable owner policy before counters and reserves compute", async () => {
   const f = fixture(), r = await f.store.reserve(input());
@@ -203,6 +229,7 @@ Deno.test("budget shared reservation locks stable owner policy before counters a
   const saved = f.calls.find((c) => c.s === USAGE_LEASE_INSERT_SQL)!;
   equal(saved.p[4], "active");
   assert(!String(saved.p[8]).includes("scores"));
+  await readLeaseCase();
 });
 Deno.test("budget refused compute commits request charge and denied receipt without reserving compute", async () => {
   const f = fixture({ used: { calculation_cost: "4" } }), r = await f.store.reserve(input());

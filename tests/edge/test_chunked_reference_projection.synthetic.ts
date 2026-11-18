@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-explicit-any require-await
 /** Invented scores and weights only. No production data or deployment. */
 import { ChunkedReferenceTailProjection } from "../../supabase/functions/_shared/jungsi/domain/chunked_reference_projection.ts";
-import { Rational } from "../../supabase/functions/_shared/jungsi/domain/exact.ts";
+import { exact, Rational } from "../../supabase/functions/_shared/jungsi/domain/exact.ts";
+import { SavedReferenceTailProjection } from "../../supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts";
 import {
   nativeJsonText,
   type NativeObject,
@@ -170,6 +171,162 @@ function pct(x: NativeObject | null) {
   return x?.estimated_upper_cumulative_percent_all_examinees ?? null;
 }
 
+/** 2026-11-17 운영 CPU 초과 수정: 같은 조각은 두 투영이 나눠 써 한 번만 읽고, 빠른 해석에서도 소수·안전 범위 밖 정수는 거부 */
+async function sharedChunkCache() {
+  const f = await fixture(), a = authority(f), shared = new Map();
+  const raw = await a.port.read(f.pin.key, f.pin.bytes, a.controller.signal);
+  const open = (id: string) =>
+    ChunkedReferenceTailProjection.bind(
+      raw,
+      { ...f.pin, binding: { offering_id: id } },
+      a.port,
+      a.controller.signal,
+      4 * 1024 * 1024,
+      id,
+      shared,
+    );
+  const p1 = await open("SYNTHETIC-one"), p2 = await open("SYNTHETIC-two");
+  eq(pct(await p1.query(new Rational(4n), f.context)), "20.000000000000");
+  eq(pct(await p2.query(new Rational(4n), f.context)), "20.000000000000");
+  eq(a.reads.filter((k) => k === "synthetic/chunk1").length, 1);
+  for (const bad of [[[10, "2"], [20.5, "1"]], [[10, "2"], [9007199254740993n, "1"]]]) {
+    const g = await fixture(undefined, (x: any[]) => {
+      x[0] = bad;
+    });
+    const q = await authority(g).open();
+    await rejects(() => q.query(new Rational(1n), g.context));
+  }
+}
+/** 단일 저장 곡선의 음수 환산점수 축(11-17): 점수 분자만 부호를 받고 분모·가중치는 양수 그대로 */
+async function signedSavedTail() {
+  const doc = (rows: string[][]): NativeObject => ({
+    format: "jungsi.saved-reference-tail-projection/v1",
+    version: "SYNTHETIC-tail.v1",
+    context: {
+      academic_year: 2027,
+      exam_id: "SYNTHETIC-mock",
+      exam_type: "september_mock",
+      source_pack_version: "SYNTHETIC-pack",
+      model_version: "SYNTHETIC-model",
+      profile_sha256: "a".repeat(64),
+      rule_version: "SYNTHETIC-rule",
+      score_scale_id: "SYNTHETIC-native",
+      reference_curve_id: "SYNTHETIC-curve",
+      weight_encoding: "SYNTHETIC_EXPLICIT_ENCODING",
+      source_scenario_field_present: false,
+      source_scenario_value: null,
+      resolved_model_scenario: "SYNTHETIC-fixed",
+    },
+    evidence: Object.fromEntries(
+      [
+        "source_csv_sha256",
+        "source_cdf_sha256",
+        "definition_sha256",
+        "shared_proof_sha256",
+        "binder_sha256",
+        "independent_sha256",
+      ].map((k) => [k, "b".repeat(64)]),
+    ),
+    projection: {
+      derived_method_id: "estimated-whole-cohort-percentile:" + "d".repeat(64),
+      weight_decimal_scale: 1,
+      eligible_weight_units: "15",
+      whole_mass_decimal: "3.00001",
+      whole_mass_numerator: "300001",
+      whole_mass_denominator: "100000",
+      production_allowed: false,
+      actual_admission_full_total_approved: false,
+    },
+    rows: rows.map(([n, d, s, t, i]) => ({
+      score_numerator: n,
+      score_denominator: d,
+      strict_weight_units: s,
+      tie_weight_units: t,
+      inclusive_weight_units: i,
+    })),
+  });
+  const good = [
+    ["-100", "40", "10", "5", "15"],
+    ["0", "40", "5", "5", "10"],
+    ["400", "40", "0", "5", "5"],
+  ];
+  const bind = async (p: NativeObject) => {
+    const raw = new TextEncoder().encode(nativeJsonText(p));
+    return await SavedReferenceTailProjection.bind(raw, {
+      sha256: await hash(raw),
+      bytes: raw.length,
+      maxBytes: 65536,
+      context: p.context as NativeObject,
+      evidence: p.evidence as NativeObject,
+    });
+  };
+  const p = doc(good), curve = await bind(p), ctx = p.context as NativeObject;
+  eq(pct(curve.query(exact("-2.5"), ctx)), "49.999833333889");
+  eq(curve.query(exact("-2.6"), ctx), null);
+  eq(curve.query(exact("-1"), ctx), curve.query(exact(0), ctx));
+  eq(curve.query(exact("-0.001"), ctx), curve.query(exact(0), ctx));
+  eq(pct(curve.query(exact(10), ctx)), "16.666611111296");
+  eq(curve.query(exact("10.001"), ctx), null);
+  for (
+    const [r, c, v] of [
+      [0, 1, "-40"],
+      [0, 0, "-0"],
+      [0, 0, "-0100"],
+      [1, 0, "-200"],
+      [1, 3, "-5"],
+      [2, 2, "-1"],
+    ] as const
+  ) {
+    const rows = good.map((x) => [...x]);
+    rows[r][c] = v;
+    await rejects(() => bind(doc(rows)));
+  }
+}
+/** 음수 환산점수 축(11-17): 조각 경계·점수 분자에 부호를 받고, 같은 축에서 학생 점수와 비교한다 */
+async function signedChunks() {
+  const negIndex = (x: any) => {
+    x.chunks[0].min_score_numerator = -25;
+    x.chunks[0].max_score_numerator = -5;
+    x.chunks[1].min_score_numerator = 30;
+    x.chunks[1].max_score_numerator = 30;
+  };
+  const negParts = (x: any[]) => {
+    x[0] = [[-25, "2"], [-5, "1"]];
+    x[1] = [[30, "2"]];
+  };
+  const f = await fixture(negIndex, negParts), p = await authority(f).open();
+  for (
+    const [n, d, want] of [
+      [-3, 1, null],
+      [-5, 2, "50.000000000000"],
+      [-1, 1, "30.000000000000"],
+      [-1, 2, "30.000000000000"],
+      [0, 1, "20.000000000000"],
+      [3, 1, "20.000000000000"],
+      [31, 10, null],
+    ] as const
+  ) {
+    eq(pct(await p.query(new Rational(BigInt(n), BigInt(d)), f.context)), want);
+  }
+  // 조각 범위 표기와 실제 첫 점수가 다르면 거부, 내림차순 음수도 거부
+  const g = await fixture((x: any) => {
+    negIndex(x);
+    x.chunks[0].min_score_numerator = -24;
+  }, negParts);
+  const q = await authority(g).open();
+  await rejects(() => q.query(new Rational(-1n), g.context));
+  const h = await fixture(negIndex, (x: any[]) => {
+    negParts(x);
+    x[0] = [[-5, "2"], [-25, "1"]];
+  });
+  const r = await authority(h).open();
+  await rejects(() => r.query(new Rational(-5n, 2n), h.context));
+  const k = await fixture((x: any) => {
+    negIndex(x);
+    x.score_denominator = -10;
+  }, negParts);
+  await rejects(() => authority(k).open());
+}
 Deno.test("chunked values preserve points, ties, gaps and bounds", async () => {
   const f = await fixture(), a = authority(f), p = await a.open();
   for (
@@ -186,6 +343,9 @@ Deno.test("chunked values preserve points, ties, gaps and bounds", async () => {
     eq(pct(await p.query(new Rational(BigInt(n), BigInt(d)), f.context)), want);
   }
   eq(a.reads, ["synthetic/index", "synthetic/chunk0", "synthetic/chunk1"]);
+  await signedChunks();
+  await signedSavedTail();
+  await sharedChunkCache();
 });
 Deno.test("a point reads only index and its one chunk", async () => {
   const f = await fixture(), a = authority(f), p = await a.open();
@@ -247,4 +407,72 @@ Deno.test("chunk native types and distinct ascending scores are enforced", async
       p = await a.open();
     await rejects(() => p.query(new Rational(1n), f.context));
   }
+});
+
+Deno.test("pieces may total more than 125,000 rows; only the needed piece is read (2026-11-17)", async () => {
+  const base = await fixture();
+  const context = base.context,
+    contextSha = JSON.parse(new TextDecoder().decode(base.root)).context_sha256;
+  const objects = new Map<string, Uint8Array>(), descriptors: any[] = [];
+  const sizes = [60000, 60000, 10000];
+  let start = 1;
+  const pieces = sizes.map((n) => {
+    const rows = Array.from({ length: n }, (_, i) => [start + i * 2, "1"]);
+    start += n * 2;
+    return rows;
+  });
+  let above = sizes.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < pieces.length; i++) {
+    const key = "synthetic/big" + i;
+    const raw = bytes({
+      format: "jungsi.saved-reference-tail-chunk/v1",
+      version: "SYNTHETIC-v1",
+      ordinal: i,
+      context_sha256: contextSha,
+      score_denominator: 10,
+      frequencies: pieces[i] as any,
+    });
+    objects.set(key, raw);
+    above -= pieces[i].length;
+    descriptors.push({
+      ordinal: i,
+      key,
+      sha256: await hash(raw),
+      bytes: raw.length,
+      row_count: pieces[i].length,
+      min_score_numerator: pieces[i][0][0],
+      max_score_numerator: pieces[i][pieces[i].length - 1][0],
+      weight_units: String(pieces[i].length),
+      strict_above_units: String(above),
+    });
+  }
+  const index = JSON.parse(new TextDecoder().decode(base.root));
+  index.chunks = descriptors;
+  index.projection.eligible_weight_units = "130000";
+  index.projection.whole_mass_decimal = "200000";
+  index.projection.whole_mass_numerator = "200000";
+  const root = bytes(index);
+  objects.set("synthetic/index", root);
+  const f = {
+    ...base,
+    root,
+    objects,
+    pin: { ...base.pin, sha256: await hash(root), bytes: root.length },
+  };
+  const a = authority(f as any);
+  const p = await a.open();
+  const id = {
+    academic_year: context.academic_year,
+    exam_id: context.exam_id,
+    exam_type: context.exam_type,
+    source_pack_version: context.source_pack_version,
+    rule_version: context.rule_version,
+    score_scale_id: context.score_scale_id,
+  };
+  // 첫 조각 마지막 점수(119999)와 둘째 조각 첫 점수(120001) 사이 → 둘째 조각, 70,000 이상
+  const between = await p.query(new Rational(120000n, 10n), id as any);
+  eq(pct(between), "35.000000000000");
+  eq(between?.estimated_upper_cumulative_percent_upper_bound, "70.000000000000");
+  eq(a.reads.filter((k) => k.startsWith("synthetic/big")), ["synthetic/big1"]);
+  eq(await p.query(new Rational(0n, 10n), id as any), null);
 });

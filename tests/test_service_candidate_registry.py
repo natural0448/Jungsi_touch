@@ -17,9 +17,13 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
     def setUp(self):
         self.spec = json.loads((ROOT / "docs/current/service_spec.json").read_bytes())
         self.ext = self.spec["backend_platform_contract"]["service_candidate_suite_extension"]
-        self.manifest = json.loads((ROOT / self.ext["manifest"]["path"]).read_bytes())
+        self.overlay = self.spec["backend_platform_contract"]["service_candidate_suite_source_overlay_20261113_v1"]
+        self.manifest = json.loads((ROOT / self.overlay["current_manifest"]["path"]).read_bytes())
+        self.additive = json.loads((ROOT / self.overlay["additive_manifest"]["path"]).read_bytes())
         self.names = {p for suite in self.manifest["suites"].values() for p in suite["files"]}
+        self.names |= set(self.additive["files"]) | {self.additive["workflow"]["path"]}
         self.names |= {self.ext[k]["path"] for k in ("manifest", "wrapper", "regression_test")}
+        self.names |= {self.overlay[k]["path"] for k in ("current_manifest", "additive_manifest", "wrapper", "regression_test")}
         self.overrides = {}
 
     def read(self, path):
@@ -27,8 +31,8 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
 
     def rebind_manifest(self, manifest):
         raw = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
-        self.overrides[self.ext["manifest"]["path"]] = raw
-        self.ext["manifest"]["sha256"] = hashlib.sha256(raw).hexdigest()
+        self.overrides[self.overlay["current_manifest"]["path"]] = raw
+        self.overlay["current_manifest"]["sha256"] = hashlib.sha256(raw).hexdigest()
 
     def errors(self):
         return checker.service_candidate_suite_errors(sorted(self.names), self.read, self.spec)
@@ -37,6 +41,16 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         self.assertEqual(self.errors(), [])
         self.assertEqual([self.ext["groups"][x]["test_count"] for x in ("p1_review", "service_end", "search503", "service_p1")], [108, 125, 48, 81])
         self.assertEqual(self.ext["activation_status"], "NOT_RUN")
+
+    def test_budget_admission_registration_is_exact_and_fail_closed(self):
+        budget = self.spec["backend_platform_contract"]["budget_admission_source_registration_20261114_v1"]
+        self.assertEqual(budget["case_count"], 6)
+        self.assertEqual(self.errors(), [])
+        budget["case_count"] = 5
+        self.assertTrue(self.errors())
+        budget["case_count"] = 6
+        self.names.remove(budget["test_path"])
+        self.assertTrue(self.errors())
 
     def test_new_builtin_is_limited_to_score_null_root(self):
         for root_index, bad_builtin in ((0, "node:test"), (-1, "node:fs")):
@@ -128,13 +142,37 @@ class CandidateSuiteRegistryTests(unittest.TestCase):
         self.rebind_manifest(changed)
         self.assertTrue(self.errors())
 
+    def test_source_overlay_rejects_status_promotion_and_historical_rewrite(self):
+        self.overlay["activation_status"] = "PASS"
+        self.assertTrue(self.errors())
+        self.overlay["activation_status"] = "NOT_RUN"
+        self.ext["activation_status"] = "PASS"
+        self.assertTrue(self.errors())
+
+    def test_additive_roots_and_manifest_are_required(self):
+        path = self.overlay["additive_manifest"]["path"]
+        self.names.remove(path)
+        self.assertTrue(self.errors())
+        self.names.add(path)
+        self.names.remove("tests/service_p1/test_student_pk_scoped.synthetic.ts")
+        self.assertTrue(self.errors())
+
+    def test_additive_workflow_and_source_are_hash_bound(self):
+        path = self.additive["workflow"]["path"]
+        self.overrides[path] = b"synthetic changed workflow"
+        self.assertTrue(self.errors())
+        self.overrides.clear()
+        root = "tests/service_p1/test_current_guide_scoped.synthetic.ts"
+        self.overrides[root] = b'Deno.test("synthetic", () => {});'
+        self.assertTrue(self.errors())
+
     def test_runtime_missing_is_failure_not_skip_for_each_suite(self):
         path = ROOT / self.ext["wrapper"]["path"]
         module_spec = importlib.util.spec_from_file_location("service_candidate_wrapper_for_regression", path)
         module = importlib.util.module_from_spec(module_spec)
         module_spec.loader.exec_module(module)
         with patch.object(module, "load_manifest", side_effect=FileNotFoundError("synthetic missing runtime")):
-            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46"):
+            for name in ("test_p1_deno_80", "test_service_end_deno_125", "test_search503_deno_48", "test_service_p1_deno_46", "test_budget_admission_deno_6", "test_school_reflected_deno_19"):
                 result = unittest.TestResult()
                 module.ReviewSuites(name).run(result)
                 self.assertFalse(result.wasSuccessful())

@@ -199,6 +199,32 @@ def owner_review_registration(spec,before):
         raise EdgeFailure("owner_review_source_binding_invalid")
     return v
 
+def select_saved_report_runner_binding(spec, before, family, historical, selected):
+    """Bind runner input to the current candidate without rewriting historical receipts.
+
+    This is registration only: the five new receipt statuses remain NOT_RUN.
+    Exact historical digest, exact prior path and current snapshot pins are required.
+    """
+    from check_project_consistency import saved_report_overlay, SAVED_REPORT_RECEIPT_PATHS
+    try:
+        pins = saved_report_overlay(spec, before)
+        if pins is None:
+            return selected
+        if family not in SAVED_REPORT_RECEIPT_PATHS:
+            raise ValueError("unknown saved report receipt")
+        result = copy.deepcopy(selected)
+        for path in SAVED_REPORT_RECEIPT_PATHS[family]:
+            prior = [row for row in historical["source_bindings"] if isinstance(row, dict) and row.get("path") == path]
+            current = [row for row in result["source_bindings"] if isinstance(row, dict) and row.get("path") == path]
+            if len(prior) != 1 or len(current) != 1 or current[0].get("sha256") != prior[0].get("sha256"):
+                raise ValueError("historical source binding")
+            if path not in pins or before.get(path) != pins[path]:
+                raise ValueError("current snapshot binding")
+            current[0]["sha256"] = pins[path]
+        return result
+    except (KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise EdgeFailure("saved_report_receipt_source_binding_invalid") from exc
+
 def current_public_registration(spec,before):
     """Exact separate provider proposal suite; no activation or legacy-count change."""
     prefix='supabase/functions/_shared/'
@@ -212,6 +238,7 @@ def current_public_registration(spec,before):
         if required.intersection(before):raise EdgeFailure('current_public_verification_missing')
         return None
     tests=[prefix+n+'.ts'for n in names if n.endswith('_test')]
+    c=select_saved_report_runner_binding(spec,before,'current_public',c,c)
     bindings=c.get('source_bindings')
     if (c.get('format')!='jungsi.current-public-provider-verification/v1' or
         c.get('test_paths')!=tests or c.get('test_count')!=84 or
@@ -233,6 +260,7 @@ def current_public_own_2027_registration(spec,before):
     if contract is None:
         if any(p in before for p in required if p!=existing):raise EdgeFailure('own_2027_batch_verification_missing')
         return None
+    contract=select_saved_report_runner_binding(spec,before,'own_2027',contract,contract)
     bindings=contract.get('source_bindings') if isinstance(contract,dict) else None
     if (not isinstance(contract,dict) or contract.get('format')!='jungsi.own-2027-batch-verification/v1' or
         contract.get('status')!='SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED' or
@@ -255,6 +283,7 @@ def current_public_snapshot_batch_registration(spec,before):
     if contract is None:
         if source in before or test in before:raise EdgeFailure('snapshot_batch_verification_missing')
         return None
+    contract=select_saved_report_runner_binding(spec,before,'snapshot_batch',contract,contract)
     bindings=contract.get('source_bindings') if isinstance(contract,dict) else None
     if (not isinstance(contract,dict) or contract.get('format')!='jungsi.snapshot-batch-verification/v1' or
         contract.get('status')!='SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED' or
@@ -285,6 +314,7 @@ def current_page_projection_registration(spec,before):
     if contract is None:
         if source in before or test in before:raise EdgeFailure("current_page_projection_verification_missing")
         return None
+    contract=select_saved_report_runner_binding(spec,before,'current_page_projection',contract,contract)
     bindings=contract.get("source_bindings") if isinstance(contract,dict) else None
     if (not isinstance(contract,dict) or contract.get("format")!="jungsi.current-page-projection-verification/v1" or
         contract.get("status")!="SOURCE_CANDIDATE_SYNTHETIC_ONLY_NOT_ACTIVATED" or
@@ -362,7 +392,16 @@ def select_runner_current_rebound(spec, family, historical):
         selected=copy.deepcopy(historical);rows=selected['source_bindings']
         matches=[r for r in rows if isinstance(r,dict) and r.get('path')==path]
         if len(matches)!=1:raise ValueError('exact source occurrence')
-        matches[0]['sha256']=current
+        # A later authenticated current-source overlay (e.g. 55PK chunked reader, 2026-11-17)
+        # supersedes this family's current pin; the historical receipt stays unchanged.
+        saved=None
+        if family=='whole_population':
+            from check_project_consistency import saved_report_overlay
+            try:
+                saved=saved_report_overlay(spec)
+            except ValueError:
+                saved=None
+        matches[0]['sha256']=saved[path] if saved is not None and path in saved else current
         return selected
     except (KeyError,TypeError,ValueError,AttributeError):
         raise EdgeFailure('runner_current_source_rebound_invalid')
@@ -376,6 +415,24 @@ def period_renewal_registration(spec,before):
         return None
     selected=select_runner_current_rebound(spec,'period_renewal',historical)
     try:
+        # A separate current candidate may rebind only the two named source
+        # files after the original period-renewal receipt was verified above.
+        from check_project_consistency import saved_report_overlay
+        candidate=saved_report_overlay(spec,before)
+        if candidate is not None:
+            expected={
+                'supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts':
+                    '8565612cd404fdfd98ff9c8e3b32f2d0bedc2029fcd2ec51184ccac55f2e1756',
+                'supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts':
+                    '7481a67980de4d0dc9e0882ef03d6f7922e94c42bb9f55b2cc2f46e483635b77',
+            }
+            selected=copy.deepcopy(selected)
+            for path,old in expected.items():
+                matches=[row for row in selected['source_bindings']
+                         if isinstance(row,dict) and row.get('path')==path]
+                if len(matches)!=1 or matches[0].get('sha256')!=old:
+                    raise ValueError('period renewal previous source binding')
+                matches[0]['sha256']=candidate[path]
         rows=selected['source_bindings'];paths=[r['path'] for r in rows]
         if (not isinstance(rows,list) or len(paths)!=len(set(paths)) or
             selected.get('format')!='jungsi.period-renewal-source-extension/v1' or
@@ -483,6 +540,11 @@ def school_reference_registration(spec,before):
     if v is None:
         if set(SCHOOL_REFERENCE_TESTS).intersection(before):raise EdgeFailure('school_reference_verification_missing')
         return None
+    from check_project_consistency import apply_member_school_overlay
+    try:
+        v=apply_member_school_overlay(spec,"school",v,before)
+    except (KeyError,TypeError,ValueError,AttributeError) as error:
+        raise EdgeFailure("school_reference_overlay_invalid") from error
     required={*SCHOOL_REFERENCE_SOURCES,*SCHOOL_REFERENCE_TESTS,'tests/edge/synthetic_school_reference.ts',
       'tests/edge/reference_candidate_scope_cases.ts','tests/edge/saved_reference_tail_source_cases.ts',
       'tests/edge/test_saved_tail_scope_cache.followup.synthetic.ts',
@@ -940,7 +1002,10 @@ P1_SELECTION_BRIDGE_FIXTURE = "tests/p1_contract_review/fixture.bridge.v2.synthe
 def p1_selection_bridge_registration(spec, before):
     """Bind P1 selection source, reused sources and offline test fixture."""
     c = spec.get("p1_selection_bridge_review_verification")
-    if c is not None: c = select_runner_current_rebound(spec,"p1_selection",c)
+    historical = c
+    if c is not None:
+        c = select_runner_current_rebound(spec,"p1_selection",c)
+        c = select_saved_report_runner_binding(spec,before,"p1_selection",historical,c)
     required = set(P1_SELECTION_BRIDGE_SOURCES) | {P1_SELECTION_BRIDGE_TEST, P1_SELECTION_BRIDGE_FIXTURE}
     if c is None:
         if P1_SELECTION_BRIDGE_SOURCES[0] in before or 'current_source_rebounds_20261113' in spec: raise EdgeFailure("p1_selection_bridge_registration_missing")
@@ -1039,7 +1104,7 @@ P1CG_PINNED_TYPE_IMPORTS = {
     "supabase/functions/_shared/jungsi/application/platform_repository.ts": (
         "a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639", ["./score_input_ports.ts"]),
     "supabase/functions/_shared/jungsi/application/profile_reports.ts": (
-        "28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c",
+        "c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87",
         ["./score_input_ports.ts", "./score_input_ports.ts"]),
     "supabase/functions/_shared/jungsi/application/score_input_ports.ts": (
         "c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c", ["./session_service.ts"] * 6),
@@ -1422,7 +1487,7 @@ CURCG_ROOTS = (CURCG_PREFIX + "combined_policy_catalog_runtime.test.ts",
 CURCG_FIXTURE = CURCG_PREFIX + "combined_policy_catalog_runtime.original.ts"
 CURCG_SHARED = "tests/edge/synthetic_api_contract.ts"
 CURCG_TEST_FILES = frozenset((*CURCG_ROOTS, CURCG_FIXTURE))
-CURCG_MANIFEST = "tests/cursor_contract_review_graph.20261113_fmt.current.json"
+CURCG_MANIFEST = "tests/cursor_contract_review_graph.20261114_pr75.current.json"
 CURCG_FORMAT = "jungsi.cursor-contract-offline-closure/v1"
 CURCG_META = "cursor_contract_offline_graph_verification"
 CURCG_REGRESSION = "tests/test_cursor_contract_graph_guard.py"

@@ -14,8 +14,13 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "tests/review_suite_manifest.20261113_fmt.current.json"
-MANIFEST_SHA256 = "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
+HISTORICAL_MANIFEST = "tests/review_suite_manifest.20261113_fmt.current.json"
+HISTORICAL_MANIFEST_SHA256 = "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
+MANIFEST_NAME = "tests/review_suite_manifest.20261114_budget_candidate.json"
+MANIFEST = ROOT / MANIFEST_NAME
+MANIFEST_SHA256 = "94917dfc41b239cbd3bf86460cc36d14493995a0800a06ea7471482b3b3fc335"
+ADDITIVE_MANIFEST = "tests/student_pk_additive_manifest.20261113_source_candidate.json"
+ADDITIVE_SHA256 = "25230102a6ede88ca5183f0edbc4919052a35e78f76e41c9acf3eecbabdc3215"
 EDGE_RUNTIME_LOCK_SHA256 = "75981218812cb43e87ca2425da4d5efaa12d05db4acfd58b882a579483f02c98"
 DENO = None
 DENO_SHA256 = None
@@ -24,11 +29,13 @@ GENERATED_ROUTE = "src/jungsi_touch/application/route_catalog.json"
 GENERATED_ROUTE_MARKER = "GENERATED_BY_SPEC_VIA_COMMON_GATE"
 NODE_ALLOWED = ["node:assert/strict", "node:fs", "node:zlib"]
 SERVICE_CANDIDATE_SHARED_FIXTURES = {
+    "budget_admission": frozenset({"tests/edge/fixture.ts"}),
+    "school_reflected": frozenset({"tests/edge/fixture.ts"}),
     "service_end": frozenset({"tests/edge/synthetic_exam_pack.ts"}),
     "service_p1": frozenset(['tests/edge/fixture.ts', 'tests/edge/synthetic_api_contract.ts', 'tests/edge/synthetic_history_qualification.ts', 'tests/edge/synthetic_history_snapshot.ts', 'tests/edge/synthetic_runtime_binding.ts']),
 }
 
-SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('28673816e05328cbdc3e8122da6679a6c7cf081e3c6a1fabd3e23864e65d8a3c', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
+SERVICE_P1_PINNED_TYPE_IMPORTS = {'supabase/functions/_shared/jungsi/application/platform_repository.ts': ('a90983b9f970cdb3aec8f564df4971ae37ce85b3f457d56381cc06eaf43d5639', ['./score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/profile_reports.ts': ('c7e5ba17c07f6f3e74442093e581ac06e8f43a4014291486d3012b52a3f3bf87', ['./score_input_ports.ts', './score_input_ports.ts']), 'supabase/functions/_shared/jungsi/application/score_input_ports.ts': ('c17d798e08750bdc7a8e0ec5ace5fb0cd3c132f8e9256288baebe5077c5df71c', ['./session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts', './session_service.ts']), 'supabase/functions/_shared/jungsi/application/score_input_service.ts': ('26cb702657fe67e66334435e8632e631451572f7d3032ba1897aa6ece0b1caa1', ['./score_input_ports.ts'])}
 
 SCORE_NULL_SUITE_ROOT = "tests/service_p1/test_score_null_reason_review.synthetic.mjs"
 SERVICE_P1_ROOTS = ['tests/service_p1/test_p1_r27_partial_scope.synthetic.mjs', 'tests/service_p1/test_p1_r27_admission_integration.synthetic.mjs', 'tests/service_p1/test_p1_r27_runtime_partial_join.synthetic.mjs', 'tests/service_p1/test_p1_r27_request_admission.synthetic.ts', 'tests/service_p1/test_p1_r27_http_order.synthetic.ts', SCORE_NULL_SUITE_ROOT]
@@ -252,7 +259,9 @@ def layer_bindings(files,graphs):
 
 def load_manifest():
     global DENO, DENO_SHA256
-    if sha(safe_file("tests/review_suite_manifest.20261113_fmt.current.json")) != MANIFEST_SHA256:
+    if sha(safe_file(HISTORICAL_MANIFEST)) != HISTORICAL_MANIFEST_SHA256:
+        raise ValueError("historical review manifest mismatch")
+    if sha(safe_file(MANIFEST_NAME)) != MANIFEST_SHA256:
         raise ValueError("review manifest mismatch")
     data = json.loads(MANIFEST.read_bytes())
     if data.get("format") != "jungsi.review-suite-closure/v2" or data.get("review_only") is not True:
@@ -261,12 +270,14 @@ def load_manifest():
     version = invoke([str(DENO), "--version"], 10).splitlines()[0]
     if version != "deno 2.9.7 (stable, release, " + target + ")":
         raise ValueError("unexpected Deno version")
+    verify_additive_suite(data)
     return data
 
 
-def verify_suite(data, name, expected_roots, allowed, expected_count):
+def verify_suite(data, name, expected_roots, allowed, expected_count, shared_fixtures=None):
     suite_name = name
     suite = data["suites"][name]
+    fixtures = SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()) if shared_fixtures is None else shared_fixtures
     if (suite["roots"] != expected_roots or suite["allowed_builtins"] != allowed or
             suite["expected_count"] != expected_count or set(suite["graphs"]) != set(expected_roots)):
         raise ValueError("suite registration mismatch")
@@ -284,10 +295,10 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
                 if pinned is None or sha(source) != pinned[0] or literals != pinned[1]:
                     raise ValueError("dynamic import is not allowed in P1 closure")
     for path in suite["files"]:
-        if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
+        if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in fixtures:
             raise ValueError("unregistered test scope: " + path)
     extra_fixtures = {p for p in suite["files"] if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
-    if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+    if extra_fixtures != set(fixtures):
         raise ValueError("exact shared fixture set mismatch")
     if GENERATED_ROUTE in suite["files"]:
         verify_generated_route()
@@ -302,7 +313,61 @@ def verify_suite(data, name, expected_roots, allowed, expected_count):
             raise ValueError("module closure mismatch: " + root)
     return suite
 
+def verify_additive_suite(data):
+    """Verify the separate source registration without claiming execution results."""
+    if sha(safe_file(ADDITIVE_MANIFEST)) != ADDITIVE_SHA256:
+        raise ValueError("additive manifest mismatch")
+    add = json.loads(safe_file(ADDITIVE_MANIFEST).read_bytes())
+    roots = ["tests/service_p1/test_student_pk_scoped.synthetic.ts", "tests/service_p1/test_current_guide_scoped.synthetic.ts"]
+    fields = {"format", "status", "roots", "case_count", "case_names", "config", "workflow", "files", "graphs", "layers", "native_acceptance", "activation_status", "operating_writes"}
+    if (set(add) != fields or add["format"] != "jungsi.student-pk-additive-suite-source/v1" or
+        add["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or add["roots"] != roots or
+        type(add["case_count"]) is not int or add["case_count"] != 12 or
+        add["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or add["activation_status"] != "NOT_RUN" or
+        type(add["operating_writes"]) is not int or add["operating_writes"] != 0 or add["config"] != data["config"]):
+        raise ValueError("additive registration mismatch")
+    workflow = {"path": ".github/workflows/project-consistency.yml", "sha256": "f44b782193d2c9b7020f3755342ee631a5189dc1b119502a5857fdc4ef325c42"}
+    if add["workflow"] != workflow or sha(safe_file(workflow["path"])) != workflow["sha256"]:
+        raise ValueError("additive workflow mismatch")
+    if set(add["case_names"]) != set(roots):
+        raise ValueError("additive case roots mismatch")
+    for root, count in zip(roots, (8, 4)):
+        source = safe_file(root).read_text(encoding="utf8")
+        names = re.findall(r'Deno\.test\(\s*("(?:[^"\\]|\\.)*")\s*,', source)
+        if len(names) != count or source.count("Deno.test(") != count or [json.loads(x) for x in names] != add["case_names"][root]:
+            raise ValueError("additive case names mismatch")
+    suite = {"roots": roots, "expected_count": 12, "allowed_builtins": [], "manual_read_files": [],
+             "files": add["files"], "graphs": add["graphs"], "layers": add["layers"]}
+    verify_suite({"suites": {"service_p1": suite}}, "service_p1", roots, [], 12, shared_fixtures=frozenset())
+
+
 class ReviewSuites(unittest.TestCase):
+    def test_school_reflected_deno_19(self):
+        data = load_manifest()
+        roots = ["tests/school_reflected/test_school_reflected_reference.synthetic.ts"]
+        verify_suite(data, "school_reflected", roots, [], 19)
+        args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
+                "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
+                "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *roots]
+        output = invoke(args, 90)
+        matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
+        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (19, 0, 0, 0):
+            raise AssertionError("school reflected result/count mismatch: " + output[-1000:])
+        verify_suite(data, "school_reflected", roots, [], 19)
+
+    def test_budget_admission_deno_6(self):
+        data = load_manifest()
+        roots = ["tests/budget_admission/test_usage_admission_race.synthetic.ts"]
+        verify_suite(data, "budget_admission", roots, [], 6)
+        args = [str(DENO), "test", "--config", CONFIG, "--cached-only", "--no-lock", "--no-prompt",
+                "--no-remote", "--no-npm", "--deny-read", "--deny-write", "--deny-net", "--deny-env",
+                "--deny-run", "--deny-sys", "--deny-ffi", "--reporter=dot", *roots]
+        output = invoke(args, 90)
+        matches = re.findall(r"^ok \| (\d+) passed \| (\d+) failed(?: \| (\d+) ignored)?(?: \| (\d+) filtered out)? \(", output, re.M)
+        if len(matches) != 1 or tuple(int(n or 0) for n in matches[0]) != (6, 0, 0, 0):
+            raise AssertionError("budget admission result/count mismatch: " + output[-1000:])
+        verify_suite(data, "budget_admission", roots, [], 6)
+
     def test_p1_deno_80(self):
         data = load_manifest()
         suite = verify_suite(data, "p1_review", P1_ROOTS, NODE_ALLOWED, 108)

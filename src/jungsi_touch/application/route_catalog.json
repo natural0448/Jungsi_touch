@@ -1,7 +1,7 @@
 {
   "format": "jungsi.application-routes/v1",
-  "spec_version": "1.9.176",
-  "source_sha256": "22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542",
+  "spec_version": "1.9.177",
+  "source_sha256": "44841d564d38eaf17f6190a6d6cb0560fe4c6ec352e345c5641ffeba5aba3202",
   "pages": [
     {
       "id": "PAGE-01",
@@ -335,6 +335,8 @@
         "body": [],
         "query": [
           "academic_year (2024~2027 선택)",
+          "exam_id (선택; 본인 저장 점수의 승인 시험 식별자)",
+          "stage (선택; 해당 시험의 승인된 입력 단계)",
           "university_q",
           "department_q",
           "region",
@@ -342,7 +344,7 @@
           "cursor",
           "limit (1~100; 기본 50)"
         ],
-        "response": "catalog_search (items=offering)",
+        "response": "catalog_search (items=offering; 본인 조회가 허용된 저장 점수 my_score는 선택 필드)",
         "idempotency_key_required": false,
         "response_schema": "catalog_search"
       },
@@ -3909,11 +3911,11 @@
       "status": "SOURCE_CANDIDATE_SYNTHETIC_ONLY",
       "manifest": {
         "path": "tests/review_suite_manifest.20261113_fmt.current.json",
-        "sha256": "778f69a3c324ba985f8b3a3dc82f7b6a4c609ac233112e93925af293bd44d14e"
+        "sha256": "2fbef29c171166582c38519d93ac9436d5eed6ceb4d6d43829b4fe009ee8caac"
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
+        "sha256": "ea9a10e3960e581f56b708d939c6d5628b682bf29344e79e536514b0718d6f36"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -4369,9 +4371,11 @@
           "chunked values preserve points, ties, gaps and bounds",
           "index structural guards reject invalid ranges, mass, size and release",
           "outside support reads only the index",
+          "pieces may total more than 125,000 rows; only the needed piece is read (2026-11-17)",
           "tampered chunk is rejected despite unchanged length"
         ],
         "tests/edge/test_chunked_runtime_wiring.synthetic.ts": [
+          "catalog issuer reads only a piece listed with its exact length in the pinned index (2026-11-17)",
           "runtime wrapper forwards chunk selection and rechecks lease and scoped signal"
         ],
         "tests/edge/test_existing_reference_candidate_scope.ts": [
@@ -4612,8 +4616,8 @@
           "unfiltered maximum retains existing behavior for a different reference domain"
         ]
       },
-      "case_identity_sha256": "e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1",
-      "test_count": 199,
+      "case_identity_sha256": "0f672c1b80b059c2cdf3bdfb0f01b7647edbbb726d78d3eee3160f265ba9c1bc",
+      "test_count": 201,
       "baseline_foundation_count": 656,
       "source_bindings": [
         {
@@ -4622,15 +4626,15 @@
         },
         {
           "path": "tests/edge/test_chunked_reference_integration.synthetic.ts",
-          "sha256": "c7b755f4062dc018c44b67d693a50f10ab7a953c03134368cea8a533d1d94074"
+          "sha256": "ea5d812a9de3935d3101133aa3e64a363b0a576ecb78cc57248294bf10100906"
         },
         {
           "path": "tests/edge/test_chunked_reference_projection.synthetic.ts",
-          "sha256": "5a7115cb44a8a5216fa4423f0573d356128d130faeae40ca2d5faa6afb186fa9"
+          "sha256": "04be9c9af027a50d978a374eb5e4b80063824ac3267013da113d17f79bd0ef81"
         },
         {
           "path": "tests/edge/test_chunked_runtime_wiring.synthetic.ts",
-          "sha256": "96673fec9c99683bebc4f29a4821075b2b26385f36f2668c7c6631885f474bb2"
+          "sha256": "30c9ba86d433c1c17cf9a925680add2a907e6aa275287c5b374d86f57371595a"
         },
         {
           "path": "tests/edge/test_existing_reference_candidate_scope.ts",
@@ -4642,7 +4646,7 @@
         },
         {
           "path": "tests/edge/test_native_reference_cdf_projection.ts",
-          "sha256": "13856b72559d816c4a055f939f2d49686471d5c689504b89eecc184cc0a676a5"
+          "sha256": "5e245c30a0df8fd48ac87f0e02fb3978f327e3d5a17a8086a0650da7cb8191d8"
         },
         {
           "path": "tests/edge/test_native_reference_db_tail.ts",
@@ -4755,7 +4759,7 @@
       ],
       "regression_test": {
         "path": "tests/test_reference_db_suite_registration.py",
-        "sha256": "e7fb91e5538ffc6133d023a18dc9d0c231bf9378794ee9244956ed3fc200f468"
+        "sha256": "4743b65a88e3ffb4ba22ea987a88ec8dbac144fea876ff377a7caf028b76dba8"
       },
       "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
       "activation_status": "NOT_RUN",
@@ -4764,6 +4768,53 @@
     "score_map_source_extension": {
       "format": "jungsi.score-map-source-extension/v1",
       "status": "SOURCE_PREPARED_NOT_ACTIVATED",
+      "observed_operating_table_20261113": {
+        "table": "jungsi_backend.score_maps",
+        "observation": "TABLE_AND_COLUMN_METADATA_ONLY",
+        "primary_key": [
+          "owner_id",
+          "profile_id",
+          "data_pin",
+          "offering_id"
+        ],
+        "verified_columns": [
+          "status",
+          "converted_score",
+          "official_max_score",
+          "reason_code",
+          "computed_at"
+        ],
+        "converted_percentile_column": "ABSENT",
+        "runtime_role_select": "GRANT_METADATA_TRUE_BASE_RLS_AND_QUERY_NOT_VERIFIED",
+        "saved_member_rows_and_current_data_pin": "NOT_VERIFIED",
+        "live_API_connection": "NOT_VERIFIED"
+      },
+      "student_pk_existing_read_candidate_20261113": {
+        "status": "SOURCE_SCOPED_UNIT_TESTS_PASSED_NOT_DEPLOYED",
+        "operation": "offerings.search",
+        "selection": "검증된 세션의 학생 식별자와 승인 시험·단계의 현재 profile, 승인된 data_pin, 화면에 전달할 모집단위 PK 목록으로 기존 score_maps에서 이미 저장된 점수만 읽는다.",
+        "query": [
+          "exam_id_optional",
+          "stage_optional"
+        ],
+        "response": "기존 items[].my_score 선택 필드를 사용하며 null과 실제 0을 구분한다. 누백·판정이 없는 경우 만들지 않는다.",
+        "cursor": "선택한 시험과 입력 단계를 검색 커서 결속에 반영한다.",
+        "scope": "기존 정본의 대학 코드와 모집단위 PK를 사용하고 전국 검색을 관심대학에 한정하지 않는다. 조회 시 계산·쓰기·재수집·새 테이블 생성을 하지 않는다.",
+        "security": "기존 유료 권한·본인 소유권·자료판·공유 예산·물리 SQL 취소·private/no-store 및 역할별 응답 허용목록을 유지한다.",
+        "page4": "report.read의 본인 보고서·현재 승인 head·학년도와 원 PK로 저장된 분석을 부분 연결한다. 이미 존재하는 결과는 보존한다. 미분석 범위와 와일드카드는 전체 완료로 표시하지 않는다.",
+        "verification": "Deno 2.9.7: 12 scoped synthetic tests passed (2026-11-13); 3P v6 and 4P v2 screen patches apply-check passed; runtime type check passed. Stage projection guard: 15 scoped tests passed after historical/current binding correction. Remote CI, actual DB calls, screen execution and deployment remain NOT_RUN.",
+        "operating_application": "NOT_RUN",
+        "targeted_unit_tests": {
+          "status": "PASS_SYNTHETIC_ONLY",
+          "total": 12,
+          "paths": [
+            "tests/service_p1/test_student_pk_scoped.synthetic.ts",
+            "tests/service_p1/test_current_guide_scoped.synthetic.ts"
+          ],
+          "no_operating_db_or_real_student_data": true,
+          "CI_status_for_this_candidate": "NOT_RUN"
+        }
+      },
       "schema_source": "database/migrations/011_score_maps.prepared.sql",
       "schema_version": "score_maps_2026",
       "legacy_ledgers_modified": false,
@@ -4873,6 +4924,83 @@
         "path": "tests/reference_safety_suite_manifest.20261113_fmt.current.json",
         "sha256": "08a8d4689214f5eeb7890b8623f1eab7ff52e2d06eb80d1fafa9c16403e8e018"
       }
+    },
+    "service_candidate_suite_source_overlay_20261113_v1": {
+      "format": "jungsi.service-suite-source-overlay/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
+      "current_manifest": {
+        "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
+        "sha256": "94917dfc41b239cbd3bf86460cc36d14493995a0800a06ea7471482b3b3fc335"
+      },
+      "additive_manifest": {
+        "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
+        "sha256": "25230102a6ede88ca5183f0edbc4919052a35e78f76e41c9acf3eecbabdc3215"
+      },
+      "wrapper": {
+        "path": "tests/test_service_candidate_suites.py",
+        "sha256": "830059a26c63ddd7c60d0ce8f498d1e243239f3d7b81429ced1cfe09f98524f0"
+      },
+      "regression_test": {
+        "path": "tests/test_service_candidate_registry.py",
+        "sha256": "f8eb86d365e57c5b69ea68a8c80a393669ed9f11a423d1465c772b484f5bb82f"
+      },
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "budget_admission_source_registration_20261114_v1": {
+      "format": "jungsi.budget-admission-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "source_path": "supabase/functions/_shared/jungsi/application/usage_service.ts",
+      "source_sha256": "ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43",
+      "test_path": "tests/budget_admission/test_usage_admission_race.synthetic.ts",
+      "test_sha256": "a0b0082f32dc31f70c77a2d1924de9b3e845593101d13b6f99ceca11a98df898",
+      "case_count": 6,
+      "case_names": [
+        "running admission cannot be cancelled before physical work finishes",
+        "concurrent cancellations share one failure settlement",
+        "post-rollback cleanup may settle a completed failure again",
+        "failed settlement remains eligible for rollback cleanup",
+        "concurrent cancellation shares delayed store failure and a later cleanup can retry",
+        "rolled-back successful settlement is compensated after the outer transaction"
+      ],
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
+    },
+    "school_reflected_reference_source_registration_20261114_v1": {
+      "format": "jungsi.school-reflected-reference-source-registration/v1",
+      "status": "SOURCE_REGISTERED_NOT_EXECUTED",
+      "source_path": "supabase/functions/_shared/jungsi/application/school_reflected_reference.ts",
+      "source_sha256": "e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231",
+      "test_path": "tests/school_reflected/test_school_reflected_reference.synthetic.ts",
+      "test_sha256": "4bb971e5d2b43366573e4d984b91a5e052c631e1cd585f00060b1afb97098891",
+      "case_count": 19,
+      "case_names": [
+        "two inquiry subjects share the inquiry weight and English is excluded",
+        "best inquiry subject by percentile or by standard score",
+        "real zero is kept and unreflected areas are not required",
+        "missing reflected inputs wait instead of becoming zero",
+        "invalid rules and scores are rejected",
+        "eligibility note travels with the reference value",
+        "allowlist parses and rejects malformed rows",
+        "setting is optional and strict",
+        "attach adds values to analyses and nested candidate items only for allowed 2027 offerings",
+        "public schema keeps the field and rejects a wrong shape",
+        "eligibility conditions parse, attach to 2027 analyses only and reject malformed rows",
+        "public schema accepts eligibility_conditions and rejects unknown subject names",
+        "year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows",
+        "year cutoff tags mark a combined-track release and the mean score component",
+        "public schema accepts year_cutoffs and rejects a malformed percent",
+        "reference percentile upper bound adds unscored mass above and equals the lower bound without it",
+        "reference candidates pass only a valid upper bound",
+        "public schema accepts the reference upper bound and rejects a malformed one",
+        "member saved results 015 reader switch keeps the reviewed SQL unless fn_v2"
+      ],
+      "native_acceptance": "NOT_VERIFIED_BY_SOURCE_SUITE",
+      "activation_status": "NOT_RUN",
+      "operating_writes": 0
     }
   },
   "university_scoring_contract": {
@@ -5740,7 +5868,30 @@
         "Storage_activation": "NOT_RUN",
         "frontdoor": "NOT_RUN"
       },
-      "implementation_boundary": "Member shortlist JSON storage/runtime implemented with saved DB assessment compatibility reader. School conversion/percentile component JSON writer/cache remains NOT_IMPLEMENTED; do not claim completed result reuse."
+      "implementation_boundary": "Member shortlist JSON storage/runtime implemented with saved DB assessment compatibility reader. School conversion/percentile component JSON writer/cache remains NOT_IMPLEMENTED; do not claim completed result reuse.",
+      "2027_member_result_retrieval_20261113": {
+        "status": "USER_PRIORITY_IMPLEMENTATION_AND_OPERATING_ACCEPTANCE_PENDING",
+        "priority": 2,
+        "scope": "2027학년도 각 회원의 입력 성적에 해당 학교·모집행의 기존 산식을 적용한 결과를 저장하고 본인에게 재조회한다.",
+        "storage": "기존 Supabase private Storage 회원 전용 JSON 및 현재 저장 포트를 재사용한다. 새 결과 테이블·추가 서비스·요금제 변경은 도입하지 않는다.",
+        "requested_fields": [
+          "academic_year",
+          "offering_pk",
+          "university_name",
+          "department_name",
+          "converted_score",
+          "converted_percentile"
+        ],
+        "identity": "서버가 검증한 회원·성적 프로필/리비전과 학년도·대학·캠퍼스·모집행 PK·전형·모집군, 산식과 사용된 자료 버전을 결속한다. 학교명·학과명은 동일 PK의 승인된 Guide 표시값을 사용한다.",
+        "percentile": "기존 API의 converted_percentile은 동일 대학 환산점수의 상위누백 호환 필드이므로, 동일 학년도·회원 성적·산식·곡선에 결속된 ready 값을 그대로 저장하고 재조회한다. 별도의 대학 반영 백분위·과목 백분위와 혼동하거나 100-x로 역산하지 않는다. 해당 기존 누백이 없거나 결속되지 않은 경우만 빈칸으로 둔다.",
+        "storage_transition": "저장 객체를 먼저 검증한 뒤 기존 report revision의 내부 참조를 원자적으로 연결한다. 이전 inline 본문은 현재 report_revisions와 requests.result replay에서 임시 보존되므로 DB 중복 절감 완료 상태가 아니다. report.read·replay·관심대학 등 전체 독자의 실제 전환을 확인하기 전에는 기존 본문이나 저장 객체를 삭제하지 않는다. CAS 실패 시 기존 결과와 생성 후보를 보존한다.",
+        "candidate_implementation": "2027 결과의 불변 private Storage 저장과 report CAS 참조, 관심대학 직접 SQL 재조회 후보를 통합했다. 기존 보고서와 재실행 호환을 위해 inline도 임시 보존하며 실제 DB 및 운영 연결은 미검증이다.",
+        "privacy": "서버 검증 JWT의 소유 리포트만 저장·재조회하고 기존 이용권·예산·no-store 경계와 다른 회원 격리를 유지한다. 실제 성적·개인정보·원본 산식·모형은 Git에 넣지 않는다.",
+        "operation": "university.analyze /api/v1/reports/{report_id}/university-results",
+        "evidence": "기존 산식·자료·정본과 검수 결과를 재사용한다. 코드를 작성하거나 합성 검사만 통과한 상태는 실제 저장·재조회 또는 운영 배포 완료가 아니다.",
+        "batch_policy": "100개는 한 저장 객체당 최대 개수이며 전체 모집단위 제한이 아니다. 기존 승인된 객체 크기·개수 한도에 따라 분할하고 소유자·성적·report·source revision과 PK 중복을 확인한다.",
+        "legacy_retrieval": "과거 형식에 표시 필드가 없을 때 같은 소유자·시험·성적·학년도·산식·분포에 결속된 저장값만 복원한다. 기존 값·명시적 null과 미결속 항목은 바꾸지 않는다."
+      }
     }
   },
   "member_shortlist_contract": {

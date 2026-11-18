@@ -333,14 +333,14 @@ class ProfessionalGuideTestRegistrationTests(unittest.TestCase):
         self.assertEqual(checker.professional_guide_test_registration(spec),(set(),[]))
         self.assertIn('Read-view separate exact suite registration drift',checker.validate_read_view_extension(spec))
 
-    def test_valid_exact_guide_is_separate_from_public28_pro21_and_foundation656(self):
+    def test_valid_exact_guide_is_separate_from_public28_pro22_and_foundation656(self):
         import check_project_consistency as checker
         spec,_=self.fixture()
         self.assertEqual(checker.professional_guide_test_registration(spec),({checker.PROFESSIONAL_GUIDE_TEST},[]))
         self.assertEqual(checker.validate_read_view_extension(spec),[])
         self.assertEqual(checker.validate_professional_source_registration(spec),[])
         self.assertEqual(len(spec['operations']),28+len(checker.registered_member_shortlist_ids(spec)))
-        self.assertEqual(len(spec['professional_service_contract']['candidate_operations']),21)
+        self.assertEqual(len(spec['professional_service_contract']['candidate_operations']),22)
         self.assertEqual(spec['edge_harness']['unit_count'],656)
 
     def test_malformed_contract_returns_error_and_no_exemption(self):

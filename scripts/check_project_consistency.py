@@ -50,11 +50,300 @@ _OTHER_REBOUND_FAMILIES = {
         "9bcc0fa7a404dbcf4d1825b7989906a10324f7daa613e30c288896db25fe8901"),
 }
 
+# The member-school storage transition registers new bytes without changing prior receipts.
+MEMBER_SCHOOL_OVERLAY_FIELD = "member_school_results_current_source_overlay_20261113"
+MEMBER_SCHOOL_OVERLAY_PATHS = frozenset({
+    "supabase/functions/_shared/jungsi/application/university_analysis.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts",
+    "supabase/functions/_shared/jungsi/application/member_school_results.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+    "supabase/functions/_shared/jungsi/application/p1_v25_v2_input_builder_candidate.ts",
+    "tests/edge/member_shortlist_fixture.ts",
+    "scripts/check_project_consistency.py",
+    "scripts/run_edge_tests.py",
+})
+MEMBER_SCHOOL_BASELINES = {
+    "source_rebounds": "8726e77ec1ae8800f295ea6f0c392fa5cfff790bb76f4cb35552cc1b89e351d4",
+    "aux_rebounds": "310ce7e0418e05c47852d6ef13e5beba5d48b30808d004b5475e037fd3f2bc3f",
+    "school_v2": "2fb1e247d13720d30eb0369e37ee551bb9164a9f2029894619210e0b1df5994c",
+    "cancellation": "e4462945d71e0e5d5c343a86599ea399504306df68443dc92c732e8b54bfe6c8",
+    "stage": "efd451ced10190ddaa90932f41b0f693b566f27739e71524ccefa307f6ccd992",
+}
+_MU = "supabase/functions/_shared/jungsi/application/university_analysis.ts"
+_MC = "supabase/functions/_shared/jungsi/infrastructure/runtime_composition.ts"
+_MX = "supabase/functions/_shared/jungsi/infrastructure/runtime_context.ts"
+_MS = "supabase/functions/_shared/jungsi/infrastructure/member_shortlist_postgres.ts"
+_MF = "tests/edge/member_shortlist_fixture.ts"
+_MRUN = "scripts/run_edge_tests.py"
+_MSCAN = "scripts/check_edge_contract.py"
+
+# Separate source-only continuation. The old overlay and all verification
+# receipts remain byte-for-byte unchanged; this marker never represents a run.
+SAVED_REPORT_OVERLAY_FIELD = "saved_report_current_source_overlay_20261113_v1"
+SAVED_REPORT_PREVIOUS_OVERLAY_SHA256 = "cb253a886da3519d18c72897439bd10844067f5b79ea29a6a3ae730501b9ae0f"
+_MB = "supabase/functions/_shared/jungsi/infrastructure/runtime_budget.ts"
+_MJSON = "supabase/functions/_shared/jungsi/application/member_json_results.ts"
+_SCORE_INPUT = "supabase/functions/_shared/jungsi/infrastructure/score_input_postgres.ts"
+_PUBLIC_CATALOG = "supabase/functions/_shared/current_public_catalog.ts"
+_PUBLIC_SQL = "supabase/functions/_shared/current_public_catalog_sql.ts"
+_COMBINED_CATALOG = "supabase/functions/_shared/combined_policy_catalog_runtime.ts"
+SAVED_REPORT_EDGE_PATHS = frozenset({
+    _MJSON, _MS, _MC, _MX, _MB, _SCORE_INPUT,
+    # 55PK 분할 곡선(2026-11-17): 카탈로그 분할 곡선 선택·조각 읽기
+    "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_school_results_storage.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/read_view_catalog_runtime.ts",
+})
+SAVED_REPORT_OTHER_EDGE_SOURCES = frozenset({
+    _PUBLIC_CATALOG, _PUBLIC_SQL,
+    _COMBINED_CATALOG,
+    "supabase/functions/_shared/current_public_scoped_service.ts",
+    "supabase/functions/_shared/search_failure_diagnostic.ts",
+    "supabase/functions/_shared/jungsi/application/attach_saved_scores.ts",
+    "supabase/functions/_shared/jungsi/application/member_saved_candidate_groups.ts",
+    "supabase/functions/_shared/jungsi/application/member_saved_offering_lookup.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/member_score_map_read.ts",
+    "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts",
+    "supabase/functions/_shared/jungsi/application/profile_reports.ts",
+    # 참고 누백 상한(대표님 결정 2026-11-16)
+    "supabase/functions/_shared/jungsi/application/reference_percentile.ts",
+    "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts",
+})
+SAVED_REPORT_SCRIPT_PATHS = frozenset({"scripts/check_project_consistency.py", _MRUN, _MSCAN})
+# Public response schema bytes: no code-index row; pinned by bytes only (school reflected DTO, 2026-11-14).
+_SCHEMA = "src/jungsi_touch/application/public_response_schemas.json"
+_ARTIFACTS = "supabase/functions/_shared/jungsi/infrastructure/supabase_artifacts.ts"
+_PROFILE_REPORTS = "supabase/functions/_shared/jungsi/application/profile_reports.ts"
+# 참고 누백 상한(2026-11-16): 학교 참고 묶음이 고정한 두 파일의 새 지문
+_REF_PCT = "supabase/functions/_shared/jungsi/application/reference_percentile.ts"
+_SAVED_TAIL = "supabase/functions/_shared/jungsi/domain/saved_reference_projection.ts"
+# 55PK 분할 곡선(2026-11-17): 학교 참고 묶음이 고정한 두 파일의 새 지문
+_NDP = "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts"
+_NSS = "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts"
+SAVED_REPORT_DATA_PATHS = frozenset({_SCHEMA})
+# Generated schema fixture: harness declaration only, no code-index row.
+_SCHEMA_FIXTURE = "tests/edge/public_api_contract_fixture.ts"
+SAVED_REPORT_HARNESS_PATHS = frozenset({_SCHEMA_FIXTURE})
+SAVED_REPORT_OVERLAY_PATHS = (SAVED_REPORT_EDGE_PATHS | SAVED_REPORT_OTHER_EDGE_SOURCES |
+    SAVED_REPORT_SCRIPT_PATHS | SAVED_REPORT_DATA_PATHS | SAVED_REPORT_HARNESS_PATHS)
+
+SAVED_REPORT_RECEIPT_BASELINES = {'current_public': '06f1e26e0719cabc45ece3dab98e82c0df5db9d3739906f2a47933117e3be0c5', 'own_2027': '1297aa820a4dd9573552fad416291af5024a7be8de439f3d77f738ab6545bcee', 'snapshot_batch': 'ceedf2c8ce46ee394bedb422f63b445c8d5a434e732802e1f7d1ba4a2a461c14', 'current_page_projection': '7497e7c5afcd69bdc80cecc8781a755415efa3dda4f1f597f63d1c371beef647', 'p1_selection': 'baae156bbc3786fd45e09730e4c662ee44d99b38c0ce4b8ebc2e44883c325db7'}
+SAVED_REPORT_RECEIPT_PATHS = {'current_public': ('supabase/functions/_shared/current_public_catalog.ts', 'supabase/functions/_shared/current_public_catalog_sql.ts'), 'own_2027': ('supabase/functions/_shared/current_public_catalog.ts',), 'snapshot_batch': ('supabase/functions/_shared/current_public_catalog.ts',), 'current_page_projection': ('supabase/functions/_shared/current_public_catalog.ts', 'supabase/functions/_shared/current_public_catalog_sql.ts'), 'p1_selection': ('supabase/functions/_shared/current_public_catalog.ts',)}
+
+def saved_report_overlay(spec, source_hashes=None):
+    """Check the new candidate independently; no test or operating approval is inferred."""
+    marker = spec.get(SAVED_REPORT_OVERLAY_FIELD)
+    if marker is None:
+        return None
+    try:
+        old = spec[MEMBER_SCHOOL_OVERLAY_FIELD]
+        old_sha = hashlib.sha256(json.dumps(old, ensure_ascii=True, sort_keys=True,
+            separators=(",", ":")).encode()).hexdigest()
+        fields = {"format", "status", "activation_status", "native_acceptance", "operating_writes",
+                  "previous_overlay_sha256", "source_bindings", "receipt_bindings"}
+        if (old_sha != SAVED_REPORT_PREVIOUS_OVERLAY_SHA256 or not isinstance(marker, dict) or
+            set(marker) != fields or marker["format"] != "jungsi.saved-report-current-source-overlay/v1" or
+            marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or marker["activation_status"] != "NOT_RUN" or
+            marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0 or
+            marker["previous_overlay_sha256"] != SAVED_REPORT_PREVIOUS_OVERLAY_SHA256):
+            raise ValueError("saved report overlay envelope or previous receipt")
+        expected_receipts = {
+            name: {"historical_sha256": sha, "status": "NOT_RUN"}
+            for name, sha in SAVED_REPORT_RECEIPT_BASELINES.items()
+        }
+        if marker["receipt_bindings"] != expected_receipts:
+            raise ValueError("saved report receipt registrations")
+        supply = spec["current_public_supply_contract"]
+        historical = {
+            "current_public": supply["verification"],
+            "own_2027": supply["own_2027_batch_verification"],
+            "snapshot_batch": supply["snapshot_batch_verification"],
+            "current_page_projection": supply["current_page_projection_verification"],
+            "p1_selection": spec["p1_selection_bridge_review_verification"],
+        }
+        for name, value in historical.items():
+            actual = hashlib.sha256(json.dumps(value, ensure_ascii=True, sort_keys=True,
+                separators=(",", ":")).encode()).hexdigest()
+            if actual != SAVED_REPORT_RECEIPT_BASELINES[name]:
+                raise ValueError("saved report historical receipt changed")
+        pins = marker["source_bindings"]
+        if (not isinstance(pins, dict) or set(pins) != SAVED_REPORT_OVERLAY_PATHS or
+            any(not isinstance(sha, str) or not re.fullmatch(r"[a-f0-9]{64}", sha)
+                for sha in pins.values())):
+            raise ValueError("saved report overlay exact sources")
+        index = spec["workflow"]["documentation_sync"]["code_index"]
+        py_rows, edge_rows = index["files"], index["edge_sources"]["files"]
+        if not isinstance(py_rows, list) or not isinstance(edge_rows, list):
+            raise ValueError("saved report overlay indexes")
+        py = {row["path"]: row["source_sha256"] for row in py_rows}
+        edge = {row["path"]: row["source_sha256"] for row in edge_rows}
+        if len(py) != len(py_rows) or len(edge) != len(edge_rows):
+            raise ValueError("saved report overlay duplicate indexes")
+        harness = spec["edge_harness"]["files"]
+        if not isinstance(harness, dict):
+            raise ValueError("saved report overlay harness")
+        for path, sha in pins.items():
+            if path in SAVED_REPORT_SCRIPT_PATHS:
+                if py.get(path) != sha:
+                    raise ValueError("saved report overlay script index")
+            elif path in SAVED_REPORT_DATA_PATHS:
+                if path in py or path in edge:
+                    raise ValueError("saved report overlay data index")
+            elif path in SAVED_REPORT_HARNESS_PATHS:
+                if path in py or path in edge or                     harness.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+                    raise ValueError("saved report overlay harness-only index")
+            else:
+                if edge.get(path) != sha:
+                    raise ValueError("saved report overlay code index")
+                # Only paths already in the foundation are mandatory here. New
+                # source-only files do not acquire synthetic test membership.
+                if (path in SAVED_REPORT_EDGE_PATHS or path in harness) and \
+                    harness.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+                    raise ValueError("saved report overlay harness index")
+            if source_hashes is not None and source_hashes.get(path) != sha:
+                raise ValueError("saved report overlay snapshot")
+        return dict(pins)
+    except (KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise ValueError("saved report current-source overlay invalid") from exc
+
+def member_school_overlay(spec, source_hashes=None):
+    """Check all new source/index pins; absence preserves the prior validation path."""
+    saved = saved_report_overlay(spec, source_hashes)
+    marker = spec.get(MEMBER_SCHOOL_OVERLAY_FIELD)
+    if marker is None:
+        return None
+    try:
+        fields = {"format", "status", "activation_status", "native_acceptance",
+                  "operating_writes", "baseline_sha256", "source_bindings"}
+        if (not isinstance(marker, dict) or set(marker) != fields or
+            marker["format"] != "jungsi.member-school-current-source-overlay/v1" or
+            marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+            marker["activation_status"] != "NOT_RUN" or
+            marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+            type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0 or
+            marker["baseline_sha256"] != MEMBER_SCHOOL_BASELINES):
+            raise ValueError("overlay envelope")
+        base = {
+            "source_rebounds": spec["current_source_rebounds_20261113"],
+            "aux_rebounds": spec["current_aux_source_rebounds_20261113"],
+            "school_v2": spec["university_scoring_contract"]["scoped_reference_contract"]
+                ["verification_current_source_rebound_20261113_v2"],
+            "cancellation": spec["backend_platform_contract"]["university_cancellation_test_extension"],
+            "stage": spec["backend_platform_contract"]["stage_projection_source_extension"],
+        }
+        for key, value in base.items():
+            actual = hashlib.sha256(json.dumps(value, ensure_ascii=True, sort_keys=True,
+                separators=(",", ":")).encode()).hexdigest()
+            if actual != MEMBER_SCHOOL_BASELINES[key]:
+                raise ValueError("overlay historical receipt")
+        pins = marker["source_bindings"]
+        if (not isinstance(pins, dict) or set(pins) != MEMBER_SCHOOL_OVERLAY_PATHS or
+            any(not isinstance(v, str) or not re.fullmatch(r"[a-f0-9]{64}", v)
+                for v in pins.values())):
+            raise ValueError("overlay exact source set")
+        code_index = spec["workflow"]["documentation_sync"]["code_index"]
+        py_rows = code_index["files"]
+        edge_rows = code_index["edge_sources"]["files"]
+        if not isinstance(py_rows, list) or not isinstance(edge_rows, list):
+            raise ValueError("overlay code index")
+        py = {r["path"]: r["source_sha256"] for r in py_rows}
+        edge_index = {r["path"]: r["source_sha256"] for r in edge_rows}
+        if len(py) != len(py_rows) or len(edge_index) != len(edge_rows):
+            raise ValueError("overlay duplicated index")
+        edge = spec["edge_harness"]["files"]
+        for path, sha in pins.items():
+            effective = saved.get(path, sha) if saved is not None else sha
+            if path.startswith("scripts/"):
+                if py.get(path) != effective:
+                    raise ValueError("overlay python source index")
+            else:
+                if edge.get(path, {}).get("declarations", {}).get("source_sha256") != effective:
+                    raise ValueError("overlay edge source index")
+                if path.startswith("supabase/functions/") and edge_index.get(path) != effective:
+                    raise ValueError("overlay documentation source index")
+            if source_hashes is not None and source_hashes.get(path) != effective:
+                raise ValueError("overlay selected snapshot bytes")
+        return {path: saved.get(path, sha) if saved is not None else sha for path, sha in pins.items()}
+    except (KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise ValueError("member school current-source overlay invalid") from exc
+
+def member_school_effective_sha(spec, path, previous):
+    pins = member_school_overlay(spec)
+    saved = saved_report_overlay(spec)
+    if saved is not None and path in saved:
+        return saved[path]
+    return pins[path] if pins is not None and path in pins else previous
+
+def apply_member_school_overlay(spec, family, selected, source_hashes=None):
+    """Apply only fixed family paths to a detached registration, never its receipt."""
+    pins = member_school_overlay(spec, source_hashes)
+    if pins is None:
+        return selected
+    saved = saved_report_overlay(spec, source_hashes)
+    if saved is not None:
+        pins.update(saved)
+    value = copy.deepcopy(selected)
+    def bind_list(rows, expected):
+        if not isinstance(rows, list):
+            raise ValueError("overlay binding list")
+        seen = set()
+        for row in rows:
+            if not isinstance(row, dict) or set(row) != {"path", "sha256"}:
+                raise ValueError("overlay binding row")
+            path = row["path"]
+            if path in expected:
+                if path in seen or path not in pins:
+                    raise ValueError("overlay duplicate binding")
+                seen.add(path)
+                row["sha256"] = pins[path]
+        if seen != set(expected):
+            raise ValueError("overlay missing family binding")
+    if family == "member":
+        bind_list(value["verification"]["source_bindings"],
+                  {_MC, _MX, _MS, _MF} |
+                  ({_MB, _MJSON, _PUBLIC_CATALOG, _COMBINED_CATALOG, _SCHEMA, _PROFILE_REPORTS, _SCHEMA_FIXTURE} if saved is not None else set()))
+    elif family in ("auth", "current_page"):
+        bind_list(value["source_bindings"], {_MC} | ({_MB} if saved is not None and family == "current_page" else set()))
+    elif family == "read_view":
+        bind_list(value["verification"]["source_bindings"], {_MC})
+        if _MC not in value["runtime_test_bindings"]:
+            raise ValueError("overlay read-view runtime")
+        value["runtime_test_bindings"][_MC] = pins[_MC]
+    elif family == "req27":
+        if _MC not in value:
+            raise ValueError("overlay REQ-27 runtime")
+        value[_MC] = pins[_MC]
+        if saved is not None and _SCHEMA_FIXTURE in value:
+            value[_SCHEMA_FIXTURE] = pins[_SCHEMA_FIXTURE]
+    elif family == "school":
+        bind_list(value["source_bindings"], {_MU, _MC, _MX} |
+                  ({_PUBLIC_CATALOG, _SCHEMA, _ARTIFACTS, _SCHEMA_FIXTURE, _REF_PCT, _SAVED_TAIL, _NDP, _NSS} if saved is not None else set()))
+    elif family == "cancellation":
+        bind_list(value["source_bindings"], {_MU})
+    elif family == "stage":
+        bind_list(value["source_bindings"], {_MX} | ({_SCORE_INPUT} if saved is not None else set()))
+    elif family == "dev010_runtime_assembly":
+        if value["bindings"]["composition"]["path"] != _MC:
+            raise ValueError("overlay DEV-010 runtime")
+        value["bindings"]["composition"]["source_sha256"] = pins[_MC]
+    elif family == "native_seed":
+        # 11-14: the public schema pin moved check_edge_contract.py; bind its current bytes too.
+        bind_list(value["source_bindings"], {_MRUN} | ({_MSCAN} if saved is not None else set()))
+    else:
+        raise ValueError("overlay unknown family")
+    return value
+
 def select_current_source_rebound(spec, family, historical):
     """Return a checked copy for current source only; never edit historical receipt."""
     import copy
     marker = spec.get(CURRENT_SOURCE_REBOUND_FIELD)
     if marker is None:
+        if spec.get(MEMBER_SCHOOL_OVERLAY_FIELD) is not None:
+            member_school_overlay(spec)
         return historical
     if not isinstance(marker, dict) or set(marker) != {
         "format", "status", "activation_status", "native_acceptance", "operating_writes", "families"
@@ -95,10 +384,11 @@ def select_current_source_rebound(spec, family, historical):
     if not isinstance(edge, dict) or not isinstance(rows, list):
         raise ValueError("current source rebound source index")
     for path, sha in changes.items():
-        if edge.get(path, {}).get("declarations", {}).get("source_sha256") != sha:
+        effective = member_school_effective_sha(spec, path, sha)
+        if edge.get(path, {}).get("declarations", {}).get("source_sha256") != effective:
             raise ValueError("current source rebound edge source")
         matches = [row for row in rows if isinstance(row, dict) and row.get("path") == path]
-        if len(matches) != 1 or matches[0].get("source_sha256") != sha:
+        if len(matches) != 1 or matches[0].get("source_sha256") != effective:
             raise ValueError("current source rebound documentation index")
     current = copy.deepcopy(historical)
     def update_bindings(bindings):
@@ -131,7 +421,7 @@ def select_current_source_rebound(spec, family, historical):
             if path not in current or current[path] == sha:
                 raise ValueError("current source rebound REQ-27 path")
             current[path] = sha
-    return current
+    return apply_member_school_overlay(spec, family, current)
 
 ROOT=Path(__file__).resolve().parents[1]
 SPEC_PATH="docs/current/service_spec.json"
@@ -1149,7 +1439,11 @@ def school_reference_test_registration(spec):
     bindings=verification.get('source_bindings')
     if not isinstance(bindings,list):return set(),['School reference source/test registration invalid']
     try:
-        hashes={b['path']:b['sha256']for b in bindings}
+        hashes={b['path']:member_school_effective_sha(spec,b['path'],b['sha256']) for b in bindings}
+        overlay=member_school_overlay(spec)
+        if overlay is not None:hashes.update(overlay)
+        saved=saved_report_overlay(spec)
+        if saved is not None:hashes.update(saved)
         registered=school_reference_registration(spec,hashes)
         indexed={p:v.get('declarations',{}).get('source_sha256')for p,v in spec.get('edge_harness',{}).get('files',{}).items()}
         indexed.update({v['path']:v.get('source_sha256')for v in spec.get('workflow',{}).get('documentation_sync',{}).get('code_index',{}).get('edge_sources',{}).get('files',[])})
@@ -1634,7 +1928,7 @@ REFERENCE_DB_TEST_PATHS = (
     'tests/edge/test_saved_tail_version_cache.repro.synthetic.ts',
     'tests/edge/test_school_reference_science_filtered.synthetic.ts',
 )
-REFERENCE_DB_CASE_IDENTITY_SHA256 = 'e0ea311016b567801f852f32b24c56fda4bfc6bb8132d2d5a2c077ed7867ebb1'
+REFERENCE_DB_CASE_IDENTITY_SHA256 = '0f672c1b80b059c2cdf3bdfb0f01b7647edbbb726d78d3eee3160f265ba9c1bc'
 REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256 = '5a61fd9f6265ced0b3e598a4d79a6a24b1d2c8620cf89871b6b122a3fd03fb4e'
 
 
@@ -1653,7 +1947,7 @@ def reference_db_registration(spec, source_hashes=None):
         fields = {"format", "status", "test_paths", "case_names_by_path", "case_identity_sha256", "test_count", "baseline_foundation_count", "source_bindings", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
         if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.reference-db-tests/v1" or
             ext["status"] != "SOURCE_CANDIDATE_SYNTHETIC_ONLY" or ext["test_paths"] != list(REFERENCE_DB_TEST_PATHS) or
-            type(ext["test_count"]) is not int or ext["test_count"] != 199 or
+            type(ext["test_count"]) is not int or ext["test_count"] != 201 or
             type(ext["baseline_foundation_count"]) is not int or ext["baseline_foundation_count"] != 656 or
             ext["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or ext["activation_status"] != "NOT_RUN" or
             type(ext["operating_writes"]) is not int or ext["operating_writes"] != 0):
@@ -1670,10 +1964,13 @@ def reference_db_registration(spec, source_hashes=None):
         previous = {p:list(v) for p,v in cases.items() if p not in added_paths}
         previous['tests/edge/test_reference_percentile.ts'] = [v for v in previous['tests/edge/test_reference_percentile.ts'] if v != 'attendance remains required for reused and direct reference percentile paths']
         previous['tests/edge/test_reference_percentile_postgres.ts'] = [v for v in previous['tests/edge/test_reference_percentile_postgres.ts'] if v != 'reference DB receipt separately identifies expiry and a replaced head check']
+        # 2026-11-17 55PK chunked curve reader: two new cases in existing files
+        previous['tests/edge/test_chunked_reference_projection.synthetic.ts'] = [v for v in previous['tests/edge/test_chunked_reference_projection.synthetic.ts'] if v != 'pieces may total more than 125,000 rows; only the needed piece is read (2026-11-17)']
+        previous['tests/edge/test_chunked_runtime_wiring.synthetic.ts'] = [v for v in previous['tests/edge/test_chunked_runtime_wiring.synthetic.ts'] if v != 'catalog issuer reads only a piece listed with its exact length in the pinned index (2026-11-17)']
         old_digest = hashlib.sha256(json.dumps(previous,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
         if sum(map(len,previous.values())) != 178 or old_digest != REFERENCE_DB_PREVIOUS_CASE_IDENTITY_SHA256: raise ValueError("previous case identity")
         digest=hashlib.sha256(json.dumps(cases,ensure_ascii=True,sort_keys=True,separators=(",",":")).encode()).hexdigest()
-        if len(pairs)!=199 or len(set(pairs))!=199 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
+        if len(pairs)!=201 or len(set(pairs))!=201 or digest!=REFERENCE_DB_CASE_IDENTITY_SHA256 or ext["case_identity_sha256"]!=digest: raise ValueError("case identity")
         guard=ext["regression_test"]
         if (not isinstance(guard,dict) or set(guard)!={"path","sha256"} or guard["path"]!="tests/test_reference_db_suite_registration.py" or
             not re.fullmatch(r"[0-9a-f]{64}",str(guard["sha256"])) or source_hashes is not None and source_hashes.get(guard["path"])!=guard["sha256"]): raise ValueError("guard")
@@ -1849,13 +2146,14 @@ def university_cancellation_test_registration(spec, source_hashes=None):
             UNIVERSITY_CANCELLATION_TEST in cfg['tests'] or files[UNIVERSITY_CANCELLATION_TEST]['layer']!='verification' or
             files[UNIVERSITY_CANCELLATION_BASELINE_TEST]['declarations']['source_sha256']!=UNIVERSITY_CANCELLATION_BASELINE_SHA256):
             raise ValueError('foundation separation')
-        for b in expected:
+        current=apply_member_school_overlay(spec,'cancellation',ext,source_hashes)
+        for b in current['source_bindings']:
             p,h=b['path'],b['sha256']
             if files[p]['declarations']['source_sha256']!=h or source_hashes is not None and source_hashes.get(p)!=h:
                 raise ValueError('current source binding')
         implementations=[x for x in spec['implementation'] if x.get('path')==UNIVERSITY_CANCELLATION_TEST]
         if len(implementations)!=1 or implementations[0].get('layer')!='verification':raise ValueError('test registration')
-        return ext, []
+        return current, []
     except (KeyError,TypeError,ValueError,AttributeError):return None,[error]
 
 
@@ -2027,6 +2325,23 @@ def policy_baseline_source_matches(spec,path,digest,indexed):
     prior=c.get("prior_source_bindings",{})
     if not isinstance(prior,dict) or hashlib.sha256(json.dumps(prior,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=REQ27_BASELINE_SOURCE_MANIFEST_SHA256:return False
     if prior.get(path)==digest and c.get("current_source_bindings",{}).get(path)==indexed.get(path): return True
+    # These two source-only operation bindings predate the current member-results
+    # candidate. Keep their historical SHA in place, require the independently pinned
+    # school-reference receipt and current index, and never promote runtime/deployment.
+    if path == _MU:
+        try:
+            pins=member_school_overlay(spec)
+            school=spec['university_scoring_contract']['scoped_reference_contract']['verification_current_source_rebound_20261113_v2']
+            old=[r['sha256'] for r in school['source_bindings'] if r.get('path')==path]
+            ops=spec['supabase_deployment_contract']['live_execution']['operations']
+            if (pins is not None and old==[digest] and pins[path]==indexed.get(path) and
+                c.get('current_source_bindings',{}).get(path)==indexed.get(path) and
+                all(ops[name]['binding']['path']==path and ops[name]['binding']['source_sha256']==digest and
+                    ops[name]['native']=='NOT_RUN' and ops[name]['deployment']=='NOT_RUN'
+                    for name in ('university.analyze','candidates.build'))):
+                return True
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return False
     # The previous editor entrypoint is a fixed historical source, not a new deployment.
     history=spec.get("workflow",{}).get("development_harness",{}).get("reference_db_entrypoint_history_20261110",{})
     return (path=="supabase/functions/jungsi-api/index.ts" and digest=="ef68f227b04705681d2f269babad5688bd3558dab33e3a889574b1b09b6321b2" and
@@ -2072,7 +2387,8 @@ def stage_projection_guard_registration(spec):
             ext["authenticated_API_verified"] is not False or ext["rollout_approved"] is not False or
             type(ext["writes"]) is not int or ext["writes"]!=0 or backend.get("native_edge_v5_extension") is not None):
             raise ValueError("source-only boundary")
-        cfg=spec["edge_harness"];files=cfg["files"];rows=ext["source_bindings"]
+        current=apply_member_school_overlay(spec,"stage",ext)
+        cfg=spec["edge_harness"];files=cfg["files"];rows=current["source_bindings"]
         if (not isinstance(rows,list) or len(rows)!=len(STAGE_PROJECTION_SOURCE_PATHS) or
             any(not isinstance(x,dict) or set(x)!={"path","sha256"} for x in rows) or
             {x["path"]for x in rows}!=set(STAGE_PROJECTION_SOURCE_PATHS)):
@@ -2092,7 +2408,7 @@ def stage_projection_guard_registration(spec):
         if (cfg["unit_count"]!=656 or tests.count("tests/edge/test_score_input_policy.ts")!=1 or
             v["test_path"] in tests or view.count(v["test_path"])!=1):
             raise ValueError("disjoint foundation and additions")
-        return ext,[]
+        return current,[]
     except (KeyError,TypeError,ValueError,AttributeError):
         return None,[error]
 
@@ -2144,6 +2460,27 @@ def validate_score_input_native_guard(spec):
       "rollout_approved":False,
       "writes":0,
     }
+    if spec.get(SAVED_REPORT_OVERLAY_FIELD) is not None:
+        # Preserve the earlier NOT_RUN continuation byte-for-byte; register this
+        # exact current source as a separate NOT_RUN candidate, not native proof.
+        try:
+            previous_sha = hashlib.sha256(json.dumps(continuation, ensure_ascii=False,
+                sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            if previous_sha != "19a317541d5a758c5d4d701ddab706cb325d4f2ba10a900ad14a141eeb823d04":
+                return [error]
+            old_rows = [row for row in spec["backend_platform_contract"]["stage_projection_source_extension"]["source_bindings"]
+                        if row.get("path") == NATIVE_GUARD_SOURCE_PATH]
+            pins = saved_report_overlay(spec)
+            candidate = evidence.get("guard_saved_report_source_candidate_20261113")
+            candidate_expected = {**expected, "previous_continuation_sha256": previous_sha}
+            if (len(old_rows) != 1 or old_rows[0].get("sha256") != continuation.get("source_sha256") or
+                pins is None or pins.get(NATIVE_GUARD_SOURCE_PATH) != current or
+                not isinstance(candidate,dict) or candidate != candidate_expected or
+                type(candidate.get("writes")) is not int or candidate.get("writes") != 0):
+                return [error]
+            continuation = {key: candidate[key] for key in expected}
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return [error]
     if (not isinstance(current,str) or not re.fullmatch(r"[a-f0-9]{64}",current) or
         current!=indexed or current!=v5_bindings.get(NATIVE_GUARD_SOURCE_PATH) or
         set(continuation)!=set(expected) or continuation!=expected or
@@ -3495,7 +3832,7 @@ def select_aux_current_rebound(spec,family,historical):
             rows=[r for r in selected['source_bindings'] if isinstance(r,dict) and r.get('path')==path]
             if len(rows)!=1:raise ValueError('native seed source')
             rows[0]['sha256']=current
-        return selected
+        return apply_member_school_overlay(spec,family,selected)
     except (KeyError,TypeError,ValueError,AttributeError):
         raise ValueError('auxiliary current source rebound invalid')
 
@@ -4271,7 +4608,7 @@ PROFESSIONAL_TEST = 'supabase/functions/_shared/professional_'
 PROFESSIONAL_MIGRATION = 'database/migrations/007_professional_platform.prepared.sql'
 PROFESSIONAL_SOURCE_STATUS = 'CODE_REGISTERED_RUNTIME_NOT_ACTIVATED'
 PROFESSIONAL_GENERATED = PROFESSIONAL_APP + 'contract.generated.ts'
-PROFESSIONAL_ROUTES = {'pro.session': ('GET', '/api/v1/pro/session'), 'pro.student.list': ('GET', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.create': ('POST', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.update': ('PATCH', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.archive': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/archive'), 'pro.student.assign': ('PUT', '/api/v1/pro/organizations/{org_id}/students/{student_id}/assignments'), 'pro.member.list': ('GET', '/api/v1/pro/organizations/{org_id}/members'), 'pro.score.status': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status'), 'pro.score.create': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles'), 'pro.overall.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis'), 'pro.report.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports'), 'pro.report.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}'), 'pro.university.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis'), 'pro.candidates': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates'), 'pro.bookmark.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.add': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.report.export': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export'), 'pro.correction.grant': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections'), 'pro.retention.preview': ('POST', '/api/v1/pro/organizations/{org_id}/management/retention-preview'), 'pro.retention.notice-targets': ('GET', '/api/v1/pro/organizations/{org_id}/management/retention-notice-targets')}
+PROFESSIONAL_ROUTES = {'pro.session': ('GET', '/api/v1/pro/session'), 'pro.student.list': ('GET', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.create': ('POST', '/api/v1/pro/organizations/{org_id}/students'), 'pro.student.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.update': ('PATCH', '/api/v1/pro/organizations/{org_id}/students/{student_id}'), 'pro.student.archive': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/archive'), 'pro.student.assign': ('PUT', '/api/v1/pro/organizations/{org_id}/students/{student_id}/assignments'), 'pro.member.list': ('GET', '/api/v1/pro/organizations/{org_id}/members'), 'pro.score.status': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-input-status'), 'pro.score.create': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/score-profiles'), 'pro.overall.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/overall-analysis'), 'pro.report.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports'), 'pro.report.read': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}'), 'pro.university.analyze': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/university-analysis'), 'pro.candidates': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/candidates'), 'pro.bookmark.list': ('GET', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.add': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks'), 'pro.bookmark.remove': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/bookmarks/remove'), 'pro.report.export': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/reports/{report_id}/export'), 'pro.correction.grant': ('POST', '/api/v1/pro/organizations/{org_id}/students/{student_id}/management/score-input-corrections'), 'pro.retention.preview': ('POST', '/api/v1/pro/organizations/{org_id}/management/retention-preview'), 'pro.retention.notice-targets': ('GET', '/api/v1/pro/organizations/{org_id}/management/retention-notice-targets')}
 
 
 def professional_source_path(path):
@@ -4441,6 +4778,40 @@ def professional_service_section(spec):
     """Render the separately adopted professional contract without registering a live API."""
     c=spec.get('professional_service_contract')
     if not c:return ''
+    proposal = c.get('bookmark_removal_and_member_names_proposal_20261113')
+    proposal_section = ''
+    if proposal:
+        route = proposal['proposed_operation']
+        names = proposal['proposed_member_list_extension']
+        verification = proposal['verification']
+        observation = proposal.get('database_metadata_observation')
+        observation_section = ''
+        if observation:
+            observation_section = (
+                observation['source'] + '에서 존재를 확인한 항목은 '
+                + ', '.join(f'`{item}`' for item in observation['observed_present']) + '이다. '
+                + '조회 당시 존재하지 않은 객체는 '
+                + ', '.join(f'`{item}`' for item in observation['observed_absent']) + '이다. '
+                + observation['schema_version_pattern_result'] + '\n\n'
+            )
+        proposal_section = (
+            '\n\n### 전문가용 담은 학교 빼기 및 구성원 이름 제안\n\n'
+            f"등록된 API는 {proposal['registered_professional_operation_count']}개다. "
+            f"22번째 제안은 `{route['id']}` · `{route['method']} {route['path']}`이며 "
+            f"현재 {route['implementation']}이다. 담당 교사에게만 허용하고 요청 키와 BFF CSRF를 요구한다. "
+            + route['rule'] + '\n\n'
+            + f"`{names['operation']}`의 선택 필드 `{names['field']}`도 {names['implementation']}이다. "
+            + names['rule'] + '\n\n'
+            + table(['SQL 후보', 'SHA-256', '실행 역할', '선행 계약', '적용 상태'], [
+                [row['path'], row['sha256'], row['apply_as'], row['prerequisite'], row['status']]
+                for row in proposal['migrations']
+            ]) + '\n\n'
+            + observation_section
+            + f"{verification['environment']} {verification['passed_cases']}건 {verification['status']}. "
+            + verification['scope'] + '. '
+            + f"운영 활성화 {proposal['activation_status']} · 배포 {proposal['deployment_status']}.\n\n"
+            + proposal['owner_and_handoff']
+        )
     return ('\n\n## 정시터치 전문가용 · 기관 소유 학생 상담\n\n'+c['status']+
         '. 기존 개인용 배포와 독립된 확장 계약이다. 기관 DB/API 활성화·운영은 '+c['runtime_activation']+'이다.\n\n'+
         'DB 적용: '+c['DB_schema_application']+' / 별도 소스 등록: '+c.get('source_registration',{}).get('status','NOT_REGISTERED_CONTRACT_ONLY')+'. 합성 검수와 실제 운영 인수를 구분한다.\n\n'+
@@ -4452,7 +4823,7 @@ def professional_service_section(spec):
         c['counseling_tips']['student_specific']+' '+c['counseling_tips']['missing_basis']+'\n\n'+
         '파기는 학년도 공식 일정과 계약별 정확 명부·이전 해시·개별 승인 후 수행하며 현재 자동 작업/삭제는 없다. '+
         '[전문가용 서비스·DB 계약](전문가용_서비스_DB_계약.md)과 [별도 API 계약](professional_service_api_contract.json)을 따른다.\n\n'+
-        table(['담당','범위'],c['work_split'])+'\n\n'+c['next_steps'])
+        table(['담당','범위'],c['work_split'])+'\n\n'+c['next_steps']+proposal_section)
 
 
 def validate_professional_service_contract(spec):
@@ -4493,7 +4864,7 @@ def validate_professional_service_contract(spec):
             o.get('response_schema')not in c.get('DTOs',{}) or
             (o.get('method'),o.get('path'))!=PROFESSIONAL_ROUTES.get(o.get('id')) for o in candidates) or
         {o.get('id')for o in candidates}!=set(PROFESSIONAL_ROUTES)):
-        errors.append('Professional routes must match all21 separate tenant contracts')
+        errors.append('Professional routes must match all22 separate tenant contracts')
     for operation in candidates:
         request=operation.get('request',{})
         if (not isinstance(request,dict) or request.get('unknown_fields')!='reject' or
@@ -5612,9 +5983,31 @@ def foundation_graph_extension_errors(paths,read,spec):
         if not isinstance(regression,dict) or set(regression)!={"path","sha256"} or regression["path"]!="tests/test_foundation_graph_extension.py" or regression["path"] not in paths or hashlib.sha256(read(regression["path"])).hexdigest()!=regression["sha256"]:raise ValueError("regression")
         offline_test=ext["offline_cli_test"]
         if not isinstance(offline_test,dict) or set(offline_test)!={"path","sha256"} or offline_test["path"]!="tests/test_offline_graph_cli.py" or offline_test["path"] not in paths or hashlib.sha256(read(offline_test["path"])).hexdigest()!=offline_test["sha256"]:raise ValueError("offline test")
+        candidate=spec.get("edge_harness",{}).get("bound_graph_saved_report_candidate_20261113")
+        effective={}
+        if candidate is not None:
+            # Historical graph registration is immutable; this new pin does not
+            # carry forward a successful test, runtime, or deployment receipt.
+            sealed=hashlib.sha256(json.dumps(ext,ensure_ascii=True,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+            pins=saved_report_overlay(spec)
+            path="supabase/functions/_shared/current_public_catalog.ts"
+            expected_candidate={"format":"jungsi.foundation-graph-saved-report-source/v1",
+                "status":"SOURCE_REGISTERED_NOT_EXECUTED",
+                "historical_extension_sha256":"81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6",
+                "path":path,"previous_source_sha256":"2eb12c21b0e9edb85ac0d5cd25aa419b34037176573d38de6f345f38be55fe15",
+                "current_source_sha256":pins[path] if pins is not None else None,
+                "activation_status":"NOT_RUN","operating_writes":0}
+            if (sealed != "81ab643051826ab22f757ee14732be5c09bab7a9c89b8e8495589e50d38abad6" or not isinstance(candidate,dict) or
+                candidate != expected_candidate or type(candidate.get("operating_writes")) is not int or
+                candidate["operating_writes"] != 0 or ext["files"][path]["sha256"] != expected_candidate["previous_source_sha256"]):
+                raise ValueError("historical/current graph boundary")
+            effective[path]=candidate["current_source_sha256"]
+            # Sealed schema pin stays historical; the saved-report overlay carries current bytes.
+            if pins is not None and _SCHEMA in pins:
+                effective[_SCHEMA]=pins[_SCHEMA]
         for path in expected:
             row=ext["files"][path]
-            if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=row["sha256"]:raise ValueError("binding")
+            if not isinstance(row,dict) or set(row)!={"layer","sha256"} or row["layer"]!="application" or path not in paths or hashlib.sha256(read(path)).hexdigest()!=effective.get(path,row["sha256"]):raise ValueError("binding")
             impl=next(x for x in spec["implementation"] if x["path"]==path)
             if impl["layer"]!="application":raise ValueError("layer")
         return []
@@ -5748,7 +6141,7 @@ def service_candidate_layer(path):
 def service_candidate_suite_errors(paths, read, spec):
     """Require each separate synthetic suite and its pinned local closure; never suppress existing gates."""
     error = "Service candidate suite registration or local closure invalid"
-    prefixes = tuple("tests/" + name + "/" for name in SERVICE_CANDIDATE_GROUPS)
+    prefixes = tuple("tests/" + name + "/" for name in (*SERVICE_CANDIDATE_GROUPS, "budget_admission", "school_reflected"))
     names = set(paths)
     group_paths = {p for p in names if p.startswith(prefixes)}
     backend = spec.get("backend_platform_contract", {})
@@ -5756,6 +6149,25 @@ def service_candidate_suite_errors(paths, read, spec):
     if ext is None:
         return [error] if group_paths else []
     try:
+        overlay = backend.get("service_candidate_suite_source_overlay_20261113_v1")
+        if overlay is not None:
+            old_hash = hashlib.sha256(json.dumps(ext, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            if old_hash != "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9": raise ValueError("historical suite extension drift")
+            overlay_fields = {"format", "status", "historical_extension_sha256", "current_manifest", "additive_manifest", "wrapper", "regression_test", "native_acceptance", "activation_status", "operating_writes"}
+            if (not isinstance(overlay, dict) or set(overlay) != overlay_fields or
+                overlay["format"] != "jungsi.service-suite-source-overlay/v1" or overlay["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or
+                overlay["historical_extension_sha256"] != old_hash or overlay["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or
+                overlay["activation_status"] != "NOT_RUN" or type(overlay["operating_writes"]) is not int or overlay["operating_writes"] != 0):
+                raise ValueError("suite overlay status")
+            bound = {"current_manifest": ("tests/review_suite_manifest.20261114_budget_candidate.json", "94917dfc41b239cbd3bf86460cc36d14493995a0800a06ea7471482b3b3fc335"),
+                     "additive_manifest": ("tests/student_pk_additive_manifest.20261113_source_candidate.json", "25230102a6ede88ca5183f0edbc4919052a35e78f76e41c9acf3eecbabdc3215"),
+                     "wrapper": ("tests/test_service_candidate_suites.py", None), "regression_test": ("tests/test_service_candidate_registry.py", None)}
+            for key, (path, fixed) in bound.items():
+                item = overlay[key]
+                if (not isinstance(item, dict) or set(item) != {"path", "sha256"} or item["path"] != path or path not in names or
+                    not isinstance(item["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) or
+                    (fixed is not None and item["sha256"] != fixed) or hashlib.sha256(read(path)).hexdigest() != item["sha256"]):
+                    raise ValueError("suite overlay file")
         fields = {"format", "status", "manifest", "wrapper", "regression_test", "groups", "runtime_scope",
                   "native_acceptance", "activation_status", "operating_writes"}
         if (not isinstance(ext, dict) or set(ext) != fields or ext["format"] != "jungsi.service-candidate-suites/v1" or
@@ -5765,28 +6177,86 @@ def service_candidate_suite_errors(paths, read, spec):
         expected_files = {"manifest": "tests/review_suite_manifest.20261113_fmt.current.json", "wrapper": "tests/test_service_candidate_suites.py",
                           "regression_test": "tests/test_service_candidate_registry.py"}
         for key, path in expected_files.items():
-            item = ext[key]
+            item = overlay[key] if overlay is not None and key in {"wrapper", "regression_test"} else ext[key]
             if (not isinstance(item, dict) or set(item) != {"path", "sha256"} or item["path"] != path or path not in names or
                     not isinstance(item["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", item["sha256"]) or
                     hashlib.sha256(read(path)).hexdigest() != item["sha256"]): raise ValueError("bound guard file")
         expected_groups = {name: {"roots": roots, "test_count": count} for name, (roots, count, _) in SERVICE_CANDIDATE_GROUPS.items()}
         if ext["groups"] != expected_groups: raise ValueError("suite group metadata")
-        manifest = json.loads(read(expected_files["manifest"]))
+        manifest = json.loads(read(overlay["current_manifest"]["path"] if overlay is not None else expected_files["manifest"]))
+        groups = dict(SERVICE_CANDIDATE_GROUPS)
+        manual_reads = dict(SERVICE_CANDIDATE_MANUAL_READS)
+        fixtures = dict(SERVICE_CANDIDATE_SHARED_FIXTURES)
+        if overlay is not None:
+            add = json.loads(read(overlay["additive_manifest"]["path"]))
+            roots = ["tests/service_p1/test_student_pk_scoped.synthetic.ts", "tests/service_p1/test_current_guide_scoped.synthetic.ts"]
+            add_fields = {"format", "status", "roots", "case_count", "case_names", "config", "workflow", "files", "graphs", "layers", "native_acceptance", "activation_status", "operating_writes"}
+            if (not isinstance(add, dict) or set(add) != add_fields or add["format"] != "jungsi.student-pk-additive-suite-source/v1" or
+                add["status"] != "SOURCE_REGISTERED_NOT_EXECUTED" or add["roots"] != roots or type(add["case_count"]) is not int or add["case_count"] != 12 or
+                add["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE" or add["activation_status"] != "NOT_RUN" or
+                type(add["operating_writes"]) is not int or add["operating_writes"] != 0): raise ValueError("additive status")
+            workflow = add["workflow"]
+            if workflow != {"path": ".github/workflows/project-consistency.yml", "sha256": "f44b782193d2c9b7020f3755342ee631a5189dc1b119502a5857fdc4ef325c42"} or workflow["path"] not in names or hashlib.sha256(read(workflow["path"])).hexdigest() != workflow["sha256"]:
+                raise ValueError("additive workflow")
+            if set(add["case_names"]) != set(roots): raise ValueError("additive case roots")
+            for root, expected in zip(roots, (8, 4)):
+                source = read(root).decode("utf8")
+                declared = re.findall(r'Deno\.test\(\s*("(?:[^"\\]|\\.)*")\s*,', source)
+                if (len(declared) != expected or source.count("Deno.test(") != expected or
+                    [json.loads(x) for x in declared] != add["case_names"][root]): raise ValueError("additive test cases")
+            if add["config"] != manifest.get("config"): raise ValueError("additive config")
+            manifest = dict(manifest)
+            manifest["suites"] = dict(manifest["suites"])
+            manifest["suites"]["student_pk_additive"] = {"roots": roots, "expected_count": 12, "allowed_builtins": [],
+                "manual_read_files": [], "files": add["files"], "graphs": add["graphs"], "layers": add["layers"]}
+            groups["student_pk_additive"] = (roots, 12, [])
+            manual_reads["student_pk_additive"] = []
+            fixtures["student_pk_additive"] = frozenset()
+        budget = backend.get("budget_admission_source_registration_20261114_v1")
+        if budget is not None:
+            expected_budget = {'format': 'jungsi.budget-admission-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/usage_service.ts', 'source_sha256': 'ba976626044b8bcd35f203aa920a8a13a4f63cad56124d9acf0365c7e1f40f43', 'test_path': 'tests/budget_admission/test_usage_admission_race.synthetic.ts', 'test_sha256': 'a0b0082f32dc31f70c77a2d1924de9b3e845593101d13b6f99ceca11a98df898', 'case_count': 6, 'case_names': ['running admission cannot be cancelled before physical work finishes', 'concurrent cancellations share one failure settlement', 'post-rollback cleanup may settle a completed failure again', 'failed settlement remains eligible for rollback cleanup', 'concurrent cancellation shares delayed store failure and a later cleanup can retry', 'rolled-back successful settlement is compensated after the outer transaction'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
+            if budget != expected_budget or type(budget.get("case_count")) is not int or type(budget.get("operating_writes")) is not int:
+                raise ValueError("budget admission registration")
+            if budget["test_path"] not in names or budget["source_path"] not in names:
+                raise ValueError("budget admission source missing")
+            source_text = read(budget["test_path"]).decode("utf8")
+            declarations = ['Deno.test("' + value + '",' for value in budget["case_names"]]
+            positions = [source_text.find(value) for value in declarations]
+            if source_text.count("Deno.test(") != 6 or min(positions) < 0 or positions != sorted(set(positions)):
+                raise ValueError("budget admission case identities")
+            groups["budget_admission"] = ([budget["test_path"]], 6, [])
+            manual_reads["budget_admission"] = []
+            fixtures["budget_admission"] = frozenset({"tests/edge/fixture.ts"})
+        reflected = backend.get("school_reflected_reference_source_registration_20261114_v1")
+        if reflected is not None:
+            expected_reflected = {'format': 'jungsi.school-reflected-reference-source-registration/v1', 'status': 'SOURCE_REGISTERED_NOT_EXECUTED', 'source_path': 'supabase/functions/_shared/jungsi/application/school_reflected_reference.ts', 'source_sha256': 'e7c3afb3642241d19b5c164d2b215bfb08bed64b883e2810097fde2772fbf231', 'test_path': 'tests/school_reflected/test_school_reflected_reference.synthetic.ts', 'test_sha256': '4bb971e5d2b43366573e4d984b91a5e052c631e1cd585f00060b1afb97098891', 'case_count': 19, 'case_names': ['two inquiry subjects share the inquiry weight and English is excluded', 'best inquiry subject by percentile or by standard score', 'real zero is kept and unreflected areas are not required', 'missing reflected inputs wait instead of becoming zero', 'invalid rules and scores are rejected', 'eligibility note travels with the reference value', 'allowlist parses and rejects malformed rows', 'setting is optional and strict', 'attach adds values to analyses and nested candidate items only for allowed 2027 offerings', 'public schema keeps the field and rejects a wrong shape', 'eligibility conditions parse, attach to 2027 analyses only and reject malformed rows', 'public schema accepts eligibility_conditions and rejects unknown subject names', 'year cutoffs parse newest year first, attach to 2027 analyses only and reject malformed rows', 'year cutoff tags mark a combined-track release and the mean score component', 'public schema accepts year_cutoffs and rejects a malformed percent', 'reference percentile upper bound adds unscored mass above and equals the lower bound without it', 'reference candidates pass only a valid upper bound', 'public schema accepts the reference upper bound and rejects a malformed one', 'member saved results 015 reader switch keeps the reviewed SQL unless fn_v2'], 'native_acceptance': 'NOT_VERIFIED_BY_SOURCE_SUITE', 'activation_status': 'NOT_RUN', 'operating_writes': 0}
+            if reflected != expected_reflected:
+                raise ValueError("school reflected registration")
+            if reflected["test_path"] not in names or reflected["source_path"] not in names:
+                raise ValueError("school reflected source missing")
+            source_text = read(reflected["test_path"]).decode("utf8")
+            declarations = ['Deno.test("' + value + '",' for value in reflected["case_names"]]
+            positions = [source_text.find(value) for value in declarations]
+            if source_text.count("Deno.test(") != 19 or min(positions) < 0 or positions != sorted(set(positions)):
+                raise ValueError("school reflected case identities")
+            groups["school_reflected"] = ([reflected["test_path"]], 19, [])
+            manual_reads["school_reflected"] = []
+            fixtures["school_reflected"] = frozenset({"tests/edge/fixture.ts"})
         if manifest.get("format") != "jungsi.review-suite-closure/v2" or manifest.get("review_only") is not True:
             raise ValueError("manifest format")
         if manifest.get("runtime") != {"deno_sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33", "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"}:
             raise ValueError("runtime pin")
-        if set(manifest.get("suites", {})) != set(SERVICE_CANDIDATE_GROUPS): raise ValueError("suite names")
+        if set(manifest.get("suites", {})) != set(groups): raise ValueError("suite names")
         config = manifest.get("config")
         if (not isinstance(config, dict) or set(config) != {"path", "sha256"} or
                 config.get("path") != "supabase/functions/deno.json" or config.get("path") not in names or
                 not isinstance(config.get("sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", config["sha256"]) or
                 hashlib.sha256(read(config["path"])).hexdigest() != config["sha256"]): raise ValueError("suite config")
         union_tests = set()
-        for name, (roots, count, allowed) in SERVICE_CANDIDATE_GROUPS.items():
+        for name, (roots, count, allowed) in groups.items():
             suite = manifest["suites"][name]
             if (suite.get("roots") != roots or type(suite.get("expected_count")) is not int or suite["expected_count"] != count or
-                    suite.get("allowed_builtins") != allowed or suite.get("manual_read_files") != SERVICE_CANDIDATE_MANUAL_READS[name]):
+                    suite.get("allowed_builtins") != allowed or suite.get("manual_read_files") != manual_reads[name]):
                 raise ValueError("suite roots or count")
             sf, graphs, layers = suite["files"], suite["graphs"], suite["layers"]
             if not isinstance(sf, dict) or not isinstance(graphs, dict) or set(graphs) != set(roots): raise ValueError("suite graph")
@@ -5814,7 +6284,7 @@ def service_candidate_suite_errors(paths, read, spec):
                         src, dst = service_candidate_layer(source), service_candidate_layer(target)
                         if dst not in SERVICE_CANDIDATE_LAYERS.get(src, set()): raise ValueError("layer boundary")
                         layer_edges.add((src, dst))
-            if set(sf) != all_graph_files | set(SERVICE_CANDIDATE_MANUAL_READS[name]) | {"supabase/functions/deno.json"}:
+            if set(sf) != all_graph_files | set(manual_reads[name]) | {"supabase/functions/deno.json"}:
                 raise ValueError("closure coverage")
             for path, digest in sf.items():
                 q = PurePosixPath(path)
@@ -5826,11 +6296,13 @@ def service_candidate_suite_errors(paths, read, spec):
                         raise ValueError("generated route drift")
                 elif not re.fullmatch(r"[0-9a-f]{64}", digest) or hashlib.sha256(read(path)).hexdigest() != digest:
                     raise ValueError("closure source hash")
-                if path.startswith("tests/") and not path.startswith("tests/" + name + "/") and path not in SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset()):
+                suite_dir = "service_p1" if name == "student_pk_additive" else name
+                if path.startswith("tests/") and not path.startswith("tests/" + suite_dir + "/") and path not in fixtures.get(name, frozenset()):
                     raise ValueError("test scope")
                 if path.startswith(prefixes): union_tests.add(path)
-            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + name + "/")}
-            if extra_fixtures != set(SERVICE_CANDIDATE_SHARED_FIXTURES.get(name, frozenset())):
+            suite_dir = "service_p1" if name == "student_pk_additive" else name
+            extra_fixtures = {p for p in sf if p.startswith("tests/") and not p.startswith("tests/" + suite_dir + "/")}
+            if extra_fixtures != set(fixtures.get(name, frozenset())):
                 raise ValueError("exact shared fixture set")
             if layers["files"] != {p: service_candidate_layer(p) for p in sorted(sf)} or layers["observed_layer_edges"] != [list(x) for x in sorted(layer_edges)]:
                 raise ValueError("layer registry")

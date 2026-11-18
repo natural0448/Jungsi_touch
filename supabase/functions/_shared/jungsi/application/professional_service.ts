@@ -141,7 +141,7 @@ export class ProfessionalService {
       }
       this.routes.set(r.id, r);
     }
-    if (this.routes.size !== 21) throw new AccessError("professional_contract_unavailable", 503);
+    if (this.routes.size !== 22) throw new AccessError("professional_contract_unavailable", 503);
   }
   private fresh(r: ProfessionalExecution, deadline: bigint): bigint {
     const now = this.ports.clock.nowUtc();
@@ -617,12 +617,16 @@ export class ProfessionalService {
     if (op === "pro.member.list") {
       memberRole(a, ["org_admin"]);
       proShape(r.query, [], ["limit", "cursor"]);
+      const names = this.ports.authority.memberNames
+        ? await this.ports.authority.memberNames(a)
+        : {};
       const rows = (await this.ports.authority.members(a)).map((m) => ({
         member_id: m.memberId,
         subject_id: m.subjectId,
         role: m.role,
         status: m.active ? "active" : "inactive",
         version: m.version,
+        display_name: Object.hasOwn(names, m.memberId) ? names[m.memberId] : null,
       }));
       return this.response(scope, {
         org_id: a.contract.orgId,
@@ -674,6 +678,7 @@ export class ProfessionalService {
         "pro.university.analyze",
         "pro.candidates",
         "pro.bookmark.add",
+        "pro.bookmark.remove",
       ].includes(op)
     ) throw new AccessError("professional_student_archived", 409);
     if (op === "pro.student.read") return this.response(scope, studentDto(student));
@@ -906,6 +911,27 @@ export class ProfessionalService {
           scope,
           report,
           proId(body.offering_id),
+          this.policy.maxRosterRows,
+        ),
+      });
+    }
+    if (op === "pro.bookmark.remove") {
+      proShape(body, ["report_id", "offering_id"]);
+      const remove = this.ports.reports.removeBookmark;
+      if (!remove) throw new AccessError("professional_storage_unavailable", 503);
+      const report = await this.ports.reports.report(scope, proId(body.report_id));
+      if (!report) throw new AccessError("professional_report_not_found", 404);
+      // 담기와 달리 모집단위 승인 여부는 다시 묻지 않는다 — 빼기는 이미 담긴 항목만 대상으로 하고,
+      // 담겨 있지 않으면 저장소가 404 로 거절한다. 같은 요청 키 재전송은 상위 멱등 경로가 같은 결과를 돌려준다
+      return this.response(scope, {
+        org_id: a.contract.orgId,
+        student_id: student.studentId,
+        shortlist: await remove.call(
+          this.ports.reports,
+          scope,
+          report,
+          proId(body.offering_id),
+          crypto.randomUUID().replaceAll("-", ""),
           this.policy.maxRosterRows,
         ),
       });

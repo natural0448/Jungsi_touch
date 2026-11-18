@@ -66,6 +66,10 @@ import type { PlatformRepositoryPort } from "../application/platform_repository.
 import type { PreparedUsageAdmission } from "../application/usage_service.ts";
 import { isCommittedScoreRejection } from "./score_input_postgres.ts";
 import { ScoreInputService } from "../application/score_input_service.ts";
+import { attachSavedPageScores } from "../application/attach_saved_scores.ts";
+import { readSavedCandidateGroups } from "../application/member_saved_candidate_groups.ts";
+import { scoreMapPin } from "../application/score_map.ts";
+import { readSavedScoreMap, SavedScoreTransientUnavailable } from "./member_score_map_read.ts";
 import { SCORE_POLICY_OPERATION_IDS } from "../application/api_dispatch.ts";
 import type { ScoreInputWorkflowPort } from "../application/score_input_ports.ts";
 import { resultObject } from "../application/paid_result_components.ts";
@@ -75,12 +79,15 @@ import { PublicResponseProjection } from "../application/public_response.ts";
 import { REPORT_ACTION_OPERATIONS, ReportActionService } from "../application/report_actions.ts";
 import type { RequestClockPort } from "../application/ports.ts";
 import {
+  type MemberSchoolResultsWriterPort,
   UNIVERSITY_ANALYSIS_OPERATIONS,
   type UniversityAnalysisDataPort,
   UniversityAnalysisService,
 } from "../application/university_analysis.ts";
+import { projectMemberSchoolResultBatches } from "../application/member_school_results.ts";
+import { MemberSchoolResultsStorage } from "./member_school_results_storage.ts";
 import { utcText } from "../domain/time.ts";
-import { nativeJsonText } from "../domain/json_value.ts";
+import { nativeJsonSha256, nativeJsonText, type NativeObject } from "../domain/json_value.ts";
 import {
   API_REQUEST_STAGES,
   type ApiHttpPorts,
@@ -100,10 +107,22 @@ import { RelayBoundary, safeFailure } from "./auth_relay.ts";
 import { SupabaseForecastAuthorities, SupabaseManagementResources } from "./management_postgres.ts";
 import { type NativeDataProvider, NativeForecastInputs } from "./native_data_provider.ts";
 import { PublicJeongsiPassesReader } from "./public_passes.ts";
-import { VerifiedArtifactCache } from "./supabase_artifacts.ts";
+import { SupabaseArtifactClient, VerifiedArtifactCache } from "./supabase_artifacts.ts";
+import {
+  eligibilityConditionsEntry,
+  schoolReflectedEntry,
+  StorageEligibilityConditions,
+  StorageSchoolReflectedRules,
+  StorageYearCutoffs,
+  yearCutoffsEntry,
+} from "./school_reflected_allowlist.ts";
 import { PreparedSelectionCache } from "./native_source_selection.ts";
 import { NativeRuntimeRequest } from "./runtime_context.ts";
-import { PinnedSavedReferenceTailSource } from "./saved_reference_tail_source.ts";
+import {
+  PinnedSavedReferenceTailSource,
+  SavedTailRequestBudget,
+} from "./saved_reference_tail_source.ts";
+import { PinnedChunkedReferenceTailSource } from "./chunked_reference_tail_source.ts";
 import {
   referenceCandidateScopePort,
   referenceProjectionAuthorityPort,
@@ -420,6 +439,25 @@ export function runtimeAnalysisDataPort(
         REFERENCE_TAIL_REQUEST_BYTES,
       );
     })();
+  // 분할 곡선(카탈로그 tail_layout=chunked_index_v1): 색인을 읽고 학생 점수가 든 조각 하나만 읽는다
+  let chunkedTails: Promise<PinnedChunkedReferenceTailSource | null> | undefined;
+  const chunkedSource = () =>
+    chunkedTails ??= (async () => {
+      const data = (await context.data()) as TailCapable;
+      if (typeof data.referenceTailAuthority !== "function") return null;
+      const authority = data.referenceTailAuthority();
+      if (typeof (authority as { selectChunked?: unknown }).selectChunked !== "function") {
+        return null;
+      }
+      return new PinnedChunkedReferenceTailSource(
+        authority as ConstructorParameters<typeof PinnedChunkedReferenceTailSource>[0],
+        signal!,
+        REFERENCE_TAIL_REQUEST_OBJECTS,
+        REFERENCE_TAIL_REQUEST_BYTES,
+        (scopeSignal?: AbortSignal) => scopeSignal ?? signal!,
+        new SavedTailRequestBudget(REFERENCE_TAIL_REQUEST_OBJECTS, REFERENCE_TAIL_REQUEST_BYTES),
+      );
+    })();
   return {
     ...(signal
       ? {
@@ -429,6 +467,13 @@ export function runtimeAnalysisDataPort(
               await phase("percentile_provider", async () => {
                 const source = await tailSource();
                 return source ? await source.getReferenceTail(offeringId, scopeSignal) : null;
+              }),
+            getChunkedReferenceTail: async (offeringId: string, scopeSignal?: AbortSignal) =>
+              await phase("percentile_provider", async () => {
+                const source = await chunkedSource();
+                return source
+                  ? await source.getChunkedReferenceTail(offeringId, scopeSignal)
+                  : null;
               }),
             prefetchReferenceTails: async (
               offeringIds: readonly string[],
@@ -805,6 +850,9 @@ export class NativeRuntimeApi {
           headers: { "Cache-Control": "no-store" },
         });
       }
+      const ownedReportRead: {
+        last?: Awaited<ReturnType<PlatformRepositoryPort["getReport"]>>;
+      } = {};
       const platform: PlatformRepositoryPort = {
         replay: async (...a) =>
           await phase("platform_replay", async () => (await context.platform()).replay(...a)),
@@ -818,8 +866,14 @@ export class NativeRuntimeApi {
         },
         getProfile: async (...a) =>
           await phase("profile_read", async () => (await context.platform()).getProfile(...a)),
-        getReport: async (...a) =>
-          await phase("report_read", async () => (await context.platform()).getReport(...a)),
+        getReport: async (...a) => {
+          const value = await phase(
+            "report_read",
+            async () => (await context.platform()).getReport(...a),
+          );
+          ownedReportRead.last = value;
+          return value;
+        },
         getReportRevision: async (...a) => {
           const binding = await context.binding(), controls = await context.controls();
           const settle = controls.reserveExternalRead(binding.repositoryLimits.maxRecordBytes);
@@ -842,7 +896,10 @@ export class NativeRuntimeApi {
           return value;
         },
         activeReports: async (...a) =>
-          await phase("active_reports", async () => (await context.platform()).activeReports(...a)),
+          await phase(
+            "active_reports",
+            async () => (await context.activeReportsSource()).activeReports(...a),
+          ),
       };
       const data = runtimeAnalysisDataPort(context, phase, request.signal, true);
       const catalogContext = {
@@ -919,7 +976,98 @@ export class NativeRuntimeApi {
         },
       };
       const mode = { mode: "rights" as const, workflow };
-      const profiles = new ProfileReportService(platform, data, this.clock, mode);
+      const memberSchoolResults: MemberSchoolResultsWriterPort = {
+        stage: async (owner, profile, report, offerings) => {
+          const [binding, controls] = await Promise.all([context.binding(), context.controls()]);
+          const member = binding.memberJson;
+          if (!member) return null;
+          if (
+            typeof profile.scores.exam_id !== "string" ||
+            typeof profile.scores.pack_version !== "string"
+          ) {
+            throw new AccessError("storage_result_invalid", 503);
+          }
+          await context.assertCurrent();
+          const storage = new MemberSchoolResultsStorage({
+            projectUrl: binding.projectUrl,
+            bucket: binding.storage.bucket,
+            prefix: member.prefix,
+            secretKey: binding.storage.secretKey,
+            maxBytes: member.maxObjectBytes,
+            maxItems: Math.min(member.maxItems, 100),
+            timeoutMs: binding.storage.limits.requestTimeoutMs,
+          }, controls.fetcher);
+          const identity = Object.freeze({
+            owner,
+            academicYear: 2027,
+            reportId: report.report_id,
+            reportRevision: report.revision,
+            currentReportRevision: report.revision,
+            profileId: profile.profile_id,
+            profileFingerprint: await nativeJsonSha256(profile.scores),
+            examId: profile.scores.exam_id,
+            packVersion: profile.scores.pack_version,
+          });
+          const documents = await projectMemberSchoolResultBatches(
+            owner,
+            profile,
+            report,
+            offerings,
+            Math.min(member.maxItems, 100),
+            member.maxObjectBytes,
+          );
+          const refs: NativeObject[] = [];
+          // Keep storage traffic bounded and wait for the complete group before failing.
+          for (let i = 0; i < documents.length; i += 2) {
+            const group = await Promise.allSettled(
+              documents.slice(i, i + 2).map((document) => storage.create(identity, document)),
+            );
+            const failed = group.find((outcome) => outcome.status === "rejected");
+            if (failed && failed.status === "rejected") throw failed.reason;
+            for (const outcome of group) {
+              if (outcome.status !== "fulfilled") throw new AccessError("storage_unavailable", 503);
+              const ref = outcome.value;
+              refs.push({
+                object_key: ref.object_key,
+                sha256: ref.sha256,
+                bytes: ref.bytes,
+                source_report_revision: ref.source_report_revision,
+              });
+            }
+          }
+          await context.assertCurrent();
+          return refs;
+        },
+      };
+      // 학교 반영 참고백분위·지원 자격 조건(선택 설정). 설정이 없으면 기존 응답 그대로
+      const pinnedClient = async () => {
+        const [binding, controls] = await Promise.all([context.binding(), context.controls()]);
+        return new SupabaseArtifactClient(
+          { projectUrl: binding.projectUrl, ...binding.storage },
+          controls.fetcher,
+        );
+      };
+      const reflected = new StorageSchoolReflectedRules(
+        schoolReflectedEntry(this.config.environment),
+        pinnedClient,
+      );
+      const eligibility = new StorageEligibilityConditions(
+        eligibilityConditionsEntry(this.config.environment),
+        pinnedClient,
+      );
+      const yearCutoffs = new StorageYearCutoffs(
+        yearCutoffsEntry(this.config.environment),
+        pinnedClient,
+      );
+      const profiles = new ProfileReportService(
+        platform,
+        data,
+        this.clock,
+        mode,
+        reflected,
+        eligibility,
+        yearCutoffs,
+      );
       const actions = new ReportActionService(platform, catalog, this.clock);
       const universities = new UniversityAnalysisService(
         platform,
@@ -932,6 +1080,7 @@ export class NativeRuntimeApi {
         null,
         // Existing approved selection remains the fallback only when the new factory is unselected.
         () => referenceCandidateScopePort(context),
+        memberSchoolResults,
       );
       let inputAdmission: PreparedUsageAdmission | undefined;
       let currentPageBudget: RuntimeRequestBudget | undefined;
@@ -1205,7 +1354,85 @@ export class NativeRuntimeApi {
             if (this.config.readViewExtensions && !this.config.candidateCatalog) {
               throw new AccessError("security_policy_unavailable", 503);
             }
-            return await catalog.execute(r);
+            const result = await catalog.execute(r);
+            if (
+              r.operation !== "offerings.search" || !selectedCatalog || r.session.tier !== "paid"
+            ) {
+              return result;
+            }
+            if (!boundary?.admission || boundary.signal.aborted) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            const scoreBoundary = boundary;
+            const budget = await context.budget();
+            const assertActive = () => {
+              if (scoreBoundary.signal.aborted) {
+                throw new AccessError("security_policy_unavailable", 503);
+              }
+              budget.assertRunAdmission(
+                scoreBoundary.admission as PreparedUsageAdmission,
+                r,
+                "active",
+              );
+            };
+            assertActive();
+            return await attachSavedPageScores(
+              result,
+              r.session,
+              this.clock,
+              scoreBoundary.signal,
+              {
+                read: async (session, year, ids, signal) => {
+                  assertActive();
+                  const exams = [...budget.policy.exams.values()].filter((exam) =>
+                    exam.academicYear === year &&
+                    (r.query.exam_id === undefined || exam.examId === r.query.exam_id)
+                  );
+                  if (exams.length !== 1 || !budget.policy.operating) {
+                    return { state: "unavailable" };
+                  }
+                  const selected = budget.policy.operating.context(
+                    session,
+                    exams[0].examId,
+                    r.query.stage,
+                    this.clock.nowUtc(),
+                    false,
+                  );
+                  if (selected.stage.academicYear !== year) return { state: "unavailable" };
+                  const state = await (await context.scoreInputs()).state(selected, signal);
+                  assertActive();
+                  if (!state.currentProfileId) return { state: "no_profile" };
+                  const binding = await context.binding();
+                  const pin = await scoreMapPin(binding.references);
+                  assertActive();
+                  const controls = await context.controls();
+                  const settle = controls.reserveExternalRead(
+                    binding.repositoryLimits.maxRecordBytes,
+                  );
+                  try {
+                    const values = await readSavedScoreMap(sql(), {
+                      owner: session.user.subjectId,
+                      profileId: state.currentProfileId,
+                      dataPin: pin,
+                      signal,
+                      assertActive,
+                    }, ids);
+                    assertActive();
+                    settle(
+                      new TextEncoder().encode(JSON.stringify([...values.entries()])).byteLength,
+                    );
+                    return { state: "ready", scores: values };
+                  } catch (error) {
+                    assertActive();
+                    requirePaidSession(session, this.clock.nowUtc());
+                    if (error instanceof SavedScoreTransientUnavailable) {
+                      return { state: "unavailable" };
+                    }
+                    throw error;
+                  }
+                },
+              },
+            );
           }
           if (REPORT_ACTION_OPERATIONS.some((id) => id === r.operation)) {
             if (r.operation === "shortlist.update") selectedCatalog?.prepareSelection(r);
@@ -1260,6 +1487,7 @@ export class NativeRuntimeApi {
                 mode,
                 null,
                 enabled.candidateScope,
+                memberSchoolResults,
               );
             } else if (referenceFailed || activeReference) {
               // A failed authority or an active factory without candidate scope must never fall back to legacy reference data.
@@ -1272,6 +1500,7 @@ export class NativeRuntimeApi {
                 mode,
                 null,
                 null,
+                memberSchoolResults,
               );
             }
             return await selectedUniversities.execute(r, boundary);
@@ -1279,7 +1508,186 @@ export class NativeRuntimeApi {
           if (FORECAST_OPERATIONS.some((id) => id === r.operation)) {
             return await forecasts.execute(r);
           }
-          return await profiles.execute(r);
+          const reportResult = await profiles.execute(r);
+          if (
+            r.operation !== "report.read" || r.session.tier !== "paid" || !selectedCatalog ||
+            !selectedCatalog.selectedSavedGuideOfferings ||
+            !this.config.memberShortlistExtensions ||
+            !resultObject(reportResult.analyses) || !Object.keys(reportResult.analyses).length
+          ) return reportResult;
+          const previousCandidates = reportResult.candidates;
+          if (previousCandidates !== null) {
+            if (!resultObject(previousCandidates) || previousCandidates.status !== "pending") {
+              return reportResult;
+            }
+            const arrays = [
+              "basic_university_groups",
+              "wildcards",
+              "pending_offerings",
+              "outside_offerings",
+              "ineligible_offerings",
+            ];
+            const required = ["status", "reason_code", "catalog_version", ...arrays];
+            const allowed = new Set([
+              ...required,
+              "reference_university_groups",
+              "wildcard_selection",
+            ]);
+            if (
+              required.some((name) => !Object.hasOwn(previousCandidates, name)) ||
+              Object.keys(previousCandidates).some((name) => !allowed.has(name)) ||
+              arrays.some((name) => {
+                const value = previousCandidates[name];
+                return !Array.isArray(value) || value.length !== 0;
+              }) ||
+              ![
+                null,
+                "approved_candidates_missing",
+                "current_saved_assessment_missing",
+                "saved_assessment_missing",
+              ]
+                .includes(previousCandidates.reason_code as string | null) ||
+              (previousCandidates.catalog_version !== null &&
+                typeof previousCandidates.catalog_version !== "string") ||
+              (Object.hasOwn(previousCandidates, "reference_university_groups") &&
+                (!Array.isArray(previousCandidates.reference_university_groups) ||
+                  previousCandidates.reference_university_groups.length !== 0)) ||
+              (Object.hasOwn(previousCandidates, "wildcard_selection") &&
+                previousCandidates.wildcard_selection !== null)
+            ) return reportResult;
+          }
+          const selectSavedGuide = selectedCatalog.selectedSavedGuideOfferings;
+          if (!selectSavedGuide) return reportResult;
+          if (!boundary?.admission || boundary.signal.aborted) {
+            throw new AccessError("security_policy_unavailable", 503);
+          }
+          const reportBoundary = boundary;
+          const budget = await context.budget();
+          const assertActive = () => {
+            if (reportBoundary.signal.aborted) {
+              throw new AccessError("security_policy_unavailable", 503);
+            }
+            budget.assertRunAdmission(
+              reportBoundary.admission as PreparedUsageAdmission,
+              r,
+              "active",
+            );
+            requirePaidSession(r.session, this.clock.nowUtc());
+          };
+          assertActive();
+          const record = ownedReportRead.last;
+          if (
+            !record || record.owner_id !== r.session.user.subjectId ||
+            record.report_id !== reportResult.report_id ||
+            record.profile_id !== reportResult.profile_id ||
+            record.revision !== reportResult.report_version
+          ) throw new AccessError("storage_result_invalid", 503);
+          if (
+            !resultObject(record.body) || !resultObject(record.body.analyses) ||
+            !resultObject(record.body.overall)
+          ) return reportResult;
+          const overall = record.body.overall;
+          if (!resultObject(overall.exam)) return reportResult;
+          const exam = overall.exam;
+          const year = exam.academic_year,
+            examId = exam.exam_id,
+            packVersion = overall.pack_version;
+          if (
+            typeof year !== "number" || ![2024, 2025, 2026, 2027].includes(year) ||
+            typeof examId !== "string" || typeof packVersion !== "string"
+          ) return reportResult;
+          const approvedExam = budget.policy.exams.get(examId);
+          if (
+            !approvedExam || approvedExam.academicYear !== year ||
+            approvedExam.packVersion !== packVersion
+          ) {
+            return reportResult;
+          }
+          const savedCatalog = record.body.catalog_version;
+          // Legacy snapshots without a current-head binding remain unchanged.
+          if (typeof savedCatalog !== "string" || !savedCatalog.startsWith("current:")) {
+            return reportResult;
+          }
+          if (
+            resultObject(previousCandidates) && previousCandidates.catalog_version !== null &&
+            previousCandidates.catalog_version !== savedCatalog
+          ) return reportResult;
+          const binding = await context.binding(), controls = await context.controls();
+          if (!binding.memberJson) return reportResult;
+          const limit = Math.min(
+            100,
+            binding.memberJson.maxItems,
+            binding.repositoryLimits.maxBatchIds,
+          );
+          if (!Number.isSafeInteger(limit) || limit < 1) {
+            throw new AccessError("security_policy_unavailable", 503);
+          }
+          const allIds = Object.keys(record.body.analyses).sort(), prefix = `${year}:`;
+          const ids = [
+            ...allIds.filter((id) => id.startsWith(prefix)),
+            ...allIds.filter((id) => !id.startsWith(prefix)),
+          ].slice(0, limit);
+          if (!ids.length) return reportResult;
+          if (!ids.some((id) => id.startsWith(prefix) && id.length > prefix.length)) {
+            return reportResult;
+          }
+          await context.assertCurrent(reportBoundary.signal);
+          assertActive();
+          const maximum = binding.repositoryLimits.maxRecordBytes;
+          const settleGuide = controls.reserveExternalRead(maximum);
+          const selected = await selectSavedGuide.call(
+            selectedCatalog,
+            r.session.user.subjectId,
+            year,
+            ids,
+            { signal: reportBoundary.signal, maxBytes: maximum, assertActive, settle: settleGuide },
+          );
+          assertActive();
+          if (selected.version === null) return reportResult;
+          if (selected.version !== savedCatalog) return reportResult;
+          const results = await context.memberResults();
+          assertActive();
+          const resultsMaximum = maximum * 3 + 8192;
+          if (!Number.isSafeInteger(resultsMaximum)) {
+            throw new AccessError("security_policy_unavailable", 503);
+          }
+          const settleResults = controls.reserveExternalRead(resultsMaximum);
+          const candidates = await readSavedCandidateGroups(
+            r.session,
+            year,
+            [...selected.rows.values()],
+            selected.version,
+            results,
+            this.clock,
+            reportBoundary.signal,
+            {
+              reportId: record.report_id,
+              revision: record.revision,
+              profileId: record.profile_id,
+              examId,
+              packVersion,
+            },
+            ids,
+          );
+          assertActive();
+          // The SQL reader bounds each saved object; reserve the full bound without a refund.
+          settleResults(resultsMaximum);
+          const settleCurrent = controls.reserveExternalRead(4096);
+          const current = await sql().read(r.session.user.subjectId, async (tx) =>
+            await tx.query(
+              `SELECT 'ok'::text FROM jungsi_backend.reports
+               WHERE owner_id=$1 AND report_id=$2 AND profile_id=$3 AND revision=$4::bigint`,
+              [r.session.user.subjectId, record.report_id, record.profile_id, record.revision],
+              reportBoundary.signal,
+            ), reportBoundary.signal);
+          assertActive();
+          if (current.length !== 1 || current[0].length !== 1 || current[0][0] !== "ok") {
+            throw new AccessError("revision_conflict", 409);
+          }
+          settleCurrent(new TextEncoder().encode(JSON.stringify(current)).byteLength);
+          await context.assertCurrent(reportBoundary.signal);
+          assertActive();
+          return { ...reportResult, candidates };
         },
       };
       const handler = createApiHandler(requestPolicies, {

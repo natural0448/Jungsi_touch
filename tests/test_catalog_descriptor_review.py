@@ -12,17 +12,19 @@ TEST_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_review
 SOURCE_PATH = "supabase/functions/_shared/current_public_catalog_descriptor_review.ts"
 BRIDGE_PATH = "tests/test_catalog_descriptor_review.py"
 EXPECTED_CASES = 21
-GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261113_fmt.current.json"
-GRAPH_MANIFEST_SHA256 = "4af47ec7ca92a1108ce55dc9b8c0514d9886dc7f8e5a223b4a03390305b0849d"
+GRAPH_MANIFEST_PATH = "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json"
+GRAPH_MANIFEST_SHA256 = "05640c712027db4836d6b7154ac1df0c3d4ef0894eb5072ab2aad9e17a6629e8"
 BASE_COMMIT = "125d112edcf8100d201487c9157a0d5c702c58e8"
 SCANNER_PATH = "scripts/check_edge_contract.py"
-SCANNER_SHA256 = "ee123870172124a28f4f0aa3f6ee4517e49e6747d33fdd27580137777a93392e"
+SCANNER_SHA256 = "406161ad3925ea3096a4e710070ffac828a151486b45a4d6ff7183073b728f1e"
 SUPPORT_PATH = "tests/test_service_candidate_suites.py"
-SUPPORT_SHA256 = "d3aeda27b3e8dc6163138f8471fd5b5bea7c208a0425453aff86b1a6c4ee03b7"
+SUPPORT_SHA256 = "830059a26c63ddd7c60d0ce8f498d1e243239f3d7b81429ced1cfe09f98524f0"
 
 
 DESCRIPTOR_HISTORY_SHA256 = "b9bc0b9ed14764382488d3d14862b0ae2a64bf4ee6b4960634da1d40f7d6c1b0"
-DESCRIPTOR_CURRENT_KEY = "descriptor_rebind_review_current_source_20261113"
+DESCRIPTOR_PREVIOUS_KEY = "descriptor_rebind_review_current_source_20261113"
+DESCRIPTOR_PREVIOUS_SHA256 = "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b"
+DESCRIPTOR_CURRENT_KEY = "descriptor_rebind_review_saved_report_source_20261113"
 
 
 def current_descriptor_contract(spec):
@@ -32,21 +34,27 @@ def current_descriptor_contract(spec):
     supply = spec["current_public_supply_contract"]
     historical = supply["descriptor_rebind_review"]
     marker = supply[DESCRIPTOR_CURRENT_KEY]
+    previous_digest = hashlib.sha256(json.dumps(
+        supply[DESCRIPTOR_PREVIOUS_KEY], ensure_ascii=True, sort_keys=True, separators=(",", ":")
+    ).encode()).hexdigest()
     digest = hashlib.sha256(json.dumps(
         historical, ensure_ascii=True, sort_keys=True, separators=(",", ":")
     ).encode()).hexdigest()
     expected = {
         "format", "status", "activation_status", "native_acceptance", "operating_writes",
-        "historical_sha256", "graph_manifest_path", "graph_manifest_sha256", "bridge_sha256",
+        "historical_sha256", "previous_registration_sha256",
+        "graph_manifest_path", "graph_manifest_sha256", "bridge_sha256",
     }
     if (not isinstance(marker, dict) or set(marker) != expected
-        or marker["format"] != "jungsi.catalog-descriptor-current-source-rebound/v1"
+        or marker["format"] != "jungsi.catalog-descriptor-current-source-rebound/v2"
         or marker["status"] != "SOURCE_REGISTERED_NOT_EXECUTED"
         or marker["activation_status"] != "NOT_RUN"
         or marker["native_acceptance"] != "NOT_VERIFIED_BY_SOURCE_SUITE"
         or type(marker["operating_writes"]) is not int or marker["operating_writes"] != 0
         or marker["historical_sha256"] != DESCRIPTOR_HISTORY_SHA256
         or digest != DESCRIPTOR_HISTORY_SHA256
+        or marker["previous_registration_sha256"] != DESCRIPTOR_PREVIOUS_SHA256
+        or previous_digest != DESCRIPTOR_PREVIOUS_SHA256
         or marker["graph_manifest_path"] != GRAPH_MANIFEST_PATH
         or marker["graph_manifest_sha256"] != GRAPH_MANIFEST_SHA256
         or not isinstance(marker["bridge_sha256"], str)

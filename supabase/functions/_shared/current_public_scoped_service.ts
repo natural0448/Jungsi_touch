@@ -3,7 +3,7 @@ import { AccessError } from "./jungsi/application/access.ts";
 import type { ApiExecution } from "./jungsi/application/api_dispatch.ts";
 import type { CatalogDataPort } from "./jungsi/application/catalog.ts";
 import type { RequestClockPort } from "./jungsi/application/ports.ts";
-import type { NativeObject } from "./jungsi/domain/json_value.ts";
+import { nativeJsonSha256, type NativeObject } from "./jungsi/domain/json_value.ts";
 import {
   type CurrentPublicCatalogPort,
   CurrentPublicCatalogService,
@@ -46,6 +46,18 @@ export class CurrentPublicSearchScopedService extends ObservedCurrentPublicCatal
       return super.execute(request);
     }
     return this.scopedTrace.operation(request.operation, async () => {
+      const { exam_id, stage, ...catalogQuery } = request.query;
+      if (request.operation === "offerings.search") {
+        if (exam_id !== undefined && !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(exam_id)) {
+          throw new AccessError("invalid_query", 422);
+        }
+        if (stage !== undefined && !["mock", "provisional", "final"].includes(stage)) {
+          throw new AccessError("invalid_query", 422);
+        }
+      }
+      const catalogRequest = request.operation === "offerings.search"
+        ? { ...request, query: catalogQuery }
+        : request;
       let pinned: PublicCatalogPublication | null = null;
       const observed = observeCurrentCatalog(this.scopedCurrent, this.scopedTrace);
       const current: CurrentPublicCatalogPort = {
@@ -71,9 +83,15 @@ export class CurrentPublicSearchScopedService extends ObservedCurrentPublicCatal
       let cursor: CurrentPublicBoundCursor | undefined;
       const activeCursor = () =>
         cursor ??= new CurrentPublicBoundCursor(this.secret(), this.existing, this.scopedClock);
+      const bindScoreContext = async (binding: Parameters<PublicCatalogCursorPort["seal"]>[0]) => {
+        if (request.operation !== "offerings.search" || (exam_id === undefined && stage === undefined)) {
+          return binding;
+        }
+        return { ...binding, query: await nativeJsonSha256([binding.query, exam_id ?? null, stage ?? null]) };
+      };
       const lazy: PublicCatalogCursorPort = {
-        seal: (...args) => activeCursor().seal(...args),
-        open: (...args) => activeCursor().open(...args),
+        seal: async (binding, head, after) => activeCursor().seal(await bindScoreContext(binding), head, after),
+        open: async (token, binding, now) => activeCursor().open(token, await bindScoreContext(binding), now),
       };
       const service = new CurrentPublicCatalogService(
         this.scopedData,
@@ -81,7 +99,7 @@ export class CurrentPublicSearchScopedService extends ObservedCurrentPublicCatal
         this.scopedClock,
         lazy,
       );
-      const result = await service.execute(request);
+      const result = await service.execute(catalogRequest);
       cursor?.assertUnexpired();
       if (
         request.operation === "offerings.search" && this.scoreMap && Array.isArray(result.items)

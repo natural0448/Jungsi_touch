@@ -1,7 +1,7 @@
 {
   "format": "jungsi.presentation-routes/v1",
-  "spec_version": "1.9.176",
-  "source_sha256": "22ff6df163ef23ade96a3459eb0189ec52e26a47eb2420ec600d976404c25542",
+  "spec_version": "1.9.177",
+  "source_sha256": "44841d564d38eaf17f6190a6d6cb0560fe4c6ec352e345c5641ffeba5aba3202",
   "pages": [
     {
       "id": "PAGE-01",
@@ -448,6 +448,8 @@
         "body": [],
         "query": [
           "academic_year (2024~2027 선택)",
+          "exam_id (선택; 본인 저장 점수의 승인 시험 식별자)",
+          "stage (선택; 해당 시험의 승인된 입력 단계)",
           "university_q",
           "department_q",
           "region",
@@ -455,7 +457,7 @@
           "cursor",
           "limit (1~100; 기본 50)"
         ],
-        "response": "catalog_search (items=offering)",
+        "response": "catalog_search (items=offering; 본인 조회가 허용된 저장 점수 my_score는 선택 필드)",
         "idempotency_key_required": false,
         "response_schema": "catalog_search"
       },

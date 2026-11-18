@@ -67,6 +67,7 @@ function input(operation: string): NativeObject {
     },
     "pro.candidates": { profile_id: PROFILE, expected_profile_version: PROFILE, filters: {} },
     "pro.bookmark.add": { report_id: REPORT, offering_id: "SYNTHETIC-offering" },
+    "pro.bookmark.remove": { report_id: REPORT, offering_id: "SYNTHETIC-offering" },
     "pro.report.export": { revision_id: 1 },
     "pro.correction.grant": {
       exam_id: "SYNTHETIC-mock",
@@ -91,6 +92,24 @@ for (const route of PROFESSIONAL_CONTRACT.routes) {
       f = await fixture(admin ? "org_admin" : "teacher");
     if (route.id === "pro.correction.grant" || route.id.startsWith("pro.retention.")) {
       f.f.accountRole = "admin";
+    }
+    if (route.id === "pro.bookmark.remove") {
+      // 빼기는 이미 담긴 학교만 대상이다(담겨 있지 않으면 404). 공용 합성 고정본은 그대로 두고 여기서만 붙인다
+      f.ports.reports.removeBookmark = async (_s, _r, offering) => {
+        await Promise.resolve();
+        if (!f.f.bookmarks[offering]) {
+          throw new AccessError("professional_bookmark_not_found", 404);
+        }
+        delete f.f.bookmarks[offering];
+        return f.f.bookmarks;
+      };
+      f.f.bookmarks["SYNTHETIC-offering"] = {
+        selected: true,
+        changed_at: utcText(NOW),
+        assessment_status: "needs_revalidation",
+        profile_id: PROFILE,
+        catalog_version: null,
+      };
     }
     if (route.id === "pro.score.create") {
       f.f.states.clear();

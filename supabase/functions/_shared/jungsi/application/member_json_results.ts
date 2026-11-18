@@ -21,6 +21,7 @@ export interface MemberSavedResultsPort {
     ids: readonly string[],
     reportId: string | null,
     revision?: number,
+    signal?: AbortSignal,
   ): Promise<
     {
       readonly context: MemberAssessmentContext;
@@ -36,12 +37,13 @@ export class MemberJsonResults {
     ids: readonly string[],
     reportId: string | null,
     revision?: number,
+    signal?: AbortSignal,
   ) {
     if (
       !Number.isSafeInteger(this.maxIds) || this.maxIds < 1 || ids.length > this.maxIds ||
       new Set(ids).size !== ids.length
     ) throw new AccessError("storage_result_invalid", 503);
-    const value = await this.saved.read(owner, year, ids, reportId, revision);
+    const value = await this.saved.read(owner, year, ids, reportId, revision, signal);
     if (value === null) {
       if (reportId !== null) throw new AccessError("report_not_found", 404);
       return {

@@ -82,9 +82,9 @@ Deno.test("UTC microsecond and millisecond deadline are exclusive; invalid clock
   }
   for (const v of [null, -1n, 0, NaN]) equal(admissionMicros(v), "invalid_clock");
 });
-Deno.test("all 21 professional routes stop after relay and before settings pool and work", async () => {
+Deno.test("all 22 professional routes stop after relay and before settings pool and work", async () => {
   const f = runtimes(() => END);
-  equal(PROFESSIONAL_CONTRACT.routes.length, 21);
+  equal(PROFESSIONAL_CONTRACT.routes.length, 22);
   for (const route of PROFESSIONAL_CONTRACT.routes) {
     const path = "/functions/v1/jungsi-pro-api" + route.path.replace(/\{[^}]+\}/g, "SYNTHETIC-id");
     await ended(await f.pro.fetch(req(path, route.method)));
