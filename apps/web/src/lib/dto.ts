@@ -259,7 +259,18 @@ export interface YearCutoffDto {
 }
 
 /** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
+/** 지원 판정 7단계(서버 band, 정책 20261118.relative-band-15-30.v1). 예상 합격권 폭에 대한 상대 위치 */
+export type BandCode = "stable" | "downward" | "target" | "aspirational" | "upward" | "challenge" | "outside";
+export interface BandDto {
+  code: BandCode;
+  label: string;
+  policy_version: string;
+  base_code?: BandCode;
+}
+
 export interface AssessmentDto {
+  /** 7단계 판정. 누백 축 예상 기준이 발행된 모집단위에만 온다(없으면 category 만 쓴다) */
+  band?: BandDto | null;
   offering_id: string;
   status: "ready" | "pending" | "ineligible";
   reason_code: string | null;

@@ -1,5 +1,5 @@
 import Link from "@/components/link";
-import { CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
+import { ADVANTAGE_WORD, CATEGORY, CategoryBadge, decisionOf, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto, OverallResultDto, SubjectResultDto } from "@/lib/dto";
@@ -217,7 +217,7 @@ function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectRes
         <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
       ) : (
         <>
-          <p>{CATEGORY[a.category].desc}</p>
+          <p>{decisionOf(a).desc}</p>
           {d?.adjusted_category && (
             <p className="adj">
               점수로 본 판단은 <b>{CATEGORY[d.base_category].label}</b>이지만, 입시 상담 경험을 반영해 <b>{CATEGORY[d.adjusted_category].label}</b>로 조정했습니다.
@@ -241,15 +241,15 @@ function AdvantageCard({ a, overall }: { a: AssessmentDto; overall?: OverallResu
     return (
       <section className="card" aria-label="환산 유불리">
         <h3>환산 유불리 <span className="tag">참고</span></h3>
-        <div className={`big num ${ref.tone}`}>{ref.text}<small>%p</small></div>
+        <div className={`big num ${ref.tone}`}><span className="advw">{ADVANTAGE_WORD[ref.tone]}</span> {ref.text}<small>%p</small></div>
         <p>
           {ref.tone === "up"
-            ? "이 대학 방식으로 계산하면 전체 성적 기준보다 위치가 이만큼 올라갑니다."
+            ? "나에게 유리한 대학입니다. 이 대학의 점수 계산 방식이 내 과목 구성에 잘 맞아, 전체 성적으로 볼 때보다 내 위치가 이만큼 앞으로 갑니다."
             : ref.tone === "down"
-              ? "이 대학 방식으로 계산하면 전체 성적 기준보다 위치가 이만큼 내려갑니다."
-              : "이 대학 방식으로 계산해도 전체 성적 기준과 위치가 거의 같거나, 범위가 0을 걸쳐 유불리를 단정할 수 없습니다."}
+              ? "나에게 불리한 대학입니다. 이 대학의 점수 계산 방식으로는 전체 성적으로 볼 때보다 내 위치가 이만큼 뒤로 밀립니다."
+              : "유리하지도 불리하지도 않습니다. 이 대학 방식으로 계산해도 전체 성적 기준과 위치가 거의 같거나, 범위가 0을 걸쳐 단정할 수 없습니다."}
         </p>
-        <span className="note">전체 상위 누백에서 이 대학 방식 누적 백분위(추정)를 뺀 값입니다(운영 승인 전 참고). 둘 중 하나가 범위면 범위로 보입니다. 지원 여부 판단과는 별개입니다.</span>
+        <span className="note">숫자가 +면 유리, −면 불리입니다. 전체 상위 누백에서 이 대학 방식 누적 백분위(추정)를 뺀 값이며(운영 승인 전 참고), 둘 중 하나가 범위면 범위로 보입니다. 합격 가능성 판단과는 별개입니다.</span>
       </section>
     );
   }
@@ -278,15 +278,16 @@ function AdvantageCard({ a, overall }: { a: AssessmentDto; overall?: OverallResu
     <section className="card" aria-label="환산 유불리">
       <h3>환산 유불리</h3>
       <div className={`big num ${tone}`}>
+        <span className="advw">{ADVANTAGE_WORD[tone]}</span>{" "}
         {n > 0 ? "+" : ""}
         {v.delta_pp}
         <small>%p</small>
       </div>
       <p>
         {v.status === "favorable"
-          ? "이 대학 반영식이 내 과목 구성에 비교적 잘 맞아, 전체 성적 기준보다 위치가 이만큼 올라갑니다."
+          ? "나에게 유리한 대학입니다. 이 대학 반영식이 내 과목 구성에 잘 맞아, 전체 성적으로 볼 때보다 내 위치가 이만큼 앞으로 갑니다."
           : v.status === "unfavorable"
-            ? "이 대학 반영식에서는 전체 성적 기준보다 위치가 이만큼 내려갑니다."
+            ? "나에게 불리한 대학입니다. 이 대학 반영식으로는 전체 성적으로 볼 때보다 내 위치가 이만큼 뒤로 밀립니다."
             : "이 대학 반영식으로 계산해도 전체 성적 기준과 위치가 거의 같습니다."}
         {outsideButFavorable && <b> 다만 유리해 보여도 이 학과는 올해 지원 검토 범위 밖입니다 — 왼쪽 판정이 우선입니다.</b>}
       </p>

@@ -136,6 +136,31 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 유료 데이터(유리한 학교 목록)를 그린 화면: 회원 식별 표시 + 조회 기록
   const view = viewPath(route.path, sp);
 
+  // 추천 목록·와일드카드가 하나도 없으면(판정 자료가 아직 연결되지 않은 동안) 빈 목록 틀 대신 참고 누백 묶음을 앞에 둔다.
+  // 판정이 켜진 대학이 하나라도 생기면 원래 화면(기본 학교 목록 + 와일드카드)으로 돌아간다
+  const referenceMode = groups.length === 0 && wildcards.length === 0;
+  const tail = (
+    <>
+      {/* 참고 누백 묶음은 순위·판정이 아니라 기본 목록과 섞지 않고 따로 둔다(필터와 무관) */}
+      <ReferenceGroups groups={refGroups} />
+      {(outsideCount > 0 || ineligibleCount > 0) && (
+        <p className="fv-note">
+          판단이 끝난 모집단위 중 지원 검토 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+        </p>
+      )}
+      {converted.length > 0 && (
+        <Suspense fallback={null}>
+          <ConvertedPendingList src={src} caller={caller} items={converted} />
+        </Suspense>
+      )}
+      {pendingCount > 0 && (
+        <p className="fv-note">
+          자격 확인이나 자료 검수 때문에 판단을 보류한 모집단위 <b className="num">{pendingCount}</b>곳은 목록에 넣지 않았습니다. 보류를 여유로 보지 않습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+        </p>
+      )}
+    </>
+  );
+
   return (
     <>
       <MemberMark kind="recommend" path={view} />
@@ -161,6 +186,22 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           </a>
         )}
 
+        {referenceMode ? (
+          <section className="fv-main fv-refmode" aria-labelledby="refmode-t">
+            <section className="gate flat">
+              <h2 id="refmode-t">지원 판정은 준비되는 대학부터 차례로 켜집니다</h2>
+              <p>
+                지금은 대학별 판정 자료를 연결하는 중이라 추천 학교 목록과 와일드카드를 아직 만들지 않았습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다.
+                그동안은 아래에서 내 성적이 대학마다 어느 위치인지(참고 누백) 볼 수 있고, {p3.label}에서 대학·학과를 직접 검색해 환산점수와 참고 위치를 확인할 수 있습니다.
+              </p>
+              <div className="acts">
+                <Link className="btn" href={p3.path}>{p3.label}</Link>
+              </div>
+            </section>
+            {refGroups.length === 0 && <p className="fv-note">참고 누백이 나온 대학이 아직 없습니다. 위의 &lsquo;후보 다시 확인&rsquo;을 누르면 최신 자료로 다시 찾습니다.</p>}
+            {tail}
+          </section>
+        ) : (
         <div className="fv-grid">
           <section className="fv-main" aria-labelledby="basic-t">
             <div className="fv-sec-hd">
@@ -204,23 +245,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 ))}
               </div>
             )}
-            {/* 참고 누백 묶음은 순위·판정이 아니라 기본 목록과 섞지 않고 따로 둔다(필터와 무관) */}
-            <ReferenceGroups groups={refGroups} />
-            {(outsideCount > 0 || ineligibleCount > 0) && (
-              <p className="fv-note">
-                판단이 끝난 모집단위 중 지원 검토 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
-              </p>
-            )}
-            {converted.length > 0 && (
-              <Suspense fallback={null}>
-                <ConvertedPendingList src={src} caller={caller} items={converted} />
-              </Suspense>
-            )}
-            {pendingCount > 0 && (
-              <p className="fv-note">
-                자격 확인이나 자료 검수 때문에 판단을 보류한 모집단위 <b className="num">{pendingCount}</b>곳은 목록에 넣지 않았습니다. 보류를 여유로 보지 않습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
-              </p>
-            )}
+            {tail}
             <p className="fv-note">
               환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 오르내리는 폭(%p)으로, 비슷한 수준의 학교 중 내 과목 구성에 잘 맞는 곳을 고르는 보조 지표입니다.
               여유 후보도 합격을 보장하지 않습니다. 지원가능성은 합격 확률이 아니며, 올해 전형과 지원 조건을 함께 확인해야 합니다.
@@ -231,6 +256,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
             <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} favs={favs} stats={stats} statsKey={qk} canPick analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
+        )}
       </div>
       <Suspense key={qk} fallback={null}>
         <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />

@@ -96,3 +96,7 @@
 .et .star.on{color:#E0A100}
 .et .star.on svg{fill:currentColor}
 .et .star:disabled{opacity:.6}
+
+/* 환산 유불리의 방향 글자(유리·불리·비슷). 숫자 부호만으로는 좋은 신호인지 읽기 어렵다는 지적(2026-11-18) */
+.et .advw{font-weight:800;margin-right:2px}
+.et .card .big .advw{font-size:.62em;vertical-align:middle;margin-right:6px}

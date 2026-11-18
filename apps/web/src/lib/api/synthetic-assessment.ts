@@ -1,4 +1,4 @@
-import type { AssessmentDto, Category, CandidatesDto, ConversionDto, OfferingDto, OverallAnalysisDto, PercentileDto, ReasonDto, ScoresInput, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, BandDto, Category, CandidatesDto, ConversionDto, OfferingDto, OverallAnalysisDto, PercentileDto, ReasonDto, ScoresInput, StatisticsDto } from "@/lib/dto";
 import { HISTORY, HISTORY_OFFERINGS } from "./synthetic-history";
 
 /*
@@ -10,6 +10,12 @@ import { HISTORY, HISTORY_OFFERINGS } from "./synthetic-history";
 /** 2027 모집행 = 1페이지 합성 자료의 2027 행(같은 번호를 쓴다) */
 export const CATALOG: OfferingDto[] = HISTORY_OFFERINGS.filter((o) => o.academic_year === 2027);
 
+function syntheticBand(score: number, center: number, w: number): BandDto {
+  const [code, label]: [BandDto["code"], string] =
+    score >= center + w * 1.6 ? ["stable", "안정"] : score >= center + w ? ["downward", "하향"] : score >= center ? ["target", "적정"] : score >= center - w ? ["aspirational", "소신"]
+    : score >= center - w * 2 ? ["upward", "상향"] : score >= center - w * 3 ? ["challenge", "도전"] : ["outside", "불가"];
+  return { code, label, policy_version: "SYNTHETIC-relative-band" };
+}
 export type Rule = { wk: number; wm: number; wi: number; center: number; band: number; max: number };
 /** 대학별 합성 반영 비율과 기준 점수(대학 환산점수 척도) */
 export const RULE: Record<string, Rule> = {
@@ -153,6 +159,8 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
     ...result,
     status: "ready",
     category: adopted,
+    // 가온대(syn-g*)만 7단계 판정을 붙인 합성 예. category 의 호환 묶음(여유·핵심·도전·밖)과 어긋나지 않게 가른다
+    band: base.startsWith("syn-g") && !adjusted ? syntheticBand(score, center, rule.band) : null,
     decision_components: { base_category: cat, adjusted_category: adjusted, adopted_category: adopted, base_policy_version: `SYNTHETIC-policy-${base}`, adjustment_version: adjusted ? "SYNTHETIC-adjustment-v1" : null },
     decision_evidence: adjusted ? { ...decision_evidence, adjustment_summary: { applied: true, reason: "상담 판단으로 한 단계 조정했습니다(여유 후보 → 핵심 검토).", version: "SYNTHETIC-adjustment-v1" } } : decision_evidence,
     // 비교집단이 전체 응시자와 다르면 분모가 달라 유불리를 보류한다

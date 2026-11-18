@@ -1,4 +1,4 @@
-import type { AssessmentDto, Category, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, BandCode, Category, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
 import { referenceAdvantage } from "@/lib/reference-advantage";
 import { pctText, seoulDate } from "@/lib/format";
 
@@ -14,6 +14,19 @@ export const CATEGORY: Record<Category, { cls: string; label: string; desc: stri
   pending: { cls: "check", label: "판단 보류", desc: "판단에 필요한 자료가 아직 갖춰지지 않아 결론을 내리지 않았습니다." },
   ineligible: { cls: "inel", label: "지원 조건 미충족", desc: "이 전형이 요구하는 지원 조건(과목·자격)을 충족하지 않습니다." },
 };
+
+/** 7단계 판정(assessment.band). 예상 합격권 폭의 15%·30% 를 경계로 가른다. 색은 기존 세 묶음(여유·핵심·도전)을 그대로 쓴다 */
+export const BAND: Record<BandCode, { cls: string; label: string; desc: string }> = {
+  stable: { cls: "safe", label: "안정", desc: "예상 합격권보다 충분히 앞선 위치입니다. 그래도 합격이 보장되는 것은 아닙니다." },
+  downward: { cls: "safe", label: "하향", desc: "예상 합격권보다 조금 앞선 위치입니다." },
+  target: { cls: "core", label: "적정", desc: "예상 합격권 안에서 앞쪽 절반에 드는 위치입니다." },
+  aspirational: { cls: "core", label: "소신", desc: "예상 합격권 안에서 뒤쪽 절반에 드는 위치입니다." },
+  upward: { cls: "reach", label: "상향", desc: "예상 합격권에서 조금 벗어난 위치입니다." },
+  challenge: { cls: "reach", label: "도전", desc: "예상 합격권에서 꽤 벗어나 결과를 장담하기 어려운 위치입니다." },
+  outside: { cls: "out", label: "불가", desc: "예상 합격권에서 많이 벗어난 위치입니다. 지원 자격이 없다는 뜻은 아닙니다." },
+};
+/** 화면에 보일 판정 이름·풀이. 7단계가 오면 그것을, 아니면 기존 category 를 쓴다 */
+export const decisionOf = (a: AssessmentDto) => (a.status === "ready" && a.band && BAND[a.band.code] ? BAND[a.band.code] : CATEGORY[a.category]);
 
 /** 판단 보류·자격 확인의 이유(서버 reason_code) */
 const REASON: Record<string, string> = {
@@ -69,15 +82,15 @@ export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFER
 
 export function CategoryBadge({ a }: { a: AssessmentDto }) {
   if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check">자격 확인 필요</span>;
-  const c = CATEGORY[a.category];
+  const c = decisionOf(a);
   return <span className={`st ${c.cls}`}>{c.label}</span>;
 }
 
 export function CategoryLegend() {
   return (
     <span className="legend" aria-label="지원가능성 표시">
-      {Object.values(CATEGORY).map((c) => (
-        <span key={c.cls} className={`st ${c.cls}`}>{c.label}</span>
+      {[...Object.values(BAND), CATEGORY.pending, CATEGORY.ineligible].map((c) => (
+        <span key={c.label} className={`st ${c.cls}`}>{c.label}</span>
       ))}
     </span>
   );
@@ -106,6 +119,9 @@ export function StatusCell({ a }: { a: Cell }) {
 }
 
 /** 환산 유불리: 같은 비교집단에서 보정 총점 기준 위치 − 대학 환산 기준 위치(%p). 양수면 유리 */
+/** 환산 유불리의 방향을 글자로도 적는다(대표님 지적 2026-11-18: 숫자만으로는 좋은 신호인지 알 수 없다) */
+export const ADVANTAGE_WORD: Record<"up" | "down" | "even", string> = { up: "유리", down: "불리", even: "비슷" };
+
 export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (a && !a.advantage) {
@@ -116,7 +132,7 @@ export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResult
       return (
         <span className="adv">
           <span className="bar" aria-hidden="true">{ref.tone !== "even" && <i className={ref.tone} style={{ width: `${width}%` }} />}</span>
-          <span className={`v num ${ref.tone}`}>{ref.text}%p <small className="ref">참고</small></span>
+          <span className={`v num ${ref.tone}`}><b className="advw">{ADVANTAGE_WORD[ref.tone]}</b> {ref.text}%p <small className="ref">참고</small></span>
         </span>
       );
     }
@@ -129,7 +145,7 @@ export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResult
     <span className="adv">
       <span className="bar" aria-hidden="true">{tone !== "even" && <i className={n > 0 ? "up" : "down"} style={{ width: `${width}%` }} />}</span>
       <span className={`v num ${tone}`}>
-        {n > 0 ? "+" : ""}
+        <b className="advw">{ADVANTAGE_WORD[tone]}</b> {n > 0 ? "+" : ""}
         {a.advantage.delta_pp}%p
       </span>
     </span>
