@@ -128,6 +128,8 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
       ...result,
       reason_code: "decision_range_unconfirmed",
       decision_evidence: undefined,
+      // 참고 기준 판정의 합성 예(누백이 범위라 판정도 범위인 경우)
+      reference_band: { basis: "reference_percentile", code: "target", label: "적정", policy_version: "SYNTHETIC-relative-band", approval_version: "SYNTHETIC-reference-judgment", upper_code: "upward", upper_label: "상향" },
       converted_percentile: null,
       percentile: { ...percentile, ...EMPTY_PERCENTILE_VALUES, status: "pending", reason_code: "percentile_curve_unpublished" },
     };

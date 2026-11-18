@@ -1,5 +1,5 @@
 import Link from "@/components/link";
-import { ADVANTAGE_WORD, CATEGORY, CategoryBadge, decisionOf, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
+import { ADVANTAGE_WORD, BAND, CATEGORY, CategoryBadge, decisionOf, referenceBandOf, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto, OverallResultDto, SubjectResultDto } from "@/lib/dto";
@@ -204,6 +204,15 @@ function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectRes
       <div>
         <CategoryBadge a={a} />
       </div>
+      {referenceBandOf(a) && (
+        <>
+          <p>
+            <b>참고 기준 판정입니다.</b> 이 대학 방식으로 본 내 위치(누적 백분위 추정)를 지난 입시결과로 잡은 올해 예상 합격권과 견준 것입니다. {BAND[referenceBandOf(a)!.code].desc}
+            {referenceBandOf(a)!.upper_code && referenceBandOf(a)!.upper_code !== referenceBandOf(a)!.code ? " 내 위치가 범위로 나와 판정도 범위로 적었습니다." : ""}
+          </p>
+          <span className="note">운영 승인 전 참고 자료로 낸 판정이라 정식 판정과 다를 수 있고, 합격 확률이 아닙니다. 추천 목록과 와일드카드에는 쓰이지 않습니다.</span>
+        </>
+      )}
       {a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
         conditionLines(a, subjects).length ? (
           <>

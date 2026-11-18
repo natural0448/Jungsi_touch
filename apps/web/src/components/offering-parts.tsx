@@ -80,7 +80,18 @@ export const scoreOf = (a: AssessmentDto) => a.conversion?.converted_score ?? a.
 /** 지원 판단 칸의 보류 이유. 참고 코드가 판단 이유로 오면 '판단 기준 확인 중'으로 바꿔 보인다 */
 export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFERENCE_CODE ? "reference_decision_pending" : a.reason_code);
 
+/** 참고 기준 판정을 보일지. 정식 판정이 난 곳(ready)·자격 미충족에는 보이지 않는다 */
+export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.status !== "ineligible" && a.reference_band && BAND[a.reference_band.code] ? a.reference_band : null);
+/** 참고 기준 판정의 이름. 누백이 범위라 양끝의 판정이 다르면 '적정~도전'처럼 함께 적는다 */
+export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => (r.upper_code && BAND[r.upper_code] && r.upper_code !== r.code ? `${BAND[r.code].label}~${BAND[r.upper_code].label}` : BAND[r.code].label);
+
 export function CategoryBadge({ a }: { a: AssessmentDto }) {
+  const ref = referenceBandOf(a);
+  if (ref) {
+    // 색은 불리한 끝 기준(더 조심스러운 쪽). 정식 판정과 구분되게 '참고'를 붙인다
+    const tone = BAND[ref.upper_code && BAND[ref.upper_code] ? ref.upper_code : ref.code];
+    return <span className={`st ${tone.cls} refj`} title="참고 기준 판정 · 지원 자격은 모집요강에서 확인하세요">{referenceBandLabel(ref)} <small>참고</small></span>;
+  }
   if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check">자격 확인 필요</span>;
   const c = decisionOf(a);
   return <span className={`st ${c.cls}`}>{c.label}</span>;

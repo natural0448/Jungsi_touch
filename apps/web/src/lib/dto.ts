@@ -268,7 +268,20 @@ export interface BandDto {
   base_code?: BandCode;
 }
 
+/** 참고 기준 판정(대표님 승인 2026-11-18). 참고 누백을 승인된 예상 합격권과 견준 값이며 정식 판정(category·band)과 별개.
+ * 추천·와일드카드 선정에는 쓰이지 않는다. 누백이 범위면 불리한 끝의 판정이 upper_* 로 함께 온다 */
+export interface ReferenceBandDto {
+  basis: "reference_percentile";
+  code: BandCode;
+  label: string;
+  policy_version: string;
+  approval_version: string;
+  upper_code?: BandCode;
+  upper_label?: string;
+}
+
 export interface AssessmentDto {
+  reference_band?: ReferenceBandDto | null;
   /** 7단계 판정. 누백 축 예상 기준이 발행된 모집단위에만 온다(없으면 category 만 쓴다) */
   band?: BandDto | null;
   offering_id: string;
