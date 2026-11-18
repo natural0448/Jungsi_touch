@@ -70,7 +70,9 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 리포트 번호 힌트가 있으면 리포트 읽기를 검색과 함께 먼저 보내고, 입력 상태는 검색 뒤에 보낸다(동시 2건 유지, 2026-11-18)
   // 즐겨찾기(별표)는 본체 DB 에서 따로 읽는다(서비스 API 와 별개). '즐겨찾기만 보기'에서는 검색 대신 별표한 모집단위를 보인다
   const favoring = myFavorites();
-  const searching = cur.fav ? favoring.then((f) => favoriteResult(f, cur)) : src.searchOfferings(caller, toSearch(cur));
+  // 서버는 한 번에 훑는 범위가 정해져 있어, 조건에 맞는 행이 뒤쪽에 있으면 빈 쪽과 다음 커서만 준다(예: 지역=제주).
+  // 빈 쪽을 '결과 없음'으로 보이지 않도록 다음 커서를 몇 번까지 대신 따라간다(2026-11-19 운영 확인)
+  const searching = cur.fav ? favoring.then((f) => favoriteResult(f, cur)) : skipEmptyPages(src, caller, toSearch(cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
   const mine = startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
@@ -197,6 +199,12 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 <p>유리한 대학 찾기나 이 화면에서 학과 옆 별표(☆)를 누르면 여기에 모입니다. 담기 전에 비교해 볼 곳을 {FAVORITE_LIMIT}개까지 넣을 수 있습니다.</p>
                 <div className="acts"><Link className="btn" href={hrefWith(cur, { fav: undefined, open: undefined })}>전체 목록 보기</Link></div>
               </section>
+            ) : groups.length === 0 && res.next_cursor ? (
+              <section className="gate flat">
+                <h2>아직 찾는 중입니다</h2>
+                <p>조건에 맞는 모집단위를 목록 뒤쪽에서 더 찾아야 합니다. 결과가 없다는 뜻이 아닙니다.</p>
+                <div className="acts"><Link className="btn p" href={hrefWith(cur, { cursor: res.next_cursor, open: undefined })}>계속 찾기</Link></div>
+              </section>
             ) : groups.length === 0 ? (
               <section className="gate flat">
                 <h2>조건에 맞는 모집단위가 없습니다</h2>
@@ -271,7 +279,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
               </>
             )}
 
-            {(cur.cursor || res.next_cursor) && (
+            {(cur.cursor || res.next_cursor) && !(groups.length === 0 && res.next_cursor) && (
               <nav className="pager" aria-label="쪽 넘기기">
                 {cur.cursor ? <Link className="btn" href={hrefWith(cur, { cursor: undefined, open: undefined })}>처음부터</Link> : <span />}
                 {res.next_cursor && <Link className="btn" href={hrefWith(cur, { cursor: res.next_cursor, open: undefined })}>다음 {LIMIT}개</Link>}
@@ -314,4 +322,15 @@ function ChipRow({ label, cur, k, items }: { label: string; cur: Query; k: "regi
       </div>
     </div>
   );
+}
+
+/** 빈 쪽을 건너뛰는 횟수 한도. 쪽마다 서버 요청이 한 번씩 든다 */
+const EMPTY_PAGE_HOPS = 5;
+
+async function skipEmptyPages(src: JungsiSource, caller: Caller, q: ReturnType<typeof toSearch>): Promise<CatalogSearchDto<OfferingDto>> {
+  let res = await src.searchOfferings(caller, q);
+  for (let hop = 0; hop < EMPTY_PAGE_HOPS && (res.items ?? []).length === 0 && res.next_cursor; hop++) {
+    res = await src.searchOfferings(caller, { ...q, cursor: res.next_cursor });
+  }
+  return res;
 }
