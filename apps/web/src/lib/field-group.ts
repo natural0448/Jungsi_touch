@@ -2,16 +2,23 @@ import data from "./field-groups-2027.json";
 
 /*
   모집단위의 학과 계열(표시용). 데이터팀 R2 회신(2026-11-18)을 2027 + 모집행 PK 로 붙인다.
-  - 7계열 값은 대교협 2025 학과 분류를 2027 모집단위에 임시로 참고한 것이다. 2027 확정 분류가 아니므로
-    화면에는 항상 '2025 분류 참고'를 함께 적는다(confirmed_2027 에 든 PK 만 예외).
+  - 7계열 값의 근거는 세 가지다(R2 v9 classification_status). 대부분은 대교협 2025 학과 분류를 임시로 참고한 것이라
+    '2025 분류 참고'를 함께 적는다. 2027 대학 모집요강의 계열(guide_2027)은 '2027 모집요강 계열',
+    2027 요강 초안(draft_2027)은 '2027 요강 초안 참고'라고 적는다. 어느 것도 확정 분류로 세지 않는다.
   - 자유전공은 모집단위 이름에 자유·자율·무전공이 적힌 별도 유형이다. 7계열 가운데 하나로 넣지 않는다.
   - 자료에 없는 모집단위는 null — '계열 확인 중'으로 보이고 어느 계열에도 넣지 않는다.
   - 계열은 학과 내용의 표시 축일 뿐이다. 대학 환산식 묶음·실기 여부·분석 가능 여부를 뜻하지 않는다.
 */
 export const FIELD_GROUPS = ["인문", "사회", "교육", "공학", "자연", "의약", "예체능", "자유전공"] as const;
 export type FieldGroupName = (typeof FIELD_GROUPS)[number];
+/** 계열 값의 근거. free 는 모집단위 이름에 자유·자율·무전공이 적힌 별도 유형 */
+export type FieldBasis = "2025" | "guide2027" | "draft2027" | "free";
+export const FIELD_BASIS_NOTE: Record<FieldBasis, string | null> = { "2025": "2025 분류 참고", guide2027: "2027 모집요강 계열", draft2027: "2027 요강 초안 참고", free: null };
 export interface FieldGroup {
   name: FieldGroupName;
+  basis: FieldBasis;
+  /** 근거 안내 문구(자유전공은 없음) */
+  note: string | null;
   /** 2025 분류를 임시로 참고한 값이면 true */
   provisional: boolean;
 }
@@ -20,7 +27,8 @@ export const FIELD_UNKNOWN = "계열 확인 중";
 
 const BY_PK = new Map<number, FieldGroupName>();
 for (const name of FIELD_GROUPS) for (const pk of (data.groups as Record<string, number[]>)[name] ?? []) BY_PK.set(pk, name);
-const CONFIRMED = new Set<number>(data.confirmed_2027 as number[]);
+const GUIDE = new Set<number>(data.guide_2027 as number[]);
+const DRAFT = new Set<number>(data.draft_2027 as number[]);
 
 /** offering_id("2027:1000006263")의 계열. 다른 학년도·모르는 PK 는 null */
 export function fieldGroupOf(offeringId: string): FieldGroup | null {
@@ -29,7 +37,8 @@ export function fieldGroupOf(offeringId: string): FieldGroup | null {
   const pk = Number(m[2]);
   const name = BY_PK.get(pk);
   if (!name) return null;
-  return { name, provisional: name !== "자유전공" && !CONFIRMED.has(pk) };
+  const basis: FieldBasis = name === "자유전공" ? "free" : GUIDE.has(pk) ? "guide2027" : DRAFT.has(pk) ? "draft2027" : "2025";
+  return { name, basis, note: FIELD_BASIS_NOTE[basis], provisional: basis === "2025" };
 }
 
 /** 묶음 이름: 계열 이름 또는 '계열 확인 중' */

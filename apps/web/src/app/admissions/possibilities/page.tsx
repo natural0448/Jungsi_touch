@@ -113,7 +113,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     if (last && last.id === o.university_id) last.rows.push(o);
     else groups.push({ id: o.university_id, name: o.university_name, rows: [o] });
   }
-  const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group);
+  // 즐겨찾기만 보기도 조건이다 — 0건을 '올해 모집 정보 미연결'로 안내하지 않는다
+  const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group || cur.fav);
   const star = (o: OfferingDto) => <span className="c-star">{favs && <StarButton id={o.offering_id} on={favs.ids.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}</span>;
   // 유료 데이터를 그린 화면: 회원 식별 표시 + 조회 기록. 모집단위를 펼쳤으면 대학 분석, 아니면 가능성 목록
   const view = viewPath(route.path, sp);

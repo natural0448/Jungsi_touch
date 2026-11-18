@@ -22,5 +22,8 @@ test("field groups: every PK is a positive integer and belongs to exactly one gr
     }
   }
   assert.ok(seen.size > 0 && seen.size <= data.total_rows);
-  for (const pk of data.confirmed_2027) assert.ok(seen.has(pk));
+  // 2027 요강·요강 초안 근거는 7계열에 든 PK 여야 하고 서로 겹치지 않는다(자유전공 아님)
+  const free = new Set(data.groups["자유전공"]);
+  for (const pk of [...data.guide_2027, ...data.draft_2027]) assert.ok(seen.has(pk) && !free.has(pk), String(pk));
+  assert.equal(new Set([...data.guide_2027, ...data.draft_2027]).size, data.guide_2027.length + data.draft_2027.length);
 });
