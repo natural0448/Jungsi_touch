@@ -15,8 +15,10 @@ const INITIAL: RunResult = { error: null };
 /**
  * auto: 서버가 '지금 자료판과 다른 판으로 계산된 분석'이라고 알려 준 범위(stale)일 때만 켠다(대표님 결정 2026-11-18).
  * 화면을 열면 같은 재확인을 한 번 자동으로 보낸다. 같은 리포트 판·범위에는 한 번만 보내고, 실패하면 다시 보내지 않고 버튼을 남긴다.
+ * autoScope: 재확인이 아닌 첫 분석도 자동으로 보낼 때 쓰는 범위 이름(리포트 번호). 4페이지에서 보이는 모집단위를 버튼 없이 분석한다
+ * (대표님 결정 2026-11-19, 전 모집단위 요약 미리 계산이 들어가기 전까지의 임시 방식). 같은 리포트·같은 모집단위 묶음에는 한 번만 보낸다.
  */
-export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto }: { ids?: string[]; title: string; desc: string; label: string; busy: string; refresh?: RefreshIntent; auto?: boolean }) {
+export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto, autoScope }: { ids?: string[]; title: string; desc: string; label: string; busy: string; refresh?: RefreshIntent; auto?: boolean; autoScope?: string }) {
   const submit = refresh ? (ids ? refreshAnalysesNow : refreshCandidatesNow) : (ids ? analyzeNow : buildNow);
   const [state, action, pending] = useActionState(submit, INITIAL);
   function explicitIntent(e: FormEvent<HTMLFormElement>) {
@@ -24,7 +26,14 @@ export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto }: { 
     if (!pending && input instanceof HTMLInputElement) input.value = crypto.randomUUID();
   }
   const form = useRef<HTMLFormElement>(null);
-  const autoKey = auto && refresh ? `jt-auto-refresh:${refresh.reportId}:${refresh.reportVersion}:${ids ? ids.join(",") : "candidates"}` : null;
+  const autoKey = !auto
+    ? null
+    : refresh
+      ? `jt-auto-refresh:${refresh.reportId}:${refresh.reportVersion}:${ids ? ids.join(",") : "candidates"}`
+      : autoScope && ids
+        ? `jt-auto-analyze:${autoScope}:${ids.join(",")}`
+        : null;
+  const first = !refresh;
   useEffect(() => {
     if (!autoKey) return;
     try {
@@ -45,8 +54,8 @@ export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto }: { 
         <input type="hidden" name="report_version" value={refresh.reportVersion} />
       </>}
       <div>
-        <b>{auto && pending ? "새 자료로 다시 계산하고 있습니다" : title}</b>
-        <p>{auto && pending ? "자료가 바뀌어 저장된 분석을 최신 자료로 다시 계산합니다. 잠시만 기다려 주세요. 성적 입력 횟수는 줄지 않습니다." : desc}</p>
+        <b>{auto && pending ? (first ? "내 성적으로 계산하고 있습니다" : "새 자료로 다시 계산하고 있습니다") : title}</b>
+        <p>{auto && pending ? (first ? "지금 보이는 모집단위를 내 성적으로 계산합니다. 잠시만 기다려 주세요. 성적 입력 횟수는 줄지 않습니다." : "자료가 바뀌어 저장된 분석을 최신 자료로 다시 계산합니다. 잠시만 기다려 주세요. 성적 입력 횟수는 줄지 않습니다.") : desc}</p>
         {state.error && !pending && <p className="err" role="alert">{state.error}</p>}
       </div>
       <button className="btn p" type="submit" disabled={pending}>{pending ? busy : label}</button>

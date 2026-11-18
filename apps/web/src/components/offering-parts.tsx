@@ -93,7 +93,7 @@ export function CategoryBadge({ a }: { a: AssessmentDto }) {
     const tone = BAND[ref.upper_code && BAND[ref.upper_code] ? ref.upper_code : ref.code];
     return <span className={`st ${tone.cls} refj`} title="참고 기준 판정 · 지원 자격은 모집요강에서 확인하세요">{referenceBandLabel(ref)} <small>참고</small></span>;
   }
-  if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check">자격 확인 필요</span>;
+  if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check" title="이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 지원 자격은 모집요강에서 확인하세요">판정 준비 중</span>;
   const c = decisionOf(a);
   return <span className={`st ${c.cls}`}>{c.label}</span>;
 }

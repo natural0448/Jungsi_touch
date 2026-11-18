@@ -72,9 +72,11 @@ export async function MineRunBoxes({ p, items }: { p: P; items: OfferingDto[] })
         <RunAnalysis
           ids={missing}
           title={`이 목록의 ${missing.length}개 모집단위는 아직 내 성적으로 분석하지 않았습니다`}
-          desc="누르면 지금 보이는 모집단위만 내 성적으로 분석합니다. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
+          desc="화면을 열면 지금 보이는 모집단위를 자동으로 분석합니다. 자동으로 시작되지 않으면 버튼을 누르세요. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
           label="내 성적으로 분석"
           busy="분석하는 중…"
+          auto
+          autoScope={`${report.report_id}:${report.profile_id}`}
         />
       )}
       {items.some((o) => report.analyses?.[o.offering_id]) && (

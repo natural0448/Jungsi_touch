@@ -177,9 +177,9 @@ function PercentileCard({ a }: { a: AssessmentDto }) {
 /** 판단 구간·예상선 같은 내부 기준 수치는 보이지 않는다(최종 관리자 지시 2026-10-07). 뜻풀이와 조정 여부만 적는다 */
 /** 자격 확인이 필요한 모집단위에서 학생이 할 일(2026-11-15 대표님 결정 문구) */
 const DECISION_CONFIRM =
-  "이 모집단위는 지원 자격(필수 응시 영역·지정 과목)을 모집요강에서 직접 확인해야 합니다. 자격이 맞다면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하세요.";
+  "이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 지원 자격(필수 응시 영역·지정 과목)은 모집요강에서 직접 확인해야 합니다. 자격이 맞다면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하세요.";
 const DECISION_CONDITIONS =
-  "요강에 적힌 지원 조건과 내 입력을 견줘 보세요. 맞으면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하고, 졸업 연도 등 그 밖의 자격은 모집요강에서 확인하세요.";
+  "이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 그동안은 요강에 적힌 지원 조건과 내 입력을 견줘 보세요. 맞으면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하고, 졸업 연도 등 그 밖의 자격은 모집요강에서 확인하세요.";
 
 function Conditions({ a, subjects }: { a: AssessmentDto; subjects?: SubjectResultDto[] }) {
   const lines = conditionLines(a, subjects);
@@ -225,7 +225,7 @@ function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectRes
       ) : a.status !== "ready" ? (
         a.reason_code === "designated_subject_not_taken" ? (
           <>
-            <p>{reasonText(a.reason_code)} 아래에서 '내 입력과 다름'으로 표시된 조건을 확인하세요.</p>
+            <p>{reasonText(a.reason_code)} 아래에서 &lsquo;내 입력과 다름&rsquo;으로 표시된 조건을 확인하세요.</p>
             <Conditions a={a} subjects={subjects} />
           </>
         ) : (
