@@ -82,3 +82,17 @@
 .et .run-box p.err{color:var(--risk);font-weight:700}
 .et .run-box .btn:disabled{opacity:.6;cursor:progress}
 .et .adv .v small.ref{font-size:11px;font-weight:600;color:var(--muted)}
+
+/* 학과 계열 표시(2026-11-18). 2025 분류를 참고한 값은 그 사실을 함께 적는다 */
+.et .fg{display:inline-block;margin-top:2px;font-size:12px;font-weight:700;color:var(--deep)}
+.et .fg small{font-weight:500;color:var(--muted)}
+.et .fg.none{font-weight:500;color:var(--muted)}
+
+/* 즐겨찾기 별표(2026-11-18) */
+.et .star-f{display:inline-flex;align-items:center;gap:6px}
+.et .star{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:transparent;color:var(--muted)}
+.et .star svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+.et .star:hover{background:var(--jt-head);color:#E0A100}
+.et .star.on{color:#E0A100}
+.et .star.on svg{fill:currentColor}
+.et .star:disabled{opacity:.6}

@@ -1,3 +1,5 @@
+import { StarButton } from "@/components/star-button";
+import { FieldTag } from "@/components/field-tag";
 import { CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, scoreOf } from "@/components/offering-parts";
 import { StatsSlot, type StatsPromise } from "@/components/stats-slot";
 import { pctText } from "@/lib/format";
@@ -21,13 +23,13 @@ const SUIT: Record<WildcardGroup, { label: string; mark: string }> = {
   railway: { label: "철도", mark: "R" },
 };
 
-export function WildcardDeck({ picks, selection, picked, stats, statsKey, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; stats: StatsPromise; statsKey: string; canPick: boolean; analysisPending?: boolean }) {
+export function WildcardDeck({ picks, selection, picked, favs, stats, statsKey, canPick, analysisPending }: { picks: CandidateItemDto[]; selection?: WildcardSelectionDto | null; picked: Set<string>; favs: Set<string> | null; stats: StatsPromise; statsKey: string; canPick: boolean; analysisPending?: boolean }) {
   const lay = wildcardLayout(picks, selection);
   const shown = lay.featured.length + lay.rest.length;
   const groups = lay.groupLabels.join("·");
   const card = (w: CandidateItemDto, i: number) => (
     <li key={w.offering.offering_id} style={{ "--i": i } as React.CSSProperties}>
-      <WildCard w={w} on={picked.has(w.offering.offering_id)} stats={stats} statsKey={statsKey} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
+      <WildCard w={w} on={picked.has(w.offering.offering_id)} fav={favs ? favs.has(w.offering.offering_id) : null} stats={stats} statsKey={statsKey} canPick={canPick} orderPending={lay.pendingIds.has(w.offering.offering_id)} />
     </li>
   );
   const empty = lay.status === "pending"
@@ -74,7 +76,7 @@ export function WildcardDeck({ picks, selection, picked, stats, statsKey, canPic
   );
 }
 
-function WildCard({ w, on, stats, statsKey, canPick, orderPending }: { w: CandidateItemDto; on: boolean; stats: StatsPromise; statsKey: string; canPick: boolean; orderPending?: boolean }) {
+function WildCard({ w, on, fav, stats, statsKey, canPick, orderPending }: { w: CandidateItemDto; on: boolean; fav: boolean | null; stats: StatsPromise; statsKey: string; canPick: boolean; orderPending?: boolean }) {
   const o = w.offering;
   const a = w.assessment;
   const suit = SUIT[o.wildcard_group ?? "health"];
@@ -98,6 +100,10 @@ function WildCard({ w, on, stats, statsKey, canPick, orderPending }: { w: Candid
 
       <p className="wc-univ">{o.university_name}</p>
       <h3 className="wc-unit">{o.department}</h3>
+      <p className="wc-field">
+        <FieldTag id={o.offering_id} />
+        {fav !== null && <StarButton id={o.offering_id} on={fav} name={`${o.university_name} ${o.department}`} />}
+      </p>
 
       <p className="wc-why">
         <span>한 수인 이유</span>

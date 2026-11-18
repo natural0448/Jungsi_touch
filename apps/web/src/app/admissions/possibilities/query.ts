@@ -13,6 +13,7 @@ export interface Query {
   group?: string;
   cursor?: string; // offerings.search 의 next_cursor. 서버가 정한 불투명한 값
   open?: string; // 펼친 offering_id
+  fav?: boolean; // 즐겨찾기(별표)한 모집단위만 보기
 }
 
 const one = (v: string | string[] | undefined, max = 40) => (Array.isArray(v) ? v[0] : v)?.trim().slice(0, max) || undefined;
@@ -27,6 +28,7 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): Q
     // 서버 커서는 200자를 넘는다(10-26 운영: 200자에서 잘려 다음 쪽이 400 invalid_cursor). 서버 상한 4096자까지 그대로 보낸다
     cursor: one(sp.cursor, 4096),
     open: one(sp.open, 128),
+    fav: one(sp.fav) === "1" ? true : undefined,
   };
 }
 
@@ -37,13 +39,14 @@ export function toSearch(q: Query): OfferingSearchQuery {
 /** 지금 조건에서 일부만 바꾼 주소. undefined 는 지운다. 검색 조건이 바뀌면 처음 쪽으로 */
 export function hrefWith(cur: Query, patch: Partial<Query>) {
   const next = { ...cur, ...patch };
-  if (!("cursor" in patch) && ("university_q" in patch || "department_q" in patch || "region" in patch || "group" in patch)) next.cursor = undefined;
+  if (!("cursor" in patch) && ("university_q" in patch || "department_q" in patch || "region" in patch || "group" in patch || "fav" in patch)) next.cursor = undefined;
   const u = new URLSearchParams();
   const names = { university_q: "university", department_q: "unit", region: "region", group: "group", cursor: "cursor", open: "open" } as const;
   for (const k of Object.keys(names) as (keyof typeof names)[]) {
     const v = next[k];
     if (v) u.set(names[k], v);
   }
+  if (next.fav) u.set("fav", "1");
   const s = u.toString();
   return s ? `${PATH}?${s}` : PATH;
 }

@@ -57,7 +57,7 @@
 .et .sc.open .sc-toggle .ic-chev{transform:rotate(90deg)}
 
 .et .sc-rows{margin-top:10px;border-top:1px solid var(--line)}
-.et .sc-rhd,.et .sc-row .line{display:grid;grid-template-columns:minmax(0,1.5fr) 40px minmax(0,1fr) 112px minmax(0,1fr) 60px;gap:10px;align-items:center}
+.et .sc-rhd,.et .sc-row .line{display:grid;grid-template-columns:minmax(0,1.5fr) 40px minmax(0,1fr) 112px minmax(0,1fr) 96px;gap:10px;align-items:center}
 .et .sc-rhd{padding:8px 10px;margin:0 -10px;font-size:12px;font-weight:800;color:var(--deep);background:var(--jt-head);border-bottom:1px solid var(--jt-head-line);border-radius:var(--r-sm) var(--r-sm) 0 0}
 .et .sc .r{text-align:right}
 .et .sc-row{padding:10px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
@@ -224,3 +224,23 @@
 .fv .fv-cp h3{font-size:15px;margin:0}
 .fv .fv-cp ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .fv .fv-cp li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:14px}
+
+/* 계열 묶음(2026-11-18): 학교 카드에는 계열과 학과 수를, 펼친 뒤에는 계열을 눌러 학과를 연다 */
+.et .sc-fields{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.et .sc-fields>small{font-size:12px;font-weight:800;color:var(--muted);margin-right:2px}
+.et .sc-field{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:13px;font-weight:700;color:var(--deep)}
+.et .sc-field:hover{border-color:var(--brand)}
+.et .sc-field.on{border-color:var(--brand);background:var(--brand);color:#fff}
+.et .sc-field.none{font-weight:600;color:var(--muted)}
+.et .sc-field.on.none{color:#fff}
+.et .sc-fnote{font-size:12px;color:var(--muted)}
+.et .sc-fg{border-bottom:1px solid var(--line)}
+.et .sc-fg>summary{display:flex;align-items:center;gap:8px;padding:11px 2px;cursor:pointer;font-size:14px;color:var(--deep);list-style:none}
+.et .sc-fg>summary::-webkit-details-marker{display:none}
+.et .sc-fg>summary::before{content:"";width:6px;height:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;flex:none}
+.et .sc-fg[open]>summary::before{transform:rotate(45deg)}
+.et .sc-fg>summary .num{font-size:12px;color:var(--muted)}
+.et .sc-fg>summary small{font-size:12px;color:var(--muted)}
+.et .wc-field{margin-top:3px;font-size:12px}
+.et .sc-row .c-pick{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.et .wc-field{display:flex;align-items:center;justify-content:space-between;gap:8px}

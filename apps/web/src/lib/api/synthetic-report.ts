@@ -143,7 +143,7 @@ function strip(p: StoredProfile): ProfileDto {
   return { profile_id: p.profile_id, profile_version: p.profile_version, confirmed: p.confirmed, created_at: p.created_at };
 }
 
-type Fail = "profile_not_found" | "revision_conflict" | "report_not_found" | "invalid_offering_ids" | "offering_not_found" | "score_confirmation_required" | "shortlist_group_limit_exceeded";
+type Fail = "profile_not_found" | "revision_conflict" | "report_not_found" | "invalid_offering_ids" | "offering_not_found" | "score_confirmation_required" | "shortlist_limit_exceeded";
 
 export async function saveReport(profileId: string, key: string, reportId?: string, expected?: number): Promise<ReportDto | Fail> {
   const profile = await read<StoredProfile>(C.profile);
@@ -207,7 +207,7 @@ export function setPick(reportId: string, offeringId: string, selected: boolean,
     if (selected) {
       const group = CATALOG.find((o) => o.offering_id === offeringId)?.group;
       const same = Object.entries(r.shortlist ?? {}).filter(([id, e]) => id !== offeringId && e.selected && CATALOG.find((o) => o.offering_id === id)?.group === group).length;
-      if (same >= 4) return "shortlist_group_limit_exceeded";
+      if (same >= 4) return "shortlist_limit_exceeded";
     }
     // 담는 곳은 화면에서 분석을 본 모집행이다. 합성은 그 분석을 렌더링 중에 저장하지 못하므로 여기서 함께 남긴다
     const a = analysesFor(p.scores, [offeringId])[offeringId];

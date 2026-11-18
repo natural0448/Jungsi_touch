@@ -1,3 +1,6 @@
+import { StarButton } from "@/components/star-button";
+import { FAVORITE_LIMIT, myFavorites, type Favorites } from "@/lib/favorites";
+import { FieldTag } from "@/components/field-tag";
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import Form from "next/form";
@@ -65,7 +68,9 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 화면을 열 때는 저장된 분석만 붙인다. 분석이 없는 행은 버튼을 눌러야 계산한다(담당자 회신 2026-10-25).
   // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
   // 리포트 번호 힌트가 있으면 리포트 읽기를 검색과 함께 먼저 보내고, 입력 상태는 검색 뒤에 보낸다(동시 2건 유지, 2026-11-18)
-  const searching = src.searchOfferings(caller, toSearch(cur));
+  // 즐겨찾기(별표)는 본체 DB 에서 따로 읽는다(서비스 API 와 별개). '즐겨찾기만 보기'에서는 검색 대신 별표한 모집단위를 보인다
+  const favoring = myFavorites();
+  const searching = cur.fav ? favoring.then((f) => favoriteResult(f, cur)) : src.searchOfferings(caller, toSearch(cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
   const mine = startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
@@ -94,6 +99,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
 
   // 저장된 분석만 보인다. 분석이 없는 칸은 '분석 대기'로 남고 버튼으로 채운다
   const items = res.items ?? [];
+  const favs = await favoring; // 읽지 못하면 null — 별표를 숨긴다
   // 화면 안 검색·칩·다음 쪽은 같은 화면의 전환이다. React 는 전환 중에 이미 보여 준 Suspense 경계가 다시 기다리면
   // 기다리는 칸으로 바꾸지 않고 옛 화면을 붙잡아, 새 목록까지 내 리포트를 기다렸다(11-10 부담당자 측정: 검색 뒤 목록=내 점수).
   // 검색 조건을 경계의 key 로 주어 조건이 바뀌면 새 경계가 되게 한다 — 목록은 먼저 바뀌고 내 칸만 '불러오는 중'으로 기다린다.
@@ -108,6 +114,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     else groups.push({ id: o.university_id, name: o.university_name, rows: [o] });
   }
   const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group);
+  const star = (o: OfferingDto) => <span className="c-star">{favs && <StarButton id={o.offering_id} on={favs.ids.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}</span>;
   // 유료 데이터를 그린 화면: 회원 식별 표시 + 조회 기록. 모집단위를 펼쳤으면 대학 분석, 아니면 가능성 목록
   const view = viewPath(route.path, sp);
 
@@ -130,12 +137,23 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
               <span>학과명</span>
               <input type="search" name="unit" defaultValue={cur.department_q} placeholder="예: 경영, 간호" maxLength={40} />
             </label>
+            {cur.fav && <input type="hidden" name="fav" value="1" />}
             {cur.region && <input type="hidden" name="region" value={cur.region} />}
             {cur.group && <input type="hidden" name="group" value={cur.group} />}
             <button className="btn p" type="submit">검색</button>
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS.map((r) => ({ v: r, label: r }))} />
           <ChipRow label="모집군" cur={cur} k="group" items={GROUPS.map((g) => ({ v: g, label: `${g}군` }))} />
+          {favs && (
+            <div className="cfilter">
+              <span className="lab">즐겨찾기</span>
+              <div className="chips">
+                <Link href={hrefWith(cur, { fav: cur.fav ? undefined : true, open: undefined })} className={cur.fav ? "on" : undefined} aria-pressed={Boolean(cur.fav)} scroll={false}>
+                  ★ 즐겨찾기만 보기 <b className="num">{favs.ids.size}</b>
+                </Link>
+              </div>
+            </div>
+          )}
           <p className="hint">대학명만 넣으면 그 대학의 학과를, 학과명만 넣으면 그 학과가 있는 대학을 찾습니다. 추천 여부나 지원가능성 때문에 검색에서 빠지는 모집단위는 없습니다.</p>
         </section>
 
@@ -172,6 +190,12 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 <h2>올해 모집 정보가 아직 연결되지 않았습니다</h2>
                 <p>{YEAR}학년도 모집 정보를 맞춰 보는 중이라 검색 결과를 아직 보여 드릴 수 없습니다. 지원할 수 없다는 뜻이 아니며, 자료가 연결되면 이 화면에서 검색할 수 있습니다.</p>
               </section>
+            ) : groups.length === 0 && cur.fav ? (
+              <section className="gate flat">
+                <h2>{favs && favs.ids.size > 0 ? "조건에 맞는 즐겨찾기가 없습니다" : "즐겨찾기한 모집단위가 없습니다"}</h2>
+                <p>유리한 대학 찾기나 이 화면에서 학과 옆 별표(☆)를 누르면 여기에 모입니다. 담기 전에 비교해 볼 곳을 {FAVORITE_LIMIT}개까지 넣을 수 있습니다.</p>
+                <div className="acts"><Link className="btn" href={hrefWith(cur, { fav: undefined, open: undefined })}>전체 목록 보기</Link></div>
+              </section>
             ) : groups.length === 0 ? (
               <section className="gate flat">
                 <h2>조건에 맞는 모집단위가 없습니다</h2>
@@ -198,6 +222,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                       <span className="r">환산 유불리</span>
                       <span />
                       <span />
+                      <span />
                     </div>
                     <ul>
                       {g.rows.map((o) => {
@@ -212,6 +237,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                               <>
                                 <b>{o.department}</b>
                                 <small>{o.track ?? "일반전형"}</small>
+                                <FieldTag id={o.offering_id} />
                               </>
                             }
                             cells={
@@ -220,6 +246,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                                 <Suspense key={qk} fallback={<CellsWait />}>
                                   <MineCells p={mine} id={o.offering_id} />
                                 </Suspense>
+                                {star(o)}
                               </>
                             }
                             mmeta={
@@ -258,6 +285,15 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       </Suspense>
     </>
   );
+}
+
+/** '즐겨찾기만 보기': 별표한 모집단위를 지금 조건(대학명·학과명·지역·모집군)으로 걸러 검색 결과와 같은 모양으로 만든다 */
+function favoriteResult(f: Favorites | null, cur: Query): CatalogSearchDto<OfferingDto> {
+  const has = (v: string | null | undefined, q?: string) => !q || (v ?? "").includes(q);
+  const items = (f?.items ?? [])
+    .filter((o) => o.academic_year === YEAR && has(o.university_name, cur.university_q) && has(o.department, cur.department_q) && (!cur.region || o.region === cur.region) && (!cur.group || o.group.startsWith(cur.group)))
+    .sort((a, b) => a.university_name.localeCompare(b.university_name, "ko") || a.department.localeCompare(b.department, "ko"));
+  return { status: "ready", reason_code: null, items, matching_offering_count: items.length, matching_school_count: new Set(items.map((o) => o.university_id)).size, catalog_version: null, as_of: null, next_cursor: null };
 }
 
 function ChipRow({ label, cur, k, items }: { label: string; cur: Query; k: "region" | "group"; items: { v: string; label: string }[] }) {

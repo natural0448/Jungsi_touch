@@ -1,3 +1,4 @@
+import { myFavorites } from "@/lib/favorites";
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -124,6 +125,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 담기 표시는 리포트의 shortlist 로 바로 그린다. 집계(live-statistics)와 담은 학교 이름(offering.read)은 학교 목록을
   // 막지 않게 뒤이어 받는다 — 집계 줄·담은 학교 띠만 각자 채워진다
   const picked = pickedIds(report);
+  // 즐겨찾기(별표)는 본체 DB 에서 따로 읽는다. 읽지 못하면 별표를 숨긴다. 여기서 별표하면 가능성 보기에도 그대로 보인다
+  const favs = (await myFavorites())?.ids ?? null;
   const stats = statsFor(src, caller, report, cur.open);
   // 필터·펼친 학교가 바뀌는 전환에서 집계 줄·띠가 학교 목록을 붙잡지 않게 조건을 경계의 key 로 준다(3페이지와 같은 이유)
   const qk = hrefWith(cur, {});
@@ -197,7 +200,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
             ) : (
               <div className="fv-list">
                 {shown.map((g) => (
-                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} stats={stats} statsKey={qk} />
+                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} favs={favs} stats={stats} statsKey={qk} />
                 ))}
               </div>
             )}
@@ -225,7 +228,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} stats={stats} statsKey={qk} canPick analysisPending={report.analysis_status?.status === "pending"} />
+            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} favs={favs} stats={stats} statsKey={qk} canPick analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
       </div>
