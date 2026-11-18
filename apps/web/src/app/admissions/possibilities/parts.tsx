@@ -40,7 +40,7 @@ export function Detail({ o, a, extras, picked, subjects, overall }: { o: Offerin
     return (
       <>
         {recruit}
-        <div className="empty-an"><p>이 모집단위의 분석 결과를 아직 받지 못했습니다. 잠시 뒤 다시 열어 보세요.</p></div>
+        <div className="empty-an"><p>이 모집단위는 아직 내 성적으로 분석하지 않았습니다. 목록 위의 <b>내 성적으로 분석</b>을 누르면 결과가 채워집니다.</p></div>
       </>
     );
   }

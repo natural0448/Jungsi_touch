@@ -22,6 +22,9 @@ import type {
   StatisticsDto,
 } from "@/lib/dto";
 import { withConditionUnmet } from "../eligibility-conditions";
+/** 지정 과목 미응시를 '지원 조건 미충족'으로 바꿔 보일지(2026-11-19 대표님 결정으로 끔).
+ *  지금 조건 목록은 지원 요건인지 가산·반영 항목인지 가려져 있지 않다. 담당자가 요건으로 확인한 행이 오면 그 행에만 다시 켠다. */
+const CONDITION_UNMET_ENABLED: boolean = false;
 import { AccessDenied, ConnectionError, SnapshotChanged, type Caller, type JungsiSource, type Result } from "./source";
 
 /*
@@ -329,8 +332,8 @@ const statusOfCached = cache((accessToken: string, examId: string, stage: string
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- _gen 은 기억 열쇠에만 쓴다
 const reportOfCached = cache(async (accessToken: string, reportId: string, _gen: number) => {
   const r = await orNull(call<ReportDto>({ accessToken }, `/reports/${enc(reportId)}`));
-  // 지정 과목 미응시는 '지원 조건 미충족'으로 보인다(대표님 지시 2026-11-18). 서버 저장값은 바꾸지 않는다
-  return r ? withConditionUnmet(r) : r;
+  // 지정 과목 미응시 표시(2026-11-18)는 CONDITION_UNMET_ENABLED 로 끄고 켠다. 서버 저장값은 바꾸지 않는다
+  return r && CONDITION_UNMET_ENABLED ? withConditionUnmet(r) : r;
 });
 const statusOf = (accessToken: string, examId: string, stage: string | undefined) => statusOfCached(accessToken, examId, stage, writeGeneration);
 const reportOf = (accessToken: string, reportId: string) => reportOfCached(accessToken, reportId, writeGeneration);
