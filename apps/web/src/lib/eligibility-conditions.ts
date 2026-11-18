@@ -50,4 +50,35 @@ export function conditionLines(a: AssessmentDto, subjects?: SubjectResultDto[]):
   return out;
 }
 
+/**
+ * 지정 과목 미응시로 지원할 수 없는지(대표님 지시 2026-11-18). 목록으로 온 조건만 보고, 확실한 경우만 미충족으로 본다.
+ * - 수학: 지정 선택과목 목록에 내 선택과목이 없다
+ * - 탐구: 인정 영역 안에 내가 응시한 탐구 과목이 하나도 없다(일부만 맞는 경우는 반영 과목 수에 따라 달라 단정하지 않는다)
+ */
+export function conditionUnmet(a: AssessmentDto, subjects?: SubjectResultDto[]): boolean {
+  const c = a.eligibility_conditions;
+  if (!c || !subjects?.length) return false;
+  if (c.math_choices?.length && mathMark(c.math_choices, subjects) === "differ") return true;
+  if (c.inquiry_domains?.length) {
+    const mine = subjects.filter((s) => s.area === "inquiry1" || s.area === "inquiry2").map((s) => DOMAIN_OF[s.subject]);
+    if (mine.length && mine.every((d) => d && !c.inquiry_domains!.includes(d))) return true;
+  }
+  return false;
+}
+
+/** 리포트의 분석 항목 가운데 지정 과목 미응시인 곳을 '지원 조건 미충족'으로 바꿔 돌려준다. 참고 기준 판정은 붙이지 않는다 */
+export function withConditionUnmet<R extends { overall?: { subjects?: SubjectResultDto[] } | null; analyses?: Record<string, AssessmentDto> }>(report: R): R {
+  const subjects = report.overall?.subjects;
+  if (!report.analyses || !subjects?.length) return report;
+  let changed = false;
+  const analyses: Record<string, AssessmentDto> = {};
+  for (const [id, a] of Object.entries(report.analyses)) {
+    if (a.status !== "ineligible" && conditionUnmet(a, subjects)) {
+      changed = true;
+      analyses[id] = { ...a, status: "ineligible", category: "ineligible", eligibility_status: "ineligible", reason_code: "designated_subject_not_taken", reference_band: null };
+    } else analyses[id] = a;
+  }
+  return changed ? { ...report, analyses } : report;
+}
+
 export const CONDITION_MARK_TEXT: Record<"match" | "differ", string> = { match: "내 입력과 맞음", differ: "내 입력과 다름" };

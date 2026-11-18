@@ -21,6 +21,7 @@ import type {
   SnapshotHeadDto,
   StatisticsDto,
 } from "@/lib/dto";
+import { withConditionUnmet } from "../eligibility-conditions";
 import { AccessDenied, ConnectionError, SnapshotChanged, type Caller, type JungsiSource, type Result } from "./source";
 
 /*
@@ -326,7 +327,11 @@ const statusOfCached = cache((accessToken: string, examId: string, stage: string
   call<ScoreInputStatusDto>({ accessToken }, `/me/score-input-status${qs({ exam_id: examId, stage })}`),
 );
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- _gen 은 기억 열쇠에만 쓴다
-const reportOfCached = cache((accessToken: string, reportId: string, _gen: number) => orNull(call<ReportDto>({ accessToken }, `/reports/${enc(reportId)}`)));
+const reportOfCached = cache(async (accessToken: string, reportId: string, _gen: number) => {
+  const r = await orNull(call<ReportDto>({ accessToken }, `/reports/${enc(reportId)}`));
+  // 지정 과목 미응시는 '지원 조건 미충족'으로 보인다(대표님 지시 2026-11-18). 서버 저장값은 바꾸지 않는다
+  return r ? withConditionUnmet(r) : r;
+});
 const statusOf = (accessToken: string, examId: string, stage: string | undefined) => statusOfCached(accessToken, examId, stage, writeGeneration);
 const reportOf = (accessToken: string, reportId: string) => reportOfCached(accessToken, reportId, writeGeneration);
 

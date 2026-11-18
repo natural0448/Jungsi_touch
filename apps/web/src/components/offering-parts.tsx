@@ -32,6 +32,7 @@ export const decisionOf = (a: AssessmentDto) => (a.status === "ready" && a.band 
 const REASON: Record<string, string> = {
   eligibility_confirmation_required: "지원 자격을 확인해야 합니다.",
   eligibility_not_met: "입력한 성적으로는 이 전형의 지원 자격을 충족하지 않습니다.",
+  designated_subject_not_taken: "이 전형이 지정한 과목을 응시하지 않아 지원할 수 없습니다.",
   decision_range_unconfirmed: "올해 판단 구간이 아직 확정되지 않았습니다.",
   decision_policy_missing: "이 모집단위의 판단 기준이 아직 없습니다.",
   decision_policy_not_approved: "판단 기준을 검수하고 있습니다.",

@@ -223,7 +223,14 @@ function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectRes
           <p>{DECISION_CONFIRM}</p>
         )
       ) : a.status !== "ready" ? (
-        <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
+        a.reason_code === "designated_subject_not_taken" ? (
+          <>
+            <p>{reasonText(a.reason_code)} 아래에서 '내 입력과 다름'으로 표시된 조건을 확인하세요.</p>
+            <Conditions a={a} subjects={subjects} />
+          </>
+        ) : (
+          <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
+        )
       ) : (
         <>
           <p>{decisionOf(a).desc}</p>
