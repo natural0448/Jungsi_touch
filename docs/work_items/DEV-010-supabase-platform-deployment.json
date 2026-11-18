@@ -821,7 +821,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
-            "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+            "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
             "symbol": "ReportActionService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -909,7 +909,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
-            "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+            "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
             "symbol": "ReportActionService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",

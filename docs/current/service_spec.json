@@ -13740,7 +13740,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "56ba4016e8f4bf191e7bfe7502433784aef8323a4756877bb2c722e27be42beb",
+            "source_sha256": "059c6c9d72ccdeae9e8b777982f894a92635c481e56134857d3cc45e467b78b9",
             "symbols": [
               {
                 "kind": "class",
@@ -23533,7 +23533,7 @@
                 "REQ-25",
                 "REQ-26"
               ],
-              "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+              "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
               "declared_exports": [
                 "REPORT_ACTION_OPERATIONS",
                 "ReportActionService"
@@ -34806,7 +34806,7 @@
       "historical_extension_sha256": "ab3584f7880719972cf4794043700319a857fab99fd16297b4047d63998035f9",
       "current_manifest": {
         "path": "tests/review_suite_manifest.20261114_budget_candidate.json",
-        "sha256": "b17de557a71ac3dfd3fba86fabcfefd60d80fd7c93db27ceadfb4bad610f1128"
+        "sha256": "94917dfc41b239cbd3bf86460cc36d14493995a0800a06ea7471482b3b3fc335"
       },
       "additive_manifest": {
         "path": "tests/student_pk_additive_manifest.20261113_source_candidate.json",
@@ -34814,7 +34814,7 @@
       },
       "wrapper": {
         "path": "tests/test_service_candidate_suites.py",
-        "sha256": "d660d12e52ab04dd2f1a650c03bedf7cc5a155c921b4d8e959705cd2d7a60926"
+        "sha256": "830059a26c63ddd7c60d0ce8f498d1e243239f3d7b81429ced1cfe09f98524f0"
       },
       "regression_test": {
         "path": "tests/test_service_candidate_registry.py",
@@ -45021,7 +45021,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
-            "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+            "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
             "symbol": "ReportActionService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -45109,7 +45109,7 @@
           "deployment": "NOT_RUN",
           "binding": {
             "path": "supabase/functions/_shared/jungsi/application/report_actions.ts",
-            "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+            "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
             "symbol": "ReportActionService.execute",
             "http": "supabase/functions/_shared/jungsi/infrastructure/api_http.ts#createApiHandler",
             "supabase_prefix": "supabase/functions/_shared/jungsi/infrastructure/supabase_api_ingress.ts#createSupabaseApiIngress",
@@ -126480,7 +126480,7 @@
               "src": "supabase/functions/_shared/jungsi/domain/time.ts"
             }
           ],
-          "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+          "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
           "symbols": [
             {
               "declarations": [
@@ -126703,6 +126703,166 @@
                         },
                         "kind": "method",
                         "name": "execute"
+                      },
+                      {
+                        "accessibility": "private",
+                        "functionDef": {
+                          "hasBody": true,
+                          "isAsync": true,
+                          "params": [
+                            {
+                              "kind": "identifier",
+                              "name": "owner",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "keyword",
+                                "repr": "string",
+                                "value": "string"
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "release",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "intersection",
+                                "value": [
+                                  {
+                                    "kind": "typeRef",
+                                    "repr": "Awaited",
+                                    "value": {
+                                      "typeName": "Awaited",
+                                      "typeParams": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "ReturnType",
+                                          "value": {
+                                            "typeName": "ReturnType",
+                                            "typeParams": [
+                                              {
+                                                "kind": "indexedAccess",
+                                                "value": {
+                                                  "indexType": {
+                                                    "kind": "literal",
+                                                    "repr": "catalog",
+                                                    "value": {
+                                                      "kind": "string",
+                                                      "string": "catalog"
+                                                    }
+                                                  },
+                                                  "objType": {
+                                                    "kind": "typeRef",
+                                                    "repr": "CatalogService",
+                                                    "value": {
+                                                      "resolution": {
+                                                        "kind": "import",
+                                                        "name": "CatalogService",
+                                                        "specifier": "./catalog.ts"
+                                                      },
+                                                      "typeName": "CatalogService"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "kind": "keyword",
+                                    "repr": "object",
+                                    "value": "object"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "target",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeRef",
+                                "repr": "NativeObject",
+                                "value": {
+                                  "resolution": {
+                                    "kind": "import",
+                                    "name": "NativeObject",
+                                    "specifier": "../domain/json_value.ts"
+                                  },
+                                  "typeName": "NativeObject"
+                                }
+                              }
+                            },
+                            {
+                              "kind": "identifier",
+                              "name": "ids",
+                              "optional": false,
+                              "tsType": {
+                                "kind": "typeOperator",
+                                "value": {
+                                  "operator": "readonly",
+                                  "tsType": {
+                                    "kind": "array",
+                                    "value": {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "returnType": {
+                            "kind": "typeRef",
+                            "repr": "Promise",
+                            "value": {
+                              "typeName": "Promise",
+                              "typeParams": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Map",
+                                  "value": {
+                                    "typeName": "Map",
+                                    "typeParams": [
+                                      {
+                                        "kind": "keyword",
+                                        "repr": "string",
+                                        "value": "string"
+                                      },
+                                      {
+                                        "kind": "union",
+                                        "value": [
+                                          {
+                                            "kind": "typeRef",
+                                            "repr": "NativeJson",
+                                            "value": {
+                                              "resolution": {
+                                                "kind": "import",
+                                                "name": "NativeJson",
+                                                "specifier": "../domain/native_json.ts"
+                                              },
+                                              "typeName": "NativeJson"
+                                            }
+                                          },
+                                          {
+                                            "kind": "keyword",
+                                            "repr": "undefined",
+                                            "value": "undefined"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "kind": "method",
+                        "name": "groupsOf"
                       },
                       {
                         "accessibility": "private",
@@ -273751,7 +273911,7 @@
               "src": "tests/edge/synthetic_catalog.ts"
             }
           ],
-          "source_sha256": "2d0a33f90454cad571fc86f0bcd060cad12e199f25780f6b8f82059f54335dbd",
+          "source_sha256": "60a1efc488fc792867edcb1fa75acacff467c159b54d9710339d74cef107ccfa",
           "symbols": [
             {
               "declarations": [
@@ -365444,7 +365604,7 @@
       "supabase/functions/_shared/jungsi/application/reference_quiescence_fence.review-only.ts": "22bbbad8beb8de94aee287c6503b436121a1aa378deb9e021fb6812d1920aae4",
       "supabase/functions/_shared/jungsi/application/reference_quiescence_fence.synthetic_test.ts": "cca4d7f861c173fe143dcdb983409e5c45ff67a6a80fbf9a3842a8615a1a192e",
       "supabase/functions/_shared/jungsi/application/reference_report_projection.ts": "0d19c4c010d43ac98d1de44aed2a5a290a91746c546de2398f618c3e1d3aaa78",
-      "supabase/functions/_shared/jungsi/application/report_actions.ts": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+      "supabase/functions/_shared/jungsi/application/report_actions.ts": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
       "supabase/functions/_shared/jungsi/application/request_budget.ts": "287b51a90ea6e50d9104ea6b557b310c9bfb046b5110687b98d7629e1bfc1830",
       "supabase/functions/_shared/jungsi/application/research_offering.ts": "61bce98d94da99f0dbccb0ab918fcafc8f36bbe553a04f25347d6e6930a30dda",
       "supabase/functions/_shared/jungsi/application/rule_explanations.ts": "06665302e154a32106bb2ea9a10057004690e63762dde36e3ceeb48b2cec3028",
@@ -365676,7 +365836,7 @@
       "tests/edge/test_reference_tail_prefetch.followup.synthetic.ts": "909acf1c05d7c937cbd82fcd6e19affd39d91e8f881b6ea29f7a699bfa1600c7",
       "tests/edge/test_reference_tail_selection.ts": "1dd7607650896db3bdc5b1682bd902fb5813cf3daf20d5c1587eaa7ce3609d7b",
       "tests/edge/test_reference_tail_storage.ts": "33da457ca6faedfface04741fbd27902542e8b8c2d719941eef5c322e8df03e8",
-      "tests/edge/test_report_actions.ts": "2d0a33f90454cad571fc86f0bcd060cad12e199f25780f6b8f82059f54335dbd",
+      "tests/edge/test_report_actions.ts": "60a1efc488fc792867edcb1fa75acacff467c159b54d9710339d74cef107ccfa",
       "tests/edge/test_runtime_budget.ts": "4e87eb4cb6779edfd03be5d4a6b236227f3f7ae0d9d504cc413080faec43492e",
       "tests/edge/test_runtime_composition.ts": "9068115febab60b410e5a13bc9b69c4dcf589a06688b1ab74c7f3959ff80dee9",
       "tests/edge/test_runtime_context.ts": "46b71f1c7a5aa4418476c671c1177adbf4cdf76ab87c7f36f7f3378896b50b70",
@@ -367618,7 +367778,7 @@
       "previous_registration_sha256": "2975168d8c675251a0cc8f329e5f70507c7081151d5513966dc3595da5d4e67b",
       "graph_manifest_path": "tests/catalog_descriptor_review_graph.20261113_saved_report.current.json",
       "graph_manifest_sha256": "05640c712027db4836d6b7154ac1df0c3d4ef0894eb5072ab2aad9e17a6629e8",
-      "bridge_sha256": "00b5939d0134d40c0c4d15a2912871715900f2a8538695fb8d48d72f63317b52"
+      "bridge_sha256": "445cba468884feb218cea0fbab08db62c0163a913eb8b146043c725469d4e433"
     }
   },
   "P1_display_snapshot_contract": {
@@ -371658,7 +371818,7 @@
       "supabase/functions/_shared/jungsi/infrastructure/native_data_provider.ts": "fe8e4a900cadc45a271b81aecfd63bd4fc25dd57e1b27ecf0c40f8ba45282ed7",
       "supabase/functions/_shared/jungsi/infrastructure/native_source_selection.ts": "0f9264d06f028d8d607e01f48813577f16e81cd65d294c48b7995ca66600450e",
       "scripts/check_edge_contract.py": "406161ad3925ea3096a4e710070ffac828a151486b45a4d6ff7183073b728f1e",
-      "scripts/check_project_consistency.py": "56ba4016e8f4bf191e7bfe7502433784aef8323a4756877bb2c722e27be42beb",
+      "scripts/check_project_consistency.py": "059c6c9d72ccdeae9e8b777982f894a92635c481e56134857d3cc45e467b78b9",
       "scripts/run_edge_tests.py": "4cb0315ea147abf617c66dae3086acacf7851e8b71d2538c049579bf680a0f6d",
       "src/jungsi_touch/application/public_response_schemas.json": "8fb479771fbadebf860dd3d97f8ea28f2fe631f2195939bd727865601c1e8db1",
       "supabase/functions/_shared/combined_policy_catalog_runtime.ts": "b5f28b162f5293dbc8eef39e4c3c9968057ca0b3faa261ffcaaa1045c520a162",

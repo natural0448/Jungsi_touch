@@ -107758,7 +107758,7 @@
             "src": "supabase/functions/_shared/jungsi/domain/time.ts"
           }
         ],
-        "source_sha256": "decd351cfe116589fd73e8e0f68b02bc9b06b5b3d5a784f4f2f77f5b979d8812",
+        "source_sha256": "f1e4c7b96bb80dcd1955e283880459bbd1b1bbdce82c1b6b96d5f3682242fe80",
         "symbols": [
           {
             "declarations": [
@@ -107981,6 +107981,166 @@
                       },
                       "kind": "method",
                       "name": "execute"
+                    },
+                    {
+                      "accessibility": "private",
+                      "functionDef": {
+                        "hasBody": true,
+                        "isAsync": true,
+                        "params": [
+                          {
+                            "kind": "identifier",
+                            "name": "owner",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "keyword",
+                              "repr": "string",
+                              "value": "string"
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "release",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "intersection",
+                              "value": [
+                                {
+                                  "kind": "typeRef",
+                                  "repr": "Awaited",
+                                  "value": {
+                                    "typeName": "Awaited",
+                                    "typeParams": [
+                                      {
+                                        "kind": "typeRef",
+                                        "repr": "ReturnType",
+                                        "value": {
+                                          "typeName": "ReturnType",
+                                          "typeParams": [
+                                            {
+                                              "kind": "indexedAccess",
+                                              "value": {
+                                                "indexType": {
+                                                  "kind": "literal",
+                                                  "repr": "catalog",
+                                                  "value": {
+                                                    "kind": "string",
+                                                    "string": "catalog"
+                                                  }
+                                                },
+                                                "objType": {
+                                                  "kind": "typeRef",
+                                                  "repr": "CatalogService",
+                                                  "value": {
+                                                    "resolution": {
+                                                      "kind": "import",
+                                                      "name": "CatalogService",
+                                                      "specifier": "./catalog.ts"
+                                                    },
+                                                    "typeName": "CatalogService"
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "keyword",
+                                  "repr": "object",
+                                  "value": "object"
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "target",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeRef",
+                              "repr": "NativeObject",
+                              "value": {
+                                "resolution": {
+                                  "kind": "import",
+                                  "name": "NativeObject",
+                                  "specifier": "../domain/json_value.ts"
+                                },
+                                "typeName": "NativeObject"
+                              }
+                            }
+                          },
+                          {
+                            "kind": "identifier",
+                            "name": "ids",
+                            "optional": false,
+                            "tsType": {
+                              "kind": "typeOperator",
+                              "value": {
+                                "operator": "readonly",
+                                "tsType": {
+                                  "kind": "array",
+                                  "value": {
+                                    "kind": "keyword",
+                                    "repr": "string",
+                                    "value": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "returnType": {
+                          "kind": "typeRef",
+                          "repr": "Promise",
+                          "value": {
+                            "typeName": "Promise",
+                            "typeParams": [
+                              {
+                                "kind": "typeRef",
+                                "repr": "Map",
+                                "value": {
+                                  "typeName": "Map",
+                                  "typeParams": [
+                                    {
+                                      "kind": "keyword",
+                                      "repr": "string",
+                                      "value": "string"
+                                    },
+                                    {
+                                      "kind": "union",
+                                      "value": [
+                                        {
+                                          "kind": "typeRef",
+                                          "repr": "NativeJson",
+                                          "value": {
+                                            "resolution": {
+                                              "kind": "import",
+                                              "name": "NativeJson",
+                                              "specifier": "../domain/native_json.ts"
+                                            },
+                                            "typeName": "NativeJson"
+                                          }
+                                        },
+                                        {
+                                          "kind": "keyword",
+                                          "repr": "undefined",
+                                          "value": "undefined"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "kind": "method",
+                      "name": "groupsOf"
                     },
                     {
                       "accessibility": "private",
@@ -294104,7 +294264,7 @@
             "src": "tests/edge/synthetic_catalog.ts"
           }
         ],
-        "source_sha256": "2d0a33f90454cad571fc86f0bcd060cad12e199f25780f6b8f82059f54335dbd",
+        "source_sha256": "60a1efc488fc792867edcb1fa75acacff467c159b54d9710339d74cef107ccfa",
         "symbols": [
           {
             "declarations": [

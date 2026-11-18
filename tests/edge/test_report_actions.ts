@@ -242,7 +242,7 @@ async function groupLimitCase() {
   // 한도 전에 다섯 개가 담겨 있어도 그대로 읽히고, 같은 군에 새로 담는 것만 막힌다
   await denied(
     () => call(OID, true, 1, "SYNTHETIC-limit-1"),
-    "shortlist_group_limit_exceeded",
+    "shortlist_limit_exceeded",
     409,
   );
   equal(repo.reports.get(RID)!.revision, 1);
@@ -255,7 +255,7 @@ async function groupLimitCase() {
   equal((await call(ids[0], false, 2, "SYNTHETIC-limit-3")).report_version, 3);
   await denied(
     () => call(OID, true, 3, "SYNTHETIC-limit-4"),
-    "shortlist_group_limit_exceeded",
+    "shortlist_limit_exceeded",
     409,
   );
   equal((await call(ids[1], false, 3, "SYNTHETIC-limit-5")).report_version, 4);
@@ -264,7 +264,59 @@ async function groupLimitCase() {
   equal(((done.shortlist as NativeObject)[OID] as NativeObject).selected, true);
   // 이미 담긴 것을 다시 담는 요청은 한도와 무관하게 그대로다
   equal((await call(ids[2], true, 5, "SYNTHETIC-limit-7")).report_version, 5);
+  // 운영 카탈로그처럼 전국 목록 없이 요청한 모집단위만 내주는 경우에도 이미 담긴 것의 군을 조회해 센다
+  class PagedCatalog extends CatalogService {
+    lookups = 0;
+    constructor() {
+      super({ getCatalog: () => syncPromise(() => ({ ...wide, offerings: [] })) }, clock);
+    }
+    override offering(_release: unknown, id: unknown): NativeObject {
+      const row = wide.offerings.find((r) => r.offering_id === id);
+      if (!row) throw new AccessError("offering_not_found", 404);
+      return row;
+    }
+    override selectedOfferings(_owner: string, _year: number, wanted: readonly string[]) {
+      this.lookups++;
+      return Promise.resolve(
+        new Map(
+          wide.offerings.filter((r) => wanted.includes(r.offering_id as string)).map((r) =>
+            [r.offering_id as string, r] as [string, NativeObject]
+          ),
+        ),
+      );
+    }
+  }
+  const pagedRepo = new SyntheticNativeRepository(), paged = new PagedCatalog();
+  pagedRepo.profiles.set(PID, {
+    profile_id: PID,
+    owner_id: OWNER,
+    scores: {},
+    confirmed: true,
+    created_at: TIME,
+  });
+  const full = report();
+  full.body.shortlist = {
+    [OID]: row(false),
+    "SYNTHETIC-gone": row(true),
+    ...Object.fromEntries(ids.slice(0, 4).map((id) => [id, row(true)])),
+  };
+  pagedRepo.reports.set(RID, full);
+  const pagedService = new ReportActionService(pagedRepo, paged, clock);
+  const pagedCall = (oid: string, selected: boolean, version: number, key: string) => {
+    const r = input("shortlist.update", { selected, expected_version: version }, true, key);
+    return pagedService.execute({ ...r, params: { ...r.params, offering_id: oid } });
+  };
+  await denied(
+    () => pagedCall(OID, true, 1, "SYNTHETIC-paged-1"),
+    "shortlist_limit_exceeded",
+    409,
+  );
+  assert(paged.lookups > 0);
+  equal((await pagedCall("SYNTHETIC-b", true, 1, "SYNTHETIC-paged-2")).report_version, 2);
+  equal((await pagedCall(ids[0], false, 2, "SYNTHETIC-paged-3")).report_version, 3);
+  equal((await pagedCall(OID, true, 3, "SYNTHETIC-paged-4")).report_version, 4);
 }
+
 Deno.test("shortlist without catalog is a pending dependency and does not update report", async () => {
   const f = fixture(),
     catalog = new CatalogService({

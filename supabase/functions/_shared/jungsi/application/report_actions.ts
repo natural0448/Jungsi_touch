@@ -119,18 +119,12 @@ export class ReportActionService implements ApiBusinessPort {
       old = shortlist[oid];
     const noOp = object(old) && old.selected === input.selected;
     if (!noOp && input.selected) {
-      const groups = new Map<string, NativeJson | undefined>();
-      for (const row of this.catalog.serviceRows(release)) {
-        if (typeof row.offering_id === "string") groups.set(row.offering_id, row.group);
-      }
-      let sameGroup = 0;
-      for (const [id, row] of Object.entries(shortlist)) {
-        if (id !== oid && object(row) && row.selected === true && groups.get(id) === target.group) {
-          sameGroup += 1;
-        }
-      }
-      if (sameGroup >= SHORTLIST_GROUP_LIMIT) {
-        throw new AccessError("shortlist_group_limit_exceeded", 409);
+      const others = Object.entries(shortlist).filter(([id, row]) =>
+        id !== oid && object(row) && row.selected === true
+      ).map(([id]) => id);
+      const groups = await this.groupsOf(session.user.subjectId, release, target, others);
+      if (others.filter((id) => groups.get(id) === target.group).length >= SHORTLIST_GROUP_LIMIT) {
+        throw new AccessError("shortlist_limit_exceeded", 409);
       }
     }
     if (!noOp) {
@@ -157,6 +151,48 @@ export class ReportActionService implements ApiBusinessPort {
     });
     this.fresh(session);
     return reportDto(session, written);
+  }
+  /** 이미 담긴 모집단위의 모집군. 운영 카탈로그는 요청한 모집단위만 조회하므로(전국 목록을 들고 있지 않다)
+   * 목록에 없는 것은 선택 조회로 읽는다. 지금 카탈로그에서 찾을 수 없는 것은 세지 않는다. */
+  private async groupsOf(
+    owner: string,
+    release: Awaited<ReturnType<CatalogService["catalog"]>> & object,
+    target: NativeObject,
+    ids: readonly string[],
+  ): Promise<Map<string, NativeJson | undefined>> {
+    const groups = new Map<string, NativeJson | undefined>();
+    const wanted = new Set(ids);
+    for (const row of this.catalog.serviceRows(release)) {
+      if (typeof row.offering_id === "string" && wanted.has(row.offering_id)) {
+        groups.set(row.offering_id, row.group);
+      }
+    }
+    const missing = ids.filter((id) => !groups.has(id) && ID.test(id)),
+      year = Number(target.academic_year);
+    if (!missing.length || !Number.isSafeInteger(year)) return groups;
+    const read = async (part: readonly string[]) => {
+      for (const [id, row] of await this.catalog.selectedOfferings(owner, year, part)) {
+        groups.set(id, row.group);
+      }
+    };
+    for (let at = 0; at < missing.length; at += 100) {
+      const part = missing.slice(at, at + 100);
+      try {
+        await read(part);
+      } catch (e) {
+        if (!(e instanceof AccessError)) throw e;
+        if (e.code === "operation_scope_not_approved") return groups;
+        // 묶음 안에 지금 카탈로그에 없는 것이 섞여 있으면 하나씩 읽어 있는 것만 센다
+        for (const id of part) {
+          try {
+            await read([id]);
+          } catch (x) {
+            if (!(x instanceof AccessError)) throw x;
+          }
+        }
+      }
+    }
+    return groups;
   }
   private async statistics(
     session: SessionSnapshot,
