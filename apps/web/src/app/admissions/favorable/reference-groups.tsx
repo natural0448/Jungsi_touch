@@ -30,7 +30,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, p3Label }
     <section className="fv-ref" aria-labelledby="ref-t">
       <div className="fv-sec-hd">
         <h2 id="ref-t">
-          지원해 볼 만한 대학 <span className="num">{universities.length}</span>
+          내 성적 분포상 지원에 유리한 대학 <span className="num">{universities.length}</span>
         </h2>
         <span>지난해 합격선(70%컷)에 내 위치가 닿는 학과만, 여유가 큰 학교부터 보여 줍니다. 계열을 누르면 학과가 펼쳐집니다.</span>
       </div>
