@@ -1,6 +1,7 @@
 import type { AssessmentDto, EligibilityConditionsDto, SubjectResultDto } from "./dto";
 import { INQUIRY_SUBJECTS } from "./exam";
 import { REQUIRED_CONDITIONS_101 } from "./required-conditions-101";
+import { FORMAL105_CONDITIONS } from "./formal105-conditions";
 
 /**
  * 지원 자격 조건(대표님 결정 2026-11-15). 서버가 요강 정본에서 확정된 필드만 보낸다.
@@ -91,9 +92,9 @@ export const CONDITION_MARK_TEXT: Record<"match" | "differ", string> = { match: 
  */
 const BASE = (name: string) => name.replace(/[ⅠⅡ]$/, "");
 export function requiredUnmet(offeringId: string, subjects: SubjectResultDto[] | undefined): boolean {
-  const r = REQUIRED_CONDITIONS_101[offeringId];
+  const r = REQUIRED_CONDITIONS_101[offeringId] ?? FORMAL105_CONDITIONS[offeringId];
   if (!r || !subjects?.length) return false;
-  if (r.m) {
+  if ("m" in r && r.m) {
     const mine = subjects.find((x) => x.area === "math")?.choice;
     if (mine && !r.m.map(squash).includes(squash(mine))) return true;
   }
@@ -101,8 +102,8 @@ export function requiredUnmet(offeringId: string, subjects: SubjectResultDto[] |
   const domains = inq.map((x) => DOMAIN_OF[x.subject]);
   if (inq.length === 0 || domains.some((d) => !d)) return false;
   if (r.d && r.n !== undefined && domains.filter((d) => r.d!.includes(d!)).length < r.n) return true;
-  if (r.s !== undefined && domains.filter((d) => d === "과학").length < r.s) return true;
-  if (r.x && inq.length === 2 && domains.every((d) => d === "과학") && BASE(inq[0].subject) === BASE(inq[1].subject) && inq[0].subject !== inq[1].subject) return true;
+  if ("s" in r && r.s !== undefined && domains.filter((d) => d === "과학").length < r.s) return true;
+  if ("x" in r && r.x && inq.length === 2 && domains.every((d) => d === "과학") && BASE(inq[0].subject) === BASE(inq[1].subject) && inq[0].subject !== inq[1].subject) return true;
   return false;
 }
 
@@ -119,4 +120,22 @@ export function withRequiredUnmet<R extends { overall?: { subjects?: SubjectResu
     } else analyses[id] = a;
   }
   return changed ? { ...report, analyses } : report;
+}
+
+/**
+ * 정식 판정 우선 105개 모집단위의 지원자격 안내(담당자 v38, 대표님 결정 2026-11-19).
+ * 점수로 확인할 조건(2027 본수능 응시·필수 영역·탐구 과목)은 본수능 실채점 성적이 저장됐을 때만 '충족'으로 본다.
+ * 9월 모의평가·가채점이면 '확인 필요'. 학력과 지역인재 증빙은 늘 모집요강에서 확인하도록 안내한다.
+ * 확실히 어긋나는 탐구 조건은 requiredUnmet 이 '지원 조건 미충족'으로 바꾼다.
+ */
+export interface Formal105Notice { score: "met" | "unverified"; text: string; documents: string }
+export function formal105Notice(offeringId: string, examType: string | null | undefined, subjects?: SubjectResultDto[]): Formal105Notice | null {
+  const r = FORMAL105_CONDITIONS[offeringId];
+  if (!r) return null;
+  const parts = ["2027 본수능 응시"];
+  if (r.d && r.n) parts.push(`${r.d.map((d) => d + "탐구").join("·")} 중 ${r.n}과목`);
+  const documents = r.g ? "학력과 지역인재 자격 증빙" : "학력(고교 졸업 또는 동등)";
+  const final = examType === "csat_final" || examType === "csat";
+  const score = final && subjects?.length && !requiredUnmet(offeringId, subjects) ? "met" : "unverified";
+  return { score, text: parts.join(" · "), documents };
 }

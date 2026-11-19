@@ -205,3 +205,7 @@
 .et .ps .years .cl-g.above{color:var(--safe);font-weight:700}
 .et .ps .years .cl-g.below{color:var(--reach);font-weight:700}
 @media (max-width:560px){.et .ps .years .cl{grid-template-columns:max-content minmax(0,1fr)}.et .ps .years .cl-g{grid-column:1 / -1;padding-left:8px;margin-bottom:4px}}
+
+/* 정식 판정 우선 105개 모집단위의 지원자격 안내(2026-11-20) */
+.et .ps .f105{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.et .ps .f105 b{margin-right:6px;color:var(--deep)}

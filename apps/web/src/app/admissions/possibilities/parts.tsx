@@ -4,7 +4,7 @@ import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
 import type { AssessmentDto, OfferingDto, OverallResultDto, SubjectResultDto } from "@/lib/dto";
 import { referenceAdvantage } from "@/lib/reference-advantage";
-import { CONDITION_MARK_TEXT, conditionLines } from "@/lib/eligibility-conditions";
+import { CONDITION_MARK_TEXT, conditionLines, formal105Notice } from "@/lib/eligibility-conditions";
 import { yearCutoffLines } from "@/lib/year-cutoffs";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
@@ -16,7 +16,7 @@ import { P1YearCell } from "./p1-year-cell";
  * 펼친 줄: 2027 모집 정보(extras 자리, recruit-parts.tsx) + 환산·학교 누백·지원 판단·유불리 + 근거(assessment).
  * 환산·누백·판단은 서로 따로 준비된다(1.7.0). 판단이 보류여도 성공한 환산·누백은 숨기지 않는다.
  */
-export function Detail({ o, a, extras, picked, subjects, overall }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null }) {
+export function Detail({ o, a, extras, picked, subjects, overall, examType }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null; examType?: string | null }) {
   const p2 = page("PAGE-02").path;
   // 2027 모집 정보·발행 기준은 펼친 뒤 따로 받아 채운다(extras.tsx) — 펼치기를 기다리게 하지 않는다
   const recruit = extras;
@@ -52,7 +52,7 @@ export function Detail({ o, a, extras, picked, subjects, overall }: { o: Offerin
       <div className="four">
         <ConversionCard a={a} />
         <PercentileCard a={a} />
-        <DecisionCard a={a} subjects={subjects} />
+        <DecisionCard a={a} subjects={subjects} examType={examType} />
         <AdvantageCard a={a} overall={overall} />
       </div>
       <SchoolReflectedLine a={a} />
@@ -196,7 +196,18 @@ function Conditions({ a, subjects }: { a: AssessmentDto; subjects?: SubjectResul
   );
 }
 
-function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectResultDto[] }) {
+function Formal105({ a, subjects, examType }: { a: AssessmentDto; subjects?: SubjectResultDto[]; examType?: string | null }) {
+  const n = formal105Notice(a.offering_id, examType, subjects);
+  if (!n || a.status === "ineligible") return null;
+  return (
+    <p className="f105">
+      <b>{n.score === "met" ? "점수 조건 충족" : "지원자격 확인 필요"}</b> 모집요강 지원자격: {n.text}.{" "}
+      {n.score === "met" ? `${n.documents}은 모집요강에서 확인하세요.` : `본수능 실채점 성적을 넣으면 점수로 확인할 수 있는 조건을 확인합니다. ${n.documents}은 모집요강에서 확인하세요.`}
+    </p>
+  );
+}
+
+function DecisionCard({ a, subjects, examType }: { a: AssessmentDto; subjects?: SubjectResultDto[]; examType?: string | null }) {
   const d = a.decision_components;
   return (
     <section className="card" aria-label="지원가능성">
@@ -204,6 +215,7 @@ function DecisionCard({ a, subjects }: { a: AssessmentDto; subjects?: SubjectRes
       <div>
         <CategoryBadge a={a} />
       </div>
+      <Formal105 a={a} subjects={subjects} examType={examType} />
       {referenceBandOf(a) && (
         <>
           <p>

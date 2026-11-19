@@ -117,3 +117,19 @@ test("withRequiredUnmet changes only listed offerings and keeps the server value
   assert.equal(out.analyses["2027:1000001185"].reference_band, null);
   assert.equal(out.analyses["2027:1"], report.analyses["2027:1"]);
 });
+
+test("formal 105: 탐구 조건 미충족은 확실할 때만, 점수 조건 충족은 본수능 실채점일 때만(2026-11-20)", async () => {
+  const { formal105Notice } = await import("../src/lib/eligibility-conditions.ts");
+  const { FORMAL105_CONDITIONS } = await import("../src/lib/formal105-conditions.ts");
+  const ids = Object.keys(FORMAL105_CONDITIONS);
+  assert.equal(ids.length, 105);
+  const sci = ids.find((k) => FORMAL105_CONDITIONS[k].d?.length === 1);
+  const plain = ids.find((k) => !FORMAL105_CONDITIONS[k].d);
+  assert.equal(requiredUnmet(sci, subj("미적분", "생활과 윤리", "화학Ⅰ")), true);
+  assert.equal(requiredUnmet(sci, subj("미적분", "물리학Ⅰ", "화학Ⅰ")), false);
+  assert.equal(requiredUnmet(plain, subj("확률과 통계", "생활과 윤리", "한국지리")), false);
+  assert.equal(formal105Notice(sci, "september_mock", subj("미적분", "물리학Ⅰ", "화학Ⅰ")).score, "unverified");
+  assert.equal(formal105Notice(sci, "csat_final", subj("미적분", "물리학Ⅰ", "화학Ⅰ")).score, "met");
+  assert.equal(formal105Notice(sci, "csat_final", subj("미적분", "생활과 윤리", "화학Ⅰ")).score, "unverified");
+  assert.equal(formal105Notice("2027:1", "csat_final", []), null);
+});
