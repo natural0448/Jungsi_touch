@@ -134,6 +134,9 @@
 .et .wc-score{display:flex;align-items:baseline;gap:5px;margin-top:14px}
 .et .wc-score b{font-size:30px;font-weight:900;letter-spacing:-1px;color:var(--deep)}
 .et .wc-score i{font-style:normal;font-size:13px;font-weight:700;color:#8C8470}
+.et .wc-score.ref{flex-direction:column;align-items:flex-start;gap:2px}
+.et .wc-score.ref b{font-size:22px;letter-spacing:-.6px;white-space:nowrap}
+.et .wc-score.ref b small{font-size:12px;font-weight:700;color:#8C8470;letter-spacing:0}
 .et .wc-move{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13px}
 .et .wc-move small{display:block;font-size:11px;font-weight:600;color:#8C8470;margin-bottom:1px}
 .et .wc-move .from{color:#8C8470;font-weight:700}

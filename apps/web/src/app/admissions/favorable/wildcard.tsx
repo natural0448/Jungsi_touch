@@ -216,9 +216,10 @@ function ReferenceWildCard({ w, fav }: { w: ReferenceItem; fav: boolean | null }
           ? `이 학과 계산 방식에서 전체 성적 기준보다 내 위치가 ${a.text}%p 올라갑니다(참고).`
           : "참고 누백이 나온 계열 후보입니다."}
       </p>
-      <div className="wc-score">
-        {pct ? <b className="num">상위 {pct}%<small> 참고</small></b> : <b>계산 보류</b>}
+      {/* 범위 값(상위 0.7~1.0%)도 한 줄에 들도록 설명을 위로 올리고 숫자를 조금 줄인다 */}
+      <div className="wc-score ref">
         <i>이 대학 방식 누적 백분위(추정)</i>
+        {pct ? <b className="num">상위 {pct}%<small> 참고</small></b> : <b>계산 보류</b>}
       </div>
       <div className="wc-bench">
         <span>
