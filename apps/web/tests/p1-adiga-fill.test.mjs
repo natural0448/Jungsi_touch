@@ -84,3 +84,25 @@ test("대학어디가 충원인원(fills, 0 포함)은 예비번호보다 뒤, �
   assert.equal(c.ad.v, null);
   assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, fills: { [k]: "-1" } })), null);
 });
+
+test("미발표 코드·'가군' 표기·성적 stats·3인 이하 미발표(2026-11-19 밤)", async () => {
+  const { FILL_UNDISCLOSED, STATS_LE3 } = await import("../src/lib/p1-adiga-fill.ts");
+  const text = JSON.stringify({
+    format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" },
+    fills: { "2025|11|수능(일반전형)|다": "undisclosed", "2025|12|수능(일반전형)|가": "9" },
+    stats: { "2025|11|수능(일반전형)|다": [{ label: "50%컷", value: "788", basis: "대학 환산점수" }], "2025|13|수능(일반전형)|다": "le3" },
+  });
+  const fill = parseAdigaFill(text);
+  assert.ok(fill);
+  const [a, b, c] = applyAdigaFill([row(2025, "11"), row(2025, "12", { g: "가군" }), row(2025, "13")], fill);
+  assert.equal(a.ad.v, null);
+  assert.equal(a.ad.r, FILL_UNDISCLOSED);
+  assert.equal(a.c50.v, "788");
+  assert.equal(b.ad.v, "9");
+  assert.equal(c.c50.r, STATS_LE3);
+  assert.equal(c.c50.v, null);
+  // 모르는 지표 이름·잘못된 코드는 표 전체를 버린다
+  for (const bad of [{ fills: { "2025|11|x|다": "none" } }, { stats: { "2025|11|x|다": [{ label: "평균", value: "1" }] } }, { stats: { "2025|11|x|다": "le4" } }]) {
+    assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ...bad })), null);
+  }
+});

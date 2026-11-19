@@ -16,7 +16,12 @@ const VALUE = /^[0-9]{1,4}(?:\.[0-9]{1,4})?$/;
 const MAX = 20000;
 const RANK_KEY = /^(2024|2025|2026)\|[0-9]{1,12}\|[^|]{1,80}\|[가나다]$/;
 const RANK_VALUE = /^[1-9][0-9]{0,5}$/;
-const FILL_VALUE = /^(?:0|[1-9][0-9]{0,5})$/;
+const FILL_VALUE = /^(?:0|[1-9][0-9]{0,5}|undisclosed|unavailable)$/;
+/** 충원 칸 사유 코드(2026-11-19 대표님: 빈칸 없음, 발표 안 함·자료 없음은 '미발표') */
+export const FILL_UNDISCLOSED = "fill_undisclosed";
+/** 성적 칸 사유 코드: 3인 이하라 대학이 성적을 발표하지 않음 */
+export const STATS_LE3 = "stats_le3_undisclosed";
+const STAT_LABELS = new Set(["50%컷", "70%컷"]);
 /** p1-published-stats 의 statName 과 같은 규칙으로 50·70%컷 이름만 맞춘다(시험이 TS 확장자 없이 불러오도록 값 가져오기를 두지 않음) */
 const cutName = (l: string | null) => {
   const m = /^(\d{1,3})(?:%컷|%cut|_percent_cut|%)$/i.exec((l ?? "").replace(/\s+/g, ""));
@@ -50,6 +55,23 @@ export function parseAdigaFill(text: string | null): AdigaFill | null {
       out.set(`R|${k}`, v);
     }
   }
+  // 대학어디가 원본의 성적(50%·70%컷) 또는 3인 이하 미발표(le3). 키: 학년도|PK|전형|군
+  const { stats } = doc as { stats?: unknown };
+  if (stats !== undefined) {
+    if (!stats || typeof stats !== "object" || Array.isArray(stats)) return null;
+    const ss = Object.entries(stats as Record<string, unknown>);
+    if (ss.length > MAX) return null;
+    for (const [k, v] of ss) {
+      if (!RANK_KEY.test(k)) return null;
+      if (v === "le3") { out.set(`S|${k}`, "le3"); continue; }
+      if (!Array.isArray(v) || v.length < 1 || v.length > 4) return null;
+      for (const it of v) {
+        const { label, value } = (it ?? {}) as { label?: unknown; value?: unknown };
+        if (typeof label !== "string" || !STAT_LABELS.has(label) || typeof value !== "string" || !VALUE.test(value)) return null;
+        out.set(`S|${k}|${label}`, value);
+      }
+    }
+  }
   // 대학어디가 '전형 결과' 표의 충원인원(명, 2026-11-19 화면팀 원문 대조). 0은 원문 표 값이 0인 칸만 담는다
   if (fills !== undefined) {
     if (!fills || typeof fills !== "object" || Array.isArray(fills)) return null;
@@ -75,12 +97,27 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
     if (r.pk === null || r.y >= 2027) return r;
     let next: Row | null = null;
     // 예비번호·충원 칸이 모두 비었을 때만 원문 확인된 예비번호로 채운다
-    const key = `${r.y}|${r.pk}|${r.t ?? ""}|${r.g ?? ""}`;
+    // 모집군은 화면 자료에 '가'·'가군' 두 표기가 있어 '가'로 맞춘다
+    const key = `${r.y}|${r.pk}|${r.t ?? ""}|${(r.g ?? "").replace(/군$/, "")}`;
     const rank = fill.get(`R|${key}`), people = fill.get(`F|${key}`);
     if ((r.rk?.v ?? "").trim() === "" && (r.ad?.v ?? "").trim() === "") {
-      // 담당자가 원문으로 확인한 예비번호가 먼저, 없으면 대학어디가 충원인원
+      // 담당자가 원문으로 확인한 예비번호가 먼저, 없으면 대학어디가 충원인원, 발표 안 함·자료 없음은 사유만
       if (rank !== undefined) next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
+      else if (people === "undisclosed" || people === "unavailable") next = { ...r, ad: { v: null, s: ADIGA_FILL_STATUS, r: FILL_UNDISCLOSED, u: null, l: "충원인원", at: null, ctx: null } };
       else if (people !== undefined) next = { ...r, ad: { v: people, s: ADIGA_FILL_STATUS, r: null, u: "명", l: "충원인원", at: null, ctx: null } };
+    }
+    const le3 = fill.get(`S|${key}`) === "le3";
+    for (const [slot, label, p] of SLOTS) {
+      const cur = (next ?? r)[slot];
+      if (cur.v !== null && cur.v.trim() !== "") continue;
+      const v = fill.get(`S|${key}|${label}`);
+      if (v !== undefined) {
+        next ??= { ...r };
+        next[slot] = filled(label, p, v);
+      } else if (le3 && slot === "c50" && ((next ?? r).c70.v ?? "").trim() === "") {
+        next ??= { ...r };
+        next.c50 = { ...cur, r: STATS_LE3 };
+      }
     }
     for (const [slot, label, p] of SLOTS) {
       const cur = r[slot];
