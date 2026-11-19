@@ -5,6 +5,14 @@ import { analyzeNow, buildNow, refreshAnalysesNow, refreshCandidatesNow, type Ru
 import type { RefreshIntent } from "@/lib/report-ops";
 
 const INITIAL: RunResult = { error: null };
+const AUTO_SUBMIT_DELAY_MS = 250;
+
+function navigationKey() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("open"); // Opening a card does not select a new result set.
+  url.searchParams.sort();
+  return `${url.pathname}?${url.searchParams}`;
+}
 
 /**
  * 분석·후보 만들기를 회원이 한 번 누를 때만 보낸다(화면을 열 때 자동으로 계산하지 않는다).
@@ -21,11 +29,8 @@ const INITIAL: RunResult = { error: null };
 export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto, autoScope }: { ids?: string[]; title: string; desc: string; label: string; busy: string; refresh?: RefreshIntent; auto?: boolean; autoScope?: string }) {
   const submit = refresh ? (ids ? refreshAnalysesNow : refreshCandidatesNow) : (ids ? analyzeNow : buildNow);
   const [state, action, pending] = useActionState(submit, INITIAL);
-  function explicitIntent(e: FormEvent<HTMLFormElement>) {
-    const input = e.currentTarget.elements.namedItem("refresh_intent");
-    if (!pending && input instanceof HTMLInputElement) input.value = crypto.randomUUID();
-  }
   const form = useRef<HTMLFormElement>(null);
+  const attemptedFor = useRef<string | null>(null);
   const autoKey = !auto
     ? null
     : refresh
@@ -34,18 +39,47 @@ export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto, auto
         ? `jt-auto-analyze:${autoScope}:${ids.join(",")}`
         : null;
   const first = !refresh;
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    attemptedFor.current = autoKey;
+    if (!refresh || pending) return;
+    const input = e.currentTarget.elements.namedItem("refresh_intent");
+    if (input instanceof HTMLInputElement) input.value = crypto.randomUUID();
+  }
   useEffect(() => {
-    if (!autoKey) return;
-    try {
-      if (sessionStorage.getItem(autoKey)) return;
-      sessionStorage.setItem(autoKey, "1");
-    } catch {
-      return; // 한 번만 보냈다는 표시를 남길 수 없으면 자동으로 보내지 않는다(되풀이 방지)
+    if (!autoKey || pending) return;
+    const key: string = autoKey;
+    const initialNavigation = navigationKey();
+    let timer: number | undefined;
+    function cancel() {
+      window.clearTimeout(timer);
     }
-    form.current?.requestSubmit();
-  }, [autoKey]);
+    function schedule() {
+      cancel();
+      if (document.visibilityState !== "visible") return;
+      timer = window.setTimeout(() => {
+        const current = form.current;
+        if (document.visibilityState !== "visible" || navigationKey() !== initialNavigation ||
+            !current?.isConnected || attemptedFor.current === autoKey) return;
+        try {
+          if (sessionStorage.getItem(key)) return;
+          sessionStorage.setItem(key, "1");
+        } catch {
+          return; // Prevent automatic repetition when tab storage is unavailable.
+        }
+        current.requestSubmit();
+      }, AUTO_SUBMIT_DELAY_MS);
+    }
+    schedule();
+    document.addEventListener("visibilitychange", schedule);
+    window.addEventListener("pagehide", cancel);
+    return () => {
+      cancel();
+      document.removeEventListener("visibilitychange", schedule);
+      window.removeEventListener("pagehide", cancel);
+    };
+  }, [autoKey, pending]);
   return (
-    <form ref={form} action={action} className="run-box" onSubmit={refresh ? explicitIntent : undefined}>
+    <form ref={form} action={action} className="run-box" onSubmit={onSubmit}>
       {ids && <input type="hidden" name="ids" value={ids.join(",")} />}
       {refresh && <>
         <input type="hidden" name="refresh_intent" defaultValue={refresh.id} />

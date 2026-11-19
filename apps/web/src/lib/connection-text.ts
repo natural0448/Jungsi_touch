@@ -1,4 +1,5 @@
 import type { ConnectionError } from "@/lib/api";
+import { seoulTime } from "./format";
 
 export const OFFERING_NOT_LINKED_NOTICE = "선택한 모집단위가 분석 자료에 연결되지 않아 계산하지 못했습니다. 저장한 성적과 리포트는 유지됩니다. 자료 연결이 완료된 뒤 다시 확인해 주세요.";
 
@@ -13,7 +14,14 @@ export const SCORE_INPUT_TRANSITION_NOTICE = "성적 입력 방식을 바꾸는 
  */
 export function connectionText(e: ConnectionError): string {
   if (e.code === "score_input_transition_pending") return `${SCORE_INPUT_TRANSITION_NOTICE} (문의 번호 score_input_transition_pending)`;
-  if (e.kind === "rate_limited") return "요청이 겹쳤습니다. 몇 초 뒤 다시 눌러 주세요.";
+  if (e.kind === "rate_limited") {
+    const retryTime = e.retryAt ? seoulTime(e.retryAt.toISOString()) : null;
+    if (e.code === "analysis_quota_exceeded") {
+      return `오늘 분석 한도를 모두 썼습니다. 기존 리포트는 열 수 있습니다.${retryTime ? ` ${retryTime} 이후 다시 분석해 주세요.` : ""}`;
+    }
+    const cause = e.code === "rate_limit_exceeded" ? "같은 계정의 요청이 겹쳤습니다." : "서버가 이번 요청을 잠시 제한했습니다.";
+    return `${cause} ${retryTime ? `${retryTime} 이후 다시 눌러 주세요.` : "잠시 뒤 다시 눌러 주세요."}`;
+  }
   if (e.code === "backend_unreachable") return "정시터치 서버에 연결할 수 없습니다.";
   return `정시터치 서버가 지금 이 작업을 잠시 받지 않습니다. 나중에 다시 눌러 주세요. (문의 번호 ${e.code})`;
 }

@@ -128,24 +128,44 @@ async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
 
 /*
   계정당 동시 한도(429 rate_limit_exceeded)로 거절되면 잠시 기다렸다 같은 요청을 다시 보낸다. 최대 3번(3초·3초·4초,
-  서버 Retry-After 가 5초 이하면 그 값). 2026-10-18 결정은 '3초 뒤 한 번'이었으나, 다른 화면에서 시작된 요청이 서버에서
+  서버 Retry-After 가 5초 이하면 그 값, 유효한 값이 5초 초과면 자동 재시도 없이 안내). 2026-10-18 결정은 '3초 뒤 한 번'이었으나, 다른 화면에서 시작된 요청이 서버에서
   아직 끝나지 않아 겹치는 경우 한 번으로는 풀리지 않아 확인 자체가 막혔다(2026-10-20 사용자 지적으로 3번으로 늘림).
   하루 분석 한도(analysis_quota_exceeded)는 다시 보내지 않는다. 쓰기는 같은 Idempotency-Key 로 다시 보내므로 중복되지 않는다.
 */
 const CONTENTION_WAITS_MS = [3000, 3000, 4000];
 const CONTENTION_HINT_MAX_MS = 5000;
+type RetryDecision = "retry_hint" | "retry_fallback" | "retry_dispatch" | "deferred_by_hint" | "no_contention_code" | "attempt_limit";
+
+function recordRetryDecision(path: string, attempt: number, decision: RetryDecision) {
+  try {
+    console.info(`[jungsi-api-retry] ${pathTemplate(path)} status=429 attempt=${attempt} decision=${decision}`);
+  } catch {
+    // The observation cannot change the request result.
+  }
+}
+
 async function sendContended(path: string, init: RequestInit): Promise<Response> {
   let res = await send(path, init);
-  for (const fallback of CONTENTION_WAITS_MS) {
+  for (const [index, fallback] of CONTENTION_WAITS_MS.entries()) {
     if (res.status !== 429) return res;
+    const attempt = index + 1;
     const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
-    if (code !== "rate_limit_exceeded") return res;
-    const hint = retryAfterAt(res.headers.get("Retry-After"));
-    const hintMs = hint ? hint.getTime() - Date.now() : null;
-    const wait = hintMs !== null && hintMs >= 0 && hintMs <= CONTENTION_HINT_MAX_MS ? Math.max(500, hintMs) : fallback;
+    if (code !== "rate_limit_exceeded") {
+      recordRetryDecision(path, attempt, "no_contention_code");
+      return res;
+    }
+    const hintMs = retryAfterDelay(res.headers.get("Retry-After"), Date.now());
+    if (hintMs !== null && hintMs > CONTENTION_HINT_MAX_MS) {
+      recordRetryDecision(path, attempt, "deferred_by_hint");
+      return res;
+    }
+    const wait = hintMs === null ? fallback : Math.max(500, hintMs);
+    recordRetryDecision(path, attempt, hintMs === null ? "retry_fallback" : "retry_hint");
     await new Promise((r) => setTimeout(r, wait));
+    recordRetryDecision(path, attempt + 1, "retry_dispatch");
     res = await send(path, init);
   }
+  if (res.status === 429) recordRetryDecision(path, CONTENTION_WAITS_MS.length + 1, "attempt_limit");
   return res;
 }
 
@@ -189,16 +209,27 @@ async function send(path: string, init: RequestInit): Promise<Response> {
  * 유효하지 않으면 null 을 돌려주고 화면은 시각 없는 제한 안내만 보인다. 입력값·멱등 키 보존은 호출한 쪽 규칙 그대로다.
  */
 const RETRY_AFTER_MAX_MS = 7 * 24 * 60 * 60 * 1000;
+const HTTP_DATE = [
+  /^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/,
+  /^[A-Z][a-z]+, \d{2}-[A-Z][a-z]{2}-\d{2} \d{2}:\d{2}:\d{2} GMT$/,
+  /^[A-Z][a-z]{2} [A-Z][a-z]{2} (?: \d|\d{2}) \d{2}:\d{2}:\d{2} \d{4}$/,
+];
+
+function retryAfterDelay(header: string | null, now: number): number | null {
+  const value = header?.trim() ?? "";
+  if (/^\d+$/.test(value)) return Number(value) * 1000;
+  const format = HTTP_DATE.findIndex((shape) => shape.test(value));
+  if (format === -1) return null;
+  // ANSI C asctime expresses UTC on HTTP but contains no zone marker.
+  const time = Date.parse(format === 2 ? `${value} GMT` : value);
+  if (!Number.isFinite(time) || time < now) return null;
+  return time - now;
+}
+
 function retryAfterAt(header: string | null): Date | null {
-  if (header === null) return null;
-  const v = header.trim();
-  if (/^\d{1,7}$/.test(v)) {
-    const ms = Number(v) * 1000;
-    return ms <= RETRY_AFTER_MAX_MS ? new Date(Date.now() + ms) : null;
-  }
-  const t = Date.parse(v);
-  if (!Number.isNaN(t) && t > Date.now() && t - Date.now() <= RETRY_AFTER_MAX_MS) return new Date(t);
-  return null;
+  const now = Date.now();
+  const wait = retryAfterDelay(header, now);
+  return wait !== null && wait <= RETRY_AFTER_MAX_MS ? new Date(now + wait) : null;
 }
 
 /** 401·403·429·503 은 공통으로 올린다. 나머지는 호출한 쪽이 판단한다 */
@@ -209,7 +240,7 @@ async function guard(res: Response, path: string, sensitiveSnapshot = false) {
   }
   // 429(요청 제한, SEC-07): 코드와 Retry-After 만 받아 안내한다. 성공으로 숨기지 않는다
   if (res.status === 429) {
-    throw new ConnectionError("rate_limited", (await codeOf(res, path, sensitiveSnapshot)) ?? "rate_limit_exceeded", retryAfterAt(res.headers.get("Retry-After")));
+    throw new ConnectionError("rate_limited", (await codeOf(res, path, sensitiveSnapshot)) ?? "rate_limited", retryAfterAt(res.headers.get("Retry-After")));
   }
   if (res.status === 503) throw new ConnectionError("unavailable", (await codeOf(res, path, sensitiveSnapshot)) ?? "backend_dependency_unavailable");
 }

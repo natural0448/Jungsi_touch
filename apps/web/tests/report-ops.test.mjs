@@ -18,6 +18,8 @@ const mocks = new Map([
   ["@/lib/report-ref", data("export async function currentReportId(){return globalThis.__reportOpsFixture.reportId}")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
+  // connection-text 가 시각 표시용으로 부르는 같은 폴더 모듈(429 안내, 2026-11-19)
+  ["./format", new URL("../src/lib/format.ts", import.meta.url).href],
   ["next/cache", data("export function revalidatePath(...args){globalThis.__reportOpsFixture.revalidations.push(args)}")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });
