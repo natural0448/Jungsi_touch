@@ -3,6 +3,7 @@ import type { ConnectionError } from "@/lib/api";
 import { isEdutouchAdmin } from "@/lib/admin";
 import { seoulTime } from "@/lib/format";
 import { SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
+import { AutoReopen } from "./auto-reopen";
 
 /**
  * 우리 서비스 API 에 닿지 못했거나 서버가 요청을 제한했을 때의 안내(DEV-006 mode_rules, SEC-07).
@@ -50,6 +51,8 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
             ))}
           </p>
         )}
+        {/* 요청 겹침으로 제한된 경우만 스스로 다시 연다. 하루 분석 한도는 기다려도 풀리지 않아 제외한다 */}
+        {e.kind === "rate_limited" && e.code !== "analysis_quota_exceeded" && <AutoReopen />}
         {(!proPending || showNames) && (
           <p className="conn-code">
             문의 번호 <code>{e.code}</code>
