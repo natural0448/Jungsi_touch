@@ -70,3 +70,17 @@ test("원문으로 확인된 최종 합격 예비번호(ranks)는 예비번호·
     assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ranks: bad })), null);
   }
 });
+
+test("대학어디가 충원인원(fills, 0 포함)은 예비번호보다 뒤, 빈 행에만 '명'으로 채운다(2026-11-19)", () => {
+  const k = "2025|1000000777|수능(일반전형)|다";
+  const fill = parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, fills: { [k]: "7", "2025|1000000778|수능(일반전형)|다": "0" } }));
+  const [a, b] = applyAdigaFill([row(2025, "1000000777"), row(2025, "1000000778")], fill);
+  assert.equal(a.ad.v, "7");
+  assert.equal(a.ad.u, "명");
+  assert.equal(b.ad.v, "0");
+  const both = parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ranks: { [k]: "13" }, fills: { [k]: "7" } }));
+  const [c] = applyAdigaFill([row(2025, "1000000777")], both);
+  assert.equal(c.rk.v, "13");
+  assert.equal(c.ad.v, null);
+  assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, fills: { [k]: "-1" } })), null);
+});
