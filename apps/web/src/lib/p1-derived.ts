@@ -40,16 +40,26 @@ export function fillCount(r: Pick<Row, "rk" | "ad">): number | null {
   if (rank) return rank.n;
   for (const c of [r.rk, r.ad]) {
     const s = c?.v?.trim() ?? "";
-    if (/^\d{1,9}$/.test(s)) return Number(s);
+    // 원문이 "12.0"처럼 소수점 0을 붙여 적은 정수도 같은 정수로 읽는다(2026-11-19)
+    const m = /^(\d{1,9})(?:\.0+)?$/.exec(s);
+    if (m) return Number(m[1]);
   }
   return null;
 }
+/**
+ * 충원 원문값이 없는 과거 행(2026-11-19 대표님 결정): 대학어디가가 충원인원을 "-"로 적은 칸은 0명으로 본다.
+ * 그 해 결과(모집인원이나 경쟁률)가 있는데 예비번호·충원 칸이 둘 다 비어 있을 때만 0으로 하고,
+ * 결과 자체가 없는 행과 2027 행(아직 충원이 생기지 않음)은 빈칸으로 둔다. 다른 글자가 적힌 칸도 바꾸지 않는다.
+ */
+const emptyCell = (c: Cell | undefined) => (c?.v?.trim() ?? "") === "";
+const noFillPublished = (r: Row, hasResult: boolean) =>
+  typeof r.y === "number" && r.y < 2027 && hasResult && emptyCell(r.rk) && emptyCell(r.ad);
 /* 추정 총 지원자 = 모집인원×경쟁률(2026-10-22 사용자 확인), 추정 탈락자 = 그 값 − (모집인원 + 충원인원)(2026-11-16 대표님 결정) */
 export function derived(r: Row): { applicants: number | null; dropped: number | null; fill: number | null; heldA: boolean; heldD: boolean } {
   const cap = personInt(r.rc);
   const rankCell = rankInt(r.rk)?.cell ?? null;
-  const fill = fillCount(r);
   const ratio = ratioOf(r.cr);
+  const fill = fillCount(r) ?? (noFillPublished(r, cap !== null || ratio !== null) ? 0 : null);
   const isHeld = (c: Cell) => c.s !== "verified_official" && c.s.startsWith("pending");
   if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, fill, heldA: false, heldD: false };
   // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s)
