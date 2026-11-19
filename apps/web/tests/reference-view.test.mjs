@@ -51,4 +51,7 @@ test("when the server leaves wildcard_group empty, the group comes from the depa
   assert.equal(referenceWildcardGroup(o("경영학과")), null);
   assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "health" }), "health");
   assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "contract" }), null);
+  // 세 계열이 아닌 표기가 와도 이름으로 가린다
+  assert.equal(referenceWildcardGroup({ ...o("간호학과"), wildcard_group: "일반" }), "nursing");
+  assert.equal(referenceWildcardGroup({ ...o("초등교육과"), wildcard_group: "" }), "education");
 });

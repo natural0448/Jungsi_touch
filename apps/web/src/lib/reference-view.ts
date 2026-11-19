@@ -38,13 +38,14 @@ export const REFERENCE_WILDCARD_FEATURED = 3;
 export const REFERENCE_WILDCARD_MAX = 12;
 
 /**
- * 와일드카드 계열. 서버가 준 표시(wildcard_group)가 있으면 그것을 쓰고, 운영 자료처럼 비어 있으면
+ * 와일드카드 계열. 서버가 준 표시(wildcard_group)가 간호·보건·교육이면 그것을 쓰고, 운영 자료처럼 비었거나 다른 표기면
  * 계열과 학과 이름으로 가린다: 이름에 '간호' → 간호, 교육 계열·'○○교육과' → 교육,
  * 의약 계열(의예·치의예·한의예·약학·수의예 제외) → 보건.
  */
 const MEDICAL = /의예|의학과|약학|수의/;
 export function referenceWildcardGroup(o: OfferingDto): WildcardGroup | null {
-  if (o.wildcard_group !== null && o.wildcard_group !== undefined) return REFERENCE_WILDCARD_GROUPS.includes(o.wildcard_group) ? o.wildcard_group : null;
+  // 서버 값이 세 계열 가운데 하나일 때만 그대로 쓴다. 비었거나 다른 표기(운영 정본의 원문 표기 등)면 이름으로 가린다
+  if (typeof o.wildcard_group === "string" && REFERENCE_WILDCARD_GROUPS.includes(o.wildcard_group)) return o.wildcard_group;
   const dept = o.department ?? "";
   const field = fieldGroupOf(o.offering_id)?.name ?? null;
   if (dept.includes("간호")) return "nursing";
