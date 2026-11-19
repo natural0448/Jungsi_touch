@@ -11,7 +11,7 @@ import { AutoReopen } from "./auto-reopen";
  * 설정값 자체(주소·키)는 화면에 내보내지 않는다. 빠진 설정의 이름은 운영에서는 에듀터치 관리자에게만,
  * 개발·합성 환경에서는 누구에게나 보인다(회원에게는 내부 이름이 뜻 없는 정보라 감춘다). 제한 안내는 사유 코드와 재시도 시각만 보인다.
  */
-export async function ConnectionNotice({ e }: { e: ConnectionError }) {
+export async function ConnectionNotice({ e, reopenUnavailable = false }: { e: ConnectionError; reopenUnavailable?: boolean }) {
   const showNames = e.kind === "unconfigured" && (apiMode() !== "live" || (await isEdutouchAdmin().catch(() => false)));
   const missing = showNames ? missingConfig() : [];
   // 서버가 이 기능의 자료를 아직 승인·연결하지 않았다(503 operation_scope_not_approved). 장애나 이용권 문제가 아니다.
@@ -52,7 +52,10 @@ export async function ConnectionNotice({ e }: { e: ConnectionError }) {
           </p>
         )}
         {/* 요청 겹침으로 제한된 경우만 스스로 다시 연다. 하루 분석 한도는 기다려도 풀리지 않아 제외한다 */}
-        {e.kind === "rate_limited" && e.code !== "analysis_quota_exceeded" && <AutoReopen />}
+        {/* 같은 화면의 다른 요청은 이미 받아 서버가 살아 있는 경우(reopenUnavailable), 일시적인 응답 실패도 같은 횟수 제한으로 다시 연다.
+            2026-11-18 운영 관측: 3페이지 다음 쪽에서 목록은 왔는데 내 리포트 읽기만 실패해 30행이 '확인 못 함'으로 멈췄다. 연결·전환 준비 중 안내는 제외한다 */}
+        {((e.kind === "rate_limited" && e.code !== "analysis_quota_exceeded") ||
+          (reopenUnavailable && e.kind === "unavailable" && !pendingScope && !transitionPending && !proPending)) && <AutoReopen />}
         {(!proPending || showNames) && (
           <p className="conn-code">
             문의 번호 <code>{e.code}</code>

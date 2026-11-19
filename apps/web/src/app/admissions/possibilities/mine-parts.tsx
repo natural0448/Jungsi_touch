@@ -44,7 +44,8 @@ export function BasisWait() {
 
 /** 리포트를 받지 못했을 때. 검색 목록은 그대로 두고 이 자리에만 안내한다 */
 function MineFailed({ e }: { e: ConnectionError | AccessDenied }) {
-  if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
+  // 검색 목록은 이미 받았으므로 서버는 살아 있다. 일시적인 리포트 읽기 실패는 스스로 다시 연다(1분에 2번까지)
+  if (e instanceof ConnectionError) return <ConnectionNotice e={e} reopenUnavailable />;
   return (
     <section className="basis none" aria-label="내 성적 기준">
       <p>
