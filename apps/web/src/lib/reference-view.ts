@@ -1,5 +1,5 @@
 import type { OfferingDto, OverallResultDto, ReferencePercentileDto, ReferenceUniversityGroupDto, WildcardGroup } from "./dto";
-import { groupByField } from "./field-group";
+import { fieldGroupOf, groupByField } from "./field-group";
 import { referenceAdvantage, type ReferenceAdvantage } from "./reference-advantage";
 
 /*
@@ -37,12 +37,30 @@ export const REFERENCE_WILDCARD_GROUPS: WildcardGroup[] = ["nursing", "health", 
 export const REFERENCE_WILDCARD_FEATURED = 3;
 export const REFERENCE_WILDCARD_MAX = 12;
 
+/**
+ * 와일드카드 계열. 서버가 준 표시(wildcard_group)가 있으면 그것을 쓰고, 운영 자료처럼 비어 있으면
+ * 계열과 학과 이름으로 가린다: 이름에 '간호' → 간호, 교육 계열·'○○교육과' → 교육,
+ * 의약 계열(의예·치의예·한의예·약학·수의예 제외) → 보건.
+ */
+const MEDICAL = /의예|의학과|약학|수의/;
+export function referenceWildcardGroup(o: OfferingDto): WildcardGroup | null {
+  if (o.wildcard_group !== null && o.wildcard_group !== undefined) return REFERENCE_WILDCARD_GROUPS.includes(o.wildcard_group) ? o.wildcard_group : null;
+  const dept = o.department ?? "";
+  const field = fieldGroupOf(o.offering_id)?.name ?? null;
+  if (dept.includes("간호")) return "nursing";
+  if (field === "교육" || /교육(과|학과|학부|전공)/.test(dept)) return "education";
+  if (field === "의약" && !MEDICAL.test(dept)) return "health";
+  return null;
+}
+
 /** 참고 목록에서 고른 와일드카드: 간호·보건·교육 계열, 유불리 큰 순서, 최대 12장(앞 3장 펼침) */
 export function referenceWildcards(groups: ReferenceUniversityGroupDto[], overall: OverallResultDto | null | undefined): { featured: ReferenceItem[]; rest: ReferenceItem[] } {
   const all = groups
     .flatMap((g) => g.offerings)
-    .filter((it) => it.offering.wildcard_group !== null && REFERENCE_WILDCARD_GROUPS.includes(it.offering.wildcard_group))
-    .map((it) => ({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall) }))
+    .flatMap((it) => {
+      const wg = referenceWildcardGroup(it.offering);
+      return wg ? [{ ...it, offering: { ...it.offering, wildcard_group: wg }, advantage: referenceAdvantage(it.reference_percentile, overall) }] : [];
+    })
     .sort(byAdvantage)
     .slice(0, REFERENCE_WILDCARD_MAX);
   return { featured: all.slice(0, REFERENCE_WILDCARD_FEATURED), rest: all.slice(REFERENCE_WILDCARD_FEATURED) };

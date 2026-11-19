@@ -11,7 +11,7 @@ registerHooks({ resolve(specifier, context, next) {
   }
   return next(specifier, context);
 } });
-const { referenceUniversities, referenceWildcards } = await import("../src/lib/reference-view.ts");
+const { referenceUniversities, referenceWildcards, referenceWildcardGroup } = await import("../src/lib/reference-view.ts");
 
 const overall = { status: "estimated", top_percent: "10", exclusive_top_percent: "10", inclusive_top_percent: "10" };
 const ref = (p) => ({ status: "reference_estimated", estimated_upper_cumulative_percent_all_examinees: p, estimated_upper_cumulative_percent_upper_bound: p });
@@ -42,4 +42,13 @@ test("without an overall position nothing is ranked but the list still shows", (
   const u = referenceUniversities(groups, null);
   assert.deepEqual(u.map((x) => x.university_id), ["A", "B"]);
   assert.equal(u[0].best, null);
+});
+
+test("when the server leaves wildcard_group empty, the group comes from the department name (2026-11-19)", () => {
+  const o = (department) => ({ offering_id: "2027:1", department, wildcard_group: null });
+  assert.equal(referenceWildcardGroup(o("간호학과")), "nursing");
+  assert.equal(referenceWildcardGroup(o("초등교육과")), "education");
+  assert.equal(referenceWildcardGroup(o("경영학과")), null);
+  assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "health" }), "health");
+  assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "contract" }), null);
 });
