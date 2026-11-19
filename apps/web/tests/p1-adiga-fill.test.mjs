@@ -53,3 +53,20 @@ test("표 형식이 하나라도 어긋나면 표 전체를 쓰지 않는다", (
   assert.equal(parseAdigaFill(doc({})), null);
   assert.equal(parseAdigaFill(doc({ "2026|1|70%컷": "642.5" })).get("2026|1|70%컷"), "642.5");
 });
+
+test("원문으로 확인된 최종 합격 예비번호(ranks)는 예비번호·충원 칸이 모두 빈 행에만 채운다(2026-11-19)", () => {
+  const text = JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ranks: { "2024|1000000501|수능(일반전형)|다": "13" } });
+  const fill = parseAdigaFill(text);
+  const [r] = applyAdigaFill([row(2024, "1000000501")], fill);
+  assert.equal(r.rk.v, "13");
+  assert.equal(r.rk.u, "번");
+  // 이미 값이 있으면, 다른 전형·군이면 채우지 않는다
+  const [kept] = applyAdigaFill([row(2024, "1000000501", { ad: { ...empty(), v: "5", u: "명" } })], fill);
+  assert.equal(kept.rk.v, null);
+  const [other] = applyAdigaFill([row(2024, "1000000501", { g: "나" })], fill);
+  assert.equal(other.rk.v, null);
+  // ranks 형식이 어긋나면 표 전체를 쓰지 않는다
+  for (const bad of [{ "2024|1|x|라": "1" }, { "2024|1|x|다": "0" }, { "2024|1|x|다": 3 }, []]) {
+    assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ranks: bad })), null);
+  }
+});

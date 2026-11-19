@@ -46,20 +46,17 @@ export function fillCount(r: Pick<Row, "rk" | "ad">): number | null {
   }
   return null;
 }
-/**
- * 충원 원문값이 없는 과거 행(2026-11-19 대표님 결정): 대학어디가가 충원인원을 "-"로 적은 칸은 0명으로 본다.
- * 그 해 결과(모집인원이나 경쟁률)가 있는데 예비번호·충원 칸이 둘 다 비어 있을 때만 0으로 하고,
- * 결과 자체가 없는 행과 2027 행(아직 충원이 생기지 않음)은 빈칸으로 둔다. 다른 글자가 적힌 칸도 바꾸지 않는다.
+/*
+ * 충원 원문값이 없는 과거 행은 빈칸으로 둔다(2026-11-19 저녁 대표님 결정 '담당자안').
+ * 한때 0명으로 보였으나 담당자 대조(2,640행)에서 '-'로 확인된 칸이 없고 실제 충원이 있던 행이 섞여 있어 되돌렸다.
+ * 원문으로 확인된 예비번호 51행은 화면 서버 KV 표(p1-adiga-fill:v1 의 ranks)로 채운다.
  */
-const emptyCell = (c: Cell | undefined) => (c?.v?.trim() ?? "") === "";
-const noFillPublished = (r: Row, hasResult: boolean) =>
-  typeof r.y === "number" && r.y < 2027 && hasResult && emptyCell(r.rk) && emptyCell(r.ad);
 /* 추정 총 지원자 = 모집인원×경쟁률(2026-10-22 사용자 확인), 추정 탈락자 = 그 값 − (모집인원 + 충원인원)(2026-11-16 대표님 결정) */
 export function derived(r: Row): { applicants: number | null; dropped: number | null; fill: number | null; heldA: boolean; heldD: boolean } {
   const cap = personInt(r.rc);
   const rankCell = rankInt(r.rk)?.cell ?? null;
   const ratio = ratioOf(r.cr);
-  const fill = fillCount(r) ?? (noFillPublished(r, cap !== null || ratio !== null) ? 0 : null);
+  const fill = fillCount(r);
   const isHeld = (c: Cell) => c.s !== "verified_official" && c.s.startsWith("pending");
   if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, fill, heldA: false, heldD: false };
   // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s)

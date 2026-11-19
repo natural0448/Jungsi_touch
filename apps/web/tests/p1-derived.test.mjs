@@ -50,18 +50,10 @@ test("an integer in the rank cell is used whatever its unit; non-integer text is
     assert.equal(derived(row(cell("22", "명"), cell("5.8", "대1"), rk)).dropped, null);
 });
 
-test("a past row with results but no fill value shows 0; rows without results and 2027 rows stay empty (2026-11-19)", () => {
+test("a past row with no fill value stays empty (2026-11-19 evening: 담당자안); '12.0' still reads as 12", () => {
   const past = (rc, cr, rk = none, ad = none, y = 2026) => ({ y, rc, cr, rk, ad });
   const d = derived(past(cell("22", "명"), cell("5.8", "대1")));
-  assert.equal(d.fill, 0);
-  assert.equal(d.dropped, 128 - 22);
-  // 경쟁률만 있어도 그 해 결과가 있는 행이다
-  assert.equal(derived(past(none, cell("5.8", "대1"))).fill, 0);
-  // 모집인원·경쟁률이 없으면 빈칸, 2027 행도 빈칸
-  assert.equal(derived(past(none, none)).fill, null);
-  assert.equal(derived(past(cell("22", "명"), cell("5.8", "대1"), none, none, 2027)).fill, null);
-  // 숫자가 아닌 글자가 적힌 칸은 0으로 바꾸지 않는다
-  assert.equal(derived(past(cell("22", "명"), cell("5.8", "대1"), cell("확인 중", "번"))).fill, null);
-  // "12.0"은 12명
+  assert.equal(d.fill, null);
+  assert.equal(d.dropped, null);
   assert.equal(derived(past(cell("22", "명"), cell("5.8", "대1"), cell("12.0", "번"))).fill, 12);
 });

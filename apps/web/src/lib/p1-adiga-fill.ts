@@ -14,6 +14,8 @@ const SLOTS = [["c50", "50%컷", 50], ["c70", "70%컷", 70]] as const;
 const KEY = /^(2024|2025|2026)\|[0-9]{1,12}\|(50|70)%컷$/;
 const VALUE = /^[0-9]{1,4}(?:\.[0-9]{1,4})?$/;
 const MAX = 20000;
+const RANK_KEY = /^(2024|2025|2026)\|[0-9]{1,12}\|[^|]{1,80}\|[가나다]$/;
+const RANK_VALUE = /^[1-9][0-9]{0,5}$/;
 /** p1-published-stats 의 statName 과 같은 규칙으로 50·70%컷 이름만 맞춘다(시험이 TS 확장자 없이 불러오도록 값 가져오기를 두지 않음) */
 const cutName = (l: string | null) => {
   const m = /^(\d{1,3})(?:%컷|%cut|_percent_cut|%)$/i.exec((l ?? "").replace(/\s+/g, ""));
@@ -28,7 +30,7 @@ export function parseAdigaFill(text: string | null): AdigaFill | null {
   let doc: unknown;
   try { doc = JSON.parse(text); } catch { return null; }
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) return null;
-  const { format, cells } = doc as { format?: unknown; cells?: unknown };
+  const { format, cells, ranks } = doc as { format?: unknown; cells?: unknown; ranks?: unknown };
   if (format !== ADIGA_FILL_FORMAT || !cells || typeof cells !== "object" || Array.isArray(cells)) return null;
   const entries = Object.entries(cells as Record<string, unknown>);
   if (entries.length === 0 || entries.length > MAX) return null;
@@ -36,6 +38,16 @@ export function parseAdigaFill(text: string | null): AdigaFill | null {
   for (const [k, v] of entries) {
     if (!KEY.test(k) || typeof v !== "string" || !VALUE.test(v)) return null;
     out.set(k, v);
+  }
+  // 최종 합격 예비번호(담당자 v41 후속 대조로 원문에서 확인된 양수, 2026-11-19). 키: 학년도|PK|전형|군
+  if (ranks !== undefined) {
+    if (!ranks || typeof ranks !== "object" || Array.isArray(ranks)) return null;
+    const rs = Object.entries(ranks as Record<string, unknown>);
+    if (rs.length > MAX) return null;
+    for (const [k, v] of rs) {
+      if (!RANK_KEY.test(k) || typeof v !== "string" || !RANK_VALUE.test(v)) return null;
+      out.set(`R|${k}`, v);
+    }
   }
   return out;
 }
@@ -51,6 +63,11 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
   return rows.map((r) => {
     if (r.pk === null || r.y >= 2027) return r;
     let next: Row | null = null;
+    // 예비번호·충원 칸이 모두 비었을 때만 원문 확인된 예비번호로 채운다
+    const rank = fill.get(`R|${r.y}|${r.pk}|${r.t ?? ""}|${r.g ?? ""}`);
+    if (rank !== undefined && (r.rk?.v ?? "").trim() === "" && (r.ad?.v ?? "").trim() === "") {
+      next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
+    }
     for (const [slot, label, p] of SLOTS) {
       const cur = r[slot];
       if (cur.v !== null && cur.v.trim() !== "") continue;
