@@ -21,6 +21,7 @@ import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
 import { bestDelta, SchoolCard } from "./school-card";
 import { WildcardDeck } from "./wildcard";
+import { CatalogBrowse } from "../possibilities/catalog-browse";
 import "./favorable.css";
 
 const route = page("PAGE-04");
@@ -28,13 +29,14 @@ export const metadata: Metadata = { title: route.label };
 const FEATURES = ["내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원가능성 확인", "간호 · 교육 · 계약학과 · 해양 · 철도 등 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
 
 export default async function Page({ searchParams }: PageProps<"/admissions/favorable">) {
-  const p3 = page("PAGE-03");
+  const sp = await searchParams;
+  const catalogView = sp.view === "catalog";
   const head = (
     <PageHead
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
-      desc="전체 성적에서 출발해 환산에 유리한 학교를 찾고, 학교 안에서 학과마다 지원 범위를 따로 확인하세요."
-      side={<Link prefetch={false} className="btn" href={p3.path}>추천 밖 대학·학과도 직접 검토</Link>}
+      desc={catalogView ? "전국 대학과 학과를 검색하고 모집단위별 지원 정보를 확인하세요." : "전체 성적에서 출발해 환산에 유리한 학교를 찾고, 학교 안에서 학과마다 지원 범위를 따로 확인하세요."}
+      side={<Link prefetch={false} className="btn" href={catalogView ? route.path : `${route.path}?view=catalog`}>{catalogView ? "유리한 대학 추천 보기" : "전국 대학·학과 보기"}</Link>}
     />
   );
 
@@ -48,12 +50,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   const name = await naming;
 
   // 머리글은 바로 보이고, 내 리포트가 필요한 본문만 기다린다(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기)
-  const sp = await searchParams;
   return (
     <>
       {head}
-      <Suspense fallback={<BookLoading name={name} kind="favorable" />}>
-        <Body src={src} caller={caller} sp={sp} />
+      <Suspense fallback={<BookLoading name={name} kind={catalogView ? "possibilities" : "favorable"} />}>
+        {catalogView ? <CatalogBrowse src={src} caller={caller} sp={sp} route={route} features={FEATURES} catalogView /> : <Body src={src} caller={caller} sp={sp} />}
       </Suspense>
     </>
   );

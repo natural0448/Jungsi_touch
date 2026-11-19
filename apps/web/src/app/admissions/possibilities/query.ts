@@ -1,10 +1,16 @@
-import type { OfferingSearchQuery } from "@/lib/api";
+import type { Caller, JungsiSource, OfferingSearchQuery } from "@/lib/api";
+import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 
 export const GROUPS = ["가", "나", "다"];
 export const PATH = "/admissions/possibilities";
 /** 3페이지는 올해(2027) 모집행만 본다. 지난 입시결과는 1페이지에서 */
 export const YEAR = 2027;
 export const LIMIT = 30;
+
+export interface CatalogDestination {
+  path: string;
+  catalogView: boolean;
+}
 
 export interface Query {
   university_q?: string;
@@ -36,11 +42,23 @@ export function toSearch(q: Query): OfferingSearchQuery {
   return { academic_year: YEAR, university_q: q.university_q, department_q: q.department_q, region: q.region, group: q.group, cursor: q.cursor, limit: LIMIT };
 }
 
+/** Keep a continuation when the operation's bounded scan finds only empty pages. */
+const EMPTY_PAGE_HOPS = 5;
+
+export async function skipEmptyPages(src: JungsiSource, caller: Caller, q: OfferingSearchQuery): Promise<CatalogSearchDto<OfferingDto>> {
+  let page = await src.searchOfferings(caller, q);
+  for (let hop = 0; hop < EMPTY_PAGE_HOPS && (page.items ?? []).length === 0 && page.next_cursor; hop++) {
+    page = await src.searchOfferings(caller, { ...q, cursor: page.next_cursor });
+  }
+  return page;
+}
+
 /** 지금 조건에서 일부만 바꾼 주소. undefined 는 지운다. 검색 조건이 바뀌면 처음 쪽으로 */
-export function hrefWith(cur: Query, patch: Partial<Query>) {
+export function hrefWith(cur: Query, patch: Partial<Query>, destination: CatalogDestination = { path: PATH, catalogView: false }) {
   const next = { ...cur, ...patch };
   if (!("cursor" in patch) && ("university_q" in patch || "department_q" in patch || "region" in patch || "group" in patch || "fav" in patch)) next.cursor = undefined;
   const u = new URLSearchParams();
+  if (destination.catalogView) u.set("view", "catalog");
   const names = { university_q: "university", department_q: "unit", region: "region", group: "group", cursor: "cursor", open: "open" } as const;
   for (const k of Object.keys(names) as (keyof typeof names)[]) {
     const v = next[k];
@@ -48,5 +66,5 @@ export function hrefWith(cur: Query, patch: Partial<Query>) {
   }
   if (next.fav) u.set("fav", "1");
   const s = u.toString();
-  return s ? `${PATH}?${s}` : PATH;
+  return s ? `${destination.path}?${s}` : destination.path;
 }

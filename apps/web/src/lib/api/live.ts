@@ -366,7 +366,14 @@ export const liveSource: JungsiSource = {
   grantScoreCorrection: (caller, body, key) => write<ScoreInputStatusDto>(caller, "POST", "/management/score-input-corrections", { ...body, reason_code: "score_correction" }, key),
   exportReport: (caller, reportId) => orNull(call<SnapshotDto>(caller, `/reports/${enc(reportId)}/print`)),
 
-  searchOfferings: (caller, q) => call<CatalogSearchDto<OfferingDto>>(caller, `/offerings/search${qs({ ...q })}`),
+  searchOfferings: async (caller, q) => {
+    try {
+      return await call<CatalogSearchDto<OfferingDto>>(caller, `/offerings/search${qs({ ...q })}`);
+    } catch (error) {
+      if (q.cursor && error instanceof Stale) throw new Error("invalid_cursor");
+      throw error;
+    }
+  },
   readOffering: (caller, id) => orNull(call<OfferingDetailDto>(caller, `/offerings/${enc(id)}`)),
   analyzeUniversities: (caller, reportId, expected, ids, key) =>
     write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/university-results`, { expected_version: expected, offering_ids: ids }, key, true),

@@ -59,7 +59,7 @@ export async function MineLegend({ p }: { p: P }) {
 }
 
 /** '내 성적으로 분석'·'이 범위 다시 확인' */
-export async function MineRunBoxes({ p, items }: { p: P; items: OfferingDto[] }) {
+export async function MineRunBoxes({ p, items, automatic = true }: { p: P; items: OfferingDto[]; automatic?: boolean }) {
   const report = mineReport(await p);
   if (!report) return null;
   const missing = items.filter((o) => !report.analyses?.[o.offering_id]).map((o) => o.offering_id);
@@ -72,10 +72,10 @@ export async function MineRunBoxes({ p, items }: { p: P; items: OfferingDto[] })
         <RunAnalysis
           ids={missing}
           title={`이 목록의 ${missing.length}개 모집단위는 아직 내 성적으로 분석하지 않았습니다`}
-          desc="화면을 열면 지금 보이는 모집단위를 자동으로 분석합니다. 자동으로 시작되지 않으면 버튼을 누르세요. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
+          desc={automatic ? "화면을 열면 지금 보이는 모집단위를 자동으로 분석합니다. 자동으로 시작되지 않으면 버튼을 누르세요. 한 번 분석한 곳은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다." : "버튼을 누르면 지금 보이는 모집단위를 분석합니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."}
           label="내 성적으로 분석"
           busy="분석하는 중…"
-          auto
+          auto={automatic}
           autoScope={`${report.report_id}:${report.profile_id}`}
         />
       )}
@@ -87,7 +87,7 @@ export async function MineRunBoxes({ p, items }: { p: P; items: OfferingDto[] })
           desc="저장한 성적을 그대로 사용해 이 범위를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
           label="이 범위 다시 확인"
           busy="다시 확인하는 중…"
-          auto={hasStale}
+          auto={automatic && hasStale}
         />
       )}
     </>
