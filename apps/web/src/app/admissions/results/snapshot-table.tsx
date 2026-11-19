@@ -1,5 +1,5 @@
 import { asOfDate, ratioText } from "@/lib/format";
-import { FILL_UNDISCLOSED, STATS_LE3 } from "@/lib/p1-adiga-fill";
+import { FILL_UNDISCLOSED, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
 import { derived } from "@/lib/p1-derived";
 import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
@@ -131,7 +131,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     <td className="r derived">
                       {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>
-                    <td className="r">{r.c50.r === STATS_LE3 && !ps[0] && !ps[1] ? <small className="rs-bs">3인 이하 미발표</small> : <Stat s={ps[0]} />}</td>
+                    <td className="r">{(r.c50.r ?? "").startsWith(`${STATS_LE3}:`) && !ps[0] && !ps[1] ? <small className="rs-bs">{STATS_CODE_TEXT[(r.c50.r ?? "").slice(STATS_LE3.length + 1)] ?? "미발표"}</small> : <Stat s={ps[0]} />}</td>
                     <td className="r"><Stat s={ps[1]} /></td>
                   </tr>
                 );

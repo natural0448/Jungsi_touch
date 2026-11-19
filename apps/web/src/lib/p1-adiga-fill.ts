@@ -21,7 +21,18 @@ const FILL_VALUE = /^(?:0|[1-9][0-9]{0,5}|undisclosed|unavailable)$/;
 export const FILL_UNDISCLOSED = "fill_undisclosed";
 /** 성적 칸 사유 코드: 3인 이하라 대학이 성적을 발표하지 않음 */
 export const STATS_LE3 = "stats_le3_undisclosed";
-const STAT_LABELS = new Set(["50%컷", "70%컷"]);
+const STAT_LABELS = new Set(["50%컷", "70%컷", "평균", "최저", "최고", "80%컷", "85%컷", "90%컷", "100%컷"]);
+/** 원문 기준 표기 → 화면 기준 이름(p1-published-stats 의 BASIS_ORDER) */
+const STAT_BASIS: Record<string, string> = {
+  "대학 환산점수": "대학 환산점수",
+  "수능 백분위(대학 반영 방식)": "대학 반영 백분위",
+  "수능 등급 평균": "발표 수능 평균등급",
+  "수능 성적(대학 발표 기준)": "대학 발표 총점",
+};
+/** 성적 칸 사유 코드 → 화면 문구(2026-11-20 대표님: 성적 칸도 빈칸 없음) */
+export const STATS_CODE_TEXT: Record<string, string> = {
+  le3: "3인 이하 미발표", no_recruit: "모집 없음", no_registrant: "등록자 없음", not_csat: "수능 미반영", undisclosed: "미발표",
+};
 /** p1-published-stats 의 statName 과 같은 규칙으로 50·70%컷 이름만 맞춘다(시험이 TS 확장자 없이 불러오도록 값 가져오기를 두지 않음) */
 const cutName = (l: string | null) => {
   const m = /^(\d{1,3})(?:%컷|%cut|_percent_cut|%)$/i.exec((l ?? "").replace(/\s+/g, ""));
@@ -63,12 +74,17 @@ export function parseAdigaFill(text: string | null): AdigaFill | null {
     if (ss.length > MAX) return null;
     for (const [k, v] of ss) {
       if (!RANK_KEY.test(k)) return null;
-      if (v === "le3") { out.set(`S|${k}`, "le3"); continue; }
+      if (typeof v === "string") {
+        if (!Object.hasOwn(STATS_CODE_TEXT, v)) return null;
+        out.set(`S|${k}`, v);
+        continue;
+      }
       if (!Array.isArray(v) || v.length < 1 || v.length > 4) return null;
       for (const it of v) {
-        const { label, value } = (it ?? {}) as { label?: unknown; value?: unknown };
+        const { label, value, basis } = (it ?? {}) as { label?: unknown; value?: unknown; basis?: unknown };
         if (typeof label !== "string" || !STAT_LABELS.has(label) || typeof value !== "string" || !VALUE.test(value)) return null;
-        out.set(`S|${k}|${label}`, value);
+        if (typeof basis !== "string" || !Object.hasOwn(STAT_BASIS, basis)) return null;
+        out.set(`S|${k}|${label}`, `${STAT_BASIS[basis]}\u0000${value}`);
       }
     }
   }
@@ -106,18 +122,40 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
       else if (people === "undisclosed" || people === "unavailable") next = { ...r, ad: { v: null, s: ADIGA_FILL_STATUS, r: FILL_UNDISCLOSED, u: null, l: "충원인원", at: null, ctx: null } };
       else if (people !== undefined) next = { ...r, ad: { v: people, s: ADIGA_FILL_STATUS, r: null, u: "명", l: "충원인원", at: null, ctx: null } };
     }
-    const le3 = fill.get(`S|${key}`) === "le3";
+    const code = fill.get(`S|${key}`);
+    let addedStats = false;
     for (const [slot, label, p] of SLOTS) {
       const cur = (next ?? r)[slot];
       if (cur.v !== null && cur.v.trim() !== "") continue;
       const v = fill.get(`S|${key}|${label}`);
       if (v !== undefined) {
+        const [basis, value] = v.split("\u0000");
         next ??= { ...r };
-        next[slot] = filled(label, p, v);
-      } else if (le3 && slot === "c50" && ((next ?? r).c70.v ?? "").trim() === "") {
-        next ??= { ...r };
-        next.c50 = { ...cur, r: STATS_LE3 };
+        next[slot] = { ...filled(label, p, value), b: basis };
+        addedStats = true;
       }
+    }
+    // 50%·70%컷 밖의 지표(평균·최저·최고·다른 %컷)는 대체 통계 목록에 붙인다. 이미 값이 보이는 행에는 붙이지 않는다
+    const base = next ?? r;
+    const shown = [base.c50, base.c70, ...base.alt.e].some((c) => c.v !== null && c.v.trim() !== "");
+    if (!shown || addedStats) {
+      const extra: Cell[] = [];
+      for (const label of STAT_LABELS) {
+        if (label === "50%컷" || label === "70%컷") continue;
+        const v = fill.get(`S|${key}|${label}`);
+        if (v === undefined) continue;
+        const [basis, value] = v.split("\u0000");
+        extra.push({ v: value, s: ADIGA_FILL_STATUS, r: null, u: null, l: label, b: basis, co: "final_registrants", cc: "final_registrants", at: null, ctx: null } as Cell);
+      }
+      if (extra.length) {
+        next ??= { ...r };
+        next.alt = { ...base.alt, e: [...base.alt.e, ...extra] };
+        addedStats = true;
+      }
+    }
+    if (code !== undefined && !addedStats && !shown) {
+      next ??= { ...r };
+      next.c50 = { ...(next.c50), r: `${STATS_LE3}:${code}` };
     }
     for (const [slot, label, p] of SLOTS) {
       const cur = r[slot];

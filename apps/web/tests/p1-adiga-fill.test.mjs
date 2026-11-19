@@ -99,10 +99,33 @@ test("미발표 코드·'가군' 표기·성적 stats·3인 이하 미발표(202
   assert.equal(a.ad.r, FILL_UNDISCLOSED);
   assert.equal(a.c50.v, "788");
   assert.equal(b.ad.v, "9");
-  assert.equal(c.c50.r, STATS_LE3);
+  assert.equal(c.c50.r, `${STATS_LE3}:le3`);
   assert.equal(c.c50.v, null);
   // 모르는 지표 이름·잘못된 코드는 표 전체를 버린다
-  for (const bad of [{ fills: { "2025|11|x|다": "none" } }, { stats: { "2025|11|x|다": [{ label: "평균", value: "1" }] } }, { stats: { "2025|11|x|다": "le4" } }]) {
+  for (const bad of [{ fills: { "2025|11|x|다": "none" } }, { stats: { "2025|11|x|다": [{ label: "상위평균", value: "1", basis: "대학 환산점수" }] } }, { stats: { "2025|11|x|다": [{ label: "평균", value: "1", basis: "학생부" }] } }, { stats: { "2025|11|x|다": "le4" } }]) {
     assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ...bad })), null);
   }
+});
+
+test("성적 사유 코드(모집 없음 등)와 50·70%컷 밖 지표(평균·90%컷)는 대체 통계로(2026-11-20)", async () => {
+  const { STATS_LE3, STATS_CODE_TEXT } = await import("../src/lib/p1-adiga-fill.ts");
+  const fill = parseAdigaFill(JSON.stringify({
+    format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" },
+    stats: {
+      "2026|21|수능(일반전형)|다": "no_recruit",
+      "2026|22|수능(일반전형)|다": [{ label: "평균", value: "79.4", basis: "대학 환산점수" }],
+      "2026|23|수능(일반전형)|다": [{ label: "50%컷", value: "95", basis: "수능 백분위(대학 반영 방식)" }, { label: "90%컷", value: "91", basis: "수능 백분위(대학 반영 방식)" }],
+    },
+  }));
+  assert.ok(fill);
+  const [a, b, c] = applyAdigaFill([row(2026, "21"), row(2026, "22"), row(2026, "23")], fill);
+  assert.equal(a.c50.r, `${STATS_LE3}:no_recruit`);
+  assert.equal(STATS_CODE_TEXT.no_recruit, "모집 없음");
+  assert.equal(b.alt.e.at(-1).l, "평균");
+  assert.equal(publishedStats(b)[0].label, "평균");
+  assert.equal(c.c50.v, "95");
+  assert.equal(c.c50.b, "대학 반영 백분위");
+  const [one, two] = publishedStats(c);
+  assert.equal(one.cell.v, "95");
+  assert.equal(two.label, "90%컷");
 });
