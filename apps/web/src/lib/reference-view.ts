@@ -67,7 +67,7 @@ export interface ReferenceItem {
 }
 export interface ReferenceField { label: string; provisional: boolean; items: ReferenceItem[]; best: CutoffMargin | null }
 export interface ReferenceUniversity { university_id: string; university_name: string; region: string | null; count: number; best: CutoffMargin | null; fields: ReferenceField[] }
-export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff: number }
+export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff: number; ineligible: number }
 
 const worstOf = (m: CutoffMargin | null) => (m ? m.worst : -Infinity);
 const byMargin = (a: ReferenceItem, b: ReferenceItem) => worstOf(b.margin) - worstOf(a.margin);
@@ -75,15 +75,17 @@ const bestOf = (items: ReferenceItem[]) => items.reduce<CutoffMargin | null>((m,
 
 /** 참고 누백이 나온 학과 중 지난해 합격선에 닿는 곳(위·비슷)만 고른다. 빠진 곳은 숫자로 센다 */
 export function referencePool(groups: ReferenceUniversityGroupDto[], overall: OverallResultDto | null | undefined, analyses: Record<string, AssessmentDto> | null | undefined): ReferencePool {
-  let below = 0, noCutoff = 0;
+  let below = 0, noCutoff = 0, ineligible = 0;
   const items: ReferenceItem[] = [];
   for (const it of groups.flatMap((g) => g.offerings)) {
+    // 지원 필수 조건이 확인된 모집단위에서 내가 조건을 못 채우면 넣지 않는다(지원 조건 미충족)
+    if (analyses?.[it.offering.offering_id]?.status === "ineligible") { ineligible++; continue; }
     const margin = cutoffMargin(analyses?.[it.offering.offering_id]?.year_cutoffs, it.reference_percentile);
     if (!margin) { noCutoff++; continue; }
     if (margin.side === "below") { below++; continue; }
     items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin });
   }
-  return { items: items.sort(byMargin), below, noCutoff };
+  return { items: items.sort(byMargin), below, noCutoff, ineligible };
 }
 
 export function referenceUniversities(pool: ReferencePool): ReferenceUniversity[] {

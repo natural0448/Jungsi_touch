@@ -1,5 +1,6 @@
 import type { AssessmentDto, EligibilityConditionsDto, SubjectResultDto } from "./dto";
 import { INQUIRY_SUBJECTS } from "./exam";
+import { REQUIRED_CONDITIONS_101 } from "./required-conditions-101";
 
 /**
  * 지원 자격 조건(대표님 결정 2026-11-15). 서버가 요강 정본에서 확정된 필드만 보낸다.
@@ -82,3 +83,40 @@ export function withConditionUnmet<R extends { overall?: { subjects?: SubjectRes
 }
 
 export const CONDITION_MARK_TEXT: Record<"match" | "differ", string> = { match: "내 입력과 맞음", differ: "내 입력과 다름" };
+
+/**
+ * 담당자가 모집요강으로 '지원 필수'임을 확인한 모집단위(v36 A1 명부, 남은 확인이 없는 92행)만
+ * 지정 과목 미응시를 '지원 조건 미충족'으로 본다(대표님 결정 2026-11-19: 요건으로 확인된 행에만 다시 켠다).
+ * 확실히 어긋날 때만 미충족이다. 내 입력이 비었거나 과목 분류를 모르면 그대로 둔다.
+ */
+const BASE = (name: string) => name.replace(/[ⅠⅡ]$/, "");
+export function requiredUnmet(offeringId: string, subjects: SubjectResultDto[] | undefined): boolean {
+  const r = REQUIRED_CONDITIONS_101[offeringId];
+  if (!r || !subjects?.length) return false;
+  if (r.m) {
+    const mine = subjects.find((x) => x.area === "math")?.choice;
+    if (mine && !r.m.map(squash).includes(squash(mine))) return true;
+  }
+  const inq = subjects.filter((x) => x.area === "inquiry1" || x.area === "inquiry2");
+  const domains = inq.map((x) => DOMAIN_OF[x.subject]);
+  if (inq.length === 0 || domains.some((d) => !d)) return false;
+  if (r.d && r.n !== undefined && domains.filter((d) => r.d!.includes(d!)).length < r.n) return true;
+  if (r.s !== undefined && domains.filter((d) => d === "과학").length < r.s) return true;
+  if (r.x && inq.length === 2 && domains.every((d) => d === "과학") && BASE(inq[0].subject) === BASE(inq[1].subject) && inq[0].subject !== inq[1].subject) return true;
+  return false;
+}
+
+/** withConditionUnmet 와 같은 모양으로, 92행 범위의 확인된 지원 필수 조건만 반영한다 */
+export function withRequiredUnmet<R extends { overall?: { subjects?: SubjectResultDto[] } | null; analyses?: Record<string, AssessmentDto> }>(report: R): R {
+  const subjects = report.overall?.subjects;
+  if (!report.analyses || !subjects?.length) return report;
+  let changed = false;
+  const analyses: Record<string, AssessmentDto> = {};
+  for (const [id, a] of Object.entries(report.analyses)) {
+    if (a.status !== "ineligible" && requiredUnmet(id, subjects)) {
+      changed = true;
+      analyses[id] = { ...a, status: "ineligible", category: "ineligible", eligibility_status: "ineligible", reason_code: "designated_subject_not_taken", reference_band: null };
+    } else analyses[id] = a;
+  }
+  return changed ? { ...report, analyses } : report;
+}

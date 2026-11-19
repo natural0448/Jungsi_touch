@@ -24,7 +24,7 @@ function AdvantageNote({ a }: { a: ReferenceAdvantage | null }) {
  * 참고 누백이 나온 학과 가운데 지난해 합격선에 내 위치가 닿는 곳을 대학 → 계열 → 학과로 보인다(대표님 결정 2026-11-19).
  * 계열을 누르면 학과와 합격선 대비 위치가 펼쳐지고, 학과마다 즐겨찾기만 할 수 있다. 판정·담기는 없다.
  */
-export function ReferenceGroups({ universities, favs, below, noCutoff, p3Label }: { universities: ReferenceUniversity[]; favs: Set<string> | null; below: number; noCutoff: number; p3Label: string }) {
+export function ReferenceGroups({ universities, favs, below, noCutoff, ineligible = 0, p3Label }: { universities: ReferenceUniversity[]; favs: Set<string> | null; below: number; noCutoff: number; ineligible?: number; p3Label: string }) {
   if (universities.length === 0) return null;
   return (
     <section className="fv-ref" aria-labelledby="ref-t">
@@ -75,7 +75,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, p3Label }
       <p className="fv-ref-note">
         지난해 대학이 발표한 합격선(최종등록자 70%컷, 없으면 50%컷)을 전체 응시자 기준 위치로 옮긴 값과, 이 대학 방식으로 계산한 내 위치(참고 누백)를 견준 것입니다.
         &lsquo;위&rsquo;일수록 지난해 기준으로 여유가 있다는 뜻이고, 내 위치가 범위면 불리한 끝으로 순서를 정했습니다. 합격 가능성 판정이 아니며 올해 모집인원·지원자에 따라 달라집니다.
-        {(below > 0 || noCutoff > 0) && <> 합격선보다 아래인 {below}곳과 합격선 자료가 없는 {noCutoff}곳은 넣지 않았습니다. {p3Label}에서 하나씩 확인할 수 있습니다.</>}
+        {(below > 0 || noCutoff > 0 || ineligible > 0) && <> 합격선보다 아래인 {below}곳과 합격선 자료가 없는 {noCutoff}곳{ineligible > 0 && <>, 지원 필수 과목 조건을 채우지 못한 {ineligible}곳</>}은 넣지 않았습니다. {p3Label}에서 하나씩 확인할 수 있습니다.</>}
       </p>
     </section>
   );

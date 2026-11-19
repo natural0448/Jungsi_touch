@@ -78,3 +78,42 @@ test("report analyses are relabelled and reference judgment is dropped", () => {
   const same = { overall: { subjects }, analyses: { "2027:1": a } };
   assert.equal(withConditionUnmet(same), same);
 });
+
+const { requiredUnmet, withRequiredUnmet } = await import("../src/lib/eligibility-conditions.ts");
+const subj = (math, i1, i2) => [
+  { area: "math", subject: "수학", choice: math },
+  { area: "inquiry1", subject: i1, choice: null },
+  { area: "inquiry2", subject: i2, choice: null },
+];
+
+test("only the 92 guide-verified required rows can turn into 'conditions not met' (2026-11-19)", () => {
+  // 수학 지정(미적분·기하) + 과탐 2과목: 확률과 통계면 미충족, 사탐이 섞여도 미충족
+  assert.equal(requiredUnmet("2027:1000001185", subj("확률과 통계", "물리학Ⅰ", "화학Ⅰ")), true);
+  assert.equal(requiredUnmet("2027:1000001185", subj("미적분", "생활과 윤리", "화학Ⅰ")), true);
+  assert.equal(requiredUnmet("2027:1000001185", subj("미적분", "물리학Ⅰ", "화학Ⅰ")), false);
+  // 사회·과학 중 2과목, 과학 1과목 이상: 사탐 2과목이면 미충족
+  assert.equal(requiredUnmet("2027:1000000631", subj("확률과 통계", "생활과 윤리", "한국지리")), true);
+  assert.equal(requiredUnmet("2027:1000000631", subj("확률과 통계", "생활과 윤리", "화학Ⅰ")), false);
+  // 사회·과학 중 2과목만: 어떤 조합도 미충족이 아니다
+  assert.equal(requiredUnmet("2027:1000002513", subj("확률과 통계", "생활과 윤리", "한국지리")), false);
+  // 같은 과목 Ⅰ·Ⅱ 조합 불가 행
+  assert.equal(requiredUnmet("2027:1000002469", subj("미적분", "물리학Ⅰ", "물리학Ⅱ")), true);
+  assert.equal(requiredUnmet("2027:1000002469", subj("미적분", "물리학Ⅰ", "화학Ⅱ")), false);
+  // 명부 밖 모집단위와 입력이 없는 경우는 그대로
+  assert.equal(requiredUnmet("2027:1", subj("확률과 통계", "생활과 윤리", "한국지리")), false);
+  assert.equal(requiredUnmet("2027:1000001185", []), false);
+});
+
+test("withRequiredUnmet changes only listed offerings and keeps the server value otherwise", () => {
+  const report = {
+    overall: { subjects: subj("확률과 통계", "생활과 윤리", "한국지리") },
+    analyses: {
+      "2027:1000001185": { offering_id: "2027:1000001185", status: "pending", category: "pending", eligibility_status: "needs_confirmation", reference_band: { code: "target" } },
+      "2027:1": { offering_id: "2027:1", status: "pending", category: "pending", eligibility_status: "needs_confirmation" },
+    },
+  };
+  const out = withRequiredUnmet(report);
+  assert.equal(out.analyses["2027:1000001185"].status, "ineligible");
+  assert.equal(out.analyses["2027:1000001185"].reference_band, null);
+  assert.equal(out.analyses["2027:1"], report.analyses["2027:1"]);
+});

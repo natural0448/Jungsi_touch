@@ -202,7 +202,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 </div>
               </section>
             ) : (
-              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} p3Label={p3.label} />
+              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} p3Label={p3.label} />
             )}
             {tail}
           </section>
