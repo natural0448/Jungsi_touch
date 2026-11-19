@@ -166,22 +166,22 @@ export function ReferenceWildcardDeck({ featured, rest, favs }: { featured: Refe
           비장의 한 수 <span className="num">{shown}</span>
           <small>장</small>
         </h2>
-        <p>{groups} 계열 중 이 대학 계산 방식이 내 성적에 유리한 곳을 참고 유불리 큰 순서로 모았습니다.</p>
+        <p>{groups} 계열 중 지난해 합격선에 내 위치가 닿는 곳을 여유가 큰 순서로 골랐습니다.</p>
       </div>
       {shown === 0 ? (
-        <p className="wd-empty">참고 누백이 나온 {groups} 계열 학과가 아직 없습니다. 후보가 없다는 뜻이 아닙니다.</p>
+        <p className="wd-empty">지난해 합격선에 내 위치가 닿는 {groups} 계열 학과가 아직 없습니다. 후보가 없다는 뜻이 아닙니다.</p>
       ) : (
         <>
           <ol className="wd-deck">{featured.map(card)}</ol>
           {rest.length > 0 && (
             <details className="wd-rest">
-              <summary>나머지 <b className="num">{rest.length}장</b> 더 펼치기</summary>
+              <summary>한 장 더 보기</summary>
               <ol className="wd-deck">{rest.map((w, i) => card(w, i + featured.length))}</ol>
             </details>
           )}
         </>
       )}
-      <p className="wd-foot">참고 누백 기준으로 고른 곳이며 합격 가능성 판정이 아닙니다. 별표를 누르면 즐겨찾기에 들어가 전체 대학·학과 가능성 보기에서도 보입니다.</p>
+      <p className="wd-foot">지난해 합격선과 견준 참고값으로 고른 곳이며 합격 가능성 판정이 아닙니다. 별표를 누르면 즐겨찾기에 들어가 전체 대학·학과 가능성 보기에서도 보입니다.</p>
     </section>
   );
 }
@@ -212,9 +212,7 @@ function ReferenceWildCard({ w, fav }: { w: ReferenceItem; fav: boolean | null }
       </p>
       <p className="wc-why">
         <span>한 수인 이유</span>
-        {a && a.tone === "up"
-          ? `이 학과 계산 방식에서 전체 성적 기준보다 내 위치가 ${a.text}%p 올라갑니다(참고).`
-          : "참고 누백이 나온 계열 후보입니다."}
+        {!w.margin ? "참고 누백이 나온 계열 후보입니다." : w.margin.side === "near" ? `내 위치가 ${w.margin.year} ${w.margin.metric}과 비슷합니다(참고).` : `내 위치가 ${w.margin.text}에 있습니다(참고).`}
       </p>
       {/* 범위 값(상위 0.7~1.0%)도 한 줄에 들도록 설명을 위로 올리고 숫자를 조금 줄인다 */}
       <div className="wc-score ref">

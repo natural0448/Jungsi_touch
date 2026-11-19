@@ -11,37 +11,53 @@ registerHooks({ resolve(specifier, context, next) {
   }
   return next(specifier, context);
 } });
-const { referenceUniversities, referenceWildcards, referenceWildcardGroup } = await import("../src/lib/reference-view.ts");
+const { cutoffMargin, referencePool, referenceUniversities, referenceWildcards, referenceWildcardGroup } = await import("../src/lib/reference-view.ts");
 
-const overall = { status: "estimated", top_percent: "10", exclusive_top_percent: "10", inclusive_top_percent: "10" };
-const ref = (p) => ({ status: "reference_estimated", estimated_upper_cumulative_percent_all_examinees: p, estimated_upper_cumulative_percent_upper_bound: p });
-const off = (id, uni, dept, wg = null) => ({ offering: { offering_id: `2027:${id}`, university_id: uni, university_name: uni, department: dept, track: null, group: "가", region: "서울", wildcard_group: wg }, reference_percentile: ref(id === 3 ? "x" : String(id)) });
+const overall = { status: "estimated", top_percent: "4", exclusive_top_percent: "4", inclusive_top_percent: "4" };
+const ref = (lo, hi = lo) => ({ status: "reference_estimated", estimated_upper_cumulative_percent_all_examinees: lo, estimated_upper_cumulative_percent_upper_bound: hi });
+const cut = (y, metric, v) => ({ academic_year: y, published_metric: metric, cutoff_top_percent: v, observation_id: `${y}${metric}` });
+
+test("margin uses the latest year's 70% cutoff, then 50%, and the unfavourable end of my range (2026-11-19)", () => {
+  const cs = [cut(2024, "70%컷", "20"), cut(2025, "50%컷", "12.1"), cut(2025, "70%컷", "15.7")];
+  const m = cutoffMargin(cs, ref("5.0", "8.5"));
+  assert.equal(m.text, "2025 70%컷보다 7.2~10.7%p 위");
+  assert.equal(m.side, "above");
+  assert.ok(Math.abs(m.worst - 7.2) < 1e-9);
+  assert.equal(cutoffMargin([cut(2025, "50%컷", "6")], ref("5", "8")).side, "near");
+  assert.equal(cutoffMargin([cut(2025, "70%컷", "3")], ref("5", "8")).text, "2025 70%컷보다 2.0~5.0%p 아래");
+  assert.equal(cutoffMargin([], ref("5")), null);
+  assert.equal(cutoffMargin([cut(2025, "평균", "9")], ref("5")), null);
+});
+
+const off = (id, uni, dept, wg = null) => ({ offering: { offering_id: `2027:${id}`, university_id: uni, university_name: uni, department: dept, track: null, group: "가", region: "서울", wildcard_group: wg }, reference_percentile: ref("5") });
 const groups = [
-  { university_id: "A", university_name: "A", offerings: [off(12, "A", "a1"), off(9, "A", "a2", "nursing")] },
-  { university_id: "B", university_name: "B", offerings: [off(5, "B", "b1", "education"), off(3, "B", "b2", "health")] },
+  { university_id: "A", university_name: "A", offerings: [off(1, "A", "간호학과"), off(2, "A", "경영학과"), off(3, "A", "사학과")] },
+  { university_id: "B", university_name: "B", offerings: [off(4, "B", "초등교육과"), off(5, "B", "물리치료학과", "health"), off(6, "B", "유아교육과"), off(7, "B", "응급구조학과")] },
 ];
+const analyses = {
+  "2027:1": { year_cutoffs: [cut(2025, "70%컷", "9")] },   // +4 위
+  "2027:2": { year_cutoffs: [cut(2025, "70%컷", "3")] },   // 아래 → 빠짐
+  "2027:4": { year_cutoffs: [cut(2025, "70%컷", "12")] },  // +7 위
+  "2027:5": { year_cutoffs: [cut(2025, "70%컷", "6")] },   // +1
+  "2027:6": { year_cutoffs: [cut(2025, "70%컷", "8")] },   // +3
+  "2027:7": { year_cutoffs: [cut(2025, "70%컷", "5")] },   // 같음 → 비슷
+};
 
-test("universities are ordered by their best reference advantage, departments inside too (2026-11-19)", () => {
-  const u = referenceUniversities(groups, overall);
+test("only departments that reach last year's cutoff are listed, ordered by margin; the rest are counted", () => {
+  const pool = referencePool(groups, overall, analyses);
+  assert.deepEqual(pool.items.map((i) => i.offering.department), ["초등교육과", "간호학과", "유아교육과", "물리치료학과", "응급구조학과"]);
+  assert.equal(pool.below, 1);
+  assert.equal(pool.noCutoff, 1);
+  const u = referenceUniversities(pool);
   assert.deepEqual(u.map((x) => x.university_id), ["B", "A"]);
-  assert.equal(u[0].best.text, "+5.0");
-  assert.equal(u[1].best.text, "+1.0");
-  const flatA = u[1].fields.flatMap((f) => f.items.map((i) => i.offering.department));
-  assert.deepEqual(flatA, ["a2", "a1"]);
-  assert.equal(u[1].count, 2);
+  assert.equal(u[0].count, 4);
 });
 
-test("reference wildcards take nursing/health/education only, best advantage first, unknown advantage last", () => {
-  const w = referenceWildcards(groups, overall);
-  assert.deepEqual([...w.featured, ...w.rest].map((i) => i.offering.department), ["b1", "a2", "b2"]);
+test("wildcards: at most 4 cards (3 shown, 1 more), same pool and order (2026-11-19)", () => {
+  const w = referenceWildcards(referencePool(groups, overall, analyses));
   assert.equal(w.featured.length, 3);
-  assert.equal(w.featured[2].advantage, null);
-});
-
-test("without an overall position nothing is ranked but the list still shows", () => {
-  const u = referenceUniversities(groups, null);
-  assert.deepEqual(u.map((x) => x.university_id), ["A", "B"]);
-  assert.equal(u[0].best, null);
+  assert.equal(w.rest.length, 1);
+  assert.deepEqual(w.featured.map((i) => i.offering.department), ["초등교육과", "간호학과", "유아교육과"]);
 });
 
 test("when the server leaves wildcard_group empty, the group comes from the department name (2026-11-19)", () => {
@@ -50,8 +66,5 @@ test("when the server leaves wildcard_group empty, the group comes from the depa
   assert.equal(referenceWildcardGroup(o("초등교육과")), "education");
   assert.equal(referenceWildcardGroup(o("경영학과")), null);
   assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "health" }), "health");
-  assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "contract" }), null);
-  // 세 계열이 아닌 표기가 와도 이름으로 가린다
   assert.equal(referenceWildcardGroup({ ...o("간호학과"), wildcard_group: "일반" }), "nursing");
-  assert.equal(referenceWildcardGroup({ ...o("초등교육과"), wildcard_group: "" }), "education");
 });

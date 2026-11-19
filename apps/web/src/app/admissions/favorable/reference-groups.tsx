@@ -1,31 +1,38 @@
 import { StarButton } from "@/components/star-button";
 import { ADVANTAGE_WORD } from "@/components/offering-parts";
 import type { ReferenceAdvantage } from "@/lib/reference-advantage";
-import type { ReferenceUniversity } from "@/lib/reference-view";
+import type { CutoffMargin, ReferenceUniversity } from "@/lib/reference-view";
 
-/** 참고 유불리 한 줄: "유리 +1.2%p 참고". 계산하지 못하면 '확인 중' */
-export function ReferenceAdvantageText({ a }: { a: ReferenceAdvantage | null }) {
-  if (!a) return <span className="need">유불리 확인 중</span>;
+/** 지난해 합격선과의 위치 한 줄: "2025 70%컷보다 7.2~10.7%p 위 참고" */
+export function MarginText({ m }: { m: CutoffMargin | null }) {
+  if (!m) return <span className="need">합격선 자료 없음</span>;
+  const tone = m.side === "above" ? "up" : m.side === "near" ? "even" : "down";
   return (
-    <span className={`v num ${a.tone}`}>
-      <b className="advw">{ADVANTAGE_WORD[a.tone]}</b> {a.text}%p <small className="ref">참고</small>
+    <span className={`v num ${tone}`}>
+      {m.text} <small className="ref">참고</small>
     </span>
   );
 }
 
+/** 참고 유불리 보조 표시: "유리 +1.2%p" */
+function AdvantageNote({ a }: { a: ReferenceAdvantage | null }) {
+  if (!a) return null;
+  return <small className="rf-adv">환산 {ADVANTAGE_WORD[a.tone]} {a.text}%p</small>;
+}
+
 /**
- * 참고 누백(추정)이 나온 대학을 대학 → 계열 → 학과로 묶어 보인다(대표님 결정 2026-11-19).
- * 계열 줄을 누르면 그 계열 학과와 참고 유불리 요약이 펼쳐지고, 학과마다 즐겨찾기만 할 수 있다. 판정·담기는 없다.
+ * 참고 누백이 나온 학과 가운데 지난해 합격선에 내 위치가 닿는 곳을 대학 → 계열 → 학과로 보인다(대표님 결정 2026-11-19).
+ * 계열을 누르면 학과와 합격선 대비 위치가 펼쳐지고, 학과마다 즐겨찾기만 할 수 있다. 판정·담기는 없다.
  */
-export function ReferenceGroups({ universities, favs }: { universities: ReferenceUniversity[]; favs: Set<string> | null }) {
+export function ReferenceGroups({ universities, favs, below, noCutoff, p3Label }: { universities: ReferenceUniversity[]; favs: Set<string> | null; below: number; noCutoff: number; p3Label: string }) {
   if (universities.length === 0) return null;
   return (
     <section className="fv-ref" aria-labelledby="ref-t">
       <div className="fv-sec-hd">
         <h2 id="ref-t">
-          내 성적에 유리한 대학 <span className="num">{universities.length}</span>
+          지원해 볼 만한 대학 <span className="num">{universities.length}</span>
         </h2>
-        <span>이 대학의 점수 계산 방식이 내 과목 구성에 유리한 학교부터 보여 줍니다(참고 유불리 큰 순). 계열을 누르면 학과가 펼쳐집니다.</span>
+        <span>지난해 합격선(70%컷)에 내 위치가 닿는 학과만, 여유가 큰 학교부터 보여 줍니다. 계열을 누르면 학과가 펼쳐집니다.</span>
       </div>
       <div className="fv-ref-list">
         {universities.map((u) => (
@@ -35,7 +42,7 @@ export function ReferenceGroups({ universities, favs }: { universities: Referenc
                 {u.university_name}
                 {u.region && <small>{u.region}</small>}
               </h3>
-              <ReferenceAdvantageText a={u.best} />
+              <MarginText m={u.best} />
             </header>
             {u.fields.map((f) => (
               <details key={f.label} className="sc-fg rf-fg">
@@ -43,16 +50,19 @@ export function ReferenceGroups({ universities, favs }: { universities: Referenc
                   <b>{f.label}</b>
                   <span className="num">{f.items.length}개 학과</span>
                   {f.provisional && <small>2025 분류 참고</small>}
-                  <span className="rf-best"><ReferenceAdvantageText a={f.best} /></span>
+                  <span className="rf-best"><MarginText m={f.best} /></span>
                 </summary>
                 <ul>
-                  {f.items.map(({ offering: o, advantage }) => (
+                  {f.items.map(({ offering: o, margin, advantage }) => (
                     <li key={o.offering_id}>
                       <span className="u">
                         <b>{o.department}</b>
                         <small>{[o.group ? `${o.group}군` : null, o.track].filter(Boolean).join(" · ")}</small>
                       </span>
-                      <ReferenceAdvantageText a={advantage} />
+                      <span className="rf-m">
+                        <MarginText m={margin} />
+                        <AdvantageNote a={advantage} />
+                      </span>
                       {favs && <StarButton id={o.offering_id} on={favs.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}
                     </li>
                   ))}
@@ -63,8 +73,9 @@ export function ReferenceGroups({ universities, favs }: { universities: Referenc
         ))}
       </div>
       <p className="fv-ref-note">
-        참고 유불리는 전체 성적 기준 위치와 이 대학 방식으로 계산한 위치의 차이(%p)입니다. 양수면 이 대학 방식에서 내 위치가 더 위입니다.
-        합격 가능성 판정이 아니며, 판정은 준비되는 대학부터 차례로 켜집니다.
+        지난해 대학이 발표한 합격선(최종등록자 70%컷, 없으면 50%컷)을 전체 응시자 기준 위치로 옮긴 값과, 이 대학 방식으로 계산한 내 위치(참고 누백)를 견준 것입니다.
+        &lsquo;위&rsquo;일수록 지난해 기준으로 여유가 있다는 뜻이고, 내 위치가 범위면 불리한 끝으로 순서를 정했습니다. 합격 가능성 판정이 아니며 올해 모집인원·지원자에 따라 달라집니다.
+        {(below > 0 || noCutoff > 0) && <> 합격선보다 아래인 {below}곳과 합격선 자료가 없는 {noCutoff}곳은 넣지 않았습니다. {p3Label}에서 하나씩 확인할 수 있습니다.</>}
       </p>
     </section>
   );
