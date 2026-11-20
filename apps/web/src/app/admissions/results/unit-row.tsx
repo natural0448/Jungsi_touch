@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { BookLoading } from "@/components/book-loading";
 import { ChevronIcon } from "@/components/icons";
 import type { R27Summary } from "@/lib/p1-shape";
 import { YearTable } from "./snapshot-table";
@@ -117,7 +118,8 @@ function Item({ loader, schoolName, it }: { loader: SchoolLoader; schoolName: st
       {open && it.r27?.note && <p className="rs-idnote">2027 모집: {it.r27.note}</p>}
       {open &&
         (got === null ? (
-          <p className="rs-wait">학년도별 결과를 불러오는 중…</p>
+          // 대기 표시는 책 넘김 애니메이션으로 통일(2026-11-21 대표님 지적)
+          <BookLoading compact text="학년도별 대학 발표 입시결과를 모으고 있습니다." sub="" />
         ) : got.ok ? (
           <YearTable rows={got.rows} schoolName={schoolName} />
         ) : (

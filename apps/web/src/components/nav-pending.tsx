@@ -2,6 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { BOOK_SUB, BookLoading } from "@/components/book-loading";
 import { LoadingNotice } from "@/components/loading-notice";
 import { ROOT_REDIRECT } from "@/lib/routes";
 
@@ -17,15 +18,26 @@ import { ROOT_REDIRECT } from "@/lib/routes";
 */
 
 const BASE = "/jeongsi";
-type Notice = { title: string; desc: string };
-// app/**/loading.tsx 와 같은 글. 바꿀 때 함께 바꾼다
+// 모든 대기 표시는 책 넘김 애니메이션 하나로 그린다(2026-11-21 대표님 지적). 3·4페이지는 그 화면의 분석 문구를 그대로 쓴다
+type Notice = { title: string; desc?: string } | { kind: "favorable" | "possibilities" };
+// 각 화면 loading.tsx 와 같은 글. 바꿀 때 함께 바꾼다
 const NOTICES: [string, Notice][] = [
   ["/admissions/results", { title: "대학 발표 입시결과를 불러오고 있습니다", desc: "대학이 발표한 지난 3개 학년도 결과를 한 번에 확인하는 중입니다." }],
-  ["/admissions/possibilities", { title: "대학·학과 가능성을 불러오고 있습니다", desc: "모집단위 검색 결과와 내 환산점수·지원가능성을 확인하는 중입니다." }],
-  ["/admissions/favorable", { title: "유리한 대학을 찾고 있습니다", desc: "내 성적 기준으로 환산에 유리한 학교와 학과를 확인하는 중입니다." }],
+  ["/admissions/possibilities", { kind: "possibilities" }],
+  ["/admissions/favorable", { kind: "favorable" }],
   ["/reports/me", { title: "내 성적 리포트를 불러오고 있습니다", desc: "저장한 성적과 과목별 결과를 확인하는 중입니다." }],
 ];
-const DEFAULT_NOTICE: Notice = { title: "화면을 불러오고 있습니다", desc: "잠시만 기다려 주세요." };
+const DEFAULT_NOTICE: Notice = { title: "화면을 불러오고 있습니다", desc: BOOK_SUB };
+// 같은 화면 안이라도 검색·다음 쪽·필터처럼 목록이 새로 계산되는 이동은 책 넘김으로 가린다(?open= 만 바뀌는 펼치기는 제외)
+const RECOMPUTE = ["/admissions/possibilities", "/admissions/favorable"];
+
+/** open 을 뺀 검색 조건(정렬). 같으면 목록은 그대로이고 펼친 줄만 바뀐다 */
+function listKey(search: string): string {
+  const q = new URLSearchParams(search);
+  q.delete("open");
+  q.sort();
+  return q.toString();
+}
 const GIVE_UP_MS = 20_000; // 주소가 끝내 바뀌지 않으면(같은 주소로 다시 그림 등) 안내를 거둔다
 
 function noticeFor(path: string): Notice {
@@ -65,7 +77,10 @@ export function NavPending() {
   useEffect(() => {
     const start = (to: URL) => {
       const from = shown.current;
-      setPending(to.pathname === location.pathname ? { kind: "same", from } : { kind: "page", notice: noticeFor(to.pathname), from });
+      const same = to.pathname === location.pathname;
+      const p = to.pathname.startsWith(BASE) ? to.pathname.slice(BASE.length) : to.pathname;
+      const recompute = same && RECOMPUTE.includes(p) && listKey(to.search) !== listKey(location.search);
+      setPending(same && !recompute ? { kind: "same", from } : { kind: "page", notice: noticeFor(to.pathname), from });
     };
     const onClick = (e: MouseEvent) => {
       // 링크(next/link)가 자기 처리에서 기본 동작을 막으므로, 그보다 먼저(capture) 본다
@@ -116,7 +131,11 @@ export function NavPending() {
       <div className="jt-navbar" role="progressbar" aria-label="화면을 불러오는 중" />
       {visible.kind === "page" && (
         <div className="jt-nav-pending">
-          <LoadingNotice title={visible.notice.title} desc={visible.notice.desc} />
+          {"kind" in visible.notice ? (
+            <BookLoading name="회원" kind={visible.notice.kind} />
+          ) : (
+            <LoadingNotice title={visible.notice.title} desc={visible.notice.desc} />
+          )}
         </div>
       )}
     </>

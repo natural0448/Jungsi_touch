@@ -128,7 +128,7 @@ function WildCard({ w, on, fav, stats, statsKey, canPick, orderPending }: { w: C
         </span>
         <span>
           <small>환산 유불리</small>
-          <b className="num">{n === null ? "판단 보류" : `${n > 0 ? "+" : ""}${a.advantage!.delta_pp}%p`}</b>
+          <b className="num">{n === null ? "비교 자료 부족" : `${n > 0 ? "+" : ""}${a.advantage!.delta_pp}%p`}</b>
         </span>
       </div>
 

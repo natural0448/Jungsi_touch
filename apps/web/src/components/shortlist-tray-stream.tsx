@@ -18,7 +18,8 @@ export function StreamTray({ report, known, src, caller, other }: { report: Repo
   const rest = entries.filter(([id]) => !byId.has(id));
   if (rest.length === 0) return <ShortlistTray items={shown} other={other} />;
   const names = (
-    <Suspense fallback={<span className="wait">외 {rest.length}곳 이름 불러오는 중</span>}>
+    // '불러오는 중' 같은 중간 문구는 보이지 않는다(2026-11-21). 이름이 오면 '외 n곳'이 이름으로 바뀐다
+    <Suspense fallback={<span className="wait">외 {rest.length}곳</span>}>
       <RestNames rest={rest} src={src} caller={caller} />
     </Suspense>
   );

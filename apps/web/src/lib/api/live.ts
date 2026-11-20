@@ -128,14 +128,22 @@ async function withLane<T>(key: string, run: () => Promise<T>): Promise<T> {
 }
 
 /*
-  계정당 동시 한도(429 rate_limit_exceeded)로 거절되면 잠시 기다렸다 같은 요청을 다시 보낸다. 최대 3번(3초·3초·4초,
-  서버 Retry-After 가 5초 이하면 그 값, 유효한 값이 5초 초과면 자동 재시도 없이 안내). 2026-10-18 결정은 '3초 뒤 한 번'이었으나, 다른 화면에서 시작된 요청이 서버에서
-  아직 끝나지 않아 겹치는 경우 한 번으로는 풀리지 않아 확인 자체가 막혔다(2026-10-20 사용자 지적으로 3번으로 늘림).
+  계정당 동시 한도(429 rate_limit_exceeded)로 거절되면 잠시 기다렸다 같은 요청을 다시 보낸다. 2026-10-18 결정은 '3초 뒤 한 번',
+  2026-10-20 사용자 지적으로 3번, 2026-11-21 대표님 지적으로 '풀릴 때까지(약 1분 50초 한도)'로 늘렸다(아래 CONTENTION_BUDGET_MS).
   하루 분석 한도(analysis_quota_exceeded)는 다시 보내지 않는다. 쓰기는 같은 Idempotency-Key 로 다시 보내므로 중복되지 않는다.
 */
-const CONTENTION_WAITS_MS = [3000, 3000, 4000];
-const CONTENTION_HINT_MAX_MS = 5000;
-type RetryDecision = "retry_hint" | "retry_fallback" | "retry_dispatch" | "deferred_by_hint" | "no_contention_code" | "attempt_limit";
+/*
+  2026-11-21 대표님 지적: 요청 제한 안내(문의 번호 rate_limit_exceeded, 'hh:mm:ss 이후 다시 눌러 주세요')가 고객에게 보이면 안 된다.
+  - 서버가 준 재시도 시각(Retry-After)이 멀어도 포기하지 않고, 그 시각까지 몇 초 간격으로 조용히 다시 보낸다
+    (서버 시각은 '최악의 경우 만료 시각'이라 실제 겹침은 보통 몇 초 안에 풀린다, auto-reopen.tsx 참고).
+  - 화면은 그동안 책 넘김 대기 화면을 그대로 둔다. 요청 하나당 최대 CONTENTION_BUDGET_MS(약 1분 50초)까지만 기다리고,
+    그래도 풀리지 않을 때만 429 를 올려 차분한 안내 한 줄을 보인다(connection-notice.tsx).
+  - 하루 분석 한도(analysis_quota_exceeded)처럼 기다려도 풀리지 않는 제한은 전과 같이 다시 보내지 않는다.
+*/
+const CONTENTION_WAITS_MS = [2000, 3000, 3000, 4000, 5000];
+const CONTENTION_STEP_MAX_MS = 6000;
+const CONTENTION_BUDGET_MS = 110_000;
+type RetryDecision = "retry_hint" | "retry_fallback" | "retry_dispatch" | "no_contention_code" | "attempt_limit";
 
 function recordRetryDecision(path: string, attempt: number, decision: RetryDecision) {
   try {
@@ -145,10 +153,16 @@ function recordRetryDecision(path: string, attempt: number, decision: RetryDecis
   }
 }
 
+/** n번째(0부터) 재시도 전 기다릴 시간. 서버 시각이 더 가까우면 그때까지만, 멀면 몇 초 간격으로 나눠 다시 본다 */
+export function contentionWait(index: number, hintMs: number | null): number {
+  const step = CONTENTION_WAITS_MS[index] ?? CONTENTION_STEP_MAX_MS;
+  return hintMs === null ? step : Math.max(500, Math.min(hintMs, step));
+}
+
 async function sendContended(path: string, init: RequestInit): Promise<Response> {
+  const started = Date.now();
   let res = await send(path, init);
-  for (const [index, fallback] of CONTENTION_WAITS_MS.entries()) {
-    if (res.status !== 429) return res;
+  for (let index = 0; res.status === 429; index++) {
     const attempt = index + 1;
     const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
     if (code !== "rate_limit_exceeded") {
@@ -156,17 +170,16 @@ async function sendContended(path: string, init: RequestInit): Promise<Response>
       return res;
     }
     const hintMs = retryAfterDelay(res.headers.get("Retry-After"), Date.now());
-    if (hintMs !== null && hintMs > CONTENTION_HINT_MAX_MS) {
-      recordRetryDecision(path, attempt, "deferred_by_hint");
+    const wait = contentionWait(index, hintMs);
+    if (Date.now() - started + wait > CONTENTION_BUDGET_MS) {
+      recordRetryDecision(path, attempt, "attempt_limit");
       return res;
     }
-    const wait = hintMs === null ? fallback : Math.max(500, hintMs);
     recordRetryDecision(path, attempt, hintMs === null ? "retry_fallback" : "retry_hint");
     await new Promise((r) => setTimeout(r, wait));
     recordRetryDecision(path, attempt + 1, "retry_dispatch");
     res = await send(path, init);
   }
-  if (res.status === 429) recordRetryDecision(path, CONTENTION_WAITS_MS.length + 1, "attempt_limit");
   return res;
 }
 

@@ -13,7 +13,7 @@ import { BookLoading } from "@/components/book-loading";
 import { memberName } from "@/lib/member-name";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
-import { loadMineEager, pickedIds, type ReportState } from "@/lib/report-ops";
+import { loadMineEager, pickedIds, settleCandidates, type ReportState } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
@@ -25,6 +25,7 @@ import { ReferenceGroups } from "./reference-groups";
 import { referenceGroups } from "@/lib/reference-percentile";
 import { referencePool, referenceUniversities, referenceWildcards } from "@/lib/reference-view";
 import { CatalogBrowse } from "../possibilities/catalog-browse";
+import { listKey } from "../possibilities/query";
 import "./favorable.css";
 
 const route = page("PAGE-04");
@@ -56,7 +57,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   return (
     <>
       {head}
-      <Suspense fallback={<BookLoading name={name} kind={catalogView ? "possibilities" : "favorable"} />}>
+      {/* 필터·검색·다음 쪽처럼 목록이 바뀌면 key 가 바뀌어 다시 책 넘김을 보인다(펼치기 open 만 바뀌면 그대로, 2026-11-21) */}
+      <Suspense key={listKey(sp)} fallback={<BookLoading name={name} kind={catalogView ? "possibilities" : "favorable"} />}>
         {catalogView ? <CatalogBrowse src={src} caller={caller} sp={sp} route={route} features={FEATURES} catalogView /> : <Body src={src} caller={caller} sp={sp} />}
       </Suspense>
     </>
@@ -70,8 +72,9 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   try {
     // 입력 상태와 지난번 현재 리포트를 동시에 읽는다(2026-11-10 임시 단축, report-ops 참고)
     const mine = await loadMineEager(src, caller);
-    // 저장된 후보만 읽는다. 후보가 아직 없으면 회원이 버튼을 눌러야 만든다(담당자 회신 2026-10-25)
-    state = mine ? { kind: "ready", report: mine } : { kind: "none" };
+    // 후보가 아직 없으면 만들고, 옛 자료판 후보면 다시 확인한 뒤 한 번에 그린다. 그동안은 책 넘김 대기 화면이다
+    // (2026-11-21 대표님 지적: '아직 찾지 않았습니다' 버튼·'다시 계산하고 있습니다' 띠 같은 중간 상태를 고객에게 보이지 않는다)
+    state = mine ? { kind: "ready", report: await settleCandidates(src, caller, mine) } : { kind: "none" };
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
@@ -104,8 +107,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
         <div className="wrap pg-body fv">
           <ScoreBasis overall={report.overall} emptyText="" />
           <RunAnalysis
-            title="이 성적으로 아직 유리한 학교를 찾지 않았습니다"
-            desc="누르면 저장한 성적으로 학교 목록과 와일드카드를 한 번 만듭니다. 만든 목록은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
+            title="유리한 학교 목록을 아직 만들지 못했습니다"
+            desc="화면을 열 때 자동으로 만들었지만 이번에는 끝나지 않았습니다. 누르면 저장한 성적으로 학교 목록과 와일드카드를 다시 만듭니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
             label="유리한 학교 찾기"
             busy="찾는 중…"
           />
@@ -170,7 +173,6 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           desc="저장한 성적을 그대로 사용해 후보를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
           label="후보 다시 확인"
           busy="다시 확인하는 중…"
-          auto={report.candidates_stale === true}
         />
 
         {/* 좁은 화면에서는 와일드카드가 목록 아래로 내려간다. 있다는 것을 위에서 먼저 알린다 */}

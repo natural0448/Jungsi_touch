@@ -3,7 +3,6 @@ import { FAVORITE_LIMIT, myFavorites, type Favorites } from "@/lib/favorites";
 import { FieldTag } from "@/components/field-tag";
 import { ConnectionNotice } from "@/components/connection-notice";
 import Form from "next/form";
-import { Suspense } from "react";
 import Link from "@/components/link";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
@@ -11,11 +10,11 @@ import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { startMine } from "@/lib/report-ops";
+import { settleAnalyses, startMine } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
-import { BasisWait, CellsWait, DetailWait, MineBasis, MineCells, MineDetail, MineLegend, MineRunBoxes, MineTray, cellOf } from "./mine-parts";
+import { MineBasis, MineCells, MineDetail, MineLegend, MineRunBoxes, MineTray, cellOf } from "./mine-parts";
 import { GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
 import "./possibilities.css";
 
@@ -30,10 +29,10 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const cur = parseQuery(sp);
   const destination: CatalogDestination = { path: route.path, catalogView };
   const link = (patch: Partial<Query>) => hrefWith(cur, patch, destination);
-  // 검색과 내 리포트를 함께 보내되 기다리는 것은 검색뿐이다(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기).
-  // 목록(대학·학과·모집군)은 검색만 오면 그리고, 내 환산점수·지원가능성·담기·분석 버튼·담은 학교 띠는
-  // 각자 Suspense 경계 안에서 내 리포트(mine)를 기다린다(mine-parts.tsx). 리포트는 이 요청에서 한 번만 받는다.
-  // 화면을 열 때는 저장된 분석만 붙인다. 분석이 없는 행은 버튼을 눌러야 계산한다(담당자 회신 2026-10-25).
+  // 검색과 내 리포트를 함께 보내고, 보이는 모집단위의 분석까지 끝낸 뒤 목록을 한 번에 그린다
+  // (2026-11-21 대표님 지적: '아직 내 성적으로 분석하지 않았습니다' 띠·'분석 대기'·'불러오는 중' 칸이 고객에게 보이면 안 된다).
+  // 그동안은 page.tsx 의 Suspense 가 책 넘김 대기 화면을 보인다. 화면을 열 때·다음 30개·검색 때 모두 같다.
+  // 분석이 없는 곳만 계산하고(이미 분석한 곳은 다시 계산하지 않음), 옛 자료판 분석은 다시 확인한 뒤 보인다(report-ops settleAnalyses).
   // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
   // 리포트 번호 힌트가 있으면 리포트 읽기를 검색과 함께 먼저 보내고, 입력 상태는 검색 뒤에 보낸다(동시 2건 유지, 2026-11-18)
   // 즐겨찾기(별표)는 본체 DB 에서 따로 읽는다(서비스 API 와 별개). '즐겨찾기만 보기'에서는 검색 대신 별표한 모집단위를 보인다
@@ -67,14 +66,17 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     throw e;
   }
 
-  // 저장된 분석만 보인다. 분석이 없는 칸은 '분석 대기'로 남고 버튼으로 채운다
   const items = res.items ?? [];
   const favs = await favoring; // 읽지 못하면 null — 별표를 숨긴다
-  // 화면 안 검색·칩·다음 쪽은 같은 화면의 전환이다. React 는 전환 중에 이미 보여 준 Suspense 경계가 다시 기다리면
-  // 기다리는 칸으로 바꾸지 않고 옛 화면을 붙잡아, 새 목록까지 내 리포트를 기다렸다(11-10 부담당자 측정: 검색 뒤 목록=내 점수).
-  // 검색 조건을 경계의 key 로 주어 조건이 바뀌면 새 경계가 되게 한다 — 목록은 먼저 바뀌고 내 칸만 '불러오는 중'으로 기다린다.
-  // 같은 조건에서 다시 그릴 때(분석·담기 뒤)는 key 가 같아 옛 내용을 둔 채 새 값으로 바뀐다(깜박임 없음)
-  const qk = link({ open: undefined });
+  // 내 리포트를 기다린다. 받지 못하면 '확인 못 함' 칸을 30줄 그리지 않고 화면 안내 하나로 바꾼다
+  const m = await mine;
+  if (!m.ok) {
+    if ("fatal" in m) throw m.fatal;
+    if (m.error instanceof ConnectionError) return <ConnectionNotice e={m.error} reopenUnavailable />;
+    return <PaidGate kind={m.error.status === 401 ? "login" : "paid"} route={route} features={features} />;
+  }
+  // 보이는 모집단위의 분석을 채우고 옛 자료판 분석은 다시 확인한다. 끝난 뒤에 한 번에 그린다
+  const report = m.report ? await settleAnalyses(src, caller, m.report, items.map((o) => o.offering_id)) : null;
 
   // 같은 대학끼리 묶는다(받은 순서를 지킨다)
   const groups: { id: string; name: string; rows: OfferingDto[] }[] = [];
@@ -94,9 +96,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
 
       <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />
       <div className="wrap pg-body ps">
-        <Suspense key={qk} fallback={<BasisWait />}>
-          <MineBasis p={mine} />
-        </Suspense>
+        <MineBasis report={report} />
 
         <section className="filter" aria-label="검색 조건">
           <Form action={route.path} prefetch={false} className="search" role="search">
@@ -149,9 +149,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                 {/* 날짜만(YYYY-MM-DD)이든 시각까지(ISO)든 'YYYY.MM.DD'로 보인다(10-24 QA: 'T14:51:47Z'가 그대로 보였다) */}
                 {asOfDate(res.as_of) && <small> · {asOfDate(res.as_of)} 기준</small>}
               </span>
-              <Suspense key={qk} fallback={null}>
-                <MineLegend p={mine} />
-              </Suspense>
+              <MineLegend report={report} />
             </div>
 
             {groups.length === 0 && !filtered && !res.next_cursor ? (
@@ -182,9 +180,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
               </section>
             ) : (
               <>
-              <Suspense key={qk} fallback={null}>
-                <MineRunBoxes p={mine} items={items} automatic={!catalogView} />
-              </Suspense>
+              <MineRunBoxes report={report} items={items} />
               <div className="list">
                 {groups.map((g) => (
                   <section key={`${g.id}-${g.rows[0].offering_id}`} className="univ" aria-label={g.name}>
@@ -209,7 +205,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                           <ItemShell
                             key={o.offering_id}
                             o={o}
-                            aP={mine.then((m) => cellOf(m, o.offering_id))}
+                            a={cellOf(report, o.offering_id)}
                             initialOpen={open}
                             unit={
                               <>
@@ -221,9 +217,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                             cells={
                               <>
                                 <span className="c-grp"><span className="grp">{o.group}</span></span>
-                                <Suspense key={qk} fallback={<CellsWait />}>
-                                  <MineCells p={mine} id={o.offering_id} />
-                                </Suspense>
+                                <MineCells report={report} id={o.offering_id} />
                                 {star(o)}
                               </>
                             }
@@ -233,11 +227,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                                 <span>{o.group}군</span>
                               </span>
                             }
-                            detail={
-                              <Suspense key={qk} fallback={<DetailWait />}>
-                                <MineDetail p={mine} o={o} />
-                              </Suspense>
-                            }
+                            detail={<MineDetail report={report} o={o} />}
                           />
                         );
                       })}
@@ -258,9 +248,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         )}
       </div>
 
-      <Suspense key={qk} fallback={null}>
-        <MineTray p={mine} items={items} src={src} caller={caller} />
-      </Suspense>
+      <MineTray report={report} items={items} src={src} caller={caller} />
     </>
   );
 }

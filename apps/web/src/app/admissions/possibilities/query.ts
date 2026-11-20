@@ -53,6 +53,20 @@ export async function skipEmptyPages(src: JungsiSource, caller: Caller, q: Offer
   return page;
 }
 
+/**
+ * 펼친 줄(open)을 뺀 주소 조건(정렬). 목록이 새로 계산되는지 가르는 열쇠 — 3·4페이지 본문 Suspense 의 key 로 쓴다
+ * (같으면 펼치기만 바뀐 것이라 옛 화면을 두고, 다르면 책 넘김 대기 화면을 다시 보인다, 2026-11-21)
+ */
+export function listKey(sp: Record<string, string | string[] | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (k === "open" || v === undefined) continue;
+    for (const one of Array.isArray(v) ? v : [v]) q.append(k, one);
+  }
+  q.sort();
+  return q.toString();
+}
+
 /** 지금 조건에서 일부만 바꾼 주소. undefined 는 지운다. 검색 조건이 바뀌면 처음 쪽으로 */
 export function hrefWith(cur: Query, patch: Partial<Query>, destination: CatalogDestination = { path: PATH, catalogView: false }) {
   const next = { ...cur, ...patch };

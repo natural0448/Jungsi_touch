@@ -9,6 +9,7 @@ import { getCaller, sessionOrDown, source } from "@/lib/api";
 import { memberName } from "@/lib/member-name";
 import { lockFor, page } from "@/lib/routes";
 import { CatalogBrowse } from "./catalog-browse";
+import { listKey } from "./query";
 
 const route = page("PAGE-03");
 const FEATURES = ["추천에 없는 대학·학과까지 직접 검색", "모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
@@ -35,11 +36,12 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
 
   const sp = await searchParams;
   const name = await naming;
-  // 머리글은 바로 보이고, 검색과 내 분석을 기다리는 본문 자리에는 책 넘김 대기 화면을 둔다(2026-11-18 대표님 요청)
+  // 머리글은 바로 보이고, 검색과 내 분석을 기다리는 본문 자리에는 책 넘김 대기 화면을 둔다(2026-11-18 대표님 요청).
+  // 검색·다음 30개·필터로 조건이 바뀌면 경계의 key 가 바뀌어 옛 목록 대신 다시 책 넘김을 보인다(2026-11-21 대표님 지적)
   return (
     <>
       {head}
-      <Suspense fallback={<BookLoading name={name} kind="possibilities" />}>
+      <Suspense key={listKey(sp)} fallback={<BookLoading name={name} kind="possibilities" />}>
         <CatalogBrowse src={src} caller={caller} sp={sp} route={route} features={FEATURES} />
       </Suspense>
     </>

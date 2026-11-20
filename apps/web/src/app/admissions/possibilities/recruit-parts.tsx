@@ -20,7 +20,8 @@ export function Recruit({ o, rec }: { o: OfferingDto; rec: RecruitmentDto | null
           <span>최종 인원<b className="num">{r.final_count ?? wait("미확정")}</b></span>
         </>
       ) : (
-        <span>모집 인원<b>{wait("자료 준비 중")}</b></span>
+        // 값이 없으면 확정 표시 '미공개'(2026-11-21: '자료 준비 중' 같은 중간 문구를 고객에게 보이지 않는다)
+        <span>모집 인원<b>{wait("미공개")}</b></span>
       )}
       <Link href={`${page("PAGE-01").path}?university=${encodeURIComponent(o.university_name)}&unit=${encodeURIComponent(o.department)}`}>대학 발표 입시결과 보기</Link>
     </div>

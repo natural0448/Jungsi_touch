@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, type FormEvent } from "react";
 import { analyzeNow, buildNow, refreshAnalysesNow, refreshCandidatesNow, type RunResult } from "@/app/analysis-actions";
+import { enqueue } from "@/lib/client-queue";
 import type { RefreshIntent } from "@/lib/report-ops";
 
 const INITIAL: RunResult = { error: null };
@@ -28,7 +29,8 @@ function navigationKey() {
  */
 export function RunAnalysis({ ids, title, desc, label, busy, refresh, auto, autoScope }: { ids?: string[]; title: string; desc: string; label: string; busy: string; refresh?: RefreshIntent; auto?: boolean; autoScope?: string }) {
   const submit = refresh ? (ids ? refreshAnalysesNow : refreshCandidatesNow) : (ids ? analyzeNow : buildNow);
-  const [state, action, pending] = useActionState(submit, INITIAL);
+  // 담기·다른 분석과 겹치지 않게 한 줄로 세워 보낸다(같은 계정 요청 겹침 방지, 2026-11-21)
+  const [state, action, pending] = useActionState((prev: RunResult, fd: FormData) => enqueue(() => submit(prev, fd)), INITIAL);
   const form = useRef<HTMLFormElement>(null);
   const attemptedFor = useRef<string | null>(null);
   const autoKey = !auto

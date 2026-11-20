@@ -1,23 +1,25 @@
 "use client";
 
-import { Suspense, use, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { BookLoading } from "@/components/book-loading";
 import { ChevronIcon } from "@/components/icons";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
+import { enqueue } from "@/lib/client-queue";
 import { loadExtras, type Extras, type P1Year } from "./extras-actions";
 import { Published, Recruit, sameRelease } from "./recruit-parts";
 import { P1YearsContext } from "./p1-year-cell";
 
 /**
  * 모집단위 한 줄. 펼치기·접기는 화면에서 바로 한다(서버 왕복 없음) — 환산·누백·판단 카드(detail)는
- * 목록을 받을 때 이미 그려 두었다. 2027 모집 정보·발행 기준만 처음 펼칠 때 그 모집단위만 받아 채운다.
+ * 목록을 받을 때 이미 그려 두었다. 2027 모집 정보·발행 기준·학년도별 대학 발표 성적만 처음 펼칠 때 그 모집단위만 받아 채운다.
  * 주소의 ?open= 은 화면 이동 없이 바꿔(공유·새로 고침 때 같은 줄이 열림) 둔다.
- * 내 분석(a)은 목록보다 늦게 올 수 있어 약속(aP)으로 받는다. 줄·카드 틀은 먼저 보이고(2026-11-10 나눠 그리기),
- * 내 칸(cells)·판단 카드(detail)는 서버에서 각자 Suspense 경계로 채워 온다.
+ * 2026-11-21 대표님 지적: 펼친 상세는 필요한 자료가 다 모인 뒤 한 번에 보인다. 그 전에는 책 넘김 대기 화면이고,
+ * '모집 인원 불러오는 중…'·'판정 근거 부족'이 먼저 보였다가 바뀌는 일이 없게 한다. 받는 요청은 한 줄로 세워 보낸다(client-queue).
  */
 export function ItemShell({
   o,
-  aP,
+  a,
   initialOpen,
   unit,
   cells,
@@ -25,7 +27,7 @@ export function ItemShell({
   detail,
 }: {
   o: OfferingDto;
-  aP: Promise<Cell>;
+  a: Cell;
   initialOpen: boolean;
   unit: ReactNode;
   cells: ReactNode;
@@ -45,7 +47,8 @@ export function ItemShell({
       .then((r) => (r.ok ? r.json() : { p1: null }))
       .then((b: { p1?: P1Year[] | null }) => setP1Fast(Array.isArray(b.p1) ? b.p1 : null))
       .catch(() => setP1Fast(null));
-    loadExtras(o.offering_id, o.university_name)
+    // 정시터치 서버 조회(모집 정보·발행 기준)는 다른 펼치기·담기와 겹치지 않게 차례로 보낸다
+    enqueue(() => loadExtras(o.offering_id, o.university_name))
       .then(setExtras)
       .catch(() => setExtras({ ok: false, code: "request_failed" }));
   };
@@ -84,32 +87,17 @@ export function ItemShell({
       {open && (
         <div className="detail">
           {extras === null ? (
-            <div className="recruit">
-              <span>2027 모집군<b>{o.group}군</b></span>
-              <span>모집 인원<b><span className="wait">불러오는 중…</span></b></span>
-            </div>
-          ) : extras.ok ? (
-            <>
-              <Recruit o={o} rec={extras.rec} />
-              {/* 발행 기준이 내 판단과 같은 판인지는 내 분석이 온 뒤에 적는다(오기 전에는 비워 둔다) */}
-              <Suspense fallback={null}>
-                <PublishedFor aP={aP} f={extras.pub} />
-              </Suspense>
-            </>
+            <BookLoading compact text={<>{o.university_name} {o.department}의 모집 정보와 지원 판단 근거를 모으고 있습니다.</>} />
           ) : (
-            <div className="recruit">
-              <span>2027 모집군<b>{o.group}군</b></span>
-              <span>모집 인원<b><span className="wait">불러오지 못했습니다(문의 번호 {extras.code})</span></b></span>
-            </div>
+            <>
+              {/* 받지 못했으면 값이 없는 것과 같은 확정 표시(미공개)로 그린다. 문의 번호·'불러오지 못했습니다'는 보이지 않는다 */}
+              <Recruit o={o} rec={extras.ok ? extras.rec : null} />
+              {extras.ok && <Published f={extras.pub} same={sameRelease(a, extras.pub)} />}
+              <P1YearsContext.Provider value={p1Fast ? p1Fast : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
+            </>
           )}
-          <P1YearsContext.Provider value={p1Fast ? p1Fast : extras === null ? undefined : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
         </div>
       )}
     </li>
   );
-}
-
-function PublishedFor({ aP, f }: { aP: Promise<Cell>; f: Parameters<typeof Published>[0]["f"] }) {
-  const a = use(aP);
-  return <Published f={f} same={sameRelease(a, f)} />;
 }

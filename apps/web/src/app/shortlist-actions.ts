@@ -39,6 +39,8 @@ export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickR
       if (unsure) revalidatePath("/", "layout");
       // 저장됐을 수 있으므로 '못했습니다·다시 눌러 주세요'라고 하지 않는다(10-27 사용자 지적)
       if (unsure) return { error: `${MAYBE_SAVED} (문의 번호 ${e.code})` };
+      // 요청 겹침은 '담지 못했습니다'로 말하지 않는다 — 약 2분 조용히 다시 보낸 뒤에도 안 풀릴 때만 차분한 한 줄(2026-11-21)
+      if (e.kind === "rate_limited" && e.code !== "analysis_quota_exceeded") return { error: connectionText(e) };
       return { error: `${failed}. ${connectionText(e)}` };
     }
     throw e;

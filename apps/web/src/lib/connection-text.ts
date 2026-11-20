@@ -19,8 +19,9 @@ export function connectionText(e: ConnectionError): string {
     if (e.code === "analysis_quota_exceeded") {
       return `오늘 분석 한도를 모두 썼습니다. 기존 리포트는 열 수 있습니다.${retryTime ? ` ${retryTime} 이후 다시 분석해 주세요.` : ""}`;
     }
-    const cause = e.code === "rate_limit_exceeded" ? "같은 계정의 요청이 겹쳤습니다." : "서버가 이번 요청을 잠시 제한했습니다.";
-    return `${cause} ${retryTime ? `${retryTime} 이후 다시 눌러 주세요.` : "잠시 뒤 다시 눌러 주세요."}`;
+    // 요청 겹침은 화면 서버가 풀릴 때까지(약 2분) 조용히 다시 보낸 뒤에야 여기 온다(lib/api/live.ts).
+    // 제한·재시도 시각·문의 번호는 보이지 않고 차분한 한 줄만 보인다(2026-11-21 대표님 지적)
+    return "지금 이용자가 많아 처리가 늦어지고 있습니다. 잠시 뒤 다시 눌러 주세요.";
   }
   if (e.code === "backend_unreachable") return "정시터치 서버에 연결할 수 없습니다.";
   return `정시터치 서버가 지금 이 작업을 잠시 받지 않습니다. 나중에 다시 눌러 주세요. (문의 번호 ${e.code})`;

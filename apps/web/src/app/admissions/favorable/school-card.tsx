@@ -75,7 +75,7 @@ export function SchoolCard({ g, cur, picked, favs, stats, statsKey }: { g: Group
         </div>
         <div className="n">
           <small>환산 유불리 최대</small>
-          {best !== null ? <b className={`num big ${best >= 0.1 ? "up" : best <= -0.1 ? "down" : "even"}`}>{best > 0 ? "+" : ""}{best.toFixed(2)}%p</b> : <span className="need">판단 보류</span>}
+          {best !== null ? <b className={`num big ${best >= 0.1 ? "up" : best <= -0.1 ? "down" : "even"}`}>{best > 0 ? "+" : ""}{best.toFixed(2)}%p</b> : <span className="need">비교 자료 부족</span>}
         </div>
         <div className="n">
           <small>후보 학과</small>

@@ -14,7 +14,8 @@ const WAIT_MS = 4000;
 const MAX_TRIES = 2;
 const WINDOW_MS = 60_000;
 
-export function AutoReopen() {
+/** quiet: 안내 문장은 부르는 쪽이 이미 적었다. 자동으로 다시 여는 동안에는 아무 글도 덧붙이지 않는다 */
+export function AutoReopen({ quiet = false }: { quiet?: boolean }) {
   const router = useRouter();
   const [state, setState] = useState<"waiting" | "stopped">("waiting");
   useEffect(() => {
@@ -41,6 +42,8 @@ export function AutoReopen() {
     }, WAIT_MS);
     return () => window.clearTimeout(timer);
   }, [router]);
+  if (quiet && state === "waiting") return null;
+  if (quiet) return <p className="conn-code" role="status">잠시 뒤 새로 고쳐 주세요.</p>;
   return (
     <p className="conn-code" role="status">
       {state === "waiting" ? "잠시 뒤 이 화면을 자동으로 다시 엽니다." : "자동으로 다시 열어도 풀리지 않았습니다. 잠시 뒤 새로 고쳐 주세요."}

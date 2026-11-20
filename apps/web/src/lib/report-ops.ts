@@ -247,6 +247,74 @@ export async function togglePickOn(src: JungsiSource, caller: Caller, report: Re
   );
 }
 
+/*
+  화면을 열 때 계산을 끝낸 뒤 보여 주기(2026-11-21 대표님 지적: '분석 대기'·'아직 분석하지 않았습니다' 띠, '판정 근거 부족'이
+  몇 초 뒤 '안정'으로 바뀌는 깜박임이 고객에게 보이면 안 된다).
+  - 3·4페이지 본문은 아래 두 함수가 끝날 때까지 책 넘김 대기 화면(Suspense fallback)을 둔다.
+  - 이미 분석된 곳은 다시 계산하지 않는다(ensureAnalyses·ensureCandidates 와 같은 요청 키 → 서버가 중복 실행하지 않는다).
+  - 서버가 옛 자료판으로 계산됐다고 알려 준 곳(stale)은 같은 성적으로 한 번 다시 확인한 뒤 보인다. 재확인 의도 번호는
+    (리포트·판·범위)에서 정해 만들어, 같은 화면을 다시 열어도 같은 요청 키가 되어 서버가 두 번 계산하지 않는다.
+  - 실패해도 화면을 깨지 않고 받은 리포트로 그린다(빈 칸은 확정 표시 규칙대로).
+*/
+async function stableIntent(report: ReportDto, scope: string): Promise<RefreshIntent> {
+  const bytes = new TextEncoder().encode(JSON.stringify(["auto-refresh", report.report_id, report.profile_id, report.report_version, scope]));
+  const h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)), (b) => b.toString(16).padStart(2, "0")).join("");
+  const id = `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+  return { id, reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version };
+}
+
+/** 갱신 한 번. 거절·연결 실패면 갱신 전 리포트로 그린다. 응답만 503 으로 끊겼으면 저장됐을 수 있어 한 번 다시 읽는다 */
+async function settleStep(src: JungsiSource, caller: Caller, current: ReportDto, run: () => Promise<ReportState>): Promise<ReportDto> {
+  try {
+    const st = await run();
+    return st.kind === "ready" ? st.report : current;
+  } catch (e) {
+    if (!(e instanceof ConnectionError || e instanceof AccessDenied)) throw e;
+    if (e instanceof ConnectionError && e.kind === "unavailable") {
+      try {
+        return (await src.readReport(caller, current.report_id)) ?? current;
+      } catch {
+        return current;
+      }
+    }
+    return current;
+  }
+}
+
+/** 보이는 모집단위의 분석을 채우고(없는 것만), 옛 자료판 분석이면 다시 확인한 리포트를 돌려준다 */
+export async function settleAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<ReportDto> {
+  const targets = canonicalOfferingIds(ids).slice(0, 100);
+  if (targets.length === 0) return report;
+  let current = report;
+  if (targets.some((id) => !current.analyses?.[id])) {
+    const base = current;
+    current = await settleStep(src, caller, base, () => ensureAnalyses(src, caller, base, targets));
+  }
+  const stale = new Set(current.stale_analysis_ids ?? []);
+  const staleHere = targets.filter((id) => stale.has(id) && current.analyses?.[id]);
+  if (staleHere.length > 0) {
+    const base = current;
+    const intent = await stableIntent(base, staleHere.join(","));
+    current = await settleStep(src, caller, base, () => refreshAnalyses(src, caller, base, staleHere, intent));
+  }
+  return current;
+}
+
+/** 후보가 없으면 만들고, 옛 자료판 후보면 다시 확인한 리포트를 돌려준다 */
+export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto): Promise<ReportDto> {
+  let current = report;
+  if (!current.candidates) {
+    const base = current;
+    current = await settleStep(src, caller, base, () => ensureCandidates(src, caller, base));
+  }
+  if (current.candidates && current.candidates_stale === true) {
+    const base = current;
+    const intent = await stableIntent(base, "candidates");
+    current = await settleStep(src, caller, base, () => refreshCandidates(src, caller, base, intent));
+  }
+  return current;
+}
+
 export interface PickedItem {
   offering: OfferingDto | null; // 카탈로그에서 빠졌으면 null
   offering_id: string;

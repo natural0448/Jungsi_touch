@@ -18,11 +18,24 @@ export async function ConnectionNotice({ e, reopenUnavailable = false }: { e: Co
   // 이 코드만 따로 안내하고 다른 503(security_policy_unavailable 등)은 아래 일반 문구 그대로 둔다
   const pendingScope = e.code === "operation_scope_not_approved";
   const transitionPending = e.code === "score_input_transition_pending";
+  // 요청 겹침 제한은 화면 서버가 풀릴 때까지(약 2분) 조용히 다시 보낸 뒤에야 여기 온다(lib/api/live.ts).
+  // 고객에게 제한·문의 번호·재시도 시각을 보이지 않고 차분한 한 줄만 보인 채 스스로 다시 연다(2026-11-21 대표님 지적)
+  const contention = e.kind === "rate_limited" && e.code !== "analysis_quota_exceeded";
+  if (contention) {
+    return (
+      <div className="wrap pg-body">
+        <section className="gate flat" aria-live="polite">
+          <p>지금 이용자가 많아 화면을 여는 데 시간이 더 걸리고 있습니다. 잠시 뒤 이 화면을 자동으로 다시 엽니다.</p>
+          <AutoReopen quiet />
+        </section>
+      </div>
+    );
+  }
   // 전문가용 서버 연결 전(시범 준비 중, 2026-10-29 사용자 결정): 선생님께는 사유 코드 없이 준비 안내만 보인다
   const proPending = e.code === "pro_api_not_configured";
   const heading = proPending ? "정시터치 전문가용을 준비하고 있습니다" : transitionPending ? "성적 입력 방식을 바꾸는 작업을 하고 있습니다" : pendingScope
     ? "이 화면의 자료를 연결하고 있습니다"
-    : e.kind === "unconfigured" ? "정시터치 서버 연결 설정을 기다리고 있습니다" : e.kind === "rate_limited" ? "요청이 많아 잠시 제한되었습니다" : "정시터치 서버에 잠시 연결할 수 없습니다";
+    : e.kind === "unconfigured" ? "정시터치 서버 연결 설정을 기다리고 있습니다" : e.kind === "rate_limited" ? "오늘 분석할 수 있는 한도를 모두 썼습니다" : "정시터치 서버에 잠시 연결할 수 없습니다";
   const body = proPending
     ? "학생 성적 입력과 분석은 시범 운영을 시작할 때 열립니다. 시작 날짜는 에듀터치가 기관 관리자께 메일로 알려 드립니다. 위의 기관·계약 정보는 지금도 확인하실 수 있습니다."
     : transitionPending ? SCORE_INPUT_TRANSITION_NOTICE : pendingScope

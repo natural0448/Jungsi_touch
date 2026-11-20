@@ -110,3 +110,12 @@ test("offering paths keep ':' in 2027:PK ids (recruitment and published forecast
   assert.equal(seen[0].path.split("?")[0], "/offerings/2027:1000001753/recruitment");
   assert.equal(seen[1].path.split("?")[0], "/offerings/2027:1000001753/forecast");
 });
+
+test("429 contention waits: short steps, never past the server hint, kept going while the hint is far away (2026-11-21)", async () => {
+  const { contentionWait } = await import("../src/lib/api/live.ts");
+  assert.equal(contentionWait(0, null), 2000);
+  assert.equal(contentionWait(0, 800), 800);
+  assert.equal(contentionWait(0, 100), 500);
+  assert.equal(contentionWait(1, 60_000), 3000); // 서버 시각이 1분 뒤여도 몇 초 간격으로 다시 본다
+  assert.equal(contentionWait(40, 60_000), 6000);
+});

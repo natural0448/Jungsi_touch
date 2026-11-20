@@ -157,7 +157,9 @@ export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResult
       );
     }
   }
-  if (!a || !a.advantage) return <span className="need">판단 보류</span>;
+  // '판단 보류'는 중간 상태처럼 읽혀 쓰지 않는다(2026-11-21 대표님 지적). 사유가 분명한 종료 표시로 적는다
+  if (!a) return <span className="need">분석 대기</span>;
+  if (!a.advantage) return <span className="need" title="이 모집단위는 비교 자료가 모자라 유불리를 표시하지 않았습니다">{a.status === "ineligible" ? "해당 없음" : "비교 자료 부족"}</span>;
   const n = Number(a.advantage.delta_pp);
   const tone = a.advantage.status === "neutral" || Math.abs(n) < 0.1 ? "even" : n > 0 ? "up" : "down";
   const width = Math.min(50, (Math.abs(n) / 0.6) * 50);

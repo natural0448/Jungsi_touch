@@ -15,6 +15,7 @@ import { correctionExhausted } from "@/lib/superseded";
 import { readPicks } from "@/lib/shortlist";
 import { finishEagerReport, pickedIds, rememberCurrentReport, startEagerReport } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
+import { BookLoading } from "@/components/book-loading";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
@@ -217,7 +218,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                   busy="분석하는 중…"
                 />
               )}
-              <Suspense fallback={<p className="rp-note" aria-busy="true">담은 학교를 불러오는 중…</p>}>
+              <Suspense fallback={<BookLoading compact text="담은 학교를 불러오고 있습니다." />}>
                 <Picked src={src} caller={caller} report={report} />
               </Suspense>
             </>

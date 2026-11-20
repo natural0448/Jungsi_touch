@@ -12,7 +12,8 @@ async function Slot({ p, id }: { p: StatsPromise; id: string }) {
 /** k: 화면 조건(필터·펼친 학교). 조건이 바뀌는 전환에서 이 줄만 기다리고 학교 목록은 먼저 바뀌게 경계를 새로 만든다 */
 export function StatsSlot({ p, id, k }: { p: StatsPromise; id: string; k: string }) {
   return (
-    <Suspense key={k} fallback={<span className="stats wait">추천·선택 집계 불러오는 중</span>}>
+    // 받는 동안 이 줄은 비워 둔다. '불러오는 중' 같은 중간 문구는 고객에게 보이지 않는다(2026-11-21 대표님 지적)
+    <Suspense key={k} fallback={<span className="stats" aria-busy="true" />}>
       <Slot p={p} id={id} />
     </Suspense>
   );

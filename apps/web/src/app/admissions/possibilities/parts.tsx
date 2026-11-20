@@ -41,7 +41,8 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType }: { 
     return (
       <>
         {recruit}
-        <div className="empty-an"><p>이 모집단위는 아직 내 성적으로 분석하지 않았습니다. 목록 위의 <b>내 성적으로 분석</b>을 누르면 결과가 채워집니다.</p></div>
+        {/* 화면을 그리기 전에 서버가 분석을 이미 시도했다(2026-11-21). 그래도 없으면 자료 미연결이라 버튼 안내를 하지 않는다 */}
+        <div className="empty-an"><p>이 모집단위는 아직 분석 자료에 연결되지 않아 내 성적으로 계산하지 않았습니다. 위의 <b>대학 발표 입시결과 보기</b>에서 지난 결과를 확인할 수 있습니다.</p></div>
       </>
     );
   }
@@ -321,7 +322,7 @@ function AdvantageCard({ a, overall }: { a: AssessmentDto; overall?: OverallResu
     return (
       <section className="card" aria-label="환산 유불리">
         <h3>환산 유불리</h3>
-        <div className="big hold">판단 보류</div>
+        <div className="big hold">{a.status === "ineligible" ? "해당 없음" : "비교 자료 부족"}</div>
         <p>
           {a.status === "ineligible"
             ? "지원 자격을 충족하지 않아 유불리를 계산하지 않았습니다."
