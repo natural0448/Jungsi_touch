@@ -167,13 +167,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       <div className="wrap pg-body fv">
         <ScoreBasis overall={report.overall} emptyText="" />
 
-        <RunAnalysis
-          refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
-          title="저장된 후보를 현재 자료로 다시 확인합니다"
-          desc="저장한 성적을 그대로 사용해 후보를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
-          label="후보 다시 확인"
-          busy="다시 확인하는 중…"
-        />
+        {/* '후보 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).
+            옛 자료판 후보는 화면을 열 때 서버가 조용히 다시 확인한다(report-ops settleCandidates) */}
 
         {/* 좁은 화면에서는 와일드카드가 목록 아래로 내려간다. 있다는 것을 위에서 먼저 알린다 */}
         {(wildcards.length > 0 || refWildCount > 0) && (
@@ -194,7 +189,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 <h2>{c.status === "pending" ? "판정 자료 준비 중" : "현재 상향 범위 이내 추천 후보 없음"}</h2>
                 <p>
                   {c.status === "pending"
-                    ? "지금은 대학별 판정 자료를 연결하는 중이고, 참고 누백이 나온 대학도 아직 없습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다. 위의 ‘후보 다시 확인’을 누르면 최신 자료로 다시 찾습니다."
+                    ? "지금은 대학별 판정 자료를 연결하는 중이고, 참고 누백이 나온 대학도 아직 없습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다. 자료가 연결되면 이 화면을 열 때 최신 자료로 다시 찾습니다."
                     : "판정이 나온 모집단위 가운데 안정·하향·적정·소신·상향에 드는 곳이 없습니다."}{" "}
                   {refGroups.length > 0 && <>참고 누백이 나온 학과 중 지난해 합격선에 내 위치가 닿는 곳이 없습니다(합격선보다 아래 {refPool.below}곳, 합격선 자료 없음 {refPool.noCutoff}곳).{" "}</>}
                   {p3.label}에서 대학·학과를 직접 검색해 하나씩 확인할 수 있습니다.

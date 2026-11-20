@@ -263,6 +263,47 @@ async function stableIntent(report: ReportDto, scope: string): Promise<RefreshIn
   return { id, reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version };
 }
 
+/*
+  재확인 되풀이 막기(2026-11-21). 재확인한 뒤에도 서버가 계속 '옛 자료판'이라고 하면 그 결과를 확정 표시로 두고,
+  화면을 다시 열 때마다 또 보내지 않는다. (리포트·성적·범위)마다 재확인 뒤의 리포트 판을 화면 서버(Worker) 메모리에 적어 두고,
+  리포트 판이 그보다 올라가지 않았으면(새 분석·담기 등이 없었으면) 다시 보내지 않는다. 6시간 지나면 버리고 1,000건까지만 둔다.
+*/
+const RECHECK_TTL_MS = 6 * 60 * 60_000;
+const RECHECK_MAX = 1000;
+const rechecked = new Map<string, { version: number; at: number }>();
+
+/** 운영 확인용 기록. 리포트 번호·성적·학교 이름은 남기지 않고 개수·참거짓만 적는다 */
+function logSettle(kind: string, facts: Record<string, number | boolean>) {
+  try {
+    console.info(`[jungsi-settle] ${kind} ${Object.entries(facts).map(([k, v]) => `${k}=${v}`).join(" ")}`);
+  } catch {
+    // 기록 실패는 화면에 영향 없음
+  }
+}
+
+function recheckKey(kind: string, report: ReportDto, scope: string) {
+  return JSON.stringify([kind, report.report_id, report.profile_id, scope]);
+}
+
+/** 이 범위를 이 판(또는 그 뒤 판)에서 이미 재확인했는지 */
+export function alreadyRechecked(kind: string, report: ReportDto, scope: string): boolean {
+  const k = recheckKey(kind, report, scope);
+  const r = rechecked.get(k);
+  if (!r) return false;
+  if (Date.now() - r.at > RECHECK_TTL_MS) {
+    rechecked.delete(k);
+    return false;
+  }
+  return report.report_version <= r.version;
+}
+
+function markRechecked(kind: string, before: ReportDto, after: ReportDto, scope: string) {
+  const k = recheckKey(kind, before, scope);
+  rechecked.delete(k);
+  rechecked.set(k, { version: Math.max(before.report_version, after.report_version), at: Date.now() });
+  while (rechecked.size > RECHECK_MAX) rechecked.delete(rechecked.keys().next().value as string);
+}
+
 /** 갱신 한 번. 거절·연결 실패면 갱신 전 리포트로 그린다. 응답만 503 으로 끊겼으면 저장됐을 수 있어 한 번 다시 읽는다 */
 async function settleStep(src: JungsiSource, caller: Caller, current: ReportDto, run: () => Promise<ReportState>): Promise<ReportDto> {
   try {
@@ -292,10 +333,17 @@ export async function settleAnalyses(src: JungsiSource, caller: Caller, report: 
   }
   const stale = new Set(current.stale_analysis_ids ?? []);
   const staleHere = targets.filter((id) => stale.has(id) && current.analyses?.[id]);
-  if (staleHere.length > 0) {
+  const scope = staleHere.join(",");
+  const skip = staleHere.length > 0 && alreadyRechecked("analyses", current, scope);
+  if (staleHere.length > 0 && !skip) {
     const base = current;
-    const intent = await stableIntent(base, staleHere.join(","));
+    const intent = await stableIntent(base, scope);
     current = await settleStep(src, caller, base, () => refreshAnalyses(src, caller, base, staleHere, intent));
+    markRechecked("analyses", base, current, scope);
+  }
+  if (staleHere.length > 0) {
+    const still = new Set(current.stale_analysis_ids ?? []);
+    logSettle("analyses", { stale: staleHere.length, sent: !skip, skipped: skip, after_stale: staleHere.filter((id) => still.has(id)).length });
   }
   return current;
 }
@@ -307,11 +355,20 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     const base = current;
     current = await settleStep(src, caller, base, () => ensureCandidates(src, caller, base));
   }
-  if (current.candidates && current.candidates_stale === true) {
+  const c = current.candidates;
+  // 서버 표식(candidates_stale)이 있거나, 후보가 비어 있는 동안(판정이 켜진 대학이 없던 때 만든 후보 — 추천·와일드카드 0, 또는 보류)
+  // 화면을 열 때 한 번 다시 확인한다. 11-21 운영: 표식 없이 옛 후보(참고 목록 2곳)가 그대로 남았다.
+  // 같은 리포트 판에서는 한 번만(alreadyRechecked), 요청 키도 판마다 같아 서버가 두 번 계산하지 않는다
+  const emptyOrPending = !!c && (c.status === "pending" || (c.basic_university_groups.length === 0 && c.wildcards.length === 0));
+  const want = !!c && (current.candidates_stale === true || emptyOrPending);
+  const skip = want && alreadyRechecked("candidates", current, "candidates");
+  if (want && !skip) {
     const base = current;
     const intent = await stableIntent(base, "candidates");
     current = await settleStep(src, caller, base, () => refreshCandidates(src, caller, base, intent));
+    markRechecked("candidates", base, current, "candidates");
   }
+  logSettle("candidates", { stale: report.candidates_stale === true, empty: emptyOrPending, sent: want && !skip, skipped: skip, changed: current !== report, after_stale: current.candidates_stale === true });
   return current;
 }
 

@@ -14,7 +14,7 @@ import { settleAnalyses, startMine } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
-import { MineBasis, MineCells, MineDetail, MineLegend, MineRunBoxes, MineTray, cellOf } from "./mine-parts";
+import { MineBasis, MineCells, MineDetail, MineLegend, MineTray, cellOf } from "./mine-parts";
 import { GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
 import "./possibilities.css";
 
@@ -180,7 +180,6 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
               </section>
             ) : (
               <>
-              <MineRunBoxes report={report} items={items} />
               <div className="list">
                 {groups.map((g) => (
                   <section key={`${g.id}-${g.rows[0].offering_id}`} className="univ" aria-label={g.name}>

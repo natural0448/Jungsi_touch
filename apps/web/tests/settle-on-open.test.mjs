@@ -53,16 +53,23 @@ test("nothing to do sends nothing", async () => {
   assert.equal(p.calls.length, 0);
 });
 
-test("stale analyses in view are re-checked once with a stable intent (same screen → same key)", async () => {
-  const r = report({ analyses: { A: saved, B: saved }, stale_analysis_ids: ["B", "Z"] });
-  const fresh = report({ report_version: 8, analyses: { A: saved, B: saved }, stale_analysis_ids: [] });
-  const p1 = port([{ ok: true, value: fresh }]);
-  assert.equal(await settleAnalyses(p1.src, caller, r, ["A", "B"]), fresh);
-  const p2 = port([{ ok: true, value: fresh }]);
-  await settleAnalyses(p2.src, caller, r, ["B", "A"]);
+test("stale analyses in view are re-checked once; reopening the same report version does not send again", async () => {
+  const r = report({ report_id: "R-stale", analyses: { A: saved, B: saved }, stale_analysis_ids: ["B", "Z"] });
+  // 서버가 재확인 뒤에도 옛 자료판이라고 해도 그 결과를 확정 표시로 두고 되풀이하지 않는다
+  const still = report({ report_id: "R-stale", report_version: 8, analyses: { A: saved, B: saved }, stale_analysis_ids: ["B"] });
+  const p1 = port([{ ok: true, value: still }]);
+  assert.equal(await settleAnalyses(p1.src, caller, r, ["A", "B"]), still);
   assert.equal(p1.calls.length, 1);
   assert.deepEqual(p1.calls[0].args[3], ["B"]);
-  assert.equal(p1.calls[0].args[4], p2.calls[0].args[4]);
+  const p2 = port();
+  assert.equal(await settleAnalyses(p2.src, caller, r, ["B", "A"]), r);
+  assert.equal(await settleAnalyses(p2.src, caller, still, ["B", "A"]), still);
+  assert.equal(p2.calls.length, 0);
+  // 리포트 판이 그 뒤로 올라가면(새 분석·담기 등) 다시 한 번 확인한다
+  const later = report({ report_id: "R-stale", report_version: 9, analyses: { A: saved, B: saved }, stale_analysis_ids: ["B"] });
+  const p3 = port([{ ok: true, value: later }]);
+  await settleAnalyses(p3.src, caller, later, ["A", "B"]);
+  assert.equal(p3.calls.length, 1);
 });
 
 test("a failed or rate-limited computation still draws the screen with the report it had", async () => {
@@ -81,17 +88,33 @@ test("a 503 after the write re-reads the report (the analysis may have been save
   assert.deepEqual(p.calls.map((c) => c.op), ["ua", "read"]);
 });
 
-test("page 3: candidates are built when missing and re-checked when stale", async () => {
-  const built = report({ report_version: 8, candidates: { basic_university_groups: [], wildcards: [], pending_offerings: [] } });
+const full = { status: "ready", basic_university_groups: [{ university_id: "U", university_name: "u", offerings: [] }], wildcards: [], pending_offerings: [] };
+const empty = { status: "ready", basic_university_groups: [], wildcards: [], pending_offerings: [] };
+
+test("page 3: candidates are built when missing; a stored list is kept as is", async () => {
+  const built = report({ report_id: "C1", report_version: 8, candidates: full });
   const p = port([{ ok: true, value: built }]);
-  assert.equal(await settleCandidates(p.src, caller, report()), built);
-  const stale = report({ candidates: built.candidates, candidates_stale: true });
-  const fresh = report({ report_version: 9, candidates: built.candidates, candidates_stale: false });
+  assert.equal(await settleCandidates(p.src, caller, report({ report_id: "C1" })), built);
+  assert.deepEqual(p.calls.map((c) => c.op), ["cb"]);
+  const none = port();
+  const ready = report({ report_id: "C2", candidates: full });
+  assert.equal(await settleCandidates(none.src, caller, ready), ready);
+  assert.equal(none.calls.length, 0);
+});
+
+test("page 3: stale or empty stored candidates are re-checked once per report version", async () => {
+  const stale = report({ report_id: "C3", candidates: full, candidates_stale: true });
+  const fresh = report({ report_id: "C3", report_version: 8, candidates: full });
   const q = port([{ ok: true, value: fresh }]);
   assert.equal(await settleCandidates(q.src, caller, stale), fresh);
   assert.deepEqual(q.calls.map((c) => c.op), ["cb"]);
-  const none = port();
-  const ready = report({ candidates: built.candidates });
-  assert.equal(await settleCandidates(none.src, caller, ready), ready);
-  assert.equal(none.calls.length, 0);
+  // 표식이 없어도 비어 있는 후보(판정이 켜지기 전에 만든 것)는 한 번 다시 확인하고, 다시 열 때는 되풀이하지 않는다
+  const old = report({ report_id: "C4", candidates: empty });
+  const stillEmpty = report({ report_id: "C4", report_version: 8, candidates: empty });
+  const r1 = port([{ ok: true, value: stillEmpty }]);
+  assert.equal(await settleCandidates(r1.src, caller, old), stillEmpty);
+  const r2 = port();
+  assert.equal(await settleCandidates(r2.src, caller, stillEmpty), stillEmpty);
+  assert.equal(r1.calls.length, 1);
+  assert.equal(r2.calls.length, 0);
 });

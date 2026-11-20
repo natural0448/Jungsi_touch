@@ -1,5 +1,4 @@
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
-import { RunAnalysis } from "@/components/run-analysis";
 import { ScoreBasis } from "@/components/score-basis";
 import { StreamTray } from "@/components/shortlist-tray-stream";
 import type { Caller, JungsiSource } from "@/lib/api";
@@ -30,20 +29,8 @@ export function MineLegend({ report }: { report: ReportDto | null }) {
   return report ? <CategoryLegend /> : null;
 }
 
-/** '이 범위 다시 확인'(회원이 누를 때만). 첫 분석·옛 자료판 재확인은 화면을 그리기 전에 서버가 이미 끝냈다 */
-export function MineRunBoxes({ report, items }: { report: ReportDto | null; items: OfferingDto[] }) {
-  if (!report || !items.some((o) => report.analyses?.[o.offering_id])) return null;
-  return (
-    <RunAnalysis
-      ids={items.slice(0, 100).map((o) => o.offering_id)}
-      refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
-      title="지금 보이는 모집단위를 다시 확인합니다"
-      desc="저장한 성적을 그대로 사용해 이 범위를 최신 자료로 다시 확인합니다. 결과가 바뀔 수 있으며 성적 입력 횟수는 줄지 않습니다."
-      label="이 범위 다시 확인"
-      busy="다시 확인하는 중…"
-    />
-  );
-}
+// '이 범위 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).
+// 첫 분석·옛 자료판 재확인은 화면을 그리기 전에 서버가 조용히 끝낸다(report-ops settleAnalyses)
 
 /** 분석을 끝내 만들지 못한 모집단위(자료 미연결 등)의 확정 표시 */
 const NO_DATA = <span className="need" title="이 모집단위는 아직 분석 자료에 연결되지 않아 내 성적으로 계산하지 않았습니다">자료 없음</span>;
