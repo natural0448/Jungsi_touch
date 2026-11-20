@@ -1,6 +1,7 @@
 import type { AssessmentDto, BandCode, Category, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
 import { referenceAdvantage } from "@/lib/reference-advantage";
 import { pctText, seoulDate } from "@/lib/format";
+import { POSITION_NONE_DESC, POSITION_NONE_LABEL, positionNoteOf, positionNoteShort } from "@/lib/position-note";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
 
@@ -86,12 +87,18 @@ export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.
 /** 참고 기준 판정의 이름. 누백이 범위라 양끝의 판정이 다르면 '적정~도전'처럼 함께 적는다 */
 export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => (r.upper_code && BAND[r.upper_code] && r.upper_code !== r.code ? `${BAND[r.code].label}~${BAND[r.upper_code].label}` : BAND[r.code].label);
 
-export function CategoryBadge({ a }: { a: AssessmentDto }) {
+export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: OverallResultDto | null }) {
   const ref = referenceBandOf(a);
   if (ref) {
     // 색은 불리한 끝 기준(더 조심스러운 쪽). 정식 판정과 구분되게 '참고'를 붙인다
     const tone = BAND[ref.upper_code && BAND[ref.upper_code] ? ref.upper_code : ref.code];
     return <span className={`st ${tone.cls} refj`} title="참고 기준 판정 · 지원 자격은 모집요강에서 확인하세요">{referenceBandLabel(ref)} <small>참고</small></span>;
+  }
+  // 판정 경계가 없는 곳의 종료 표시(대표님 결정 2026-11-20): 지난해 합격선 대비 위치, 또는 판정 근거 부족
+  const pn = positionNoteOf(a, overall);
+  if (pn) {
+    if (pn.kind === "none") return <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
+    return <span className={`st pos ${pn.margin.side}`} title={`${pn.margin.text} · 판정이 아닌 위치 비교입니다`}>{positionNoteShort(pn)} <small>참고</small></span>;
   }
   if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check" title="이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 지원 자격은 모집요강에서 확인하세요">판정 준비 중</span>;
   const c = decisionOf(a);
@@ -101,7 +108,7 @@ export function CategoryBadge({ a }: { a: AssessmentDto }) {
 export function CategoryLegend() {
   return (
     <span className="legend" aria-label="지원가능성 표시">
-      {[...Object.values(BAND), CATEGORY.pending, CATEGORY.ineligible].map((c) => (
+      {[...Object.values(BAND), { cls: "pos near", label: "합격선 대비 위치" }, { cls: "check", label: POSITION_NONE_LABEL }, CATEGORY.ineligible].map((c) => (
         <span key={c.label} className={`st ${c.cls}`}>{c.label}</span>
       ))}
     </span>
@@ -124,10 +131,10 @@ export function ScoreCell({ a }: { a: Cell }) {
   );
 }
 
-export function StatusCell({ a }: { a: Cell }) {
+export function StatusCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (!a) return <span className="need">분석 대기</span>;
-  return <CategoryBadge a={a} />;
+  return <CategoryBadge a={a} overall={overall} />;
 }
 
 /** 환산 유불리: 같은 비교집단에서 보정 총점 기준 위치 − 대학 환산 기준 위치(%p). 양수면 유리 */

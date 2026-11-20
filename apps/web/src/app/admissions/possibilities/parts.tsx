@@ -6,6 +6,7 @@ import type { AssessmentDto, OfferingDto, OverallResultDto, SubjectResultDto } f
 import { referenceAdvantage } from "@/lib/reference-advantage";
 import { CONDITION_MARK_TEXT, conditionLines, formal105Notice } from "@/lib/eligibility-conditions";
 import { yearCutoffLines } from "@/lib/year-cutoffs";
+import { POSITION_LINE_DESC, POSITION_NONE_DESC, positionNoteOf } from "@/lib/position-note";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
 import { SchoolReflectedLine } from "@/components/school-reflected";
@@ -48,11 +49,11 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType }: { 
   return (
     <>
       {recruit}
-      <StatusStrip a={a} />
+      <StatusStrip a={a} overall={overall ?? null} />
       <div className="four">
         <ConversionCard a={a} />
         <PercentileCard a={a} />
-        <DecisionCard a={a} subjects={subjects} examType={examType} />
+        <DecisionCard a={a} subjects={subjects} examType={examType} overall={overall} />
         <AdvantageCard a={a} overall={overall} />
       </div>
       <SchoolReflectedLine a={a} />
@@ -73,7 +74,8 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType }: { 
 }
 
 /** 세 계산의 준비 상태를 따로 보인다 */
-function StatusStrip({ a }: { a: AssessmentDto }) {
+function StatusStrip({ a, overall }: { a: AssessmentDto; overall: OverallResultDto | null }) {
+  const pn = positionNoteOf(a, overall);
   const conv = a.conversion?.status ?? (a.converted_score ? "ready" : "pending");
   const ref = isReferenceScore(a) && !!scoreOf(a);
   const pct = a.percentile?.status ?? (a.converted_percentile ? "ready" : "pending");
@@ -81,7 +83,9 @@ function StatusStrip({ a }: { a: AssessmentDto }) {
   const items = [
     { k: "점수 변환", ok: conv === "ready" || ref, label: ref ? "참고 계산" : undefined, why: a.conversion?.reason_code },
     { k: "대학 안 내 위치", ok: pct === "ready" || refPct, label: refPct ? "참고 추정" : undefined, why: a.percentile?.reason_code },
-    { k: "지원 판단", ok: a.status === "ready", why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
+    pn
+      ? { k: "지원 판단", ok: true, label: pn.kind === "line" ? "합격선 대비 위치(참고)" : "판정 근거 부족", why: undefined }
+      : { k: "지원 판단", ok: a.status === "ready" || !!referenceBandOf(a), label: referenceBandOf(a) ? "참고 판정" : undefined, why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
   ];
   return (
     <ul className="strip" aria-label="계산 준비 상태">
@@ -207,15 +211,40 @@ function Formal105({ a, subjects, examType }: { a: AssessmentDto; subjects?: Sub
   );
 }
 
-function DecisionCard({ a, subjects, examType }: { a: AssessmentDto; subjects?: SubjectResultDto[]; examType?: string | null }) {
+function DecisionCard({ a, subjects, examType, overall }: { a: AssessmentDto; subjects?: SubjectResultDto[]; examType?: string | null; overall?: OverallResultDto | null }) {
   const d = a.decision_components;
+  const pn = positionNoteOf(a, overall);
   return (
     <section className="card" aria-label="지원가능성">
       <h3>지원가능성</h3>
       <div>
-        <CategoryBadge a={a} />
+        <CategoryBadge a={a} overall={overall} />
       </div>
       <Formal105 a={a} subjects={subjects} examType={examType} />
+      {pn ? (
+        <>
+          {pn.kind === "line" ? (
+            <>
+              <p>
+                <b>{pn.margin.text}</b>입니다{pn.basis === "overall" ? " (이 대학 기준 내 위치가 없어 국·수·탐 표준점수 합 전체 위치로 견줌)" : ""}.
+              </p>
+              <p>{POSITION_LINE_DESC}</p>
+            </>
+          ) : (
+            <p>{POSITION_NONE_DESC}</p>
+          )}
+          {a.eligibility_status === "needs_confirmation" && <Conditions a={a} subjects={subjects} />}
+          <span className="note">지원 자격(필수 응시 영역·지정 과목·졸업 연도 등)은 모집요강에서 확인하세요.</span>
+        </>
+      ) : null}
+      {pn ? null : <DecisionBody a={a} subjects={subjects} d={d} />}
+    </section>
+  );
+}
+
+function DecisionBody({ a, subjects, d }: { a: AssessmentDto; subjects?: SubjectResultDto[]; d: AssessmentDto["decision_components"] }) {
+  return (
+    <>
       {referenceBandOf(a) && (
         <>
           <p>
@@ -254,7 +283,7 @@ function DecisionCard({ a, subjects, examType }: { a: AssessmentDto; subjects?: 
         </>
       )}
       {a.status === "ready" && <span className="note">지난 입시결과와 비교해 나눈 구간입니다.</span>}
-    </section>
+    </>
   );
 }
 

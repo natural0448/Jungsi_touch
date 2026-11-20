@@ -104,3 +104,10 @@
 /* 참고 기준 판정 배지: 정식 판정과 구분되게 점선 테두리와 '참고' 꼬리표 */
 .et .st.refj{border-style:dashed;border-color:currentColor}
 .et .st.refj small{font-size:10px;font-weight:700;opacity:.75}
+/* 판정 경계가 없는 곳의 지난해 합격선 대비 위치(2026-11-20): 판정 색을 쓰지 않고 방향 화살표만 */
+.et .st.pos{background:var(--bg);color:var(--deep);border:1px dashed var(--deep)}
+.et .st.pos::before{content:"";width:0;height:0;border-radius:0;background:none;border-left:4px solid transparent;border-right:4px solid transparent}
+.et .st.pos.above::before{border-bottom:6px solid currentColor}
+.et .st.pos.below::before{border-top:6px solid currentColor}
+.et .st.pos.near::before{width:8px;height:2px;border:0;background:currentColor}
+.et .st.pos small{font-size:10px;font-weight:700;opacity:.75}

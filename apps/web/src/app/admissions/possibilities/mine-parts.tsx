@@ -107,7 +107,7 @@ export async function MineCells({ p, id }: { p: P; id: string }) {
   return (
     <>
       <span className="c-score r"><ScoreCell a={a} /></span>
-      <span className="c-st"><StatusCell a={a} /></span>
+      <span className="c-st"><StatusCell a={a} overall={report?.overall?.overall} /></span>
       <span className="c-adv r"><AdvantageCell a={a} overall={report?.overall?.overall} /></span>
       <span className="c-pick">{report && <PickButton id={id} on={pickedIds(report).has(id)} />}</span>
     </>
