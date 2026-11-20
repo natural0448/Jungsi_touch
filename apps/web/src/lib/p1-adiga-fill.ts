@@ -170,3 +170,13 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
     return next ?? r;
   });
 }
+
+/**
+ * 그해 정시에서 뽑지 않은 행(2026-11-20 대표님 결정): 모집인원이 0이고 대학 발표 성적 값이 하나도 없으면
+ * 모집인원 칸에 '모집 없음'을 쓰고 충원·경쟁률·추정 칸은 비운다. 성적 값이 있는 0명 행(수시 이월 선발 가능)은 그대로 둔다.
+ */
+export function noRecruit(r: Pick<Row, "y" | "rc" | "c50" | "c70" | "alt">): boolean {
+  if (r.y >= 2027 || r.rc.v === null || !/^0+$/.test(r.rc.v.trim())) return false;
+  const has = (c: Cell) => c.v !== null && c.v.trim() !== "";
+  return !has(r.c50) && !has(r.c70) && !r.alt.e.some(has);
+}

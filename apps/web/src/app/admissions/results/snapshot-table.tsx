@@ -1,5 +1,5 @@
 import { asOfDate, ratioText } from "@/lib/format";
-import { FILL_UNDISCLOSED, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
+import { FILL_UNDISCLOSED, noRecruit, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
 import { derived } from "@/lib/p1-derived";
 import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
@@ -108,7 +108,8 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
           <tbody>
             {years.flatMap((y) =>
               byYear.get(y)!.map((r, i) => {
-                const dv = derived(r);
+                const none = noRecruit(r);
+                const dv = none ? { applicants: null, dropped: null, fill: null } : derived(r);
                 const ps = publishedStats(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
@@ -122,12 +123,12 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                       {renamedDept && <small>당시 {renamedDept}</small>}
                       {historicalConditions && <small>{historicalConditions}</small>}
                     </th>
-                    <td className="r"><Value c={r.rc} /></td>
-                    <td className="r"><Value c={r.cr.v === null || r.cr.v.trim() === "" ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} /></td>
+                    <td className="r">{none ? <small className="rs-bs">모집 없음</small> : <Value c={r.rc} />}</td>
+                    <td className="r">{none ? null : <Value c={r.cr.v === null || r.cr.v.trim() === "" ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} />}</td>
                     <td className="r derived">
                       {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
-                    <td className="r">{dv.fill !== null ? <b className="num">{dv.fill}</b> : r.ad.r === FILL_UNDISCLOSED ? <small className="rs-bs">미발표</small> : null}</td>
+                    <td className="r">{none ? null : dv.fill !== null ? <b className="num">{dv.fill}</b> : r.ad.r === FILL_UNDISCLOSED ? <small className="rs-bs">미발표</small> : null}</td>
                     <td className="r derived">
                       {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>
