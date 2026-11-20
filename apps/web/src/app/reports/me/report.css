@@ -289,3 +289,17 @@
 .et .rp-err{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--risk-soft);color:var(--risk);font-size:13px}
 /* 리포트 표시: '현재 성적'·'정정 입력'(판 번호 대신, 2026-10-28) */
 .et .rp-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700;vertical-align:middle}
+
+/* 수능 가채점 예상 성적 미리보기(2026-11-20) */
+.pv{display:grid;gap:14px;padding:18px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
+.pv-hd h2{margin:0 0 6px;font-size:18px;color:var(--deep)}
+.pv-hd p{margin:0;font-size:15px;line-height:1.6;color:var(--sub)}
+.pv-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;align-items:end}
+.pv-form fieldset{margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);display:grid;gap:6px;min-width:0}
+.pv-form legend{padding:0 4px;font-size:13px;font-weight:700;color:var(--ink)}
+.pv-form select,.pv-form input{width:100%;min-width:0;font-size:15px;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-sm)}
+.pv-in{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.pv-form .btn{grid-column:1/-1;justify-self:start}
+.pv-err{margin:0;color:var(--risk);font-size:15px}
+.pv-out{display:grid;gap:8px;overflow-x:auto}
+.pv-out caption{text-align:left;font-size:13px;font-weight:800;color:var(--brand);padding-bottom:4px}

@@ -24,6 +24,7 @@ import { canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/c
 import { correctionInputClosed } from "@/lib/csat-release";
 import { ScoreForm, type ScoreDefaults } from "./score-form";
 import { ProvisionalForm } from "./provisional-form";
+import { ProvisionalPreview } from "./provisional-preview";
 import { StageSteps } from "./stage-steps";
 import "./report.css";
 
@@ -57,6 +58,18 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   if (!paid) return <>{head}<PaidGate kind="paid" route={route} features={FEATURES} /></>;
 
   const sp = await searchParams;
+  // 수능 가채점 예상 성적 미리보기(2026-11-20 대표님 결정): 저장하지 않는 조회라 입력 상태·리포트를 읽지 않는다
+  if (sp.preview === "csat") {
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body rp">
+          <ProvisionalPreview />
+          <Link className="btn" href={route.path}>내 성적 리포트로 돌아가기</Link>
+        </div>
+      </>
+    );
+  }
   const editing = sp.edit === "1";
   // 어느 리포트를 열지는 계정 기준이다(2026-11-04 사용자 결정): 서버 입력 상태의 현재 리포트.
   // 입력 상태를 읽지 못하면 어느 리포트가 내 것인지 모르므로 성적 입력 칸을 열지 않고 연결 안내를 보인다(횟수를 추정하지 않는다)
@@ -121,6 +134,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <div className="wrap pg-body rp">
           <StageSteps stage={stage} finalOpen={status.stage_state === "open"} />
           {status && <InputStatus st={status} />}
+          <p className="rp-note"><Link href={`${route.path}?preview=csat`}>수능 가채점 원점수로 과목별 예상 성적 보기</Link> — 저장하지 않는 조회입니다.</p>
           {inputOpen && stage === "provisional" ? (
             <ProvisionalForm examLabel={title} />
           ) : inputOpen ? (
@@ -165,6 +179,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           {/* 저장한 성적은 고치지 않는다 — 입력권이 남은 유료 회원만 새 성적으로 리포트의 새 판을 만든다 */}
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
           {!inputOpen && correctHref && <Link className="btn" href={correctHref}>{canCorrect ? "성적 정정 요청" : "정정 요청 상태"}</Link>}
+          <Link className="btn" href={`${route.path}?preview=csat`}>수능 가채점 예상 성적 보기</Link>
         </div>
 
         <OverallCard a={a} />
