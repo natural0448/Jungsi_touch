@@ -84,6 +84,8 @@ export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFER
 
 /** 참고 기준 판정을 보일지. 정식 판정이 난 곳(ready)·자격 미충족에는 보이지 않는다 */
 export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.status !== "ineligible" && a.reference_band && BAND[a.reference_band.code] ? a.reference_band : null);
+/** 9월 전국 추정 경계로 낸 참고 판정인지(대표님 결정 2026-11-20: 근거 확인 뒤 3페이지만). 기존 승인판과 구분해 '추정 참고'로 보인다 */
+export const isModeledReferenceBand = (r: NonNullable<AssessmentDto["reference_band"]>) => r.policy_version.startsWith("20261120.september-national-modeled.");
 /** 참고 기준 판정의 이름. 누백이 범위라 양끝의 판정이 다르면 '적정~도전'처럼 함께 적는다 */
 export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => (r.upper_code && BAND[r.upper_code] && r.upper_code !== r.code ? `${BAND[r.code].label}~${BAND[r.upper_code].label}` : BAND[r.code].label);
 
@@ -92,7 +94,8 @@ export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: Over
   if (ref) {
     // 색은 불리한 끝 기준(더 조심스러운 쪽). 정식 판정과 구분되게 '참고'를 붙인다
     const tone = BAND[ref.upper_code && BAND[ref.upper_code] ? ref.upper_code : ref.code];
-    return <span className={`st ${tone.cls} refj`} title="참고 기준 판정 · 지원 자격은 모집요강에서 확인하세요">{referenceBandLabel(ref)} <small>참고</small></span>;
+    const modeled = isModeledReferenceBand(ref);
+    return <span className={`st ${tone.cls} refj`} title={`${modeled ? "추정 경계로 낸 참고 판정" : "참고 기준 판정"} · 지원 자격은 모집요강에서 확인하세요`}>{referenceBandLabel(ref)} <small>{modeled ? "추정 참고" : "참고"}</small></span>;
   }
   // 판정 경계가 없는 곳의 종료 표시(대표님 결정 2026-11-20): 지난해 합격선 대비 위치, 또는 판정 근거 부족
   const pn = positionNoteOf(a, overall);
