@@ -1,5 +1,5 @@
 import { asOfDate, ratioText } from "@/lib/format";
-import { FILL_UNDISCLOSED, noRecruit, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
+import { FILL_UNDISCLOSED, noRecruit, OFFICIAL_NOT_PUBLISHED, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
 import { derived } from "@/lib/p1-derived";
 import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
@@ -128,7 +128,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     <td className="r derived">
                       {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
-                    <td className="r">{none ? null : dv.fill !== null ? <b className="num">{dv.fill}</b> : r.ad.r === FILL_UNDISCLOSED ? <small className="rs-bs">미발표</small> : null}</td>
+                    <td className="r">{none ? null : dv.fill !== null ? <b className="num">{dv.fill}</b> : r.ad.r === FILL_UNDISCLOSED || r.ad.s === OFFICIAL_NOT_PUBLISHED || r.rk.s === OFFICIAL_NOT_PUBLISHED ? <small className="rs-bs">미발표</small> : null}</td>
                     <td className="r derived">
                       {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>

@@ -129,3 +129,16 @@ test("성적 사유 코드(모집 없음 등)와 50·70%컷 밖 지표(평균·9
   assert.equal(one.cell.v, "95");
   assert.equal(two.label, "90%컷");
 });
+
+test("정본이 공식 미발표(not_published)인 충원 칸에는 KV 숫자를 붙이지 않는다(2026-11-20 담당자 v46 검토)", () => {
+  const key = "2025|900|수능(일반전형)|다";
+  const fill = parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2025|900|50%컷": "1.0" }, fills: { [key]: "7" } }));
+  const nope = { v: null, s: "not_published", r: null, u: null, l: null };
+  const official = row(2025, 900, { ad: nope });
+  const [o] = applyAdigaFill([official], fill);
+  assert.equal(o.ad.v, null);
+  assert.equal(o.ad.s, "not_published");
+  // 사유가 없는 빈 칸에는 그대로 붙는다
+  const [p] = applyAdigaFill([row(2025, 900)], fill);
+  assert.equal(p.ad.v, "7");
+});

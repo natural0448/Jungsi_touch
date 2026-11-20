@@ -360759,6 +360759,13 @@
         "REQ-21"
       ],
       "summary": "화면: 지원 필수 조건 표(담당자 v36 A1 92행)와 정식 판정 우선 105개 모집단위 지원자격 표(담당자 v38·v45 formal105)를 저장소의 생성 파일(apps/web/src/lib/required-conditions-101.ts, formal105-conditions.ts)에서 빼고 화면 서버 KV(JT_SHARED_CACHE, 키 eligibility-conditions:v1, 형식 jungsi.eligibility-conditions/v1)로 옮긴다(담당자 v45 지시 2026-11-20: 명부는 저장소·브라우저 번들·공개 DTO에 넣지 않음). 리포트를 읽을 때 서버에서 한 번 읽어 10분 동안 기억하고, 못 읽거나 형식이 어긋나면 빈 표로 본다(그때는 '지원 조건 미충족'·105곳 안내만 붙지 않고 서버 판정은 그대로). 화면 표시와 규칙은 바뀌지 않는다. 시험은 합성 행을 쓴다."
+    },
+    {
+      "date": "2026-11-20",
+      "requirements": [
+        "REQ-04"
+      ],
+      "summary": "화면: 1페이지 충원 칸에서 정본이 출처로 확인한 공식 미발표(publication_status not_published)인 칸에는 화면 서버 KV(p1-adiga-fill:v1)의 예비번호·충원 값을 붙이지 않고 '미발표'로 보인다(담당자 v46 검토 2026-11-20: 정본 발행 뒤 옛 KV 숫자가 다시 보이지 않게, KV 키별 해제의 선행 조건). 사유 없는 빈 칸에는 지금처럼 KV를 붙인다."
     }
   ],
   "p1_recruitment_score_review_verification": {

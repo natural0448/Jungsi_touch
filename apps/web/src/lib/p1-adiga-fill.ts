@@ -21,6 +21,8 @@ const FILL_VALUE = /^(?:0|[1-9][0-9]{0,5}|undisclosed|unavailable)$/;
 export const FILL_UNDISCLOSED = "fill_undisclosed";
 /** 성적 칸 사유 코드: 3인 이하라 대학이 성적을 발표하지 않음 */
 export const STATS_LE3 = "stats_le3_undisclosed";
+/** 정본이 출처로 확인한 공식 미발표 상태(current_public_catalog 의 publication_status) */
+export const OFFICIAL_NOT_PUBLISHED = "not_published";
 const STAT_LABELS = new Set(["50%컷", "70%컷", "평균", "최저", "최고", "80%컷", "85%컷", "90%컷", "100%컷"]);
 /** 원문 기준 표기 → 화면 기준 이름(p1-published-stats 의 BASIS_ORDER) */
 const STAT_BASIS: Record<string, string> = {
@@ -116,7 +118,9 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
     // 모집군은 화면 자료에 '가'·'가군' 두 표기가 있어 '가'로 맞춘다
     const key = `${r.y}|${r.pk}|${r.t ?? ""}|${(r.g ?? "").replace(/군$/, "")}`;
     const rank = fill.get(`R|${key}`), people = fill.get(`F|${key}`);
-    if ((r.rk?.v ?? "").trim() === "" && (r.ad?.v ?? "").trim() === "") {
+    // 정본이 공식 미발표(not_published)라고 확인한 칸에는 KV를 붙이지 않는다(담당자 v46 검토 2026-11-20: 정본 발행 뒤 옛 KV 숫자가 다시 보이지 않게)
+    const officialNone = r.rk?.s === OFFICIAL_NOT_PUBLISHED || r.ad?.s === OFFICIAL_NOT_PUBLISHED;
+    if (!officialNone && (r.rk?.v ?? "").trim() === "" && (r.ad?.v ?? "").trim() === "") {
       // 담당자가 원문으로 확인한 예비번호가 먼저, 없으면 대학어디가 충원인원, 발표 안 함·자료 없음은 사유만
       if (rank !== undefined) next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
       else if (people === "undisclosed" || people === "unavailable") next = { ...r, ad: { v: null, s: ADIGA_FILL_STATUS, r: FILL_UNDISCLOSED, u: null, l: "충원인원", at: null, ctx: null } };
