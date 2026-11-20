@@ -79,57 +79,73 @@ test("report analyses are relabelled and reference judgment is dropped", () => {
   assert.equal(withConditionUnmet(same), same);
 });
 
-const { requiredUnmet, withRequiredUnmet } = await import("../src/lib/eligibility-conditions.ts");
+const { requiredUnmet, withRequiredUnmet, formal105Notice } = await import("../src/lib/eligibility-conditions.ts");
+const { setEligibilityTablesForTest, parseEligibilityTables, ELIGIBILITY_TABLES_FORMAT } = await import("../src/lib/eligibility-tables.ts");
+// 실제 명부는 화면 서버 KV에만 둔다(담당자 v45 지시 2026-11-20). 시험은 같은 모양의 합성 행을 쓴다
+const T = {
+  required: {
+    "2027:9000000001": { m: ["미적분", "기하"], d: ["과학"], n: 2 },
+    "2027:9000000002": { d: ["사회", "과학"], n: 2, s: 1 },
+    "2027:9000000003": { d: ["사회", "과학"], n: 2 },
+    "2027:9000000004": { d: ["과학"], n: 2, x: 1 },
+  },
+  formal105: { "2027:9000000105": { d: ["과학"], n: 2 }, "2027:9000000106": {}, "2027:9000000107": { d: ["사회", "과학"], n: 2, g: 1 } },
+};
+setEligibilityTablesForTest(T);
 const subj = (math, i1, i2) => [
   { area: "math", subject: "수학", choice: math },
   { area: "inquiry1", subject: i1, choice: null },
   { area: "inquiry2", subject: i2, choice: null },
 ];
 
-test("only the 92 guide-verified required rows can turn into 'conditions not met' (2026-11-19)", () => {
-  // 수학 지정(미적분·기하) + 과탐 2과목: 확률과 통계면 미충족, 사탐이 섞여도 미충족
-  assert.equal(requiredUnmet("2027:1000001185", subj("확률과 통계", "물리학Ⅰ", "화학Ⅰ")), true);
-  assert.equal(requiredUnmet("2027:1000001185", subj("미적분", "생활과 윤리", "화학Ⅰ")), true);
-  assert.equal(requiredUnmet("2027:1000001185", subj("미적분", "물리학Ⅰ", "화학Ⅰ")), false);
-  // 사회·과학 중 2과목, 과학 1과목 이상: 사탐 2과목이면 미충족
-  assert.equal(requiredUnmet("2027:1000000631", subj("확률과 통계", "생활과 윤리", "한국지리")), true);
-  assert.equal(requiredUnmet("2027:1000000631", subj("확률과 통계", "생활과 윤리", "화학Ⅰ")), false);
-  // 사회·과학 중 2과목만: 어떤 조합도 미충족이 아니다
-  assert.equal(requiredUnmet("2027:1000002513", subj("확률과 통계", "생활과 윤리", "한국지리")), false);
-  // 같은 과목 Ⅰ·Ⅱ 조합 불가 행
-  assert.equal(requiredUnmet("2027:1000002469", subj("미적분", "물리학Ⅰ", "물리학Ⅱ")), true);
-  assert.equal(requiredUnmet("2027:1000002469", subj("미적분", "물리학Ⅰ", "화학Ⅱ")), false);
-  // 명부 밖 모집단위와 입력이 없는 경우는 그대로
+test("only listed required rows can turn into 'conditions not met' (2026-11-19)", () => {
+  assert.equal(requiredUnmet("2027:9000000001", subj("확률과 통계", "물리학Ⅰ", "화학Ⅰ")), true);
+  assert.equal(requiredUnmet("2027:9000000001", subj("미적분", "생활과 윤리", "화학Ⅰ")), true);
+  assert.equal(requiredUnmet("2027:9000000001", subj("미적분", "물리학Ⅰ", "화학Ⅰ")), false);
+  assert.equal(requiredUnmet("2027:9000000002", subj("확률과 통계", "생활과 윤리", "한국지리")), true);
+  assert.equal(requiredUnmet("2027:9000000002", subj("확률과 통계", "생활과 윤리", "화학Ⅰ")), false);
+  assert.equal(requiredUnmet("2027:9000000003", subj("확률과 통계", "생활과 윤리", "한국지리")), false);
+  assert.equal(requiredUnmet("2027:9000000004", subj("미적분", "물리학Ⅰ", "물리학Ⅱ")), true);
+  assert.equal(requiredUnmet("2027:9000000004", subj("미적분", "물리학Ⅰ", "화학Ⅱ")), false);
   assert.equal(requiredUnmet("2027:1", subj("확률과 통계", "생활과 윤리", "한국지리")), false);
-  assert.equal(requiredUnmet("2027:1000001185", []), false);
+  assert.equal(requiredUnmet("2027:9000000001", []), false);
 });
 
 test("withRequiredUnmet changes only listed offerings and keeps the server value otherwise", () => {
   const report = {
     overall: { subjects: subj("확률과 통계", "생활과 윤리", "한국지리") },
     analyses: {
-      "2027:1000001185": { offering_id: "2027:1000001185", status: "pending", category: "pending", eligibility_status: "needs_confirmation", reference_band: { code: "target" } },
+      "2027:9000000001": { offering_id: "2027:9000000001", status: "pending", category: "pending", eligibility_status: "needs_confirmation", reference_band: { code: "target" } },
       "2027:1": { offering_id: "2027:1", status: "pending", category: "pending", eligibility_status: "needs_confirmation" },
     },
   };
   const out = withRequiredUnmet(report);
-  assert.equal(out.analyses["2027:1000001185"].status, "ineligible");
-  assert.equal(out.analyses["2027:1000001185"].reference_band, null);
+  assert.equal(out.analyses["2027:9000000001"].status, "ineligible");
+  assert.equal(out.analyses["2027:9000000001"].reference_band, null);
   assert.equal(out.analyses["2027:1"], report.analyses["2027:1"]);
 });
 
-test("formal 105: 탐구 조건 미충족은 확실할 때만, 점수 조건 충족은 본수능 실채점일 때만(2026-11-20)", async () => {
-  const { formal105Notice } = await import("../src/lib/eligibility-conditions.ts");
-  const { FORMAL105_CONDITIONS } = await import("../src/lib/formal105-conditions.ts");
-  const ids = Object.keys(FORMAL105_CONDITIONS);
-  assert.equal(ids.length, 105);
-  const sci = ids.find((k) => FORMAL105_CONDITIONS[k].d?.length === 1);
-  const plain = ids.find((k) => !FORMAL105_CONDITIONS[k].d);
+test("formal 105: 탐구 조건 미충족은 확실할 때만, 점수 조건 충족은 본수능 실채점일 때만(2026-11-20)", () => {
+  const sci = "2027:9000000105", plain = "2027:9000000106";
   assert.equal(requiredUnmet(sci, subj("미적분", "생활과 윤리", "화학Ⅰ")), true);
   assert.equal(requiredUnmet(sci, subj("미적분", "물리학Ⅰ", "화학Ⅰ")), false);
   assert.equal(requiredUnmet(plain, subj("확률과 통계", "생활과 윤리", "한국지리")), false);
   assert.equal(formal105Notice(sci, "september_mock", subj("미적분", "물리학Ⅰ", "화학Ⅰ")).score, "unverified");
   assert.equal(formal105Notice(sci, "csat_final", subj("미적분", "물리학Ⅰ", "화학Ⅰ")).score, "met");
   assert.equal(formal105Notice(sci, "csat_final", subj("미적분", "생활과 윤리", "화학Ⅰ")).score, "unverified");
+  assert.match(formal105Notice("2027:9000000107", "september_mock", []).documents, /지역인재/);
   assert.equal(formal105Notice("2027:1", "csat_final", []), null);
+});
+
+test("KV 표는 형식이 하나라도 어긋나면 쓰지 않고, 표가 없으면 아무 행도 바꾸지 않는다", () => {
+  const ok = JSON.stringify({ format: ELIGIBILITY_TABLES_FORMAT, ...T });
+  assert.ok(parseEligibilityTables(ok));
+  assert.equal(parseEligibilityTables(JSON.stringify({ format: "x", ...T })), null);
+  assert.equal(parseEligibilityTables(JSON.stringify({ format: ELIGIBILITY_TABLES_FORMAT, required: { "2027:1": { d: ["외계"] } }, formal105: {} })), null);
+  assert.equal(parseEligibilityTables(JSON.stringify({ format: ELIGIBILITY_TABLES_FORMAT, required: { "bad": {} }, formal105: {} })), null);
+  assert.equal(parseEligibilityTables(null), null);
+  setEligibilityTablesForTest(null);
+  assert.equal(requiredUnmet("2027:9000000001", subj("확률과 통계", "물리학Ⅰ", "화학Ⅰ")), false);
+  assert.equal(formal105Notice("2027:9000000105", "csat_final", []), null);
+  setEligibilityTablesForTest(T);
 });

@@ -78,4 +78,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=2248d5ae7bada04d35456cca965447b94001a49c4aca51006a5293368437beee -->
+<!-- jungsi:generated spec_sha256=0e41e457ad9ac7e610811268d2b3e219652b0c1653105fcd66f70d229b36b9de -->
