@@ -254,7 +254,13 @@ function DecisionBody({ a, subjects, d }: { a: AssessmentDto; subjects?: Subject
           <span className="note">합격 확률이 아니니, 아래 연도별 근거와 함께 보고 판단하세요. 추천 목록에는 쓰이지 않습니다.</span>
         </>
       )}
-      {a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
+      {referenceBandOf(a) ? (
+        // 판정이 나온 곳에는 '판정 자료가 아직 준비되지 않았다'는 보류 문장을 붙이지 않는다(2026-11-21)
+        <>
+          {a.eligibility_status === "needs_confirmation" && <Conditions a={a} subjects={subjects} />}
+          <p>지원 자격(필수 응시 영역·지정 과목·졸업 연도 등)은 모집요강에서 확인하세요.</p>
+        </>
+      ) : a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
         conditionLines(a, subjects).length ? (
           <>
             <Conditions a={a} subjects={subjects} />
