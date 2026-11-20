@@ -119,7 +119,10 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   }
   const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
   const wildcards = c?.wildcards ?? [];
-  const pendingCount = c?.pending_offerings.length ?? 0;
+  // 참고 목록(reference_university_groups)에 함께 온 행은 서버 후보 묶음에서 '보류'로도 세어진다(정식 판정이 없어서).
+  // 참고 목록에서 따로 세므로 보류 숫자에서는 뺀다(2026-11-21 p3_empty: '판단을 보류한 61곳' = 홍익대 1 + 참고 60)
+  const refIds = new Set((c?.reference_university_groups ?? []).flatMap((g) => (g.offerings ?? []).map((it) => it?.offering?.offering_id)));
+  const pendingCount = (c?.pending_offerings ?? []).filter((p) => !refIds.has(p.offering_id)).length;
   const outsideCount = c?.outside_offerings?.length ?? 0;
   const ineligibleCount = c?.ineligible_offerings?.length ?? 0;
   // 담기 표시는 리포트의 shortlist 로 바로 그린다. 집계(live-statistics)와 담은 학교 이름(offering.read)은 학교 목록을
@@ -191,7 +194,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                   {c.status === "pending"
                     ? "지금은 대학별 판정 자료를 연결하는 중이고, 참고 누백이 나온 대학도 아직 없습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다. 자료가 연결되면 이 화면을 열 때 최신 자료로 다시 찾습니다."
                     : "판정이 나온 모집단위 가운데 안정·하향·적정·소신·상향에 드는 곳이 없습니다."}{" "}
-                  {refGroups.length > 0 && <>참고 누백이 나온 학과 중 지난해 합격선에 내 위치가 닿는 곳이 없습니다(합격선보다 아래 {refPool.below}곳, 합격선 자료 없음 {refPool.noCutoff}곳).{" "}</>}
+                  {refGroups.length > 0 && <>참고 누백이 나온 학과 중 안정~상향에 들거나 지난해 합격선에 내 위치가 닿는 곳이 없습니다(판정 도전·불가 {refPool.outsideBand}곳, 합격선보다 아래 {refPool.below}곳, 합격선 자료 없음 {refPool.noCutoff}곳).{" "}</>}
                   {p3.label}에서 대학·학과를 직접 검색해 하나씩 확인할 수 있습니다.
                 </p>
                 <div className="acts">
@@ -199,7 +202,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 </div>
               </section>
             ) : (
-              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} p3Label={p3.label} />
+              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} outsideBand={refPool.outsideBand} p3Label={p3.label} />
             )}
             {tail}
           </section>

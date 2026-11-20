@@ -68,3 +68,22 @@ test("when the server leaves wildcard_group empty, the group comes from the depa
   assert.equal(referenceWildcardGroup({ ...o("경영학과"), wildcard_group: "health" }), "health");
   assert.equal(referenceWildcardGroup({ ...o("간호학과"), wildcard_group: "일반" }), "nursing");
 });
+
+test("7-stage reference band comes first: up to 상향 listed (unfavourable end), 도전·불가 counted, no band falls back to cutoffs (2026-11-21 p3_empty)", () => {
+  const band = (code, upper) => ({ basis: "reference_percentile", code, label: code, policy_version: "20261120.september-national-modeled.p3.v1", approval_version: "v", ...(upper ? { upper_code: upper, upper_label: upper } : {}) });
+  const withBands = {
+    ...analyses,
+    "2027:2": { ...analyses["2027:2"], reference_band: band("target") },            // 합격선 아래여도 7단계가 적정이면 넣는다
+    "2027:3": { reference_band: band("aspirational", "challenge") },                 // 불리한 끝 도전 → 뺀다
+    "2027:4": { ...analyses["2027:4"], reference_band: band("outside") },            // 합격선 위여도 불가 → 뺀다
+    "2027:6": { ...analyses["2027:6"], reference_band: band("stable") },
+  };
+  const pool = referencePool(groups, overall, withBands);
+  assert.deepEqual(pool.items.map((i) => i.offering.department), ["경영학과", "유아교육과", "간호학과", "물리치료학과", "응급구조학과"]);
+  assert.equal(pool.outsideBand, 2);
+  assert.equal(pool.below, 0);
+  assert.equal(pool.noCutoff, 0);
+  const u = referenceUniversities(pool);
+  assert.deepEqual(u.map((x) => x.university_id), ["A", "B"]);
+  assert.equal(u[0].bestBand.code, "target");
+});

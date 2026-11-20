@@ -1,4 +1,4 @@
-import type { AssessmentDto, OfferingDto, OverallResultDto, ReferencePercentileDto, ReferenceUniversityGroupDto, WildcardGroup, YearCutoffDto } from "./dto";
+import type { AssessmentDto, BandCode, OfferingDto, OverallResultDto, ReferenceBandDto, ReferencePercentileDto, ReferenceUniversityGroupDto, WildcardGroup, YearCutoffDto } from "./dto";
 import { fieldGroupOf, groupByField } from "./field-group";
 import { referenceAdvantage, type ReferenceAdvantage } from "./reference-advantage";
 
@@ -64,28 +64,50 @@ export interface ReferenceItem {
   reference_percentile: ReferencePercentileDto | null;
   advantage: ReferenceAdvantage | null;
   margin: CutoffMargin | null;
+  /** 참고 기준 7단계(리포트 읽기가 붙인 reference_band). 있으면 합격선 위치보다 먼저 쓴다(2026-11-21 p3_empty) */
+  band?: ReferenceBandDto | null;
 }
-export interface ReferenceField { label: string; provisional: boolean; items: ReferenceItem[]; best: CutoffMargin | null }
-export interface ReferenceUniversity { university_id: string; university_name: string; region: string | null; count: number; best: CutoffMargin | null; fields: ReferenceField[] }
-export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff: number; ineligible: number }
+export interface ReferenceField { label: string; provisional: boolean; items: ReferenceItem[]; best: CutoffMargin | null; bestBand?: ReferenceBandDto | null }
+export interface ReferenceUniversity { university_id: string; university_name: string; region: string | null; count: number; best: CutoffMargin | null; bestBand?: ReferenceBandDto | null; fields: ReferenceField[] }
+export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff: number; ineligible: number; outsideBand: number }
+
+/** 3번째 화면 자동 목록에 넣는 7단계(상향까지, 대표님 결정 2026-11-19). 서버 RECOMMENDED_BAND_CODES 와 같다 */
+export const LISTED_BANDS: readonly BandCode[] = ["stable", "downward", "target", "aspirational", "upward"];
+/** 목록 순서: 적정·소신 → 상향 → 하향 → 안정(서버 참고 후보 고르는 순서와 같다) */
+const BAND_ORDER: Record<BandCode, number> = { target: 0, aspirational: 1, upward: 2, downward: 3, stable: 4, challenge: 5, outside: 6 };
+/** 범위로 나온 누백은 불리한 끝(upper_code)으로 넣고 뺀다 */
+const worstBand = (b: ReferenceBandDto): BandCode => b.upper_code ?? b.code;
+const bandRank = (b: ReferenceBandDto | null | undefined) => (b ? BAND_ORDER[worstBand(b)] ?? 9 : 9);
 
 const worstOf = (m: CutoffMargin | null) => (m ? m.worst : -Infinity);
-const byMargin = (a: ReferenceItem, b: ReferenceItem) => worstOf(b.margin) - worstOf(a.margin);
+const byMargin = (a: ReferenceItem, b: ReferenceItem) => bandRank(a.band) - bandRank(b.band) || worstOf(b.margin) - worstOf(a.margin);
 const bestOf = (items: ReferenceItem[]) => items.reduce<CutoffMargin | null>((m, x) => (worstOf(x.margin) > worstOf(m) ? x.margin : m), null);
+const bestBandOf = (items: ReferenceItem[]) => items.reduce<ReferenceBandDto | null>((m, x) => (x.band && bandRank(x.band) < bandRank(m) ? x.band : m), null);
 
-/** 참고 누백이 나온 학과 중 지난해 합격선에 닿는 곳(위·비슷)만 고른다. 빠진 곳은 숫자로 센다 */
+/**
+ * 참고 누백이 나온 학과 가운데 넣을 곳을 고른다. 빠진 곳은 숫자로 센다.
+ * 1) 참고 기준 7단계(reference_band)가 붙은 곳: 불리한 끝이 상향까지면 넣고, 도전·불가면 뺀다(outsideBand).
+ * 2) 7단계가 없는 곳: 지난해 합격선(70%컷, 없으면 50%컷)에 닿는 곳(위·비슷)만(기존 규칙).
+ */
 export function referencePool(groups: ReferenceUniversityGroupDto[], overall: OverallResultDto | null | undefined, analyses: Record<string, AssessmentDto> | null | undefined): ReferencePool {
-  let below = 0, noCutoff = 0, ineligible = 0;
+  let below = 0, noCutoff = 0, ineligible = 0, outsideBand = 0;
   const items: ReferenceItem[] = [];
   for (const it of groups.flatMap((g) => g.offerings)) {
+    const a = analyses?.[it.offering.offering_id];
     // 지원 필수 조건이 확인된 모집단위에서 내가 조건을 못 채우면 넣지 않는다(지원 조건 미충족)
-    if (analyses?.[it.offering.offering_id]?.status === "ineligible") { ineligible++; continue; }
-    const margin = cutoffMargin(analyses?.[it.offering.offering_id]?.year_cutoffs, it.reference_percentile);
+    if (a?.status === "ineligible") { ineligible++; continue; }
+    const margin = cutoffMargin(a?.year_cutoffs, it.reference_percentile);
+    const band = a?.reference_band ?? null;
+    if (band) {
+      if (!LISTED_BANDS.includes(worstBand(band))) { outsideBand++; continue; }
+      items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin, band });
+      continue;
+    }
     if (!margin) { noCutoff++; continue; }
     if (margin.side === "below") { below++; continue; }
-    items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin });
+    items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin, band: null });
   }
-  return { items: items.sort(byMargin), below, noCutoff, ineligible };
+  return { items: items.sort(byMargin), below, noCutoff, ineligible, outsideBand };
 }
 
 export function referenceUniversities(pool: ReferencePool): ReferenceUniversity[] {
@@ -93,11 +115,11 @@ export function referenceUniversities(pool: ReferencePool): ReferenceUniversity[
   for (const it of pool.items) by.set(it.offering.university_id, [...(by.get(it.offering.university_id) ?? []), it]);
   return [...by.entries()]
     .map(([id, items]) => {
-      const fields = groupByField(items, (x) => x.offering.offering_id).map((f) => ({ ...f, items: [...f.items].sort(byMargin), best: bestOf(f.items) }));
-      fields.sort((a, b) => worstOf(b.best) - worstOf(a.best));
-      return { university_id: id, university_name: items[0].offering.university_name, region: items[0].offering.region ?? null, count: items.length, best: bestOf(items), fields };
+      const fields = groupByField(items, (x) => x.offering.offering_id).map((f) => ({ ...f, items: [...f.items].sort(byMargin), best: bestOf(f.items), bestBand: bestBandOf(f.items) }));
+      fields.sort((a, b) => bandRank(a.bestBand) - bandRank(b.bestBand) || worstOf(b.best) - worstOf(a.best));
+      return { university_id: id, university_name: items[0].offering.university_name, region: items[0].offering.region ?? null, count: items.length, best: bestOf(items), bestBand: bestBandOf(items), fields };
     })
-    .sort((a, b) => worstOf(b.best) - worstOf(a.best));
+    .sort((a, b) => bandRank(a.bestBand) - bandRank(b.bestBand) || worstOf(b.best) - worstOf(a.best));
 }
 
 export const REFERENCE_WILDCARD_GROUPS: WildcardGroup[] = ["nursing", "health", "education"];
