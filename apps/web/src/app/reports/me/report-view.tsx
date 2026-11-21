@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AdvantageCell, decisionBasis, ScoreCell, StatusCell } from "@/components/offering-parts";
-import type { OverallAnalysisDto, OverallResultDto } from "@/lib/dto";
+import type { OverallAnalysisDto, OverallResultDto, ReportDto } from "@/lib/dto";
+import { MineConds, MineDetail } from "@/app/admissions/possibilities/mine-parts";
+import { PickedRow } from "./picked-row";
 import { groupPicked, PICK_GROUP_LIMIT } from "@/lib/picked-view";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
@@ -605,9 +607,13 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
  * 지원가능성·환산 유불리·판단 근거는 3·4페이지와 같은 부품·규칙이다 — 전체 위치(overall)를 넘겨야 참고 유불리와
  * 합격선 대비 위치(전체 위치로 견줌)가 같게 나온다. 성적을 바꾼 뒤 아직 다시 확인하지 않은 항목은 표시한다.
  * pending: 수능 가채점 리포트(3·4페이지와 같이 가채점 판정 준비 중) — 담은 학교 이름만 군별로 보이고 점수·판정 칸은 두지 않는다
+ * report: 이 표를 만든 리포트. 주면 줄마다 눌러 4페이지와 같은 상세 카드(MineDetail)를 펼친다(인쇄·가채점에서는 펼치지 않음).
+ * '참고' 꼬리표는 이 표의 어느 칸에도 달지 않는다(대표님 결정 2026-11-20, 지적 2026-11-22)
  */
-export function PickedTable({ items, overall, print = false, pending = false }: { items: PickedItem[]; overall?: OverallResultDto | null; print?: boolean; pending?: boolean }) {
+export function PickedTable({ items, overall, report = null, print = false, pending = false }: { items: PickedItem[]; overall?: OverallResultDto | null; report?: ReportDto | null; print?: boolean; pending?: boolean }) {
   const { groups, other } = groupPicked(items);
+  const expandable = !!report && !print && !pending;
+  const span = expandable ? 6 : 5;
   const sections = [
     ...groups.map((g) => ({ key: g.group, title: `${g.group}군`, items: g.items, count: true })),
     ...(other.length ? [{ key: "other", title: "모집군 확인 필요", items: other, count: false }] : []),
@@ -632,7 +638,8 @@ export function PickedTable({ items, overall, print = false, pending = false }: 
                     <col className="c-score" />
                     <col className="c-st" />
                     <col className="c-adv" />
-                    <col />
+                    <col className="c-why" />
+                    {expandable && <col className="c-chev" />}
                   </colgroup>
                 )}
                 <thead>
@@ -644,6 +651,7 @@ export function PickedTable({ items, overall, print = false, pending = false }: 
                         <th scope="col">지원가능성</th>
                         <th scope="col" className="r">환산 유불리</th>
                         <th scope="col">판단 근거</th>
+                        {expandable && <th scope="col" aria-label="자세히" />}
                       </>
                     )}
                   </tr>
@@ -651,22 +659,42 @@ export function PickedTable({ items, overall, print = false, pending = false }: 
                 <tbody>
                   {sec.items.map((s) => {
                     const a = s.assessment;
+                    const name = (
+                      <>
+                        <span className="uni">{s.offering ? s.offering.university_name : "지금 목록에서 찾을 수 없는 모집단위"}</span>
+                        {s.offering && <span className="dept">{s.offering.department}</span>}
+                        {!pending && s.entry.assessment_status === "needs_revalidation" && <span className="stale-tag">다시 확인 필요</span>}
+                      </>
+                    );
+                    // 모바일(좁은 화면)에서는 줄이 카드로 쌓이므로 칸 이름을 data-label 로 붙인다(report.css)
+                    const cells = pending ? null : (
+                      <>
+                        <td className="r" data-label="내 환산점수"><ScoreCell a={a} plain /></td>
+                        <td data-label="지원가능성"><StatusCell a={a} overall={overall} plain /></td>
+                        <td className="r" data-label="환산 유불리"><AdvantageCell a={a} overall={overall} plain /></td>
+                        {/* 판단 구간 같은 내부 기준 수치는 적지 않는다(최종 관리자 지시 2026-10-07) */}
+                        <td className="why" data-label="판단 근거">{a ? decisionBasis(a, overall) : "─"}</td>
+                      </>
+                    );
+                    if (expandable && s.offering) {
+                      return (
+                        <PickedRow
+                          key={s.offering_id}
+                          o={s.offering}
+                          a={a}
+                          name={name}
+                          cells={cells}
+                          span={span}
+                          detail={<MineDetail report={report} o={s.offering} acts={false} />}
+                          conds={<MineConds report={report} o={s.offering} />}
+                        />
+                      );
+                    }
                     return (
                       <tr key={s.offering_id}>
-                        <th scope="row">
-                          <span className="uni">{s.offering ? s.offering.university_name : "지금 목록에서 찾을 수 없는 모집단위"}</span>
-                          {s.offering && <span className="dept">{s.offering.department}</span>}
-                          {!pending && s.entry.assessment_status === "needs_revalidation" && <span className="stale-tag">다시 확인 필요</span>}
-                        </th>
-                        {!pending && (
-                          <>
-                            <td className="r"><ScoreCell a={a} plain /></td>
-                            <td><StatusCell a={a} overall={overall} /></td>
-                            <td className="r"><AdvantageCell a={a} overall={overall} /></td>
-                            {/* 판단 구간 같은 내부 기준 수치는 적지 않는다(최종 관리자 지시 2026-10-07) */}
-                            <td className="why">{a ? decisionBasis(a, overall) : "─"}</td>
-                          </>
-                        )}
+                        <th scope="row">{name}</th>
+                        {cells}
+                        {expandable && <td className="rp-chev" />}
                       </tr>
                     );
                   })}
@@ -680,7 +708,7 @@ export function PickedTable({ items, overall, print = false, pending = false }: 
         <p className="rp-short-note">
           내 환산점수는 그 대학이 정한 과목 비율대로 다시 계산한 점수(대학마다 만점이 달라 서로 비교하지 않음),
           환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 얼마나 오르내리는지입니다(%p: 상위 %가 몇 %만큼 바뀌는지, 예 +0.5%p는 상위 5.6%→5.1%).
-          지원가능성은 안정 → 하향 → 적정 → 소신 → 상향 → 도전 → 불가 순서이며 합격 확률이 아닙니다. 학과마다 자세한 설명은 가능성 보기에서 그 학과를 펼치면 볼 수 있습니다.
+          지원가능성은 안정 → 하향 → 적정 → 소신 → 상향 → 도전 → 불가 순서이며 합격 확률이 아닙니다. {expandable ? "학교 이름이나 오른쪽 화살표를 누르면 그 학과의 자세한 설명이 펼쳐집니다." : "학과마다 자세한 설명은 가능성 보기에서 그 학과를 펼치면 볼 수 있습니다."}
         </p>
       )}
     </div>

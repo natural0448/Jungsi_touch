@@ -17,7 +17,8 @@ import { P1YearCell } from "./p1-year-cell";
  * 펼친 줄: 2027 모집 정보(extras 자리, recruit-parts.tsx) + 환산·학교 누백·지원 판단·유불리 + 근거(assessment).
  * 환산·누백·판단은 서로 따로 준비된다(1.7.0). 판단이 보류여도 성공한 환산·누백은 숨기지 않는다.
  */
-export function Detail({ o, a, extras, picked, subjects, overall, examType }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null; examType?: string | null }) {
+/** acts=false: 맨 아래 담기·'내 성적 리포트에서 보기' 줄을 두지 않는다(2페이지 핵심 지원 학교 표에서 펼칠 때 — 이미 그 화면이고, 지난 기록은 읽기 전용) */
+export function Detail({ o, a, extras, picked, subjects, overall, examType, acts = true }: { o: OfferingDto; a: Cell; extras: ReactNode; picked: boolean; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null; examType?: string | null; acts?: boolean }) {
   const p2 = page("PAGE-02").path;
   // 2027 모집 정보·발행 기준은 펼친 뒤 따로 받아 채운다(extras.tsx) — 펼치기를 기다리게 하지 않는다
   const recruit = extras;
@@ -66,10 +67,12 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType }: { 
       )}
       <AdoptedEvidence a={a} />
       <Years a={a} overall={overall ?? null} />
-      <div className="acts">
-        <PickButton id={o.offering_id} on={picked} variant="wide" />
-        <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
-      </div>
+      {acts && (
+        <div className="acts">
+          <PickButton id={o.offering_id} on={picked} variant="wide" />
+          <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
+        </div>
+      )}
     </>
   );
 }

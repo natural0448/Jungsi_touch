@@ -134,18 +134,57 @@
 .et .rp-abs{margin:0;display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--ink-2)}
 .et .rp-abs b{color:var(--ink)}
 .et .rp-abs small{color:var(--muted)}
-.et .rp-short{min-width:720px;width:100%;table-layout:fixed}
-.et .rp-short col.c-name{width:22%}
-.et .rp-short col.c-score{width:13%}
-.et .rp-short col.c-st{width:12%}
-.et .rp-short col.c-adv{width:17%}
+/*
+  칸 너비(2026-11-22 대표님 지적: 환산 유불리 글자가 판단 근거 칸을 덮었다). 표는 칸을 고정하고(세 군의 표 칸 맞춤),
+  칸 안 글자는 넘치지 않고 줄을 바꾼다 — 표 기본(base.css)의 white-space:nowrap 을 이 표에서만 푼다.
+*/
+.et .rp-short{min-width:760px;width:100%;table-layout:fixed}
+.et .rp-short col.c-name{width:21%}
+.et .rp-short col.c-score{width:12%}
+.et .rp-short col.c-st{width:14%}
+.et .rp-short col.c-adv{width:19%}
+.et .rp-short col.c-chev{width:44px}
 .et .rp-short.names{min-width:0;table-layout:auto}
+.et .rp-short:not(.names) td{white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.et .rp-short .st{height:auto;min-height:26px;padding:3px 9px;white-space:normal;line-height:1.35}
+.et .rp-short .adv{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px 8px;max-width:100%}
+.et .rp-short .adv .bar{flex:0 1 64px;min-width:32px}
+.et .rp-short .adv .v{min-width:0;white-space:normal}
+/* 줄 펼침: 학교 이름·화살표를 누르면 4페이지와 같은 상세 카드가 바로 아래 줄에 펼쳐진다 */
+.et .rp-short .rp-unit{display:block;width:100%;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.et .rp-short .rp-unit:hover .uni,.et .rp-short .rp-unit:hover .dept{color:var(--brand)}
+.et .rp-short td.rp-chev{padding:0;text-align:center}
+.et .rp-short td.rp-chev button{display:inline-grid;place-items:center;width:32px;height:32px;border:0;border-radius:6px;background:none;color:var(--muted);cursor:pointer}
+.et .rp-short td.rp-chev button:hover{background:var(--sub);color:var(--brand)}
+.et .rp-short .ic-chev{transition:transform .15s}
+.et .rp-short tr.open .ic-chev{transform:rotate(90deg)}
+.et .rp-short tr.rp-row.open>*{background:var(--jt-picked)}
+.et .rp-short tr.rp-drow>td{padding:0;white-space:normal}
+.et .rp-short .rp-ps{display:block;padding:0;gap:0}
+.et .rp-short .rp-ps .detail{border-top:0}
 .et .rp-short tbody th{font-weight:800;color:var(--ink);background:none;white-space:normal;word-break:keep-all}
 /* 모집단위명은 학교 이름 아래 줄에 본문 크기로(대표님 요청 2026-11-21, 글자 기준 본문15·보조13·배지12) */
 .et .rp-short tbody th .uni{display:block}
 .et .rp-short tbody th .dept{display:block;margin-top:2px;font-size:15px;font-weight:700;color:var(--deep);line-height:1.4}
 .et .rp-short .stale-tag{display:inline-block;margin-top:4px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:12px;font-weight:700;color:var(--muted)}
-.et .rp-short .why{white-space:normal;min-width:240px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+.et .rp-short .why{white-space:normal;font-size:13px;line-height:1.55;color:var(--ink-2)}
+/* 좁은 화면(모바일 400px 등): 표를 옆으로 밀지 않고 줄마다 카드로 쌓는다. 칸 이름은 data-label */
+@media (max-width:640px){
+  .et .rp-short:not(.names){min-width:0;table-layout:auto}
+  .et .rp-short:not(.names) colgroup,.et .rp-short:not(.names) thead{display:none}
+  .et .rp-short:not(.names),.et .rp-short:not(.names) tbody{display:block;width:100%}
+  .et .rp-short:not(.names) tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .et .rp-short:not(.names) tr>th,.et .rp-short:not(.names) tr>td{display:block;grid-column:1 / -1;padding:4px 0;border:0;text-align:left}
+  .et .rp-short:not(.names) tr>th{grid-column:1}
+  .et .rp-short:not(.names) tr>td.rp-chev{grid-column:2;grid-row:1;align-self:start}
+  .et .rp-short:not(.names) td[data-label]{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px;align-items:center}
+  .et .rp-short:not(.names) td[data-label]::before{content:attr(data-label);font-size:12px;font-weight:700;color:var(--muted)}
+  .et .rp-short:not(.names) td.r .score{align-items:flex-start}
+  .et .rp-short .adv{justify-content:flex-start}
+  .et .rp-short:not(.names) tr.rp-drow{display:block;padding:0}
+  .et .rp-short:not(.names) tr.rp-drow>td{padding:0}
+  .et .rp-short .rp-ps .detail{padding:12px}
+}
 /* 가·나·다군 묶음 */
 .et .rp-picked{display:grid;gap:14px}
 .et .rp-group{display:grid;gap:6px}

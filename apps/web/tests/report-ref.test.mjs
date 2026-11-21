@@ -39,8 +39,18 @@ test("no page or action remembers a report id in the browser", async () => {
   const files = ["../src/lib/report-ref.ts", "../src/lib/report-ops.ts", "../src/app/reports/me/actions.ts", "../src/app/reports/me/page.tsx", "../src/app/reports/me/print/page.tsx"];
   for (const f of files) {
     const text = await readFile(new URL(f, import.meta.url), "utf8");
-    assert.doesNotMatch(text, /jt_report_id|cookies\(\)|getReportId|setReportId|\?pick=1|\?report=/, f);
+    // 인쇄 화면만 예외: 9월 지난 기록의 '상담 리포트 인쇄용 보기'(2026-11-22)가 주소로 리포트 번호를 넘긴다 — 아래 시험에서 범위를 확인한다
+    const forbidden = f.endsWith("print/page.tsx") ? /jt_report_id|cookies\(\)|getReportId|setReportId|\?pick=1/ : /jt_report_id|cookies\(\)|getReportId|setReportId|\?pick=1|\?report=/;
+    assert.doesNotMatch(text, forbidden, f);
   }
+});
+
+test("print page: a report id from the address is printed only if it is in the member's own 9월 list; otherwise the current report", async () => {
+  const text = await readFile(new URL("../src/app/reports/me/print/page.tsx", import.meta.url), "utf8");
+  assert.match(text, /src\.listOwnReports\(caller, \{ exam_id: MOCK_EXAM\.exam_id, limit: 20 \}\)/);
+  assert.match(text, /reportId = list\.items\.some\(\(i\) => i\.report_id === wanted && \(!i\.exam_id \|\| i\.exam_id === MOCK_EXAM\.exam_id\)\) \? wanted : null;/);
+  // 브라우저에 리포트 번호를 저장하지 않는다(주소 값은 그 요청에만 쓴다)
+  assert.doesNotMatch(text, /localStorage|sessionStorage|document\.cookie/);
 });
 
 // 부정확 입력(2026-11-22 대표님 결정): 3·4페이지와 분석 버튼은 현재 리포트를 받지 못해 분석하지 않고, 화면은 안내를 고른다

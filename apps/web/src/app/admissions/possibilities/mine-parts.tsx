@@ -60,9 +60,10 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
 }
 
 /** 펼친 카드의 환산·누백·판단 카드 */
-export function MineDetail({ report, o }: { report: ReportDto | null; o: OfferingDto }) {
+/** acts=false: 2페이지 핵심 지원 학교 표에서 펼칠 때(담기·'내 성적 리포트에서 보기' 줄 없음) */
+export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
   if (report && provisionalOnly(report)) return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
-  return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} />;
+  return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
 }
 
 /** 펼친 상세 맨 위 줄 안의 지원 조건 묶음(2026-11-22) */

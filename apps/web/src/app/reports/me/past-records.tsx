@@ -19,6 +19,8 @@ import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } f
 
 const PAGE = "/reports/me";
 export const pastHref = (reportId?: string) => (reportId ? `${PAGE}?past=1&report=${encodeURIComponent(reportId)}` : `${PAGE}?past=1`);
+/** 지난 리포트 하나의 인쇄용 화면(print/page.tsx 가 ?report= 를 받는다) */
+export const printHref = (reportId: string) => `${PAGE}/print?report=${encodeURIComponent(reportId)}`;
 
 /** 이 회원에게 9월 모의평가 리포트가 있는가(1개만 읽는다). 읽지 못하면 false — 링크를 숨기고 오류 화면은 보이지 않는다 */
 export async function hasPastMock(src: JungsiSource, caller: Caller): Promise<boolean> {
@@ -93,6 +95,8 @@ async function PastDetail({ src, caller, reportId }: { src: JungsiSource; caller
         <span>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준</span>
         <span>{seoulDateTime(report.updated_at)} 저장</span>
         <span className="rp-tag">지난 기록 · 읽기 전용</span>
+        {/* 이 지난 리포트를 인쇄(대표님 지적 2026-11-22). 인쇄 화면은 ?report= 를 받아 목록에 있는 9월 리포트만 그린다 */}
+        <Link className="btn p rp-print" href={printHref(report.report_id)}>상담 리포트 인쇄용 보기</Link>
       </div>
       <OverallCard a={a} />
       <section aria-label="과목별 결과" className="rp-sec">
@@ -126,7 +130,7 @@ async function PastPicked({ src, caller, report }: { src: JungsiSource; caller: 
   return (
     <section className="rp-sec" aria-label="그때 담은 학교">
       <h3>그때 담은 학교 <span className="num">{items.length}</span></h3>
-      <PickedTable items={items} overall={report.overall?.overall} />
+      <PickedTable items={items} overall={report.overall?.overall} report={report} />
     </section>
   );
 }

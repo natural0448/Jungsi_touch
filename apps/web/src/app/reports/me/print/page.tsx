@@ -7,7 +7,8 @@ import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import { isProvisionalOverall, type SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
-import { EXAM } from "@/lib/exam";
+import { EXAM, MOCK_EXAM } from "@/lib/exam";
+import { pastHref } from "../past-records";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { isInaccurate } from "@/lib/score-validity";
 import { page } from "@/lib/routes";
@@ -21,8 +22,18 @@ export const metadata: Metadata = { title: "상담 리포트" };
  * 상담 리포트 인쇄용 화면 — report.export(유료·본인·확인 성적)의 고정 revision 을 그대로 그린다.
  * 인쇄 시 머리글·탭·띠는 숨긴다(styles/jungsi.css @media print).
  */
-export default async function Page() {
-  const back = page("PAGE-02").path;
+/** ?report= 로 고를 수 있는 리포트 번호 모양(2페이지 지난 기록 화면과 같은 규칙) */
+const REPORT_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+
+/**
+ * ?report=<id>: 지난 기록(9월 모의평가) 화면의 '상담 리포트 인쇄용 보기'(대표님 지적 2026-11-22).
+ * 이 회원의 9월 리포트 목록(report.list-own)에 있는 번호만 인쇄한다 — 지난 기록 화면이 여는 범위와 같고, 소유권은 서버가 다시 확인한다.
+ * 없으면 지금까지처럼 계정의 현재 리포트를 인쇄한다.
+ */
+export default async function Page({ searchParams }: { searchParams: Promise<{ report?: string | string[] }> }) {
+  const sp = await searchParams;
+  const wanted = typeof sp.report === "string" && REPORT_ID.test(sp.report) ? sp.report : null;
+  const back = wanted ? pastHref(wanted) : page("PAGE-02").path;
   const caller = await getCaller();
   const src = source();
   const paidOnly = (
@@ -42,9 +53,16 @@ export default async function Page() {
   let snap: SnapshotDto | null = null;
   let shortlist: PickedItem[] = [];
   try {
-    const status = await src.readScoreInputStatus(caller, EXAM.exam_id);
-    // 부정확 입력 상태(2026-11-22 대표님 결정)에서는 인쇄할 분석이 없다(2페이지와 같다)
-    const reportId = isInaccurate(status) ? null : status.current_report_id;
+    let reportId: string | null;
+    if (wanted) {
+      // 지난 기록: 목록에 있는 9월 리포트만(없거나 다른 시험이면 '인쇄할 리포트가 없습니다')
+      const list = await src.listOwnReports(caller, { exam_id: MOCK_EXAM.exam_id, limit: 20 });
+      reportId = list.items.some((i) => i.report_id === wanted && (!i.exam_id || i.exam_id === MOCK_EXAM.exam_id)) ? wanted : null;
+    } else {
+      const status = await src.readScoreInputStatus(caller, EXAM.exam_id);
+      // 부정확 입력 상태(2026-11-22 대표님 결정)에서는 인쇄할 분석이 없다(2페이지와 같다)
+      reportId = isInaccurate(status) ? null : status.current_report_id;
+    }
     // 리포트 읽기(report.read)도 함께 받는다: 참고 기준 7단계·지난 합격선 같은 판정 표시는 서버가 읽기 응답에만 붙이고
     // 인쇄용 고정본(report.export)에는 없다. 같은 판일 때만 그 분석으로 바꿔 2페이지 화면과 같은 판정을 인쇄한다(2026-11-21)
     const [exported, read] = reportId
@@ -67,8 +85,17 @@ export default async function Page() {
       <div className="wrap pg-body">
         <section className="gate">
           <h2>인쇄할 리포트가 없습니다</h2>
-          <p>먼저 성적을 넣어 리포트를 만들어 주세요.</p>
-          <div className="acts"><Link className="btn p" href={back}>성적 입력하기</Link></div>
+          {wanted ? (
+            <>
+              <p>이 지난 리포트는 지금 인쇄할 수 없습니다. 지난 기록 목록에서 다시 골라 주세요.</p>
+              <div className="acts"><Link className="btn p" href={pastHref()}>지난 기록으로</Link></div>
+            </>
+          ) : (
+            <>
+              <p>먼저 성적을 넣어 리포트를 만들어 주세요.</p>
+              <div className="acts"><Link className="btn p" href={back}>성적 입력하기</Link></div>
+            </>
+          )}
         </section>
       </div>
     );

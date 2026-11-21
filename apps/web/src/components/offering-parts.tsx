@@ -77,7 +77,8 @@ export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.
  */
 export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => BAND[r.code].label;
 
-export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: OverallResultDto | null }) {
+/** plain: 합격선 대비 위치 배지에 '참고' 꼬리표를 달지 않는다(2페이지 핵심 지원 학교 표, 대표님 결정 2026-11-20·지적 2026-11-22) */
+export function CategoryBadge({ a, overall, plain = false }: { a: AssessmentDto; overall?: OverallResultDto | null; plain?: boolean }) {
   const ref = referenceBandOf(a);
   if (ref) {
     // 이름·색 모두 추정값 단계 하나(2026-11-22). '참고'·'추정 참고' 꼬리표는 달지 않는다(대표님 결정 2026-11-20:
@@ -89,7 +90,7 @@ export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: Over
   const pn = positionNoteOf(a, overall);
   if (pn) {
     if (pn.kind === "none") return <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
-    return <span className={`st pos ${pn.margin.side}`} title={`${pn.margin.text} · 판정이 아닌 위치 비교입니다`}>{positionNoteShort(pn)} <small>참고</small></span>;
+    return <span className={`st pos ${pn.margin.side}`} title={`${pn.margin.text} · 판정이 아닌 위치 비교입니다`}>{positionNoteShort(pn)}{!plain && <> <small>참고</small></>}</span>;
   }
   if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check" title="이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 지원 자격은 모집요강에서 확인하세요">판정 준비 중</span>;
   const c = decisionOf(a);
@@ -123,17 +124,19 @@ export function ScoreCell({ a, plain = false }: { a: Cell; plain?: boolean }) {
   );
 }
 
-export function StatusCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null }) {
+/** plain: '참고' 꼬리표 없음(2페이지 핵심 지원 학교 표) */
+export function StatusCell({ a, overall, plain = false }: { a: Cell; overall?: OverallResultDto | null; plain?: boolean }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (!a) return <span className="need">분석 대기</span>;
-  return <CategoryBadge a={a} overall={overall} />;
+  return <CategoryBadge a={a} overall={overall} plain={plain} />;
 }
 
 /** 환산 유불리: 같은 비교집단에서 보정 총점 기준 위치 − 대학 환산 기준 위치(%p). 양수면 유리 */
 /** 환산 유불리의 방향을 글자로도 적는다(대표님 지적 2026-11-18: 숫자만으로는 좋은 신호인지 알 수 없다) */
 export const ADVANTAGE_WORD: Record<"up" | "down" | "even", string> = { up: "유리", down: "불리", even: "비슷" };
 
-export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null }) {
+/** plain: 대학 참고 누백으로 낸 유불리에도 '참고' 꼬리표를 달지 않는다(2페이지 핵심 지원 학교 표) */
+export function AdvantageCell({ a, overall, plain = false }: { a: Cell; overall?: OverallResultDto | null; plain?: boolean }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (a && !a.advantage) {
     // 서버 유불리가 없을 때만 대학 참고 누백으로 참고 유불리를 보인다(R16, 2026-11-16)
@@ -143,7 +146,7 @@ export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResult
       return (
         <span className="adv">
           <span className="bar" aria-hidden="true">{ref.tone !== "even" && <i className={ref.tone} style={{ width: `${width}%` }} />}</span>
-          <span className={`v num ${ref.tone}`}><b className="advw">{ADVANTAGE_WORD[ref.tone]}</b> {ref.text}%p <small className="ref">참고</small></span>
+          <span className={`v num ${ref.tone}`}><b className="advw">{ADVANTAGE_WORD[ref.tone]}</b> {ref.text}%p{!plain && <> <small className="ref">참고</small></>}</span>
         </span>
       );
     }

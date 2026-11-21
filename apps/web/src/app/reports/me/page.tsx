@@ -394,7 +394,7 @@ async function Picked({ src, caller, report, pending = false }: { src: JungsiSou
           busy="분석하는 중…"
         />
       )}
-      <PickedTable items={items} overall={current.overall?.overall} />
+      <PickedTable items={items} overall={current.overall?.overall} report={current} />
     </>
   );
 }
