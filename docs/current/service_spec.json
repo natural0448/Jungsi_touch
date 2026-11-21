@@ -14863,7 +14863,7 @@
             "layer": "planning_tool",
             "status": "shared_management_or_synthetic_CLI",
             "requirements": [],
-            "source_sha256": "995be3a4093e57a9c17f2b02df5212813b83b319efe2855a45645a25f7dafdc0",
+            "source_sha256": "4240b29dbaa96aecf4cbcc772b49183a136ebac793a51743addc1de33ecd88c0",
             "symbols": [
               {
                 "kind": "function",
@@ -360931,6 +360931,13 @@
         "PAGE-04"
       ],
       "summary": "화면: 7단계 '불가'의 뜻을 배지 풀이(마우스 올림)와 4페이지 상세에 적는다 — 합격선보다 크게 낮은 위치(7단계 중 가장 아래)이며 지원 자격과는 관계없고 지원은 할 수 있다(대표님 결정 2026-11-21). 다른 단계 배지·범례에도 같은 풀이를 단다."
+    },
+    {
+      "date": "2026-11-21",
+      "requirements": [
+        "REQ-16"
+      ],
+      "summary": "도구: 커밋 시험(run_committed_tests.py)의 서버(edge) 묶음 시간 상한을 300초에서 1,200초로 늘린다(EDGE_SUITE_TIMEOUT_SECONDS). 묶음이 300초 근처까지 늘어 통과한 시험도 EDGE_TIMEOUT 으로 실패했다(2026-11-21 네 번). 시험 내용은 그대로."
     }
   ],
   "p1_recruitment_score_review_verification": {
