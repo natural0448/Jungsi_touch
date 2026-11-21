@@ -12,10 +12,10 @@ import { positionNoteOf } from "./position-note";
 export const STATUS_KEYS = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside", "line", "none", "ineligible", "other"] as const;
 export type StatusKey = (typeof STATUS_KEYS)[number];
 
-/** 칩 이름(화면 이름 순서: 하향 → 안정 → … , 서버 stable = 하향, downward = 안정 — 2026-11-22 이름 바꿈) */
+/** 칩 이름(배지 BAND 이름과 같다: 안정 → 하향 → 적정 → …) */
 export const STATUS_LABEL: Record<StatusKey, string> = {
-  stable: "하향",
-  downward: "안정",
+  stable: "안정",
+  downward: "하향",
   target: "적정",
   aspirational: "소신",
   upward: "상향",

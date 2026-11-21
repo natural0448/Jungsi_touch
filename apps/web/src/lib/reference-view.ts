@@ -73,7 +73,7 @@ export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff
 
 /** 3번째 화면 자동 목록에 넣는 7단계(상향까지, 대표님 결정 2026-11-19). 서버 RECOMMENDED_BAND_CODES 와 같다 */
 export const LISTED_BANDS: readonly BandCode[] = ["stable", "downward", "target", "aspirational", "upward"];
-/** 목록 순서: 적정·소신 → 상향 → 안정 → 하향(화면 이름, 2026-11-22 이름 바꿈 반영. 서버 참고 후보 고르는 순서와 같다) */
+/** 목록 순서: 적정·소신 → 상향 → 하향 → 안정(서버 참고 후보 고르는 순서와 같다) */
 const BAND_ORDER: Record<BandCode, number> = { target: 0, aspirational: 1, upward: 2, downward: 3, stable: 4, challenge: 5, outside: 6 };
 /**
  * 범위로 나온 누백도 추정값(점수를 낸 응시자 기준 누백, estimated_upper_cumulative_percent_all_examinees — 범위의 유리한 끝)으로

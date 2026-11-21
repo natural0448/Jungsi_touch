@@ -28,9 +28,9 @@ test("filter key follows the badge: a range reference band uses the estimate sta
   assert.equal(statusKeyOf("need"), "other");
 });
 
-test("display names follow the 2026-11-22 order: server stable = 하향, downward = 안정", () => {
-  assert.equal(STATUS_LABEL.stable, "하향");
-  assert.equal(STATUS_LABEL.downward, "안정");
+test("display names match the badge: server stable = 안정, downward = 하향 (2026-11-22 이름 바꿈 취소)", () => {
+  assert.equal(STATUS_LABEL.stable, "안정");
+  assert.equal(STATUS_LABEL.downward, "하향");
 });
 
 test("st= in the address: unknown values dropped, stable order, toggle adds/removes, changing it restarts from the first page", () => {

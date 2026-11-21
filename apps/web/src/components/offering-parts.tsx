@@ -18,10 +18,8 @@ export const CATEGORY: Record<Category, { cls: string; label: string; desc: stri
 
 /** 7단계 판정(assessment.band). 예상 합격권 폭의 15%·30% 를 경계로 가른다. 색은 기존 세 묶음(여유·핵심·도전)을 그대로 쓴다 */
 export const BAND: Record<BandCode, { cls: string; label: string; desc: string }> = {
-  // 이름 순서 '하향 → 안정 → 적정 → 소신 → 상향 → 도전 → 불가'(대표님 결정 2026-11-22, 하향이 가장 여유).
-  // 서버 단계 값은 그대로 두고 화면 이름만 바꾼다: 서버 stable(경계의 유리한 끝보다 앞) = '하향', 서버 downward(첫 15% 구간) = '안정'
-  stable: { cls: "safe", label: "하향", desc: "예상 합격권보다 충분히 앞선 위치입니다. 그래도 합격이 보장되는 것은 아닙니다." },
-  downward: { cls: "safe", label: "안정", desc: "예상 합격권보다 조금 앞선 위치입니다." },
+  stable: { cls: "safe", label: "안정", desc: "예상 합격권보다 충분히 앞선 위치입니다. 그래도 합격이 보장되는 것은 아닙니다." },
+  downward: { cls: "safe", label: "하향", desc: "예상 합격권보다 조금 앞선 위치입니다." },
   target: { cls: "core", label: "적정", desc: "예상 합격권 안에서 앞쪽 절반에 드는 위치입니다." },
   aspirational: { cls: "core", label: "소신", desc: "예상 합격권 안에서 뒤쪽 절반에 드는 위치입니다." },
   upward: { cls: "reach", label: "상향", desc: "예상 합격권에서 조금 벗어난 위치입니다." },

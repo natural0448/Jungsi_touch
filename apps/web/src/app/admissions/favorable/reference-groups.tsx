@@ -42,7 +42,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
         <h2 id="ref-t">
           내 성적 분포상 지원에 유리한 대학 <span className="num">{universities.length}</span>
         </h2>
-        <span>대학 방식으로 계산한 내 위치(참고 누백)가 하향~상향에 드는 학과와, 판정 경계가 없으면 지난해 합격선(70%컷)에 닿는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다.</span>
+        <span>대학 방식으로 계산한 내 위치(참고 누백)가 안정~상향에 드는 학과와, 판정 경계가 없으면 지난해 합격선(70%컷)에 닿는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다.</span>
       </div>
       <div className="fv-ref-list">
         {universities.map((u) => (
