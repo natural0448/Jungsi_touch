@@ -7,14 +7,16 @@ import Link from "@/components/link";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
-import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
+import type { CatalogSearchDto, OfferingDto, ReportDto } from "@/lib/dto";
+import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, toggleStatus, type StatusKey } from "@/lib/status-filter";
+import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
 import { settleAnalyses, startMine } from "@/lib/report-ops";
 import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
-import { MineBasis, MineCells, MineDetail, MineLegend, MineTray, cellOf } from "./mine-parts";
+import { MineBasis, MineCells, MineConds, MineDetail, MineLegend, MineTray, cellOf } from "./mine-parts";
 import { GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
 import "./possibilities.css";
 
@@ -76,17 +78,36 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     return <PaidGate kind={m.error.status === 401 ? "login" : "paid"} route={route} features={features} />;
   }
   // 보이는 모집단위의 분석을 채우고 옛 자료판 분석은 다시 확인한다. 끝난 뒤에 한 번에 그린다
-  const report = m.report ? await settleAnalyses(src, caller, m.report, items.map((o) => o.offering_id)) : null;
+  let report = m.report ? await settleAnalyses(src, caller, m.report, items.map((o) => o.offering_id)) : null;
+  // 지원가능성 필터(2026-11-22): 고른 단계만 모은다. 성적이 없으면(리포트 없음) 필터를 쓰지 않는다
+  let shown = items;
+  let nextCursor = res.next_cursor;
+  let scanned: number | null = null;
+  if (cur.st && report) {
+    const want = new Set<StatusKey>(cur.st);
+    const hit = (r: ReportDto, o: OfferingDto) => want.has(statusKeyOf(r.analyses?.[o.offering_id] ?? null, r.overall?.overall));
+    if (cur.fav) {
+      const r = report;
+      shown = items.filter((o) => hit(r, o));
+      scanned = items.length;
+    } else {
+      const c = await collectByStatus(src, caller, cur, res, report, hit);
+      report = c.report;
+      shown = c.items;
+      nextCursor = c.next;
+      scanned = c.scanned;
+    }
+  }
 
   // 같은 대학끼리 묶는다(받은 순서를 지킨다)
   const groups: { id: string; name: string; rows: OfferingDto[] }[] = [];
-  for (const o of items) {
+  for (const o of shown) {
     const last = groups[groups.length - 1];
     if (last && last.id === o.university_id) last.rows.push(o);
     else groups.push({ id: o.university_id, name: o.university_name, rows: [o] });
   }
   // 즐겨찾기만 보기도 조건이다 — 0건을 '올해 모집 정보 미연결'로 안내하지 않는다
-  const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group || cur.fav);
+  const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group || cur.fav || cur.st);
   const star = (o: OfferingDto) => <span className="c-star">{favs && <StarButton id={o.offering_id} on={favs.ids.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}</span>;
   // 유료 데이터를 그린 화면: 회원 식별 표시 + 조회 기록. 모집단위를 펼쳤으면 대학 분석, 아니면 가능성 목록
   const view = viewPath(route.path, sp);
@@ -112,10 +133,12 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
             {cur.fav && <input type="hidden" name="fav" value="1" />}
             {cur.region && <input type="hidden" name="region" value={cur.region} />}
             {cur.group && <input type="hidden" name="group" value={cur.group} />}
+            {cur.st && <input type="hidden" name="st" value={cur.st.join(",")} />}
             <button className="btn p" type="submit">검색</button>
           </Form>
           <ChipRow label="지역" cur={cur} destination={destination} k="region" items={REGIONS.map((r) => ({ v: r, label: r }))} />
           <ChipRow label="모집군" cur={cur} destination={destination} k="group" items={GROUPS.map((g) => ({ v: g, label: `${g}군` }))} />
+          {report && <StatusChips cur={cur} destination={destination} />}
           {favs && (
             <div className="cfilter">
               <span className="lab">즐겨찾기</span>
@@ -148,11 +171,14 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                 )}
                 {/* 날짜만(YYYY-MM-DD)이든 시각까지(ISO)든 'YYYY.MM.DD'로 보인다(10-24 QA: 'T14:51:47Z'가 그대로 보였다) */}
                 {asOfDate(res.as_of) && <small> · {asOfDate(res.as_of)} 기준</small>}
+                {cur.st && scanned !== null && (
+                  <small className="st-scan"> · 지원가능성 {cur.st.map((k) => STATUS_LABEL[k]).join("·")}: 모집단위 <b className="num">{scanned}</b>개를 확인해 <b className="num">{shown.length}</b>개</small>
+                )}
               </span>
               <MineLegend report={report} />
             </div>
 
-            {groups.length === 0 && !filtered && !res.next_cursor ? (
+            {groups.length === 0 && !filtered && !nextCursor ? (
               /* 조건 없이 0건이면 검색이 좁아서가 아니라 올해(YEAR) 모집행 카탈로그가 아직
                  결속되지 않은 자료 보류다 — '지원 가능한 대학 없음'류 결론으로 말하지 않는다
                  (담당자 지시 2026-10-11: 카탈로그 부재와 결과 0 판정을 구분) */
@@ -166,16 +192,16 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                 <p>유리한 대학 찾기나 이 화면에서 학과 옆 별표(☆)를 누르면 여기에 모입니다. 담기 전에 비교해 볼 곳을 {FAVORITE_LIMIT}개까지 넣을 수 있습니다.</p>
                 <div className="acts"><Link className="btn" href={link({ fav: undefined, open: undefined })}>전체 목록 보기</Link></div>
               </section>
-            ) : groups.length === 0 && res.next_cursor ? (
+            ) : groups.length === 0 && nextCursor ? (
               <section className="gate flat">
-                <h2>아직 찾는 중입니다</h2>
-                <p>조건에 맞는 모집단위를 목록 뒤쪽에서 더 찾아야 합니다. 결과가 없다는 뜻이 아닙니다.</p>
-                <div className="acts"><Link className="btn p" href={link({ cursor: res.next_cursor, open: undefined })}>계속 찾기</Link></div>
+                <h2>{cur.st ? "확인한 범위에는 고른 지원가능성이 없습니다" : "아직 찾는 중입니다"}</h2>
+                <p>{cur.st ? `모집단위 ${scanned ?? 0}개를 내 성적으로 확인했지만 고른 단계에 드는 곳이 없었습니다. 목록 뒤쪽에서 이어서 찾을 수 있습니다.` : "조건에 맞는 모집단위를 목록 뒤쪽에서 더 찾아야 합니다. 결과가 없다는 뜻이 아닙니다."}</p>
+                <div className="acts"><Link className="btn p" href={link({ cursor: nextCursor, open: undefined })}>{cur.st ? "이어서 찾기" : "계속 찾기"}</Link></div>
               </section>
             ) : groups.length === 0 ? (
               <section className="gate flat">
                 <h2>조건에 맞는 모집단위가 없습니다</h2>
-                <p>검색어를 줄이거나 지역·모집군을 전체로 바꿔 보세요. 결과가 없다는 것은 지원할 수 없다는 뜻이 아닙니다.</p>
+                <p>검색어를 줄이거나 지역·모집군{cur.st ? "·지원가능성" : ""}을 전체로 바꿔 보세요. 결과가 없다는 것은 지원할 수 없다는 뜻이 아닙니다.</p>
                 <div className="acts"><Link className="btn" href={hrefWith({}, {}, destination)}>조건 지우기</Link></div>
               </section>
             ) : (
@@ -227,6 +253,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                               </span>
                             }
                             detail={<MineDetail report={report} o={o} />}
+                            conds={<MineConds report={report} o={o} />}
                           />
                         );
                       })}
@@ -237,18 +264,74 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
               </>
             )}
 
-            {(cur.cursor || res.next_cursor) && !(groups.length === 0 && res.next_cursor) && (
+            {(cur.cursor || nextCursor) && !(groups.length === 0 && nextCursor) && (
               <nav className="pager" aria-label="쪽 넘기기">
                 {cur.cursor ? <Link className="btn" href={link({ cursor: undefined, open: undefined })}>처음부터</Link> : <span />}
-                {res.next_cursor && <Link className="btn" href={link({ cursor: res.next_cursor, open: undefined })}>다음 {LIMIT}개</Link>}
+                {nextCursor && <Link className="btn" href={link({ cursor: nextCursor, open: undefined })}>{cur.st ? "이어서 찾기" : `다음 ${LIMIT}개`}</Link>}
               </nav>
             )}
           </>
         )}
       </div>
 
-      <MineTray report={report} items={items} src={src} caller={caller} />
+      {/* 띠는 담은 곳의 이름·모집군을 모두 받은 뒤 한 번에 그린다. 목록은 띠를 기다리지 않는다 */}
+      <Suspense fallback={null}>
+        <MineTray report={report} items={items} src={src} caller={caller} />
+      </Suspense>
     </>
+  );
+}
+
+/**
+ * 지원가능성 필터를 켰을 때(2026-11-22): 검색 결과를 30개씩 차례로 받아 분석을 채우고(분석 요청은 한 번에 하나, 30개 이하)
+ * 고른 단계만 모은다. 30개가 모이거나 한 화면에서 SCAN_PAGES 쪽을 확인했거나 검색이 끝나면 멈추고,
+ * 다음 쪽은 멈춘 곳의 검색 커서에서 이어 간다(lib/status-filter.ts). 그동안 화면은 책 넘김 대기 화면이다.
+ */
+async function collectByStatus(src: JungsiSource, caller: Caller, cur: Query, first: CatalogSearchDto<OfferingDto>, report: ReportDto, hit: (r: ReportDto, o: OfferingDto) => boolean) {
+  let page = first;
+  let current = report;
+  const picked: OfferingDto[] = [];
+  let scanned = 0;
+  let analyzed = 0;
+  let empty = 0;
+  for (;;) {
+    const items = page.items ?? [];
+    if (items.length > 0) {
+      current = await settleAnalyses(src, caller, current, items.map((o) => o.offering_id));
+      analyzed++;
+      scanned += items.length;
+      for (const o of items) if (hit(current, o)) picked.push(o);
+    } else empty++;
+    if (picked.length >= LIMIT || !page.next_cursor || analyzed >= SCAN_PAGES || empty >= SCAN_EMPTY_HOPS) break;
+    try {
+      page = await src.searchOfferings(caller, { ...toSearch(cur), cursor: page.next_cursor });
+    } catch (e) {
+      // 다음 쪽을 받지 못하면 모은 만큼 보이고, 같은 곳에서 이어 찾을 수 있게 둔다
+      if (e instanceof ConnectionError || e instanceof AccessDenied) break;
+      throw e;
+    }
+  }
+  return { items: picked, report: current, scanned, next: page.next_cursor };
+}
+
+/** 지원가능성 필터 칩. 여러 개 고를 수 있다. 성적이 있을 때만 보인다 */
+function StatusChips({ cur, destination }: { cur: Query; destination: CatalogDestination }) {
+  const on = new Set(cur.st ?? []);
+  const link = (patch: Partial<Query>) => hrefWith(cur, patch, destination);
+  return (
+    <div className="cfilter st-filter">
+      <span className="lab">지원가능성</span>
+      <div className="chips">
+        <Link href={link({ st: undefined, open: undefined })} className={on.size ? undefined : "on"} aria-current={on.size ? undefined : "true"} scroll={false}>
+          전체
+        </Link>
+        {STATUS_KEYS.map((k) => (
+          <Link key={k} href={link({ st: toggleStatus(cur.st, k), open: undefined })} className={on.has(k) ? "on" : undefined} aria-pressed={on.has(k)} scroll={false}>
+            {STATUS_LABEL[k]}
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
 

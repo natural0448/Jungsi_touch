@@ -58,11 +58,18 @@
 .et .tray .names{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
 .et .tray .names span{padding:3px 9px;border-radius:12px;background:var(--sub);font-size:12px;color:var(--ink-2)}
 .et .tray .names .none{background:none;color:var(--muted);padding:3px 0}
-/* 휴대폰: 이름 목록은 접고 개수와 리포트 버튼만 한 줄로 */
+/* 군별 담은 수(2026-11-22): 가군 2/4 · 나군 1/4 · 다군 0/4 · 전체 3/12. 다 찬 군은 진하게 */
+.et .tray .quota{display:flex;gap:4px 10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.et .tray .quota span+span::before{content:"·";margin-right:10px;color:var(--muted)}
+.et .tray .quota b{color:var(--ink);font-weight:800}
+.et .tray .quota .full,.et .tray .quota .full b{color:var(--touch)}
+/* 휴대폰: 이름 목록은 접고 개수·군별 수와 리포트 버튼만 */
 @media (max-width:860px){
   .et .tray .in{flex-wrap:nowrap;padding:10px 12px}
   .et .tray .names,.et .tray .in .btn:not(.p){display:none}
-  .et .tray .t{flex:1}
+  .et .tray .t{flex:none}
+  .et .tray .quota{flex:1;min-width:0;gap:2px 6px}
+  .et .tray .quota span+span::before{margin-right:6px}
 }
 
 /* 추천·선택 집계 한 줄 (REQ-10) */

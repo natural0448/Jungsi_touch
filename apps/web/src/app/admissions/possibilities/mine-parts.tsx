@@ -4,7 +4,7 @@ import { StreamTray } from "@/components/shortlist-tray-stream";
 import type { Caller, JungsiSource } from "@/lib/api";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
 import { pickedIds } from "@/lib/report-ops";
-import { Detail } from "./parts";
+import { ConditionsBlock, Detail } from "./parts";
 
 /*
   4페이지에서 '내 리포트'가 있어야 그릴 수 있는 칸들.
@@ -54,6 +54,11 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
 /** 펼친 카드의 환산·누백·판단 카드 */
 export function MineDetail({ report, o }: { report: ReportDto | null; o: OfferingDto }) {
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} />;
+}
+
+/** 펼친 상세 맨 위 줄 안의 지원 조건 묶음(2026-11-22) */
+export function MineConds({ report, o }: { report: ReportDto | null; o: OfferingDto }) {
+  return <ConditionsBlock a={cellOf(report, o.offering_id)} subjects={report?.overall?.subjects} />;
 }
 
 /** 핵심 지원 학교 띠. 개수와 이 목록에 있는 이름은 바로, 목록에 없는 곳의 이름만 뒤이어(shortlist-tray-stream.tsx) */

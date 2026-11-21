@@ -1,6 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, YEAR } from "../src/app/admissions/possibilities/query.ts";
+import { registerHooks } from "node:module";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+// query.ts 가 지원가능성 필터(lib/status-filter, 2026-11-22)를 확장자 없이 읽는다
+registerHooks({ resolve(specifier, context, next) {
+  if (specifier.endsWith(".json")) return { ...next(specifier, context), importAttributes: { type: "json" } };
+  if (specifier.startsWith(".") && context.parentURL?.startsWith("file:") && !/\.[cm]?[jt]sx?$|\.json$/.test(specifier)) {
+    const url = new URL(`${specifier}.ts`, context.parentURL);
+    if (existsSync(fileURLToPath(url))) return next(url.href, context);
+  }
+  return next(specifier, context);
+} });
+const { hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, YEAR } = await import("../src/app/admissions/possibilities/query.ts");
 
 const favorable = { path: "/admissions/favorable", catalogView: true };
 

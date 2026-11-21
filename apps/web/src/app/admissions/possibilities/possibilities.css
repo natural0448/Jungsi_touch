@@ -56,6 +56,11 @@
 .et .ps .recruit b{display:block;font-size:16px;font-weight:900;color:var(--ink)}
 .et .ps .recruit .wait{font-size:13px;font-weight:700;color:var(--reach)}
 .et .ps .recruit a{margin-left:auto;color:var(--brand);font-weight:700}
+/* 지원 조건 묶음(2026-11-22): 모집 인원과 '대학 발표 입시결과 보기' 사이 빈 자리. 좁은 화면에서는 그 줄 아래로 */
+.et .ps .recruit .rc-conds{flex:1 1 320px;min-width:0;align-self:center;font-size:13px}
+.et .ps .recruit .rc-conds .conds{margin:0 0 4px}
+.et .ps .recruit .rc-conds b{display:inline;font-size:13px}
+.et .ps .recruit .rc-conds .rc-note{margin:0;font-size:13px;color:var(--muted)}
 .et .ps .four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 /* 환산·누백·판단 준비 상태 띠 */
 .et .ps .strip{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:0;list-style:none}
@@ -173,6 +178,7 @@
   .et .ps .search{grid-template-columns:1fr}
   .et .ps .univ .scale{margin-left:0;width:100%}
   .et .ps .recruit a{margin-left:0}
+  .et .ps .recruit .rc-conds{order:9;flex-basis:100%}
 }
 
 /* 펼치기 단추(item-shell.tsx): 예전 링크와 같은 모양으로 — 기본 단추 꾸밈을 지운다 */
@@ -186,11 +192,11 @@
 .et .sr-line.hold{color:var(--muted)}
 .et .sr-line .sr-elig{display:block;color:var(--muted);font-size:12px}
 /* 지원 자격 조건(2026-11-15): 요강 조건 줄과 내 입력 비교 표시 */
-.et .ps .card .conds{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:4px;font-size:13px;color:var(--ink-2);line-height:1.5}
-.et .ps .card .conds b{color:var(--deep);font-weight:800;margin-right:4px}
-.et .ps .card .conds .cm{display:inline-block;margin-left:6px;padding:0 6px;border-radius:var(--r-sm);font-size:12px;font-weight:700;border:1px solid var(--line)}
-.et .ps .card .conds .cm.match{color:var(--safe);border-color:var(--safe)}
-.et .ps .card .conds .cm.differ{color:var(--reach);border-color:var(--reach)}
+.et .ps .conds{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:4px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.et .ps .conds b{color:var(--deep);font-weight:800;margin-right:4px}
+.et .ps .conds .cm{display:inline-block;margin-left:6px;padding:0 6px;border-radius:var(--r-sm);font-size:12px;font-weight:700;border:1px solid var(--line)}
+.et .ps .conds .cm.match{color:var(--safe);border-color:var(--safe)}
+.et .ps .conds .cm.differ{color:var(--reach);border-color:var(--reach)}
 /* 연도별 근거(2026-11-15): 합격선과 내 누적 백분위 차이 */
 .et .years .m.gap.above{color:var(--safe);font-weight:700}
 .et .years .m.gap.below{color:var(--reach);font-weight:700}

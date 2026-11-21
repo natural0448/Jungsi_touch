@@ -12,7 +12,7 @@ export const CATALOG: OfferingDto[] = HISTORY_OFFERINGS.filter((o) => o.academic
 
 function syntheticBand(score: number, center: number, w: number): BandDto {
   const [code, label]: [BandDto["code"], string] =
-    score >= center + w * 1.6 ? ["stable", "안정"] : score >= center + w ? ["downward", "하향"] : score >= center ? ["target", "적정"] : score >= center - w ? ["aspirational", "소신"]
+    score >= center + w * 1.6 ? ["stable", "하향"] : score >= center + w ? ["downward", "안정"] : score >= center ? ["target", "적정"] : score >= center - w ? ["aspirational", "소신"]
     : score >= center - w * 2 ? ["upward", "상향"] : score >= center - w * 3 ? ["challenge", "도전"] : ["outside", "불가"];
   return { code, label, policy_version: "SYNTHETIC-relative-band" };
 }

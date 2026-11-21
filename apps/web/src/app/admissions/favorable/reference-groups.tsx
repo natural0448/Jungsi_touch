@@ -4,10 +4,10 @@ import type { ReferenceBandDto } from "@/lib/dto";
 import type { ReferenceAdvantage } from "@/lib/reference-advantage";
 import type { CutoffMargin, ReferenceUniversity } from "@/lib/reference-view";
 
-/** 참고 기준 7단계 배지(2026-11-21 p3_empty). 색은 불리한 끝 기준. 7단계가 없으면 합격선 위치 한 줄 */
+/** 참고 기준 7단계 배지(2026-11-21 p3_empty). 이름·색 모두 추정값 단계 하나(2026-11-22). 7단계가 없으면 합격선 위치 한 줄 */
 function BandOrMargin({ band, m }: { band?: ReferenceBandDto | null; m: CutoffMargin | null }) {
   if (band && BAND[band.code]) {
-    const tone = BAND[band.upper_code && BAND[band.upper_code] ? band.upper_code : band.code];
+    const tone = BAND[band.code];
     return <span className={`st ${tone.cls}`}>{referenceBandLabel(band)}</span>;
   }
   return <MarginText m={m} />;
@@ -42,7 +42,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
         <h2 id="ref-t">
           내 성적 분포상 지원에 유리한 대학 <span className="num">{universities.length}</span>
         </h2>
-        <span>대학 방식으로 계산한 내 위치(참고 누백)가 안정~상향에 드는 학과와, 판정 경계가 없으면 지난해 합격선(70%컷)에 닿는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다.</span>
+        <span>대학 방식으로 계산한 내 위치(참고 누백)가 하향~상향에 드는 학과와, 판정 경계가 없으면 지난해 합격선(70%컷)에 닿는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다.</span>
       </div>
       <div className="fv-ref-list">
         {universities.map((u) => (
@@ -85,7 +85,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
       </div>
       <p className="fv-ref-note">
         지난해 대학이 발표한 합격선(최종등록자 70%컷, 없으면 50%컷)을 전체 응시자 기준 위치로 옮긴 값과, 이 대학 방식으로 계산한 내 위치(참고 누백)를 견준 것입니다.
-        &lsquo;위&rsquo;일수록 지난해 기준으로 여유가 있다는 뜻이고, 내 위치가 범위면 불리한 끝으로 순서를 정했습니다. 합격 가능성 판정이 아니며 올해 모집인원·지원자에 따라 달라집니다.
+        &lsquo;위&rsquo;일수록 지난해 기준으로 여유가 있다는 뜻이고, 내 위치가 범위면 점수를 낸 응시자 기준 추정값으로 판정과 순서를 정했습니다. 합격 가능성 판정이 아니며 올해 모집인원·지원자에 따라 달라집니다.
         {(below > 0 || noCutoff > 0 || ineligible > 0 || outsideBand > 0) && <> {outsideBand > 0 && <>판정이 도전·불가인 {outsideBand}곳, </>}합격선보다 아래인 {below}곳과 합격선 자료가 없는 {noCutoff}곳{ineligible > 0 && <>, 지원 필수 과목 조건을 채우지 못한 {ineligible}곳</>}은 넣지 않았습니다. {p3Label}에서 하나씩 확인할 수 있습니다.</>}
       </p>
     </section>

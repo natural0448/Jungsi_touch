@@ -73,11 +73,15 @@ export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff
 
 /** 3번째 화면 자동 목록에 넣는 7단계(상향까지, 대표님 결정 2026-11-19). 서버 RECOMMENDED_BAND_CODES 와 같다 */
 export const LISTED_BANDS: readonly BandCode[] = ["stable", "downward", "target", "aspirational", "upward"];
-/** 목록 순서: 적정·소신 → 상향 → 하향 → 안정(서버 참고 후보 고르는 순서와 같다) */
+/** 목록 순서: 적정·소신 → 상향 → 안정 → 하향(화면 이름, 2026-11-22 이름 바꿈 반영. 서버 참고 후보 고르는 순서와 같다) */
 const BAND_ORDER: Record<BandCode, number> = { target: 0, aspirational: 1, upward: 2, downward: 3, stable: 4, challenge: 5, outside: 6 };
-/** 범위로 나온 누백은 불리한 끝(upper_code)으로 넣고 뺀다 */
-const worstBand = (b: ReferenceBandDto): BandCode => b.upper_code ?? b.code;
-const bandRank = (b: ReferenceBandDto | null | undefined) => (b ? BAND_ORDER[worstBand(b)] ?? 9 : 9);
+/**
+ * 범위로 나온 누백도 추정값(점수를 낸 응시자 기준 누백, estimated_upper_cumulative_percent_all_examinees — 범위의 유리한 끝)으로
+ * 정한 단계 하나로 넣고 뺀다(대표님 결정 2026-11-22, 전에는 불리한 끝 upper_code). 서버 reference_band.code 가 바로 그 값으로
+ * 정한 단계이고(school_reflected_projection.ts: code = classify(추정값), upper_code = classify(상한)), 목록·상세 배지도 같은 값을 쓴다
+ */
+export const estimateBand = (b: ReferenceBandDto): BandCode => b.code;
+const bandRank = (b: ReferenceBandDto | null | undefined) => (b ? BAND_ORDER[estimateBand(b)] ?? 9 : 9);
 
 const worstOf = (m: CutoffMargin | null) => (m ? m.worst : -Infinity);
 const byMargin = (a: ReferenceItem, b: ReferenceItem) => bandRank(a.band) - bandRank(b.band) || worstOf(b.margin) - worstOf(a.margin);
@@ -86,7 +90,7 @@ const bestBandOf = (items: ReferenceItem[]) => items.reduce<ReferenceBandDto | n
 
 /**
  * 참고 누백이 나온 학과 가운데 넣을 곳을 고른다. 빠진 곳은 숫자로 센다.
- * 1) 참고 기준 7단계(reference_band)가 붙은 곳: 불리한 끝이 상향까지면 넣고, 도전·불가면 뺀다(outsideBand).
+ * 1) 참고 기준 7단계(reference_band)가 붙은 곳: 추정값 단계(estimateBand)가 상향까지면 넣고, 도전·불가면 뺀다(outsideBand).
  * 2) 7단계가 없는 곳: 지난해 합격선(70%컷, 없으면 50%컷)에 닿는 곳(위·비슷)만(기존 규칙).
  */
 export function referencePool(groups: ReferenceUniversityGroupDto[], overall: OverallResultDto | null | undefined, analyses: Record<string, AssessmentDto> | null | undefined): ReferencePool {
@@ -99,7 +103,7 @@ export function referencePool(groups: ReferenceUniversityGroupDto[], overall: Ov
     const margin = cutoffMargin(a?.year_cutoffs, it.reference_percentile);
     const band = a?.reference_band ?? null;
     if (band) {
-      if (!LISTED_BANDS.includes(worstBand(band))) { outsideBand++; continue; }
+      if (!LISTED_BANDS.includes(estimateBand(band))) { outsideBand++; continue; }
       items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin, band });
       continue;
     }

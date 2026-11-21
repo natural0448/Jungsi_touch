@@ -1,5 +1,7 @@
 import type { Caller, JungsiSource, OfferingSearchQuery } from "@/lib/api";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
+// 상대 경로: 이 파일은 테스트(national-catalog-navigation)가 별칭 없이 바로 읽는다
+import { parseStatusFilter, type StatusKey } from "../../../lib/status-filter";
 
 export const GROUPS = ["가", "나", "다"];
 export const PATH = "/admissions/possibilities";
@@ -20,6 +22,7 @@ export interface Query {
   cursor?: string; // offerings.search 의 next_cursor. 서버가 정한 불투명한 값
   open?: string; // 펼친 offering_id
   fav?: boolean; // 즐겨찾기(별표)한 모집단위만 보기
+  st?: StatusKey[]; // 지원가능성 필터(2026-11-22). 고른 단계의 모집단위만 모아 보기
 }
 
 const one = (v: string | string[] | undefined, max = 40) => (Array.isArray(v) ? v[0] : v)?.trim().slice(0, max) || undefined;
@@ -35,6 +38,7 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): Q
     cursor: one(sp.cursor, 4096),
     open: one(sp.open, 128),
     fav: one(sp.fav) === "1" ? true : undefined,
+    st: parseStatusFilter(one(sp.st, 200)),
   };
 }
 
@@ -70,7 +74,7 @@ export function listKey(sp: Record<string, string | string[] | undefined>): stri
 /** 지금 조건에서 일부만 바꾼 주소. undefined 는 지운다. 검색 조건이 바뀌면 처음 쪽으로 */
 export function hrefWith(cur: Query, patch: Partial<Query>, destination: CatalogDestination = { path: PATH, catalogView: false }) {
   const next = { ...cur, ...patch };
-  if (!("cursor" in patch) && ("university_q" in patch || "department_q" in patch || "region" in patch || "group" in patch || "fav" in patch)) next.cursor = undefined;
+  if (!("cursor" in patch) && ("university_q" in patch || "department_q" in patch || "region" in patch || "group" in patch || "fav" in patch || "st" in patch)) next.cursor = undefined;
   const u = new URLSearchParams();
   if (destination.catalogView) u.set("view", "catalog");
   const names = { university_q: "university", department_q: "unit", region: "region", group: "group", cursor: "cursor", open: "open" } as const;
@@ -79,6 +83,7 @@ export function hrefWith(cur: Query, patch: Partial<Query>, destination: Catalog
     if (v) u.set(names[k], v);
   }
   if (next.fav) u.set("fav", "1");
+  if (next.st?.length) u.set("st", next.st.join(","));
   const s = u.toString();
   return s ? `${destination.path}?${s}` : destination.path;
 }

@@ -25,6 +25,7 @@ export function ItemShell({
   cells,
   mmeta,
   detail,
+  conds,
 }: {
   o: OfferingDto;
   a: Cell;
@@ -33,6 +34,8 @@ export function ItemShell({
   cells: ReactNode;
   mmeta: ReactNode;
   detail: ReactNode;
+  /** 지원 조건 묶음. 상세 맨 위 모집 정보 줄 안에 둔다(2026-11-22) */
+  conds?: ReactNode;
 }) {
   const [open, setOpen] = useState(initialOpen);
   const [extras, setExtras] = useState<Extras | null>(null); // null = 아직 받는 중
@@ -91,7 +94,7 @@ export function ItemShell({
           ) : (
             <>
               {/* 받지 못했으면 값이 없는 것과 같은 확정 표시(미공개)로 그린다. 문의 번호·'불러오지 못했습니다'는 보이지 않는다 */}
-              <Recruit o={o} rec={extras.ok ? extras.rec : null} />
+              <Recruit o={o} rec={extras.ok ? extras.rec : null} conds={conds} />
               {extras.ok && <Published f={extras.pub} same={sameRelease(a, extras.pub)} />}
               <P1YearsContext.Provider value={p1Fast ? p1Fast : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
             </>

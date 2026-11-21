@@ -186,6 +186,22 @@ const DECISION_CONFIRM =
 const DECISION_CONDITIONS =
   "이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 그동안은 요강에 적힌 지원 조건과 내 입력을 견줘 보세요. 맞으면 왼쪽 두 점수와 아래 연도별 근거로 지난 합격선과 비교해 판단하고, 졸업 연도 등 그 밖의 자격은 모집요강에서 확인하세요.";
 
+/**
+ * 펼친 상세 맨 위 줄(2027 모집군·모집 인원 … 대학 발표 입시결과 보기) 사이에 두는 지원 조건 묶음(대표님 요청 2026-11-22).
+ * 전에는 지원가능성 카드 안에 있어 카드가 세로로 길었다. 필수 응시·수학·탐구 줄과 '내 입력과 맞음/다름', 모집요강 확인 안내를 함께 둔다.
+ * 좁은 화면에서는 CSS 로 그 줄 아래로 내려간다(possibilities.css .rc-conds)
+ */
+export function ConditionsBlock({ a, subjects }: { a: Cell; subjects?: SubjectResultDto[] }) {
+  if (!a || a === "need") return null;
+  const show = a.eligibility_status === "needs_confirmation" || a.reason_code === "designated_subject_not_taken";
+  return (
+    <div className="rc-conds" aria-label="지원 조건">
+      {show && <Conditions a={a} subjects={subjects} />}
+      <p className="rc-note">지원 자격(필수 응시 영역·지정 과목·졸업 연도 등)은 모집요강에서 확인하세요.</p>
+    </div>
+  );
+}
+
 function Conditions({ a, subjects }: { a: AssessmentDto; subjects?: SubjectResultDto[] }) {
   const lines = conditionLines(a, subjects);
   if (!lines.length) return null;
@@ -234,8 +250,7 @@ function DecisionCard({ a, subjects, examType, overall }: { a: AssessmentDto; su
           ) : (
             <p>{POSITION_NONE_DESC}</p>
           )}
-          {a.eligibility_status === "needs_confirmation" && <Conditions a={a} subjects={subjects} />}
-          <span className="note">지원 자격(필수 응시 영역·지정 과목·졸업 연도 등)은 모집요강에서 확인하세요.</span>
+          {/* 지원 조건 줄·모집요강 확인 안내는 상세 맨 위 줄로 옮겼다(ConditionsBlock, 2026-11-22) */}
         </>
       ) : null}
       {pn ? null : <DecisionBody a={a} subjects={subjects} d={d} />}
@@ -250,32 +265,18 @@ function DecisionBody({ a, subjects, d }: { a: AssessmentDto; subjects?: Subject
         <>
           <p>
             이 대학 방식으로 본 내 위치(누적 백분위)를 올해 합격권과 견준 결과입니다. {BAND[referenceBandOf(a)!.code].desc}
-            {referenceBandOf(a)!.upper_code && referenceBandOf(a)!.upper_code !== referenceBandOf(a)!.code ? " 내 위치가 범위로 나와 판정도 범위로 적었습니다." : ""}
+            {/* 범위로 나온 누백도 판정은 추정값 단계 하나로 적고, 범위는 누적 백분위 칸에만 둔다(2026-11-22) */}
+            {referenceBandOf(a)!.upper_code && referenceBandOf(a)!.upper_code !== referenceBandOf(a)!.code ? " 내 위치가 범위로 나와, 점수를 낸 응시자 기준 추정값으로 판정했습니다. 범위는 누적 백분위 칸에서 확인하세요." : ""}
           </p>
           <span className="note">합격 확률이 아니니, 아래 연도별 근거와 함께 보고 판단하세요. 추천 목록에는 쓰이지 않습니다.</span>
         </>
       )}
-      {referenceBandOf(a) ? (
-        // 판정이 나온 곳에는 '판정 자료가 아직 준비되지 않았다'는 보류 문장을 붙이지 않는다(2026-11-21)
-        <>
-          {a.eligibility_status === "needs_confirmation" && <Conditions a={a} subjects={subjects} />}
-          <p>지원 자격(필수 응시 영역·지정 과목·졸업 연도 등)은 모집요강에서 확인하세요.</p>
-        </>
-      ) : a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
-        conditionLines(a, subjects).length ? (
-          <>
-            <Conditions a={a} subjects={subjects} />
-            <p>{DECISION_CONDITIONS}</p>
-          </>
-        ) : (
-          <p>{DECISION_CONFIRM}</p>
-        )
+      {/* 지원 조건 줄·모집요강 확인 안내는 상세 맨 위 줄로 옮겼다(ConditionsBlock, 2026-11-22) */}
+      {referenceBandOf(a) ? null : a.status === "pending" && a.eligibility_status === "needs_confirmation" ? (
+        conditionLines(a, subjects).length ? <p>{DECISION_CONDITIONS}</p> : <p>{DECISION_CONFIRM}</p>
       ) : a.status !== "ready" ? (
         a.reason_code === "designated_subject_not_taken" ? (
-          <>
-            <p>{reasonText(a.reason_code)} 아래에서 &lsquo;내 입력과 다름&rsquo;으로 표시된 조건을 확인하세요.</p>
-            <Conditions a={a} subjects={subjects} />
-          </>
+          <p>{reasonText(a.reason_code)} 위의 지원 조건에서 &lsquo;내 입력과 다름&rsquo;으로 표시된 조건을 확인하세요.</p>
         ) : (
           <p>{reasonText(decisionReasonCode(a))}{a.status === "ineligible" ? " 지원 조건을 충족하지 않으면 점수 비교를 하지 않습니다." : ""}</p>
         )

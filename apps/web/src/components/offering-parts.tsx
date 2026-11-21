@@ -18,8 +18,10 @@ export const CATEGORY: Record<Category, { cls: string; label: string; desc: stri
 
 /** 7단계 판정(assessment.band). 예상 합격권 폭의 15%·30% 를 경계로 가른다. 색은 기존 세 묶음(여유·핵심·도전)을 그대로 쓴다 */
 export const BAND: Record<BandCode, { cls: string; label: string; desc: string }> = {
-  stable: { cls: "safe", label: "안정", desc: "예상 합격권보다 충분히 앞선 위치입니다. 그래도 합격이 보장되는 것은 아닙니다." },
-  downward: { cls: "safe", label: "하향", desc: "예상 합격권보다 조금 앞선 위치입니다." },
+  // 이름 순서 '하향 → 안정 → 적정 → 소신 → 상향 → 도전 → 불가'(대표님 결정 2026-11-22, 하향이 가장 여유).
+  // 서버 단계 값은 그대로 두고 화면 이름만 바꾼다: 서버 stable(경계의 유리한 끝보다 앞) = '하향', 서버 downward(첫 15% 구간) = '안정'
+  stable: { cls: "safe", label: "하향", desc: "예상 합격권보다 충분히 앞선 위치입니다. 그래도 합격이 보장되는 것은 아닙니다." },
+  downward: { cls: "safe", label: "안정", desc: "예상 합격권보다 조금 앞선 위치입니다." },
   target: { cls: "core", label: "적정", desc: "예상 합격권 안에서 앞쪽 절반에 드는 위치입니다." },
   aspirational: { cls: "core", label: "소신", desc: "예상 합격권 안에서 뒤쪽 절반에 드는 위치입니다." },
   upward: { cls: "reach", label: "상향", desc: "예상 합격권에서 조금 벗어난 위치입니다." },
@@ -84,15 +86,18 @@ export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFER
 
 /** 참고 기준 판정을 보일지. 정식 판정이 난 곳(ready)·자격 미충족에는 보이지 않는다 */
 export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.status !== "ineligible" && a.reference_band && BAND[a.reference_band.code] ? a.reference_band : null);
-/** 참고 기준 판정의 이름. 누백이 범위라 양끝의 판정이 다르면 '적정~도전'처럼 함께 적는다 */
-export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => (r.upper_code && BAND[r.upper_code] && r.upper_code !== r.code ? `${BAND[r.code].label}~${BAND[r.upper_code].label}` : BAND[r.code].label);
+/**
+ * 참고 기준 판정의 이름. 누백이 범위로 나와도 배지는 한 단계만 적는다 — 추정값(점수를 낸 응시자 기준 누백, 범위의 유리한 끝)으로
+ * 정한 단계 = 서버 reference_band.code(대표님 결정 2026-11-22, 전에는 '적정~도전'처럼 양끝). 범위는 상세의 누적 백분위 칸에만 남긴다
+ */
+export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => BAND[r.code].label;
 
 export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: OverallResultDto | null }) {
   const ref = referenceBandOf(a);
   if (ref) {
-    // 색은 불리한 끝 기준(더 조심스러운 쪽). '참고'·'추정 참고' 꼬리표는 달지 않는다(대표님 결정 2026-11-20:
+    // 이름·색 모두 추정값 단계 하나(2026-11-22). '참고'·'추정 참고' 꼬리표는 달지 않는다(대표님 결정 2026-11-20:
     // 우리가 도출한 값이고, 이를 보고 지원할지는 학생·학부모가 정한다)
-    const tone = BAND[ref.upper_code && BAND[ref.upper_code] ? ref.upper_code : ref.code];
+    const tone = BAND[ref.code];
     return <span className={`st ${tone.cls}`} title="지원 자격은 모집요강에서 확인하세요">{referenceBandLabel(ref)}</span>;
   }
   // 판정 경계가 없는 곳의 종료 표시(대표님 결정 2026-11-20): 지난해 합격선 대비 위치, 또는 판정 근거 부족
