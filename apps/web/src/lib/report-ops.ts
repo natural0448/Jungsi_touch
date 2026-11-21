@@ -1,6 +1,6 @@
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
-import type { AssessmentDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
+import type { AssessmentDto, CandidatesDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId } from "@/lib/report-ref";
 
 /*
@@ -385,40 +385,111 @@ export async function settleAnalyses(src: JungsiSource, caller: Caller, report: 
   return current;
 }
 
-/** 후보가 없으면 만들고, 옛 자료판 후보면 다시 확인한 리포트를 돌려준다 */
-export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto): Promise<ReportDto> {
+/*
+  3페이지를 열 때의 후보(candidates.build) — 서버 dep_r17(2026-11-21, 문서 C:\j\w\p3_thresh\SCREEN_API_r17.md).
+  - 참고 문턱 목록(reference_university_groups·reference_threshold_summary)은 리포트에 저장되지 않고 report.read 에도 없다.
+    candidates.build 응답에만 실린다. 그래서 3페이지를 열 때마다 candidates.build 를 한 번 부르고(매번 새 요청 키 — 같은 키면
+    서버가 목록 없는 저장본을 되돌려준다), 그 응답의 참고 목록으로 그린다. report.read 결과로 덮어쓰지 않는다.
+  - 기본 목록·와일드카드·분석·담기·지원 요건 표시는 다시 읽은 리포트(report.read, 화면 서버 보정 포함)를 쓴다. 응답과 값이 같다.
+  - 409 revision_conflict 면 report.read 로 판을 받아 한 번 더. 429 는 live.ts 가 조용히 기다렸다 다시 보낸다.
+  - complete:false(서버가 미뤘거나 크기 한도로 뒤를 뺌)여도 따로 알리지 않고 받은 만큼 그린다. 자동으로 다시 부르지 않는다.
+  - 서버 액션(담기·계열 펼침 계산) 뒤 같은 화면을 다시 그릴 때는 다시 부르지 않고, 이 화면 서버가 방금 받은 목록을 다시 쓴다
+    (한 번 열 때 candidates.build 한 번). 목록은 Worker 메모리에 리포트별로 15분만 둔다.
+  - dep_r13(목록이 리포트에 저장되던 예전 방식)과도 맞는다: 다시 읽은 리포트에 이미 참고 목록이 있으면 그것을 그대로 쓴다.
+*/
+type ReferenceLists = Pick<CandidatesDto, "reference_university_groups" | "reference_threshold_summary">;
+const REFERENCE_TTL_MS = 15 * 60_000;
+const REFERENCE_MAX = 300;
+const referenceMemo = new Map<string, { lists: ReferenceLists; at: number }>();
+const memoKey = (r: ReportDto) => JSON.stringify([r.report_id, r.profile_id]);
+
+function rememberReference(r: ReportDto, lists: ReferenceLists) {
+  const k = memoKey(r);
+  referenceMemo.delete(k);
+  referenceMemo.set(k, { lists, at: Date.now() });
+  while (referenceMemo.size > REFERENCE_MAX) referenceMemo.delete(referenceMemo.keys().next().value as string);
+}
+function recallReference(r: ReportDto): ReferenceLists | null {
+  const k = memoKey(r);
+  const hit = referenceMemo.get(k);
+  if (!hit) return null;
+  if (Date.now() - hit.at > REFERENCE_TTL_MS) {
+    referenceMemo.delete(k);
+    return null;
+  }
+  return hit.lists;
+}
+
+/** 응답 후보에서 참고 목록만 꺼낸다. 목록이 없으면 null */
+function referenceListsOf(c: CandidatesDto | null | undefined): ReferenceLists | null {
+  const groups = c?.reference_university_groups;
+  if (!Array.isArray(groups) || groups.length === 0) return null;
+  return { reference_university_groups: groups, reference_threshold_summary: c?.reference_threshold_summary ?? null };
+}
+
+/** 리포트에 참고 목록을 붙인다. 리포트에 이미 목록이 있으면(예전 방식) 그대로 둔다. 후보가 없으면 응답 후보를 쓴다 */
+function withReference(base: ReportDto, lists: ReferenceLists | null, fallback?: CandidatesDto | null): ReportDto {
+  const c = base.candidates ?? fallback ?? null;
+  if (!c) return base;
+  if (!lists || referenceListsOf(c)) return c === base.candidates ? base : { ...base, candidates: c };
+  return { ...base, candidates: { ...c, ...lists } };
+}
+
+const freshKey = () => `cbo-${crypto.randomUUID()}`;
+
+/**
+ * 3페이지를 열 때 후보를 만든다(위 설명). reuse: 서버 액션 뒤 다시 그리기 — 방금 받은 목록이 있으면 candidates.build 를 부르지 않는다.
+ * 어떤 실패에도 받은 리포트로 그린다(화면 전체를 깨지 않는다).
+ */
+export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean } = {}): Promise<ReportDto> {
+  if (opts.reuse) {
+    const lists = recallReference(report);
+    if (lists && report.candidates) {
+      logSettle("candidates", { sent: false, reused: true });
+      return withReference(report, lists);
+    }
+  }
   let current = report;
-  if (!current.candidates) {
-    const base = current;
-    current = await settleStep(src, caller, base, () => ensureCandidates(src, caller, base));
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let res: Awaited<ReturnType<JungsiSource["buildCandidates"]>>;
+    try {
+      res = await src.buildCandidates(caller, current.report_id, current.report_version, freshKey());
+    } catch (e) {
+      if (!(e instanceof ConnectionError || e instanceof AccessDenied)) logSettleError("candidates-build", e);
+      // 응답만 503 으로 끊겼으면 저장됐을 수 있어 다시 읽는다(참고 목록은 받지 못했으니 기본 목록만)
+      if (e instanceof ConnectionError && e.kind === "unavailable") return (await rereadOr(src, caller, current)) ?? current;
+      return current;
+    }
+    if (res.ok) {
+      const built = res.value;
+      const lists = referenceListsOf(built.candidates);
+      if (lists) rememberReference(built, lists);
+      const read = await rereadOr(src, caller, built);
+      const out = withReference(read ?? built, lists, built.candidates);
+      const sum = lists?.reference_threshold_summary;
+      logSettle("candidates", { sent: true, attempt, rows: (lists?.reference_university_groups ?? []).reduce((n, g) => n + (g?.offerings?.length ?? 0), 0), complete: sum ? sum.complete !== false : true });
+      return out;
+    }
+    if (res.code !== "revision_conflict" || attempt === 1) {
+      logSettle("candidates", { sent: true, failed: true });
+      return current;
+    }
+    const fresh = await rereadOr(src, caller, current);
+    if (!fresh) return current;
+    current = fresh;
   }
-  const c = current.candidates;
-  // 서버 표식(candidates_stale)이 있거나, 후보가 비어 있는 동안(판정이 켜진 대학이 없던 때 만든 후보 — 추천·와일드카드 0, 또는 보류)
-  // 화면을 열 때 한 번 다시 확인한다. 11-21 운영: 표식 없이 옛 후보(참고 목록 2곳)가 그대로 남았다.
-  // 같은 리포트 판에서는 한 번만(alreadyRechecked), 요청 키도 판마다 같아 서버가 두 번 계산하지 않는다
-  const emptyOrPending = !!c && (c.status === "pending" || ((c.basic_university_groups ?? []).length === 0 && (c.wildcards ?? []).length === 0));
-  // 서버 문턱 판정(dep_r15)이 이번 요청에서 일부를 미뤘으면(reference_threshold_summary.complete=false, deferred>0)
-  // 고객에게 따로 알리지 않고 다음에 열 때 한 번 더 보내 이어 채운다. 같은 판에서 최대 2번(무한 반복 금지)
-  const sum = c?.reference_threshold_summary;
-  const incomplete = !!sum && sum.complete === false && (sum.deferred ?? 0) > 0;
-  const stale = !!c && current.candidates_stale === true;
-  const want = !!c && (stale || emptyOrPending || incomplete);
-  // 서버 표식(stale)은 리포트 판마다 한 번. 표식 없이 화면이 판단한 경우(비었음·미룸)는 판과 상관없이 6시간에 한 번(미룸이면 두 번)만 —
-  // 계열을 펼쳐 학과를 계산하면(university.analyze) 리포트 판이 올라가는데, 그때마다 후보를 다시 만들지 않게 한다
-  const kind = stale ? "candidates" : "candidates-auto";
-  const tries = recheckTries(kind, current, "candidates", !stale);
-  const skip = want && tries >= (!stale && incomplete ? 2 : 1);
-  if (want && !skip) {
-    const base = current;
-    // 두 번째 요청은 요청 키를 바꿔야 서버가 처음 응답을 되돌려주지 않고 이어서 계산한다
-    const intent = await stableIntent(base, tries === 0 ? kind : `${kind}#${tries + 1}`);
-    current = await settleStep(src, caller, base, () => refreshCandidates(src, caller, base, intent));
-    markRechecked(kind, base, current, "candidates", !stale);
-  }
-  logSettle("candidates", { stale: report.candidates_stale === true, empty: emptyOrPending, incomplete, deferred: sum?.deferred ?? 0, sent: want && !skip, skipped: skip, changed: current !== report, after_stale: current.candidates_stale === true });
   return current;
 }
 
+/** 리포트를 다시 읽는다. 실패하면 null(화면은 가진 리포트로 그린다) */
+async function rereadOr(src: JungsiSource, caller: Caller, r: ReportDto): Promise<ReportDto | null> {
+  try {
+    return await src.readReport(caller, r.report_id);
+  } catch (e) {
+    if (!(e instanceof ConnectionError || e instanceof AccessDenied)) logSettleError("candidates-reread", e);
+    return null;
+  }
+}
 export interface PickedItem {
   offering: OfferingDto | null; // 카탈로그에서 빠졌으면 null
   offering_id: string;

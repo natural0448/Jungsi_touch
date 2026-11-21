@@ -1,6 +1,7 @@
 import { myFavorites } from "@/lib/favorites";
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 import Link from "@/components/link";
 import { ArrowRightIcon } from "@/components/icons";
@@ -72,9 +73,10 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   try {
     // 입력 상태와 지난번 현재 리포트를 동시에 읽는다(2026-11-10 임시 단축, report-ops 참고)
     const mine = await loadMineEager(src, caller);
-    // 후보가 아직 없으면 만들고, 옛 자료판 후보면 다시 확인한 뒤 한 번에 그린다. 그동안은 책 넘김 대기 화면이다
-    // (2026-11-21 대표님 지적: '아직 찾지 않았습니다' 버튼·'다시 계산하고 있습니다' 띠 같은 중간 상태를 고객에게 보이지 않는다)
-    state = mine ? { kind: "ready", report: await settleCandidates(src, caller, mine) } : { kind: "none" };
+    // 열 때마다 후보(candidates.build)를 한 번 만들고 그 응답의 참고 목록으로 그린다(dep_r17, report-ops settleCandidates).
+    // 그동안은 책 넘김 대기 화면이다. 서버 액션(담기·계열 펼침 계산) 뒤 다시 그릴 때는 방금 받은 목록을 다시 쓴다(한 번 열 때 한 번)
+    const actionRender = (await headers()).has("next-action");
+    state = mine ? { kind: "ready", report: await settleCandidates(src, caller, mine, { reuse: actionRender }) } : { kind: "none" };
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
