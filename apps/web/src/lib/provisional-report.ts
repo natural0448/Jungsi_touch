@@ -75,6 +75,43 @@ export function spanText(r: { low: number; high: number } | null | undefined): s
 /** 표준점수 추정 범위 'a~b'(낮음~높음). 가운데 값은 따로 적는다 */
 export const tripleText = (t: ProvisionalTripleDto | null | undefined) => spanText(t ? { low: t.low, high: t.high } : null);
 
+/**
+ * 가채점 과목 한 칸의 보이는 방식(대표님 결정 2026-11-22).
+ * - central: 서버가 가운데 표준점수에 대응하는 백분위(percentile_at_central)를 준 과목. '표준점수 121 · 백분위 83'처럼
+ *   한 값씩 보이고, 낮음~높음 범위는 작은 보조 줄로만 남긴다.
+ * - range: 그 값이 없거나(옛 리포트·서버 배포 전) null·잘못된 값이면 지금처럼 범위로 보인다.
+ * - none: 이 원점수에 표준점수 추정이 없다(추정 없음).
+ * 화면은 값을 다시 계산하지 않는다. 등급은 이 결정 범위 밖이라 늘 범위로 둔다.
+ */
+export type ProvisionalSubjectView =
+  | { mode: "central"; standard: number; percentile: number; standardRange: string | null; percentileRange: string | null }
+  | { mode: "range"; standardRange: string; central: number | null; percentileRange: string | null }
+  | { mode: "none" };
+
+type ProvisionalSubjectLike = {
+  standard_score_range?: ProvisionalTripleDto | null;
+  percentile_range?: { low: number; high: number } | null;
+  percentile_at_central?: number | null;
+};
+
+/** 서버 percentile_at_central 이 쓸 수 있는 값(0~100 정수)인가. 키 없음·null·그 밖은 없음으로 본다 */
+export function centralPercentile(s: ProvisionalSubjectLike | null | undefined): number | null {
+  const v = s?.percentile_at_central;
+  return typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 100 ? v : null;
+}
+
+export function provisionalSubjectView(s: ProvisionalSubjectLike | null | undefined): ProvisionalSubjectView {
+  const t = s?.standard_score_range;
+  const stdRange = tripleText(t);
+  if (!t || stdRange === null) return { mode: "none" };
+  const pr = spanText(s?.percentile_range);
+  const p = centralPercentile(s);
+  const c = Number.isFinite(t.central) ? t.central : null;
+  if (p !== null && c !== null)
+    return { mode: "central", standard: c, percentile: p, standardRange: t.low !== t.high ? stdRange : null, percentileRange: pr && pr !== String(p) ? pr : null };
+  return { mode: "range", standardRange: stdRange, central: t.low !== t.high ? c : null, percentileRange: pr };
+}
+
 /** 서버의 0.01% 문자열을 그대로 두 자리로. 숫자가 아니면 null */
 function cent(v: string | null | undefined): string | null {
   if (v === null || v === undefined || String(v).trim() === "") return null;

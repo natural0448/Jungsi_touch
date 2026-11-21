@@ -163,6 +163,11 @@ export interface SubjectResultDto {
   /** 표준점수 추정 범위(낮음·중앙·높음). null 이면 이 원점수의 추정이 없다(provisional_conversion_unavailable) */
   standard_score_range?: ProvisionalTripleDto | null;
   percentile_range?: { low: number; high: number } | null;
+  /**
+   * 가운데 표준점수(standard_score_range.central)를 과목별 '표준점수→백분위' 대응표로 바꾼 값(정수 0~100, dep_r26, 2026-11-22).
+   * 옛 리포트·서버 배포 전에는 키가 없을 수 있다. 없거나 null 이면 화면은 percentile_range 범위로 보인다
+   */
+  percentile_at_central?: number | null;
   grade_range?: { low: number; high: number } | null;
 }
 

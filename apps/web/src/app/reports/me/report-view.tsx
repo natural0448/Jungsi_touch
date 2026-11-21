@@ -5,7 +5,7 @@ import { groupPicked, PICK_GROUP_LIMIT } from "@/lib/picked-view";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import { pctText } from "@/lib/format";
-import { provisionalReason, spanText, topRangeText, tripleText } from "@/lib/provisional-report";
+import { provisionalReason, provisionalSubjectView, spanText, topRangeText, tripleText } from "@/lib/provisional-report";
 import type { PickedItem } from "@/lib/shortlist";
 
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
@@ -157,12 +157,23 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
   // 이 원점수에 추정이 없는 칸은 '추정 없음'으로 확정 표시한다(계산 중이 아니다)
   const none = <span className="rs-na">추정 없음</span>;
   const raw = (s?: (typeof a.subjects)[number]) => (typeof s?.raw_score === "number" ? <b className="num">{s.raw_score}</b> : na);
-  const std = (s?: (typeof a.subjects)[number]) => {
-    const t = s?.standard_score_range;
-    return t ? <><b className="num">{tripleText(t)}</b>{t.low !== t.high && <small className="rs-mid"> 가운데 {t.central}</small>}</> : none;
-  };
   const span = (r: { low: number; high: number } | null | undefined, unit = "") => (spanText(r) ? <b className="num">{spanText(r)}{unit}</b> : none);
-  const pctl = (s?: (typeof a.subjects)[number]) => (s?.standard_score_range ? span(s.percentile_range) : none);
+  // 가운데 백분위(percentile_at_central)가 온 과목은 '표준점수 121 · 백분위 83' 한 값씩, 범위는 작은 보조 줄로만(2026-11-22 대표님 결정).
+  // 없거나 null 이면 지금처럼 범위로 보인다
+  const views = new Map([k, m, q1, q2].map((s) => [s, provisionalSubjectView(s)] as const));
+  const central = [...views.values()].some((v) => v.mode === "central");
+  const std = (s?: (typeof a.subjects)[number]) => {
+    const v = views.get(s) ?? provisionalSubjectView(s);
+    if (v.mode === "central") return <><b className="num">{v.standard}</b>{v.standardRange && <small className="rs-range">범위 {v.standardRange}</small>}</>;
+    if (v.mode === "range") return <><b className="num">{v.standardRange}</b>{v.central !== null && <small className="rs-mid"> 가운데 {v.central}</small>}</>;
+    return none;
+  };
+  const pctl = (s?: (typeof a.subjects)[number]) => {
+    const v = views.get(s) ?? provisionalSubjectView(s);
+    if (v.mode === "central") return <><b className="num">{v.percentile}</b>{v.percentileRange && <small className="rs-range">범위 {v.percentileRange}</small>}</>;
+    if (v.mode === "range") return v.percentileRange ? <b className="num">{v.percentileRange}</b> : none;
+    return none;
+  };
   const grade = (s?: (typeof a.subjects)[number]) => span(s?.grade_range);
   return (
     <div className="rp-sheet" role="group" aria-label="가채점 과목별 예상 성적표">
@@ -208,7 +219,7 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{sl && typeof sl.raw_score === "number" ? <b className="num">{sl.raw_score}</b> : na}</td>
           </tr>
           <tr className="key">
-            <th scope="row">예상 표준점수</th>
+            <th scope="row">{central ? <>표준점수<small className="sf-rowsub">가채점 추정 · 가운데 값</small></> : "예상 표준점수"}</th>
             <td className="na">{na}</td>
             <td>{std(k)}</td>
             <td>{std(m)}</td>
@@ -217,8 +228,8 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{std(q2)}</td>
             <td className="na">{na}</td>
           </tr>
-          <tr>
-            <th scope="row">예상 백분위</th>
+          <tr className={central ? "key" : undefined}>
+            <th scope="row">{central ? <>백분위<small className="sf-rowsub">가채점 추정 · 가운데 표준점수 기준</small></> : "예상 백분위"}</th>
             <td className="na">{na}</td>
             <td>{pctl(k)}</td>
             <td>{pctl(m)}</td>
@@ -240,7 +251,9 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
         </tbody>
       </table>
       <p className="rp-sheet-note">
-        예상 표준점수·백분위·등급은 가채점 변환표로 추정한 범위입니다(낮음~높음). 성적표의 실제 값과 다를 수 있습니다.
+        {central
+          ? "표준점수는 가채점 변환표로 낮게·가운데·높게 추정한 값 중 가운데 값이고, 백분위는 그 가운데 표준점수에 대응하는 값입니다. 작은 글씨 '범위'는 낮음~높음이며, 등급은 예상 범위입니다. 모두 가채점 추정이라 성적표의 실제 값과 다를 수 있습니다."
+          : "예상 표준점수·백분위·등급은 가채점 변환표로 추정한 범위입니다(낮음~높음). 성적표의 실제 값과 다를 수 있습니다."}
         영어·한국사·제2외국어/한문은 절대평가라 원점수로 등급이 정해지며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.
       </p>
     </div>

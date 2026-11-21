@@ -169,9 +169,12 @@ export function computeProvisional(s: ProvisionalScoresInput): OverallAnalysisDt
   const row = (area: SubjectResultDto["area"], name: string, choice: string | null, raw: number, max: number, base: number, span: number, mid: number, spread: number): SubjectResultDto => {
     const st = conv(raw, max, base, span);
     const g = st ? grade(curve(st.central, mid, spread)) : null;
+    const pr = st ? pctl(st.central, mid, spread) : null;
+    // 서버 dep_r26 percentile_at_central 흉내: 가운데 표준점수의 백분위(정수, 범위 안). 추정 없는 행은 null
+    const pac = st && pr ? Math.min(pr.high, Math.max(pr.low, Math.round(100 - curve(st.central, mid, spread)))) : null;
     return {
       area, subject: name, choice, standard_score: null as unknown as number, grade: null, top_percent_exclusive: null, top_percent_inclusive: null, basis: "provisional_raw_conversion",
-      raw_score: raw, standard_score_range: st, percentile_range: st ? pctl(st.central, mid, spread) : null, grade_range: g ? { low: Math.max(1, g - 1), high: g } : null,
+      raw_score: raw, standard_score_range: st, percentile_range: pr, percentile_at_central: pac, grade_range: g ? { low: Math.max(1, g - 1), high: g } : null,
     };
   };
   const subjects = [
