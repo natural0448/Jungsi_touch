@@ -7,6 +7,7 @@ import { isProvisionalOverall, type OwnReportListDto, type ReportDto } from "@/l
 import { MOCK_EXAM, examTypeLabel } from "@/lib/exam";
 import { seoulDateTime } from "@/lib/format";
 import { readPicks } from "@/lib/shortlist";
+import { hasMockReports } from "@/lib/past-mock";
 import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
 
 /*
@@ -18,6 +19,15 @@ import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } f
 
 const PAGE = "/reports/me";
 export const pastHref = (reportId?: string) => (reportId ? `${PAGE}?past=1&report=${encodeURIComponent(reportId)}` : `${PAGE}?past=1`);
+
+/** 이 회원에게 9월 모의평가 리포트가 있는가(1개만 읽는다). 읽지 못하면 false — 링크를 숨기고 오류 화면은 보이지 않는다 */
+export async function hasPastMock(src: JungsiSource, caller: Caller): Promise<boolean> {
+  try {
+    return hasMockReports(await src.listOwnReports(caller, { exam_id: MOCK_EXAM.exam_id, limit: 1 }), MOCK_EXAM.exam_id);
+  } catch {
+    return false;
+  }
+}
 
 export async function PastRecords({ src, caller, reportId }: { src: JungsiSource; caller: Caller; reportId: string | null }) {
   let list: OwnReportListDto;

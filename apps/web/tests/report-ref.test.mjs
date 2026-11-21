@@ -9,9 +9,10 @@ const data = (code) => "data:text/javascript," + encodeURIComponent(code);
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/exam", data("export const EXAM={exam_id:'synthetic-exam'}")],
+  ["@/lib/score-validity", new URL("../src/lib/score-validity.ts", import.meta.url).href],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });
-const { currentReportId } = await import(refUrl.href);
+const { currentReportId, inaccurateSeen, screenReport } = await import(refUrl.href);
 
 const caller = { accessToken: "synthetic-port-only" };
 const src = (status) => {
@@ -40,4 +41,28 @@ test("no page or action remembers a report id in the browser", async () => {
     const text = await readFile(new URL(f, import.meta.url), "utf8");
     assert.doesNotMatch(text, /jt_report_id|cookies\(\)|getReportId|setReportId|\?pick=1|\?report=/, f);
   }
+});
+
+// 부정확 입력(2026-11-22 대표님 결정): 3·4페이지와 분석 버튼은 현재 리포트를 받지 못해 분석하지 않고, 화면은 안내를 고른다
+test("an inaccurate (rejected) last save opens no current report and is remembered for the page", async () => {
+  const c = { accessToken: "synthetic-inaccurate" };
+  assert.equal(await currentReportId(src({ stage: "provisional", last_attempt_outcome: "rejected", current_report_id: "OLD" }), c), null);
+  assert.equal(inaccurateSeen(c), true);
+  const ok = { accessToken: "synthetic-accurate" };
+  assert.equal(await currentReportId(src({ stage: "provisional", last_attempt_outcome: "accepted", current_report_id: "R" }), ok), "R");
+  assert.equal(inaccurateSeen(ok), false);
+  // 끝난 9월 모의평가 단계의 거절은 막지 않는다(지난 기록 그대로)
+  const mock = { accessToken: "synthetic-mock" };
+  assert.equal(await currentReportId(src({ stage: "mock", last_attempt_outcome: "rejected", current_report_id: "M" }), mock), "M");
+});
+
+test("a provisional report saved with an unattainable raw score is screened out", () => {
+  const c = { accessToken: "synthetic-screen" };
+  const report = { overall: { subjects: [{ area: "korean", raw_score: 99 }, { area: "math", raw_score: 84 }] } };
+  assert.equal(screenReport(c, report), null);
+  assert.equal(inaccurateSeen(c), true);
+  const fine = { overall: { subjects: [{ area: "korean", raw_score: 98 }, { area: "inquiry1", subject: "x", raw_score: 50 }] } };
+  const c2 = { accessToken: "synthetic-screen-ok" };
+  assert.equal(screenReport(c2, fine), fine);
+  assert.equal(inaccurateSeen(c2), false);
 });

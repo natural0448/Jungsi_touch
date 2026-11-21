@@ -10,7 +10,7 @@ const data = (code) => "data:text/javascript," + encodeURIComponent(code);
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied, ConnectionError} from ${JSON.stringify(classesUrl)};`)],
-  ["@/lib/report-ref", data("export async function currentReportId(){return null}")],
+  ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export async function currentReportId(){return null}")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });
 const { settleAnalyses, settleCandidates } = await import(opsUrl);

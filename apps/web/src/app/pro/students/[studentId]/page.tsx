@@ -12,6 +12,11 @@ import { EXAM, csatOpen, examTitle, examTypeLabel, proCsatEnabled, stageOf, type
 import { seoulDateTime } from "@/lib/format";
 import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess } from "@/lib/pro-access";
+import { studentHasMockReports } from "@/lib/past-mock";
+import { inaccurateText } from "@/lib/score-validity";
+import { MOCK_EXAM } from "@/lib/exam";
+
+const EXAM_MOCK_ID = () => MOCK_EXAM.exam_id;
 import { OverallCard, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../reports/me/report-view";
 import { ProvisionalForm } from "../../../reports/me/provisional-form";
 import { ScoreForm } from "../../../reports/me/score-form";
@@ -84,7 +89,9 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   // 전문가용 학생 가채점 입력: 서버가 원점수 pro.score.create 를 아는 배포 뒤(JUNGSI_PRO_CSAT_ENABLED=1)·전환 시각 뒤에만 연다
   const proCsat = proCsatEnabled() && csatOpen();
   // 수능 가채점 전환 뒤 9월 모의평가 리포트는 지난 기록(읽기 전용)
-  const pastOf = (r: ProStudentReportDto) => csatOpen() && stageOf(r.stage) === "mock";
+  // 9월 리포트가 있는 학생에게만 '지난 기록' 표시가 보인다(2026-11-22 대표님 요청)
+  const pastMock = csatOpen() && studentHasMockReports(reports, EXAM_MOCK_ID());
+  const pastOf = (r: ProStudentReportDto) => pastMock && stageOf(r.stage) === "mock";
   // 판 번호 대신 꼬리표(2026-10-28, 2026-11-04 사용자 결정): 서버 입력 상태의 current_report_id 리포트 중 가장 최근 판이 현재 성적이다.
   // 정정을 모두 썼으면 개인용 2페이지와 같은 '정정 입력 횟수 소진', 아니면 '현재 성적'(교사는 학생의 예전 판도 고르므로 남긴다). 판 번호는 열기·인쇄 주소에만 쓴다
   const curRev = Math.max(0, ...reports.filter((r) => r.report_id === status?.current_report_id).map((r) => r.revision_id));
@@ -123,7 +130,14 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
               <span>
                 최초 입력 남음 <b className="num">{status.initial_remaining}</b>회 · 정정(고객센터) 승인 남음 <b className="num">{Math.max(0, status.correction_granted - status.correction_used)}</b>회
               </span>
-              {status.last_rejection_code && <span className="warn">지난 입력이 정상 계산되지 않았습니다(문의 번호 {status.last_rejection_code}). 정정은 고객센터에 요청해 주세요.</span>}
+              {status.last_rejection_code && (
+                stage && stage !== "mock" ? (
+                  // 부정확 입력(2026-11-22 대표님 결정): 학생 이름으로 같은 문구. 정정은 고객센터 승인(전문가용)
+                  <span className="warn">{inaccurateText(student.display_name)}. 정정은 고객센터에 요청해 주세요. (문의 번호 {status.last_rejection_code})</span>
+                ) : (
+                  <span className="warn">지난 입력이 정상 계산되지 않았습니다(문의 번호 {status.last_rejection_code}). 정정은 고객센터에 요청해 주세요.</span>
+                )
+              )}
             </div>
           ) : (
             <p className="pro-note">{stage ? "이 학생의 입력 상태를 지금 확인할 수 없습니다. 입력을 열지 않았습니다." : "지금 입력 단계(모의평가·가채점·실채점)를 확인할 수 없어 입력을 열지 않았습니다. 잠시 뒤 다시 열어 주세요."}</p>

@@ -34,6 +34,21 @@ export function lastCorrectionDay(releaseOn: string): string {
   return d.toISOString().slice(0, 10).replace(/-/g, ".");
 }
 
+/**
+ * 가채점 원점수 정정 자동 승인(2026-11-22 대표님 결정): 사진·관리자 승인 없이 바로 다시 입력한다.
+ * 서버(dep_r24)가 저장 직전에 본인 명의로 정정권 1회를 남긴다. 화면은 이 조건일 때 정정 입력 양식을 바로 연다:
+ * 열린 가채점 단계 · 이용권 · 단계별 입력권 · 최초 입력을 썼고 · 정정 요청이 남았고 · 아직 정정권이 없고 · 성적표 배부 전.
+ */
+export function selfCorrectionOpen(
+  st: Pick<ScoreInputStatusDto, "stage" | "stage_state" | "paid_input_allowed" | "input_limit_mode" | "initial_remaining" | "correction_request_remaining" | "correction_granted" | "correction_used"> | null,
+  releaseOn: string | null,
+  now: Date = new Date(),
+): boolean {
+  if (!st || st.stage !== "provisional" || st.stage_state !== "open" || !st.paid_input_allowed || st.input_limit_mode !== "stage_rights") return false;
+  if (provisionalClosed(releaseOn, now)) return false;
+  return st.initial_remaining <= 0 && st.correction_request_remaining > 0 && st.correction_granted <= st.correction_used;
+}
+
 /** 지금 남은 입력이 승인받은 정정뿐인 가채점 단계인데 배부일이 지났다 → 입력을 열지 않는다 */
 export function correctionInputClosed(st: Pick<ScoreInputStatusDto, "stage" | "initial_remaining" | "correction_granted" | "correction_used"> | null, releaseOn: string | null, now: Date = new Date()): boolean {
   if (!st || st.stage !== "provisional" || !provisionalClosed(releaseOn, now)) return false;

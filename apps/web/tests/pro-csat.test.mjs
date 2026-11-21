@@ -17,6 +17,7 @@ const mocks = new Map([
   ["@/lib/pro-profile", new URL("../src/lib/pro-profile.ts", import.meta.url).href],
   ["@/lib/exam", new URL("../src/lib/exam.ts", import.meta.url).href],
   ["@/lib/provisional-report", new URL("../src/lib/provisional-report.ts", import.meta.url).href],
+  ["@/lib/score-validity", new URL("../src/lib/score-validity.ts", import.meta.url).href],
 ]);
 registerHooks({
   resolve(spec, ctx, next) {

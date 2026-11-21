@@ -4,10 +4,11 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { csatReleaseOn } from "@/lib/correction";
-import { correctionInputClosed } from "@/lib/csat-release";
+import { correctionInputClosed, provisionalClosed } from "@/lib/csat-release";
 import { CSAT_EXAM, csatOpen, csatOpensAt } from "@/lib/exam";
 import { seoulDateTime, seoulTime } from "@/lib/format";
 import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
+import { badScoreText, UNATTAINABLE_FIRST, unattainableRaw } from "@/lib/score-validity";
 
 export type { ProvisionalValues };
 /** field: 고칠 칸(제2외국어/한문 'sl_subject'·'sl_value'). 양식이 그 칸 옆에 짧은 안내를 띄운다 */
@@ -35,6 +36,12 @@ const MESSAGE: Record<string, string> = {
   score_input_transition_pending: "성적 입력 기록을 새 기준으로 옮기는 중이라 지금은 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 잠시 뒤 다시 시도해 주세요.",
   paid_required: "성적 입력은 이용권 회원만 할 수 있습니다.",
 };
+
+/** 정상 거절(입력 1회 사용) 코드 — 서버 SCORE_CONTENT_REJECTION_CODES 와 같다. 가채점의 받을 수 없는 원점수는 invalid_score 로 온다 */
+const CONTENT_REJECTIONS = new Set([
+  "unobserved_standard_score", "invalid_score", "invalid_integer", "invalid_grade",
+  "invalid_reported_grade", "invalid_reported_percentile", "reported_grade_conflict", "reported_percentile_conflict",
+]);
 
 const partial = (code: string) =>
   `가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 이 화면을 다시 열어 주세요. (문의 번호 ${code})`;
@@ -66,6 +73,9 @@ export async function submitProvisional(prev: ProvisionalFormState, fd: FormData
   const built = buildProvisionalScores(values, CSAT_EXAM);
   if (!built.ok) return fail(built.error, built.field);
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 입력값을 확인하고 '이대로 저장'을 눌러 주세요.");
+  // 받을 수 없는 원점수(2026-11-22 대표님 결정)는 확인 창의 두 번 경고를 거친 요청만 보낸다. 서버는 정상 거절로 남기고 입력 1회를 쓴다
+  const bad = unattainableRaw(values);
+  if (bad.length > 0 && fd.get("ack_unattainable") !== "on") return fail(`${UNATTAINABLE_FIRST} (${badScoreText(bad)})`);
   const key = String(fd.get("idem") ?? "");
   if (!/^[0-9a-f-]{36}$/i.test(key)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
   const reportId = String(fd.get("report_id") ?? "") || undefined;
@@ -75,12 +85,23 @@ export async function submitProvisional(prev: ProvisionalFormState, fd: FormData
   const src = source();
   // 수능 성적표 배부일이 지나면 승인받은 가채점 정정도 저장하지 않는다(2026-10-29 사용자 결정, 본체 관리자 설정)
   const st = await src.readScoreInputStatus(caller, CSAT_EXAM.exam_id).catch(() => null);
-  if (st?.stage === "provisional" && correctionInputClosed(st, await csatReleaseOn(st.academic_year)))
+  // 자동 승인 정정(아직 정정권이 없는 상태로 저장, 서버가 저장 직전에 정정권을 남긴다)도 같은 날짜로 막는다
+  const releaseOn = st?.stage === "provisional" ? await csatReleaseOn(st.academic_year) : null;
+  if (st?.stage === "provisional" && (correctionInputClosed(st, releaseOn) || (st.initial_remaining <= 0 && provisionalClosed(releaseOn))))
     return fail("수능 성적표가 배부되어 가채점 정정 입력 기간이 끝났습니다. 실채점 성적은 실채점 단계에서 입력해 주세요.");
   let step = "성적 저장";
+  let rejected = false;
   try {
     const profile = await src.createScoreProfile(caller, built.scores, true, `${key}:profile`, "provisional");
-    if (!profile.ok) return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (문의 번호 ${profile.code})`);
+    if (!profile.ok) {
+      // 정상 거절(받을 수 없는 점수 등, 입력 1회 사용): 서버 상태에 '부정확 입력'으로 남았으니 2페이지가 그 안내를 그린다
+      if (profile.status === 422 && CONTENT_REJECTIONS.has(profile.code)) rejected = true;
+      else return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (문의 번호 ${profile.code})`);
+    }
+    if (rejected || !profile.ok) {
+      const viaJs = (await headers()).has("next-action");
+      redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
+    }
     step = "예상 위치 계산";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);
     if (!report.ok) return fail(partial(report.code));

@@ -9,6 +9,7 @@ import { isProvisionalOverall, type SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { EXAM } from "@/lib/exam";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
+import { isInaccurate } from "@/lib/score-validity";
 import { page } from "@/lib/routes";
 import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
 import { PrintButton } from "./print-button";
@@ -42,7 +43,8 @@ export default async function Page() {
   let shortlist: PickedItem[] = [];
   try {
     const status = await src.readScoreInputStatus(caller, EXAM.exam_id);
-    const reportId = status.current_report_id;
+    // 부정확 입력 상태(2026-11-22 대표님 결정)에서는 인쇄할 분석이 없다(2페이지와 같다)
+    const reportId = isInaccurate(status) ? null : status.current_report_id;
     // 리포트 읽기(report.read)도 함께 받는다: 참고 기준 7단계·지난 합격선 같은 판정 표시는 서버가 읽기 응답에만 붙이고
     // 인쇄용 고정본(report.export)에는 없다. 같은 판일 때만 그 분석으로 바꿔 2페이지 화면과 같은 판정을 인쇄한다(2026-11-21)
     const [exported, read] = reportId

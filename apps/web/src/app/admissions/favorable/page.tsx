@@ -16,6 +16,8 @@ import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type C
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
 import { loadMineEager, logSettleError, pickedIds, provisionalOnly, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
 import { ProvisionalPendingGate } from "@/components/provisional-pending";
+import { InaccurateNotice } from "@/components/inaccurate-notice";
+import { inaccurateSeen } from "@/lib/report-ref";
 import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
@@ -76,6 +78,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   try {
     // 입력 상태와 지난번 현재 리포트를 동시에 읽는다(2026-11-10 임시 단축, report-ops 참고)
     const mine = await loadMineEager(src, caller);
+    // 부정확 입력 상태(2026-11-22 대표님 결정): 분석하지 않고 안내와 정정 길만 보인다(직접 주소로 들어와도 같다)
+    if (!mine && inaccurateSeen(caller)) return <div className="wrap pg-body fv"><InaccurateNotice name={await memberName()} correctHref={`${page("PAGE-02").path}?correct=1`} back /></div>;
     // 열 때마다 후보(candidates.build)를 한 번 만들고 그 응답의 참고 목록으로 그린다(dep_r17, report-ops settleCandidates).
     // 그동안은 책 넘김 대기 화면이다. 서버 액션(담기·계열 펼침 계산) 뒤 다시 그릴 때는 방금 받은 목록을 다시 쓴다(한 번 열 때 한 번)
     const actionRender = (await headers()).has("next-action");

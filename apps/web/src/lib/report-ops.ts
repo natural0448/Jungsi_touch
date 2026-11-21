@@ -1,7 +1,7 @@
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
-import { currentReportId } from "@/lib/report-ref";
+import { currentReportId, screenReport } from "@/lib/report-ref";
 
 /*
   3·4페이지(와 2페이지 유료 부분)가 리포트에 묶인 분석을 쓰는 방법.
@@ -35,7 +35,7 @@ export type ReportState =
 export async function loadMine(src: JungsiSource, caller: Caller): Promise<ReportDto | null> {
   const id = await currentReportId(src, caller);
   await rememberCurrentReport(src, caller, id);
-  return id ? src.readReport(caller, id) : null;
+  return id ? screenReport(caller, await src.readReport(caller, id)) : null;
 }
 
 /*
@@ -107,7 +107,7 @@ export async function loadMineEager(src: JungsiSource, caller: Caller): Promise<
   const id = await currentReportId(src, caller);
   const eager = await eagerP;
   await rememberCurrentReport(src, caller, id);
-  return id ? finishEagerReport(src, caller, eager, id) : null;
+  return id ? screenReport(caller, await finishEagerReport(src, caller, eager, id)) : null;
 }
 
 /**
@@ -133,7 +133,7 @@ export async function loadMineAfter(src: JungsiSource, caller: Caller, gate: Pro
   await gate.then(() => undefined, () => undefined);
   const id = await currentReportId(src, caller);
   await rememberCurrentReport(src, caller, id);
-  return id ? finishEagerReport(src, caller, eager, id) : null;
+  return id ? screenReport(caller, await finishEagerReport(src, caller, eager, id)) : null;
 }
 
 export function startMine(src: JungsiSource, caller: Caller, gate?: Promise<unknown>): Promise<MineResult> {

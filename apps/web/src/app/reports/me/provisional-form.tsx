@@ -3,6 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import { absoluteGrade, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, RAW_MAX, SECOND_LANGUAGE_SUBJECTS } from "@/lib/exam";
 import { checkSecondLanguage, SL_NONE, slHint } from "@/lib/second-language";
+import { nextStep, REENTRY_WARNING, UNATTAINABLE_FIRST, unattainableRaw, unattainableSecond, type BadScore } from "@/lib/score-validity";
 import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } from "./provisional-actions";
 
 /*
@@ -23,7 +24,7 @@ const REQUIRED = ["korean_choice", "math_choice", "inq1", "inq2", "sl_subject", 
  * hidden 에 기관·학생·입력 판을, subject 에 학생 이름을 넘긴다(확인 창에 크게 보인다).
  * idem: 이 화면의 요청 키(두 번 눌러도 한 번만 저장)
  */
-export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit = submitProvisional, hidden, subject }: {
+export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit = submitProvisional, hidden, subject, name, correcting = false }: {
   examLabel: string;
   idem: string;
   defaults?: ProvisionalValues;
@@ -31,6 +32,10 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
   submit?: (prev: ProvisionalFormState, fd: FormData) => Promise<ProvisionalFormState>;
   hidden?: Record<string, string>;
   subject?: string;
+  /** 회원 이름(두 번째 경고 문구). 전문가용은 subject(학생 이름)를 쓴다 */
+  name?: string;
+  /** 정정 입력(승인된 정정권으로 저장) — 확인 창에 재입력 경고를 보인다 */
+  correcting?: boolean;
 }) {
   const [state, action, pending] = useActionState<ProvisionalFormState, FormData>(submit, null);
   const d: ProvisionalValues = state?.values ?? defaults;
@@ -53,7 +58,10 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
   const dialogRef = useRef<HTMLDialogElement>(null);
   const confirmRef = useRef<HTMLInputElement>(null);
   const sentRef = useRef(false);
-  const [review, setReview] = useState<{ rows: [string, string][]; problem: string | null } | null>(null);
+  const ackRef = useRef<HTMLInputElement>(null);
+  // step: review(입력값 대조) → warn1(받을 수 없는 점수 첫 안내) → warn2(두 번째 경고). 받을 수 없는 점수가 없으면 review 에서 바로 저장
+  const [review, setReview] = useState<{ rows: [string, string][]; problem: string | null; bad: BadScore[]; step: "review" | "warn1" | "warn2" } | null>(null);
+  const who = subject ?? name ?? "회원";
 
   const val = (k: string) => String((formRef.current?.elements.namedItem(k) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "").trim();
   const onInput = () => setFilled(REQUIRED.filter((k) => val(k) !== "").length);
@@ -107,8 +115,19 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
     if (!problem && !slCheck.ok) problem = slCheck.error;
     const g = (area: "english" | "history" | "second", k: string) => (absoluteGrade(area, val(k)) ?? "─") + "등급";
     const choice = (k: string) => (val(k) ? ` (${val(k)})` : "");
+    const num = (k: string) => (val(k) === "" ? undefined : Number(val(k)));
+    const bad = problem
+      ? []
+      : unattainableRaw({
+          korean_choice: val("korean_choice"), korean: num("korean"), math_choice: val("math_choice"), math: num("math"),
+          inq1: val("inq1"), inq1_raw: num("inq1_raw"), inq2: val("inq2"), inq2_raw: num("inq2_raw"),
+          english: num("english"), history: num("history"), sl_subject: val("sl_subject"), sl_raw: num("sl_raw"),
+        });
+    if (ackRef.current) ackRef.current.value = "";
     setReview({
       problem,
+      bad,
+      step: "review",
       rows: [
         [`국어${choice("korean_choice")}`, `${val("korean")}점`],
         [`수학${choice("math_choice")}`, `${val("math")}점`],
@@ -122,9 +141,13 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
     dialogRef.current?.showModal();
   };
   const confirmSave = () => {
-    if (sentRef.current || pending) return;
+    if (sentRef.current || pending || !review) return;
+    // 받을 수 없는 점수가 있으면 두 번 경고한 뒤에만 보낸다(2026-11-22 대표님 결정)
+    const next = nextStep(review.step, review.bad.length > 0);
+    if (next !== "send") return setReview({ ...review, step: next });
     sentRef.current = true;
     if (confirmRef.current) confirmRef.current.value = "on";
+    if (ackRef.current) ackRef.current.value = review.bad.length > 0 ? "on" : "";
     dialogRef.current?.close();
     formRef.current?.requestSubmit();
   };
@@ -260,6 +283,8 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
       {state?.error && <p className="sf-error" role="alert">{state.error}</p>}
 
       <input ref={confirmRef} type="hidden" name="confirm" defaultValue="" />
+      {/* 받을 수 없는 점수를 두 번 경고받고도 저장한다는 표지. 없으면 서버 액션이 보내지 않는다 */}
+      <input ref={ackRef} type="hidden" name="ack_unattainable" defaultValue="" />
       <input type="hidden" name="idem" value={idem} />
       {hidden && Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       {update && (
@@ -277,11 +302,36 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
         </div>
       </div>
       <p className="sf-note">
-        가채점은 이 단계의 입력 1회를 사용합니다(9월 모의평가·실채점과 따로 셉니다). 잘못 넣었으면 성적표 배부 전날까지 정정을 1회 요청할 수 있습니다.
+        가채점은 이 단계의 입력 1회를 사용합니다(9월 모의평가·실채점과 따로 셉니다). 잘못 넣었으면 성적표 배부 전날까지 정정을 1회 요청할 수 있고, 가채점 원점수 정정은 사진 없이 바로 승인됩니다.
       </p>
 
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="pf-dialog-h" onClose={() => setReview(null)}>
-        {review && (
+        {review && review.step !== "review" && (
+          <div className="sf-dialog-in">
+            <h3 id="pf-dialog-h">{review.step === "warn1" ? "받을 수 없는 점수입니다" : "다시 한번 경고드립니다"}</h3>
+            {subject && <p className="sf-dialog-subject">{subject}</p>}
+            {review.step === "warn1" ? (
+              <>
+                <p className="sf-dialog-problem">{UNATTAINABLE_FIRST}</p>
+                <dl className="sf-dialog-rows">
+                  {review.bad.map((b) => (
+                    <div key={b.label}>
+                      <dt>{b.label}</dt>
+                      <dd>{b.score}점</dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            ) : (
+              <p className="sf-dialog-problem">{unattainableSecond(who)}</p>
+            )}
+            <div className="sf-dialog-acts">
+              <button type="button" className="btn t" onClick={() => dialogRef.current?.close()} autoFocus>돌아가서 고치기</button>
+              <button type="button" className="btn p" onClick={confirmSave}>{review.step === "warn1" ? "그래도 이 점수로 저장" : "경고를 확인했고 저장합니다"}</button>
+            </div>
+          </div>
+        )}
+        {review && review.step === "review" && (
           <div className="sf-dialog-in">
             <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : subject ? "이 학생의 원점수로 저장할까요?" : "이 원점수로 저장할까요?"}</h3>
             {review.problem ? (
@@ -289,7 +339,8 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
             ) : (
               <>
                 {subject && <p className="sf-dialog-subject">{subject}</p>}
-                <p><b>저장하면 {subject ? "이 학생의 " : ""}가채점 단계의 입력 1회를 사용합니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
+                {correcting && <p className="sf-dialog-problem">{REENTRY_WARNING}</p>}
+                <p><b>저장하면 {subject ? "이 학생의 " : ""}가채점 단계의 {correcting ? "정정 입력 1회" : "입력 1회"}를 사용합니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
                 <dl className="sf-dialog-rows">
                   {review.rows.map(([k, v]) => (
                     <div key={k}>

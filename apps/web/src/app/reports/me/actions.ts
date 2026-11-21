@@ -9,6 +9,7 @@ import { csatReleaseOn } from "@/lib/correction";
 import { correctionInputClosed } from "@/lib/csat-release";
 import { EXAM, csatOpen } from "@/lib/exam";
 import { checkSecondLanguage } from "@/lib/second-language";
+import { MISSING_STANDARD, missingStandard } from "@/lib/score-validity";
 
 import type { ScoreDefaults } from "./score-form";
 
@@ -75,7 +76,8 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
   if (csatOpen()) return fail("9월 모의평가 성적 입력은 수능 가채점 전환과 함께 끝났습니다. 화면을 새로 고치면 수능 가채점 원점수를 넣을 수 있습니다. 입력 횟수는 쓰이지 않았습니다.");
   const ks = int(fd, "korean"), ms = int(fd, "math"), i1 = int(fd, "inq1_score"), i2 = int(fd, "inq2_score");
   const s1 = String(fd.get("inq1") ?? ""), s2 = String(fd.get("inq2") ?? "");
-  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !s1 || !s2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");
+  // 모든 과목 필수(2026-11-22 대표님 결정): 확인 창과 같은 목록. 빈 칸이 있으면 서버로 보내지 않는다(입력 횟수를 쓰지 않는다)
+  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !s1 || !s2 || missingStandard((k) => values[k]).length > 0) return fail(MISSING_STANDARD);
   // 제2외국어/한문 필수 선택(2026-11-22 대표님 결정). 미선택·과목만 고르고 등급 없음은 서버로 보내기 전에 막는다(입력 횟수를 쓰지 않는다)
   const sl = checkSecondLanguage(String(fd.get("sl_subject") ?? ""), int(fd, "sl_grade"), "grade");
   if (!sl.ok) return fail(sl.error, sl.field);
@@ -110,6 +112,7 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
   }
   // 어느 단계에서 멈췄는지(성적 저장 / 전체 분석). 성적만 저장된 부분 성공을 구분하려고 문구에 붙인다
   let step = "성적 저장";
+  let rejectedTo = false;
   try {
     const profile = await src.createScoreProfile(caller, scores, true, `${key}:profile`);
     // 문장이 없는 코드는 사유 코드를 같이 보여 준다 — 담당자가 서버 기록과 맞춰 볼 수 있게
@@ -117,10 +120,17 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
       // 정상 거절은 이 단계의 입력 1회를 쓴다. 남은 정정 횟수는 서버 상태를 다시 읽어 그대로 안내한다(추정하지 않는다)
       if (profile.status === 422 && CONTENT_REJECTIONS.has(profile.code)) {
         const st = await src.readScoreInputStatus(caller, EXAM.exam_id).catch(() => null);
-        const left = st ? `남은 성적 정정 가능 횟수는 ${st.correction_request_remaining}회이며, 정정은 고객센터에 요청해 주세요.` : "정정은 고객센터에 요청해 주세요.";
-        return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. ${left} (문의 번호 ${profile.code})`);
-      }
-      return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (문의 번호 ${profile.code})`);
+        // 실채점: 부정확 입력 상태로 남았으니 2페이지가 그 안내와 정정 길을 그린다(2026-11-22 대표님 결정)
+        if (st && st.stage !== "mock") rejectedTo = true;
+        else {
+          const left = st ? `남은 성적 정정 가능 횟수는 ${st.correction_request_remaining}회이며, 정정은 고객센터에 요청해 주세요.` : "정정은 고객센터에 요청해 주세요.";
+          return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. ${left} (문의 번호 ${profile.code})`);
+        }
+      } else return fail(MESSAGE[profile.code] ?? `저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요. (문의 번호 ${profile.code})`);
+    }
+    if (rejectedTo || !profile.ok) {
+      const viaJs = (await headers()).has("next-action");
+      redirect(viaJs ? "/reports/me" : "/jeongsi/reports/me");
     }
     step = "전체 분석";
     const report = await src.analyzeOverall(caller, { profile_id: profile.value.profile_id, ...(reportId ? { report_id: reportId, expected_version: version } : {}) }, `${key}:report`);

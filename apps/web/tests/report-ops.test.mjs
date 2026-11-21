@@ -15,7 +15,7 @@ const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", apiUrl],
   // 계정의 현재 리포트 번호(서버 입력 상태)만 대신한다. 브라우저 번호는 없다(2026-11-04)
-  ["@/lib/report-ref", data("export async function currentReportId(){return globalThis.__reportOpsFixture.reportId}")],
+  ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export async function currentReportId(){return globalThis.__reportOpsFixture.reportId}")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
   // connection-text 가 시각 표시용으로 부르는 같은 폴더 모듈(429 안내, 2026-11-19)

@@ -14,6 +14,9 @@ import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
 import { provisionalOnly, settleAnalyses, startMine } from "@/lib/report-ops";
 import { ProvisionalPendingNote } from "@/components/provisional-pending";
+import { InaccurateNotice } from "@/components/inaccurate-notice";
+import { inaccurateSeen } from "@/lib/report-ref";
+import { memberName } from "@/lib/member-name";
 import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
@@ -78,6 +81,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     if (m.error instanceof ConnectionError) return <ConnectionNotice e={m.error} reopenUnavailable />;
     return <PaidGate kind={m.error.status === 401 ? "login" : "paid"} route={route} features={features} />;
   }
+  // 부정확 입력 상태(2026-11-22 대표님 결정): 분석·지원가능성 없이 안내와 정정 길만 보인다(직접 주소로 들어와도 같다)
+  if (!m.report && inaccurateSeen(caller)) return <div className="wrap pg-body ps"><InaccurateNotice name={await memberName()} correctHref={`${page("PAGE-02").path}?correct=1`} back /></div>;
   // 보이는 모집단위의 분석을 채우고 옛 자료판 분석은 다시 확인한다. 끝난 뒤에 한 번에 그린다
   let report = m.report ? await settleAnalyses(src, caller, m.report, items.map((o) => o.offering_id)) : null;
   // 지원가능성 필터(2026-11-22): 고른 단계만 모은다. 성적이 없으면(리포트 없음) 필터를 쓰지 않는다

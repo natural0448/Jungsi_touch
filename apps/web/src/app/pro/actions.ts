@@ -8,6 +8,7 @@ import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoresInput } from "@/lib/dto";
 import { CSAT_EXAM, EXAM, csatOpen, proCsatEnabled } from "@/lib/exam";
 import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
+import { badScoreText, MISSING_STANDARD, missingStandard, UNATTAINABLE_FIRST, unattainableRaw } from "@/lib/score-validity";
 import type { ProvisionalFormState } from "../reports/me/provisional-actions";
 import type { ProPrintDto, ProStudentInput } from "@/lib/pro-dto";
 import type { ScoreFormState } from "../reports/me/actions";
@@ -129,7 +130,8 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
   // 2026-11-23 0시 수능 가채점 전환 뒤에는 9월 모의평가 표준점수를 받지 않는다(서버도 9월 단계를 닫는다). 입력 횟수를 쓰지 않게 보내지 않는다
   if (csatOpen() && stage !== "final") return fail("9월 모의평가 성적 입력은 수능 가채점 전환과 함께 끝났습니다. 화면을 새로 고쳐 주세요. 입력 횟수는 쓰이지 않았습니다.");
   const ks = values.korean, ms = values.math, i1 = values.inq1_score, i2 = values.inq2_score;
-  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !values.inq1 || !values.inq2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");
+  // 모든 과목 필수(2026-11-22 대표님 결정). 개인용과 같은 목록
+  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !values.inq1 || !values.inq2 || missingStandard((k) => values[k]).length > 0) return fail(MISSING_STANDARD);
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 점수를 확인하고 '이대로 저장'을 눌러 주세요.", "confirm");
   const scores: ScoresInput = {
     exam_id: EXAM.exam_id,
@@ -204,6 +206,9 @@ export async function submitStudentProvisional(prev: ProvisionalFormState, fd: F
   const built = buildProvisionalScores(values, CSAT_EXAM);
   if (!built.ok) return fail(built.error, built.field);
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 원점수를 확인하고 '이대로 저장'을 눌러 주세요.");
+  // 받을 수 없는 원점수는 확인 창의 두 번 경고(학생 이름)를 거친 요청만 보낸다(2026-11-22 대표님 결정)
+  const bad = unattainableRaw(values);
+  if (bad.length > 0 && fd.get("ack_unattainable") !== "on") return fail(`${UNATTAINABLE_FIRST} (${badScoreText(bad)})`);
   const caller = await getCaller();
   const src = proSource();
   let step = "성적 저장";

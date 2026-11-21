@@ -60,7 +60,12 @@ export function NoInput({ st, correctHref }: { st: ScoreInputStatusDto | null; c
         <p>
           이 시험 단계의 성적 입력을 이미 사용했습니다. 저장한 리포트는 계속 볼 수 있습니다.{" "}
           {correctHref ? (
-            <>성적표와 다르게 저장했다면 성적표 사진과 함께 <Link href={correctHref}>정정을 요청</Link>해 주세요(이 단계에서 한 번).</>
+            st.stage === "provisional" ? (
+              // 가채점 원점수 정정은 사진 없이 즉시 자동 승인(2026-11-22 대표님 결정)
+              <>잘못 넣었다면 <Link href={correctHref}>정정을 요청</Link>해 주세요. 가채점 원점수 정정은 사진 없이 바로 승인되며 이 단계에서 한 번뿐입니다.</>
+            ) : (
+              <>성적표와 다르게 저장했다면 성적표 사진과 함께 <Link href={correctHref}>정정을 요청</Link>해 주세요(이 단계에서 한 번).</>
+            )
           ) : (
             <>궁금한 점은 <a href={SUPPORT_HREF}>고객센터</a>로 알려 주세요.</>
           )}

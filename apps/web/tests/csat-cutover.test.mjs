@@ -8,7 +8,7 @@ const classesUrl = new URL("../src/lib/api/source.ts", import.meta.url).href;
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied, ConnectionError} from ${JSON.stringify(classesUrl)};`)],
-  ["@/lib/report-ref", data("export async function currentReportId(){return null}")],
+  ["@/lib/report-ref", data("export async function currentReportId(){return null};export const screenReport=(c,r)=>r;")],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
   ["./format", new URL("../src/lib/format.ts", import.meta.url).href],
   ["next/cache", data("export function revalidatePath(){}")],

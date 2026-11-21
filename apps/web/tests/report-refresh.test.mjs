@@ -9,7 +9,7 @@ const data = (code) => "data:text/javascript," + encodeURIComponent(code);
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied,ConnectionError} from ${JSON.stringify(classesUrl)};export const getCaller=async()=>globalThis.__refreshFixture.caller;export const source=()=>globalThis.__refreshFixture.src;`)],
-  ["@/lib/report-ref", data("export const currentReportId=async()=>globalThis.__refreshFixture.cookie;")],
+  ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export const currentReportId=async()=>globalThis.__refreshFixture.cookie;")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
   // connection-text 가 시각 표시용으로 부르는 같은 폴더 모듈(429 안내, 2026-11-19)

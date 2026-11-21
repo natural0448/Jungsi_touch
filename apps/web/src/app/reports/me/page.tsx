@@ -32,6 +32,12 @@ import { ScoreForm, type ScoreDefaults } from "./score-form";
 import { ProvisionalForm } from "./provisional-form";
 import { ProvisionalPreview } from "./provisional-preview";
 import { StageSteps } from "./stage-steps";
+import { redirect } from "next/navigation";
+import { InaccurateNotice } from "@/components/inaccurate-notice";
+import { memberName } from "@/lib/member-name";
+import { isInaccurate } from "@/lib/score-validity";
+import { selfCorrectionOpen } from "@/lib/csat-release";
+import { hasPastMock } from "./past-records";
 import "./report.css";
 
 const route = page("PAGE-02");
@@ -73,6 +79,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   const sp = await searchParams;
   // 지난 기록(전환 뒤): 저장한 9월 모의평가 리포트를 읽기 전용으로 본다(대표님 결정: 9월 기록은 남긴다)
   if (csat && sp.past === "1") {
+    // 9월 리포트를 저장한 적이 없으면 지난 기록을 열지 않고 가채점 리포트 화면으로 돌려보낸다(2026-11-22 대표님 요청)
+    if (!(await hasPastMock(src, caller))) redirect(route.path);
     const want = typeof sp.report === "string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(sp.report) ? sp.report : null;
     return (
       <>
@@ -135,8 +143,39 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   const inputOpen = canInput(status) && !correctionInputClosed(status, releaseOn);
   const corr = await corrP;
   const latestCorr = corr?.row ?? null;
-  const canCorrect = !!corr && canRequestCorrection(status, latestCorr, releaseOn);
-  const correctHref = canCorrect || latestCorr?.status === "pending" || latestCorr?.status === "returned" ? `${route.path}?correct=1` : null;
+  // 가채점 원점수 정정은 사진 없이 즉시 자동 승인(2026-11-22 대표님 결정). 그 밖의 단계는 지금처럼 사진과 함께 요청한다
+  const provisionalStage = status.stage === "provisional";
+  const selfCorrect = selfCorrectionOpen(status, releaseOn);
+  const canCorrect = provisionalStage ? selfCorrect : !!corr && canRequestCorrection(status, latestCorr, releaseOn);
+  const correctHref = canCorrect || (!provisionalStage && (latestCorr?.status === "pending" || latestCorr?.status === "returned")) ? `${route.path}?correct=1` : null;
+  // 정정 입력(승인된 정정권 또는 자동 승인)으로 저장하는 중이면 확인 창에 재입력 경고를 보인다
+  const correcting = status.initial_remaining <= 0;
+  const name = await memberName();
+  const stage = stageOf(status.stage);
+  const title = examTitle(stage, status.academic_year);
+  const idem = crypto.randomUUID();
+  // 부정확 입력(받을 수 없는 점수로 저장, 서버 상태 기준): 분석 대신 안내만, 3·4페이지도 막힌다(lib/report-ref)
+  const inaccurate = isInaccurate(status, report);
+  if (sp.correct === "1" && provisionalStage && (selfCorrect || (inputOpen && status.correction_granted > status.correction_used))) {
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body rp">
+          <InputStatus st={status} />
+          <p className="rp-note" role="status">가채점 원점수 정정 요청이 바로 승인되었습니다. 바른 원점수를 다시 넣어 주세요. 정정은 이 단계에서 한 번뿐입니다.</p>
+          <ProvisionalForm
+            examLabel={title}
+            idem={idem}
+            name={name}
+            correcting
+            defaults={report && isProvisionalReport(report) ? provisionalDefaults(report) : {}}
+            update={report && isProvisionalReport(report) && !inaccurate ? { reportId: report.report_id, version: report.report_version } : undefined}
+          />
+          <Link className="btn" href={route.path}>정정하지 않고 돌아가기</Link>
+        </div>
+      </>
+    );
+  }
   if (sp.correct === "1" && status && corr) {
     // 관리자가 저장된 점수와 비교하도록 지금 성적(현재 리포트)을 함께 보낸다
     const current = report;
@@ -154,13 +193,28 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 리포트 표시(2026-11-04 사용자 결정): 판 번호 대신 '○○ 기준 ○○ 저장'. 정정 입력을 다 쓴 뒤에만 '정정 입력 횟수 소진'을 붙인다
   // (리포트는 늘 현재 리포트 하나라 '현재 성적' 꼬리표는 쓰지 않는다). 판 번호는 서버의 겹침 방지에만 쓴다
   const tag = correctionExhausted(status) ? "정정 입력 횟수 소진" : null;
-  const idem = crypto.randomUUID();
-  // 입력 단계(2026-11-12 최종관리자 결정): 서버가 정한 단계로 양식을 고른다. 수능 뒤에는 9월 모의평가가 보이지 않는다
-  const stage = stageOf(status.stage);
-  const title = examTitle(stage, status.academic_year);
+  // 입력 단계(2026-11-12 최종관리자 결정): 서버가 정한 단계로 양식을 고른다(stage·title 은 위에서 정했다). 수능 뒤에는 9월 모의평가가 보이지 않는다
   // 전환 뒤 리포트는 수능 가채점 리포트다(9월 리포트는 지난 기록). 가채점 리포트는 범위로만 그린다
   const provisional = isProvisionalReport(report);
-  const pastLink = csat ? <p className="rp-note"><Link href={pastHref()}>지난 기록 · {MOCK_EXAM.label} 리포트 보기</Link> — 저장한 9월 리포트를 읽기 전용으로 봅니다.</p> : null;
+  // 지난 기록 · 9월 모의평가는 9월 리포트를 저장한 회원에게만(2026-11-22 대표님 요청). 목록 1개만, 실패하면 숨긴다
+  const pastMock = csat ? await hasPastMock(src, caller) : false;
+  const pastLink = pastMock ? <p className="rp-note"><Link href={pastHref()}>지난 기록 · {MOCK_EXAM.label} 리포트 보기</Link> — 저장한 9월 리포트를 읽기 전용으로 봅니다.</p> : null;
+
+  // 부정확 입력 상태: '○○님께서 부정확한 성적을 입력하여 성적 분석이 되지 않습니다' 문구와 정정 길만(2026-11-22 대표님 결정).
+  // 승인된 정정 입력을 고르러 ?edit=1 로 온 경우만 아래 양식으로 간다
+  if (inaccurate && !(editing && inputOpen)) {
+    const fix = provisionalStage ? (selfCorrect || inputOpen ? `${route.path}?correct=1` : null) : inputOpen ? `${route.path}?edit=1` : correctHref;
+    return (
+      <>
+        {head}
+        <div className="wrap pg-body rp">
+          <InputStatus st={status} />
+          <InaccurateNotice name={name} correctHref={fix} provisional={provisionalStage} />
+          {pastLink}
+        </div>
+      </>
+    );
+  }
 
   if (!report || editing) {
     return (
@@ -180,6 +234,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
               <ProvisionalForm
                 examLabel={title}
                 idem={idem}
+                name={name}
+                correcting={correcting}
                 defaults={report && provisional ? provisionalDefaults(report) : {}}
                 update={report && provisional ? { reportId: report.report_id, version: report.report_version } : undefined}
               />
@@ -198,7 +254,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                 examLabel={title}
                 kicker={stage === "final" ? "성적 입력 · 수능 실채점" : "성적 입력"}
                 banner={stage === "final" ? "가채점 성적이 있으면 실채점 성적을 저장할 때 리포트가 실채점 기준으로 바뀝니다. 가채점 기록은 그대로 남습니다." : undefined}
-                idem={idem} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
+                idem={idem} name={name} defaults={report ? defaultsFrom(report) : {}} update={report ? { reportId: report.report_id, version: report.report_version } : undefined} />
             </>
           ) : (
             <NoInput st={status} correctHref={correctHref} />
@@ -229,7 +285,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
           {!inputOpen && correctHref && <Link className="btn" href={correctHref}>{canCorrect ? "성적 정정 요청" : "정정 요청 상태"}</Link>}
           {!csat && <Link className="btn" href={`${route.path}?preview=csat`}>수능 가채점 예상 성적 보기</Link>}
-          {csat && <Link className="btn" href={pastHref()}>지난 기록 · 9월 모의평가</Link>}
+          {pastMock && <Link className="btn" href={pastHref()}>지난 기록 · 9월 모의평가</Link>}
         </div>
 
         {provisional ? (
