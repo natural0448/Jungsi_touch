@@ -87,3 +87,23 @@ test("7-stage reference band comes first: up to 상향 listed by the estimate st
   assert.deepEqual(u.map((x) => x.university_id), ["A", "B"]);
   assert.equal(u[0].bestBand.code, "target");
 });
+
+test("dep_r15 threshold rows: no percentile, band on the row; analyses band wins; listed by code up to 상향; marked pending until analysed", async () => {
+  const { referenceGroups } = await import("../src/lib/reference-percentile.ts");
+  const off = (id, dept) => ({ offering_id: id, academic_year: 2027, university_id: "T", university_name: "문턱대", campus: null, department: dept, track: null, group: "가", region: "서울", wildcard_group: null });
+  const tb = (code) => ({ basis: "reference_threshold", code, label: code, source: "a" });
+  const c = { reference_university_groups: [{ university_id: "T", university_name: "문턱대", offerings: [
+    { offering: off("2027:91", "경영학과"), reference_band: tb("target") },
+    { offering: off("2027:92", "법학과"), reference_band: tb("challenge") },
+    { offering: off("2027:93", "사학과"), reference_band: { code: "target" } }, // basis 가 없으면 받지 않는다
+    { offering: off("2027:94", "철학과"), reference_band: tb("outside") },
+  ] }] };
+  const groups = referenceGroups(c);
+  assert.deepEqual(groups[0].offerings.map((it) => it.offering.offering_id), ["2027:91", "2027:92", "2027:94"]);
+  const analyses = { "2027:94": { reference_band: { basis: "reference_percentile", code: "upward", label: "상향" }, reference_percentile: ref("5"), year_cutoffs: [cut(2025, "최종등록자 70%컷", "8")] } };
+  const pool = referencePool(groups, overall, analyses);
+  assert.deepEqual(pool.items.map((i) => [i.offering.offering_id, i.band.code, i.pending]), [["2027:91", "target", true], ["2027:94", "upward", false]]);
+  assert.equal(pool.outsideBand, 1);
+  assert.equal(pool.items[0].margin, null);
+  assert.ok(pool.items[1].margin);
+});

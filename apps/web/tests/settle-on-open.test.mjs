@@ -136,3 +136,28 @@ test("page 3: stale or empty stored candidates are re-checked once per report ve
   assert.equal(writes(r1).length, 1);
   assert.equal(r2.calls.length, 0);
 });
+
+test("page 3: a deferred threshold summary (complete=false) gets one more try on the next open, then stops (dep_r15, 2026-11-21)", async () => {
+  const partial = { ...empty, reference_threshold_summary: { basis: "reference_threshold", threshold_version: "t", universe: 600, judged: 600, listed: 300, delivered: 200, complete: false, deferred: 100 } };
+  const r0 = report({ report_id: "C5", candidates: partial });
+  const r1 = report({ report_id: "C5", report_version: 8, candidates: partial });
+  const p1 = port([{ ok: true, value: r1 }]);
+  assert.equal(await settleCandidates(p1.src, caller, r0), r1);
+  const r2 = report({ report_id: "C5", report_version: 9, candidates: partial });
+  const p2 = port([{ ok: true, value: r2 }]);
+  assert.equal(await settleCandidates(p2.src, caller, r1), r2);
+  assert.notEqual(writes(p1)[0].args[3], writes(p2)[0].args[3]); // 두 번째는 다른 요청 키로 이어 계산
+  const p3 = port();
+  assert.equal(await settleCandidates(p3.src, caller, r2), r2);
+  assert.equal(p3.calls.length, 0); // 세 번째는 보내지 않는다
+});
+
+test("page 3: analysing rows (report version goes up) does not rebuild unflagged empty candidates again", async () => {
+  const r0 = report({ report_id: "C6", candidates: empty });
+  const r1 = report({ report_id: "C6", report_version: 8, candidates: empty });
+  await settleCandidates(port([{ ok: true, value: r1 }]).src, caller, r0);
+  const later = report({ report_id: "C6", report_version: 12, candidates: empty });
+  const p = port();
+  assert.equal(await settleCandidates(p.src, caller, later), later);
+  assert.equal(p.calls.length, 0);
+});

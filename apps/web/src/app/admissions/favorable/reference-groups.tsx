@@ -3,6 +3,7 @@ import { ADVANTAGE_WORD, BAND, referenceBandLabel } from "@/components/offering-
 import type { ReferenceBandDto } from "@/lib/dto";
 import type { ReferenceAdvantage } from "@/lib/reference-advantage";
 import type { CutoffMargin, ReferenceUniversity } from "@/lib/reference-view";
+import { ReferenceFieldDetails } from "./reference-field";
 
 /** 참고 기준 7단계 배지(2026-11-21 p3_empty). 이름·색 모두 추정값 단계 하나(2026-11-22). 7단계가 없으면 합격선 위치 한 줄 */
 function BandOrMargin({ band, m }: { band?: ReferenceBandDto | null; m: CutoffMargin | null }) {
@@ -55,13 +56,19 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
               <BandOrMargin band={u.bestBand} m={u.best} />
             </header>
             {u.fields.map((f) => (
-              <details key={f.label} className="sc-fg rf-fg">
-                <summary>
-                  <b>{f.label}</b>
-                  <span className="num">{f.items.length}개 학과</span>
-                  {f.provisional && <small>2025 분류 참고</small>}
-                  <span className="rf-best"><BandOrMargin band={f.bestBand} m={f.best} /></span>
-                </summary>
+              <ReferenceFieldDetails
+                key={f.label}
+                label={f.label}
+                pendingIds={f.items.filter((x) => x.pending).map((x) => x.offering.offering_id)}
+                summary={
+                  <>
+                    <b>{f.label}</b>
+                    <span className="num">{f.items.length}개 학과</span>
+                    {f.provisional && <small>2025 분류 참고</small>}
+                    <span className="rf-best"><BandOrMargin band={f.bestBand} m={f.best} /></span>
+                  </>
+                }
+              >
                 <ul>
                   {f.items.map(({ offering: o, margin, advantage, band }) => (
                     <li key={o.offering_id}>
@@ -78,7 +85,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
                     </li>
                   ))}
                 </ul>
-              </details>
+              </ReferenceFieldDetails>
             ))}
           </article>
         ))}

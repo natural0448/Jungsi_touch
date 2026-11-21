@@ -271,13 +271,31 @@ export interface BandDto {
 /** 참고 기준 판정(대표님 승인 2026-11-18). 참고 누백을 승인된 예상 합격권과 견준 값이며 정식 판정(category·band)과 별개.
  * 추천·와일드카드 선정에는 쓰이지 않는다. 누백이 범위면 불리한 끝의 판정이 upper_* 로 함께 온다 */
 export interface ReferenceBandDto {
-  basis: "reference_percentile";
+  /** reference_threshold: 3페이지 참고 묶음 행에 서버가 누백 없이 실어 보내는 문턱 판정(dep_r15, 2026-11-21) */
+  basis: "reference_percentile" | "reference_threshold";
   code: BandCode;
   label: string;
-  policy_version: string;
-  approval_version: string;
+  /** 문턱 판정 행에서는 생략될 수 있다(정책·승인판은 reference_threshold_summary.sources[source] 에 한 번만 싣는다) */
+  policy_version?: string;
+  approval_version?: string;
   upper_code?: BandCode;
   upper_label?: string;
+  source?: string;
+}
+
+/** candidates.reference_threshold_summary(dep_r15). complete=false 면 서버가 이번 요청에서 일부를 미뤘다(deferred) */
+export interface ReferenceThresholdSummaryDto {
+  basis: "reference_threshold";
+  threshold_version: string;
+  universe: number;
+  judged: number;
+  listed: number;
+  delivered: number;
+  complete: boolean;
+  deferred?: number;
+  sources?: Record<string, { policy_version: string; approval_version: string }>;
+  by_code?: Record<string, number>;
+  delivered_by_code?: Record<string, number>;
 }
 
 export interface AssessmentDto {
@@ -350,7 +368,8 @@ export interface ReferencePercentileDto {
 export interface ReferenceUniversityGroupDto {
   university_id: string;
   university_name: string;
-  offerings: { offering: OfferingDto; reference_percentile: ReferencePercentileDto | null }[];
+  /** dep_r15: 문턱 판정 행은 reference_percentile 없이 reference_band(basis reference_threshold)만 싣는다 */
+  offerings: { offering: OfferingDto; reference_percentile?: ReferencePercentileDto | null; reference_band?: ReferenceBandDto | null }[];
 }
 
 /** assessment.conversion — 대학 공식 반영식 환산. 판단이 보류여도 성공한 환산은 남는다 */
@@ -460,6 +479,7 @@ export interface CandidatesDto {
   wildcards: CandidateItemDto[]; // wildcard_selection 이 있으면 서버 순서 그대로, 최대 4장
   wildcard_selection?: WildcardSelectionDto | null;
   reference_university_groups?: ReferenceUniversityGroupDto[] | null; // 없거나 비면 영역을 숨긴다
+  reference_threshold_summary?: ReferenceThresholdSummaryDto | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
   ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)

@@ -1,6 +1,6 @@
 import { StarButton } from "@/components/star-button";
 import { FieldTag } from "@/components/field-tag";
-import { CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, scoreOf } from "@/components/offering-parts";
+import { BAND, CategoryBadge, enrichedReasonTexts, isReferenceScore, PickButton, referenceBandLabel, scoreOf } from "@/components/offering-parts";
 import { StatsSlot, type StatsPromise } from "@/components/stats-slot";
 import { pctText } from "@/lib/format";
 import { referencePercentText } from "@/lib/reference-percentile";
@@ -212,7 +212,7 @@ function ReferenceWildCard({ w, fav }: { w: ReferenceItem; fav: boolean | null }
       </p>
       <p className="wc-why">
         <span>한 수인 이유</span>
-        {!w.margin ? "참고 누백이 나온 계열 후보입니다." : w.margin.side === "near" ? `내 위치가 ${w.margin.year} ${w.margin.metric}과 비슷합니다(참고).` : `내 위치가 ${w.margin.text}에 있습니다(참고).`}
+        {!w.margin ? (w.band ? "내 성적으로 본 참고 판정이 상향 이내인 계열 후보입니다." : "참고 누백이 나온 계열 후보입니다.") : w.margin.side === "near" ? `내 위치가 ${w.margin.year} ${w.margin.metric}과 비슷합니다(참고).` : `내 위치가 ${w.margin.text}에 있습니다(참고).`}
       </p>
       {/* 범위 값(상위 0.7~1.0%)도 한 줄에 들도록 설명을 위로 올리고 숫자를 조금 줄인다 */}
       <div className="wc-score ref">
@@ -222,11 +222,12 @@ function ReferenceWildCard({ w, fav }: { w: ReferenceItem; fav: boolean | null }
       <div className="wc-bench">
         <span>
           <small>지원가능성</small>
-          <b>판정 준비 중</b>
+          {/* 참고 판정(문턱 판정 포함, 추정값 단계 하나)이 있으면 그 배지를 보인다(2026-11-21 p3_thresh) */}
+          {w.band && BAND[w.band.code] ? <span className={`st ${BAND[w.band.code].cls}`}>{referenceBandLabel(w.band)}</span> : <b>판정 근거 부족</b>}
         </span>
         <span>
           <small>환산 유불리</small>
-          <b className="num">{a ? `${a.text}%p` : "확인 중"}</b>
+          <b className="num">{a ? `${a.text}%p` : "비교 자료 부족"}</b>
         </span>
       </div>
       {nonCsatConditionTexts(o.non_csat_conditions).map((t) => (

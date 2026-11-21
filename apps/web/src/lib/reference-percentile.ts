@@ -1,4 +1,4 @@
-import type { CandidatesDto, ReferencePercentileDto, ReferenceUniversityGroupDto } from "./dto";
+import type { CandidatesDto, ReferenceBandDto, ReferencePercentileDto, ReferenceUniversityGroupDto } from "./dto";
 
 /**
  * 누적 백분위(추정) — 학생의 대학별 환산점수가 응시자 전체 중 위에서 몇 %쯤인지 추정한 값.
@@ -54,9 +54,18 @@ export function referencePercentText(p: ReferencePercentileDto | null | undefine
   return a === b ? a : `${a}~${b}`;
 }
 
-/** 4페이지 참고 묶음: 서버 순서 그대로(순위 아님), 보여 줄 값이 있는 모집단위만, 빈 대학은 뺀다 */
+const BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"]);
+/** 서버 문턱 판정 행의 판정(dep_r15, basis reference_threshold). 모양이 맞을 때만 */
+export function thresholdBandOf(b: ReferenceBandDto | null | undefined): ReferenceBandDto | null {
+  return b && b.basis === "reference_threshold" && typeof b.code === "string" && BAND_CODES.has(b.code) ? b : null;
+}
+
+/**
+ * 3페이지 참고 묶음: 서버 순서 그대로(순위 아님), 보여 줄 값이 있는 모집단위만, 빈 대학은 뺀다.
+ * 보여 줄 값 = 참고 누백, 또는 누백 없이 온 문턱 판정(reference_band, dep_r15 2026-11-21)
+ */
 export function referenceGroups(c: CandidatesDto | null | undefined): ReferenceUniversityGroupDto[] {
   return (c?.reference_university_groups ?? [])
-    .map((g) => ({ ...g, offerings: (g.offerings ?? []).filter((it) => it?.offering && referencePercentText(it.reference_percentile)) }))
+    .map((g) => ({ ...g, offerings: (g.offerings ?? []).filter((it) => it?.offering && (referencePercentText(it.reference_percentile) || thresholdBandOf(it.reference_band))) }))
     .filter((g) => g.offerings.length > 0);
 }

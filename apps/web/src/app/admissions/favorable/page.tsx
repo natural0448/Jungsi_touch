@@ -13,7 +13,7 @@ import { BookLoading } from "@/components/book-loading";
 import { memberName } from "@/lib/member-name";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
-import { loadMineEager, pickedIds, settleCandidates, type ReportState } from "@/lib/report-ops";
+import { loadMineEager, pickedIds, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
@@ -145,9 +145,17 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 판정이 켜진 대학이 하나라도 생기면 원래 화면(기본 학교 목록 + 와일드카드)으로 돌아간다
   const referenceMode = groups.length === 0 && wildcards.length === 0;
   const refGroups = referenceMode ? referenceGroups(c) : [];
-  const refPool = referencePool(refGroups, report.overall?.overall, report.analyses);
+  let refPool = referencePool(refGroups, report.overall?.overall, report.analyses);
+  let refWild = referenceWildcards(refPool);
+  // 서버 문턱 판정 행(dep_r15)은 누백 없이 온다. 와일드카드 카드는 누백·유불리를 바로 보이므로, 고른 카드 중 아직 계산하지 않은 곳만
+  // (최대 4곳) 그리기 전에 내 성적으로 계산해 정확한 값으로 그린다. 목록의 학과들은 계열을 펼칠 때 계산한다(reference-field.tsx)
+  const wildPending = [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
+  if (wildPending.length > 0) {
+    const settled = await settleAnalyses(src, caller, report, wildPending);
+    refPool = referencePool(refGroups, settled.overall?.overall, settled.analyses);
+    refWild = referenceWildcards(refPool);
+  }
   const refUniversities = referenceUniversities(refPool);
-  const refWild = referenceWildcards(refPool);
   const refWildCount = refWild.featured.length + refWild.rest.length;
   const tail = (
     <>

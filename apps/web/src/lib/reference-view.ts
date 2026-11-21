@@ -1,6 +1,7 @@
 import type { AssessmentDto, BandCode, OfferingDto, OverallResultDto, ReferenceBandDto, ReferencePercentileDto, ReferenceUniversityGroupDto, WildcardGroup, YearCutoffDto } from "./dto";
 import { fieldGroupOf, groupByField } from "./field-group";
 import { referenceAdvantage, type ReferenceAdvantage } from "./reference-advantage";
+import { thresholdBandOf } from "./reference-percentile";
 
 /*
   3번째 화면(유리한 대학 찾기)의 참고 목록(대표님 결정 2026-11-19 낮·저녁).
@@ -66,6 +67,8 @@ export interface ReferenceItem {
   margin: CutoffMargin | null;
   /** 참고 기준 7단계(리포트 읽기가 붙인 reference_band). 있으면 합격선 위치보다 먼저 쓴다(2026-11-21 p3_empty) */
   band?: ReferenceBandDto | null;
+  /** 문턱 판정만 있고 누백·합격선 위치·유불리를 아직 계산하지 않은 행(dep_r15). 계열을 펼칠 때 university.analyze 로 채운다 */
+  pending?: boolean;
 }
 export interface ReferenceField { label: string; provisional: boolean; items: ReferenceItem[]; best: CutoffMargin | null; bestBand?: ReferenceBandDto | null }
 export interface ReferenceUniversity { university_id: string; university_name: string; region: string | null; count: number; best: CutoffMargin | null; bestBand?: ReferenceBandDto | null; fields: ReferenceField[] }
@@ -100,16 +103,22 @@ export function referencePool(groups: ReferenceUniversityGroupDto[], overall: Ov
     const a = analyses?.[it.offering.offering_id];
     // 지원 필수 조건이 확인된 모집단위에서 내가 조건을 못 채우면 넣지 않는다(지원 조건 미충족)
     if (a?.status === "ineligible") { ineligible++; continue; }
-    const margin = cutoffMargin(a?.year_cutoffs, it.reference_percentile);
-    const band = a?.reference_band ?? null;
+    // 2026-11-21 p3_thresh(dep_r15): 서버 문턱 판정 행은 누백 없이 행에 reference_band(basis reference_threshold)를 싣는다.
+    // 리포트 읽기가 붙인 판정(analyses[id].reference_band)이 있으면 그것이 먼저다(서버가 같은 값이 나오는지 전수 대조함).
+    // 누백도 분석에 있으면 그것을 쓴다(펼칠 때 university.analyze 로 채워진 정확한 값)
+    const pct = it.reference_percentile ?? a?.reference_percentile ?? null;
+    const margin = cutoffMargin(a?.year_cutoffs, pct);
+    const band = a?.reference_band ?? thresholdBandOf(it.reference_band);
+    // 누백·합격선 위치·유불리를 아직 내 성적으로 정확히 계산하지 않은 행(문턱 판정만 있음)
+    const pending = !pct;
     if (band) {
       if (!LISTED_BANDS.includes(estimateBand(band))) { outsideBand++; continue; }
-      items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin, band });
+      items.push({ offering: it.offering, reference_percentile: pct, advantage: referenceAdvantage(pct, overall), margin, band, pending });
       continue;
     }
     if (!margin) { noCutoff++; continue; }
     if (margin.side === "below") { below++; continue; }
-    items.push({ ...it, advantage: referenceAdvantage(it.reference_percentile, overall), margin, band: null });
+    items.push({ offering: it.offering, reference_percentile: pct, advantage: referenceAdvantage(pct, overall), margin, band: null, pending });
   }
   return { items: items.sort(byMargin), below, noCutoff, ineligible, outsideBand };
 }
