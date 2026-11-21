@@ -360864,6 +360864,14 @@
         "PAGE-04"
       ],
       "summary": "화면: 3페이지 참고 묶음의 문턱 판정 행(누백 없이 행에 reference_band basis reference_threshold)을 받아들인다. 판정은 analyses 우선, 없으면 행의 판정. 계열을 처음 펼칠 때 그 계열 학과를 analyze 로 정확 계산(애니메이션). 와일드카드 카드는 그리기 전 계산. 서버가 일부를 미루면(complete false, deferred>0) 다음 열 때 조용히 최대 2번 이어 채움."
+    },
+    {
+      "date": "2026-11-21",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "화면: 3페이지 서버 렌더 방어 — 리포트 읽기·자동 재확인·참고 목록 준비·집계·담기 띠 이름에서 예상 밖 오류가 나도 Next 오류 화면 대신 받은 리포트로 그리거나 차분한 안내로 다시 연다. 모양이 어긋난 참고 행은 그 행만 뺀다. 원인 추적 로그 [jungsi-settle] error step=…(2026-11-21 운영 사고 대응)."
     }
   ],
   "p1_recruitment_score_review_verification": {

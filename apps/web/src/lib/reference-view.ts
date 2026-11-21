@@ -37,10 +37,12 @@ export function cutoffMargin(cutoffs: YearCutoffDto[] | null | undefined, p: Ref
   if (lo === null) return null;
   const upRaw = micro(p.estimated_upper_cumulative_percent_upper_bound ?? null);
   const hi = upRaw !== null && upRaw > lo ? upRaw : lo;
-  const years = [...new Set((cutoffs ?? []).map((c) => c.academic_year))].sort((a, b) => b - a);
+  // 모양이 어긋난 합격선 행(이름이 없는 등)은 건너뛴다 — 행 하나로 화면 전체가 깨지지 않게(2026-11-22)
+  const list = (Array.isArray(cutoffs) ? cutoffs : []).filter((x) => x && typeof x.published_metric === "string" && typeof x.academic_year === "number");
+  const years = [...new Set(list.map((c) => c.academic_year))].sort((a, b) => b - a);
   for (const y of years) {
     for (const metric of ["70%컷", "50%컷"] as const) {
-      const c = (cutoffs ?? []).find((x) => x.academic_year === y && !x.score_component && x.published_metric.replace(/\s+/g, "").endsWith(metric));
+      const c = list.find((x) => x.academic_year === y && !x.score_component && x.published_metric.replace(/\s+/g, "").endsWith(metric));
       const cut = c ? micro(c.cutoff_top_percent) : null;
       if (cut === null) continue;
       // 위에서 몇 %: 숫자가 작을수록 위. 여유 = 합격선 − 내 값
@@ -100,27 +102,39 @@ export function referencePool(groups: ReferenceUniversityGroupDto[], overall: Ov
   let below = 0, noCutoff = 0, ineligible = 0, outsideBand = 0;
   const items: ReferenceItem[] = [];
   for (const it of groups.flatMap((g) => g.offerings)) {
-    const a = analyses?.[it.offering.offering_id];
+    // 행 하나의 모양이 어긋나 계산이 실패해도 그 행만 빼고 나머지를 그린다(2026-11-22 운영 사고 방어)
+    try {
+      poolRow(it);
+    } catch {
+      noCutoff++;
+    }
+  }
+  return { items: items.sort(byMargin), below, noCutoff, ineligible, outsideBand };
+
+  function poolRow(it: ReferenceUniversityGroupDto["offerings"][number]) {
+    const raw = analyses?.[it.offering.offering_id];
+    const a = raw && typeof raw === "object" ? raw : undefined;
     // 지원 필수 조건이 확인된 모집단위에서 내가 조건을 못 채우면 넣지 않는다(지원 조건 미충족)
-    if (a?.status === "ineligible") { ineligible++; continue; }
+    if (a?.status === "ineligible") { ineligible++; return; }
     // 2026-11-21 p3_thresh(dep_r15): 서버 문턱 판정 행은 누백 없이 행에 reference_band(basis reference_threshold)를 싣는다.
     // 리포트 읽기가 붙인 판정(analyses[id].reference_band)이 있으면 그것이 먼저다(서버가 같은 값이 나오는지 전수 대조함).
     // 누백도 분석에 있으면 그것을 쓴다(펼칠 때 university.analyze 로 채워진 정확한 값)
     const pct = it.reference_percentile ?? a?.reference_percentile ?? null;
     const margin = cutoffMargin(a?.year_cutoffs, pct);
-    const band = a?.reference_band ?? thresholdBandOf(it.reference_band);
+    // 분석의 판정은 코드가 7단계일 때만 쓴다(모양이 어긋나면 행의 문턱 판정으로)
+    const own = a?.reference_band && typeof a.reference_band.code === "string" && a.reference_band.code in BAND_ORDER ? a.reference_band : null;
+    const band = own ?? thresholdBandOf(it.reference_band);
     // 누백·합격선 위치·유불리를 아직 내 성적으로 정확히 계산하지 않은 행(문턱 판정만 있음)
     const pending = !pct;
     if (band) {
-      if (!LISTED_BANDS.includes(estimateBand(band))) { outsideBand++; continue; }
+      if (!LISTED_BANDS.includes(estimateBand(band))) { outsideBand++; return; }
       items.push({ offering: it.offering, reference_percentile: pct, advantage: referenceAdvantage(pct, overall), margin, band, pending });
-      continue;
+      return;
     }
-    if (!margin) { noCutoff++; continue; }
-    if (margin.side === "below") { below++; continue; }
+    if (!margin) { noCutoff++; return; }
+    if (margin.side === "below") { below++; return; }
     items.push({ offering: it.offering, reference_percentile: pct, advantage: referenceAdvantage(pct, overall), margin, band: null, pending });
   }
-  return { items: items.sort(byMargin), below, noCutoff, ineligible, outsideBand };
 }
 
 export function referenceUniversities(pool: ReferencePool): ReferenceUniversity[] {

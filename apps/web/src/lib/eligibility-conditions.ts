@@ -115,7 +115,8 @@ export function withRequiredUnmet<R extends { overall?: { subjects?: SubjectResu
   let changed = false;
   const analyses: Record<string, AssessmentDto> = {};
   for (const [id, a] of Object.entries(report.analyses)) {
-    if (a.status !== "ineligible" && requiredUnmet(id, subjects)) {
+    // 모양이 어긋난 분석(객체가 아님)은 손대지 않고 그대로 둔다 — 리포트 읽기 전체가 실패하지 않게(2026-11-22)
+    if (a && typeof a === "object" && a.status !== "ineligible" && requiredUnmet(id, subjects)) {
       changed = true;
       analyses[id] = { ...a, status: "ineligible", category: "ineligible", eligibility_status: "ineligible", reason_code: "designated_subject_not_taken", reference_band: null };
     } else analyses[id] = a;

@@ -161,3 +161,12 @@ test("page 3: analysing rows (report version goes up) does not rebuild unflagged
   assert.equal(await settleCandidates(p.src, caller, later), later);
   assert.equal(p.calls.length, 0);
 });
+
+test("an unexpected (non-connection) error during automatic settling never breaks the page (2026-11-22 incident)", async () => {
+  const r = report({ report_id: "E1" });
+  const boom = port([new Error("정시터치 API 500 internal")]);
+  assert.equal(await settleAnalyses(boom.src, caller, r, ["A"]), r);
+  const built = report({ report_id: "E1", report_version: 8, candidates: full });
+  const rereadBoom = port([{ ok: true, value: built }, new Error("정시터치 API 500 reread")]);
+  assert.equal(await settleCandidates(rereadBoom.src, caller, r), built);
+});

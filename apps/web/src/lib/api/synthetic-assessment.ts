@@ -208,6 +208,9 @@ export function buildCandidates(analyses: Record<string, AssessmentDto>): Candid
     groups.get(o.university_id)!.offerings.push(item);
     if (o.wildcard_group) wildcards.push(item);
   }
+  // 합성 재현(2026-11-22 운영 사고): JUNGSI_SYNTHETIC_P3=threshold 이면 dep_r15 처럼 추천·와일드카드 없이
+  // 참고 묶음 행을 누백 없이 문턱 판정(reference_band, basis reference_threshold)만 실어 보낸다(요약 complete=false·deferred)
+  if (process.env.JUNGSI_SYNTHETIC_P3 === "threshold") return thresholdCandidates();
   return {
     // 추천 학교가 없어도 판단이 끝났으면 ready. 실제 보류만 있을 때 pending (1.7.1)
     status: groups.size || !pending.length ? "ready" : "pending",
@@ -217,6 +220,41 @@ export function buildCandidates(analyses: Record<string, AssessmentDto>): Candid
     pending_offerings: pending,
     outside_offerings: outside,
     ineligible_offerings: ineligible,
+    catalog_version: "SYNTHETIC-catalog-v1",
+  };
+}
+
+const THRESHOLD_CODES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"] as const;
+const THRESHOLD_LABELS = ["안정", "하향", "적정", "소신", "상향", "도전", "불가"];
+/** dep_r15 candidates 모양(reference_thresholds.ts thresholdBandDto·public_response_schemas reference_threshold_summary) */
+export function thresholdCandidates(): CandidatesDto {
+  const groups = new Map<string, NonNullable<CandidatesDto["reference_university_groups"]>[number]>();
+  CATALOG.forEach((o, i) => {
+    const k = hash(o.offering_id) % THRESHOLD_CODES.length;
+    const up = i % 3 === 0 ? Math.min(k + 2, THRESHOLD_CODES.length - 1) : null;
+    const band = {
+      basis: "reference_threshold" as const,
+      code: THRESHOLD_CODES[k],
+      label: THRESHOLD_LABELS[k],
+      ...(up !== null && up !== k ? { upper_code: THRESHOLD_CODES[up] } : {}),
+      source: "a",
+    };
+    if (!groups.has(o.university_id)) groups.set(o.university_id, { university_id: o.university_id, university_name: o.university_name, offerings: [] });
+    groups.get(o.university_id)!.offerings.push({ offering: o, reference_band: band });
+  });
+  return {
+    status: "ready",
+    reason_code: null,
+    basic_university_groups: [],
+    wildcards: [],
+    reference_university_groups: [...groups.values()],
+    reference_threshold_summary: {
+      basis: "reference_threshold", threshold_version: "SYNTHETIC-thresholds", universe: CATALOG.length + 5, judged: CATALOG.length, listed: CATALOG.length,
+      delivered: CATALOG.length, complete: false, deferred: 5, sources: { a: { policy_version: "SYNTHETIC-policy", approval_version: "SYNTHETIC-approval" } },
+    },
+    pending_offerings: CATALOG.map((o) => ({ offering_id: o.offering_id, category: "pending" as const, reason_code: "reference_threshold_only" })),
+    outside_offerings: [],
+    ineligible_offerings: [],
     catalog_version: "SYNTHETIC-catalog-v1",
   };
 }

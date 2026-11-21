@@ -281,6 +281,18 @@ function logSettle(kind: string, facts: Record<string, number | boolean>) {
   }
 }
 
+/** 자동 계산·화면 준비 중 예상 밖 오류. 화면은 깨지 않고 이유만 남긴다(리포트 번호·성적·학교 이름 없음) */
+export function logSettleError(step: string, e: unknown) {
+  try {
+    const name = e instanceof Error ? e.name : typeof e;
+    const msg = e instanceof Error ? e.message.slice(0, 200) : "";
+    const at = e instanceof Error ? (e.stack ?? "").split("\n").slice(1, 3).map((s) => s.trim()).join(" | ") : "";
+    console.warn(`[jungsi-settle] error step=${step} ${name}: ${msg} @ ${at}`);
+  } catch {
+    // 기록 실패는 화면에 영향 없음
+  }
+}
+
 function recheckKey(kind: string, report: ReportDto, scope: string) {
   return JSON.stringify([kind, report.report_id, report.profile_id, scope]);
 }
@@ -326,11 +338,16 @@ async function settleStep(src: JungsiSource, caller: Caller, current: ReportDto,
     try {
       return (await src.readReport(caller, st.report.report_id)) ?? st.report;
     } catch (e) {
-      if (e instanceof ConnectionError || e instanceof AccessDenied) return st.report;
-      throw e;
+      // 2026-11-22 운영 사고 방어: 자동 계산은 화면을 돕는 일이다. 연결 오류가 아닌 예상 밖 오류(Error)도 화면 전체를
+      // 오류 화면으로 깨지 않고 받은 리포트로 그린 뒤 이유만 기록한다
+      if (!(e instanceof ConnectionError || e instanceof AccessDenied)) logSettleError("reread", e);
+      return st.report;
     }
   } catch (e) {
-    if (!(e instanceof ConnectionError || e instanceof AccessDenied)) throw e;
+    if (!(e instanceof ConnectionError || e instanceof AccessDenied)) {
+      logSettleError("write", e);
+      return current;
+    }
     if (e instanceof ConnectionError && e.kind === "unavailable") {
       try {
         return (await src.readReport(caller, current.report_id)) ?? current;
@@ -379,7 +396,7 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
   // 서버 표식(candidates_stale)이 있거나, 후보가 비어 있는 동안(판정이 켜진 대학이 없던 때 만든 후보 — 추천·와일드카드 0, 또는 보류)
   // 화면을 열 때 한 번 다시 확인한다. 11-21 운영: 표식 없이 옛 후보(참고 목록 2곳)가 그대로 남았다.
   // 같은 리포트 판에서는 한 번만(alreadyRechecked), 요청 키도 판마다 같아 서버가 두 번 계산하지 않는다
-  const emptyOrPending = !!c && (c.status === "pending" || (c.basic_university_groups.length === 0 && c.wildcards.length === 0));
+  const emptyOrPending = !!c && (c.status === "pending" || ((c.basic_university_groups ?? []).length === 0 && (c.wildcards ?? []).length === 0));
   // 서버 문턱 판정(dep_r15)이 이번 요청에서 일부를 미뤘으면(reference_threshold_summary.complete=false, deferred>0)
   // 고객에게 따로 알리지 않고 다음에 열 때 한 번 더 보내 이어 채운다. 같은 판에서 최대 2번(무한 반복 금지)
   const sum = c?.reference_threshold_summary;

@@ -47,6 +47,7 @@ function cut1(s: string | null | undefined, floor: boolean): string | null {
 export function referencePercentText(p: ReferencePercentileDto | null | undefined): string | null {
   if (!p || p.status !== "reference_estimated") return null;
   const low = p.estimated_upper_cumulative_percent_all_examinees, high = p.estimated_upper_cumulative_percent_upper_bound;
+  if (typeof low !== "string") return null; // 누백 없는 행(문턱 판정만, dep_r15)·모양이 어긋난 값
   const single = roundPercent1(low);
   if (single === null || typeof high !== "string" || high.trim() === low.trim()) return single;
   const a = cut1(low, true), b = cut1(high, false);
@@ -65,7 +66,25 @@ export function thresholdBandOf(b: ReferenceBandDto | null | undefined): Referen
  * 보여 줄 값 = 참고 누백, 또는 누백 없이 온 문턱 판정(reference_band, dep_r15 2026-11-21)
  */
 export function referenceGroups(c: CandidatesDto | null | undefined): ReferenceUniversityGroupDto[] {
-  return (c?.reference_university_groups ?? [])
-    .map((g) => ({ ...g, offerings: (g.offerings ?? []).filter((it) => it?.offering && (referencePercentText(it.reference_percentile) || thresholdBandOf(it.reference_band))) }))
+  const raw = c?.reference_university_groups;
+  const groups = Array.isArray(raw) ? raw : [];
+  return groups
+    .filter((g) => g && typeof g === "object")
+    .map((g) => ({ ...g, offerings: (Array.isArray(g.offerings) ? g.offerings : []).filter(usableRow) }))
     .filter((g) => g.offerings.length > 0);
+}
+
+const text = (v: unknown) => typeof v === "string" && v.trim() !== "";
+/**
+ * 화면이 그릴 수 있는 행인지(2026-11-22 운영 사고 방어). 모집단위 이름·번호가 문자열이고, 보여 줄 값(참고 누백 또는 문턱 판정)이
+ * 있어야 한다. 모양이 어긋난 행 하나 때문에 3페이지 전체가 오류 화면이 되지 않게 그 행만 뺀다
+ */
+function usableRow(it: ReferenceUniversityGroupDto["offerings"][number]): boolean {
+  try {
+    const o = it?.offering;
+    if (!o || typeof o !== "object" || !text(o.offering_id) || !text(o.department)) return false;
+    return Boolean(referencePercentText(it.reference_percentile) || thresholdBandOf(it.reference_band));
+  } catch {
+    return false;
+  }
 }

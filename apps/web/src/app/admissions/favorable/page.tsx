@@ -13,7 +13,7 @@ import { BookLoading } from "@/components/book-loading";
 import { memberName } from "@/lib/member-name";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
-import { loadMineEager, pickedIds, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
+import { loadMineEager, logSettleError, pickedIds, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
 import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
@@ -78,7 +78,10 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
-    throw e;
+    // 2026-11-22 운영 사고: 리포트 읽기가 예상 밖 응답(연결 오류가 아닌 오류)으로 끝나면 화면 전체가 Next 오류 화면이 됐다.
+    // 이유를 기록하고, 같은 '잠시 연결할 수 없음' 안내로 바꿔 스스로 다시 열게 한다
+    logSettleError("p3-load", e);
+    return <ConnectionNotice e={new ConnectionError("unavailable", "report_read_failed")} reopenUnavailable />;
   }
 
   if (state.kind !== "ready") {
@@ -117,8 +120,13 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       </>
     );
   }
-  const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
-  const wildcards = c?.wildcards ?? [];
+  // 모양이 어긋난 행(모집단위·판단이 빠진 행)은 그 행만 빼고 그린다(2026-11-22 운영 사고 방어)
+  const groups = (c?.basic_university_groups ?? [])
+    .filter((g) => g && typeof g === "object")
+    .map((g) => ({ ...g, offerings: (g.offerings ?? []).filter((o) => o?.offering && o?.assessment && typeof o.assessment === "object") }))
+    .filter((g) => g.offerings.length > 0)
+    .sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
+  const wildcards = (c?.wildcards ?? []).filter((o) => o?.offering && o?.assessment && typeof o.assessment === "object");
   // 참고 목록(reference_university_groups)에 함께 온 행은 서버 후보 묶음에서 '보류'로도 세어진다(정식 판정이 없어서).
   // 참고 목록에서 따로 세므로 보류 숫자에서는 뺀다(2026-11-21 p3_empty: '판단을 보류한 61곳' = 홍익대 1 + 참고 60)
   const refIds = new Set((c?.reference_university_groups ?? []).flatMap((g) => (g.offerings ?? []).map((it) => it?.offering?.offering_id)));
@@ -133,7 +141,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   const stats = statsFor(src, caller, report, cur.open);
   // 필터·펼친 학교가 바뀌는 전환에서 집계 줄·띠가 학교 목록을 붙잡지 않게 조건을 경계의 key 로 준다(3페이지와 같은 이유)
   const qk = hrefWith(cur, {});
-  const known = [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering);
+  const known = [...(c.basic_university_groups ?? []).flatMap((g) => g.offerings ?? []), ...(c.wildcards ?? [])].map((i) => i?.offering).filter((o): o is NonNullable<typeof o> => Boolean(o));
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
   // 유료 데이터(유리한 학교 목록)를 그린 화면: 회원 식별 표시 + 조회 기록
@@ -144,18 +152,31 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 판정이 켜진 뒤의 자동 추천 목록은 상향까지라는 결정은 그대로다.
   // 판정이 켜진 대학이 하나라도 생기면 원래 화면(기본 학교 목록 + 와일드카드)으로 돌아간다
   const referenceMode = groups.length === 0 && wildcards.length === 0;
-  const refGroups = referenceMode ? referenceGroups(c) : [];
-  let refPool = referencePool(refGroups, report.overall?.overall, report.analyses);
-  let refWild = referenceWildcards(refPool);
-  // 서버 문턱 판정 행(dep_r15)은 누백 없이 온다. 와일드카드 카드는 누백·유불리를 바로 보이므로, 고른 카드 중 아직 계산하지 않은 곳만
-  // (최대 4곳) 그리기 전에 내 성적으로 계산해 정확한 값으로 그린다. 목록의 학과들은 계열을 펼칠 때 계산한다(reference-field.tsx)
-  const wildPending = [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
-  if (wildPending.length > 0) {
-    const settled = await settleAnalyses(src, caller, report, wildPending);
-    refPool = referencePool(refGroups, settled.overall?.overall, settled.analyses);
+  let refGroups: ReturnType<typeof referenceGroups> = [];
+  let refPool: ReturnType<typeof referencePool> = { items: [], below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 };
+  let refWild: ReturnType<typeof referenceWildcards> = { featured: [], rest: [] };
+  let refUniversities: ReturnType<typeof referenceUniversities> = [];
+  // 참고 목록 준비가 예상 밖 자료로 실패해도 화면 전체를 오류로 깨지 않는다. 기록만 남기고 빈 참고 목록(안내)으로 그린다(2026-11-22)
+  try {
+    refGroups = referenceMode ? referenceGroups(c) : [];
+    refPool = referencePool(refGroups, report.overall?.overall, report.analyses);
     refWild = referenceWildcards(refPool);
+    // 서버 문턱 판정 행(dep_r15)은 누백 없이 온다. 와일드카드 카드는 누백·유불리를 바로 보이므로, 고른 카드 중 아직 계산하지 않은 곳만
+    // (최대 4곳) 그리기 전에 내 성적으로 계산해 정확한 값으로 그린다. 목록의 학과들은 계열을 펼칠 때 계산한다(reference-field.tsx)
+    const wildPending = [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
+    if (wildPending.length > 0) {
+      const settled = await settleAnalyses(src, caller, report, wildPending);
+      refPool = referencePool(refGroups, settled.overall?.overall, settled.analyses);
+      refWild = referenceWildcards(refPool);
+    }
+    refUniversities = referenceUniversities(refPool);
+  } catch (e) {
+    logSettleError("p3-reference", e);
+    refGroups = [];
+    refPool = { items: [], below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 };
+    refWild = { featured: [], rest: [] };
+    refUniversities = [];
   }
-  const refUniversities = referenceUniversities(refPool);
   const refWildCount = refWild.featured.length + refWild.rest.length;
   const tail = (
     <>
@@ -287,15 +308,16 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
 /** 집계는 모집단위마다 따로 부른다. 펼친 학교와 와일드카드만. 받지 못한 곳은 '집계 준비 중'으로 둔다(목록은 그대로) */
 function statsFor(src: JungsiSource, caller: Caller, report: ReportDto, open: string | undefined): StatsPromise {
   const c = report.candidates;
-  const openGroup = c?.basic_university_groups.find((g) => g.university_id === open);
-  const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
+  const openGroup = (c?.basic_university_groups ?? []).find((g) => g.university_id === open);
+  const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i?.offering?.offering_id).filter((id): id is string => typeof id === "string")));
   const p = Promise.all(
     ids.map(async (id) => {
       try {
         return [id, await src.readStatistics(caller, report.report_id, id)] as const;
       } catch (e) {
-        if (e instanceof ConnectionError || e instanceof AccessDenied) return [id, null] as const;
-        throw e;
+        // 집계는 보조 줄이다. 어떤 오류든 그 줄만 '집계 준비 중'으로 두고 화면은 깨지 않는다(2026-11-22)
+        if (!(e instanceof ConnectionError || e instanceof AccessDenied)) logSettleError("p3-stats", e);
+        return [id, null] as const;
       }
     }),
   ).then((rows) => new Map<string, StatisticsDto | null>(rows));

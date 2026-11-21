@@ -107,3 +107,33 @@ test("dep_r15 threshold rows: no percentile, band on the row; analyses band wins
   assert.equal(pool.items[0].margin, null);
   assert.ok(pool.items[1].margin);
 });
+
+test("malformed rows never break page 3: bad offering/band/percentile/cutoffs are dropped row by row (2026-11-22 incident)", async () => {
+  const { referenceGroups } = await import("../src/lib/reference-percentile.ts");
+  const off = (id, dept) => ({ offering_id: id, academic_year: 2027, university_id: "M", university_name: "모양대", campus: null, department: dept, track: null, group: "가", region: null, wildcard_group: null });
+  const tb = (code) => ({ basis: "reference_threshold", code, label: code, source: "a" });
+  const c = { reference_university_groups: [
+    null,
+    { university_id: "M", university_name: "모양대", offerings: [
+      null,
+      { offering: null, reference_band: tb("target") },
+      { offering: { offering_id: "2027:80" }, reference_band: tb("target") },                  // 이름 없음
+      { offering: off("2027:81", "가학과"), reference_band: tb("bogus") },                     // 모르는 단계
+      { offering: off("2027:82", "나학과"), reference_percentile: { status: "reference_estimated" } }, // 값 없는 누백
+      { offering: off("2027:83", "다학과"), reference_band: tb("target") },
+      { offering: off("2027:84", "라학과"), reference_band: tb("upward") },
+    ] },
+    { university_id: "E", university_name: "빈대", offerings: "not-a-list" },
+  ] };
+  const groups = referenceGroups(c);
+  assert.deepEqual(groups.flatMap((g) => g.offerings.map((it) => it.offering.offering_id)), ["2027:83", "2027:84"]);
+  const analyses = {
+    "2027:83": { reference_band: { code: "nonsense" }, year_cutoffs: [null, { academic_year: 2025 }, { academic_year: 2025, published_metric: "최종등록자 70%컷", cutoff_top_percent: "9" }], reference_percentile: ref("5") },
+    "2027:84": "garbage",
+  };
+  const pool = referencePool(groups, overall, analyses);
+  assert.deepEqual(pool.items.map((i) => [i.offering.offering_id, i.band.code]), [["2027:83", "target"], ["2027:84", "upward"]]);
+  assert.equal(pool.items[0].margin.side, "above");
+  assert.doesNotThrow(() => referenceUniversities(pool));
+  assert.doesNotThrow(() => referenceWildcards(pool));
+});

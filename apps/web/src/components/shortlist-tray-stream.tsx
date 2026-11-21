@@ -12,7 +12,7 @@ import type { PickedItem } from "@/lib/shortlist";
 */
 export async function StreamTray({ report, known, src, caller, other }: { report: ReportDto; known: OfferingDto[]; src: JungsiSource; caller: Caller; other: "PAGE-03" | "PAGE-04" }) {
   const byId = new Map(known.map((o) => [o.offering_id, o]));
-  const entries = Object.entries(report.shortlist ?? {}).filter(([, e]) => e.selected);
+  const entries = Object.entries(report.shortlist ?? {}).filter(([, e]) => e && typeof e === "object" && e.selected);
   const item = (id: string, entry: ShortlistEntryDto, offering: OfferingDto | null): PickedItem => ({ offering, offering_id: id, entry, assessment: report.analyses?.[id] ?? null });
   const items = await Promise.all(
     entries.map(async ([id, e]) => {
@@ -21,8 +21,9 @@ export async function StreamTray({ report, known, src, caller, other }: { report
       try {
         return item(id, e, (await src.readOffering(caller, id))?.offering ?? null);
       } catch (err) {
-        if (err instanceof ConnectionError || err instanceof AccessDenied) return item(id, e, null);
-        throw err;
+        // 띠는 보조 영역이다. 이름을 받지 못하면(어떤 오류든) 그 곳만 이름 없이 두고 화면 전체는 깨지 않는다(2026-11-22)
+        if (!(err instanceof ConnectionError || err instanceof AccessDenied)) console.warn(`[jungsi-tray] offering.read failed: ${err instanceof Error ? err.message.slice(0, 160) : typeof err}`);
+        return item(id, e, null);
       }
     }),
   );
