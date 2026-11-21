@@ -19,6 +19,7 @@ const { ConnectionError } = await import(classesUrl);
 const caller = { accessToken: "synthetic-port-only" };
 const saved = { status: "ready" };
 const report = (patch = {}) => ({ report_id: "R", profile_id: "P", report_version: 7, analyses: {}, candidates: null, shortlist: {}, ...patch });
+const writes = (p) => p.calls.filter((c) => c.op !== "read");
 function port(replies = []) {
   const calls = [];
   const reply = (op, args) => {
@@ -42,8 +43,25 @@ test("missing analyses are computed before the list is drawn; saved ones are not
   const p = port([{ ok: true, value: done }]);
   const out = await settleAnalyses(p.src, caller, report({ analyses: { A: saved } }), ["A", "B"]);
   assert.equal(out, done);
-  assert.equal(p.calls.length, 1);
+  assert.deepEqual(p.calls.map((c) => c.op), ["ua", "read"]);
   assert.deepEqual(p.calls[0].args[3], ["B"]);
+});
+
+test("after a successful write the list is drawn from a fresh report read, not the write response (2026-11-22 rnat3f)", async () => {
+  // 쓰기 응답에는 읽기에서만 붙는 값이 빠져 옛 결과처럼 보였다. 새로 읽은 리포트로 그린다
+  const old = report({ report_id: "R-read", analyses: { A: saved }, stale_analysis_ids: ["A"] });
+  const response = report({ report_id: "R-read", report_version: 8, analyses: { A: saved } });
+  const readBack = report({ report_id: "R-read", report_version: 8, analyses: { A: { status: "pending", reference_band: { code: "target" } } }, stale_analysis_ids: [] });
+  const p = port([{ ok: true, value: response }, readBack]);
+  assert.equal(await settleAnalyses(p.src, caller, old, ["A"]), readBack);
+  assert.deepEqual(p.calls.map((c) => c.op), ["ua", "read"]);
+  const built = report({ report_id: "C-read", report_version: 8, candidates: full });
+  const builtRead = report({ report_id: "C-read", report_version: 8, candidates: full, candidates_stale: false });
+  const q = port([{ ok: true, value: built }, builtRead]);
+  assert.equal(await settleCandidates(q.src, caller, report({ report_id: "C-read" })), builtRead);
+  // 다시 읽기가 실패하면 쓰기 응답으로라도 그린다(재확인 전 리포트로 되돌리지 않는다)
+  const r = port([{ ok: true, value: response }, new ConnectionError("unavailable", "backend_dependency_unavailable")]);
+  assert.equal(await settleAnalyses(r.src, caller, report({ report_id: "R-read2" }), ["A"]), response);
 });
 
 test("nothing to do sends nothing", async () => {
@@ -59,7 +77,7 @@ test("stale analyses in view are re-checked once; reopening the same report vers
   const still = report({ report_id: "R-stale", report_version: 8, analyses: { A: saved, B: saved }, stale_analysis_ids: ["B"] });
   const p1 = port([{ ok: true, value: still }]);
   assert.equal(await settleAnalyses(p1.src, caller, r, ["A", "B"]), still);
-  assert.equal(p1.calls.length, 1);
+  assert.equal(writes(p1).length, 1);
   assert.deepEqual(p1.calls[0].args[3], ["B"]);
   const p2 = port();
   assert.equal(await settleAnalyses(p2.src, caller, r, ["B", "A"]), r);
@@ -69,7 +87,7 @@ test("stale analyses in view are re-checked once; reopening the same report vers
   const later = report({ report_id: "R-stale", report_version: 9, analyses: { A: saved, B: saved }, stale_analysis_ids: ["B"] });
   const p3 = port([{ ok: true, value: later }]);
   await settleAnalyses(p3.src, caller, later, ["A", "B"]);
-  assert.equal(p3.calls.length, 1);
+  assert.equal(writes(p3).length, 1);
 });
 
 test("a failed or rate-limited computation still draws the screen with the report it had", async () => {
@@ -95,7 +113,7 @@ test("page 3: candidates are built when missing; a stored list is kept as is", a
   const built = report({ report_id: "C1", report_version: 8, candidates: full });
   const p = port([{ ok: true, value: built }]);
   assert.equal(await settleCandidates(p.src, caller, report({ report_id: "C1" })), built);
-  assert.deepEqual(p.calls.map((c) => c.op), ["cb"]);
+  assert.deepEqual(p.calls.map((c) => c.op), ["cb", "read"]);
   const none = port();
   const ready = report({ report_id: "C2", candidates: full });
   assert.equal(await settleCandidates(none.src, caller, ready), ready);
@@ -107,7 +125,7 @@ test("page 3: stale or empty stored candidates are re-checked once per report ve
   const fresh = report({ report_id: "C3", report_version: 8, candidates: full });
   const q = port([{ ok: true, value: fresh }]);
   assert.equal(await settleCandidates(q.src, caller, stale), fresh);
-  assert.deepEqual(q.calls.map((c) => c.op), ["cb"]);
+  assert.deepEqual(q.calls.map((c) => c.op), ["cb", "read"]);
   // 표식이 없어도 비어 있는 후보(판정이 켜지기 전에 만든 것)는 한 번 다시 확인하고, 다시 열 때는 되풀이하지 않는다
   const old = report({ report_id: "C4", candidates: empty });
   const stillEmpty = report({ report_id: "C4", report_version: 8, candidates: empty });
@@ -115,6 +133,6 @@ test("page 3: stale or empty stored candidates are re-checked once per report ve
   assert.equal(await settleCandidates(r1.src, caller, old), stillEmpty);
   const r2 = port();
   assert.equal(await settleCandidates(r2.src, caller, stillEmpty), stillEmpty);
-  assert.equal(r1.calls.length, 1);
+  assert.equal(writes(r1).length, 1);
   assert.equal(r2.calls.length, 0);
 });

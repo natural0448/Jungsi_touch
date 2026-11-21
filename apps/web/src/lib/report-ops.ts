@@ -304,11 +304,25 @@ function markRechecked(kind: string, before: ReportDto, after: ReportDto, scope:
   while (rechecked.size > RECHECK_MAX) rechecked.delete(rechecked.keys().next().value as string);
 }
 
-/** 갱신 한 번. 거절·연결 실패면 갱신 전 리포트로 그린다. 응답만 503 으로 끊겼으면 저장됐을 수 있어 한 번 다시 읽는다 */
+/**
+ * 갱신 한 번. 거절·연결 실패면 갱신 전 리포트로 그린다. 응답만 503 으로 끊겼으면 저장됐을 수 있어 한 번 다시 읽는다.
+ * 쓰기가 실제로 나가 성공했으면 응답 본문 대신 리포트를 새로 읽어 그린다(2026-11-22 운영: 자료판 rnat3d→rnat3f 직후
+ * 4페이지 전남대 30줄이 재확인 200 뒤에도 옛 결과로 그려지고, 다시 열어야 새 판정이 보였다).
+ * 쓰기 응답 본문에는 리포트 읽기에서만 붙는 값(옛 자료판 표식 stale_analysis_ids·candidates_stale 등)이 빠지고,
+ * 화면 서버가 읽을 때만 하는 보정(live.ts reportOf: 지원 요건 표시)도 거치지 않는다. 버튼 방식(서버 액션 → 화면 다시 그리기)은
+ * 늘 리포트를 다시 읽어 이 차이가 드러나지 않았다. 다시 읽기는 쓰기 뒤 새 기억 열쇠로 가므로(writeGeneration) 옛 기억을 쓰지 않는다.
+ */
 async function settleStep(src: JungsiSource, caller: Caller, current: ReportDto, run: () => Promise<ReportState>): Promise<ReportDto> {
   try {
     const st = await run();
-    return st.kind === "ready" ? st.report : current;
+    if (st.kind !== "ready") return current;
+    if (st.report === current) return current; // 보낼 것이 없어 쓰기를 하지 않았다
+    try {
+      return (await src.readReport(caller, st.report.report_id)) ?? st.report;
+    } catch (e) {
+      if (e instanceof ConnectionError || e instanceof AccessDenied) return st.report;
+      throw e;
+    }
   } catch (e) {
     if (!(e instanceof ConnectionError || e instanceof AccessDenied)) throw e;
     if (e instanceof ConnectionError && e.kind === "unavailable") {
