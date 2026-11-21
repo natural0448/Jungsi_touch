@@ -84,11 +84,43 @@ test("stale analyses in view are re-checked once; reopening the same report vers
   assert.equal(await settleAnalyses(p2.src, caller, r, ["B", "A"]), r);
   assert.equal(await settleAnalyses(p2.src, caller, still, ["B", "A"]), still);
   assert.equal(p2.calls.length, 0);
-  // 리포트 판이 그 뒤로 올라가면(새 분석·담기 등) 다시 한 번 확인한다
+  // 리포트 판만 올라가고(담기 등) 분석 내용이 같으면 되풀이하지 않는다(되풀이 막기는 분석 내용 지문 기준, 2026-11-22)
   const later = report({ report_id: "R-stale", report_version: 9, analyses: { A: saved, B: saved }, stale_analysis_ids: ["B"] });
-  const p3 = port([{ ok: true, value: later }]);
+  const p3 = port();
   await settleAnalyses(p3.src, caller, later, ["A", "B"]);
-  assert.equal(writes(p3).length, 1);
+  assert.equal(p3.calls.length, 0);
+});
+
+test("a data-release switch after an earlier re-check: same version, same rows, new stale mark → re-checked on the first open with a new request key (2026-11-22 rnat3h)", async () => {
+  const vg = { status: "pending", versions: { curve: "rnat3g" } };
+  const vh = { status: "ready", band: { code: "stable" }, versions: { curve: "rnat3h" } };
+  // 앞 자료판 때: f → g 로 재확인(같은 30줄)
+  const before = report({ report_id: "R-pack", analyses: { A: { status: "pending", versions: { curve: "rnat3f" } } }, stale_analysis_ids: ["A"] });
+  const afterG = report({ report_id: "R-pack", report_version: 8, analyses: { A: vg } });
+  const p1 = port([{ ok: true, value: afterG }, afterG]);
+  await settleAnalyses(p1.src, caller, before, ["A"]);
+  // 자료판이 h 로 바뀌어 같은 판(8)에서 다시 옛 분석 표시 → 첫 열기에서 반드시 다시 계산하고, 결과로 그린다
+  const staleAgain = report({ report_id: "R-pack", report_version: 8, analyses: { A: vg }, stale_analysis_ids: ["A"] });
+  const afterH = report({ report_id: "R-pack", report_version: 9, analyses: { A: vh } });
+  const p2 = port([{ ok: true, value: afterH }, afterH]);
+  assert.equal(await settleAnalyses(p2.src, caller, staleAgain, ["A"]), afterH);
+  assert.equal(writes(p2).length, 1);
+  assert.notEqual(writes(p1)[0].args[4], writes(p2)[0].args[4]); // 요청 키가 달라 서버가 앞 응답을 되돌려주지 않는다
+});
+
+test("still stale after a re-check but the content changed (another server instance used the old release): one more try in the same render, then stop", async () => {
+  const r0 = report({ report_id: "R-two", analyses: { A: { status: "pending", versions: { curve: "old1" } } }, stale_analysis_ids: ["A"] });
+  const r1 = report({ report_id: "R-two", report_version: 8, analyses: { A: { status: "pending", versions: { curve: "old2" } } }, stale_analysis_ids: ["A"] });
+  const r2 = report({ report_id: "R-two", report_version: 9, analyses: { A: { status: "ready", versions: { curve: "new" } } } });
+  const p = port([{ ok: true, value: r1 }, r1, { ok: true, value: r2 }, r2]);
+  assert.equal(await settleAnalyses(p.src, caller, r0, ["A"]), r2);
+  assert.equal(writes(p).length, 2);
+  const r3 = report({ report_id: "R-three", analyses: { A: { status: "pending", versions: { curve: "x1" } } }, stale_analysis_ids: ["A"] });
+  const r4 = report({ report_id: "R-three", report_version: 8, analyses: { A: { status: "pending", versions: { curve: "x2" } } }, stale_analysis_ids: ["A"] });
+  const r5 = report({ report_id: "R-three", report_version: 9, analyses: { A: { status: "pending", versions: { curve: "x3" } } }, stale_analysis_ids: ["A"] });
+  const q = port([{ ok: true, value: r4 }, r4, { ok: true, value: r5 }, r5]);
+  assert.equal(await settleAnalyses(q.src, caller, r3, ["A"]), r5);
+  assert.equal(writes(q).length, 2); // 한 화면에서 최대 두 번
 });
 
 test("a failed or rate-limited computation still draws the screen with the report it had", async () => {

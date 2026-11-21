@@ -375,6 +375,22 @@ async function settleStep(src: JungsiSource, caller: Caller, current: ReportDto,
   }
 }
 
+/**
+ * 행들의 지금 분석 내용 지문(16자). 판단에 쓰인 버전(versions)과 화면에 보이는 결과(상태·판정·환산·누백)만 본다 —
+ * 시각처럼 읽을 때마다 바뀔 수 있는 값으로 되풀이 막기가 풀리지 않게 한다
+ */
+export async function analysesFingerprint(report: ReportDto, ids: string[]): Promise<string> {
+  const pick = (a: AssessmentDto | undefined) =>
+    a && typeof a === "object"
+      ? [a.versions ?? null, a.status ?? null, a.category ?? null, a.band?.code ?? null, a.reference_band?.code ?? null, a.reference_band?.upper_code ?? null,
+        a.conversion?.converted_score ?? a.converted_score ?? null, a.percentile?.top_percent ?? a.converted_percentile ?? null,
+        a.reference_percentile?.estimated_upper_cumulative_percent_all_examinees ?? null, a.decision_evidence?.version ?? null]
+      : null;
+  const body = JSON.stringify([...ids].sort().map((id) => [id, pick(report.analyses?.[id])]));
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
+}
+
 /** 보이는 모집단위의 분석을 채우고(없는 것만), 옛 자료판 분석이면 다시 확인한 리포트를 돌려준다 */
 export async function settleAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<ReportDto> {
   const targets = canonicalOfferingIds(ids).slice(0, 100);
@@ -384,19 +400,30 @@ export async function settleAnalyses(src: JungsiSource, caller: Caller, report: 
     const base = current;
     current = await settleStep(src, caller, base, () => ensureAnalyses(src, caller, base, targets));
   }
-  const stale = new Set(current.stale_analysis_ids ?? []);
-  const staleHere = targets.filter((id) => stale.has(id) && current.analyses?.[id]);
-  const scope = staleHere.join(",");
-  const skip = staleHere.length > 0 && alreadyRechecked("analyses", current, scope);
-  if (staleHere.length > 0 && !skip) {
-    const base = current;
-    const intent = await stableIntent(base, scope);
-    current = await settleStep(src, caller, base, () => refreshAnalyses(src, caller, base, staleHere, intent));
-    markRechecked("analyses", base, current, scope);
-  }
-  if (staleHere.length > 0) {
+  // 서버가 옛 자료판으로 계산됐다고 표시한 보이는 행은 모두 다시 계산한다.
+  // 되풀이 막기(2026-11-22 운영: 판 rnat3h 적용 직후 4페이지 중앙대 첫 열기에서 옛 결과가 보이고 다시 열어야 새 판정이 나왔다):
+  //  - 전에는 '리포트 판' 기준이라, 앞 자료판 때 같은 판·같은 30줄을 재확인한 기록이 남아 있으면 새 자료판의 재확인을 건너뛰었고,
+  //    요청 키도 (리포트 판·범위)로만 정해 서버가 앞 자료판 때의 응답을 그대로 되돌려줄 수 있었다.
+  //  - 서버는 지금 자료판 표식 자체를 응답에 싣지 않는다(stale_analysis_ids 만 준다). 그래서 '그 행들의 지금 분석 내용'의 지문을
+  //    열쇠와 요청 키에 넣는다. 자료판이 바뀌어 다시 옛 분석이 되면 지문이 달라 반드시 다시 보내고, 다시 계산해도 서버가 같은 분석을
+  //    돌려주며 계속 옛 분석이라 하면 지문이 같아 되풀이하지 않는다.
+  //  - 다시 계산했는데도 일부가 여전히 옛 자료판이고 내용은 달라졌으면(자료판이 바뀌는 순간 서버의 다른 인스턴스가 앞 판으로 계산한 경우)
+  //    같은 화면을 그리는 동안 한 번 더 보낸다. 그래도 남으면 그 결과로 그린다(최대 두 번).
+  for (let round = 0; round < 2; round++) {
+    const stale = new Set(current.stale_analysis_ids ?? []);
+    const staleHere = targets.filter((id) => stale.has(id) && current.analyses?.[id]);
+    if (staleHere.length === 0) break;
+    const scope = `${staleHere.join(",")}@${await analysesFingerprint(current, staleHere)}`;
+    const skip = recheckTries("analyses", current, scope, true) >= 1;
+    if (!skip) {
+      const base = current;
+      const intent = await stableIntent(base, scope);
+      current = await settleStep(src, caller, base, () => refreshAnalyses(src, caller, base, staleHere, intent));
+      markRechecked("analyses", base, current, scope, true);
+    }
     const still = new Set(current.stale_analysis_ids ?? []);
-    logSettle("analyses", { stale: staleHere.length, sent: !skip, skipped: skip, after_stale: staleHere.filter((id) => still.has(id)).length });
+    logSettle("analyses", { round, stale: staleHere.length, sent: !skip, skipped: skip, after_stale: staleHere.filter((id) => still.has(id)).length });
+    if (skip) break;
   }
   return current;
 }
