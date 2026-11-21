@@ -16,7 +16,7 @@ export type Filter = (typeof FILTERS)[number]["v"];
 export interface Query {
   has?: Filter;
   open?: string; // 펼친 학교 university_id
-  field?: string; // 펼친 학교 안에서 열어 둔 계열(계열 이름 또는 '계열 확인 중')
+  field?: string; // 펼친 학교 안에서 열어 둔 계열(계열 이름 또는 '기타')
 }
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?.trim().slice(0, 128) || undefined;

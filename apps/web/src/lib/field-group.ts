@@ -6,7 +6,7 @@ import data from "./field-groups-2027.json";
     '2025 분류 참고'를 함께 적는다. 2027 대학 모집요강의 계열(guide_2027)은 '2027 모집요강 계열',
     2027 요강 초안(draft_2027)은 '2027 요강 초안 참고'라고 적는다. 어느 것도 확정 분류로 세지 않는다.
   - 자유전공은 모집단위 이름에 자유·자율·무전공이 적힌 별도 유형이다. 7계열 가운데 하나로 넣지 않는다.
-  - 자료에 없는 모집단위는 null — '계열 확인 중'으로 보이고 어느 계열에도 넣지 않는다.
+  - 자료에 없는 모집단위는 null — '기타'로 묶어 보이고 7계열·자유전공 어디에도 넣지 않는다(대표님 결정 2026-11-21, 계열 자료가 올 때까지).
   - 계열은 학과 내용의 표시 축일 뿐이다. 대학 환산식 묶음·실기 여부·분석 가능 여부를 뜻하지 않는다.
 */
 export const FIELD_GROUPS = ["인문", "사회", "교육", "공학", "자연", "의약", "예체능", "자유전공"] as const;
@@ -23,7 +23,7 @@ export interface FieldGroup {
   provisional: boolean;
 }
 /** 계열을 모르는 모집단위를 묶을 때 쓰는 이름(계열이 아니다) */
-export const FIELD_UNKNOWN = "계열 확인 중";
+export const FIELD_UNKNOWN = "기타";
 
 const BY_PK = new Map<number, FieldGroupName>();
 for (const name of FIELD_GROUPS) for (const pk of (data.groups as Record<string, number[]>)[name] ?? []) BY_PK.set(pk, name);
@@ -41,12 +41,12 @@ export function fieldGroupOf(offeringId: string): FieldGroup | null {
   return { name, basis, note: FIELD_BASIS_NOTE[basis], provisional: basis === "2025" };
 }
 
-/** 묶음 이름: 계열 이름 또는 '계열 확인 중' */
+/** 묶음 이름: 계열 이름 또는 '기타' */
 export function fieldLabelOf(offeringId: string): string {
   return fieldGroupOf(offeringId)?.name ?? FIELD_UNKNOWN;
 }
 
-/** 모집단위들을 계열 순서(7계열 → 자유전공 → 확인 중)로 묶는다. 빈 묶음은 내지 않는다 */
+/** 모집단위들을 계열 순서(7계열 → 자유전공 → 기타)로 묶는다. 빈 묶음은 내지 않는다 */
 export function groupByField<T>(items: T[], idOf: (x: T) => string): { label: string; provisional: boolean; items: T[] }[] {
   const order: string[] = [...FIELD_GROUPS, FIELD_UNKNOWN];
   const buckets = new Map<string, { label: string; provisional: boolean; items: T[] }>();

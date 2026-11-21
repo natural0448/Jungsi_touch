@@ -7,7 +7,7 @@ const TITLE: Record<FieldBasis, string | null> = {
   free: null,
 };
 
-/** 학과 계열 표시. 2025 분류를 참고한 값은 그 사실을 함께 적고, 모르면 '계열 확인 중'이라고만 적는다 */
+/** 학과 계열 표시. 2025 분류를 참고한 값은 그 사실을 함께 적고, 모르면 '기타'라고만 적는다 */
 export function FieldTag({ id }: { id: string }) {
   const f = fieldGroupOf(id);
   if (!f) return <span className="fg none">{FIELD_UNKNOWN}</span>;
