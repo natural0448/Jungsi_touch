@@ -7,7 +7,7 @@ import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import type { ScoresInput } from "@/lib/dto";
 import { csatReleaseOn } from "@/lib/correction";
 import { correctionInputClosed } from "@/lib/csat-release";
-import { EXAM } from "@/lib/exam";
+import { EXAM, csatOpen } from "@/lib/exam";
 
 import type { ScoreDefaults } from "./score-form";
 
@@ -69,6 +69,9 @@ export async function submitScores(prev: ScoreFormState, fd: FormData): Promise<
     sl_grade: int(fd, "sl_grade"),
   };
   const fail = (error: string, field?: string): ScoreFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
+  // 2026-11-23 0시 수능 가채점 전환 뒤에는 9월 모의평가 표준점수를 받지 않는다(서버도 9월 단계를 닫는다). 전환 전에 열어 둔 화면에서 보내도
+  // 서버로 보내지 않아 입력 횟수를 쓰지 않는다. 저장한 9월 리포트는 지난 기록에서 그대로 볼 수 있다
+  if (csatOpen()) return fail("9월 모의평가 성적 입력은 수능 가채점 전환과 함께 끝났습니다. 화면을 새로 고치면 수능 가채점 원점수를 넣을 수 있습니다. 입력 횟수는 쓰이지 않았습니다.");
   const ks = int(fd, "korean"), ms = int(fd, "math"), i1 = int(fd, "inq1_score"), i2 = int(fd, "inq2_score");
   const s1 = String(fd.get("inq1") ?? ""), s2 = String(fd.get("inq2") ?? "");
   if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !s1 || !s2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");

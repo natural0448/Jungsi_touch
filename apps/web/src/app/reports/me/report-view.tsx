@@ -4,6 +4,7 @@ import type { OverallAnalysisDto } from "@/lib/dto";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import { pctText } from "@/lib/format";
+import { provisionalReason, spanText, topRangeText, tripleText } from "@/lib/provisional-report";
 import type { PickedItem } from "@/lib/shortlist";
 
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
@@ -86,6 +87,162 @@ export function OverallCard({ a, fold = true }: { a: OverallAnalysisDto; fold?: 
         )}
       </div>
     </section>
+  );
+}
+
+/*
+  수능 가채점 리포트(2026-11-23 전환, 서버 provisional_estimate). 원점수로 추정한 범위만 보인다.
+  - 전체 위치: '가채점 기준 추정 상위누백 a~b%'(서버 top_percent_range, 0.01% 단위 그대로)
+  - 과목: 원점수 · 예상 표준점수 범위 · 예상 백분위·등급 범위. 화면이 다시 계산하지 않는다.
+  - 계산하지 않은 곳은 사유 문장(provisional_conversion_unavailable 등)을 그대로 보인다.
+*/
+export function ProvisionalOverallCard({ a, fold = true }: { a: OverallAnalysisDto; fold?: boolean }) {
+  const o = a.overall;
+  const total = a.total_standard_range ?? o.total_standard_score_range ?? null;
+  const top = o.status === "estimated_range" ? topRangeText(o.top_percent_range) : null;
+  const more = (
+    <>
+      <p className="tie">
+        채점표로 맞혀 본 원점수를 정시터치 가채점 변환표로 바꿔, 과목마다 예상 표준점수를 낮게·가운데·높게 세 가지로 잡았습니다.
+        {" "}상위누백 범위는 세 경우를 모두 넣어 가장 좋게 본 끝과 가장 나쁘게 본 끝을 함께 적은 것입니다.
+      </p>
+      <p className="tie">
+        공식 성적이 아니며, 수능 성적표가 배부되면 실채점 성적으로 다시 확인해야 합니다. 합격 가능성이나 오차 범위를 뜻하지 않습니다.
+      </p>
+    </>
+  );
+  return (
+    <section className="rp-overall" aria-label="가채점 기준 전체 성적 위치">
+      <div className="n">
+        <small>국어·수학·탐구 2과목 예상 표준점수 합</small>
+        {tripleText(total) ? <b className="num big">{tripleText(total)}</b> : <b className="wait">─</b>}
+        {tripleText(total) && <span className="unit">점</span>}
+        {total && total.low !== total.high && <p className="tie">가운데 값 <b className="num">{total.central}</b>점</p>}
+      </div>
+      <div className="n">
+        <small>가채점 기준 추정 상위누백</small>
+        {top ? (
+          <>
+            <b className="num big">{top}%</b>
+            <span className="est">추정</span>
+            <p className="tie">전체 응시자를 국어·수학·탐구 2과목 표준점수 합 순서로 줄 세웠을 때 내가 위에서 몇 % 안에 드는지를, 가채점 원점수로 추정한 범위입니다.</p>
+            {fold ? (
+              <details className="tie-more">
+                <summary>이 범위는 어떻게 계산했나요?</summary>
+                {more}
+              </details>
+            ) : (
+              more
+            )}
+          </>
+        ) : (
+          <>
+            <b className="wait">─</b>
+            <p className="tie">{provisionalReason(o.reason_code)}</p>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** 가채점 성적표: 입력 성적표와 같은 틀. 상대평가 과목은 원점수와 예상 범위, 절대평가는 원점수로 정해진 등급 */
+export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
+  const by = new Map(a.subjects.map((s) => [s.area, s]));
+  const k = by.get("korean"), m = by.get("math"), q1 = by.get("inquiry1"), q2 = by.get("inquiry2");
+  const g = a.absolute_grades;
+  const sl = (a.second_language ?? null) as { subject: string; grade: number | null; raw_score?: number } | null;
+  const na = <span className="rs-na" aria-label="해당 없음">─</span>;
+  // 이 원점수에 추정이 없는 칸은 '추정 없음'으로 확정 표시한다(계산 중이 아니다)
+  const none = <span className="rs-na">추정 없음</span>;
+  const raw = (s?: (typeof a.subjects)[number]) => (typeof s?.raw_score === "number" ? <b className="num">{s.raw_score}</b> : na);
+  const std = (s?: (typeof a.subjects)[number]) => {
+    const t = s?.standard_score_range;
+    return t ? <><b className="num">{tripleText(t)}</b>{t.low !== t.high && <small className="rs-mid"> 가운데 {t.central}</small>}</> : none;
+  };
+  const span = (r: { low: number; high: number } | null | undefined, unit = "") => (spanText(r) ? <b className="num">{spanText(r)}{unit}</b> : none);
+  const pctl = (s?: (typeof a.subjects)[number]) => (s?.standard_score_range ? span(s.percentile_range) : none);
+  const grade = (s?: (typeof a.subjects)[number]) => span(s?.grade_range);
+  return (
+    <div className="rp-sheet" role="group" aria-label="가채점 과목별 예상 성적표">
+      <table>
+        <colgroup>
+          <col className="c-head" />
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => <col key={i} className="c-main" />)}
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col" rowSpan={2} className="corner">구분</th>
+            <th scope="col" rowSpan={2}>한국사<br />영역</th>
+            <th scope="col" rowSpan={2}>국어<br />영역</th>
+            <th scope="col" rowSpan={2}>수학<br />영역</th>
+            <th scope="col" rowSpan={2}>영어<br />영역</th>
+            <th scope="colgroup" colSpan={2}>탐구 영역</th>
+            <th scope="col" rowSpan={2}>제2외국어<br />/한문 영역</th>
+          </tr>
+          <tr>
+            <th scope="col" className="sub">탐구 1</th>
+            <th scope="col" className="sub">탐구 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">선택과목</th>
+            <td className="na">{na}</td>
+            <td>{k?.choice ?? "─"}</td>
+            <td>{m?.choice ?? "─"}</td>
+            <td className="na">{na}</td>
+            <td>{q1?.subject ?? "─"}</td>
+            <td>{q2?.subject ?? "─"}</td>
+            <td>{sl ? sl.subject : <span className="rs-na">미응시</span>}</td>
+          </tr>
+          <tr>
+            <th scope="row">원점수</th>
+            <td className="na">{na}</td>
+            <td>{raw(k)}</td>
+            <td>{raw(m)}</td>
+            <td className="na">{na}</td>
+            <td>{raw(q1)}</td>
+            <td>{raw(q2)}</td>
+            <td>{sl && typeof sl.raw_score === "number" ? <b className="num">{sl.raw_score}</b> : na}</td>
+          </tr>
+          <tr className="key">
+            <th scope="row">예상 표준점수</th>
+            <td className="na">{na}</td>
+            <td>{std(k)}</td>
+            <td>{std(m)}</td>
+            <td className="na">{na}</td>
+            <td>{std(q1)}</td>
+            <td>{std(q2)}</td>
+            <td className="na">{na}</td>
+          </tr>
+          <tr>
+            <th scope="row">예상 백분위</th>
+            <td className="na">{na}</td>
+            <td>{pctl(k)}</td>
+            <td>{pctl(m)}</td>
+            <td className="na">{na}</td>
+            <td>{pctl(q1)}</td>
+            <td>{pctl(q2)}</td>
+            <td className="na">{na}</td>
+          </tr>
+          <tr>
+            <th scope="row">등급<small className="sf-rowsub">절대평가는 확정 · 그 밖은 예상</small></th>
+            <td>{g.한국사 ? <b className="num">{g.한국사}</b> : <span className="rs-na">안 넣음</span>}</td>
+            <td>{grade(k)}</td>
+            <td>{grade(m)}</td>
+            <td>{g.영어 ? <b className="num">{g.영어}</b> : <span className="rs-na">안 넣음</span>}</td>
+            <td>{grade(q1)}</td>
+            <td>{grade(q2)}</td>
+            <td>{sl && typeof sl.grade === "number" ? <b className="num">{sl.grade}</b> : na}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p className="rp-sheet-note">
+        예상 표준점수·백분위·등급은 가채점 변환표로 추정한 범위입니다(낮음~높음). 성적표의 실제 값과 다를 수 있습니다.
+        영어·한국사·제2외국어/한문은 절대평가라 원점수로 등급이 정해지며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.
+      </p>
+    </div>
   );
 }
 

@@ -11,6 +11,7 @@ import type {
   OfferingDto,
   OwnReportListDto,
   ProfileDto,
+  ProvisionalScoresInput,
   RecruitmentDto,
   ReportDto,
   SampleReportDto,
@@ -82,8 +83,8 @@ export interface JungsiSource {
   /** recruitment.read (일반·유료). 없는 모집행이면 null */
   readRecruitment(caller: Caller, offeringId: string): Promise<RecruitmentDto | null>;
 
-  /** score-profile.create (일반·유료). 새 프로필. 검증 실패는 서버 오류 코드 */
-  createScoreProfile(caller: Caller, scores: ScoresInput, confirmed: boolean, idempotencyKey: string): Promise<Result<ProfileDto>>;
+  /** score-profile.create (일반·유료). 새 프로필. 검증 실패는 서버 오류 코드. stage 를 주면 그 입력 단계(provisional 등)로 저장한다 */
+  createScoreProfile(caller: Caller, scores: ScoresInput | ProvisionalScoresInput, confirmed: boolean, idempotencyKey: string, stage?: string): Promise<Result<ProfileDto>>;
   /** overall.analyze (일반·유료). report_id 가 있으면 그 리포트의 새 revision */
   analyzeOverall(caller: Caller, body: { profile_id: string; report_id?: string; expected_version?: number }, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** report.read (본인). 없거나 남의 리포트면 null(서버는 같은 404). 일반 회원 응답에는 유료 필드가 없다 */

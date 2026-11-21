@@ -14,7 +14,8 @@ import { BookLoading } from "@/components/book-loading";
 import { memberName } from "@/lib/member-name";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
-import { loadMineEager, logSettleError, pickedIds, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
+import { loadMineEager, logSettleError, pickedIds, provisionalOnly, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
+import { ProvisionalPendingGate } from "@/components/provisional-pending";
 import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
@@ -105,6 +106,15 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   }
 
   const report = state.report;
+  // 수능 가채점 리포트(2026-11-23 전환): 학교별 가채점 판정 자료가 아직 없어 후보를 만들지 않는다(settleCandidates 도 보내지 않음)
+  if (provisionalOnly(report)) {
+    return (
+      <div className="wrap pg-body fv">
+        <ScoreBasis overall={report.overall} emptyText="" />
+        <ProvisionalPendingGate catalogHref={`${route.path}?view=catalog`} />
+      </div>
+    );
+  }
   const c = report.candidates;
   if (!c) {
     return (

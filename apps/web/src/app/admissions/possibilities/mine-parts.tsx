@@ -3,7 +3,8 @@ import { ScoreBasis } from "@/components/score-basis";
 import { StreamTray } from "@/components/shortlist-tray-stream";
 import type { Caller, JungsiSource } from "@/lib/api";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
-import { pickedIds } from "@/lib/report-ops";
+import { pickedIds, provisionalOnly } from "@/lib/report-ops";
+import { PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
 import { ConditionsBlock, Detail } from "./parts";
 
 /*
@@ -26,8 +27,12 @@ export function MineBasis({ report }: { report: ReportDto | null }) {
 }
 
 export function MineLegend({ report }: { report: ReportDto | null }) {
-  return report ? <CategoryLegend /> : null;
+  return report && !provisionalOnly(report) ? <CategoryLegend /> : null;
 }
+
+/** 수능 가채점 리포트의 칸(2026-11-23 전환): 학교별 가채점 판정 자료가 아직 없다 */
+const PROV = <span className="need" title={PROVISIONAL_PENDING_TEXT}>가채점 판정 준비 중</span>;
+const DASH = <span className="need" aria-label="해당 없음">─</span>;
 
 // '이 범위 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).
 // 첫 분석·옛 자료판 재확인은 화면을 그리기 전에 서버가 조용히 끝낸다(report-ops settleAnalyses)
@@ -38,6 +43,9 @@ const NO_DATA = <span className="need" title="이 모집단위는 아직 분석 
 /** 한 줄의 내 환산점수·지원가능성·환산 유불리·담기 칸 */
 export function MineCells({ report, id }: { report: ReportDto | null; id: string }) {
   const a = cellOf(report, id);
+  if (report && provisionalOnly(report)) {
+    return <><span className="c-score r">{DASH}</span><span className="c-st">{PROV}</span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
+  }
   if (a === null) {
     return <><span className="c-score r">{NO_DATA}</span><span className="c-st">{NO_DATA}</span><span className="c-adv r">{NO_DATA}</span><span className="c-pick">{report && <PickButton id={id} on={pickedIds(report).has(id)} />}</span></>;
   }
@@ -53,6 +61,7 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
 
 /** 펼친 카드의 환산·누백·판단 카드 */
 export function MineDetail({ report, o }: { report: ReportDto | null; o: OfferingDto }) {
+  if (report && provisionalOnly(report)) return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} />;
 }
 

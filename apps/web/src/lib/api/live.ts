@@ -403,7 +403,8 @@ export const liveSource: JungsiSource = {
   readSnapshotPart: (caller, snapshotId, partId) => callBytes(caller, `/admission-history/snapshots/${snapshotSegment(snapshotId)}${qs({ part_id: partId })}`),
   readRecruitment: (caller, id) => orNull(call<RecruitmentDto>(caller, `/offerings/${enc(id)}/recruitment`)),
 
-  createScoreProfile: (caller, scores, confirmed, key) => write<ProfileDto>(caller, "POST", "/score-profiles", { scores, confirmed }, key),
+  // stage 는 수능 가채점(provisional)처럼 단계를 밝혀 저장할 때만 보낸다(서버 score-profile.create 선택 필드). 9월 모의평가는 지금처럼 보내지 않는다
+  createScoreProfile: (caller, scores, confirmed, key, stage) => write<ProfileDto>(caller, "POST", "/score-profiles", stage ? { scores, confirmed, stage } : { scores, confirmed }, key),
   analyzeOverall: (caller, body, key) => write<ReportDto>(caller, "POST", "/overall-reports", body, key),
   readReport: (caller, reportId) => (caller.accessToken ? reportOf(caller.accessToken, reportId) : orNull(call<ReportDto>(caller, `/reports/${enc(reportId)}`))),
   listOwnReports: (caller, q) => call<OwnReportListDto>(caller, `/me/reports${qs({ ...q })}`),

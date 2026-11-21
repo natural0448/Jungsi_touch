@@ -121,14 +121,14 @@ export interface ScoresInput {
 }
 
 /**
-  수능 가채점 입력(제안 계약 — 서버 미구현, 수능 뒤 연결 예정). 원점수만 보낸다.
-  표준점수·백분위·상대평가 등급은 서버가 예상 등급컷 자료로 추정하고, 절대평가 등급은 서버가 고정 구간으로 정한다.
+  수능 가채점 입력(서버 dep_r19c validateRawScoreStructure). 원점수만 보낸다. 국어·수학 선택과목은 변환표를 고르는 데
+  필요해 필수다. 표준점수 범위·백분위·상대평가 등급은 서버가 가채점 변환표로 추정하고, 절대평가 등급은 서버가 고정 구간으로 정한다.
 */
 export interface ProvisionalScoresInput {
   exam_id: string;
   pack_version: string;
-  korean: { raw_score: number; choice?: string };
-  math: { raw_score: number; choice?: string };
+  korean: { raw_score: number; choice: string };
+  math: { raw_score: number; choice: string };
   inquiry: { subject: string; raw_score: number }[];
   english_raw?: number;
   korean_history_raw?: number;
@@ -158,6 +158,24 @@ export interface SubjectResultDto {
   top_percent_exclusive: string | null;
   top_percent_inclusive: string | null;
   basis: string | null;
+  /* 수능 가채점(score_basis provisional_estimate)에서만 온다. 그때 standard_score 는 null 이다 */
+  raw_score?: number;
+  /** 표준점수 추정 범위(낮음·중앙·높음). null 이면 이 원점수의 추정이 없다(provisional_conversion_unavailable) */
+  standard_score_range?: ProvisionalTripleDto | null;
+  percentile_range?: { low: number; high: number } | null;
+  grade_range?: { low: number; high: number } | null;
+}
+
+/** 가채점 범위(낮음·중앙·높음) */
+export interface ProvisionalTripleDto {
+  low: number;
+  central: number;
+  high: number;
+}
+/** 가채점 전체 상위 누백 범위. 0.01% 단위 문자열(best=좋은 쪽 끝, worst=나쁜 쪽 끝) */
+export interface ProvisionalTopRangeDto {
+  best: string;
+  worst: string;
 }
 
 /**
@@ -177,7 +195,8 @@ export interface ComboPositionDto {
 }
 
 export interface OverallResultDto {
-  status: "observed" | "estimated" | "pending";
+  /** estimated_range: 수능 가채점 범위 결과(top_percent_range) */
+  status: "observed" | "estimated" | "pending" | "estimated_range";
   reason_code: string | null;
   top_percent: string | null;
   inclusive_top_percent: string | null;
@@ -188,6 +207,10 @@ export interface OverallResultDto {
   population_id: string | null;
   model_version: string | null;
   data_kind?: DataKind | null; // 1.7.0: 관측 도수인지 자체 추정 가중치인지
+  /* 수능 가채점(provisional_overall_position)에서만 온다 */
+  top_percent_range?: ProvisionalTopRangeDto | null;
+  exclusive_top_percent_range?: ProvisionalTopRangeDto | null;
+  total_standard_score_range?: ProvisionalTripleDto;
 }
 
 /** 누적의 근거. observed_counts=실제 도수, estimated_weights=공식 주변도수로 자체 추정한 가중치 */
@@ -210,6 +233,15 @@ export interface OverallAnalysisDto {
   second_language?: SecondLanguageDto | null;
   overall: OverallResultDto;
   combinations?: ComboPositionDto[] | null; // 제안 필드(위 ComboPositionDto 설명). 서버가 줄 때만 존재
+  /* 수능 가채점(score_basis provisional_estimate, input_kind provisional_raw)에서만 온다. 그때 total_standard_score 는 null */
+  input_kind?: string;
+  total_standard_range?: ProvisionalTripleDto;
+}
+
+/** 수능 가채점 원점수로 만든 전체 분석인가(서버 PROVISIONAL_SCORE_BASIS). 이때 표준점수 칸은 범위로만 온다 */
+export const PROVISIONAL_SCORE_BASIS = "provisional_estimate";
+export function isProvisionalOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return !!a && (a.score_basis === PROVISIONAL_SCORE_BASIS || a.input_kind === "provisional_raw");
 }
 
 export interface ShortlistEntryDto {

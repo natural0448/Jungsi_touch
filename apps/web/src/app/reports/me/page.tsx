@@ -7,7 +7,9 @@ import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, ScoreInputStatusDto } from "@/lib/dto";
-import { EXAM, examTitle, examTypeLabel, stageOf } from "@/lib/exam";
+import { EXAM, MOCK_EXAM, csatOpen, examTitle, examTypeLabel, stageOf } from "@/lib/exam";
+import { isProvisionalReport, provisionalDefaults } from "@/lib/provisional-report";
+import { AutoReopen } from "@/components/auto-reopen";
 import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
@@ -18,7 +20,8 @@ import { RunAnalysis } from "@/components/run-analysis";
 import { BookLoading } from "@/components/book-loading";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
-import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "./report-view";
+import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "./report-view";
+import { PastRecords, pastHref } from "./past-records";
 import { InputStatus, NoInput, canInput } from "./rights";
 import { CorrectionPanel } from "./correction";
 import { canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/correction";
@@ -31,6 +34,10 @@ import "./report.css";
 
 const route = page("PAGE-02");
 const FEATURES = ["수능(모의평가) 성적을 넣으면 전체 응시자 중 내 위치", "담아 둔 학교마다 내 환산점수 · 지원가능성 · 환산 유불리를 한 장에", "상담용 리포트 인쇄"];
+// 2026-11-23 0시 수능 가채점 전환 뒤 문구(lib/exam csatOpen). 전환 전에는 위 문구 그대로다
+const CSAT_FEATURES = ["수능 가채점 원점수를 넣으면 전체 응시자 중 내 예상 위치(범위)", "과목마다 예상 표준점수 · 백분위 · 등급 범위", "저장한 9월 모의평가 리포트는 지난 기록으로 그대로"];
+const DESC = "수능(모의평가) 성적을 넣으면 전체 응시자 중 내 위치를 보여 드립니다. 이용권이 있으면 담아 둔 학교의 분석까지 한 장으로 정리합니다.";
+const CSAT_DESC = "수능 가채점 원점수를 넣으면 전체 응시자 중 내 예상 위치를 범위로 보여 드립니다. 저장한 9월 모의평가 리포트는 지난 기록에서 볼 수 있습니다.";
 export const metadata: Metadata = { title: route.label };
 
 /**
@@ -43,6 +50,9 @@ export const metadata: Metadata = { title: route.label };
  * 응답 모양: lib/dto.ts (API_DTO_계약 report·profile·overall-analysis)
  */
 export default async function Page({ searchParams }: PageProps<"/reports/me">) {
+  // 9월 모의평가 → 수능 가채점 전환(2026-11-23 0시 KST)은 화면이 요청마다 지금 시각으로 고른다(lib/exam).
+  // 전환 전에는 지금까지의 9월 모의평가 화면 그대로다
+  const csat = csatOpen();
   const caller = await getCaller();
   const src = source();
   const { session, down } = await sessionOrDown(src, caller);
@@ -50,17 +60,33 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     <PageHead
       kicker={`PAGE ${route.number}`}
       title={route.label}
-      desc="수능(모의평가) 성적을 넣으면 전체 응시자 중 내 위치를 보여 드립니다. 이용권이 있으면 담아 둔 학교의 분석까지 한 장으로 정리합니다."
+      desc={csat ? CSAT_DESC : DESC}
     />
   );
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
   if (lockFor(session, route)) return <>{head}<LoginGate /></>;
   const paid = session?.member_tier === "paid";
-  if (!paid) return <>{head}<PaidGate kind="paid" route={route} features={FEATURES} /></>;
+  if (!paid) return <>{head}<PaidGate kind="paid" route={route} features={csat ? CSAT_FEATURES : FEATURES} /></>;
 
   const sp = await searchParams;
-  // 수능 가채점 예상 성적 미리보기(2026-11-20 대표님 결정): 저장하지 않는 조회라 입력 상태·리포트를 읽지 않는다
-  if (sp.preview === "csat") {
+  // 지난 기록(전환 뒤): 저장한 9월 모의평가 리포트를 읽기 전용으로 본다(대표님 결정: 9월 기록은 남긴다)
+  if (csat && sp.past === "1") {
+    const want = typeof sp.report === "string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(sp.report) ? sp.report : null;
+    return (
+      <>
+        {head}
+        <MemberMark kind="report" path={viewPath(route.path, sp)} />
+        <div className="wrap pg-body rp">
+          <Suspense fallback={<BookLoading compact text="지난 기록을 불러오고 있습니다." />}>
+            <PastRecords src={src} caller={caller} reportId={want} />
+          </Suspense>
+        </div>
+      </>
+    );
+  }
+  // 수능 가채점 예상 성적 미리보기(2026-11-20 대표님 결정): 저장하지 않는 조회라 입력 상태·리포트를 읽지 않는다.
+  // 전환 뒤에는 실제 가채점 입력이 열리므로 미리보기를 내리고 아래 리포트 화면으로 그린다
+  if (!csat && sp.preview === "csat") {
     return (
       <>
         {head}
@@ -96,6 +122,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
     await rememberCurrentReport(src, caller, current);
     report = current ? await finishEagerReport(src, caller, await eagerP, current) : null;
   } catch (e) {
+    // 전환 직후 가채점 입력 설정이 서버에 아직 닿지 않았을 때(score_stage_unavailable 등)도 고객에게 오류 화면을 보이지 않는다.
+    // 차분한 한 줄과 지난 기록 길만 두고 몇 초 뒤 스스로 다시 연다(같은 주소 1분에 2번까지)
+    if (csat && e instanceof ConnectionError && e.kind !== "unconfigured") return <>{head}<CsatOpening /></>;
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
     throw e;
@@ -114,7 +143,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         {head}
         <div className="wrap pg-body rp">
           <InputStatus st={status} />
-          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} releaseOn={releaseOn} savedScores={current ? JSON.stringify(defaultsFrom(current)) : ""} />
+          <CorrectionPanel st={status} latest={latestCorr} can={canCorrect} releaseOn={releaseOn} savedScores={current ? JSON.stringify(isProvisionalReport(current) ? provisionalDefaults(current) : defaultsFrom(current)) : ""} />
           <Link className="btn" href={route.path}>내 성적 리포트로 돌아가기</Link>
         </div>
       </>
@@ -127,6 +156,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 입력 단계(2026-11-12 최종관리자 결정): 서버가 정한 단계로 양식을 고른다. 수능 뒤에는 9월 모의평가가 보이지 않는다
   const stage = stageOf(status.stage);
   const title = examTitle(stage, status.academic_year);
+  // 전환 뒤 리포트는 수능 가채점 리포트다(9월 리포트는 지난 기록). 가채점 리포트는 범위로만 그린다
+  const provisional = isProvisionalReport(report);
+  const pastLink = csat ? <p className="rp-note"><Link href={pastHref()}>지난 기록 · {MOCK_EXAM.label} 리포트 보기</Link> — 저장한 9월 리포트를 읽기 전용으로 봅니다.</p> : null;
 
   if (!report || editing) {
     return (
@@ -135,9 +167,24 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <div className="wrap pg-body rp">
           <StageSteps stage={stage} finalOpen={status.stage_state === "open"} />
           {status && <InputStatus st={status} />}
-          <p className="rp-note"><Link href={`${route.path}?preview=csat`}>수능 가채점 원점수로 과목별 예상 성적 보기</Link> — 저장하지 않는 조회입니다.</p>
+          {!csat && <p className="rp-note"><Link href={`${route.path}?preview=csat`}>수능 가채점 원점수로 과목별 예상 성적 보기</Link> — 저장하지 않는 조회입니다.</p>}
           {inputOpen && stage === "provisional" ? (
-            <ProvisionalForm examLabel={title} />
+            <>
+              {report && (
+                <p className="rp-note">
+                  새 가채점 성적을 저장하면 리포트가 새로 계산됩니다. 담아 둔 학교는 남아 있습니다.
+                </p>
+              )}
+              <ProvisionalForm
+                examLabel={title}
+                idem={idem}
+                defaults={report && provisional ? provisionalDefaults(report) : {}}
+                update={report && provisional ? { reportId: report.report_id, version: report.report_version } : undefined}
+              />
+            </>
+          ) : inputOpen && csat && stage === "mock" ? (
+            // 전환 뒤 서버가 9월 단계를 주면 9월 표준점수 양식을 열지 않는다(9월 입력은 끝났다. 실채점 final 은 아래 양식 그대로)
+            <NoInput st={{ ...status, stage_state: "closed" }} correctHref={correctHref} />
           ) : inputOpen ? (
             <>
               {report && (
@@ -154,6 +201,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           ) : (
             <NoInput st={status} correctHref={correctHref} />
           )}
+          {pastLink}
           {report && <Link className="btn" href={route.path}>고치지 않고 돌아가기</Link>}
         </div>
       </>
@@ -180,17 +228,31 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           {/* 저장한 성적은 고치지 않는다 — 입력권이 남은 유료 회원만 새 성적으로 리포트의 새 판을 만든다 */}
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
           {!inputOpen && correctHref && <Link className="btn" href={correctHref}>{canCorrect ? "성적 정정 요청" : "정정 요청 상태"}</Link>}
-          <Link className="btn" href={`${route.path}?preview=csat`}>수능 가채점 예상 성적 보기</Link>
+          {!csat && <Link className="btn" href={`${route.path}?preview=csat`}>수능 가채점 예상 성적 보기</Link>}
+          {csat && <Link className="btn" href={pastHref()}>지난 기록 · 9월 모의평가</Link>}
         </div>
 
-        <OverallCard a={a} />
-        {/* 저장 스냅샷이 자료 연결 전 상태로 남은 리포트만. 사용자가 한 번 누를 때만 계산한다(자동 요청 없음) */}
-        <section aria-labelledby="sub-h" className="rp-sec">
-          <h2 id="sub-h">과목별 결과</h2>
-          <SubjectsSheet a={a} />
-          <PositionChart a={a} />
-          <ComboScores a={a} />
-        </section>
+        {provisional ? (
+          <>
+            <StageSteps stage={stage} finalOpen={status.stage_state === "open"} />
+            <ProvisionalOverallCard a={a} />
+            <section aria-labelledby="sub-h" className="rp-sec">
+              <h2 id="sub-h">과목별 예상 성적</h2>
+              <ProvisionalSubjectsSheet a={a} />
+            </section>
+          </>
+        ) : (
+          <>
+            <OverallCard a={a} />
+            {/* 저장 스냅샷이 자료 연결 전 상태로 남은 리포트만. 사용자가 한 번 누를 때만 계산한다(자동 요청 없음) */}
+            <section aria-labelledby="sub-h" className="rp-sec">
+              <h2 id="sub-h">과목별 결과</h2>
+              <SubjectsSheet a={a} />
+              <PositionChart a={a} />
+              <ComboScores a={a} />
+            </section>
+          </>
+        )}
 
         <section aria-labelledby="sl-h" className="rp-sec">
           <div className="rp-sechd">
@@ -199,7 +261,15 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
             </h2>
             <Link className="btn p" href={`${route.path}/print`}>상담 리포트 인쇄용 보기</Link>
           </div>
-          {pickedList.length === 0 ? (
+          {provisional ? (
+            // 학교별 가채점 판정 자료가 아직 없다(서버 provisional_stage_unavailable). 3·4페이지와 같은 말로 둔다
+            <div className="rp-empty">
+              <p><b>가채점 판정 준비 중</b> — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다. 담아 둔 학교는 그대로 남아 있습니다.</p>
+              <div className="acts">
+                <Link className="btn" href={page("PAGE-03").path}>{page("PAGE-03").label}</Link>
+              </div>
+            </div>
+          ) : pickedList.length === 0 ? (
             <div className="rp-empty">
               <p>아직 담은 학교가 없습니다. 아래 화면에서 마음에 드는 모집단위를 담으면 여기에 모입니다.</p>
               <div className="acts">
@@ -260,6 +330,19 @@ function defaultsFrom(r: ReportDto): ScoreDefaults {
     english: r.overall.absolute_grades.영어,
     history: r.overall.absolute_grades.한국사,
   };
+}
+
+/** 전환 직후 가채점 입력 상태를 아직 받지 못했을 때. 오류·문의 번호 없이 한 줄만 보이고 스스로 다시 연다 */
+function CsatOpening() {
+  return (
+    <div className="wrap pg-body rp">
+      <section className="gate flat" aria-live="polite">
+        <h2>잠시 뒤 수능 가채점 성적 입력 화면을 엽니다</h2>
+        <p>이 화면을 자동으로 다시 엽니다. 저장한 9월 모의평가 리포트는 <Link href={pastHref()}>지난 기록</Link>에서 볼 수 있습니다.</p>
+        <AutoReopen quiet />
+      </section>
+    </div>
+  );
 }
 
 function LoginGate() {

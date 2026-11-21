@@ -5,12 +5,12 @@ import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { SnapshotDto } from "@/lib/dto";
+import { isProvisionalOverall, type SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { EXAM } from "@/lib/exam";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
-import { ComboScores, OverallCard, PickedTable, PositionChart, SubjectsSheet } from "../report-view";
+import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
 import { PrintButton } from "./print-button";
 import "../report.css";
 
@@ -89,14 +89,27 @@ export default async function Page() {
           </dl>
         </header>
 
-        <OverallCard a={a} fold={false} />
-        <h2>과목별 결과</h2>
-        <SubjectsSheet a={a} />
-        <PositionChart a={a} />
-        <ComboScores a={a} />
+        {isProvisionalOverall(a) ? (
+          // 수능 가채점 리포트(2026-11-23 전환): 원점수로 추정한 범위만. 학교별 판정은 아직 없다
+          <>
+            <ProvisionalOverallCard a={a} fold={false} />
+            <h2>과목별 예상 성적</h2>
+            <ProvisionalSubjectsSheet a={a} />
+          </>
+        ) : (
+          <>
+            <OverallCard a={a} fold={false} />
+            <h2>과목별 결과</h2>
+            <SubjectsSheet a={a} />
+            <PositionChart a={a} />
+            <ComboScores a={a} />
+          </>
+        )}
 
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
-        {shortlist.length === 0 ? (
+        {isProvisionalOverall(a) ? (
+          <p className="rp-foot">가채점 판정 준비 중 — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다.</p>
+        ) : shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>
         ) : (
           <PickedTable items={shortlist} print />

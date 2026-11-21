@@ -5,7 +5,7 @@ import { seoulDate } from "@/lib/format";
 import { SUPPORT_HREF } from "@/lib/links";
 import { CorrectionForm } from "./correction-form";
 
-export const STAGE_LABEL: Record<string, string> = { mock: "모의평가", provisional: "수능 가채점", final: "수능 실채점" };
+export const STAGE_LABEL: Record<string, string> = { mock: "9월 모의평가", provisional: "수능 가채점", final: "수능 실채점" };
 
 /**
  * 2페이지 성적 정정 영역(?correct=1). 내 마지막 요청 상태와, 요청할 수 있으면 양식을 보인다.

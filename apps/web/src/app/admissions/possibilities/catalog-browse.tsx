@@ -12,7 +12,8 @@ import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, to
 import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { settleAnalyses, startMine } from "@/lib/report-ops";
+import { provisionalOnly, settleAnalyses, startMine } from "@/lib/report-ops";
+import { ProvisionalPendingNote } from "@/components/provisional-pending";
 import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
@@ -83,7 +84,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   let shown = items;
   let nextCursor = res.next_cursor;
   let scanned: number | null = null;
-  if (cur.st && report) {
+  // 수능 가채점 리포트(2026-11-23 전환): 학교별 판정이 아직 없어 분석 요청·지원가능성 필터를 쓰지 않는다(검색·모집 정보는 그대로)
+  const provisional = provisionalOnly(report);
+  if (cur.st && report && !provisional) {
     const want = new Set<StatusKey>(cur.st);
     const hit = (r: ReportDto, o: OfferingDto) => want.has(statusKeyOf(r.analyses?.[o.offering_id] ?? null, r.overall?.overall));
     if (cur.fav) {
@@ -118,6 +121,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />
       <div className="wrap pg-body ps">
         <MineBasis report={report} />
+        {provisional && <ProvisionalPendingNote />}
 
         <section className="filter" aria-label="검색 조건">
           <Form action={route.path} prefetch={false} className="search" role="search">
@@ -138,7 +142,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
           </Form>
           <ChipRow label="지역" cur={cur} destination={destination} k="region" items={REGIONS.map((r) => ({ v: r, label: r }))} />
           <ChipRow label="모집군" cur={cur} destination={destination} k="group" items={GROUPS.map((g) => ({ v: g, label: `${g}군` }))} />
-          {report && <StatusChips cur={cur} destination={destination} />}
+          {report && !provisional && <StatusChips cur={cur} destination={destination} />}
           {favs && (
             <div className="cfilter">
               <span className="lab">즐겨찾기</span>

@@ -5,17 +5,64 @@
   여기에 둔다(service_spec pending). 과목 이름은 시험 자료의 이름과 같아야 하며, 최종 검증은 서버 엔진이 한다.
 */
 
-export const EXAM = {
-  // 합성 응답용 토큰이 기본값. 운영은 wrangler.jsonc vars 의 승인 식별자를 쓴다.
-  // 워커는 요청 때 환경값을 채우므로 모듈을 불러올 때가 아니라 쓸 때 읽는다
+/*
+  9월 모의평가 → 수능 가채점 전환(2026-11-21 대표님 확정). 전환 시각은 JUNGSI_CSAT_OPENS_AT(기본 2026-11-23 00:00 KST)이고,
+  화면이 요청마다 지금 시각과 비교해 스스로 고른다. 그래서 전환 전에 미리 배포해도 고객 화면은 시각이 될 때까지 9월 모의평가 그대로다.
+  - 전환 전: 지금 시험 = 9월 모의평가(JUNGSI_PAST_EXAM_ID · JUNGSI_PAST_PACK_VERSION)
+  - 전환 뒤: 지금 시험 = 수능 가채점(JUNGSI_EXAM_ID · JUNGSI_PACK_VERSION), 9월 모의평가는 '지난 기록'(읽기 전용)
+  서버도 같은 시각에 9월 단계를 닫는다(window.mode=closed, 새 입력·정정 409). 입력 가능 여부의 최종 판단은 늘 서버 입력 상태다.
+  워커는 요청 때 환경값을 채우므로 모듈을 불러올 때가 아니라 쓸 때 읽는다. 합성 응답용 토큰이 기본값이다.
+*/
+export const CSAT_OPENS_AT_DEFAULT = "2026-11-22T15:00:00Z";
+
+/** 전환 시각. 값이 없거나 읽을 수 없으면 기본 시각(대표님 확정 시각)을 쓴다 */
+export function csatOpensAt(): Date {
+  const v = process.env.JUNGSI_CSAT_OPENS_AT;
+  const d = v ? new Date(v) : null;
+  return d && Number.isFinite(d.getTime()) ? d : new Date(CSAT_OPENS_AT_DEFAULT);
+}
+
+/** 수능 가채점으로 전환됐는가(전환 시각 포함) */
+export function csatOpen(now: Date = new Date()): boolean {
+  return now.getTime() >= csatOpensAt().getTime();
+}
+
+/** 9월 모의평가(전환 뒤에는 지난 기록) */
+export const MOCK_EXAM = {
   get exam_id() {
-    return process.env.JUNGSI_EXAM_ID ?? "SYNTHETIC-2027-09-mock";
+    return process.env.JUNGSI_PAST_EXAM_ID ?? "SYNTHETIC-2027-09-mock";
   },
   get pack_version() {
-    return process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC-pack-v1";
+    return process.env.JUNGSI_PAST_PACK_VERSION ?? "SYNTHETIC-pack-v1";
   },
   label: "2027학년도 9월 모의평가",
+  short: "9월 모의평가",
 } as const;
+
+/** 수능 가채점 */
+export const CSAT_EXAM = {
+  get exam_id() {
+    return process.env.JUNGSI_EXAM_ID ?? "SYNTHETIC-2027-csat-provisional";
+  },
+  get pack_version() {
+    return process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC-csat-pack-v1";
+  },
+  label: "2027학년도 대학수학능력시험 가채점",
+  short: "수능 가채점",
+} as const;
+
+/** 지금 성적 입력에 쓰는 시험. 전환 시각 전에는 9월 모의평가, 뒤에는 수능 가채점 */
+export const EXAM = {
+  get exam_id() {
+    return csatOpen() ? CSAT_EXAM.exam_id : MOCK_EXAM.exam_id;
+  },
+  get pack_version() {
+    return csatOpen() ? CSAT_EXAM.pack_version : MOCK_EXAM.pack_version;
+  },
+  get label() {
+    return csatOpen() ? CSAT_EXAM.label : MOCK_EXAM.label;
+  },
+};
 
 export const KOREAN_CHOICES = ["화법과 작문", "언어와 매체"] as const;
 export const MATH_CHOICES = ["확률과 통계", "미적분", "기하"] as const;
@@ -40,7 +87,7 @@ export const stageOf = (s: string | null | undefined): InputStage => (s === "pro
 export function examTitle(stage: InputStage, year: number): string {
   if (stage === "provisional") return `${year}학년도 대학수학능력시험 가채점`;
   if (stage === "final") return `${year}학년도 대학수학능력시험`;
-  return EXAM.label;
+  return MOCK_EXAM.label;
 }
 
 /** 가채점 원점수 만점 */

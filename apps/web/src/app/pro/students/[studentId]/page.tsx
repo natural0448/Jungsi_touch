@@ -13,7 +13,6 @@ import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentRepor
 import { proAccess } from "@/lib/pro-access";
 import { OverallCard, PositionChart, SubjectsSheet } from "../../../reports/me/report-view";
 import { ScoreForm } from "../../../reports/me/score-form";
-import { ProvisionalForm } from "../../../reports/me/provisional-form";
 import { StageSteps } from "../../../reports/me/stage-steps";
 import { findCandidates, submitStudentScores } from "../../actions";
 import { ActionButton } from "../../action-button";
@@ -122,8 +121,9 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
             <p className="pro-note">{stage ? "이 학생의 입력 상태를 지금 확인할 수 없습니다. 입력을 열지 않았습니다." : "지금 입력 단계(모의평가·가채점·실채점)를 확인할 수 없어 입력을 열지 않았습니다. 잠시 뒤 다시 열어 주세요."}</p>
           )}
           {canInput && status && stage === "provisional" && (
-            // 가채점 저장은 개인용과 같이 수능 뒤 서버 연결 전까지 값 검사만 하고 보내지 않는다(입력 횟수도 쓰지 않음)
-            <ProvisionalForm examLabel={title} subject={student.display_name} />
+            // 전문가용 서버(pro.score.create)는 아직 표준점수 입력만 받는다(dep_r19c). 개인용 가채점 양식은 본인 계정에 저장하므로
+            // 여기서 쓰지 않는다 — 학생 성적이 교사 개인 계정에 저장되는 일을 막는다(2026-11-21)
+            <p className="pro-note">전문가용 학생 가채점 원점수 입력은 학생별 입력권과 함께 따로 엽니다. 저장한 학생 리포트와 담은 학교는 아래에서 그대로 볼 수 있습니다.</p>
           )}
           {canInput && status && stage !== "provisional" && stage && (
             <ScoreForm

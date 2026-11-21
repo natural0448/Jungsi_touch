@@ -14,7 +14,8 @@ export function StageSteps({ stage, finalOpen = stage === "final" }: { stage: In
   // (2026-11-13 최종관리자 결정, 개인용·전문가용 같음). 실제 시각은 서버 입력 상태(opens_at)가 정한다
   const steps: { k: InputStage; label: string; sub: string; cls?: string }[] = [
     { k: "provisional", label: "수능 가채점", sub: "실채점이 열리면 잠김", cls: finalNow ? "locked" : "on" },
-    { k: "final", label: "수능 실채점", sub: "성적표 배부 3일 뒤부터 입력", cls: finalNow ? "on" : undefined },
+    // 가채점 동안 실채점 칸은 잠가 둔다(성적표 배부 3일 뒤부터, 2026-11-21 대표님 확정: 가채점·실채점 입력 횟수는 따로)
+    { k: "final", label: "수능 실채점", sub: "성적표 배부 3일 뒤부터", cls: finalNow ? "on" : "locked" },
   ];
   return (
     <ol className="rp-steps" aria-label="성적 입력 단계">

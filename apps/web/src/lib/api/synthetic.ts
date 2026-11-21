@@ -7,6 +7,7 @@ import { CATALOG, statistics } from "./synthetic-assessment";
 import { HISTORY, syntheticRecruitment } from "./synthetic-history";
 import { analyzeIds, assessFor, buildCands, inputUsed, listOwn, sameProfileKey, loadReport, saveProfile, saveReport, setPick, validateScores } from "./synthetic-report";
 import { syntheticSnapshotHead, syntheticSnapshotPart } from "./synthetic-snapshot";
+import { CSAT_EXAM, MOCK_EXAM, csatOpen, csatOpensAt } from "@/lib/exam";
 
 /*
   HTTP 핸들러 연결 전 화면 제작용 합성 응답(프레젠테이션 작업 인계: '명시적인 합성 응답').
@@ -123,30 +124,62 @@ export const syntheticSource: JungsiSource = {
     return syntheticSnapshotPart(snapshotId, partId);
   },
 
-  async listOwnReports() {
+  async listOwnReports(_caller, q) {
     await requireMember();
-    return { format: "jungsi.own-report-list/v1", items: await listOwn(), next_cursor: null, has_more: false };
+    return { format: "jungsi.own-report-list/v1", items: await listOwn(q.exam_id), next_cursor: null, has_more: false };
   },
 
   async readScoreInputStatus(_caller, examId, stage) {
     const s = await requireMember();
-    const used = await inputUsed();
     const paid = s === "paid" || s === "noscore";
+    // 수능 가채점 시험(전환 뒤 지금 시험): 9월 모의평가와 입력 횟수·현재 리포트를 따로 센다(운영 정책과 같음).
+    // 입력 창은 운영 설정과 같이 2026-12-10T15:00Z 전까지(끝 시각 제외)
+    if (examId === CSAT_EXAM.exam_id) {
+      const used = await inputUsed("provisional");
+      const spent = used.profileId ? 1 : 0;
+      return {
+        format: "jungsi.score-input-status/v1",
+        exam_id: examId,
+        pack_version: CSAT_EXAM.pack_version,
+        academic_year: 2027,
+        stage: "provisional",
+        stage_state: "open",
+        opens_at: csatOpensAt().toISOString().replace(".000Z", "Z"),
+        closes_at: "2026-12-10T15:00:00Z",
+        paid_input_allowed: paid,
+        input_limit_mode: "stage_rights",
+        initial_used: spent,
+        initial_remaining: 1 - spent,
+        correction_granted: 0,
+        correction_used: 0,
+        correction_request_remaining: 1,
+        effective_save_remaining: paid ? 1 - spent : 0,
+        entry_version: spent,
+        current_profile_id: used.profileId,
+        current_report_id: used.reportId,
+        last_attempt_outcome: spent ? "accepted" : null,
+        last_rejection_code: null,
+        legacy_transition_status: "ready",
+      };
+    }
+    const used = await inputUsed();
     const syn = await readSyntheticStage();
     const locked = !stage && syn === "final_locked";
     // 입력 횟수와 현재 리포트는 단계마다 따로다(운영 정책과 같음). 합성 저장 성적은 모두 9월 모의평가 단계로 본다
     const sameStage = syn === "mock";
     const spent = used.profileId && sameStage ? 1 : 0;
+    // 전환 뒤 9월 모의평가 단계는 닫힌다(운영 window.mode=closed). 저장된 9월 리포트는 읽기만 한다
+    const mockClosed = sameStage && csatOpen();
     return {
       format: "jungsi.score-input-status/v1",
       exam_id: examId,
-      pack_version: process.env.JUNGSI_PACK_VERSION ?? "SYNTHETIC",
+      pack_version: MOCK_EXAM.pack_version,
       academic_year: 2027,
       stage: stage ?? (syn === "final_locked" ? "final" : syn),
-      stage_state: locked ? "not_open" : "open",
+      stage_state: locked ? "not_open" : mockClosed ? "closed" : "open",
       // 합성 실채점 개방 시각 = 2026-12-14(월) 0시(성적표 배부 12-11 금 + 3일, 2026-11-13 최종관리자 결정). 실제 시각은 서버 설정이 정한다
       opens_at: locked ? "2026-12-13T15:00:00Z" : null,
-      closes_at: null,
+      closes_at: mockClosed ? csatOpensAt().toISOString().replace(".000Z", "Z") : null,
       paid_input_allowed: paid,
       input_limit_mode: "stage_rights",
       initial_used: spent,
@@ -193,12 +226,15 @@ export const syntheticSource: JungsiSource = {
     return syntheticRecruitment(offeringId);
   },
 
-  async createScoreProfile(_caller, scores, confirmed, key) {
+  async createScoreProfile(_caller, scores, confirmed, key, stage) {
     const s = await requireMember();
     // 결합 20 정책: 성적 입력은 유료 회원만, 시험 단계마다 1회(같은 요청 키 재시도는 처음 결과)
     if (s === "standard" || s === "operator") return { ok: false, code: "paid_required", status: 403 };
-    const used = await inputUsed();
-    if (used.profileId && !(await sameProfileKey(key))) return { ok: false, code: "score_input_exhausted", status: 409 };
+    const st = stage === "provisional" || "raw_score" in scores.korean ? "provisional" : "mock";
+    // 전환 뒤 9월 모의평가 새 입력은 서버처럼 409 로 거절한다(입력 횟수를 쓰지 않는다)
+    if (st === "mock" && csatOpen()) return { ok: false, code: "score_stage_closed", status: 409 };
+    const used = await inputUsed(st);
+    if (used.profileId && !(await sameProfileKey(key, st))) return { ok: false, code: "score_input_exhausted", status: 409 };
     const bad = validateScores(scores);
     if (bad) return { ok: false, code: bad, status: bad === "pack_version_mismatch" ? 409 : 422 };
     return { ok: true, value: await saveProfile(scores, confirmed, key) };

@@ -9,14 +9,16 @@ import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } 
   - 표 틀은 성적표 입력과 같다(한국사·국어·수학·영어·탐구 1·2·제2외국어/한문).
   - 영어·한국사·제2외국어/한문은 절대평가라 원점수로 등급이 확정된다 — 넣는 즉시 보여 준다(평가원 고정 구간).
     저장되는 등급은 서버가 같은 구간으로 다시 정한다. 화면 값은 입력을 돕는 표시다.
-  - 국어·수학·탐구의 표준점수·등급은 수능 뒤 예상 등급컷 자료로 서버가 계산한다(지금은 '예상치' 자리만).
+  - 국어·수학·탐구의 표준점수·등급은 저장 뒤 서버가 가채점 변환표로 추정한 범위로 보여 준다(입력 칸에는 '예상치' 자리만).
+  - 국어·수학 선택과목은 필수다(선택과목마다 변환표가 다르다, 서버 dep_r19c).
+  - 저장은 가채점 단계의 입력 1회를 쓴다(2026-11-23 전환). 정정 승인 뒤에는 같은 리포트의 새 판으로 저장한다(update).
 */
-const REQUIRED = ["inq1", "inq2", "korean", "math", "english", "history", "inq1_raw", "inq2_raw"] as const;
+const REQUIRED = ["korean_choice", "math_choice", "inq1", "inq2", "korean", "math", "english", "history", "inq1_raw", "inq2_raw"] as const;
 
-/** subject: 전문가용 — 확인 창·버튼에 크게 보일 학생 이름(잘못 고른 학생에 저장하지 않게, 성적표 양식과 같음) */
-export function ProvisionalForm({ examLabel, subject }: { examLabel: string; subject?: string }) {
+/** 개인용 2페이지 전용(서버 액션이 본인 계정에 저장한다). idem: 이 화면의 요청 키(두 번 눌러도 한 번만 저장) */
+export function ProvisionalForm({ examLabel, idem, defaults = {}, update }: { examLabel: string; idem: string; defaults?: ProvisionalValues; update?: { reportId: string; version: number } }) {
   const [state, action, pending] = useActionState<ProvisionalFormState, FormData>(submitProvisional, null);
-  const d: ProvisionalValues = state?.values ?? {};
+  const d: ProvisionalValues = state?.values ?? defaults;
   const [raw, setRaw] = useState<Record<string, string>>(() => ({
     english: d.english?.toString() ?? "",
     history: d.history?.toString() ?? "",
@@ -60,7 +62,8 @@ export function ProvisionalForm({ examLabel, subject }: { examLabel: string; sub
     const n = (k: string) => (val(k) === "" ? NaN : Number(val(k)));
     const ok = (k: string, max: number) => Number.isInteger(n(k)) && n(k) >= 0 && n(k) <= max;
     let problem: string | null = null;
-    if (REQUIRED.some((k) => val(k) === "")) problem = "국어·수학·영어·한국사·탐구 두 과목의 원점수와 탐구 과목을 모두 넣어 주세요.";
+    if (val("korean_choice") === "" || val("math_choice") === "") problem = "국어·수학 선택과목을 골라 주세요. 선택과목마다 예상 점수가 다릅니다.";
+    else if (REQUIRED.some((k) => val(k) === "")) problem = "국어·수학·영어·한국사·탐구 두 과목의 원점수와 탐구 과목을 모두 넣어 주세요.";
     else if (val("inq1") === val("inq2")) problem = "탐구 두 과목은 서로 달라야 합니다.";
     else if (!["korean", "math", "english"].every((k) => ok(k, 100))) problem = "국어·수학·영어 원점수는 0~100 사이 정수입니다.";
     else if (!["history", "inq1_raw", "inq2_raw"].every((k) => ok(k, 50))) problem = "한국사·탐구 원점수는 0~50 사이 정수입니다.";
@@ -95,7 +98,7 @@ export function ProvisionalForm({ examLabel, subject }: { examLabel: string; sub
         <div>
           <p className="sf-kicker">성적 입력 · 수능 가채점</p>
           <h2>{examLabel}</h2>
-          <p>채점표로 맞혀 본 <b>원점수</b>를 과목마다 넣어 주세요. 국어·수학·탐구의 표준점수와 등급은 예상 등급컷으로 계산한 <b>예상치</b>로 보여 드립니다.</p>
+          <p>채점표로 맞혀 본 <b>원점수</b>를 과목마다 넣어 주세요. 저장하면 국어·수학·탐구의 표준점수·백분위·등급을 가채점 변환표로 추정한 <b>범위</b>로 보여 드립니다.</p>
         </div>
         <p className={`sf-prog${filled === REQUIRED.length ? " done" : ""}`} aria-live="polite">
           <span className="bar" aria-hidden="true"><i style={{ width: `${(filled / REQUIRED.length) * 100}%` }} /></span>
@@ -128,17 +131,17 @@ export function ProvisionalForm({ examLabel, subject }: { examLabel: string; sub
           </thead>
           <tbody>
             <tr>
-              <th scope="row">선택과목</th>
+              <th scope="row">선택과목<small>필수</small></th>
               <td className="na">{none}</td>
               <td className="in">
                 <select name="korean_choice" aria-label="국어 선택과목" defaultValue={d.korean_choice ?? ""}>
-                  <option value="">선택 안 함</option>
+                  <option value="" disabled>과목 고르기</option>
                   {KOREAN_CHOICES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </td>
               <td className="in">
                 <select name="math_choice" aria-label="수학 선택과목" defaultValue={d.math_choice ?? ""}>
-                  <option value="">선택 안 함</option>
+                  <option value="" disabled>과목 고르기</option>
                   {MATH_CHOICES.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </td>
@@ -207,32 +210,36 @@ export function ProvisionalForm({ examLabel, subject }: { examLabel: string; sub
 
       <ul className="sf-legend">
         <li><i className="k in" />넣는 칸 · 과목별 원점수(맞힌 점수). 국어·수학·영어 100점, 한국사·탐구·제2외국어/한문 50점 만점</li>
-        <li><i className="k calc" />국어·수학·탐구의 예상 표준점수·등급은 수능 뒤 공개되는 예상 등급컷 자료로 계산합니다(성적표의 실제 값과 다를 수 있습니다).</li>
+        <li><i className="k calc" />국어·수학·탐구의 예상 표준점수·백분위·등급은 저장하면 정시터치 가채점 변환표로 추정한 범위로 보여 드립니다(성적표의 실제 값과 다를 수 있습니다).</li>
         <li><i className="k na" />영어·한국사·제2외국어/한문은 절대평가라 표준점수가 없고, 넣은 원점수로 등급이 바로 정해집니다(영어 90점·한국사 40점·제2외국어/한문 45점 이상이 1등급, 이후 영어 10점·나머지 5점마다 한 등급).</li>
       </ul>
 
       {state?.error && <p className="sf-error" role="alert">{state.error}</p>}
 
       <input ref={confirmRef} type="hidden" name="confirm" defaultValue="" />
+      <input type="hidden" name="idem" value={idem} />
+      {update && (
+        <>
+          <input type="hidden" name="report_id" value={update.reportId} />
+          <input type="hidden" name="report_version" value={update.version} />
+        </>
+      )}
       <div className="sf-foot">
         <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
         <div className="sf-acts">
           <button className="btn p" type="button" disabled={pending} onClick={openReview}>
-            {pending ? "저장하는 중" : subject ? `${subject} 학생 가채점 저장하고 예상 위치 보기` : "가채점 저장하고 예상 위치 보기"}
+            {pending ? "저장하는 중" : "가채점 저장하고 예상 위치 보기"}
           </button>
         </div>
       </div>
       <p className="sf-note">
-        {subject
-          ? "가채점은 이 학생의 가채점 단계 입력 1회를 사용합니다. 잘못 넣었으면 고객센터에 정정을 요청해 주세요(1회, 성적표 배부 전날까지)."
-          : "가채점은 이 단계의 입력 1회를 사용합니다. 잘못 넣었으면 성적표 배부 전날까지 정정을 1회 요청할 수 있습니다."}
+        가채점은 이 단계의 입력 1회를 사용합니다(9월 모의평가·실채점과 따로 셉니다). 잘못 넣었으면 성적표 배부 전날까지 정정을 1회 요청할 수 있습니다.
       </p>
 
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="pf-dialog-h" onClose={() => setReview(null)}>
         {review && (
           <div className="sf-dialog-in">
-            <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : subject ? "이 학생의 원점수로 저장할까요?" : "이 원점수로 저장할까요?"}</h3>
-            {subject && !review.problem && <p className="sf-dialog-subject">{subject}</p>}
+            <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : "이 원점수로 저장할까요?"}</h3>
             {review.problem ? (
               <p className="sf-dialog-problem">{review.problem}</p>
             ) : (

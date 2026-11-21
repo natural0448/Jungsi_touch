@@ -185,8 +185,18 @@ export function newerVersion(read: ReportDto, written: ReportDto): ReportDto {
   return read.report_id === written.report_id && written.report_version > read.report_version ? { ...read, report_version: written.report_version } : read;
 }
 
+/**
+ * 수능 가채점 원점수 리포트(2026-11-23 전환, 서버 provisional_estimate)인가. 학교별 가채점 판정 자료가 아직 없어
+ * 서버가 university.analyze·candidates.build 를 늘 provisional_stage_unavailable 로 돌려준다 — 화면은 이 요청을 보내지 않는다.
+ * (lib/provisional-report 의 isProvisionalReport 와 같은 판단. 이 모듈의 시험 고정 모듈 목록을 늘리지 않으려고 여기 둔다)
+ */
+export function provisionalOnly(r: ReportDto | null | undefined): boolean {
+  return !!r?.overall && (r.overall.score_basis === "provisional_estimate" || r.overall.input_kind === "provisional_raw");
+}
+
 /** 보이는 모집행 중 아직 분석이 없는 것만 university.analyze 로 채운다(한 번에 100개까지) */
 export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<ReportState> {
+  if (provisionalOnly(report)) return { kind: "ready", report };
   const targets = canonicalOfferingIds(ids);
   return retryOnConflict(src, caller, report, async (r) => {
     const missing = targets.filter((id) => !r.analyses?.[id]).slice(0, 100);
@@ -198,6 +208,7 @@ export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: 
 
 /** 후보가 아직 없으면 candidates.build 로 만든다 */
 export async function ensureCandidates(src: JungsiSource, caller: Caller, report: ReportDto): Promise<ReportState> {
+  if (provisionalOnly(report)) return { kind: "ready", report };
   return retryOnConflict(src, caller, report, async (r) => {
     if (r.candidates) return { ok: true, value: r };
     return src.buildCandidates(caller, r.report_id, r.report_version, await key("cb", r, { expected_version: r.report_version }));
@@ -393,6 +404,7 @@ export async function analysesFingerprint(report: ReportDto, ids: string[]): Pro
 
 /** 보이는 모집단위의 분석을 채우고(없는 것만), 옛 자료판 분석이면 다시 확인한 리포트를 돌려준다 */
 export async function settleAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<ReportDto> {
+  if (provisionalOnly(report)) return report;
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return report;
   let current = report;
@@ -485,6 +497,7 @@ const freshKey = () => `cbo-${crypto.randomUUID()}`;
  * 어떤 실패에도 받은 리포트로 그린다(화면 전체를 깨지 않는다).
  */
 export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean } = {}): Promise<ReportDto> {
+  if (provisionalOnly(report)) return report;
   if (opts.reuse) {
     const lists = recallReference(report);
     if (lists && report.candidates) {
