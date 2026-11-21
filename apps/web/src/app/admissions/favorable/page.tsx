@@ -158,6 +158,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   let refPool: ReturnType<typeof referencePool> = { items: [], below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 };
   let refWild: ReturnType<typeof referenceWildcards> = { featured: [], rest: [] };
   let refUniversities: ReturnType<typeof referenceUniversities> = [];
+  // 화면을 그린 뒤 계열 펼침 계산이 보낼 리포트 판(와일드카드 계산으로 판이 오르면 그 판)
+  let viewVersion = report.report_version;
   // 참고 목록 준비가 예상 밖 자료로 실패해도 화면 전체를 오류로 깨지 않는다. 기록만 남기고 빈 참고 목록(안내)으로 그린다(2026-11-22)
   try {
     refGroups = referenceMode ? referenceGroups(c) : [];
@@ -168,6 +170,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     const wildPending = [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
     if (wildPending.length > 0) {
       const settled = await settleAnalyses(src, caller, report, wildPending);
+      viewVersion = Math.max(viewVersion, settled.report_version);
       refPool = referencePool(refGroups, settled.overall?.overall, settled.analyses);
       refWild = referenceWildcards(refPool);
     }
@@ -233,7 +236,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 </div>
               </section>
             ) : (
-              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} outsideBand={refPool.outsideBand} p3Label={p3.label} />
+              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} outsideBand={refPool.outsideBand} p3Label={p3.label} reportId={report.report_id} reportVersion={viewVersion} />
             )}
             {tail}
           </section>

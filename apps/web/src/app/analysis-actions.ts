@@ -53,8 +53,13 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
 export async function analyzeNow(_prev: RunResult, fd: FormData): Promise<RunResult> {
   const ids = canonicalOfferingIds(String(fd.get("ids") ?? "").split(",")).slice(0, 100);
   if (ids.length === 0) return { error: null };
+  // 화면이 알고 있는 최신 리포트 판(3페이지는 candidates.build 응답의 판). 쓰기 직후 다시 읽은 리포트가 앞 판을 돌려줄 수 있어
+  // 둘 중 큰 판으로 보낸다(2026-11-22 운영: 계열 펼침 계산이 409 를 두 번 받음). 같은 리포트일 때만 쓴다
+  const hintId = String(fd.get("report_id") ?? "");
+  const hintVersion = Number(fd.get("report_version") ?? "");
   return run("분석하지 못했습니다", async (src, caller) => {
-    const mine = await loadMine(src, caller);
+    const loaded = await loadMine(src, caller);
+    const mine = loaded && hintId === loaded.report_id && Number.isSafeInteger(hintVersion) && hintVersion > loaded.report_version ? { ...loaded, report_version: hintVersion } : loaded;
     return mine ? ensureAnalyses(src, caller, mine, ids) : { kind: "none" };
   });
 }

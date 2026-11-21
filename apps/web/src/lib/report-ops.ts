@@ -165,9 +165,24 @@ async function retryOnConflict(src: JungsiSource, caller: Caller, report: Report
     if (attempt === 1) return { kind: "failed", report: current, code: res.code };
     const fresh = await src.readReport(caller, current.report_id);
     if (!fresh) return { kind: "none" };
-    current = fresh;
+    current = conflictVersion(fresh, current);
   }
   return { kind: "failed", report: current, code: "revision_conflict" };
+}
+
+/**
+ * 409 뒤 다시 읽은 리포트로 한 번 더 보낼 판(2026-11-22 운영: 3페이지 candidates.build 가 판을 올린 직후
+ * university.analyze 가 409 를 두 번 받았다 — 다시 읽은 리포트가 쓰기 직후라 아직 앞 판을 돌려줬다).
+ * 서버가 거절했다는 것은 보낸 판보다 새 판이 있다는 뜻이므로, 다시 읽은 판이 보낸 판보다 크지 않으면 보낸 판 + 1 로 보낸다.
+ * 리포트 판은 쓰기마다 1씩 오른다. 그래도 맞지 않으면 실패로 끝낸다(한 번만 다시 보낸다)
+ */
+export function conflictVersion(fresh: ReportDto, sent: ReportDto): ReportDto {
+  return fresh.report_version > sent.report_version ? fresh : { ...fresh, report_version: sent.report_version + 1 };
+}
+
+/** 같은 리포트를 쓰기 응답과 다시 읽기로 둘 다 받았을 때, 다시 읽은 쪽이 앞 판이면(쓰기 직후 지연) 쓰기 응답의 판을 쓴다 */
+export function newerVersion(read: ReportDto, written: ReportDto): ReportDto {
+  return read.report_id === written.report_id && written.report_version > read.report_version ? { ...read, report_version: written.report_version } : read;
 }
 
 /** 보이는 모집행 중 아직 분석이 없는 것만 university.analyze 로 채운다(한 번에 100개까지) */
@@ -336,7 +351,8 @@ async function settleStep(src: JungsiSource, caller: Caller, current: ReportDto,
     if (st.kind !== "ready") return current;
     if (st.report === current) return current; // 보낼 것이 없어 쓰기를 하지 않았다
     try {
-      return (await src.readReport(caller, st.report.report_id)) ?? st.report;
+      const read = await src.readReport(caller, st.report.report_id);
+      return read ? newerVersion(read, st.report) : st.report;
     } catch (e) {
       // 2026-11-22 운영 사고 방어: 자동 계산은 화면을 돕는 일이다. 연결 오류가 아닌 예상 밖 오류(Error)도 화면 전체를
       // 오류 화면으로 깨지 않고 받은 리포트로 그린 뒤 이유만 기록한다
@@ -465,7 +481,7 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
       const lists = referenceListsOf(built.candidates);
       if (lists) rememberReference(built, lists);
       const read = await rereadOr(src, caller, built);
-      const out = withReference(read ?? built, lists, built.candidates);
+      const out = withReference(read ? newerVersion(read, built) : built, lists, built.candidates);
       const sum = lists?.reference_threshold_summary;
       logSettle("candidates", { sent: true, attempt, rows: (lists?.reference_university_groups ?? []).reduce((n, g) => n + (g?.offerings?.length ?? 0), 0), complete: sum ? sum.complete !== false : true });
       return out;
@@ -476,7 +492,7 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     }
     const fresh = await rereadOr(src, caller, current);
     if (!fresh) return current;
-    current = fresh;
+    current = conflictVersion(fresh, current);
   }
   return current;
 }

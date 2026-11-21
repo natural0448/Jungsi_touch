@@ -13,7 +13,8 @@ const INITIAL: RunResult = { error: null };
  * 계산이 끝나 화면이 새 값으로 다시 그려질 때까지 책 넘김 애니메이션을 보인다. 이미 계산된 곳은 다시 계산하지 않는다(서버가 빠진 것만).
  * 계산하지 못하면 문턱 판정만으로 그린다(오류 문구는 보이지 않는다).
  */
-export function ReferenceFieldDetails({ pendingIds, summary, label, children }: { pendingIds: string[]; summary: ReactNode; label: string; children: ReactNode }) {
+/** reportId·reportVersion: 화면을 그린 리포트 판(3페이지는 candidates.build 응답의 판). 계산 요청이 앞 판으로 나가 409 를 받지 않게 함께 보낸다 */
+export function ReferenceFieldDetails({ pendingIds, summary, label, reportId, reportVersion, children }: { pendingIds: string[]; summary: ReactNode; label: string; reportId?: string; reportVersion?: number; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [busy, start] = useTransition();
   const asked = useRef(false);
@@ -25,6 +26,10 @@ export function ReferenceFieldDetails({ pendingIds, summary, label, children }: 
     start(async () => {
       const fd = new FormData();
       fd.set("ids", pendingIds.slice(0, 100).join(","));
+      if (reportId && reportVersion) {
+        fd.set("report_id", reportId);
+        fd.set("report_version", String(reportVersion));
+      }
       // 담기·다른 계산과 겹치지 않게 한 줄로 세워 보낸다. 성공하면 서버 액션이 화면을 새 값으로 다시 그린다
       await enqueue(() => analyzeNow(INITIAL, fd)).catch(() => INITIAL);
     });

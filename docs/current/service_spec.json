@@ -360880,6 +360880,14 @@
         "PAGE-04"
       ],
       "summary": "화면: 3페이지는 열 때마다 candidates.build 를 한 번 불러 응답의 참고 문턱 목록(reference_university_groups·reference_threshold_summary)으로 그린다(서버 dep_r17: 문턱 목록은 리포트에 저장하지 않음). 409 는 판을 다시 받아 1회 재시도, 서버 액션 뒤 다시 그리기는 받은 목록을 재사용."
+    },
+    {
+      "date": "2026-11-21",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "화면: 리포트 쓰기 직후 다시 읽기가 앞 판을 돌려줄 때를 대비해, 409 면 다시 읽은 판이 보낸 판보다 크지 않으면 보낸 판+1 로 한 번만 재시도한다. 3페이지 계열 펼침 계산은 화면이 아는 최신 판으로 보낸다(2026-11-21 운영 409 대응)."
     }
   ],
   "p1_recruitment_score_review_verification": {

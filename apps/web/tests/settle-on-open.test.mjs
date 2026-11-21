@@ -178,3 +178,20 @@ test("an unexpected (non-connection) error during automatic settling never break
   const rereadBoom = port([{ ok: true, value: built }, new Error("정시터치 API 500 reread")]);
   assert.equal(await settleCandidates(rereadBoom.src, caller, r), built);
 });
+
+test("409 right after another write: a lagging re-read (same version) retries with the next version, once (2026-11-22)", async () => {
+  const r = report({ report_id: "V1", analyses: {} });
+  const lagging = report({ report_id: "V1", analyses: {} }); // 다시 읽어도 아직 7
+  const done = report({ report_id: "V1", report_version: 9, analyses: { A: saved } });
+  const p = port([conflictReply(), lagging, { ok: true, value: done }, done]);
+  assert.equal(await settleAnalyses(p.src, caller, r, ["A"]), done);
+  assert.deepEqual(writes(p).map((c) => c.args[2]), [7, 8]);
+});
+
+test("page 3: if report.read lags behind the build response, the next write uses the response's version", async () => {
+  const before = report({ report_id: "V2", candidates: full });
+  const built = report({ report_id: "V2", report_version: 8, candidates: full });
+  const lagging = report({ report_id: "V2", report_version: 7, candidates: full });
+  const out = await settleCandidates(port([{ ok: true, value: built }, lagging]).src, caller, before);
+  assert.equal(out.report_version, 8);
+});

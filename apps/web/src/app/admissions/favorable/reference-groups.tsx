@@ -35,7 +35,7 @@ function AdvantageNote({ a }: { a: ReferenceAdvantage | null }) {
  * 참고 누백이 나온 학과 가운데 지난해 합격선에 내 위치가 닿는 곳을 대학 → 계열 → 학과로 보인다(대표님 결정 2026-11-19).
  * 계열을 누르면 학과와 합격선 대비 위치가 펼쳐지고, 학과마다 즐겨찾기만 할 수 있다. 판정·담기는 없다.
  */
-export function ReferenceGroups({ universities, favs, below, noCutoff, ineligible = 0, outsideBand = 0, p3Label }: { universities: ReferenceUniversity[]; favs: Set<string> | null; below: number; noCutoff: number; ineligible?: number; outsideBand?: number; p3Label: string }) {
+export function ReferenceGroups({ universities, favs, below, noCutoff, ineligible = 0, outsideBand = 0, p3Label, reportId, reportVersion }: { universities: ReferenceUniversity[]; favs: Set<string> | null; below: number; noCutoff: number; ineligible?: number; outsideBand?: number; p3Label: string; reportId?: string; reportVersion?: number }) {
   if (universities.length === 0) return null;
   return (
     <section className="fv-ref" aria-labelledby="ref-t">
@@ -60,6 +60,8 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
                 key={f.label}
                 label={f.label}
                 pendingIds={f.items.filter((x) => x.pending).map((x) => x.offering.offering_id)}
+                reportId={reportId}
+                reportVersion={reportVersion}
                 summary={
                   <>
                     <b>{f.label}</b>
