@@ -42,14 +42,14 @@
     "JUNGSI_API_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/jungsi-api",
     // 성적 입력 시험 식별자(비밀값 아님). 없으면 lib/exam.ts 가 합성 토큰을 보내 서버가 저장을 거절한다(2026-10-16 실측).
     // 승인 binding·시험팩의 값과 같아야 한다. 시험이 바뀌면 담당자가 알려 준 값으로 함께 바꾼다
-    // 2026-11-21 대표님 확정: 관리자만 접근 가능한 지금 바로 가채점으로 전환해 미리 확인한다(JUNGSI_CSAT_OPENS_AT = 2026-11-22 03:00 KST, 운영 25번째 갱신행과 같은 값).
+    // 2026-11-21 대표님 확정: 관리자만 접근 가능한 지금 바로 가채점으로 전환해 미리 확인한다(JUNGSI_CSAT_OPENS_AT = 2026-11-21 21:00 KST, 운영 26번째 갱신행과 같은 값 — 대표님 지시로 최대한 앞당김).
     // 화면이 요청마다 지금 시각과 비교해 고르므로(lib/exam.ts csatOpen) 전환 전에 배포해도 그 시각까지는 9월 화면 그대로다.
     // JUNGSI_EXAM_ID·JUNGSI_PACK_VERSION = 수능 가채점(전환 뒤 지금 시험), JUNGSI_PAST_* = 9월 모의평가(전환 전 지금 시험, 뒤에는 지난 기록)
     "JUNGSI_EXAM_ID": "2027-csat-provisional",
     "JUNGSI_PACK_VERSION": "20261121.csat-provisional-v51.v1",
     "JUNGSI_PAST_EXAM_ID": "2027-september-mock",
     "JUNGSI_PAST_PACK_VERSION": "20260930.v1",
-    "JUNGSI_CSAT_OPENS_AT": "2026-11-21T18:00:00Z",
+    "JUNGSI_CSAT_OPENS_AT": "2026-11-21T12:00:00Z",
     "JUNGSI_CURRENT_REVIEW_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/current-admission-review",
     // 2026-10-13 사용자 결정: 오픈 전에는 에듀터치 관리자와 허용 명단(JEONGSI_PREVIEW_EMAILS, wrangler secret)만
     // 들어온다(src/proxy.ts). Supabase 두 공개값은 빌드 때 .env.production(Git 제외)으로 넣는다. 오픈 때 지운다.

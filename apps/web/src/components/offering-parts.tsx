@@ -24,7 +24,7 @@ export const BAND: Record<BandCode, { cls: string; label: string; desc: string }
   aspirational: { cls: "core", label: "소신", desc: "예상 합격권 안에서 뒤쪽 절반에 드는 위치입니다." },
   upward: { cls: "reach", label: "상향", desc: "예상 합격권에서 조금 벗어난 위치입니다." },
   challenge: { cls: "reach", label: "도전", desc: "예상 합격권에서 꽤 벗어나 결과를 장담하기 어려운 위치입니다." },
-  outside: { cls: "out", label: "불가", desc: "예상 합격권에서 많이 벗어난 위치입니다. 지원 자격이 없다는 뜻은 아닙니다." },
+  outside: { cls: "out", label: "불가", desc: "합격선보다 크게 낮은 위치입니다(7단계 중 가장 아래). 지원 자격과는 관계없으며, 지원은 할 수 있습니다." },
 };
 /** 화면에 보일 판정 이름·풀이. 7단계가 오면 그것을, 아니면 기존 category 를 쓴다 */
 export const decisionOf = (a: AssessmentDto) => (a.status === "ready" && a.band && BAND[a.band.code] ? BAND[a.band.code] : CATEGORY[a.category]);
@@ -96,7 +96,7 @@ export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: Over
     // 이름·색 모두 추정값 단계 하나(2026-11-22). '참고'·'추정 참고' 꼬리표는 달지 않는다(대표님 결정 2026-11-20:
     // 우리가 도출한 값이고, 이를 보고 지원할지는 학생·학부모가 정한다)
     const tone = BAND[ref.code];
-    return <span className={`st ${tone.cls}`} title="지원 자격은 모집요강에서 확인하세요">{referenceBandLabel(ref)}</span>;
+    return <span className={`st ${tone.cls}`} title={`${tone.desc} 지원 자격은 모집요강에서 확인하세요`}>{referenceBandLabel(ref)}</span>;
   }
   // 판정 경계가 없는 곳의 종료 표시(대표님 결정 2026-11-20): 지난해 합격선 대비 위치, 또는 판정 근거 부족
   const pn = positionNoteOf(a, overall);
@@ -106,14 +106,14 @@ export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: Over
   }
   if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check" title="이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 지원 자격은 모집요강에서 확인하세요">판정 준비 중</span>;
   const c = decisionOf(a);
-  return <span className={`st ${c.cls}`}>{c.label}</span>;
+  return <span className={`st ${c.cls}`} title={c.desc}>{c.label}</span>;
 }
 
 export function CategoryLegend() {
   return (
     <span className="legend" aria-label="지원가능성 표시">
       {[...Object.values(BAND), { cls: "pos near", label: "합격선 대비 위치" }, { cls: "check", label: POSITION_NONE_LABEL }, CATEGORY.ineligible].map((c) => (
-        <span key={c.label} className={`st ${c.cls}`}>{c.label}</span>
+        <span key={c.label} className={`st ${c.cls}`} title={"desc" in c ? c.desc : undefined}>{c.label}</span>
       ))}
     </span>
   );

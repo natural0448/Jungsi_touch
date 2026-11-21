@@ -9,7 +9,7 @@ import { ReferenceFieldDetails } from "./reference-field";
 function BandOrMargin({ band, m }: { band?: ReferenceBandDto | null; m: CutoffMargin | null }) {
   if (band && BAND[band.code]) {
     const tone = BAND[band.code];
-    return <span className={`st ${tone.cls}`}>{referenceBandLabel(band)}</span>;
+    return <span className={`st ${tone.cls}`} title={tone.desc}>{referenceBandLabel(band)}</span>;
   }
   return <MarginText m={m} />;
 }
