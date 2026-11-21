@@ -32,7 +32,9 @@ export interface OfferingDto {
   track: string | null;
   group: string; // 가·나·다
   region: string | null;
-  wildcard_group: "nursing" | "health" | "education" | null;
+  wildcard_group: WildcardGroup | null;
+  // W5 임시안(담당자 R18 승인 대기): 수능 외 조건 코드 배열. 없거나 빈 배열이면 안내를 숨긴다
+  non_csat_conditions?: string[] | null;
 }
 
 /** history_metric — offering 필드 + 대학이 발표한 지표 하나 */
@@ -114,6 +116,29 @@ export interface ScoresInput {
   inquiry: { subject: string; standard_score: number }[]; // 서로 다른 두 과목
   english_grade?: number;
   korean_history_grade?: number;
+  /** 제2외국어/한문: 과목과 등급만. null 은 미응시 */
+  second_language?: SecondLanguageDto | null;
+}
+
+/**
+  수능 가채점 입력(서버 dep_r19c validateRawScoreStructure). 원점수만 보낸다. 국어·수학 선택과목은 변환표를 고르는 데
+  필요해 필수다. 표준점수 범위·백분위·상대평가 등급은 서버가 가채점 변환표로 추정하고, 절대평가 등급은 서버가 고정 구간으로 정한다.
+*/
+export interface ProvisionalScoresInput {
+  exam_id: string;
+  pack_version: string;
+  korean: { raw_score: number; choice: string };
+  math: { raw_score: number; choice: string };
+  inquiry: { subject: string; raw_score: number }[];
+  english_raw?: number;
+  korean_history_raw?: number;
+  second_language?: { subject: string; raw_score: number } | null;
+}
+
+/** 제2외국어/한문 결과. 절대평가 등급이라 총점·전체 위치에 넣지 않는다 */
+export interface SecondLanguageDto {
+  subject: string;
+  grade: number;
 }
 
 /** profile — score-profile.create. 새 입력은 새 profile_id, 기존 성적은 고치지 않는다 */
@@ -133,6 +158,29 @@ export interface SubjectResultDto {
   top_percent_exclusive: string | null;
   top_percent_inclusive: string | null;
   basis: string | null;
+  /* 수능 가채점(score_basis provisional_estimate)에서만 온다. 그때 standard_score 는 null 이다 */
+  raw_score?: number;
+  /** 표준점수 추정 범위(낮음·중앙·높음). null 이면 이 원점수의 추정이 없다(provisional_conversion_unavailable) */
+  standard_score_range?: ProvisionalTripleDto | null;
+  percentile_range?: { low: number; high: number } | null;
+  /**
+   * 가운데 표준점수(standard_score_range.central)를 과목별 '표준점수→백분위' 대응표로 바꾼 값(정수 0~100, dep_r26, 2026-11-22).
+   * 옛 리포트·서버 배포 전에는 키가 없을 수 있다. 없거나 null 이면 화면은 percentile_range 범위로 보인다
+   */
+  percentile_at_central?: number | null;
+  grade_range?: { low: number; high: number } | null;
+}
+
+/** 가채점 범위(낮음·중앙·높음) */
+export interface ProvisionalTripleDto {
+  low: number;
+  central: number;
+  high: number;
+}
+/** 가채점 전체 상위 누백 범위. 0.01% 단위 문자열(best=좋은 쪽 끝, worst=나쁜 쪽 끝) */
+export interface ProvisionalTopRangeDto {
+  best: string;
+  worst: string;
 }
 
 /**
@@ -152,7 +200,8 @@ export interface ComboPositionDto {
 }
 
 export interface OverallResultDto {
-  status: "observed" | "estimated" | "pending";
+  /** estimated_range: 수능 가채점 범위 결과(top_percent_range) */
+  status: "observed" | "estimated" | "pending" | "estimated_range";
   reason_code: string | null;
   top_percent: string | null;
   inclusive_top_percent: string | null;
@@ -163,6 +212,10 @@ export interface OverallResultDto {
   population_id: string | null;
   model_version: string | null;
   data_kind?: DataKind | null; // 1.7.0: 관측 도수인지 자체 추정 가중치인지
+  /* 수능 가채점(provisional_overall_position)에서만 온다 */
+  top_percent_range?: ProvisionalTopRangeDto | null;
+  exclusive_top_percent_range?: ProvisionalTopRangeDto | null;
+  total_standard_score_range?: ProvisionalTripleDto;
 }
 
 /** 누적의 근거. observed_counts=실제 도수, estimated_weights=공식 주변도수로 자체 추정한 가중치 */
@@ -181,8 +234,19 @@ export interface OverallAnalysisDto {
   total_standard_score: number; // 국·수·탐2 표준점수 합. 영어·한국사 제외
   subjects: SubjectResultDto[];
   absolute_grades: { 영어?: number; 한국사?: number };
+  /** 없거나 null 이면 미응시. 이 필드가 생기기 전(2026-11-12)에 저장된 리포트에는 없다 → 미응시로 본다 */
+  second_language?: SecondLanguageDto | null;
   overall: OverallResultDto;
   combinations?: ComboPositionDto[] | null; // 제안 필드(위 ComboPositionDto 설명). 서버가 줄 때만 존재
+  /* 수능 가채점(score_basis provisional_estimate, input_kind provisional_raw)에서만 온다. 그때 total_standard_score 는 null */
+  input_kind?: string;
+  total_standard_range?: ProvisionalTripleDto;
+}
+
+/** 수능 가채점 원점수로 만든 전체 분석인가(서버 PROVISIONAL_SCORE_BASIS). 이때 표준점수 칸은 범위로만 온다 */
+export const PROVISIONAL_SCORE_BASIS = "provisional_estimate";
+export function isProvisionalOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return !!a && (a.score_basis === PROVISIONAL_SCORE_BASIS || a.input_kind === "provisional_raw");
 }
 
 export interface ShortlistEntryDto {
@@ -210,8 +274,71 @@ export interface HistoricalMetricDto {
   source_as_of: string | null; // YYYY-MM-DD
 }
 
+/** eligibility_conditions — 모집단위의 필수 응시 영역·지정 과목(서버 public_response_schemas 와 같은 모양) */
+export interface EligibilityConditionsDto {
+  required_areas: string[] | null; // [] 이면 별도 지정 없음
+  math_choices: string[] | null; // 목록이면 그 과목 중 하나
+  math_note: string | null; // 요강 문구 그대로
+  inquiry_domains: string[] | null; // 사회·과학·직업
+  inquiry_note: string | null; // 요강 문구 그대로
+}
+
+/** year_cutoff — 지난 학년도 합격선 하나(서버 public_response_schemas 와 같은 모양) */
+export interface YearCutoffDto {
+  academic_year: number;
+  published_metric: string; // 대학 발표 지표 이름(예: 최종등록자 70%컷)
+  cutoff_top_percent: string; // 그 합격선의 누적 백분위(전체 응시자 추정, 위에서 %)
+  observation_id: string;
+  /** 전형 통합 발표(예: 일반학생·지역인재를 합쳐 발표, 대표님 결정 2026-11-16) */
+  published_scope?: "combined_tracks";
+  /** 평균의 점수 성분: 수능 환산점수 평균 / 전형 총점 평균 */
+  score_component?: "csat_converted" | "selection_total";
+}
+
 /** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
+/** 지원 판정 7단계(서버 band, 정책 20261118.relative-band-15-30.v1). 예상 합격권 폭에 대한 상대 위치 */
+export type BandCode = "stable" | "downward" | "target" | "aspirational" | "upward" | "challenge" | "outside";
+export interface BandDto {
+  code: BandCode;
+  label: string;
+  policy_version: string;
+  base_code?: BandCode;
+}
+
+/** 참고 기준 판정(대표님 승인 2026-11-18). 참고 누백을 승인된 예상 합격권과 견준 값이며 정식 판정(category·band)과 별개.
+ * 추천·와일드카드 선정에는 쓰이지 않는다. 누백이 범위면 불리한 끝의 판정이 upper_* 로 함께 온다 */
+export interface ReferenceBandDto {
+  /** reference_threshold: 3페이지 참고 묶음 행에 서버가 누백 없이 실어 보내는 문턱 판정(dep_r15, 2026-11-21) */
+  basis: "reference_percentile" | "reference_threshold";
+  code: BandCode;
+  label: string;
+  /** 문턱 판정 행에서는 생략될 수 있다(정책·승인판은 reference_threshold_summary.sources[source] 에 한 번만 싣는다) */
+  policy_version?: string;
+  approval_version?: string;
+  upper_code?: BandCode;
+  upper_label?: string;
+  source?: string;
+}
+
+/** candidates.reference_threshold_summary(dep_r15). complete=false 면 서버가 이번 요청에서 일부를 미뤘다(deferred) */
+export interface ReferenceThresholdSummaryDto {
+  basis: "reference_threshold";
+  threshold_version: string;
+  universe: number;
+  judged: number;
+  listed: number;
+  delivered: number;
+  complete: boolean;
+  deferred?: number;
+  sources?: Record<string, { policy_version: string; approval_version: string }>;
+  by_code?: Record<string, number>;
+  delivered_by_code?: Record<string, number>;
+}
+
 export interface AssessmentDto {
+  reference_band?: ReferenceBandDto | null;
+  /** 7단계 판정. 누백 축 예상 기준이 발행된 모집단위에만 온다(없으면 category 만 쓴다) */
+  band?: BandDto | null;
   offering_id: string;
   status: "ready" | "pending" | "ineligible";
   reason_code: string | null;
@@ -242,11 +369,49 @@ export interface AssessmentDto {
   conversion?: ConversionDto | null;
   percentile?: PercentileDto | null;
   recommendation_reasons?: ReasonDto[] | null;
+  // 참고 누백(추정). 서버는 승인된 곡선의 값만 보내고, 계산이 안 되면 칸을 뺀다
+  reference_percentile?: ReferencePercentileDto | null;
+  // 학교 반영 백분위(참고, 2026-11-14). 허가된 2027 모집단위만, 읽을 때 서버가 계산해 붙인다
+  school_reflected?: SchoolReflectedDto | null;
+  // 지원 자격 조건(유료 report.read, 2026-11-15). 요강 정본에서 확정된 필드만 온다. 판정은 eligibility_status 그대로
+  eligibility_conditions?: EligibilityConditionsDto | null;
+  // 지난 학년도 합격선 누적 백분위(유료 report.read, R9 명부, 2026-11-15). 담당자 명부에 있는 모집단위만 온다
+  year_cutoffs?: YearCutoffDto[] | null;
+}
+
+/** 학교 반영 백분위(참고). value 는 0~100, 영어·한국사·가산점 제외 */
+export interface SchoolReflectedDto {
+  status: "reference" | "pending";
+  value: number | null;
+  reason_code: string | null;
+  eligibility_note: boolean;
+  excluded: ("english" | "korean_history" | "bonus")[];
+}
+
+/** 참고 누백(추정) — 9월 모의평가 응시자 전체 기준 추정 위치. 합격 가능성·지원 판정이 아니다 */
+export interface ReferencePercentileDto {
+  status: "reference_estimated";
+  estimated_upper_cumulative_percent_all_examinees: string; // 정확한 소수 문자열, 화면은 소수 첫째 자리
+  /** 상한(점수를 낼 수 없는 응시자를 모두 위로 둔 값). 없거나 하한과 같으면 한 값으로 보인다(대표님 결정 2026-11-16) */
+  estimated_upper_cumulative_percent_upper_bound?: string;
+  metric: string;
+  denominator_kind: string;
+  calculation_review_scope: string;
+  production_allowed: boolean;
+  actual_admission_full_total_approved: boolean;
+}
+
+/** candidates.reference_university_groups — 순위 없는 참고 묶음. basic_university_groups 와 섞지 않는다 */
+export interface ReferenceUniversityGroupDto {
+  university_id: string;
+  university_name: string;
+  /** dep_r15: 문턱 판정 행은 reference_percentile 없이 reference_band(basis reference_threshold)만 싣는다 */
+  offerings: { offering: OfferingDto; reference_percentile?: ReferencePercentileDto | null; reference_band?: ReferenceBandDto | null }[];
 }
 
 /** assessment.conversion — 대학 공식 반영식 환산. 판단이 보류여도 성공한 환산은 남는다 */
 export interface ConversionDto {
-  status: "ready" | "pending";
+  status: "ready" | "pending" | "reference_calculated"; // reference_calculated: 참고 점수(운영 확정본 아님)
   reason_code: string | null;
   score_basis: ScoreBasis | null;
   score_scope: string | null;
@@ -333,12 +498,25 @@ export interface CandidateItemDto {
   assessment: AssessmentDto;
 }
 
-/** candidates — candidates.build. 대학별 묶음과 간호·보건·교육 와일드카드, 판단 보류 목록 */
+/** 와일드카드 계열. contract·maritime·railway 는 서버 선택(wildcard_selection) 운영 연결 뒤에 나온다 */
+export type WildcardGroup = "nursing" | "health" | "education" | "contract" | "maritime" | "railway";
+
+/** candidates.wildcard_selection — 서버가 고른 와일드카드(최대 4장)의 순서 확정 상태. 없거나 null 이면 옛 방식 */
+export interface WildcardSelectionDto {
+  status: "ready" | "partial" | "pending";
+  reason_code: "wildcard_evidence_unavailable" | "wildcard_assessment_pending" | "wildcard_comparison_unverified" | null;
+  card_stability: { offering_id: string; status: "verified" | "pending" }[]; // wildcards 와 같은 순서·같은 길이
+}
+
+/** candidates — candidates.build. 대학별 묶음과 와일드카드, 판단 보류 목록 */
 export interface CandidatesDto {
   status: "ready" | "pending";
   reason_code: string | null;
   basic_university_groups: { university_id: string; university_name: string; offerings: CandidateItemDto[] }[];
-  wildcards: CandidateItemDto[];
+  wildcards: CandidateItemDto[]; // wildcard_selection 이 있으면 서버 순서 그대로, 최대 4장
+  wildcard_selection?: WildcardSelectionDto | null;
+  reference_university_groups?: ReferenceUniversityGroupDto[] | null; // 없거나 비면 영역을 숨긴다
+  reference_threshold_summary?: ReferenceThresholdSummaryDto | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
   ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)
@@ -391,6 +569,10 @@ export interface ReportDto {
   candidates?: CandidatesDto | null;
   shortlist?: Record<string, ShortlistEntryDto>;
   analysis_status?: { status: string; reason_code: string | null };
+  /** 지금 자료판과 다른 판으로 계산돼 저장된 분석의 모집단위(서버 v224~, 읽을 때만 붙는다). 없으면 판단하지 않는다 */
+  stale_analysis_ids?: string[];
+  /** 저장된 후보 목록이 지금 자료판과 다른 판으로 만들어졌는지 */
+  candidates_stale?: boolean;
 }
 
 /** snapshot — report.export. 고정된 revision 의 상담 리포트 */
@@ -575,6 +757,8 @@ export interface SnapshotHeadDto {
   full: SnapshotPartPin | null;
   parts: SnapshotPartPin[];
   expires_at: string;
+  /** 2027 부분 발행 때만(schema v2). 화면 수신 영수증을 낸 뒤에만 온다(담당자 1.9.141) */
+  r27_scope_coverage?: { status: "partial"; source_rows: number; included_rows: number; excluded_rows: number; review_pending_rows: number };
 }
 
 /* ── 2페이지 입력권·본인 목록·예시(기획 1.9.95, 결합 20) ── */
@@ -582,7 +766,8 @@ export interface SnapshotHeadDto {
 /** own_report_list — 현재 로그인한 본인의 리포트 요약 */
 export interface OwnReportListDto {
   format: "jungsi.own-report-list/v1";
-  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string }[];
+  /** stage·is_current: 담당자 서비스 후보(2026-10-28 cross-PC v4). 아직 운영 응답에 없을 수 있어 선택 필드다. null 은 서버가 모름 */
+  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string; stage?: string | null; is_current?: boolean | null }[];
   next_cursor: string | null;
   has_more: boolean;
 }

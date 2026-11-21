@@ -1,4 +1,4 @@
-import type { AssessmentDto, Category, CandidatesDto, ConversionDto, OfferingDto, OverallAnalysisDto, PercentileDto, ReasonDto, ScoresInput, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, BandDto, Category, CandidatesDto, ConversionDto, OfferingDto, OverallAnalysisDto, PercentileDto, ReasonDto, ScoresInput, StatisticsDto } from "@/lib/dto";
 import { HISTORY, HISTORY_OFFERINGS } from "./synthetic-history";
 
 /*
@@ -10,6 +10,12 @@ import { HISTORY, HISTORY_OFFERINGS } from "./synthetic-history";
 /** 2027 모집행 = 1페이지 합성 자료의 2027 행(같은 번호를 쓴다) */
 export const CATALOG: OfferingDto[] = HISTORY_OFFERINGS.filter((o) => o.academic_year === 2027);
 
+function syntheticBand(score: number, center: number, w: number): BandDto {
+  const [code, label]: [BandDto["code"], string] =
+    score >= center + w * 1.6 ? ["stable", "안정"] : score >= center + w ? ["downward", "하향"] : score >= center ? ["target", "적정"] : score >= center - w ? ["aspirational", "소신"]
+    : score >= center - w * 2 ? ["upward", "상향"] : score >= center - w * 3 ? ["challenge", "도전"] : ["outside", "불가"];
+  return { code, label, policy_version: "SYNTHETIC-relative-band" };
+}
 export type Rule = { wk: number; wm: number; wi: number; center: number; band: number; max: number };
 /** 대학별 합성 반영 비율과 기준 점수(대학 환산점수 척도) */
 export const RULE: Record<string, Rule> = {
@@ -122,6 +128,8 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
       ...result,
       reason_code: "decision_range_unconfirmed",
       decision_evidence: undefined,
+      // 참고 기준 판정의 합성 예(누백이 범위라 판정도 범위인 경우)
+      reference_band: { basis: "reference_percentile", code: "target", label: "적정", policy_version: "SYNTHETIC-relative-band", approval_version: "SYNTHETIC-reference-judgment", upper_code: "upward", upper_label: "상향" },
       converted_percentile: null,
       percentile: { ...percentile, ...EMPTY_PERCENTILE_VALUES, status: "pending", reason_code: "percentile_curve_unpublished" },
     };
@@ -153,12 +161,22 @@ export function assess(o: OfferingDto, scores: ScoresInput, overall: OverallAnal
     ...result,
     status: "ready",
     category: adopted,
+    // 가온대(syn-g*)만 7단계 판정을 붙인 합성 예. category 의 호환 묶음(여유·핵심·도전·밖)과 어긋나지 않게 가른다
+    band: base.startsWith("syn-g") && !adjusted ? syntheticBand(score, center, rule.band) : null,
     decision_components: { base_category: cat, adjusted_category: adjusted, adopted_category: adopted, base_policy_version: `SYNTHETIC-policy-${base}`, adjustment_version: adjusted ? "SYNTHETIC-adjustment-v1" : null },
     decision_evidence: adjusted ? { ...decision_evidence, adjustment_summary: { applied: true, reason: "상담 판단으로 한 단계 조정했습니다(여유 후보 → 핵심 검토).", version: "SYNTHETIC-adjustment-v1" } } : decision_evidence,
     // 비교집단이 전체 응시자와 다르면 분모가 달라 유불리를 보류한다
     advantage: sameScope ? { delta_pp: fmt(delta), status: delta > 0.005 ? "favorable" : delta < -0.005 ? "unfavorable" : "neutral", baseline_version: "SYNTHETIC-baseline-v1" } : null,
     reason_code: sameScope ? null : "advantage_population_mismatch",
     recommendation_reasons: reasons,
+    // 학교 반영 백분위(참고, 합성): 운영에서는 서버가 허가 목록·시험 자료집으로 계산한다
+    school_reflected: {
+      status: "reference",
+      value: Math.round((100 - convPct * 0.8) * 10000) / 10000,
+      reason_code: null,
+      eligibility_note: base === "syn-h2",
+      excluded: ["english", "korean_history", "bonus"],
+    },
   };
 }
 
@@ -190,6 +208,9 @@ export function buildCandidates(analyses: Record<string, AssessmentDto>): Candid
     groups.get(o.university_id)!.offerings.push(item);
     if (o.wildcard_group) wildcards.push(item);
   }
+  // 합성 재현(2026-11-22 운영 사고): JUNGSI_SYNTHETIC_P3=threshold 이면 dep_r15 처럼 추천·와일드카드 없이
+  // 참고 묶음 행을 누백 없이 문턱 판정(reference_band, basis reference_threshold)만 실어 보낸다(요약 complete=false·deferred)
+  if (process.env.JUNGSI_SYNTHETIC_P3 === "threshold") return thresholdCandidates();
   return {
     // 추천 학교가 없어도 판단이 끝났으면 ready. 실제 보류만 있을 때 pending (1.7.1)
     status: groups.size || !pending.length ? "ready" : "pending",
@@ -200,6 +221,78 @@ export function buildCandidates(analyses: Record<string, AssessmentDto>): Candid
     outside_offerings: outside,
     ineligible_offerings: ineligible,
     catalog_version: "SYNTHETIC-catalog-v1",
+  };
+}
+
+const THRESHOLD_CODES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"] as const;
+const THRESHOLD_LABELS = ["안정", "하향", "적정", "소신", "상향", "도전", "불가"];
+/** dep_r15 candidates 모양(reference_thresholds.ts thresholdBandDto·public_response_schemas reference_threshold_summary) */
+export function thresholdCandidates(): CandidatesDto {
+  const groups = new Map<string, NonNullable<CandidatesDto["reference_university_groups"]>[number]>();
+  CATALOG.forEach((o, i) => {
+    const k = hash(o.offering_id) % THRESHOLD_CODES.length;
+    const up = i % 3 === 0 ? Math.min(k + 2, THRESHOLD_CODES.length - 1) : null;
+    const band = {
+      basis: "reference_threshold" as const,
+      code: THRESHOLD_CODES[k],
+      label: THRESHOLD_LABELS[k],
+      ...(up !== null && up !== k ? { upper_code: THRESHOLD_CODES[up] } : {}),
+      source: "a",
+    };
+    if (!groups.has(o.university_id)) groups.set(o.university_id, { university_id: o.university_id, university_name: o.university_name, offerings: [] });
+    groups.get(o.university_id)!.offerings.push({ offering: o, reference_band: band });
+  });
+  return {
+    status: "ready",
+    reason_code: null,
+    basic_university_groups: [],
+    wildcards: [],
+    reference_university_groups: [...groups.values()],
+    reference_threshold_summary: {
+      basis: "reference_threshold", threshold_version: "SYNTHETIC-thresholds", universe: CATALOG.length + 5, judged: CATALOG.length, listed: CATALOG.length,
+      delivered: CATALOG.length, complete: false, deferred: 5, sources: { a: { policy_version: "SYNTHETIC-policy", approval_version: "SYNTHETIC-approval" } },
+    },
+    pending_offerings: CATALOG.map((o) => ({ offering_id: o.offering_id, category: "pending" as const, reason_code: "reference_threshold_only" })),
+    outside_offerings: [],
+    ineligible_offerings: [],
+    catalog_version: "SYNTHETIC-catalog-v1",
+  };
+}
+
+/**
+ * 수능 가채점 리포트의 candidates.build 응답 흉내(dep_r22 csat_provisional/judgment.ts runCsatJudgment).
+ * 판정 Secret 이 있을 때처럼 학교별 가채점 7단계 행(source g)을 응답에만 싣는다(리포트에는 저장하지 않는다).
+ * 목록은 안정~상향만 오고(서버 RECOMMENDED_BAND_CODES), 중앙이 계산된 곳은 한 단계, 안 된 곳은 code~upper_code 범위.
+ * JUNGSI_SYNTHETIC_CSAT_JUDGMENT=off 면 Secret 이 없을 때처럼 판정 행 없이 돌려준다('가채점 판정 준비 중' 확인용).
+ */
+export function csatCandidates(): CandidatesDto {
+  const base: CandidatesDto = {
+    status: "ready", reason_code: null, basic_university_groups: [], wildcards: [], pending_offerings: [], outside_offerings: [], ineligible_offerings: [], catalog_version: "SYNTHETIC-catalog-v1",
+  };
+  if (process.env.JUNGSI_SYNTHETIC_CSAT_JUDGMENT === "off") return base;
+  const groups = new Map<string, NonNullable<CandidatesDto["reference_university_groups"]>[number]>();
+  const byCode: Record<string, number> = {};
+  const delivered: Record<string, number> = {};
+  let listed = 0;
+  CATALOG.forEach((o, i) => {
+    const k = hash(`g:${o.offering_id}`) % THRESHOLD_CODES.length;
+    // 셋 중 하나는 중앙이 계산되지 않아 범위로 온다(좋은 끝 k ~ 나쁜 끝 k+1)
+    const up = i % 3 === 1 && k + 1 < THRESHOLD_CODES.length ? k + 1 : null;
+    byCode[THRESHOLD_CODES[k]] = (byCode[THRESHOLD_CODES[k]] ?? 0) + 1;
+    if (k > 4) return; // 도전·불가는 목록에 싣지 않는다
+    listed++;
+    delivered[THRESHOLD_CODES[k]] = (delivered[THRESHOLD_CODES[k]] ?? 0) + 1;
+    const band = { basis: "reference_threshold" as const, code: THRESHOLD_CODES[k], label: THRESHOLD_LABELS[k], ...(up !== null ? { upper_code: THRESHOLD_CODES[up] } : {}), source: "g" };
+    if (!groups.has(o.university_id)) groups.set(o.university_id, { university_id: o.university_id, university_name: o.university_name, offerings: [] });
+    groups.get(o.university_id)!.offerings.push({ offering: o, reference_band: band });
+  });
+  return {
+    ...base,
+    reference_university_groups: [...groups.values()],
+    reference_threshold_summary: {
+      basis: "reference_threshold", threshold_version: "SYNTHETIC-csat", universe: CATALOG.length, judged: CATALOG.length, listed, delivered: listed, complete: true,
+      sources: { g: { policy_version: "SYNTHETIC-csat-policy", approval_version: "SYNTHETIC-csat-approval" } }, by_code: byCode, delivered_by_code: delivered,
+    },
   };
 }
 

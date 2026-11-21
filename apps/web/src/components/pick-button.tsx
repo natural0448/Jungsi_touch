@@ -2,12 +2,15 @@
 
 import { useActionState } from "react";
 import { togglePick, type PickResult } from "@/app/shortlist-actions";
+import { enqueue } from "@/lib/client-queue";
 
 const INITIAL: PickResult = { error: null };
+// 여러 곳을 빠르게 담아도 한 번에 하나씩 보낸다(같은 계정 요청 겹침 방지, 2026-11-21)
+const queuedPick = (prev: PickResult, fd: FormData) => enqueue(() => togglePick(prev, fd));
 
 /** 담기·빼기 버튼. 서버가 바꾸지 못했으면 버튼 옆에 이유를 보인다. 보내는 중에는 다시 누르지 못한다 */
 export function PickButton({ id, on, variant = "pill" }: { id: string; on: boolean; variant?: "pill" | "wide" | "wild" }) {
-  const [state, action, pending] = useActionState(togglePick, INITIAL);
+  const [state, action, pending] = useActionState(queuedPick, INITIAL);
   return (
     <form action={action} className={variant === "wild" ? "pick-wild" : undefined}>
       <input type="hidden" name="offering_id" value={id} />

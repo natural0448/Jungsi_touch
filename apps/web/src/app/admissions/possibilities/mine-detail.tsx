@@ -1,0 +1,29 @@
+import type { Cell } from "@/components/offering-parts";
+import type { OfferingDto, ReportDto } from "@/lib/dto";
+import { pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
+import { ConditionsBlock, Detail } from "./parts";
+
+/*
+  4페이지·2페이지 펼친 상세에서 '내 리포트'로 그리는 카드. 서버 화면과 브라우저 화면(전문가용 인쇄 print-sheet → report-view)이
+  함께 쓴다. 그래서 여기와 여기서 import 하는 모듈에는 서버 전용 모듈(report-ops·@/lib/api·shortlist-tray-stream 등)을 두지 않는다.
+  2026-11-22 ship54: report-view 가 mine-parts(→ report-ops → @/lib/api → next/headers)를 import 해 운영 빌드가 실패했다.
+  tests/client-boundary.test.mjs 가 지킨다.
+*/
+
+/** 이 모집단위의 칸 값. 리포트가 없으면(성적 전) 'need', 분석이 없으면 null */
+export function cellOf(report: ReportDto | null, id: string): Cell {
+  return report ? report.analyses?.[id] ?? null : "need";
+}
+
+/** 펼친 카드의 환산·누백·판단 카드 */
+/** acts=false: 2페이지 핵심 지원 학교 표에서 펼칠 때(담기·'내 성적 리포트에서 보기' 줄 없음) */
+export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
+  if (report && provisionalOnly(report)) return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
+  return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
+}
+
+/** 펼친 상세 맨 위 줄 안의 지원 조건 묶음(2026-11-22) */
+export function MineConds({ report, o }: { report: ReportDto | null; o: OfferingDto }) {
+  return <ConditionsBlock a={cellOf(report, o.offering_id)} subjects={report?.overall?.subjects} />;
+}

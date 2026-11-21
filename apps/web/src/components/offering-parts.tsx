@@ -1,23 +1,22 @@
-import type { AssessmentDto, Category, ReasonDto, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
+import { BAND, CATEGORY } from "@/lib/decision-labels";
+import { decisionBasisText } from "@/lib/picked-view";
+import { referenceAdvantage } from "@/lib/reference-advantage";
 import { pctText, seoulDate } from "@/lib/format";
+import { POSITION_NONE_DESC, POSITION_NONE_LABEL, positionNoteOf, positionNoteShort } from "@/lib/position-note";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
 
-/** 학과마다의 지원 판단(assessment.category). 색과 함께 점 모양으로도 구분, 빨강은 '지원 조건 미충족'에만.
- * desc 는 입시 용어에 익숙하지 않은 사용자(수험생·학부모)를 위한 쉬운 풀이 — 기준 점수는 적지 않는다 */
-export const CATEGORY: Record<Category, { cls: string; label: string; desc: string }> = {
-  challenge: { cls: "reach", label: "도전", desc: "지금 점수보다 다소 높은 곳이지만, 남은 기간을 보고 노려볼 수 있는 범위입니다." },
-  core: { cls: "core", label: "핵심 검토", desc: "올해 적극적으로 검토해 볼 만한 범위입니다." },
-  room: { cls: "safe", label: "여유 후보", desc: "내 점수에 비교적 여유가 있는 범위입니다. 그래도 합격이 보장되는 것은 아닙니다." },
-  outside: { cls: "out", label: "추천 범위 밖", desc: "올해 기준으로는 추천 범위에 들지 않습니다. 지원 자체가 불가능하다는 뜻은 아닙니다." },
-  pending: { cls: "check", label: "판단 보류", desc: "판단에 필요한 자료가 아직 갖춰지지 않아 결론을 내리지 않았습니다." },
-  ineligible: { cls: "inel", label: "지원 조건 미충족", desc: "이 전형이 요구하는 지원 조건(과목·자격)을 충족하지 않습니다." },
-};
+/** 지원가능성 이름·풀이(CATEGORY·BAND)는 lib/decision-labels 에 두고 여기서 다시 내보낸다(2페이지 표·시험과 같은 값) */
+export { BAND, CATEGORY };
+/** 화면에 보일 판정 이름·풀이. 7단계가 오면 그것을, 아니면 기존 category 를 쓴다 */
+export const decisionOf = (a: AssessmentDto) => (a.status === "ready" && a.band && BAND[a.band.code] ? BAND[a.band.code] : CATEGORY[a.category]);
 
 /** 판단 보류·자격 확인의 이유(서버 reason_code) */
 const REASON: Record<string, string> = {
   eligibility_confirmation_required: "지원 자격을 확인해야 합니다.",
   eligibility_not_met: "입력한 성적으로는 이 전형의 지원 자격을 충족하지 않습니다.",
+  designated_subject_not_taken: "이 전형이 지정한 과목을 응시하지 않아 지원할 수 없습니다.",
   decision_range_unconfirmed: "올해 판단 구간이 아직 확정되지 않았습니다.",
   decision_policy_missing: "이 모집단위의 판단 기준이 아직 없습니다.",
   decision_policy_not_approved: "판단 기준을 검수하고 있습니다.",
@@ -27,33 +26,82 @@ const REASON: Record<string, string> = {
   // — 환산 성공과 독립이라 환산 자료가 없다는 표현을 쓰지 않는다
   analysis_release_missing: "지원 판단에 필요한 이 모집단위의 분석 기준이 아직 없습니다.",
   analysis_release_not_approved: "이 모집단위의 지원 판단 기준을 검수하고 있습니다.",
-  analysis_pack_mismatch: "입력한 시험과 지원 판단 자료의 버전이 맞지 않습니다.",
+  analysis_pack_mismatch: "입력한 시험과 판단 자료의 기준 시험이 달라 판단하지 않았습니다.",
   target_distribution_missing: "그해 비교 분포가 아직 없습니다.",
-  total_model_missing: "전체 누백 분포 자료가 아직 연결되지 않았습니다(계산 진행 중이 아님).",
-  year_bridge_required: "과거 학년도 모집행과 올해 성적을 잇는 연도 연계 자료가 아직 없습니다.",
+  total_model_missing: "전체 위치를 계산할 자료가 아직 연결되지 않았습니다. 기다린다고 계산되는 것은 아니니, 같은 성적을 다시 저장하지 않으셔도 됩니다.",
+  year_bridge_required: "지난해 결과를 올해 성적과 비교할 자료가 아직 없습니다.",
+  reference_conversion_not_production_approved: "이 대학의 수능 반영 방식(영역 비율·점수 종류)대로 계산한 내 점수입니다. 같은 대학 안의 다른 학과와 비교할 때 쓰세요.",
+  reference_conversion_unavailable: "이 모집단위의 환산 자료를 확인하고 있습니다.",
+  reference_conversion_missing: "이 모집단위의 환산 자료를 연결하고 있습니다.",
+  reference_exam_context_mismatch: "입력한 시험과 학교 환산 자료가 일치하지 않습니다.",
+  reference_offering_context_mismatch: "모집단위와 학교 환산식의 연결을 확인하고 있습니다.",
+  reference_rule_context_mismatch: "모집단위와 학교 환산식의 연결을 확인하고 있습니다.",
+  reference_rule_unsupported: "이 학교 환산식을 연결하고 있습니다.",
+  reference_required_input_missing: "환산점수 계산에 필요한 성적 항목이 없습니다.",
+  reference_inquiry_category_unsupported: "이 모집단위는 선택한 탐구 과목을 반영하지 않아 환산점수를 계산하지 않았습니다.",
+  reference_inquiry_incomplete: "탐구 성적 자료를 연결하고 있습니다.",
+  conversion_release_missing: "이 모집단위의 환산 자료를 연결하고 있습니다.",
+  // 화면 전용: 참고 점수만 계산되고 지원 판단 기준은 아직 없을 때(assessment.reason_code 가 참고 코드로 올 때)
+  reference_decision_pending: "점수 위치로 비교하고, 지원 자격은 모집요강에서 직접 확인하세요.",
+  reference_score_outside_domain: "이 환산식의 확인된 계산 범위를 벗어나 환산점수를 표시하지 않았습니다.",
   conversion_not_ready: "환산 결과가 준비되지 않아 이 대학 위치를 계산하지 않았습니다.",
-  offering_analysis_pending: "올해 모집행과 대학 분석 자료가 결속되기 전이라 후보 산출을 보류했습니다.",
+  offering_analysis_pending: "올해 모집 정보와 대학 분석 자료를 맞춰 보는 중이라 후보를 아직 만들지 않았습니다.",
   counselor_adjustment_unapproved: "상담 조정 기준을 검수하고 있습니다.",
-  percentile_curve_unpublished: "이 대학 환산 분포가 아직 발행되지 않았습니다.",
-  percentile_release_missing: "이 대학의 환산 분포 자료가 아직 발행되지 않아 대학 안 위치를 계산하지 않았습니다.",
-  percentile_conversion_context_missing: "환산 척도 근거가 없어 대학 위치를 계산하지 않았습니다.",
-  advantage_population_mismatch: "비교집단이 전체 응시자와 달라 유불리를 보류합니다.",
-  forecast_70_not_published: "올해 70% 예상선이 아직 발행되지 않았습니다.",
-  forecast_not_published: "학과별 예상 기준이 아직 발행되지 않았습니다.",
+  percentile_curve_unpublished: "이 대학 환산 분포가 아직 준비되지 않았습니다.",
+  percentile_release_missing: "이 대학의 환산 분포 자료가 아직 준비되지 않아 대학 안 위치를 계산하지 않았습니다.",
+  percentile_conversion_context_missing: "이 대학 환산점수를 위치로 바꿀 자료가 없어 대학 안 위치를 계산하지 않았습니다.",
+  advantage_population_mismatch: "비교하는 학생 범위가 전체 응시자와 달라 유불리를 보여 드리지 않습니다.",
+  forecast_70_not_published: "올해 70% 예상선이 아직 준비되지 않았습니다.",
+  forecast_not_published: "학과별 예상 기준이 아직 준비되지 않았습니다.",
 };
 export const reasonText = (code: string | null | undefined) => (code ? REASON[code] ?? "자료를 확인하고 있습니다." : "");
 
-export function CategoryBadge({ a }: { a: AssessmentDto }) {
-  if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check">자격 확인 필요</span>;
-  const c = CATEGORY[a.category];
-  return <span className={`st ${c.cls}`}>{c.label}</span>;
+const REFERENCE_CODE = "reference_conversion_not_production_approved";
+/** 참고 점수(학교 수능 반영분, 운영 확정본 아님)인지. 서버는 conversion.status 를 pending 이나 reference_calculated 로 보낸다 */
+export const isReferenceScore = (a: AssessmentDto) =>
+  a.conversion?.status === "reference_calculated" || a.conversion?.reason_code === REFERENCE_CODE || a.reason_code === REFERENCE_CODE;
+/** 화면에 보일 내 환산점수. 참고 점수도 포함한다 */
+export const scoreOf = (a: AssessmentDto) => a.conversion?.converted_score ?? a.converted_score;
+/** 지원 판단 칸의 보류 이유. 참고 코드가 판단 이유로 오면 '판단 기준 확인 중'으로 바꿔 보인다 */
+export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFERENCE_CODE ? "reference_decision_pending" : a.reason_code);
+
+/** 판단 근거 한 문장(2페이지 표·인쇄본). 배지(CategoryBadge)와 같은 규칙으로 고른다 — lib/picked-view */
+export const decisionBasis = (a: AssessmentDto, overall?: OverallResultDto | null) =>
+  decisionBasisText(a, overall, (code) => reasonText(code === REFERENCE_CODE ? "reference_decision_pending" : code));
+
+/** 참고 기준 판정을 보일지. 정식 판정이 난 곳(ready)·자격 미충족에는 보이지 않는다 */
+export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.status !== "ineligible" && a.reference_band && BAND[a.reference_band.code] ? a.reference_band : null);
+/**
+ * 참고 기준 판정의 이름. 누백이 범위로 나와도 배지는 한 단계만 적는다 — 추정값(점수를 낸 응시자 기준 누백, 범위의 유리한 끝)으로
+ * 정한 단계 = 서버 reference_band.code(대표님 결정 2026-11-22, 전에는 '적정~도전'처럼 양끝). 범위는 상세의 누적 백분위 칸에만 남긴다
+ */
+export const referenceBandLabel = (r: NonNullable<AssessmentDto["reference_band"]>) => BAND[r.code].label;
+
+/** '참고' 꼬리표는 어느 화면에도 달지 않는다(대표님 결정 2026-11-22 새벽, 전에는 2페이지만 plain 으로 뺐다). plain 은 예전 호출 호환용 */
+export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: OverallResultDto | null; plain?: boolean }) {
+  const ref = referenceBandOf(a);
+  if (ref) {
+    // 이름·색 모두 추정값 단계 하나(2026-11-22). '참고'·'추정 참고' 꼬리표는 달지 않는다(대표님 결정 2026-11-20:
+    // 우리가 도출한 값이고, 이를 보고 지원할지는 학생·학부모가 정한다)
+    const tone = BAND[ref.code];
+    return <span className={`st ${tone.cls}`} title={`${tone.desc} 지원 자격은 모집요강에서 확인하세요`}>{referenceBandLabel(ref)}</span>;
+  }
+  // 판정 경계가 없는 곳의 종료 표시(대표님 결정 2026-11-20): 지난해 합격선 대비 위치, 또는 판정 근거 부족
+  const pn = positionNoteOf(a, overall);
+  if (pn) {
+    if (pn.kind === "none") return <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
+    return <span className={`st pos ${pn.margin.side}`} title={`${pn.margin.text} · 판정이 아닌 위치 비교입니다`}>{positionNoteShort(pn)}</span>;
+  }
+  if (a.status === "pending" && a.eligibility_status === "needs_confirmation") return <span className="st check" title="이 모집단위의 판정 자료가 아직 준비되지 않았습니다. 지원 자격은 모집요강에서 확인하세요">판정 준비 중</span>;
+  const c = decisionOf(a);
+  return <span className={`st ${c.cls}`} title={c.desc}>{c.label}</span>;
 }
 
 export function CategoryLegend() {
   return (
     <span className="legend" aria-label="지원가능성 표시">
-      {Object.values(CATEGORY).map((c) => (
-        <span key={c.cls} className={`st ${c.cls}`}>{c.label}</span>
+      {[...Object.values(BAND), { cls: "pos near", label: "합격선 대비 위치" }, { cls: "check", label: POSITION_NONE_LABEL }, CATEGORY.ineligible].map((c) => (
+        <span key={c.label} className={`st ${c.cls}`} title={"desc" in c ? c.desc : undefined}>{c.label}</span>
       ))}
     </span>
   );
@@ -61,28 +109,50 @@ export function CategoryLegend() {
 
 export type Cell = AssessmentDto | null | "need";
 
-export function ScoreCell({ a }: { a: Cell }) {
+/** 그 학교 환산 방식으로 계산한 점수다 — '참고' 꼬리표 없음(대표님 결정 2026-11-22 새벽). plain 은 예전 호출 호환용 */
+export function ScoreCell({ a }: { a: Cell; plain?: boolean }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (!a) return <span className="need">분석 대기</span>;
-  if (!a.converted_score) return <span className="need">계산 보류</span>;
+  const score = scoreOf(a);
+  if (!score) return <span className="need">계산 보류</span>;
   return (
     <span className="score">
-      <b className="num">{a.converted_score}</b>
+      <b className="num">{score}</b>
       {a.converted_percentile && <small>상위 {pctText(a.converted_percentile)}%</small>}
     </span>
   );
 }
 
-export function StatusCell({ a }: { a: Cell }) {
+/** '참고' 꼬리표 없음(어느 화면에서나). plain 은 예전 호출 호환용 */
+export function StatusCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null; plain?: boolean }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (!a) return <span className="need">분석 대기</span>;
-  return <CategoryBadge a={a} />;
+  return <CategoryBadge a={a} overall={overall} />;
 }
 
 /** 환산 유불리: 같은 비교집단에서 보정 총점 기준 위치 − 대학 환산 기준 위치(%p). 양수면 유리 */
-export function AdvantageCell({ a }: { a: Cell }) {
+/** 환산 유불리의 방향을 글자로도 적는다(대표님 지적 2026-11-18: 숫자만으로는 좋은 신호인지 알 수 없다) */
+export const ADVANTAGE_WORD: Record<"up" | "down" | "even", string> = { up: "유리", down: "불리", even: "비슷" };
+
+/** 대학 누적 백분위(추정)로 낸 유불리에도 '참고' 꼬리표를 달지 않는다(대표님 결정 2026-11-22 새벽). plain 은 예전 호출 호환용 */
+export function AdvantageCell({ a, overall }: { a: Cell; overall?: OverallResultDto | null; plain?: boolean }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
-  if (!a || !a.advantage) return <span className="need">판단 보류</span>;
+  if (a && !a.advantage) {
+    // 서버 유불리가 없을 때만 대학 참고 누백으로 참고 유불리를 보인다(R16, 2026-11-16)
+    const ref = referenceAdvantage(a.reference_percentile, overall);
+    if (ref) {
+      const width = Math.min(50, (Math.abs(ref.mid) / 0.6) * 50);
+      return (
+        <span className="adv">
+          <span className="bar" aria-hidden="true">{ref.tone !== "even" && <i className={ref.tone} style={{ width: `${width}%` }} />}</span>
+          <span className={`v num ${ref.tone}`}><b className="advw">{ADVANTAGE_WORD[ref.tone]}</b> {ref.text}%p</span>
+        </span>
+      );
+    }
+  }
+  // '판단 보류'는 중간 상태처럼 읽혀 쓰지 않는다(2026-11-21 대표님 지적). 사유가 분명한 종료 표시로 적는다
+  if (!a) return <span className="need">분석 대기</span>;
+  if (!a.advantage) return <span className="need" title="이 모집단위는 비교 자료가 모자라 유불리를 표시하지 않았습니다">{a.status === "ineligible" ? "해당 없음" : "비교 자료 부족"}</span>;
   const n = Number(a.advantage.delta_pp);
   const tone = a.advantage.status === "neutral" || Math.abs(n) < 0.1 ? "even" : n > 0 ? "up" : "down";
   const width = Math.min(50, (Math.abs(n) / 0.6) * 50);
@@ -90,7 +160,7 @@ export function AdvantageCell({ a }: { a: Cell }) {
     <span className="adv">
       <span className="bar" aria-hidden="true">{tone !== "even" && <i className={n > 0 ? "up" : "down"} style={{ width: `${width}%` }} />}</span>
       <span className={`v num ${tone}`}>
-        {n > 0 ? "+" : ""}
+        <b className="advw">{ADVANTAGE_WORD[tone]}</b> {n > 0 ? "+" : ""}
         {a.advantage.delta_pp}%p
       </span>
     </span>

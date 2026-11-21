@@ -21,6 +21,8 @@ export type CoordinatorState = {
   head: SnapshotHeadDto | null; checkedAt: number | null; headLease: CoordinationToken | null;
   headReceipt: Receipt | null; warm: Warm | null;
   ready: { value: PublicDocument; generation: string; step: number } | null;
+  /** 관리자 '정리본 다시 만들기'(2026-11-16): 같은 판을 다시 만드는 동안 1페이지가 계속 쓰는 이전 준비본. 없을 수 있다 */
+  standby?: PublicDocument | null;
 };
 export interface CoordinationStore {
   read(): CoordinatorState | null;
@@ -45,6 +47,7 @@ export class P1CoordinationError extends Error {
 }
 const HASH = /^[a-f0-9]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+export const MAX_MIN_FRESH_MS = 300000;
 const forbidden = new Set(["authorization", "accesstoken", "refreshtoken", "cookie", "caller", "scores", "reportid", "cursor", "subjectid", "session", "jwt", "secret", "userid", "ownerid", "role", "roles", "permission", "permissions", "capabilities", "entitlement", "entitlements", "claims", "aal", "paidpassid", "paiduntil", "__proto__", "prototype", "constructor"]);
 export function coordinationError(code: string): never { throw new P1CoordinationError(code); }
 function integer(v: unknown, low = 0): v is number { return Number.isSafeInteger(v) && Number(v) >= low; }
@@ -74,10 +77,19 @@ export function publicDocument(v: unknown): PublicDocument {
   if (new TextEncoder().encode(JSON.stringify(v)).length > 131072) coordinationError("p1_coordinator_metadata_too_large");
   return structuredClone(v) as PublicDocument;
 }
+/** 2027 부분 발행 표시. schema v2 에서만, 정확한 5키, 포함+제외+검토 중 = 원천 행, 포함·검토 중은 1 이상(서버 index v2 규칙) */
+export function r27Coverage(value: unknown, schemaVersion: unknown): boolean {
+  if (schemaVersion !== "jungsi.history-snapshot/v2" || !value || typeof value !== "object" || Array.isArray(value)) return false;
+  const c = value as Record<string, unknown>, counts = ["source_rows", "included_rows", "excluded_rows", "review_pending_rows"];
+  return Object.keys(c).length === 5 && c.status === "partial" && counts.every(k => integer(c[k])) &&
+    Number(c.included_rows) >= 1 && Number(c.review_pending_rows) >= 1 &&
+    Number(c.included_rows) + Number(c.excluded_rows) + Number(c.review_pending_rows) === Number(c.source_rows);
+}
 export function validatePublicHead(value: unknown, now: number): SnapshotHeadDto {
   const h = publicDocument(value);
   const keys = ["format", "status", "snapshot_id", "publication_sha256", "source_head_sha256", "generated_at", "source_as_of", "schema_version", "normalization_rules_version", "selection_rules_version", "counts", "delivery_mode", "full", "parts", "expires_at"];
-  if (Object.keys(h).some(k => !keys.includes(k)) || keys.some(k => !(k in h)) ||
+  if (Object.keys(h).some(k => !keys.includes(k) && k !== "r27_scope_coverage") || keys.some(k => !(k in h)) ||
+      ("r27_scope_coverage" in h && !r27Coverage(h.r27_scope_coverage, h.schema_version)) ||
       h.format !== "jungsi.history-snapshot-head/v1" || h.status !== "approved" ||
       typeof h.snapshot_id !== "string" || !ID.test(h.snapshot_id) ||
       typeof h.publication_sha256 !== "string" || !HASH.test(h.publication_sha256) ||
@@ -110,7 +122,7 @@ export function coordinatorState(raw: CoordinatorState | null): CoordinatorState
   if (raw === null) return initial();
   const keys = ["format", "fence", "headRevision", "head", "checkedAt", "headLease", "headReceipt", "warm", "ready"];
   if (!raw || raw.format !== "jungsi.p1-coordination/v1" || !integer(raw.fence) || !integer(raw.headRevision) ||
-      Object.keys(raw).some(k => !keys.includes(k)) || keys.some(k => !(k in raw)) ||
+      Object.keys(raw).some(k => !keys.includes(k) && k !== "standby") || keys.some(k => !(k in raw)) ||
       !(raw.checkedAt === null || integer(raw.checkedAt)) ||
       new TextEncoder().encode(JSON.stringify(raw)).length > 524288) coordinationError("p1_coordinator_state_invalid");
   safeValue(raw);
@@ -132,6 +144,10 @@ export function coordinatorState(raw: CoordinatorState | null): CoordinatorState
     if (!raw.warm || raw.ready.generation !== raw.warm.generation || !integer(raw.ready.step, 1) || raw.ready.step !== raw.warm.step) coordinationError("p1_coordinator_state_invalid");
     publicDocument(raw.ready.value);
   }
+  if (raw.standby !== undefined && raw.standby !== null) {
+    publicDocument(raw.standby);
+    if (!raw.head || raw.standby.publication_sha256 !== raw.head.publication_sha256) coordinationError("p1_coordinator_state_invalid");
+  }
   return structuredClone(raw);
 }
 const sameToken = (a: CoordinationToken | null, b: CoordinationToken) => a !== null && JSON.stringify(a) === JSON.stringify(b);
@@ -144,15 +160,17 @@ export class P1CoordinationCore {
     this.store = store; this.clock = clock; this.nonce = nonce;
   }
   private now(): number { const now = this.clock(); if (!integer(now)) coordinationError("p1_coordinator_clock_invalid"); return now; }
-  private fresh(s: CoordinatorState, now: number): boolean {
-    return s.head !== null && s.checkedAt !== null && now >= s.checkedAt && now - s.checkedAt < 600000 && Date.parse(s.head.expires_at) > now;
+  /** margin: a cached check must stay fresh this much longer. Warm steps pass one so a step started near the 10-minute edge does not lapse mid-step (11-06 seq18). */
+  private fresh(s: CoordinatorState, now: number, margin = 0): boolean {
+    return s.head !== null && s.checkedAt !== null && now >= s.checkedAt && now - s.checkedAt < 600000 - margin && Date.parse(s.head.expires_at) > now + margin;
   }
   private view(s: CoordinatorState, now: number): CoordinationView {
     const fresh = this.fresh(s, now), headLease = s.headLease && s.headLease.expiresAt > now, warmLease = s.warm?.lease && s.warm.lease.expiresAt > now;
     return structuredClone({ head: s.head, headRevision: s.headRevision, headFresh: fresh, checking: !!headLease, warming: !!warmLease,
       nextRetryAt: headLease ? s.headLease!.expiresAt : warmLease ? s.warm!.lease!.expiresAt : null,
       generation: s.warm?.generation ?? null, step: s.warm?.step ?? 0, progress: s.warm?.progress ?? null,
-      ready: fresh && s.ready && s.ready.value.publication_sha256 === s.head!.publication_sha256 ? s.ready.value : null });
+      ready: fresh && s.ready && s.ready.value.publication_sha256 === s.head!.publication_sha256 ? s.ready.value
+        : fresh && !s.ready && s.standby && s.standby.publication_sha256 === s.head!.publication_sha256 ? s.standby : null });
   }
   private token(s: CoordinatorState, kind: CoordinationKind, now: number, generation: string | null, step: number): CoordinationToken {
     if (!integer(s.fence + 1, 1)) coordinationError("p1_coordinator_fence_exhausted");
@@ -163,12 +181,20 @@ export class P1CoordinationCore {
       writePrefix: kind === "warm" ? `p1c:v1:${generation}:f${s.fence}:${nonce}` : null };
   }
   inspect(): CoordinationView { return this.view(coordinatorState(this.store.read()), this.now()); }
-  claimHead(afterRevision?: number): HeadClaim {
+  /** 표시 전용(3페이지 연도별 근거). 10분 머리 확인이 지났어도 만료 전이고 머리와 같은 판인 준비본을 읽기만 한다. 상태는 바꾸지 않는다(11-17). */
+  peek(): CoordinationView {
+    const s = coordinatorState(this.store.read()), now = this.now(), v = this.view(s, now);
+    if (!v.ready && s.head && s.ready && s.ready.value.publication_sha256 === s.head.publication_sha256 && Date.parse(s.head.expires_at) > now)
+      v.ready = structuredClone(s.ready.value);
+    return v;
+  }
+  claimHead(afterRevision?: number, minFreshMs = 0): HeadClaim {
     const now = this.now();
     return this.store.atomic<HeadClaim>(raw => {
       const s = coordinatorState(raw);
       if (afterRevision !== undefined && (!integer(afterRevision) || afterRevision > s.headRevision)) coordinationError("p1_coordinator_revision_invalid");
-      if (this.fresh(s, now) && (afterRevision === undefined || s.headRevision > afterRevision)) return { state: s, result: { state: "cached", view: this.view(s, now) } };
+      if (!integer(minFreshMs) || minFreshMs > MAX_MIN_FRESH_MS) coordinationError("p1_coordinator_request_invalid");
+      if (this.fresh(s, now, minFreshMs) && (afterRevision === undefined || s.headRevision > afterRevision)) return { state: s, result: { state: "cached", view: this.view(s, now) } };
       if (s.headLease && s.headLease.expiresAt > now) return { state: s, result: { state: "busy", view: this.view(s, now) } };
       s.headLease = this.token(s, "head", now, null, s.headRevision);
       return { state: s, result: { state: "claimed", token: s.headLease, view: this.view(s, now) } };
@@ -188,7 +214,8 @@ export class P1CoordinationCore {
       const changed = canonical(s.head) !== canonical(next);
       s.head = next; s.checkedAt = now; s.headRevision++; s.headLease = null;
       s.headReceipt = { fence: token.fence, nonce: token.nonce, digest };
-      if (changed) { s.warm = null; s.ready = null; }
+      // 대기본 칸은 비면 지운다: 옛 코드로 되돌려도 저장 형식이 그대로 읽히게
+      if (changed) { s.warm = null; s.ready = null; delete s.standby; }
       return { state: s, result: { replayed: false, view: this.view(s, now) } };
     });
   }
@@ -236,8 +263,25 @@ export class P1CoordinationCore {
           typeof result.index_key !== "string" || !result.index_key.startsWith(token.writePrefix! + ":"))) coordinationError("p1_coordinator_ready_invalid");
       if (w.receipts.length >= 256) coordinationError("p1_coordinator_step_limit");
       w.progress = document; w.step++; w.lease = null; w.receipts.push({ fence: token.fence, nonce: token.nonce, digest });
-      if (result) s.ready = { value: result, generation: w.generation, step: w.step };
+      if (result) { s.ready = { value: result, generation: w.generation, step: w.step }; delete s.standby; }
       return { state: s, result: { replayed: false, view: this.view(s, now) } };
+    });
+  }
+  /**
+   * 관리자 '정리본 다시 만들기'(2026-11-16). 같은 판의 준비본을 대기본으로 옮기고 새 세대로 처음부터 다시 만든다.
+   * 새 준비본이 올라오기 전까지 1페이지는 대기본을 그대로 쓴다. 판이 바뀌면 대기본도 지운다(commitHead).
+   * 진행 중인 준비가 있으면 건드리지 않는다.
+   */
+  rebuildWarm(publication: string): CoordinationView {
+    const now = this.now();
+    return this.store.atomic(raw => {
+      const s = coordinatorState(raw);
+      if (!this.fresh(s, now)) coordinationError("p1_head_check_required");
+      if (publication !== s.head!.publication_sha256) coordinationError("p1_publication_changed");
+      if (s.warm?.lease && s.warm.lease.expiresAt > now) coordinationError("p1_rebuild_busy");
+      if (!s.ready) return { state: s, result: this.view(s, now) };
+      s.standby = s.ready.value; s.ready = null; s.warm = null;
+      return { state: s, result: this.view(s, now) };
     });
   }
   failWarm(token: CoordinationToken): CoordinationView {
@@ -252,12 +296,14 @@ export class P1CoordinationCore {
 
 export type CoordinatorCommand =
   | { op: "inspect" }
-  | { op: "claimHead"; afterRevision?: number }
+  | { op: "peek" }
+  | { op: "claimHead"; afterRevision?: number; minFreshMs?: number }
   | { op: "commitHead"; token: CoordinationToken; head: SnapshotHeadDto }
   | { op: "failHead"; token: CoordinationToken }
   | { op: "claimWarm"; publication: string }
   | { op: "commitWarm"; token: CoordinationToken; progress: PublicDocument; ready: PublicDocument | null }
-  | { op: "failWarm"; token: CoordinationToken };
+  | { op: "failWarm"; token: CoordinationToken }
+  | { op: "rebuildWarm"; publication: string };
 function canonical(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
@@ -288,16 +334,20 @@ function commandToken(value: unknown): CoordinationToken {
 export async function dispatchP1Command(core: P1CoordinationCore, command: unknown): Promise<unknown> {
   if (!command || typeof command !== "object" || Array.isArray(command)) coordinationError("p1_coordinator_request_invalid");
   const b = command as Record<string, unknown>, op = b.op;
-  const fields: Record<string, string[]> = { inspect: ["op"], claimHead: ["op", "afterRevision"], commitHead: ["op", "token", "head"], failHead: ["op", "token"], claimWarm: ["op", "publication"], commitWarm: ["op", "token", "progress", "ready"], failWarm: ["op", "token"] };
-  if (typeof op !== "string" || !Object.hasOwn(fields, op) || Object.keys(b).some(k => !fields[op].includes(k)) || fields[op].some(k => k !== "afterRevision" && !(k in b))) coordinationError("p1_coordinator_request_invalid");
+  const fields: Record<string, string[]> = { inspect: ["op"], peek: ["op"], claimHead: ["op", "afterRevision", "minFreshMs"], commitHead: ["op", "token", "head"], failHead: ["op", "token"], claimWarm: ["op", "publication"], commitWarm: ["op", "token", "progress", "ready"], failWarm: ["op", "token"], rebuildWarm: ["op", "publication"] };
+  if (typeof op !== "string" || !Object.hasOwn(fields, op) || Object.keys(b).some(k => !fields[op].includes(k)) || fields[op].some(k => k !== "afterRevision" && k !== "minFreshMs" && !(k in b))) coordinationError("p1_coordinator_request_invalid");
   switch (op) {
     case "inspect": return core.inspect();
-    case "claimHead": return core.claimHead(b.afterRevision as number | undefined);
+    case "peek": return core.peek();
+    case "claimHead": return core.claimHead(b.afterRevision as number | undefined, (b.minFreshMs ?? 0) as number);
     case "commitHead": return core.commitHead(commandToken(b.token), b.head, await digest(b.head));
     case "failHead": return core.failHead(commandToken(b.token));
     case "claimWarm": return core.claimWarm(b.publication as string);
     case "commitWarm": return core.commitWarm(commandToken(b.token), b.progress, b.ready, await digest({ progress: b.progress, ready: b.ready }));
     case "failWarm": return core.failWarm(commandToken(b.token));
+    case "rebuildWarm":
+      if (typeof b.publication !== "string" || !HASH.test(b.publication)) coordinationError("p1_coordinator_request_invalid");
+      return core.rebuildWarm(b.publication);
   }
   return coordinationError("p1_coordinator_request_invalid");
 }
@@ -320,11 +370,13 @@ export function p1CoordinatorClient(stub: { fetch(request: Request): Promise<Res
   }
   return {
     inspect: () => invoke<CoordinationView>({ op: "inspect" }),
-    claimHead: (afterRevision?: number) => invoke<HeadClaim>({ op: "claimHead", ...(afterRevision === undefined ? {} : { afterRevision }) }),
+    peek: () => invoke<CoordinationView>({ op: "peek" }),
+    claimHead: (afterRevision?: number, minFreshMs?: number) => invoke<HeadClaim>({ op: "claimHead", ...(afterRevision === undefined ? {} : { afterRevision }), ...(minFreshMs === undefined ? {} : { minFreshMs }) }),
     commitHead: (token: CoordinationToken, head: SnapshotHeadDto) => invoke<CommitResult>({ op: "commitHead", token, head }),
     failHead: (token: CoordinationToken) => invoke<CoordinationView>({ op: "failHead", token }),
     claimWarm: (publication: string) => invoke<WarmClaim>({ op: "claimWarm", publication }),
     commitWarm: (token: CoordinationToken, progress: PublicDocument, ready: PublicDocument | null = null) => invoke<CommitResult>({ op: "commitWarm", token, progress, ready }),
     failWarm: (token: CoordinationToken) => invoke<CoordinationView>({ op: "failWarm", token }),
+    rebuildWarm: (publication: string) => invoke<CoordinationView>({ op: "rebuildWarm", publication }),
   };
 }

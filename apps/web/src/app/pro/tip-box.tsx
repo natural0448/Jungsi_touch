@@ -19,6 +19,7 @@ export function TipBox({ reasons, category }: { reasons: ProReason[] | undefined
     <li key={i}>
       {l.text}
       {l.caution && <span className="pro-tip-caution">{l.caution}</span>}
+      {l.ref && <small className="pro-tip-ref">근거 번호 {l.ref}</small>}
     </li>
   );
   return (

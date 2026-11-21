@@ -63,7 +63,7 @@ const TOPICS: { id: string; title: string; lines: Line[] }[] = [
     lines: [
       { t: "최초 합격자가 등록하지 않으면, 대학이 예비 순위에 따라 추가로 합격을 통보합니다(미등록 충원). 2027학년도 정시 충원 합격통보 마감은 2월 17일, 충원 등록 마감은 2월 18일 22시입니다.", s: ["A"] },
       { t: "같은 학기에 입학하는 대학은 한 곳에만 등록할 수 있으므로, 충원 합격한 대학으로 옮기려면 먼저 등록한 대학의 등록을 포기해야 합니다. 구체적인 절차는 대학별 모집요강에 따릅니다.", s: ["B"] },
-      { t: "정시터치 입시결과의 '최종 합격 예비번호'는 그해 마지막으로 합격한 예비 순번(번)이고, '충원인원'은 실제로 추가 합격한 인원(명)입니다. 둘은 서로 다른 지표입니다." },
+      { t: "정시터치 입시결과 표의 '충원인원'은 대학이 발표한 충원(추가 합격) 숫자입니다. 최종 합격 예비번호로 발표한 대학은 그 번호를 같은 칸에 적습니다." },
     ],
   },
   {
@@ -89,7 +89,7 @@ export default async function Page({ searchParams }: PageProps<"/pro/guide">) {
   const sp = await searchParams;
   const orgParam = typeof sp.org === "string" ? sp.org : "";
   const orgs = await proAccess();
-  const head = <PageHead kicker="전문가용" title="정시 기본 안내" desc="상담 전에 함께 확인할 공통 규칙과 용어입니다. 학생별 이유는 학생 화면의 상담 tip에 있습니다." />;
+  const head = <PageHead kicker="전문가용" title="정시 기본 안내" desc="상담 전에 함께 확인할 공통 규칙과 용어입니다. 학생별 이유는 학생 화면의 상담 팁에 있습니다." />;
   if (!orgs || orgs.length === 0)
     return (
       <>

@@ -1,0 +1,106 @@
+import type { Cell, Row } from "./p1-shape";
+
+/*
+  1페이지 학년도 표의 '대학 발표 성적 ①·②' 두 칸(2026-10-28 사용자 결정).
+  대학마다 발표 통계가 달라(50·70%컷, 평균·75%컷 등) 한 학년도 행에서 두 개만 골라 보인다. 열은 새로 만들지 않는다.
+  - 대상: 최종등록자(입학자·최종입학생 등 같은 뜻) → 최초합격자 → 그 밖(최종합격자 등) 순으로 한 집단만 쓴다. 대상은 화면에 쓰지 않는다
+  - 기준: 같은 집단 안에서 대학 환산점수를 먼저 쓰고, 두 값은 같은 기준끼리만 짝짓는다
+  - 칸 자리는 통계마다 고정(2026-10-28 사용자 정정): ① 칸은 50%컷 자리, ② 칸은 70%컷 자리.
+    ① 50%컷 → 평균
+    ② 70%컷 → 다른 %컷(작은 비율부터) → 평균(① 이 50%컷일 때) → 최저 → 최고
+    70%컷만 있으면 ①은 비우고 ②에 둔다. 학년도마다 같은 통계가 같은 칸에 서도록 하기 위해서다
+  - 이름: '85% 컷'·'85%cut'·'85_percent_cut' 은 학교 표기 차이일 뿐이라 모두 '85%컷'. 최상위·최대 → 최고, 최하위 → 최저
+  - 숨김(담당자 확인 대기): 영어 mean·best·worst, 뜻이 애매한 이름(상위80% 집단 평균 등), 기준 '대학 발표 성적 · 기준 확인 중',
+    같은 이름·기준·대상에 값이 둘 이상인 통계(예: 평균 553 과 631.3)
+  - 발표 용도가 실제 입결이 아닌 값(시뮬레이션·다른 학년도 산식 재환산 참고값·미확인)은 대학 발표 성적 칸에 쓰지 않는다
+    (2026-10-28 사용자 결정: 한국항공대 2025 는 2025 산식 평균 631.3 이 실제 입결, 2026 산식 553.0 은 참고값). 용도 표시가 없는 기존 자료는 그대로
+  자료(c50·c70·alt)는 그대로 두고 고르기만 한다. 값을 만들거나 다른 집단·기준의 값을 섞지 않는다.
+*/
+
+/**
+ * 선택한 발표 성적 칸의 null 표시(2026-10-29 사용자 결정).
+ * 숫자·원문 사유는 그대로 보존하며 원문이 3인 이하라고 새로 판정하지 않는다.
+ * 참고·미확인 발표 용도와 숨김 점수 기준에는 대체 문구를 붙이지 않는다.
+ */
+export function publishedScoreNullLabel(c: Cell): string | null {
+  if (c.v !== null || c.b === UNKNOWN_BASIS ||
+      (c.pr !== undefined && c.pr !== "actual_result")) return null;
+  // 검증된 칸별 사유는 서버가 아직 공급하지 않는다. 공급 전에는 10-29 결정 표시를 유지한다(2026-11-03 사용자 결정).
+  // 공급되면 그 사유만 쓴다. 일반 사유 코드·모집인원·단순 null은 근거가 아니다.
+  const reasons = c.verified_score_null_reasons;
+  if (reasons === undefined) return "3인 이하 미발표";
+  if (!Array.isArray(reasons) || reasons.length < 1 || reasons.length > 2 ||
+      reasons.some(r => r !== "other_statistic_only" && r !== "three_or_fewer") ||
+      new Set(reasons).size !== reasons.length) return null;
+  if (reasons.includes("three_or_fewer")) return "3인 이하 미발표";
+  if (reasons.includes("other_statistic_only")) return "해당 조건 미발표";
+  return null;
+}
+
+export type PublishedStat = { label: string; cell: Cell; schoolRecord: boolean };
+
+const UNKNOWN_BASIS = "대학 발표 성적 · 기준 확인 중";
+const BASIS_ORDER = [
+  "대학 환산점수", "대학 반영 백분위", "대학 가중 백분위", "발표 영역 백분위 평균", "발표 선택영역 백분위 평균",
+  "대학 수능 성분 점수", "대학 전형 총점", "대학 발표 총점", "발표 영역 평균등급", "발표 수능 평균등급", "학생부 등급",
+];
+const NAMED: Record<string, string> = { 평균: "평균", 최저: "최저", 최하위: "최저", 최고: "최고", 최상위: "최고", 최대: "최고", 최고점: "최고" };
+
+/** 통계 이름을 화면 표기로 맞춘다. 모르는 이름(영어 mean 등)은 null → 보이지 않는다 */
+export function statName(label: string | null): string | null {
+  if (label === null) return null;
+  const s = label.replace(/\s+/g, "");
+  const m = /^(\d{1,3})(?:%컷|%cut|_percent_cut|%)$/i.exec(s);
+  if (m) {
+    const n = Number(m[1]);
+    return n >= 1 && n <= 100 ? `${n}%컷` : null;
+  }
+  return NAMED[s] ?? null;
+}
+
+/** 대상 집단 순위: 1 최종등록자 계열, 2 최초합격자, 3 그 밖·미명시 */
+export function cohortTier(c: Cell): number {
+  const t = `${c.co ?? ""} ${c.cc ?? ""}`.replace(/\s+/g, "");
+  if (/final_registrant|최종등록|최종입학|입학자|입학생|등록생|최종합격\(등록\)자/.test(t)) return 1;
+  if (/^최초합격|initial_admit/.test(t)) return 2;
+  return 3;
+}
+
+const basisRank = (b: string | null | undefined) => {
+  const i = BASIS_ORDER.indexOf(b ?? "");
+  return i < 0 ? BASIS_ORDER.length : i;
+};
+/** ② 칸 우선순위: 70%컷 → 다른 %컷(작은 비율부터) → 평균 → 최저 → 최고. 평균은 ① 이 50%컷일 때만 온다 */
+const secondRank = (name: string) => {
+  if (name === "70%컷") return 0;
+  if (name.endsWith("%컷")) return 1 + Number(name.slice(0, -2)) / 1000;
+  return SECOND_NAMED[name] ?? 9;
+};
+const SECOND_NAMED: Record<string, number> = { 평균: 2, 최저: 3, 최고: 4 };
+
+/** 한 학년도 행의 발표 통계 [① 칸, ② 칸]. 맞는 통계가 없는 칸은 undefined */
+export function publishedStats(r: Row): [PublishedStat | undefined, PublishedStat | undefined] {
+  const all: { label: string; cell: Cell; i: number }[] = [];
+  const add = (label: string | null, cell: Cell) => {
+    if (label === null || cell.v === null || cell.v.trim() === "" || cell.b === UNKNOWN_BASIS || (cell.pr !== undefined && cell.pr !== "actual_result")) return;
+    all.push({ label, cell, i: all.length });
+  };
+  add("50%컷", r.c50);
+  add("70%컷", r.c70);
+  for (const e of r.alt.e) add(statName(e.l), e);
+  if (all.length === 0) return [undefined, undefined];
+  const tier = Math.min(...all.map((x) => cohortTier(x.cell)));
+  const inTier = all.filter((x) => cohortTier(x.cell) === tier);
+  const basis = inTier.reduce((best, x) => (basisRank(x.cell.b) < basisRank(best) ? x.cell.b ?? null : best), inTier[0].cell.b ?? null);
+  // 같은 이름·기준·대상에 값이 둘 이상이면 어느 쪽이 맞는지 화면이 정할 수 없어 그 통계는 숨긴다(10-28 사용자 결정, 담당자 확인 요청)
+  const values = new Map<string, Set<string>>();
+  for (const x of inTier.filter((y) => (y.cell.b ?? null) === basis)) values.set(x.label, (values.get(x.label) ?? new Set()).add(x.cell.v!));
+  const same = inTier.filter((x) => (x.cell.b ?? null) === basis && values.get(x.label)!.size === 1);
+  const stat = (x: { label: string; cell: Cell } | undefined): PublishedStat | undefined =>
+    x && { label: x.label, cell: x.cell, schoolRecord: x.cell.b === "학생부 등급" };
+  const first = same.find((x) => x.label === "50%컷") ?? same.find((x) => x.label === "평균");
+  const second = same
+    .filter((x) => x !== first && x.label !== "50%컷" && (x.label !== "평균" || first?.label === "50%컷"))
+    .sort((a, b) => secondRank(a.label) - secondRank(b.label) || a.i - b.i)[0];
+  return [stat(first), stat(second)];
+}

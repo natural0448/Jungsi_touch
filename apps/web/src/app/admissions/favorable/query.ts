@@ -16,13 +16,14 @@ export type Filter = (typeof FILTERS)[number]["v"];
 export interface Query {
   has?: Filter;
   open?: string; // 펼친 학교 university_id
+  field?: string; // 펼친 학교 안에서 열어 둔 계열(계열 이름 또는 '기타')
 }
 
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v)?.trim().slice(0, 128) || undefined;
 
 export function parseQuery(sp: Record<string, string | string[] | undefined>): Query {
   const h = one(sp.has);
-  return { has: FILTERS.some((x) => x.v === h) ? (h as Filter) : undefined, open: one(sp.open) };
+  return { has: FILTERS.some((x) => x.v === h) ? (h as Filter) : undefined, open: one(sp.open), field: one(sp.field) };
 }
 
 export function hrefWith(cur: Query, patch: Partial<Query>) {
@@ -30,6 +31,7 @@ export function hrefWith(cur: Query, patch: Partial<Query>) {
   const u = new URLSearchParams();
   if (next.has) u.set("has", next.has);
   if (next.open) u.set("open", next.open);
+  if (next.open && next.field) u.set("field", next.field);
   const s = u.toString();
   return s ? `${PATH}?${s}` : PATH;
 }

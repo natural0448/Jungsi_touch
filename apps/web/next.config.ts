@@ -32,6 +32,8 @@ const nextConfig: NextConfig = {
     */
     inlineCss: true,
     serverActions: {
+      // 성적 정정 요청의 성적표 사진(5MB 이하, 2026-10-28). 기본 1MB 로는 PDF·큰 사진이 막힌다
+      bodySizeLimit: "6mb",
       allowedOrigins: ["edutouch.co.kr", "www.edutouch.co.kr", "edutouch-web.edutouch-web.workers.dev", "jeongsi-touch.edutouch-web.workers.dev", "localhost:3003", "127.0.0.1:3003"],
     },
   },

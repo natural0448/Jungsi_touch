@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronIcon } from "@/components/icons";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
-import { loadExtras, type Extras } from "./extras-actions";
-import { Published, Recruit, sameRelease } from "./recruit-parts";
+import { ExtrasBody, useOfferingExtras } from "./offering-extras";
 
 /**
  * 모집단위 한 줄. 펼치기·접기는 화면에서 바로 한다(서버 왕복 없음) — 환산·누백·판단 카드(detail)는
- * 목록을 받을 때 이미 그려 두었다. 2027 모집 정보·발행 기준만 처음 펼칠 때 그 모집단위만 받아 채운다.
+ * 목록을 받을 때 이미 그려 두었다. 2027 모집 정보·발행 기준·학년도별 대학 발표 성적만 처음 펼칠 때 그 모집단위만 받아 채운다.
  * 주소의 ?open= 은 화면 이동 없이 바꿔(공유·새로 고침 때 같은 줄이 열림) 둔다.
+ * 2026-11-21 대표님 지적: 펼친 상세는 필요한 자료가 다 모인 뒤 한 번에 보인다. 그 전에는 책 넘김 대기 화면이고,
+ * '모집 인원 불러오는 중…'·'판정 근거 부족'이 먼저 보였다가 바뀌는 일이 없게 한다. 받는 요청은 한 줄로 세워 보낸다(client-queue).
+ * 받기·그리기는 2페이지 핵심 지원 학교 표와 함께 쓴다(offering-extras.tsx)
  */
 export function ItemShell({
   o,
@@ -20,6 +22,7 @@ export function ItemShell({
   cells,
   mmeta,
   detail,
+  conds,
 }: {
   o: OfferingDto;
   a: Cell;
@@ -28,23 +31,11 @@ export function ItemShell({
   cells: ReactNode;
   mmeta: ReactNode;
   detail: ReactNode;
+  /** 지원 조건 묶음. 상세 맨 위 모집 정보 줄 안에 둔다(2026-11-22) */
+  conds?: ReactNode;
 }) {
   const [open, setOpen] = useState(initialOpen);
-  const [extras, setExtras] = useState<Extras | null>(null); // null = 아직 받는 중
-  const asked = useRef(false);
-  // 처음 펼칠 때 한 번만 받는다(접었다 다시 펴도 다시 부르지 않음)
-  const fetchOnce = () => {
-    if (asked.current) return;
-    asked.current = true;
-    loadExtras(o.offering_id)
-      .then(setExtras)
-      .catch(() => setExtras({ ok: false, code: "request_failed" }));
-  };
-  // 주소에 ?open= 이 있어 펼친 채로 들어온 경우
-  useEffect(() => {
-    if (initialOpen) fetchOnce();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { extras, p1Fast, fetchOnce } = useOfferingExtras(o, initialOpen);
 
   const toggle = () => {
     const next = !open;
@@ -74,23 +65,7 @@ export function ItemShell({
       </div>
       {open && (
         <div className="detail">
-          {extras === null ? (
-            <div className="recruit">
-              <span>2027 모집군<b>{o.group}군</b></span>
-              <span>모집 인원<b><span className="wait">불러오는 중…</span></b></span>
-            </div>
-          ) : extras.ok ? (
-            <>
-              <Recruit o={o} rec={extras.rec} />
-              <Published f={extras.pub} same={sameRelease(a, extras.pub)} />
-            </>
-          ) : (
-            <div className="recruit">
-              <span>2027 모집군<b>{o.group}군</b></span>
-              <span>모집 인원<b><span className="wait">불러오지 못했습니다(사유 코드 {extras.code})</span></b></span>
-            </div>
-          )}
-          {detail}
+          <ExtrasBody o={o} a={a} extras={extras} p1Fast={p1Fast} detail={detail} conds={conds} />
         </div>
       )}
     </li>

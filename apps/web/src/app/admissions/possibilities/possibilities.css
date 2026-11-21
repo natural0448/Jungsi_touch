@@ -1,4 +1,4 @@
-/* 3페이지 · 전체 대학·학과 가능성 보기 (시안 2026-10-03) */
+/* 전체 대학·학과 가능성 보기(화면 번호 4 — 2026-11-15 순서 교체, 화면 ID는 PAGE-03) (시안 2026-10-03) */
 .et .ps{display:grid;gap:16px;padding-bottom:24px}
 
 
@@ -32,7 +32,7 @@
 .et .ps .univ .scale{margin-left:auto;font-size:12px;color:#C9D4F0}
 .et .ps .univ .scale b{font-weight:700;color:#fff}
 
-.et .ps .thead,.et .ps .row{display:grid;grid-template-columns:minmax(0,1.7fr) 44px minmax(0,1fr) 120px minmax(0,1.15fr) 66px 22px;gap:12px;align-items:center;padding:0 16px}
+.et .ps .thead,.et .ps .row{display:grid;grid-template-columns:minmax(0,1.7fr) 44px minmax(0,1fr) 120px minmax(0,1.15fr) 66px 30px 22px;gap:12px;align-items:center;padding:0 16px}
 .et .ps .thead{height:36px;font-size:12px;font-weight:800;color:var(--deep);background:var(--jt-head);border-bottom:1px solid var(--jt-head-line)}
 .et .ps .r{text-align:right}
 .et .ps .row{min-height:60px;padding-top:8px;padding-bottom:8px;transition:background .12s}
@@ -56,6 +56,11 @@
 .et .ps .recruit b{display:block;font-size:16px;font-weight:900;color:var(--ink)}
 .et .ps .recruit .wait{font-size:13px;font-weight:700;color:var(--reach)}
 .et .ps .recruit a{margin-left:auto;color:var(--brand);font-weight:700}
+/* 지원 조건 묶음(2026-11-22): 모집 인원과 '대학 발표 입시결과 보기' 사이 빈 자리. 좁은 화면에서는 그 줄 아래로 */
+.et .ps .recruit .rc-conds{flex:1 1 320px;min-width:0;align-self:center;font-size:13px}
+.et .ps .recruit .rc-conds .conds{margin:0 0 4px}
+.et .ps .recruit .rc-conds b{display:inline;font-size:13px}
+.et .ps .recruit .rc-conds .rc-note{margin:0;font-size:13px;color:var(--muted)}
 .et .ps .four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 /* 환산·누백·판단 준비 상태 띠 */
 .et .ps .strip{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:0;list-style:none}
@@ -158,7 +163,8 @@
 /* 휴대폰: 줄을 카드처럼 */
 @media (max-width:860px){
   .et .ps .thead{display:none}
-  .et .ps .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"unit pick" "meta meta" "score st" "adv adv";row-gap:8px}
+  .et .ps .row{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"unit star pick" "meta meta meta" "score st st" "adv adv adv";row-gap:8px}
+  .et .ps .row>.c-star{grid-area:star}
   .et .ps .row>.unit{grid-area:unit}
   .et .ps .row>.c-grp,.et .ps .row>.c-chev{display:none}
   .et .ps .row>.c-score{grid-area:score;text-align:left}
@@ -172,9 +178,45 @@
   .et .ps .search{grid-template-columns:1fr}
   .et .ps .univ .scale{margin-left:0;width:100%}
   .et .ps .recruit a{margin-left:0}
+  .et .ps .recruit .rc-conds{order:9;flex-basis:100%}
 }
 
 /* 펼치기 단추(item-shell.tsx): 예전 링크와 같은 모양으로 — 기본 단추 꾸밈을 지운다 */
 .et .ps button.unit,
 .et .ps button.c-chev{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
 .et .ps button.c-chev{display:grid;place-items:center;color:var(--muted)}
+
+.et .sr-line{margin:10px 2px 0;font-size:13px;color:var(--ink-2);line-height:1.6}
+.et .sr-line b{color:var(--deep);font-weight:800}
+.et .sr-line .num{font-weight:800;color:var(--deep)}
+.et .sr-line.hold{color:var(--muted)}
+.et .sr-line .sr-elig{display:block;color:var(--muted);font-size:12px}
+/* 지원 자격 조건(2026-11-15): 요강 조건 줄과 내 입력 비교 표시 */
+.et .ps .conds{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:4px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.et .ps .conds b{color:var(--deep);font-weight:800;margin-right:4px}
+.et .ps .conds .cm{display:inline-block;margin-left:6px;padding:0 6px;border-radius:var(--r-sm);font-size:12px;font-weight:700;border:1px solid var(--line)}
+.et .ps .conds .cm.match{color:var(--safe);border-color:var(--safe)}
+.et .ps .conds .cm.differ{color:var(--reach);border-color:var(--reach)}
+/* 연도별 근거(2026-11-15): 합격선과 내 누적 백분위 차이 */
+.et .years .m.gap.above{color:var(--safe);font-weight:700}
+.et .years .m.gap.below{color:var(--reach);font-weight:700}
+
+/* 연도별 근거: 합격선과 내 위치 짝(2026-11-16). 좁은 화면에서는 줄바꿈 */
+.et .ps .years .cl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content max-content minmax(0,1fr);gap:3px 12px;align-items:baseline}
+.et .ps .years .cl li{display:contents}
+.et .ps .years .cl-m{color:var(--ink-2)}
+.et .ps .years .cl-s{color:var(--muted);font-size:12px}
+.et .ps .years .cl-v{color:var(--ink);text-align:right;white-space:nowrap}
+.et .ps .years .cl-g{color:var(--ink-2)}
+.et .ps .years .cl-g.above{color:var(--safe);font-weight:700}
+.et .ps .years .cl-g.below{color:var(--reach);font-weight:700}
+@media (max-width:560px){.et .ps .years .cl{grid-template-columns:max-content minmax(0,1fr)}.et .ps .years .cl-g{grid-column:1 / -1;padding-left:8px;margin-bottom:4px}}
+
+/* 정식 판정 우선 105개 모집단위의 지원자격 안내(2026-11-20) */
+.et .ps .f105{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.et .ps .f105 b{margin-right:6px;color:var(--deep)}
+
+/* 수능 가채점 리포트(2026-11-23 전환): 학교별 판정 준비 중 안내 */
+.et .ps-prov{margin:8px 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--sub);font-size:13px;line-height:1.6;color:var(--ink-2)}
+.et .ps-prov b{color:var(--deep)}
+.et .ps-prov-detail{margin:0;font-size:13px;line-height:1.6;color:var(--ink-2)}

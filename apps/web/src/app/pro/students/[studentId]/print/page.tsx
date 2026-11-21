@@ -3,6 +3,8 @@ import Link from "@/components/link";
 import { validId } from "@/lib/api/pro-source";
 import { proAccess } from "@/lib/pro-access";
 import { PrintSheet } from "./print-sheet";
+// 담은 학교마다 펼친 상세 카드(4페이지와 같은 모양, 2026-11-22)
+import "@/app/admissions/possibilities/possibilities.css";
 import "../../../../reports/me/report.css";
 import "../../../pro.css";
 

@@ -1,9 +1,9 @@
 import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
-import { seoulDate } from "@/lib/format";
+import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
-import { PAGES, lockFor } from "@/lib/routes";
-import { Tabs } from "./tabs";
+import { PAGES, ROOT_REDIRECT, lockFor } from "@/lib/routes";
+import { Tabs, UserChip } from "./tabs";
 
 /**
  * 정시터치 머리글. 에듀터치 로고와 색·글꼴로 같은 사이트임을 알리고, 화면 넷을 탭으로 둔다.
@@ -16,14 +16,17 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
       <div className="jt-util">
         <div className="wrap">
           <a className="logo" href={edutouch("/")} aria-label="에듀터치 첫 화면">
-            <b>EDU</b>
-            <i>touch</i>
+            {/* 에듀터치 본체의 공개 로고를 그대로 쓴다(10-26 로고 확정, 본체 요청서). 로고가 바뀌면 함께 바뀐다 */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://edutouch.co.kr/brand/logo-horizontal.png" alt="EduTouch 에듀터치" width={550} height={108} />
           </a>
           <span className="jt-sep" aria-hidden="true" />
-          <Link prefetch={false} href="/" className="jt-name">
+          {/* 루트(/)는 서버가 1페이지로 돌려보낸다. 바로 1페이지로 걸어 한 번 더 오가지 않게 한다(11-11) */}
+          <Link prefetch={false} href={ROOT_REDIRECT} className="jt-name">
             정시<em>터치</em>
           </Link>
           <div className="jt-user">
+            <UserChip>
             {down ? (
               <span className="pass off">연결 대기</span>
             ) : !session ? (
@@ -33,7 +36,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
               // 실제 이용권이 있는 관리자는 서버가 그 만료일을 보내므로 날짜가 그대로 나온다
               session.entitlement_expires_at ? (
                 // 좁은 휴대폰(≤400px)에서는 날짜를 줄여 머리글이 옆으로 밀리지 않게 한다(jungsi.css)
-                <span className="pass">이용권<span className="pass-until"> {seoulDate(session.entitlement_expires_at)}까지</span></span>
+                <span className="pass">이용권<span className="pass-until"> {untilDate(session.entitlement_expires_at)}까지</span></span>
               ) : (
                 <span className="pass">관리자 이용</span>
               )
@@ -43,6 +46,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
                 <a className="btn t" href={PASS_HREF}>이용권 보기</a>
               </>
             )}
+            </UserChip>
           </div>
         </div>
       </div>

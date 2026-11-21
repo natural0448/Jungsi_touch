@@ -1,75 +1,101 @@
+import { myFavorites } from "@/lib/favorites";
 import { ConnectionNotice } from "@/components/connection-notice";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { Suspense } from "react";
 import Link from "@/components/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { ScoreBasis } from "@/components/score-basis";
-import { ShortlistTray } from "@/components/shortlist-tray";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import type { StatisticsDto } from "@/lib/dto";
-import { loadMine, type ReportState } from "@/lib/report-ops";
+import { StreamTray } from "@/components/shortlist-tray-stream";
+import { BookLoading } from "@/components/book-loading";
+import { memberName } from "@/lib/member-name";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
+import type { ReportDto, StatisticsDto } from "@/lib/dto";
+import { loadMineEager, logSettleError, pickedIds, provisionalOnly, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
+import { ProvisionalPendingGate } from "@/components/provisional-pending";
+import { InaccurateNotice } from "@/components/inaccurate-notice";
+import { inaccurateSeen } from "@/lib/report-ref";
 import { RunAnalysis } from "@/components/run-analysis";
-import { readPicks, type PickedItem } from "@/lib/shortlist";
+import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
 import { FILTERS, hrefWith, parseQuery } from "./query";
 import { bestDelta, SchoolCard } from "./school-card";
-import { WildcardDeck } from "./wildcard";
+import { ReferenceWildcardDeck, WildcardDeck } from "./wildcard";
+import { ReferenceGroups } from "./reference-groups";
+import { CsatGroups } from "./csat-groups";
+import { csatView } from "@/lib/provisional-view";
+import { referenceGroups } from "@/lib/reference-percentile";
+import { referencePool, referenceUniversities, referenceWildcards } from "@/lib/reference-view";
+import { CatalogBrowse } from "../possibilities/catalog-browse";
+import { listKey } from "../possibilities/query";
 import "./favorable.css";
 
 const route = page("PAGE-04");
 export const metadata: Metadata = { title: route.label };
-const FEATURES = ["내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원가능성 확인", "간호 · 보건 · 교육 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
+const FEATURES = ["내 성적으로 지원 검토 범위(도전·핵심·여유)에 드는 학교 찾기", "학교를 펼쳐 학과 · 전형 · 모집군마다 지원가능성 확인", "간호 · 교육 · 계약학과 · 해양 · 철도 등 와일드카드 — 비장의 한 수", "마음에 드는 곳을 핵심 지원 학교에 담아 리포트로 정리"];
 
 export default async function Page({ searchParams }: PageProps<"/admissions/favorable">) {
-  const p3 = page("PAGE-03");
+  const sp = await searchParams;
+  const catalogView = sp.view === "catalog";
   const head = (
     <PageHead
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
-      desc="전체 성적에서 출발해 환산에 유리한 학교를 찾고, 학교 안에서 학과마다 지원 범위를 따로 확인하세요."
-      side={<Link prefetch={false} className="btn" href={p3.path}>대학·학과 직접 검색</Link>}
+      desc={catalogView ? "전국 대학과 학과를 검색하고 모집단위별 지원 정보를 확인하세요." : "전체 성적에서 출발해 환산에 유리한 학교를 찾고, 학교 안에서 학과마다 지원 범위를 따로 확인하세요."}
+      side={<Link prefetch={false} className="btn" href={catalogView ? route.path : `${route.path}?view=catalog`}>{catalogView ? "유리한 대학 추천 보기" : "전국 대학·학과 보기"}</Link>}
     />
   );
 
   const caller = await getCaller();
   const src = source();
+  const naming = memberName(); // 대기 화면 문구용. 서비스 API 와 별개 조회라 함께 보낸다
   const { session, down } = await sessionOrDown(src, caller);
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
   const lock = lockFor(session, route);
   if (lock) return <>{head}<PaidGate kind={lock} route={route} features={FEATURES} /></>;
+  const name = await naming;
 
-  const cur = parseQuery(await searchParams);
+  // 머리글은 바로 보이고, 내 리포트가 필요한 본문만 기다린다(2026-11-10 부담당자 요청: 먼저 온 것부터 그리기)
+  return (
+    <>
+      {head}
+      {/* 필터·검색·다음 쪽처럼 목록이 바뀌면 key 가 바뀌어 다시 책 넘김을 보인다(펼치기 open 만 바뀌면 그대로, 2026-11-21) */}
+      <Suspense key={listKey(sp)} fallback={<BookLoading name={name} kind={catalogView ? "possibilities" : "favorable"} />}>
+        {catalogView ? <CatalogBrowse src={src} caller={caller} sp={sp} route={route} features={FEATURES} catalogView /> : <Body src={src} caller={caller} sp={sp} />}
+      </Suspense>
+    </>
+  );
+}
+
+async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp: Awaited<PageProps<"/admissions/favorable">["searchParams"]> }) {
+  const p3 = page("PAGE-03");
+  const cur = parseQuery(sp);
   let state: ReportState;
-  let picks: PickedItem[] = [];
-  let stats = new Map<string, StatisticsDto | null>();
   try {
-    const mine = await loadMine(src, caller);
-    // 저장된 후보만 읽는다. 후보가 아직 없으면 회원이 버튼을 눌러야 만든다(담당자 회신 2026-10-25)
-    state = mine ? { kind: "ready", report: mine } : { kind: "none" };
-    if (state.kind === "ready") {
-      const report = state.report;
-      const c = report.candidates;
-      // 집계는 모집단위마다 따로 부른다. 펼친 학교와 와일드카드만
-      const openGroup = c?.basic_university_groups.find((g) => g.university_id === cur.open);
-      const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i.offering.offering_id)));
-      const known = c ? [...c.basic_university_groups.flatMap((g) => g.offerings), ...c.wildcards].map((i) => i.offering) : [];
-      const [p, s] = await Promise.all([readPicks(src, caller, report, known), Promise.all(ids.map(async (id) => [id, await src.readStatistics(caller, report.report_id, id)] as const))]);
-      picks = p;
-      stats = new Map(s);
-    }
+    // 입력 상태와 지난번 현재 리포트를 동시에 읽는다(2026-11-10 임시 단축, report-ops 참고)
+    const mine = await loadMineEager(src, caller);
+    // 부정확 입력 상태(2026-11-22 대표님 결정): 분석하지 않고 안내와 정정 길만 보인다(직접 주소로 들어와도 같다)
+    if (!mine && inaccurateSeen(caller)) return <div className="wrap pg-body fv"><InaccurateNotice name={await memberName()} correctHref={`${page("PAGE-02").path}?correct=1`} back /></div>;
+    // 열 때마다 후보(candidates.build)를 한 번 만들고 그 응답의 참고 목록으로 그린다(dep_r17, report-ops settleCandidates).
+    // 그동안은 책 넘김 대기 화면이다. 서버 액션(담기·계열 펼침 계산) 뒤 다시 그릴 때는 방금 받은 목록을 다시 쓴다(한 번 열 때 한 번)
+    const actionRender = (await headers()).has("next-action");
+    state = mine ? { kind: "ready", report: await settleCandidates(src, caller, mine, { reuse: actionRender }) } : { kind: "none" };
   } catch (e) {
-    if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
-    if (e instanceof AccessDenied) return <>{head}<PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} /></>;
-    throw e;
+    if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
+    if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
+    // 2026-11-22 운영 사고: 리포트 읽기가 예상 밖 응답(연결 오류가 아닌 오류)으로 끝나면 화면 전체가 Next 오류 화면이 됐다.
+    // 이유를 기록하고, 같은 '잠시 연결할 수 없음' 안내로 바꿔 스스로 다시 열게 한다
+    logSettleError("p3-load", e);
+    return <ConnectionNotice e={new ConnectionError("unavailable", "report_read_failed")} reopenUnavailable />;
   }
 
   if (state.kind !== "ready") {
     return (
       <>
-        {head}
         <div className="wrap pg-body fv">
           <ScoreBasis overall={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
           <section className="gate flat">
@@ -86,16 +112,50 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
   }
 
   const report = state.report;
+  // 수능 가채점 리포트(2026-11-23 전환). candidates.build 응답에 학교별 가채점 7단계(source g 행, dep_r22)가 오면
+  // 9모 참고 목록과 같은 대학 → 계열 → 학과 목록·배지로 그린다. 판정 행이 하나도 없으면(판정 Secret 이 없을 때 등)
+  // 지금처럼 '가채점 판정 준비 중'. 가채점에는 누백·합격선 위치·유불리·와일드카드가 없어 그 부분은 그리지 않는다
+  if (provisionalOnly(report)) {
+    let csat: ReturnType<typeof csatView> = { universities: [], outsideBand: 0, judged: 0 };
+    try {
+      csat = csatView(report.candidates);
+    } catch (e) {
+      logSettleError("p3-csat", e);
+    }
+    if (csat.universities.length === 0) {
+      return (
+        <div className="wrap pg-body fv">
+          <ScoreBasis overall={report.overall} emptyText="" />
+          <ProvisionalPendingGate catalogHref={`${route.path}?view=catalog`} />
+        </div>
+      );
+    }
+    const favs = (await myFavorites())?.ids ?? null;
+    const known = csat.universities.flatMap((u) => u.fields.flatMap((f) => f.items.map((x) => x.offering)));
+    return (
+      <>
+        <MemberMark kind="recommend" path={viewPath(route.path, sp)} />
+        <div className="wrap pg-body fv">
+          <ScoreBasis overall={report.overall} emptyText="" />
+          <section className="fv-main fv-refmode" aria-label="유리한 대학">
+            <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
+          </section>
+        </div>
+        <Suspense key={hrefWith(cur, {})} fallback={null}>
+          <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />
+        </Suspense>
+      </>
+    );
+  }
   const c = report.candidates;
   if (!c) {
     return (
       <>
-        {head}
         <div className="wrap pg-body fv">
           <ScoreBasis overall={report.overall} emptyText="" />
           <RunAnalysis
-            title="이 성적으로 아직 유리한 학교를 찾지 않았습니다"
-            desc="누르면 저장한 성적으로 학교 목록과 와일드카드를 한 번 만듭니다. 만든 목록은 다시 열어도 그대로 보입니다. 성적을 다시 저장하지 않으며 입력권은 줄지 않습니다."
+            title="유리한 학교 목록을 아직 만들지 못했습니다"
+            desc="화면을 열 때 자동으로 만들었지만 이번에는 끝나지 않았습니다. 누르면 저장한 성적으로 학교 목록과 와일드카드를 다시 만듭니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
             label="유리한 학교 찾기"
             busy="찾는 중…"
           />
@@ -104,43 +164,131 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       </>
     );
   }
-  const groups = [...(c?.basic_university_groups ?? [])].sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
-  const wildcards = c?.wildcards ?? [];
-  const pendingCount = c?.pending_offerings.length ?? 0;
+  // 모양이 어긋난 행(모집단위·판단이 빠진 행)은 그 행만 빼고 그린다(2026-11-22 운영 사고 방어)
+  const groups = (c?.basic_university_groups ?? [])
+    .filter((g) => g && typeof g === "object")
+    .map((g) => ({ ...g, offerings: (g.offerings ?? []).filter((o) => o?.offering && o?.assessment && typeof o.assessment === "object") }))
+    .filter((g) => g.offerings.length > 0)
+    .sort((a, b) => (bestDelta(b) ?? -Infinity) - (bestDelta(a) ?? -Infinity));
+  const wildcards = (c?.wildcards ?? []).filter((o) => o?.offering && o?.assessment && typeof o.assessment === "object");
+  // 참고 목록(reference_university_groups)에 함께 온 행은 서버 후보 묶음에서 '보류'로도 세어진다(정식 판정이 없어서).
+  // 참고 목록에서 따로 세므로 보류 숫자에서는 뺀다(2026-11-21 p3_empty: '판단을 보류한 61곳' = 홍익대 1 + 참고 60)
+  const refIds = new Set((c?.reference_university_groups ?? []).flatMap((g) => (g.offerings ?? []).map((it) => it?.offering?.offering_id)));
+  const pendingCount = (c?.pending_offerings ?? []).filter((p) => !refIds.has(p.offering_id)).length;
   const outsideCount = c?.outside_offerings?.length ?? 0;
   const ineligibleCount = c?.ineligible_offerings?.length ?? 0;
-  const picked = new Set(picks.map((p) => p.offering_id));
+  // 담기 표시는 리포트의 shortlist 로 바로 그린다. 집계(live-statistics)와 담은 학교 이름(offering.read)은 학교 목록을
+  // 막지 않게 뒤이어 받는다 — 집계 줄·담은 학교 띠만 각자 채워진다
+  const picked = pickedIds(report);
+  // 즐겨찾기(별표)는 본체 DB 에서 따로 읽는다. 읽지 못하면 별표를 숨긴다. 여기서 별표하면 가능성 보기에도 그대로 보인다
+  const favs = (await myFavorites())?.ids ?? null;
+  const stats = statsFor(src, caller, report, cur.open);
+  // 필터·펼친 학교가 바뀌는 전환에서 집계 줄·띠가 학교 목록을 붙잡지 않게 조건을 경계의 key 로 준다(3페이지와 같은 이유)
+  const qk = hrefWith(cur, {});
+  const known = [...(c.basic_university_groups ?? []).flatMap((g) => g.offerings ?? []), ...(c.wildcards ?? [])].map((i) => i?.offering).filter((o): o is NonNullable<typeof o> => Boolean(o));
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
   // 유료 데이터(유리한 학교 목록)를 그린 화면: 회원 식별 표시 + 조회 기록
-  const view = viewPath(route.path, await searchParams);
+  const view = viewPath(route.path, sp);
+
+  // 추천 목록·와일드카드가 하나도 없으면(판정이 켜진 대학이 없는 동안) 참고 누백이 나온 대학을 대학 → 계열 → 학과로
+  // 보이고, 와일드카드도 같은 참고 목록에서 고른다. 즐겨찾기만 할 수 있다(대표님 결정 2026-11-19 낮, 같은 날 새벽 결정 대체).
+  // 판정이 켜진 뒤의 자동 추천 목록은 상향까지라는 결정은 그대로다.
+  // 판정이 켜진 대학이 하나라도 생기면 원래 화면(기본 학교 목록 + 와일드카드)으로 돌아간다
+  const referenceMode = groups.length === 0 && wildcards.length === 0;
+  let refGroups: ReturnType<typeof referenceGroups> = [];
+  let refPool: ReturnType<typeof referencePool> = { items: [], below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 };
+  let refWild: ReturnType<typeof referenceWildcards> = { featured: [], rest: [] };
+  let refUniversities: ReturnType<typeof referenceUniversities> = [];
+  // 화면을 그린 뒤 계열 펼침 계산이 보낼 리포트 판(와일드카드 계산으로 판이 오르면 그 판)
+  let viewVersion = report.report_version;
+  // 참고 목록 준비가 예상 밖 자료로 실패해도 화면 전체를 오류로 깨지 않는다. 기록만 남기고 빈 참고 목록(안내)으로 그린다(2026-11-22)
+  try {
+    refGroups = referenceMode ? referenceGroups(c) : [];
+    refPool = referencePool(refGroups, report.overall?.overall, report.analyses);
+    refWild = referenceWildcards(refPool);
+    // 서버 문턱 판정 행(dep_r15)은 누백 없이 온다. 와일드카드 카드는 누백·유불리를 바로 보이므로, 고른 카드 중 아직 계산하지 않은 곳만
+    // (최대 4곳) 그리기 전에 내 성적으로 계산해 정확한 값으로 그린다. 목록의 학과들은 계열을 펼칠 때 계산한다(reference-field.tsx)
+    const wildPending = [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
+    if (wildPending.length > 0) {
+      const settled = await settleAnalyses(src, caller, report, wildPending);
+      viewVersion = Math.max(viewVersion, settled.report_version);
+      refPool = referencePool(refGroups, settled.overall?.overall, settled.analyses);
+      refWild = referenceWildcards(refPool);
+    }
+    refUniversities = referenceUniversities(refPool);
+  } catch (e) {
+    logSettleError("p3-reference", e);
+    refGroups = [];
+    refPool = { items: [], below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 };
+    refWild = { featured: [], rest: [] };
+    refUniversities = [];
+  }
+  const refWildCount = refWild.featured.length + refWild.rest.length;
+  const tail = (
+    <>
+      {(outsideCount > 0 || ineligibleCount > 0) && (
+        <p className="fv-note">
+          판정이 나온 모집단위 중 도전·불가 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+        </p>
+      )}
+      {pendingCount > 0 && (
+        <p className="fv-note">
+          판정 자료가 아직 없어 판단을 보류한 모집단위 <b className="num">{pendingCount}</b>곳은 목록에 넣지 않았습니다. 보류를 여유로 보지 않습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
+        </p>
+      )}
+    </>
+  );
 
   return (
     <>
-      {head}
       <MemberMark kind="recommend" path={view} />
       <div className="wrap pg-body fv">
         <ScoreBasis overall={report.overall} emptyText="" />
 
-        <RunAnalysis
-          refresh={{ id: crypto.randomUUID(), reportId: report.report_id, profileId: report.profile_id, reportVersion: report.report_version }}
-          title="저장된 후보를 현재 자료로 다시 확인합니다"
-          desc="저장한 성적을 그대로 사용해 후보를 현재 승인 자료로 다시 확인합니다. 현재 결과가 갱신될 수 있으며 성적 입력권은 사용하지 않습니다."
-          label="후보 다시 확인"
-          busy="다시 확인하는 중…"
-        />
+        {/* '후보 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).
+            옛 자료판 후보는 화면을 열 때 서버가 조용히 다시 확인한다(report-ops settleCandidates) */}
 
         {/* 좁은 화면에서는 와일드카드가 목록 아래로 내려간다. 있다는 것을 위에서 먼저 알린다 */}
-        {wildcards.length > 0 && (
+        {(wildcards.length > 0 || refWildCount > 0) && (
           <a className="wd-teaser" href="#wildcard">
             <span className="k">WILD CARD</span>
             <span>
-              비장의 한 수 <b className="num">{wildcards.length}장</b>
+              비장의 한 수 <b className="num">{wildcards.length || refWildCount}장</b>
             </span>
             <span className="go"><ArrowRightIcon /></span>
           </a>
         )}
 
+        {referenceMode ? (
+        <div className={refUniversities.length > 0 ? "fv-grid" : undefined}>
+          <section className="fv-main fv-refmode" aria-label="유리한 대학">
+            {refUniversities.length === 0 ? (
+              <section className="gate flat">
+                <h2>{c.status === "pending" ? "판정 자료 준비 중" : "현재 상향 범위 이내 추천 후보 없음"}</h2>
+                <p>
+                  {c.status === "pending"
+                    ? "지금은 대학별 판정 자료를 연결하는 중이고, 대학 방식 누적 백분위(추정)가 나온 대학도 아직 없습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다. 자료가 연결되면 이 화면을 열 때 최신 자료로 다시 찾습니다."
+                    : "판정이 나온 모집단위 가운데 안정·하향·적정·소신·상향에 드는 곳이 없습니다."}{" "}
+                  {refGroups.length > 0 && <>대학 방식 누적 백분위(추정)가 나온 학과 중 안정~상향에 들거나 지난해 합격선에 내 위치가 닿는 곳이 없습니다(판정 도전·불가 {refPool.outsideBand}곳, 합격선보다 아래 {refPool.below}곳, 합격선 자료 없음 {refPool.noCutoff}곳).{" "}</>}
+                  {p3.label}에서 대학·학과를 직접 검색해 하나씩 확인할 수 있습니다.
+                </p>
+                <div className="acts">
+                  <Link className="btn" href={p3.path}>{p3.label}</Link>
+                </div>
+              </section>
+            ) : (
+              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} outsideBand={refPool.outsideBand} p3Label={p3.label} reportId={report.report_id} reportVersion={viewVersion} />
+            )}
+            {tail}
+          </section>
+          {refUniversities.length > 0 && (
+            <aside className="fv-side" aria-label="와일드카드">
+              <ReferenceWildcardDeck featured={refWild.featured} rest={refWild.rest} favs={favs} />
+            </aside>
+          )}
+        </div>
+        ) : (
         <div className="fv-grid">
           <section className="fv-main" aria-labelledby="basic-t">
             <div className="fv-sec-hd">
@@ -167,8 +315,8 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
               <section className="gate flat">
                 <h2>대학 분석 자료가 아직 준비되지 않았습니다</h2>
                 <p>
-                  성적과 총점은 계산됐지만 올해 모집행·대학 분석 자료가 결속되기 전이라 후보 산출을 보류한 상태입니다
-                  {report.analysis_status.reason_code ? <> (보류 코드 <code>{report.analysis_status.reason_code}</code>)</> : null}.
+                  성적과 총점은 계산됐지만 올해 모집 정보와 대학 분석 자료를 맞춰 보는 중이라 후보를 아직 만들지 않았습니다
+                  {report.analysis_status.reason_code ? <> (문의 번호 <code>{report.analysis_status.reason_code}</code>)</> : null}.
                   지원 가능한 대학이 없다는 뜻이 아니며, 자료가 연결되면 이 화면에 후보가 나타납니다.
                 </p>
               </section>
@@ -180,20 +328,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
             ) : (
               <div className="fv-list">
                 {shown.map((g) => (
-                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} stats={stats} />
+                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} favs={favs} stats={stats} statsKey={qk} />
                 ))}
               </div>
             )}
-            {(outsideCount > 0 || ineligibleCount > 0) && (
-              <p className="fv-note">
-                판단이 끝난 모집단위 중 추천 범위 밖 <b className="num">{outsideCount}</b>곳, 지원 조건 미충족 <b className="num">{ineligibleCount}</b>곳은 목록에 넣지 않았습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
-              </p>
-            )}
-            {pendingCount > 0 && (
-              <p className="fv-note">
-                자격 확인이나 자료 검수 때문에 판단을 보류한 모집단위 <b className="num">{pendingCount}</b>곳은 목록에 넣지 않았습니다. 보류를 여유로 보지 않습니다. {p3.label}에서 하나씩 확인할 수 있습니다.
-              </p>
-            )}
+            {tail}
             <p className="fv-note">
               환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 오르내리는 폭(%p)으로, 비슷한 수준의 학교 중 내 과목 구성에 잘 맞는 곳을 고르는 보조 지표입니다.
               여유 후보도 합격을 보장하지 않습니다. 지원가능성은 합격 확률이 아니며, 올해 전형과 지원 조건을 함께 확인해야 합니다.
@@ -201,11 +340,35 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={wildcards} picked={picked} stats={stats} canPick analysisPending={report.analysis_status?.status === "pending"} />
+            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} favs={favs} stats={stats} statsKey={qk} canPick analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
+        )}
       </div>
-      <ShortlistTray items={picks} other="PAGE-03" />
+      <Suspense key={qk} fallback={null}>
+        <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />
+      </Suspense>
     </>
   );
+}
+
+/** 집계는 모집단위마다 따로 부른다. 펼친 학교와 와일드카드만. 받지 못한 곳은 '집계 준비 중'으로 둔다(목록은 그대로) */
+function statsFor(src: JungsiSource, caller: Caller, report: ReportDto, open: string | undefined): StatsPromise {
+  const c = report.candidates;
+  const openGroup = (c?.basic_university_groups ?? []).find((g) => g.university_id === open);
+  const ids = Array.from(new Set([...(openGroup?.offerings ?? []), ...(c?.wildcards ?? [])].map((i) => i?.offering?.offering_id).filter((id): id is string => typeof id === "string")));
+  const p = Promise.all(
+    ids.map(async (id) => {
+      try {
+        return [id, await src.readStatistics(caller, report.report_id, id)] as const;
+      } catch (e) {
+        // 집계는 보조 줄이다. 어떤 오류든 그 줄만 '집계 준비 중'으로 두고 화면은 깨지 않는다(2026-11-22)
+        if (!(e instanceof ConnectionError || e instanceof AccessDenied)) logSettleError("p3-stats", e);
+        return [id, null] as const;
+      }
+    }),
+  ).then((rows) => new Map<string, StatisticsDto | null>(rows));
+  // 필터로 그 줄이 그려지지 않아 아무도 기다리지 않을 때 처리되지 않은 거절로 남지 않게 한다(기다리는 칸에는 그대로 전해진다)
+  p.catch(() => {});
+  return p;
 }
