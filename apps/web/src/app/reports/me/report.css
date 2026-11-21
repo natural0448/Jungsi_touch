@@ -76,6 +76,8 @@
 /* 수능 가채점·실채점(2026-11-12 최종관리자 결정) */
 .et .sf-banner{margin:0;padding:10px 12px;border-left:3px solid var(--touch);border-radius:0 4px 4px 0;background:var(--sub);font-size:13px;line-height:1.55;color:var(--ink)}
 .et .sf-max{display:block;margin-top:2px;font-size:10px;color:var(--muted)}
+/* 칸 옆 짧은 안내(제2외국어/한문 필수 선택, 2026-11-22). 보조 글자 13 */
+.et .sf-hint{display:block;margin-top:4px;font-size:13px;font-weight:700;line-height:1.35;color:var(--risk);white-space:normal;word-break:keep-all}
 .et .sf-grade{font-size:18px;font-weight:900;color:var(--deep);font-variant-numeric:tabular-nums}
 .et .sf-grade small{margin-left:2px;font-size:11px;font-weight:700;color:var(--muted)}
 .et .sf-sheet tbody th small.sf-rowsub{display:block;margin-top:3px;padding:0;background:none;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0;line-height:1.3}

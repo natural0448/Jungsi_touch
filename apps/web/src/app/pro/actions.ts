@@ -171,7 +171,7 @@ const PROVISIONAL_MESSAGE: Record<string, string> = {
   duplicate_inquiry: "탐구 두 과목은 서로 달라야 합니다.",
   invalid_score: "원점수 범위를 확인해 주세요. 국어·수학·영어는 0~100, 한국사·탐구·제2외국어/한문은 0~50입니다.",
   invalid_integer: "원점수는 정수로 넣어 주세요.",
-  invalid_second_language: "제2외국어/한문 과목과 원점수(0~50)를 확인해 주세요. 보지 않았으면 과목을 '미응시'로 두세요.",
+  invalid_second_language: "제2외국어/한문 과목과 원점수(0~50)를 확인해 주세요. 응시하지 않았으면 '미응시'를 골라 주세요.",
   score_stage_closed: "지금은 수능 가채점 성적을 입력할 수 있는 기간이 아닙니다. 입력 횟수는 쓰이지 않았습니다.",
   score_input_version_conflict: "다른 화면에서 이 학생의 성적이 먼저 저장되었습니다. 화면을 새로 고쳐 확인해 주세요.",
 };
@@ -195,13 +195,14 @@ export async function submitStudentProvisional(prev: ProvisionalFormState, fd: F
     english: int("english"), history: int("history"),
     sl_subject: String(fd.get("sl_subject") ?? "") || undefined, sl_raw: int("sl_raw"),
   };
-  const fail = (error: string): ProvisionalFormState => ({ error, values, attempt: (prev?.attempt ?? 0) + 1 });
+  const fail = (error: string, field?: string): ProvisionalFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
   const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
   const entry = Number(fd.get("entry_version"));
   if (!proCsatEnabled() || !csatOpen()) return fail("지금은 이 화면에서 수능 가채점을 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 화면을 새로 고쳐 주세요.");
   if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(entry)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
+  // 제2외국어/한문 미선택·과목만 고르고 원점수 없음은 서버로 보내기 전에 막는다(학생 입력 횟수를 쓰지 않는다)
   const built = buildProvisionalScores(values, CSAT_EXAM);
-  if (!built.ok) return fail(built.error);
+  if (!built.ok) return fail(built.error, built.field);
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 원점수를 확인하고 '이대로 저장'을 눌러 주세요.");
   const caller = await getCaller();
   const src = proSource();

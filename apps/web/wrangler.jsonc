@@ -50,6 +50,10 @@
     "JUNGSI_PAST_EXAM_ID": "2027-september-mock",
     "JUNGSI_PAST_PACK_VERSION": "20260930.v1",
     "JUNGSI_CSAT_OPENS_AT": "2026-11-21T12:00:00Z",
+    // 2026-11-21 전문가용 개통(대표님 결정: 오픈 때 개인용과 함께, 가채점 입력 포함). URL 끝에 / 나 /api/v1 을 붙이지 않는다(pro-source.ts 가 붙임). BFF origin 은 서버 설정 approved_bff_origin 과 같아야 한다
+    "JUNGSI_PRO_API_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/jungsi-pro-api",
+    "JUNGSI_PRO_BFF_ORIGIN": "https://edutouch.co.kr",
+    "JUNGSI_PRO_CSAT_ENABLED": "1",
     "JUNGSI_CURRENT_REVIEW_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/current-admission-review",
     // 2026-10-13 사용자 결정: 오픈 전에는 에듀터치 관리자와 허용 명단(JEONGSI_PREVIEW_EMAILS, wrangler secret)만
     // 들어온다(src/proxy.ts). Supabase 두 공개값은 빌드 때 .env.production(Git 제외)으로 넣는다. 오픈 때 지운다.

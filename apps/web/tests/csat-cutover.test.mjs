@@ -72,7 +72,7 @@ test("current exam is September mock before the cutover and CSAT provisional aft
   });
 });
 
-const full = { korean_choice: "언어와 매체", korean: 88, math_choice: "미적분", math: 84, inq1: "물리학Ⅰ", inq1_raw: 44, inq2: "화학Ⅰ", inq2_raw: 42, english: 91, history: 45 };
+const full = { korean_choice: "언어와 매체", korean: 88, math_choice: "미적분", math: 84, inq1: "물리학Ⅰ", inq1_raw: 44, inq2: "화학Ⅰ", inq2_raw: 42, english: 91, history: 45, sl_subject: "none" };
 const ex = { exam_id: "2027-csat-provisional", pack_version: "20261121.csat-provisional-v51.v1" };
 
 test("provisional payload matches the server raw-score shape (choices required)", () => {
@@ -101,7 +101,9 @@ test("provisional payload rejects missing choices, duplicate inquiry and out-of-
   assert.match(err({ ...full, korean: 101 }).error, /0~100/);
   assert.match(err({ ...full, inq1_raw: 51 }).error, /0~50/);
   assert.match(err({ ...full, history: 2.5 }).error, /0~50/);
-  assert.match(err({ ...full, sl_subject: "한문Ⅰ", sl_raw: undefined }).error, /제2외국어/);
+  assert.match(err({ ...full, sl_subject: "한문Ⅰ", sl_raw: undefined }).error, /선택한 과목의 원점수/);
+  // 제2외국어/한문을 고르지 않으면 미응시로 보지 않는다(2026-11-22 대표님 결정)
+  assert.match(err({ ...full, sl_subject: undefined }).error, /'미응시'를 골라/);
 });
 
 test("range text: 0.01% overall range as given, integer spans, single value when ends meet", () => {
@@ -148,14 +150,24 @@ test("correction form is filled from the saved raw scores", () => {
   });
 });
 
-test("pages 3·4 never send university.analyze or candidates.build for a raw-score report", async () => {
+test("raw-score report: university.analyze stays blocked, candidates.build is sent (dep_r22 school judgments)", async () => {
   const calls = [];
-  const src = new Proxy({}, { get: (_t, name) => async () => { calls.push(name); throw new Error(`unexpected ${String(name)}`); } });
+  const built = { ...provisionalReport, report_version: 2, candidates: { status: "ready", reason_code: null, basic_university_groups: [], wildcards: [] } };
+  const src = new Proxy({}, {
+    get: (_t, name) => async () => {
+      calls.push(name);
+      if (name === "buildCandidates") return { ok: true, value: built };
+      if (name === "readReport") return built;
+      throw new Error(`unexpected ${String(name)}`);
+    },
+  });
   assert.equal(ops.provisionalOnly(provisionalReport), true);
   assert.deepEqual(await ops.ensureAnalyses(src, {}, provisionalReport, ["2027:1"]), { kind: "ready", report: provisionalReport });
-  assert.deepEqual(await ops.ensureCandidates(src, {}, provisionalReport), { kind: "ready", report: provisionalReport });
   assert.equal(await ops.settleAnalyses(src, {}, provisionalReport, ["2027:1"]), provisionalReport);
-  assert.equal(await ops.settleCandidates(src, {}, provisionalReport), provisionalReport);
   assert.deepEqual(calls, []);
+  assert.equal((await ops.ensureCandidates(src, {}, provisionalReport)).report.report_version, 2);
+  assert.deepEqual(calls, ["buildCandidates"]);
+  assert.equal((await ops.settleCandidates(src, {}, provisionalReport)).report_version, 2);
+  assert.deepEqual(calls, ["buildCandidates", "buildCandidates", "readReport"]);
   assert.equal(ops.provisionalOnly({ ...provisionalReport, overall: { ...provisionalReport.overall, score_basis: "mock_exam", input_kind: undefined } }), false);
 });

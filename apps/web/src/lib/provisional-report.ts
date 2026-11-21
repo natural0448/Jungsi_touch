@@ -1,6 +1,7 @@
 import type { OverallAnalysisDto, ProvisionalScoresInput, ProvisionalTopRangeDto, ProvisionalTripleDto, ReportDto } from "./dto";
 import { isProvisionalOverall } from "./dto";
-import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, RAW_MAX, SECOND_LANGUAGE_SUBJECTS } from "./exam";
+import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES } from "./exam";
+import { checkSecondLanguage } from "./second-language";
 
 /*
   수능 가채점(2026-11-23 전환) 입력·표시 규칙. 화면 부품과 서버 액션이 같이 쓰고, 시험(tests/provisional-report.test.mjs)이 그대로 실행한다.
@@ -20,6 +21,7 @@ export interface ProvisionalValues {
   inq2_raw?: number;
   english?: number;
   history?: number;
+  /** 제2외국어/한문 과목. 'none'(SL_NONE)은 미응시를 직접 고른 것, 비어 있으면 아직 고르지 않은 것 */
   sl_subject?: string;
   sl_raw?: number;
 }
@@ -31,7 +33,7 @@ const inRange = (v: number | undefined, max: number) => v !== undefined && Numbe
 export function buildProvisionalScores(
   values: ProvisionalValues,
   exam: { exam_id: string; pack_version: string },
-): { ok: true; scores: ProvisionalScoresInput } | { ok: false; error: string } {
+): { ok: true; scores: ProvisionalScoresInput } | { ok: false; error: string; field?: "sl_subject" | "sl_value" } {
   const fail = (error: string) => ({ ok: false as const, error });
   if (!values.korean_choice || !(KOREAN_CHOICES as readonly string[]).includes(values.korean_choice) || !values.math_choice || !(MATH_CHOICES as readonly string[]).includes(values.math_choice))
     return fail("국어·수학 선택과목을 골라 주세요. 선택과목마다 예상 점수가 다릅니다.");
@@ -39,8 +41,9 @@ export function buildProvisionalScores(
   if (values.inq1 === values.inq2) return fail("탐구 두 과목은 서로 달라야 합니다.");
   if (![values.korean, values.math, values.english].every((v) => inRange(v, 100))) return fail("국어·수학·영어 원점수는 0~100 사이 정수입니다.");
   if (![values.history, values.inq1_raw, values.inq2_raw].every((v) => inRange(v, 50))) return fail("한국사·탐구 원점수는 0~50 사이 정수입니다.");
-  if (values.sl_subject && (!(SECOND_LANGUAGE_SUBJECTS as readonly string[]).includes(values.sl_subject) || !inRange(values.sl_raw, RAW_MAX.second)))
-    return fail("제2외국어/한문 원점수는 0~50 사이 정수입니다. 보지 않았으면 과목을 '미응시'로 두세요.");
+  // 제2외국어/한문은 반드시 고른다(2026-11-22 대표님 결정). 빈 값은 미응시가 아니라 '고르지 않음'이다
+  const sl = checkSecondLanguage(values.sl_subject, values.sl_raw, "raw");
+  if (!sl.ok) return { ok: false as const, error: sl.error, field: sl.field };
   return {
     ok: true,
     scores: {
@@ -54,7 +57,8 @@ export function buildProvisionalScores(
       ],
       english_raw: values.english!,
       korean_history_raw: values.history!,
-      second_language: values.sl_subject ? { subject: values.sl_subject, raw_score: values.sl_raw! } : null,
+      // 미응시를 직접 고른 경우만 null(서버의 미응시 표기)
+      second_language: sl.taken ? { subject: sl.taken.subject, raw_score: sl.taken.value } : null,
     },
   };
 }

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 import { AccessDenied, type JungsiSource, type Result } from "./source";
 import * as fc from "./synthetic-forecast";
-import { CATALOG, statistics } from "./synthetic-assessment";
+import { CATALOG, csatCandidates, statistics } from "./synthetic-assessment";
 import { HISTORY, syntheticRecruitment } from "./synthetic-history";
 import { analyzeIds, assessFor, buildCands, inputUsed, listOwn, sameProfileKey, loadReport, saveProfile, saveReport, setPick, validateScores } from "./synthetic-report";
 import { syntheticSnapshotHead, syntheticSnapshotPart } from "./synthetic-snapshot";
@@ -281,7 +281,10 @@ export const syntheticSource: JungsiSource = {
   async buildCandidates(_caller, reportId, expected, key) {
     await requirePaid();
     const r = await buildCands(reportId, expected, key);
-    return typeof r === "string" ? fail(r) : { ok: true, value: r };
+    if (typeof r === "string") return fail(r);
+    // 가채점 리포트: 학교별 가채점 7단계는 응답에만 싣는다(dep_r22, 리포트 읽기에는 없다)
+    const raw = r.overall?.score_basis === "provisional_estimate" || r.overall?.input_kind === "provisional_raw";
+    return { ok: true, value: raw ? { ...r, candidates: csatCandidates() } : r };
   },
 
   async updateShortlist(_caller, reportId, offeringId, selected, expected, key) {

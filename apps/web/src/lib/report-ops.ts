@@ -186,8 +186,9 @@ export function newerVersion(read: ReportDto, written: ReportDto): ReportDto {
 }
 
 /**
- * 수능 가채점 원점수 리포트(2026-11-23 전환, 서버 provisional_estimate)인가. 학교별 가채점 판정 자료가 아직 없어
- * 서버가 university.analyze·candidates.build 를 늘 provisional_stage_unavailable 로 돌려준다 — 화면은 이 요청을 보내지 않는다.
+ * 수능 가채점 원점수 리포트(2026-11-23 전환, 서버 provisional_estimate)인가. 가채점은 university.analyze(4페이지 상세)를
+ * 아직 계산하지 않는다(provisional_stage_unavailable) — 화면은 이 요청을 보내지 않는다.
+ * candidates.build 는 보낸다(dep_r22): 판정 Secret 이 있으면 응답에만 학교별 가채점 7단계(source g 참고 묶음)가 실린다.
  * (lib/provisional-report 의 isProvisionalReport 와 같은 판단. 이 모듈의 시험 고정 모듈 목록을 늘리지 않으려고 여기 둔다)
  */
 export function provisionalOnly(r: ReportDto | null | undefined): boolean {
@@ -208,7 +209,7 @@ export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: 
 
 /** 후보가 아직 없으면 candidates.build 로 만든다 */
 export async function ensureCandidates(src: JungsiSource, caller: Caller, report: ReportDto): Promise<ReportState> {
-  if (provisionalOnly(report)) return { kind: "ready", report };
+  // 가채점도 보낸다(dep_r22: 3페이지 학교별 가채점 7단계는 candidates.build 응답에만 실린다)
   return retryOnConflict(src, caller, report, async (r) => {
     if (r.candidates) return { ok: true, value: r };
     return src.buildCandidates(caller, r.report_id, r.report_version, await key("cb", r, { expected_version: r.report_version }));
@@ -514,7 +515,7 @@ const freshKey = () => `cbo-${crypto.randomUUID()}`;
  * 어떤 실패에도 받은 리포트로 그린다(화면 전체를 깨지 않는다).
  */
 export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean } = {}): Promise<ReportDto> {
-  if (provisionalOnly(report)) return report;
+  // 가채점 리포트도 보낸다(dep_r22). 판정 Secret 이 없으면 응답에 참고 묶음이 없고 3페이지는 '가채점 판정 준비 중'
   if (opts.reuse) {
     const lists = recallReference(report);
     if (lists && report.candidates) {

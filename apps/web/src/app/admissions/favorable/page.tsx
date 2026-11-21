@@ -24,6 +24,8 @@ import { FILTERS, hrefWith, parseQuery } from "./query";
 import { bestDelta, SchoolCard } from "./school-card";
 import { ReferenceWildcardDeck, WildcardDeck } from "./wildcard";
 import { ReferenceGroups } from "./reference-groups";
+import { CsatGroups } from "./csat-groups";
+import { csatView } from "@/lib/provisional-view";
 import { referenceGroups } from "@/lib/reference-percentile";
 import { referencePool, referenceUniversities, referenceWildcards } from "@/lib/reference-view";
 import { CatalogBrowse } from "../possibilities/catalog-browse";
@@ -106,13 +108,39 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   }
 
   const report = state.report;
-  // 수능 가채점 리포트(2026-11-23 전환): 학교별 가채점 판정 자료가 아직 없어 후보를 만들지 않는다(settleCandidates 도 보내지 않음)
+  // 수능 가채점 리포트(2026-11-23 전환). candidates.build 응답에 학교별 가채점 7단계(source g 행, dep_r22)가 오면
+  // 9모 참고 목록과 같은 대학 → 계열 → 학과 목록·배지로 그린다. 판정 행이 하나도 없으면(판정 Secret 이 없을 때 등)
+  // 지금처럼 '가채점 판정 준비 중'. 가채점에는 누백·합격선 위치·유불리·와일드카드가 없어 그 부분은 그리지 않는다
   if (provisionalOnly(report)) {
+    let csat: ReturnType<typeof csatView> = { universities: [], outsideBand: 0, judged: 0 };
+    try {
+      csat = csatView(report.candidates);
+    } catch (e) {
+      logSettleError("p3-csat", e);
+    }
+    if (csat.universities.length === 0) {
+      return (
+        <div className="wrap pg-body fv">
+          <ScoreBasis overall={report.overall} emptyText="" />
+          <ProvisionalPendingGate catalogHref={`${route.path}?view=catalog`} />
+        </div>
+      );
+    }
+    const favs = (await myFavorites())?.ids ?? null;
+    const known = csat.universities.flatMap((u) => u.fields.flatMap((f) => f.items.map((x) => x.offering)));
     return (
-      <div className="wrap pg-body fv">
-        <ScoreBasis overall={report.overall} emptyText="" />
-        <ProvisionalPendingGate catalogHref={`${route.path}?view=catalog`} />
-      </div>
+      <>
+        <MemberMark kind="recommend" path={viewPath(route.path, sp)} />
+        <div className="wrap pg-body fv">
+          <ScoreBasis overall={report.overall} emptyText="" />
+          <section className="fv-main fv-refmode" aria-label="유리한 대학">
+            <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
+          </section>
+        </div>
+        <Suspense key={hrefWith(cur, {})} fallback={null}>
+          <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />
+        </Suspense>
+      </>
     );
   }
   const c = report.candidates;

@@ -56,7 +56,7 @@ function form(extra = {}) {
   const v = {
     org_id: "invented-org", student_id: "invented-student", idem: "00000000-0000-4000-8000-000000000001", entry_version: "0",
     korean_choice: "화법과 작문", korean: "88", math_choice: "미적분", math: "84", english: "91", history: "45",
-    inq1: "생활과 윤리", inq1_raw: "44", inq2: "사회·문화", inq2_raw: "42", sl_subject: "", sl_raw: "", confirm: "on", ...extra,
+    inq1: "생활과 윤리", inq1_raw: "44", inq2: "사회·문화", inq2_raw: "42", sl_subject: "none", sl_raw: "", confirm: "on", ...extra,
   };
   for (const [k, x] of Object.entries(v)) fd.set(k, x);
   return fd;
@@ -120,7 +120,7 @@ test("raw scores go to that student's pro.score.create (stage provisional), then
 test("form problems and a missing confirmation never reach the server", async () => {
   const f = fake();
   await withEnv({ ...CSAT, ...OPEN, JUNGSI_PRO_CSAT_ENABLED: "1" }, async () => {
-    for (const extra of [{ korean_choice: "" }, { inq2: "생활과 윤리" }, { korean: "101" }, { confirm: "" }, { student_id: "../x" }, { entry_version: "x" }]) {
+    for (const extra of [{ korean_choice: "" }, { inq2: "생활과 윤리" }, { korean: "101" }, { sl_subject: "" }, { sl_subject: "일본어Ⅰ", sl_raw: "" }, { confirm: "" }, { student_id: "../x" }, { entry_version: "x" }]) {
       const r = await actions.submitStudentProvisional(null, form(extra));
       assert.ok(r?.error, JSON.stringify(extra));
       assert.equal(r.values.korean_choice, extra.korean_choice === "" ? undefined : "화법과 작문");

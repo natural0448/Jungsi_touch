@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useState } from "react";
 import { absoluteGrade, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, RAW_MAX, SECOND_LANGUAGE_SUBJECTS } from "@/lib/exam";
+import { checkSecondLanguage, SL_NONE, slHint } from "@/lib/second-language";
 import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } from "./provisional-actions";
 
 /*
@@ -11,9 +12,11 @@ import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } 
     저장되는 등급은 서버가 같은 구간으로 다시 정한다. 화면 값은 입력을 돕는 표시다.
   - 국어·수학·탐구의 표준점수·등급은 저장 뒤 서버가 가채점 변환표로 추정한 범위로 보여 준다(입력 칸에는 '예상치' 자리만).
   - 국어·수학 선택과목은 필수다(선택과목마다 변환표가 다르다, 서버 dep_r19c).
+  - 제2외국어/한문도 필수다(2026-11-22 대표님 결정). 기본값은 '선택하세요'(빈 값)이고, 응시하지 않았으면 '미응시'를 직접 고른다.
+    과목을 골랐으면 원점수가 있어야 저장된다. 검사는 lib/second-language.ts 를 화면·서버 액션이 같이 쓴다.
   - 저장은 가채점 단계의 입력 1회를 쓴다(2026-11-23 전환). 정정 승인 뒤에는 같은 리포트의 새 판으로 저장한다(update).
 */
-const REQUIRED = ["korean_choice", "math_choice", "inq1", "inq2", "korean", "math", "english", "history", "inq1_raw", "inq2_raw"] as const;
+const REQUIRED = ["korean_choice", "math_choice", "inq1", "inq2", "sl_subject", "korean", "math", "english", "history", "inq1_raw", "inq2_raw"] as const;
 
 /**
  * 개인용 2페이지(기본: 본인 계정에 저장)와 전문가용 학생 화면이 같이 쓴다. 전문가용은 submit 에 학생 저장 동작을,
@@ -37,6 +40,14 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
     sl_raw: d.sl_raw?.toString() ?? "",
   }));
   const [sl, setSl] = useState(d.sl_subject ?? "");
+  // 과목을 고른 경우만 원점수 칸이 열린다('미응시'·미선택은 닫힘)
+  const taken = sl !== "" && sl !== SL_NONE;
+  // 제2외국어/한문 칸 옆 짧은 안내. 서버 액션이 돌려준 칸 표시가 기본이고, 같은 시도 안에서는 확인 창 검사·다시 고르기가 덮어쓴다
+  const attempt = state?.attempt ?? 0;
+  const [slLocal, setSlLocal] = useState<{ at: number; field: string | null } | null>(null);
+  const slField = slLocal && slLocal.at === attempt ? slLocal.field : (state?.field ?? null);
+  const setSlField = (field: string | null) => setSlLocal({ at: attempt, field });
+  const hint = slHint(slField, "raw");
   const [filled, setFilled] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -52,8 +63,8 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
     const g = absoluteGrade(area, raw[k]);
     return <td className="calc">{g === null ? <span className="sf-auto">원점수 넣으면 표시</span> : <b className="sf-grade">{g}<small>등급</small></b>}</td>;
   };
-  const rawCell = (name: string, max: number, ph: string, opts: { live?: boolean; disabled?: boolean; dv?: number } = {}) => (
-    <td className="in">
+  const rawCell = (name: string, max: number, ph: string, opts: { live?: boolean; disabled?: boolean; dv?: number; bad?: boolean; hint?: string | null } = {}) => (
+    <td className={`in${opts.bad ? " bad" : ""}`}>
       <input
         name={name}
         type="number"
@@ -62,10 +73,21 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
         max={max}
         placeholder={ph}
         aria-label={`${name} 원점수`}
+        aria-describedby={opts.hint ? `pf-${name}-hint` : undefined}
         disabled={opts.disabled}
-        {...(opts.live ? { value: raw[name] ?? "", onChange: (e) => setRaw({ ...raw, [name]: e.currentTarget.value }) } : { defaultValue: opts.dv })}
+        {...(opts.live
+          ? {
+              value: raw[name] ?? "",
+              onChange: (e) => {
+                const v = e.currentTarget.value;
+                setRaw({ ...raw, [name]: v });
+                if (opts.bad && v.trim() !== "") setSlField(null);
+              },
+            }
+          : { defaultValue: opts.dv })}
       />
       <small className="sf-max">/ {max}</small>
+      {opts.hint && <small id={`pf-${name}-hint`} className="sf-hint">{opts.hint}</small>}
     </td>
   );
 
@@ -75,11 +97,14 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
     const ok = (k: string, max: number) => Number.isInteger(n(k)) && n(k) >= 0 && n(k) <= max;
     let problem: string | null = null;
     if (val("korean_choice") === "" || val("math_choice") === "") problem = "국어·수학 선택과목을 골라 주세요. 선택과목마다 예상 점수가 다릅니다.";
-    else if (REQUIRED.some((k) => val(k) === "")) problem = "국어·수학·영어·한국사·탐구 두 과목의 원점수와 탐구 과목을 모두 넣어 주세요.";
+    else if (REQUIRED.some((k) => k !== "sl_subject" && val(k) === "")) problem = "국어·수학·영어·한국사·탐구 두 과목의 원점수와 탐구 과목을 모두 넣어 주세요.";
     else if (val("inq1") === val("inq2")) problem = "탐구 두 과목은 서로 달라야 합니다.";
     else if (!["korean", "math", "english"].every((k) => ok(k, 100))) problem = "국어·수학·영어 원점수는 0~100 사이 정수입니다.";
     else if (!["history", "inq1_raw", "inq2_raw"].every((k) => ok(k, 50))) problem = "한국사·탐구 원점수는 0~50 사이 정수입니다.";
-    else if (sl && !ok("sl_raw", 50)) problem = "제2외국어/한문 원점수를 0~50 사이로 넣어 주세요. 보지 않았으면 과목을 '미응시'로 두세요.";
+    // 제2외국어/한문: 서버 액션과 같은 검사(미선택·과목만 고르고 원점수 없음). 칸 옆 안내도 같이 띄운다
+    const slCheck = checkSecondLanguage(val("sl_subject"), n("sl_raw"), "raw");
+    setSlField(slCheck.ok ? null : slCheck.field);
+    if (!problem && !slCheck.ok) problem = slCheck.error;
     const g = (area: "english" | "history" | "second", k: string) => (absoluteGrade(area, val(k)) ?? "─") + "등급";
     const choice = (k: string) => (val(k) ? ` (${val(k)})` : "");
     setReview({
@@ -91,7 +116,7 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
         ["한국사", `${val("history")}점 · ${g("history", "history")}`],
         [`탐구 1 · ${val("inq1") || "미선택"}`, `${val("inq1_raw")}점`],
         [`탐구 2 · ${val("inq2") || "미선택"}`, `${val("inq2_raw")}점`],
-        ["제2외국어/한문", sl ? `${sl} · ${val("sl_raw")}점 · ${g("second", "sl_raw")}` : "미응시"],
+        ["제2외국어/한문", taken ? `${sl} · ${val("sl_raw")}점 · ${g("second", "sl_raw")}` : sl === SL_NONE ? "미응시" : "선택 안 함"],
       ],
     });
     dialogRef.current?.showModal();
@@ -170,20 +195,26 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
                   </select>
                 </td>
               ))}
-              <td className="in">
+              <td className={`in${slField === "sl_subject" ? " bad" : ""}`}>
                 <select
                   name="sl_subject"
                   aria-label="제2외국어/한문 과목"
+                  aria-describedby={slField === "sl_subject" ? "pf-sl-hint" : undefined}
+                  required
                   defaultValue={d.sl_subject ?? ""}
                   onChange={(e) => {
                     const v = e.currentTarget.value;
                     setSl(v);
-                    if (!v) setRaw((r) => ({ ...r, sl_raw: "" }));
+                    if (!v || v === SL_NONE) setRaw((r) => ({ ...r, sl_raw: "" }));
+                    // 미응시를 골랐으면 안내를 거두고, 과목을 골랐으면 원점수 칸 안내로 넘긴다
+                    if (slField) setSlField(v === SL_NONE ? null : v ? (raw.sl_raw === "" ? "sl_value" : null) : "sl_subject");
                   }}
                 >
-                  <option value="">미응시</option>
+                  <option value="" disabled>선택하세요</option>
+                  <option value={SL_NONE}>미응시</option>
                   {SECOND_LANGUAGE_SUBJECTS.map((s) => <option key={s}>{s}</option>)}
                 </select>
+                {slField === "sl_subject" && hint && <small id="pf-sl-hint" className="sf-hint">{hint}</small>}
               </td>
             </tr>
             <tr className="key">
@@ -194,7 +225,7 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
               {rawCell("english", RAW_MAX.english, "예: 90", { live: true })}
               {rawCell("inq1_raw", RAW_MAX.inquiry, "예: 44", { dv: d.inq1_raw })}
               {rawCell("inq2_raw", RAW_MAX.inquiry, "예: 42", { dv: d.inq2_raw })}
-              {rawCell("sl_raw", RAW_MAX.second, sl ? "예: 40" : "과목 먼저", { live: true, disabled: !sl })}
+              {rawCell("sl_raw", RAW_MAX.second, taken ? "예: 40" : sl === SL_NONE ? "미응시" : "과목 먼저", { live: true, disabled: !taken, bad: slField === "sl_value", hint: slField === "sl_value" ? hint : null })}
             </tr>
             <tr>
               <th scope="row">예상 표준점수</th>
@@ -214,14 +245,14 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
               {fixed("english", "english")}
               <td className="calc">{est}</td>
               <td className="calc">{est}</td>
-              {sl ? fixed("second", "sl_raw") : <td className="na">{none}</td>}
+              {taken ? fixed("second", "sl_raw") : <td className="na">{none}</td>}
             </tr>
           </tbody>
         </table>
       </div>
 
       <ul className="sf-legend">
-        <li><i className="k in" />넣는 칸 · 과목별 원점수(맞힌 점수). 국어·수학·영어 100점, 한국사·탐구·제2외국어/한문 50점 만점</li>
+        <li><i className="k in" />넣는 칸 · 과목별 원점수(맞힌 점수). 국어·수학·영어 100점, 한국사·탐구·제2외국어/한문 50점 만점. 제2외국어/한문은 응시하지 않았어도 &apos;미응시&apos;를 꼭 골라 주세요(일부 대학 판정이 달라집니다).</li>
         <li><i className="k calc" />국어·수학·탐구의 예상 표준점수·백분위·등급은 저장하면 정시터치 가채점 변환표로 추정한 범위로 보여 드립니다(성적표의 실제 값과 다를 수 있습니다).</li>
         <li><i className="k na" />영어·한국사·제2외국어/한문은 절대평가라 표준점수가 없고, 넣은 원점수로 등급이 바로 정해집니다(영어 90점·한국사 40점·제2외국어/한문 45점 이상이 1등급, 이후 영어 10점·나머지 5점마다 한 등급).</li>
       </ul>

@@ -10,7 +10,8 @@ import { seoulDateTime, seoulTime } from "@/lib/format";
 import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
 
 export type { ProvisionalValues };
-export type ProvisionalFormState = { error: string; values: ProvisionalValues; attempt: number } | null;
+/** field: 고칠 칸(제2외국어/한문 'sl_subject'·'sl_value'). 양식이 그 칸 옆에 짧은 안내를 띄운다 */
+export type ProvisionalFormState = { error: string; field?: string; values: ProvisionalValues; attempt: number } | null;
 
 const int = (fd: FormData, k: string) => {
   const v = String(fd.get(k) ?? "").trim();
@@ -25,7 +26,7 @@ const MESSAGE: Record<string, string> = {
   invalid_inquiry: "탐구 과목을 목록에서 골라 주세요.",
   invalid_score: "원점수 범위를 확인해 주세요. 국어·수학·영어는 0~100, 한국사·탐구·제2외국어/한문은 0~50입니다.",
   invalid_integer: "원점수는 정수로 넣어 주세요.",
-  invalid_second_language: "제2외국어/한문 과목과 원점수(0~50)를 확인해 주세요. 보지 않았으면 과목을 '미응시'로 두세요.",
+  invalid_second_language: "제2외국어/한문 과목과 원점수(0~50)를 확인해 주세요. 응시하지 않았으면 '미응시'를 골라 주세요.",
   duplicate_inquiry: "탐구 두 과목은 서로 달라야 합니다.",
   pack_version_mismatch: "시험 자료가 새로 바뀌었습니다. 화면을 새로 고친 뒤 다시 입력해 주세요.",
   revision_conflict: "다른 화면에서 리포트가 먼저 바뀌었습니다. 새로 고친 뒤 다시 저장해 주세요.",
@@ -58,11 +59,12 @@ export async function submitProvisional(prev: ProvisionalFormState, fd: FormData
     sl_subject: String(fd.get("sl_subject") ?? "") || undefined,
     sl_raw: int(fd, "sl_raw"),
   };
-  const fail = (error: string): ProvisionalFormState => ({ error, values, attempt: (prev?.attempt ?? 0) + 1 });
+  const fail = (error: string, field?: string): ProvisionalFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
   // 전환 전에 열려 있던 화면에서 보내도 서버로 보내지 않는다(입력 횟수를 쓰지 않는다)
   if (!csatOpen()) return fail(`수능 가채점 입력은 ${seoulDateTime(csatOpensAt().toISOString())}부터 열립니다. 지금은 저장하지 않았고 입력 횟수도 쓰이지 않았습니다.`);
+  // 제2외국어/한문 미선택·과목만 고르고 원점수 없음도 여기서 막는다(서버로 보내지 않아 입력 횟수를 쓰지 않는다)
   const built = buildProvisionalScores(values, CSAT_EXAM);
-  if (!built.ok) return fail(built.error);
+  if (!built.ok) return fail(built.error, built.field);
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 입력값을 확인하고 '이대로 저장'을 눌러 주세요.");
   const key = String(fd.get("idem") ?? "");
   if (!/^[0-9a-f-]{36}$/i.test(key)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");

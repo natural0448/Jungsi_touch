@@ -259,6 +259,43 @@ export function thresholdCandidates(): CandidatesDto {
   };
 }
 
+/**
+ * 수능 가채점 리포트의 candidates.build 응답 흉내(dep_r22 csat_provisional/judgment.ts runCsatJudgment).
+ * 판정 Secret 이 있을 때처럼 학교별 가채점 7단계 행(source g)을 응답에만 싣는다(리포트에는 저장하지 않는다).
+ * 목록은 안정~상향만 오고(서버 RECOMMENDED_BAND_CODES), 중앙이 계산된 곳은 한 단계, 안 된 곳은 code~upper_code 범위.
+ * JUNGSI_SYNTHETIC_CSAT_JUDGMENT=off 면 Secret 이 없을 때처럼 판정 행 없이 돌려준다('가채점 판정 준비 중' 확인용).
+ */
+export function csatCandidates(): CandidatesDto {
+  const base: CandidatesDto = {
+    status: "ready", reason_code: null, basic_university_groups: [], wildcards: [], pending_offerings: [], outside_offerings: [], ineligible_offerings: [], catalog_version: "SYNTHETIC-catalog-v1",
+  };
+  if (process.env.JUNGSI_SYNTHETIC_CSAT_JUDGMENT === "off") return base;
+  const groups = new Map<string, NonNullable<CandidatesDto["reference_university_groups"]>[number]>();
+  const byCode: Record<string, number> = {};
+  const delivered: Record<string, number> = {};
+  let listed = 0;
+  CATALOG.forEach((o, i) => {
+    const k = hash(`g:${o.offering_id}`) % THRESHOLD_CODES.length;
+    // 셋 중 하나는 중앙이 계산되지 않아 범위로 온다(좋은 끝 k ~ 나쁜 끝 k+1)
+    const up = i % 3 === 1 && k + 1 < THRESHOLD_CODES.length ? k + 1 : null;
+    byCode[THRESHOLD_CODES[k]] = (byCode[THRESHOLD_CODES[k]] ?? 0) + 1;
+    if (k > 4) return; // 도전·불가는 목록에 싣지 않는다
+    listed++;
+    delivered[THRESHOLD_CODES[k]] = (delivered[THRESHOLD_CODES[k]] ?? 0) + 1;
+    const band = { basis: "reference_threshold" as const, code: THRESHOLD_CODES[k], label: THRESHOLD_LABELS[k], ...(up !== null ? { upper_code: THRESHOLD_CODES[up] } : {}), source: "g" };
+    if (!groups.has(o.university_id)) groups.set(o.university_id, { university_id: o.university_id, university_name: o.university_name, offerings: [] });
+    groups.get(o.university_id)!.offerings.push({ offering: o, reference_band: band });
+  });
+  return {
+    ...base,
+    reference_university_groups: [...groups.values()],
+    reference_threshold_summary: {
+      basis: "reference_threshold", threshold_version: "SYNTHETIC-csat", universe: CATALOG.length, judged: CATALOG.length, listed, delivered: listed, complete: true,
+      sources: { g: { policy_version: "SYNTHETIC-csat-policy", approval_version: "SYNTHETIC-csat-approval" } }, by_code: byCode, delivered_by_code: delivered,
+    },
+  };
+}
+
 function hash(s: string) {
   let h = 0;
   for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
