@@ -10,6 +10,8 @@ const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied, ConnectionError} from ${JSON.stringify(classesUrl)};`)],
   // 입력 상태의 현재 리포트 번호. 기다리는 동안 리포트 읽기가 이미 나갔는지 보려고 풀어 주는 시점을 시험이 정한다
+  // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
+  ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
   ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export async function currentReportId(){return globalThis.__hintFixture.status()}")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });

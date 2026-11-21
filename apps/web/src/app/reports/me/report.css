@@ -209,6 +209,14 @@
 .et .pr-hd dt{font-size:11px;color:var(--muted)}
 .et .pr-hd dd{margin:0;font-weight:800}
 .et .pr-foot{padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.6}
+/* 인쇄본의 담은 학교 상세(print-detail.tsx, 2026-11-22): 표의 한 줄 아래에 늘 펼쳐 둔다. 학교 하나(한 줄 + 상세)는 tbody 하나 */
+.et .pr-detail{display:block;padding:0;gap:0}
+.et .pr-detail .detail{border-top:0;padding:12px 12px 16px}
+.et .pr-sheet .pr-detail .four{grid-template-columns:repeat(2,minmax(0,1fr))}
+.et tr.pr-open>td{padding:0;white-space:normal}
+.et .pr-sheet .pr-unit{break-inside:avoid;page-break-inside:avoid}
+.et .rp-picked.print.full .rp-group{break-inside:auto}
+.et .pr-unit+.pr-unit>tr:first-child>*{border-top:2px solid var(--line)}
 
 @media (max-width:640px){
   .et .sf{padding:18px 16px}
@@ -223,6 +231,11 @@
   .et .pr-tools{display:none}
   .et .pr-sheet{border:0;padding:0;max-width:none}
   .et .tblwrap{overflow:visible;border:0}
+  /* 펼친 상세: 화면 이동 링크는 종이에 쓸모가 없어 숨기고, 그림자·옅은 배경은 흑백에서도 읽히게 */
+  .et .pr-detail .recruit a{display:none}
+  .et .pr-detail .card,.et .pr-detail .years,.et .pr-detail .reasons,.et .pr-detail .published,.et .pr-detail .evidence{box-shadow:none;border-color:#999}
+  .et .pr-detail .detail{background:#fff}
+  .et .pr-detail .card,.et .pr-detail .years{break-inside:avoid}
 }
 
 /* ── 과목별 결과: 수능 성적표와 같은 가로 표(읽기 전용) ── */

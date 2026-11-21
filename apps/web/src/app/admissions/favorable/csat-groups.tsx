@@ -50,7 +50,7 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label }: { unive
                   <>
                     <b>{f.label}</b>
                     <span className="num">{f.items.length}개 학과</span>
-                    {f.provisional && <small>2025 분류 참고</small>}
+                    {f.provisional && <small>2025 분류 기준</small>}
                     <span className="rf-best"><CsatBadge band={f.bestBand} /></span>
                   </>
                 }

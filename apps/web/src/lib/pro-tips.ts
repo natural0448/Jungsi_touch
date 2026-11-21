@@ -39,8 +39,8 @@ export function tipLine(r: ProReason): TipLine | null {
       if (!s || !lo || !hi || !unit || !ctx?.range_definition || !ctx.policy_version || ctx.range_role !== "baseline_reference") return null;
       if (r.values.some((x) => ["converted_score", "acceptance_lower", "acceptance_upper"].includes(x.name) && x.unit !== unit)) return null;
       return {
-        text: `이 학생의 올해 환산점수는 ${s}${unit}입니다. 서비스 예상 기준구간 참고: ${lo}~${hi}${unit}. 정의: ${ctx.range_definition}.`,
-        caution: "이 기준구간은 대학 공식 발표 합격선이 아닙니다. 이 구간은 지난 발표 자료를 참고한 서비스 예상치이고, 최종 분류에는 입시 상담 조정이 들어갈 수 있습니다.",
+        text: `이 학생의 올해 환산점수는 ${s}${unit}입니다. 서비스 예상 기준구간: ${lo}~${hi}${unit}. 정의: ${ctx.range_definition}.`,
+        caution: "이 기준구간은 대학 공식 발표 합격선이 아닙니다. 이 구간은 지난 발표 자료를 바탕으로 한 서비스 예상치이고, 최종 분류에는 입시 상담 조정이 들어갈 수 있습니다.",
         ref: ctx.policy_version,
       };
     }

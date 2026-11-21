@@ -342,12 +342,14 @@ test("warm step route checks origin and fetch header before running the admin-ga
   assert.match(runner, /setLast\(\{ ok: false, code: "stopped", retryable: false \}\)/);
 });
 
-test("p1 value cell shows no tag for pending_value_type; reference conversion is labelled as reference", () => {
+test("p1 value cell shows no tag for pending_value_type; reference conversion keeps its reason text without a '참고' label", () => {
   const table = readFileSync(new URL("../src/app/admissions/results/snapshot-table.tsx", import.meta.url), "utf8");
   assert.ok(!table.includes("rs-hold"), "1페이지 값 옆 꼬리표('확인 중'·'원문')는 보이지 않는다(2026-11-08)");
   assert.ok(!/>원문</.test(table));
   const parts = readFileSync(new URL("../src/app/admissions/possibilities/parts.tsx", import.meta.url), "utf8");
-  assert.match(parts, /내 참고 환산점수/);
+  // '참고' 꼬리표·표현은 모두 지운다(대표님 결정 2026-11-22 새벽): 제목은 '내 환산점수' 하나
+  assert.match(parts, /<h3>내 환산점수<\/h3>/);
+  assert.doesNotMatch(parts, /내 참고 환산점수/);
   const reasons = readFileSync(new URL("../src/components/offering-parts.tsx", import.meta.url), "utf8");
   for (const code of ["reference_conversion_not_production_approved", "reference_conversion_unavailable", "reference_conversion_missing",
     "reference_exam_context_mismatch", "reference_offering_context_mismatch", "reference_rule_context_mismatch", "reference_rule_unsupported",

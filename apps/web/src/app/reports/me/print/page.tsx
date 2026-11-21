@@ -13,7 +13,11 @@ import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { isInaccurate } from "@/lib/score-validity";
 import { page } from "@/lib/routes";
 import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
+import { PrintDetail } from "../print-detail";
+import { loadPrintExtras } from "@/app/admissions/possibilities/print-extras";
+import type { Extras } from "@/app/admissions/possibilities/extras-actions";
 import { PrintButton } from "./print-button";
+import "@/app/admissions/possibilities/possibilities.css";
 import "../report.css";
 
 export const metadata: Metadata = { title: "상담 리포트" };
@@ -101,6 +105,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
     );
   }
   const a = snap.report.overall;
+  // 담은 학교 전부의 상세를 펼친 채로 인쇄한다(대표님 결정 2026-11-22). 펼친 상세에 쓰는 자료(2027 모집 정보·발행 기준·
+  // 학년도별 대학 발표 성적)를 여기서 미리 받는다 — 최대 15곳, 서버 동시 요청 2 이하(print-extras.ts). 가채점 리포트는 판정 준비 중이라 받지 않는다
+  const offerings = isProvisionalOverall(a) ? [] : shortlist.flatMap((s) => (s.offering ? [s.offering] : []));
+  const extras: Record<string, Extras> = offerings.length ? await loadPrintExtras(src, caller, offerings) : {};
+  const detailOf = (s: PickedItem) =>
+    s.offering ? <PrintDetail o={s.offering} a={s.assessment} extras={extras[s.offering_id]} subjects={a.subjects} overall={a.overall} examType={a.exam?.exam_type ?? null} /> : null;
 
   return (
     <div className="wrap pg-body pr">
@@ -153,7 +163,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
         ) : shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>
         ) : (
-          <PickedTable items={shortlist} overall={a.overall} print />
+          <PickedTable items={shortlist} overall={a.overall} print detailOf={detailOf} />
         )}
         <footer className="pr-foot">
           지원가능성은 합격 확률이 아닙니다. 대학마다 만점과 반영 방식이 달라 다른 대학의 환산점수와 크기를 비교할 수 없습니다. 모의지원 서비스에서 모집군·지원 조건·모집인원 변경을 다시 확인하세요.

@@ -2,6 +2,10 @@ import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
+import { pickedIds, provisionalOnly } from "@/lib/report-pure";
+
+// 브라우저 화면도 쓰는 읽기 전용 판단은 report-pure 에 둔다(서버 전용 모듈이 브라우저 묶음에 끌려가지 않게, 2026-11-22)
+export { pickedIds, provisionalOnly };
 
 /*
   3·4페이지(와 2페이지 유료 부분)가 리포트에 묶인 분석을 쓰는 방법.
@@ -150,11 +154,6 @@ export function mineReport(m: MineResult): ReportDto | null {
   return null;
 }
 
-/** 담은 모집단위 번호(report.shortlist 의 selected). 이름(offering.read)이 없어도 담기 표시는 이것으로 그린다 */
-export function pickedIds(report: ReportDto | null): Set<string> {
-  return new Set(Object.entries(report?.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id));
-}
-
 async function retryOnConflict(src: JungsiSource, caller: Caller, report: ReportDto, run: (r: ReportDto, attempt: number) => ReturnType<JungsiSource["analyzeUniversities"]>): Promise<ReportState> {
   let current = report;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -183,16 +182,6 @@ export function conflictVersion(fresh: ReportDto, sent: ReportDto): ReportDto {
 /** 같은 리포트를 쓰기 응답과 다시 읽기로 둘 다 받았을 때, 다시 읽은 쪽이 앞 판이면(쓰기 직후 지연) 쓰기 응답의 판을 쓴다 */
 export function newerVersion(read: ReportDto, written: ReportDto): ReportDto {
   return read.report_id === written.report_id && written.report_version > read.report_version ? { ...read, report_version: written.report_version } : read;
-}
-
-/**
- * 수능 가채점 원점수 리포트(2026-11-23 전환, 서버 provisional_estimate)인가. 가채점은 university.analyze(4페이지 상세)를
- * 아직 계산하지 않는다(provisional_stage_unavailable) — 화면은 이 요청을 보내지 않는다.
- * candidates.build 는 보낸다(dep_r22): 판정 Secret 이 있으면 응답에만 학교별 가채점 7단계(source g 참고 묶음)가 실린다.
- * (lib/provisional-report 의 isProvisionalReport 와 같은 판단. 이 모듈의 시험 고정 모듈 목록을 늘리지 않으려고 여기 둔다)
- */
-export function provisionalOnly(r: ReportDto | null | undefined): boolean {
-  return !!r?.overall && (r.overall.score_basis === "provisional_estimate" || r.overall.input_kind === "provisional_raw");
 }
 
 /** 보이는 모집행 중 아직 분석이 없는 것만 university.analyze 로 채운다(한 번에 100개까지) */

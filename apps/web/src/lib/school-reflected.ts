@@ -4,7 +4,7 @@ import type { AssessmentDto, SchoolReflectedDto } from "./dto";
  * 학교 반영 백분위(참고) — 학생의 국어·수학·탐구 백분위를 이 모집단위 반영비율로 평균한 참고값(2026-11-14 대표님 결정).
  * 영어·한국사·가산점은 빼고 계산한다. 대학 환산점수·상위누백·합격 가능성이 아니다.
  */
-export const SCHOOL_REFLECTED_TITLE = "학교 반영 백분위(참고)";
+export const SCHOOL_REFLECTED_TITLE = "학교 반영 백분위";
 export const SCHOOL_REFLECTED_NOTE =
   "내 국어·수학·탐구 백분위를 이 모집단위가 중요하게 보는 비율대로 평균한 값입니다(영어·한국사·가산점 제외). 내 세 영역 백분위의 단순 평균보다 높으면 이 학과의 반영 비율이 내 강한 영역과 잘 맞는 것이고, 낮으면 약한 영역의 비중이 큰 학과입니다.";
 export const SCHOOL_REFLECTED_ELIGIBILITY = "지원 자격(필수 응시 영역·과목 지정)은 모집요강에서 확인하세요.";

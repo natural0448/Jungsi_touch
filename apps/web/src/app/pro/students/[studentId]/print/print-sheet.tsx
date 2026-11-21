@@ -8,10 +8,40 @@ import { isProvisionalOverall } from "@/lib/dto";
 import { OverallCard, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../../reports/me/report-view";
 import { PrintButton } from "../../../../reports/me/print/print-button";
 import { exportStudentReport, type PrintState } from "../../../actions";
+import type { Extras } from "@/app/admissions/possibilities/extras-actions";
+import { PrintDetail } from "../../../../reports/me/print-detail";
+import { loadProPrintExtras } from "./print-extras-action";
+
+type SheetState = (Extract<PrintState, { ok: true }> & { extras: Record<string, Extras> }) | Exclude<PrintState, { ok: true }>;
+
+/**
+ * 인쇄본 만들기 → 고정 판을 받고, 담은 학교마다 펼친 상세에 쓸 자료(모집 정보·발행 기준·학년도별 성적)까지 받은 뒤 한 번에 그린다
+ * (대표님 결정 2026-11-22: 화면에서 무엇을 열었든 담은 학교 전부의 상세를 펼친 채로 인쇄). 학생 성적은 상세 자료 받기로 보내지 않는다.
+ */
+async function exportWithDetails(prev: SheetState, fd: FormData): Promise<SheetState> {
+  const r = await exportStudentReport(prev && prev.ok ? { ok: true, data: prev.data } : prev, fd);
+  if (!r?.ok) return r;
+  const snap = r.data.snapshot;
+  if (isProvisionalOverall(snap.report.overall)) return { ...r, extras: {} };
+  const ids = Object.entries(snap.report.shortlist ?? {}).filter(([, e]) => e.selected).map(([id]) => id);
+  const known = offeringNames(snap.report.candidates);
+  const items = ids.flatMap((id) => {
+    const o = known.get(id);
+    return o ? [{ offering_id: id, university_name: o.university_name }] : [];
+  });
+  // 상세 자료를 받지 못해도 인쇄본은 그린다(그 칸은 '미공개'·'자료 없음')
+  const extras = items.length ? await loadProPrintExtras(items).catch(() => ({})) : {};
+  return { ...r, extras };
+}
+
+/** 고정 판의 후보 목록에서 모집단위 이름(OfferingDto)을 찾는다 */
+function offeringNames(cands: Extract<PrintState, { ok: true }>["data"]["snapshot"]["report"]["candidates"]) {
+  return new Map([...(cands?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(cands?.wildcards ?? []), ...(cands?.reference_university_groups?.flatMap((g) => g.offerings) ?? [])].map((it) => [it.offering.offering_id, it.offering]));
+}
 
 /** 인쇄본 만들기 → 고정 판을 그대로 그린다. 워터마크(기관·교사 코드·인쇄 시각)는 화면 전체에 옅게, 인쇄·PDF 에도 찍힌다 */
 export function PrintSheet({ fields }: { fields: Record<string, string> }) {
-  const [state, action, pending] = useActionState<PrintState, FormData>(exportStudentReport, null);
+  const [state, action, pending] = useActionState<SheetState, FormData>(exportWithDetails, null);
   // 인쇄에서 뺄 학교(2026-11-13: 담은 학교를 서버에서 빼는 기능이 생기기 전까지, 잘못 담은 학교가 학생에게 가지 않게).
   // 화면에서만 고르고 서버 기록은 바꾸지 않는다
   const [skip, setSkip] = useState<Set<string>>(() => new Set());
@@ -33,7 +63,7 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
   const shortlist = picked.filter((id) => !skip.has(id));
   const cands = snapshot.report.candidates;
   const tips = tipsByOffering(state.data.counseling_reasons ?? []);
-  const names = new Map([...(cands?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(cands?.wildcards ?? []), ...(cands?.reference_university_groups?.flatMap((g) => g.offerings) ?? [])].map((it) => [it.offering.offering_id, it.offering]));
+  const names = offeringNames(cands);
   // 담은 학교 중 참고 누백(추정)이 하나라도 있을 때만 칸을 더한다(저장 뒤 승인이 바뀌면 서버가 칸을 뺀다)
   const refOf = (id: string) => referencePercentText(snapshot.report.analyses?.[id]?.reference_percentile);
   const showRef = shortlist.some((id) => refOf(id));
@@ -81,7 +111,8 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
         {isProvisionalOverall(a) ? (
           // 수능 가채점: 개인용 인쇄본과 같은 추정 범위 표시(표준점수 확정 전이라 환산·판정 없음)
           <>
-            <ProvisionalOverallCard a={a} />
+            {/* 인쇄본은 접을 수 없으므로 계산 설명까지 펼친다 */}
+            <ProvisionalOverallCard a={a} fold={false} />
             <h2>과목별 예상 성적</h2>
             <ProvisionalSubjectsSheet a={a} />
           </>
@@ -99,20 +130,28 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
         ) : (
           <table className="tb">
             <thead><tr><th scope="col">분류</th><th scope="col">대학·모집단위</th><th scope="col" className="r">환산점수</th><th scope="col" className="r">환산 유불리</th>{showRef && <th scope="col" className="r">{REFERENCE_PERCENTILE_TITLE}</th>}</tr></thead>
-            <tbody>
-              {shortlist.map((id) => {
-                const o = names.get(id), x = snapshot.report.analyses?.[id];
-                return (
-                  <tr key={id}>
+            {/* 학교 하나(한 줄 + 펼친 상세)를 tbody 하나로 묶어 쪽 사이에서 잘리지 않게 한다(report.css .pr-unit). 가채점은 상세 없이 한 줄만 */}
+            {shortlist.map((id) => {
+              const o = names.get(id), x = snapshot.report.analyses?.[id];
+              return (
+                <tbody key={id} className="pr-unit">
+                  <tr>
                     <td>{x ? CATEGORY[x.category].label : "판단 보류"}</td>
                     <th scope="row">{o ? `${o.university_name} ${o.department}` : id}</th>
                     <td className="r num">{x?.converted_score ?? "─"}</td>
                     <td className="r num">{x?.advantage ? `${x.advantage.delta_pp}%p` : "─"}</td>
                     {showRef && <td className="r num">{refOf(id) ? `상위 ${refOf(id)}%` : "─"}</td>}
                   </tr>
-                );
-              })}
-            </tbody>
+                  {o && !isProvisionalOverall(a) && (
+                    <tr className="rp-drow pr-open">
+                      <td colSpan={showRef ? 5 : 4}>
+                        <PrintDetail o={o} a={x ?? null} extras={state.extras[id]} subjects={a.subjects} overall={a.overall} examType={a.exam?.exam_type ?? null} />
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              );
+            })}
           </table>
         )}
         {showRef && <p className="rp-foot">{REFERENCE_PERCENTILE_TITLE}: {REFERENCE_PERCENTILE_NOTE}</p>}

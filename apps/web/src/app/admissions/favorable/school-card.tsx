@@ -90,7 +90,7 @@ export function SchoolCard({ g, cur, picked, favs, stats, statsKey }: { g: Group
             {f.label} <b className="num">{f.items.length}</b>
           </Link>
         ))}
-        {fields.some((f) => f.provisional) && <span className="sc-fnote">계열은 2025 분류 참고</span>}
+        {fields.some((f) => f.provisional) && <span className="sc-fnote">계열은 2025 분류 기준</span>}
       </div>
 
       <Link className="sc-toggle" href={toggle} scroll={false} aria-expanded={open}>
@@ -113,7 +113,7 @@ export function SchoolCard({ g, cur, picked, favs, stats, statsKey }: { g: Group
               <summary>
                 <b>{f.label}</b>
                 <span className="num">학과 {f.items.length}</span>
-                {f.provisional && <small>2025 분류 참고</small>}
+                {f.provisional && <small>2025 분류 기준</small>}
               </summary>
           <ul>
             {f.items.map(({ offering: o, assessment: a }) => (

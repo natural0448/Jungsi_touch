@@ -84,7 +84,7 @@ test("2페이지 표는 3·4페이지처럼 그리기 전에 분석을 맞추고
   assert.match(page, /<PickedTable items=\{items\} overall=\{current\.overall\?\.overall\} report=\{current\} \/>/);
   assert.match(page, /<Picked src=\{src\} caller=\{caller\} report=\{report\} pending \/>/);
   const print = src("../src/app/reports/me/print/page.tsx");
-  assert.match(print, /<PickedTable items=\{shortlist\} overall=\{a\.overall\} print \/>/);
+  assert.match(print, /<PickedTable items=\{shortlist\} overall=\{a\.overall\} print detailOf=\{detailOf\} \/>/);
   assert.match(print, /<PickedTable items=\{shortlist\} pending print \/>/);
   const view = src("../src/app/reports/me/report-view.tsx");
   assert.match(view, /<ScoreCell a=\{a\} plain \/>/); // 환산점수 아래 '참고' 꼬리표 없음
@@ -101,7 +101,7 @@ test("2페이지 핵심 지원 학교 표: 줄을 펼치면 4페이지 상세 �
   // 리포트를 받은 화면 표만 펼친다 — 인쇄·가채점(판정 준비 중)은 지금처럼 펼침 없음
   assert.match(view, /const expandable = !!report && !print && !pending;/);
   assert.match(view, /<PickedRow[\s\S]*?detail=\{<MineDetail report=\{report\} o=\{s\.offering\} acts=\{false\} \/>\}[\s\S]*?conds=\{<MineConds report=\{report\} o=\{s\.offering\} \/>\}/);
-  assert.match(view, /from "@\/app\/admissions\/possibilities\/mine-parts"/);
+  assert.match(view, /from "@\/app\/admissions\/possibilities\/mine-detail"/); // 서버 전용 mine-parts 가 아니라 브라우저 화면도 쓰는 부품(2026-11-22 ship54)
   // 펼친 줄은 4페이지 목록과 같은 받기·그리기(2027 모집 정보·발행 기준·학년도별 성적)를 쓴다
   const row = src("../src/app/reports/me/picked-row.tsx");
   assert.match(row, /^"use client";/);
@@ -118,27 +118,26 @@ test("2페이지 핵심 지원 학교 표: 줄을 펼치면 4페이지 상세 �
   assert.match(parts, /이 학과의 판단 이유/);
   assert.match(parts, /<caption>연도별 근거<\/caption>/);
   assert.match(parts, /\{acts && \(\s*<div className="acts">/);
-  assert.match(src("../src/app/admissions/possibilities/mine-parts.tsx"), /acts=\{acts\} \/>;/);
+  assert.match(src("../src/app/admissions/possibilities/mine-detail.tsx"), /acts=\{acts\} \/>;/);
   // 지금 화면·지난 기록 모두 리포트를 넘긴다(가채점 pending 표는 넘기지 않는다)
   assert.match(src("../src/app/reports/me/past-records.tsx"), /<PickedTable items=\{items\} overall=\{report\.overall\?\.overall\} report=\{report\} \/>/);
   const page = src("../src/app/reports/me/page.tsx");
   assert.match(page, /<PickedTable items=\{items\} pending \/>/);
 });
 
-test("2페이지 핵심 지원 학교 표에는 '참고' 꼬리표가 없다(대표님 결정 2026-11-20), 3·4페이지 기본값은 그대로", () => {
+test("2페이지 핵심 지원 학교 표에는 '참고' 꼬리표가 없다(대표님 결정 2026-11-20), 3·4페이지도 없다(2026-11-22 새벽)", () => {
   const view = src("../src/app/reports/me/report-view.tsx");
   const table = code(view.slice(view.indexOf("export function PickedTable")));
   assert.doesNotMatch(table, /참고/);
   assert.match(table, /<ScoreCell a=\{a\} plain \/>/);
   assert.match(table, /<StatusCell a=\{a\} overall=\{overall\} plain \/>/);
   assert.match(table, /<AdvantageCell a=\{a\} overall=\{overall\} plain \/>/);
-  const parts = src("../src/components/offering-parts.tsx");
-  // 꼬리표는 plain 이 아닐 때만(3·4페이지 기본) — 합격선 대비 위치 배지·참고 유불리 모두
-  assert.match(parts, /\{positionNoteShort\(pn\)\}\{!plain && <> <small>참고<\/small><\/>\}/);
-  assert.match(parts, /\{ref\.text\}%p\{!plain && <> <small className="ref">참고<\/small><\/>\}/);
-  assert.match(parts, /<CategoryBadge a=\{a\} overall=\{overall\} plain=\{plain\} \/>/);
-  assert.match(parts, /export function StatusCell\(\{ a, overall, plain = false \}/);
-  assert.match(parts, /export function AdvantageCell\(\{ a, overall, plain = false \}/);
+  const parts = code(src("../src/components/offering-parts.tsx"));
+  // 2026-11-22 새벽 대표님 결정: 3·4페이지에서도 꼬리표를 달지 않는다(합격선 대비 위치 배지·환산점수·유불리 모두)
+  assert.match(parts, /\{positionNoteShort\(pn\)\}<\/span>/);
+  assert.match(parts, /\{ref\.text\}%p<\/span>/);
+  assert.doesNotMatch(parts, /참고/);
+  assert.match(parts, /<CategoryBadge a=\{a\} overall=\{overall\} \/>/);
   // 판단 근거 문장도 '참고'를 붙이지 않는다
   const t = decisionBasisText({ ...base, reference_percentile: refPct("8.0"), year_cutoffs: [{ academic_year: 2025, published_metric: "70%컷", cutoff_top_percent: "12.0", score_component: null }] }, overall, reason);
   assert.doesNotMatch(t, /참고/);

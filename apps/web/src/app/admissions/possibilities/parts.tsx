@@ -85,11 +85,11 @@ function StatusStrip({ a, overall }: { a: AssessmentDto; overall: OverallResultD
   const pct = a.percentile?.status ?? (a.converted_percentile ? "ready" : "pending");
   const refPct = pct !== "ready" && !!referencePercentText(a.reference_percentile);
   const items = [
-    { k: "점수 변환", ok: conv === "ready" || ref, label: ref ? "참고 계산" : undefined, why: a.conversion?.reason_code },
-    { k: "대학 안 내 위치", ok: pct === "ready" || refPct, label: refPct ? "참고 추정" : undefined, why: a.percentile?.reason_code },
+    { k: "점수 변환", ok: conv === "ready" || ref, label: ref ? "계산됨" : undefined, why: a.conversion?.reason_code },
+    { k: "대학 안 내 위치", ok: pct === "ready" || refPct, label: refPct ? "추정됨" : undefined, why: a.percentile?.reason_code },
     pn
-      ? { k: "지원 판단", ok: true, label: pn.kind === "line" ? "합격선 대비 위치(참고)" : "판정 근거 부족", why: undefined }
-      : { k: "지원 판단", ok: a.status === "ready" || !!referenceBandOf(a), label: referenceBandOf(a) ? "참고 판정" : undefined, why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
+      ? { k: "지원 판단", ok: true, label: pn.kind === "line" ? "합격선 대비 위치" : "판정 근거 부족", why: undefined }
+      : { k: "지원 판단", ok: a.status === "ready" || !!referenceBandOf(a), label: referenceBandOf(a) ? "판정" : undefined, why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
   ];
   return (
     <ul className="strip" aria-label="계산 준비 상태">
@@ -111,8 +111,8 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
   const score = scoreOf(a);
   const reference = isReferenceScore(a);
   return (
-    <section className="card" aria-label={reference ? "내 참고 환산점수" : "내 환산점수"}>
-      <h3>{reference ? "내 참고 환산점수" : "내 환산점수"}</h3>
+    <section className="card" aria-label="내 환산점수">
+      <h3>내 환산점수</h3>
       {score ? (
         <>
           <div className="big num">
@@ -122,7 +122,7 @@ function ConversionCard({ a }: { a: AssessmentDto }) {
           <p>
             {!reference && c?.score_scope && SCOPE[c.score_scope] && <>반영 {SCOPE[c.score_scope]} · </>}
             {c?.score_basis && <span className="tag">{scoreBasisLabel(c.score_basis)}</span>}
-            {reference && <span className="tag">학교 수능 반영분 · 참고</span>}
+            {reference && <span className="tag">학교 수능 반영분</span>}
           </p>
           {reference && <p>{reasonText("reference_conversion_not_production_approved")}</p>}
         </>
@@ -308,7 +308,7 @@ function AdvantageCard({ a, overall }: { a: AssessmentDto; overall?: OverallResu
   if (ref) {
     return (
       <section className="card" aria-label="환산 유불리">
-        <h3>환산 유불리 <span className="tag">참고</span></h3>
+        <h3>환산 유불리</h3>
         <div className={`big num ${ref.tone}`}><span className="advw">{ADVANTAGE_WORD[ref.tone]}</span> {ref.text}<small>%p</small></div>
         <p>
           {ref.tone === "up"
@@ -317,7 +317,7 @@ function AdvantageCard({ a, overall }: { a: AssessmentDto; overall?: OverallResu
               ? "나에게 불리한 대학입니다. 이 대학의 점수 계산 방식으로는 전체 성적으로 볼 때보다 내 위치가 이만큼 뒤로 밀립니다."
               : "유리하지도 불리하지도 않습니다. 이 대학 방식으로 계산해도 전체 성적 기준과 위치가 거의 같거나, 범위가 0을 걸쳐 단정할 수 없습니다."}
         </p>
-        <span className="note">숫자가 +면 유리, −면 불리입니다. 전체 상위 누백에서 이 대학 방식 누적 백분위(추정)를 뺀 값이며(운영 승인 전 참고), 둘 중 하나가 범위면 범위로 보입니다. 합격 가능성 판단과는 별개입니다.</span>
+        <span className="note">숫자가 +면 유리, −면 불리입니다. 전체 상위 누백에서 이 대학 방식 누적 백분위(추정)를 뺀 값이며(운영 승인 전 추정값), 둘 중 하나가 범위면 범위로 보입니다. 합격 가능성 판단과는 별개입니다.</span>
       </section>
     );
   }
@@ -412,7 +412,7 @@ function RangeEvidence({ a }: { a: AssessmentDto }) {
   return (
     <div className="range-ev">
       <p>
-        참고로, 발표된 과거 값과 그해 기준 내 환산점수를 나란히 보존해 보여 드립니다 — 만점 숫자({officialMax}점)가 같은
+        발표된 과거 값과 그해 기준 내 환산점수를 나란히 보존해 보여 드립니다 — 만점 숫자({officialMax}점)가 같은
         발표값만 골랐으며, 이것이 연도별 산식·단위·집단까지 같다는 뜻은 아닙니다(동등성은 검수 대상).
       </p>
       <ul>
@@ -513,7 +513,7 @@ function Years({ a, overall }: { a: AssessmentDto; overall: OverallResultDto | n
                           <span className="cl-m">{l.metric}{l.scope ? <span className="cl-s"> · {l.scope}</span> : null}</span>
                           <b className="num cl-v">상위 {l.cutoff}%</b>
                           <span className={`cl-g ${l.side ?? ""}`}>{l.gap ? `→ ${l.gap}` : <span className="na">내 누적 백분위 없음</span>}</span>
-                          {l.basis === "overall" && <span className="cl-s"> · 참고 · 국·수·탐 표준점수 합 기준</span>}
+                          {l.basis === "overall" && <span className="cl-s"> · 국·수·탐 표준점수 합 기준</span>}
                         </li>
                       ))}
                     </ul>
@@ -525,7 +525,7 @@ function Years({ a, overall }: { a: AssessmentDto; overall: OverallResultDto | n
         </tbody>
       </table>
       <span className="note">
-        합격선 누적 백분위는 대학이 발표한 입시결과를 전체 응시자 기준 위치로 옮겨 추정한 참고값이고(운영 승인 전), 내 누적 백분위도 같은 기준입니다. 합격선은 1페이지 대학 발표 입시결과와 같은 자료입니다. 내가 합격선보다 위에 있을수록 그해 기준으로 여유가 있다는 뜻이니, 여러 해의 차이를 함께 보고 판단하세요.
+        합격선 누적 백분위는 대학이 발표한 입시결과를 전체 응시자 기준 위치로 옮겨 추정한 값이고(운영 승인 전), 내 누적 백분위도 같은 기준입니다. 합격선은 1페이지 대학 발표 입시결과와 같은 자료입니다. 내가 합격선보다 위에 있을수록 그해 기준으로 여유가 있다는 뜻이니, 여러 해의 차이를 함께 보고 판단하세요.
       </span>
     </div>
   );

@@ -268,9 +268,9 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 <h2>{c.status === "pending" ? "판정 자료 준비 중" : "현재 상향 범위 이내 추천 후보 없음"}</h2>
                 <p>
                   {c.status === "pending"
-                    ? "지금은 대학별 판정 자료를 연결하는 중이고, 참고 누백이 나온 대학도 아직 없습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다. 자료가 연결되면 이 화면을 열 때 최신 자료로 다시 찾습니다."
+                    ? "지금은 대학별 판정 자료를 연결하는 중이고, 대학 방식 누적 백분위(추정)가 나온 대학도 아직 없습니다. 지원할 수 있는 대학이 없다는 뜻이 아닙니다. 자료가 연결되면 이 화면을 열 때 최신 자료로 다시 찾습니다."
                     : "판정이 나온 모집단위 가운데 안정·하향·적정·소신·상향에 드는 곳이 없습니다."}{" "}
-                  {refGroups.length > 0 && <>참고 누백이 나온 학과 중 안정~상향에 들거나 지난해 합격선에 내 위치가 닿는 곳이 없습니다(판정 도전·불가 {refPool.outsideBand}곳, 합격선보다 아래 {refPool.below}곳, 합격선 자료 없음 {refPool.noCutoff}곳).{" "}</>}
+                  {refGroups.length > 0 && <>대학 방식 누적 백분위(추정)가 나온 학과 중 안정~상향에 들거나 지난해 합격선에 내 위치가 닿는 곳이 없습니다(판정 도전·불가 {refPool.outsideBand}곳, 합격선보다 아래 {refPool.below}곳, 합격선 자료 없음 {refPool.noCutoff}곳).{" "}</>}
                   {p3.label}에서 대학·학과를 직접 검색해 하나씩 확인할 수 있습니다.
                 </p>
                 <div className="acts">

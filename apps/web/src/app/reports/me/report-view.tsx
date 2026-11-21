@@ -1,7 +1,8 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { AdvantageCell, decisionBasis, ScoreCell, StatusCell } from "@/components/offering-parts";
 import type { OverallAnalysisDto, OverallResultDto, ReportDto } from "@/lib/dto";
-import { MineConds, MineDetail } from "@/app/admissions/possibilities/mine-parts";
+import { MineConds, MineDetail } from "@/app/admissions/possibilities/mine-detail";
 import { PickedRow } from "./picked-row";
 import { groupPicked, PICK_GROUP_LIMIT } from "@/lib/picked-view";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
@@ -453,7 +454,7 @@ function SubjectSummary({ a }: { a: OverallAnalysisDto }) {
   return (
     <p className="pc-summary">
       과목별로 보면 <b>{name(hi.s)}</b>{iga(name(hi.s))} 가장 위(상위 {pctText(hi.s.top_percent_inclusive!)}%), <b>{name(lo.s)}</b>{iga(name(lo.s))} 가장 아래(상위 {pctText(lo.s.top_percent_inclusive!)}%)입니다.
-      <small> 과목마다 본 응시자가 달라 참고로만 보세요.</small>
+      <small> 과목마다 본 응시자가 달라 대략적인 비교로만 보세요.</small>
     </p>
   );
 }
@@ -609,17 +610,20 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
  * pending: 수능 가채점 리포트(3·4페이지와 같이 가채점 판정 준비 중) — 담은 학교 이름만 군별로 보이고 점수·판정 칸은 두지 않는다
  * report: 이 표를 만든 리포트. 주면 줄마다 눌러 4페이지와 같은 상세 카드(MineDetail)를 펼친다(인쇄·가채점에서는 펼치지 않음).
  * '참고' 꼬리표는 이 표의 어느 칸에도 달지 않는다(대표님 결정 2026-11-20, 지적 2026-11-22)
+ * detailOf: 인쇄본(print)에서 학교마다 표의 한 줄 바로 아래에 펼친 채로 그릴 상세(print-detail.tsx, 대표님 결정 2026-11-22).
+ *   학교 하나(한 줄 + 상세)를 tbody 하나로 묶어 쪽 사이에서 잘리지 않게 한다(report.css .pr-unit). details 는 쓰지 않는다
  */
-export function PickedTable({ items, overall, report = null, print = false, pending = false }: { items: PickedItem[]; overall?: OverallResultDto | null; report?: ReportDto | null; print?: boolean; pending?: boolean }) {
+export function PickedTable({ items, overall, report = null, print = false, pending = false, detailOf }: { items: PickedItem[]; overall?: OverallResultDto | null; report?: ReportDto | null; print?: boolean; pending?: boolean; detailOf?: (s: PickedItem) => ReactNode }) {
   const { groups, other } = groupPicked(items);
   const expandable = !!report && !print && !pending;
+  const full = print && !pending && !!detailOf;
   const span = expandable ? 6 : 5;
   const sections = [
     ...groups.map((g) => ({ key: g.group, title: `${g.group}군`, items: g.items, count: true })),
     ...(other.length ? [{ key: "other", title: "모집군 확인 필요", items: other, count: false }] : []),
   ];
   return (
-    <div className={print ? "rp-picked print" : "rp-picked"}>
+    <div className={print ? (full ? "rp-picked print full" : "rp-picked print") : "rp-picked"}>
       {sections.map((sec) => (
         <section key={sec.key} className="rp-group" aria-label={sec.title}>
           <h3>
@@ -656,8 +660,8 @@ export function PickedTable({ items, overall, report = null, print = false, pend
                     )}
                   </tr>
                 </thead>
-                <tbody>
-                  {sec.items.map((s) => {
+                {(() => {
+                  const rows = sec.items.map((s) => {
                     const a = s.assessment;
                     const name = (
                       <>
@@ -690,15 +694,29 @@ export function PickedTable({ items, overall, report = null, print = false, pend
                         />
                       );
                     }
-                    return (
+                    const row = (
                       <tr key={s.offering_id}>
                         <th scope="row">{name}</th>
                         {cells}
                         {expandable && <td className="rp-chev" />}
                       </tr>
                     );
-                  })}
-                </tbody>
+                    if (!full) return row;
+                    // 인쇄본: 화면에서 무엇을 열어 두었든 학교마다 상세를 펼친 채로(details 없이) 한 줄 바로 아래에 그린다
+                    const d = detailOf!(s);
+                    return (
+                      <tbody key={s.offering_id} className="pr-unit">
+                        {row}
+                        {d && (
+                          <tr className="rp-drow pr-open">
+                            <td colSpan={span}>{d}</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    );
+                  });
+                  return full ? rows : <tbody>{rows}</tbody>;
+                })()}
               </table>
             </div>
           )}

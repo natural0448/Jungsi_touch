@@ -3,9 +3,11 @@ import { ScoreBasis } from "@/components/score-basis";
 import { StreamTray } from "@/components/shortlist-tray-stream";
 import type { Caller, JungsiSource } from "@/lib/api";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
-import { pickedIds, provisionalOnly } from "@/lib/report-ops";
+// 펼친 상세·지원 조건·칸 값은 브라우저 화면(전문가용 인쇄)도 쓰므로 서버 전용 모듈 없는 mine-detail.tsx 에 둔다(2026-11-22 ship54 빌드 실패)
+export { cellOf, MineConds, MineDetail } from "./mine-detail";
+import { pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { cellOf } from "./mine-detail";
 import { PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
-import { ConditionsBlock, Detail } from "./parts";
 
 /*
   4페이지에서 '내 리포트'가 있어야 그릴 수 있는 칸들.
@@ -14,10 +16,6 @@ import { ConditionsBlock, Detail } from "./parts";
   '분석 대기'·'확인 못 함'·'불러오는 중' 같은 중간 상태는 그리지 않는다.
 */
 
-/** 이 모집단위의 칸 값. 리포트가 없으면(성적 전) 'need', 분석이 없으면 null */
-export function cellOf(report: ReportDto | null, id: string): Cell {
-  return report ? report.analyses?.[id] ?? null : "need";
-}
 
 const SCORE_EMPTY = "검색과 모집 정보는 지금 볼 수 있고, 성적을 넣으면 모집단위마다 내 분석이 붙습니다.";
 
@@ -59,17 +57,7 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
   );
 }
 
-/** 펼친 카드의 환산·누백·판단 카드 */
-/** acts=false: 2페이지 핵심 지원 학교 표에서 펼칠 때(담기·'내 성적 리포트에서 보기' 줄 없음) */
-export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
-  if (report && provisionalOnly(report)) return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
-  return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
-}
 
-/** 펼친 상세 맨 위 줄 안의 지원 조건 묶음(2026-11-22) */
-export function MineConds({ report, o }: { report: ReportDto | null; o: OfferingDto }) {
-  return <ConditionsBlock a={cellOf(report, o.offering_id)} subjects={report?.overall?.subjects} />;
-}
 
 /** 핵심 지원 학교 띠. 개수와 이 목록에 있는 이름은 바로, 목록에 없는 곳의 이름만 뒤이어(shortlist-tray-stream.tsx) */
 export function MineTray({ report, items, src, caller }: { report: ReportDto | null; items: OfferingDto[]; src: JungsiSource; caller: Caller }) {

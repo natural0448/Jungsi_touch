@@ -3,8 +3,9 @@ import data from "./field-groups-2027.json";
 /*
   모집단위의 학과 계열(표시용). 데이터팀 R2 회신(2026-11-18)을 2027 + 모집행 PK 로 붙인다.
   - 7계열 값의 근거는 세 가지다(R2 v9 classification_status). 대부분은 대교협 2025 학과 분류를 임시로 참고한 것이라
-    '2025 분류 참고'를 함께 적는다. 2027 대학 모집요강의 계열(guide_2027)은 '2027 모집요강 계열',
-    2027 요강 초안(draft_2027)은 '2027 요강 초안 참고'라고 적는다. 어느 것도 확정 분류로 세지 않는다.
+    '2025 분류 기준'을 함께 적는다. 2027 대학 모집요강의 계열(guide_2027)은 '2027 모집요강 계열',
+    2027 요강 초안(draft_2027)은 '2027 요강 초안 기준'이라고 적는다. 어느 것도 확정 분류로 세지 않는다.
+    (2026-11-22 새벽 대표님 결정: 화면의 '참고' 표현을 모두 지우되 근거 표시는 남긴다 — 전에는 '…참고')
   - 자유전공은 모집단위 이름에 자유·자율·무전공이 적힌 별도 유형이다. 7계열 가운데 하나로 넣지 않는다.
   - 자료에 없는 모집단위는 null — '기타'로 묶어 보이고 7계열·자유전공 어디에도 넣지 않는다(대표님 결정 2026-11-21, 계열 자료가 올 때까지).
   - 계열은 학과 내용의 표시 축일 뿐이다. 대학 환산식 묶음·실기 여부·분석 가능 여부를 뜻하지 않는다.
@@ -13,7 +14,7 @@ export const FIELD_GROUPS = ["인문", "사회", "교육", "공학", "자연", "
 export type FieldGroupName = (typeof FIELD_GROUPS)[number];
 /** 계열 값의 근거. free 는 모집단위 이름에 자유·자율·무전공이 적힌 별도 유형 */
 export type FieldBasis = "2025" | "guide2027" | "draft2027" | "free";
-export const FIELD_BASIS_NOTE: Record<FieldBasis, string | null> = { "2025": "2025 분류 참고", guide2027: "2027 모집요강 계열", draft2027: "2027 요강 초안 참고", free: null };
+export const FIELD_BASIS_NOTE: Record<FieldBasis, string | null> = { "2025": "2025 분류 기준", guide2027: "2027 모집요강 계열", draft2027: "2027 요강 초안 기준", free: null };
 export interface FieldGroup {
   name: FieldGroupName;
   basis: FieldBasis;

@@ -18,7 +18,7 @@ test("classification text preserves exact decimals and baseline definition witho
   for (const x of r.values) assert.ok(line.text.includes(x.value));
   assert.ok(line.text.includes(r.comparison_context.range_definition));
   assert.equal(line.ref, r.comparison_context.policy_version); assert.ok(!line.text.includes(r.comparison_context.policy_version));
-  assert.ok(line.text.includes("기준구간 참고")); assert.ok(!line.text.includes("핵심 검토 구간"));
+  assert.ok(line.text.includes("서비스 예상 기준구간:")); assert.ok(!line.text.includes("참고")); assert.ok(!line.text.includes("핵심 검토 구간"));
   assert.ok(!line.text.includes("낮습니다")); assert.ok(!line.text.includes("높습니다"));
   assert.ok(line.caution.includes("대학 공식 발표 합격선이 아닙니다"));
 });

@@ -8,6 +8,8 @@ const classesUrl = new URL("../src/lib/api/source.ts", import.meta.url).href;
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied, ConnectionError} from ${JSON.stringify(classesUrl)};`)],
+  // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
+  ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
   ["@/lib/report-ref", data("export async function currentReportId(){return null};export const screenReport=(c,r)=>r;")],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
   ["./format", new URL("../src/lib/format.ts", import.meta.url).href],
