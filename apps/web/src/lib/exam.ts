@@ -27,6 +27,15 @@ export function csatOpen(now: Date = new Date()): boolean {
   return now.getTime() >= csatOpensAt().getTime();
 }
 
+/**
+ * 전문가용 학생 가채점 입력을 여는가(2026-11-21 대표님 결정: 오픈 때 개인용과 함께). 전문가용 서버가 원점수
+ * pro.score.create 를 알기 전에는 열면 안 되므로, 서버 배포 뒤 JUNGSI_PRO_CSAT_ENABLED=1 로만 연다.
+ * 꺼져 있으면 지금 안내 문구를 그대로 둔다. 전환 시각 규칙(csatOpen)은 따로 그대로 따른다.
+ */
+export function proCsatEnabled(): boolean {
+  return process.env.JUNGSI_PRO_CSAT_ENABLED === "1";
+}
+
 /** 9월 모의평가(전환 뒤에는 지난 기록) */
 export const MOCK_EXAM = {
   get exam_id() {

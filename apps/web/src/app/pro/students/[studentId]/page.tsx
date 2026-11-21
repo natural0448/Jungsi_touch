@@ -7,14 +7,16 @@ import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
 import { currentStage } from "@/lib/pro-stage";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoreInputStatusDto } from "@/lib/dto";
-import { EXAM, examTitle, examTypeLabel, stageOf, type InputStage } from "@/lib/exam";
+import { isProvisionalOverall } from "@/lib/dto";
+import { EXAM, csatOpen, examTitle, examTypeLabel, proCsatEnabled, stageOf, type InputStage } from "@/lib/exam";
 import { seoulDateTime } from "@/lib/format";
 import type { ProOrganization, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess } from "@/lib/pro-access";
-import { OverallCard, PositionChart, SubjectsSheet } from "../../../reports/me/report-view";
+import { OverallCard, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../reports/me/report-view";
+import { ProvisionalForm } from "../../../reports/me/provisional-form";
 import { ScoreForm } from "../../../reports/me/score-form";
 import { StageSteps } from "../../../reports/me/stage-steps";
-import { findCandidates, submitStudentScores } from "../../actions";
+import { findCandidates, submitStudentProvisional, submitStudentScores } from "../../actions";
 import { ActionButton } from "../../action-button";
 import { CandidatesView, PickedList } from "../../candidates-view";
 import { ProfileView } from "../../profile-view";
@@ -62,7 +64,8 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
         stage = stageSt ? stageOf(stageSt.stage) : null;
         status = stage ? await src.scoreStatus(caller, svc.org_id, studentId, EXAM.exam_id, EXAM.pack_version, stage) : null;
         reports = (await src.listReports(caller, svc.org_id, studentId)).items;
-        const want = reportParam && validId(reportParam) ? reportParam : reports[0]?.report_id;
+        // 고른 리포트가 없으면 지금 단계의 현재 성적 리포트, 없으면 가장 최근 리포트(전환 뒤 9월 리포트는 지난 기록으로 남는다)
+        const want = reportParam && validId(reportParam) ? reportParam : (status?.current_report_id ?? reports[0]?.report_id);
         shown = want ? (reports.find((r) => r.report_id === want) ?? (await src.readReport(caller, svc.org_id, studentId, want))) : null;
       }
     }
@@ -77,6 +80,11 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   const canInput = svc.role === "teacher" && !student.archived && status !== null && status.initial_remaining > 0 && stageOpen;
   const title = stage ? examTitle(stage, stageSt?.academic_year ?? 2027) : EXAM.label;
   const a = shown?.published_result.overall ?? null;
+  const provisional = isProvisionalOverall(a);
+  // 전문가용 학생 가채점 입력: 서버가 원점수 pro.score.create 를 아는 배포 뒤(JUNGSI_PRO_CSAT_ENABLED=1)·전환 시각 뒤에만 연다
+  const proCsat = proCsatEnabled() && csatOpen();
+  // 수능 가채점 전환 뒤 9월 모의평가 리포트는 지난 기록(읽기 전용)
+  const pastOf = (r: ProStudentReportDto) => csatOpen() && stageOf(r.stage) === "mock";
   // 판 번호 대신 꼬리표(2026-10-28, 2026-11-04 사용자 결정): 서버 입력 상태의 current_report_id 리포트 중 가장 최근 판이 현재 성적이다.
   // 정정을 모두 썼으면 개인용 2페이지와 같은 '정정 입력 횟수 소진', 아니면 '현재 성적'(교사는 학생의 예전 판도 고르므로 남긴다). 판 번호는 열기·인쇄 주소에만 쓴다
   const curRev = Math.max(0, ...reports.filter((r) => r.report_id === status?.current_report_id).map((r) => r.revision_id));
@@ -120,10 +128,20 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           ) : (
             <p className="pro-note">{stage ? "이 학생의 입력 상태를 지금 확인할 수 없습니다. 입력을 열지 않았습니다." : "지금 입력 단계(모의평가·가채점·실채점)를 확인할 수 없어 입력을 열지 않았습니다. 잠시 뒤 다시 열어 주세요."}</p>
           )}
-          {canInput && status && stage === "provisional" && (
-            // 전문가용 서버(pro.score.create)는 아직 표준점수 입력만 받는다(dep_r19c). 개인용 가채점 양식은 본인 계정에 저장하므로
-            // 여기서 쓰지 않는다 — 학생 성적이 교사 개인 계정에 저장되는 일을 막는다(2026-11-21)
+          {canInput && status && stage === "provisional" && !proCsat && (
+            // 서버가 원점수 pro.score.create 를 알기 전에는 열지 않는다. 개인용 가채점 저장 동작(본인 계정)은 여기서 절대 쓰지 않는다
+            // — 학생 성적이 교사 개인 계정에 저장되는 일을 막는다(2026-11-21)
             <p className="pro-note">전문가용 학생 가채점 원점수 입력은 학생별 입력권과 함께 따로 엽니다. 저장한 학생 리포트와 담은 학교는 아래에서 그대로 볼 수 있습니다.</p>
+          )}
+          {canInput && status && stage === "provisional" && proCsat && (
+            // 개인용과 같은 원점수 양식. 저장은 이 학생의 pro.score.create(stage provisional)로만 간다(submitStudentProvisional)
+            <ProvisionalForm
+              examLabel={title}
+              idem={crypto.randomUUID()}
+              submit={submitStudentProvisional}
+              subject={student.display_name}
+              hidden={{ org_id: svc.org_id, student_id: student.student_id, entry_version: String(status.entry_version) }}
+            />
           )}
           {canInput && status && stage !== "provisional" && stage && (
             <ScoreForm
@@ -158,11 +176,22 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
               <h2 id="report-h">
                 리포트 <small className="pro-note">{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준 {seoulDateTime(shown.created_at_utc)} 저장</small>
                 {tagOf(shown) && <span className="rp-tag">{tagOf(shown)}</span>}
+                {pastOf(shown) && <span className="rp-tag">지난 기록 · 읽기 전용</span>}
               </h2>
             </div>
-            <OverallCard a={a} />
-            <SubjectsSheet a={a} second={false} />
-            <PositionChart a={a} />
+            {pastOf(shown) && <p className="pro-note">9월 모의평가 성적 입력은 수능 가채점 전환과 함께 끝났습니다. 저장한 9월 리포트는 그대로 볼 수 있고, 고치거나 새로 입력할 수는 없습니다.</p>}
+            {provisional ? (
+              <>
+                <ProvisionalOverallCard a={a} />
+                <ProvisionalSubjectsSheet a={a} />
+              </>
+            ) : (
+              <>
+                <OverallCard a={a} />
+                <SubjectsSheet a={a} second={false} />
+                <PositionChart a={a} />
+              </>
+            )}
                         <div className="pro-sechd">
               <Link className="btn" href={`/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}`}>
                 상담 리포트 인쇄·PDF
@@ -171,7 +200,15 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           </section>
         )}
 
-        {shown && a && (
+        {shown && a && provisional && (
+          <section className="pro-sec" aria-labelledby="cand-h">
+            <h2 id="cand-h">유리한 대학 찾기</h2>
+            {/* 가채점 성적은 표준점수 확정 전이라 학교별 환산·판정을 하지 않는다(서버도 대학 분석을 막는다). 개인용과 같은 말 */}
+            <p className="pro-note"><b>가채점 판정 준비 중</b> — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다. 담아 둔 학교는 그대로 남아 있습니다.</p>
+          </section>
+        )}
+
+        {shown && a && !provisional && (
           <section className="pro-sec" aria-labelledby="cand-h">
             <div className="pro-sechd">
               <h2 id="cand-h">유리한 대학 찾기</h2>
@@ -218,8 +255,9 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
               {reports.map((r) => (
                 <li key={`${r.report_id}-${r.revision_id}`}>
                   <span>
-                    <span className="num">{seoulDateTime(r.created_at_utc)}</span> 저장
+                    <span className="num">{seoulDateTime(r.created_at_utc)}</span> 저장 · {r.stage === "provisional" ? "수능 가채점" : r.stage === "final" ? "수능 실채점" : "9월 모의평가"}
                     {tagOf(r) && <span className="rp-tag">{tagOf(r)}</span>}
+                    {pastOf(r) && <span className="rp-tag">지난 기록</span>}
                   </span>
                   {shown?.report_id === r.report_id && shown.revision_id === r.revision_id ? (
                     <span className="cur">보는 중</span>

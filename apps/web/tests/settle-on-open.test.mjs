@@ -227,3 +227,21 @@ test("page 3: if report.read lags behind the build response, the next write uses
   const out = await settleCandidates(port([{ ok: true, value: built }, lagging]).src, caller, before);
   assert.equal(out.report_version, 8);
 });
+
+test("missing and stale rows in view go in ONE request so the server's size pruning cannot drop the row computed a moment ago (2026-11-21 incident: 강원대 0000002·국민대)", async () => {
+  const r = report({ report_id: "R-together", analyses: { A: saved }, stale_analysis_ids: ["A"] });
+  const done = report({ report_id: "R-together", report_version: 8, analyses: { A: { status: "pending" }, B: { status: "pending" } }, stale_analysis_ids: [] });
+  const p = port([{ ok: true, value: done }, done]);
+  assert.equal(await settleAnalyses(p.src, caller, r, ["A", "B"]), done);
+  assert.deepEqual(writes(p).length, 1);
+  assert.deepEqual(writes(p)[0].args[3], ["A", "B"]);
+});
+
+test("if the combined request fails, the missing rows are still tried once on their own", async () => {
+  const r = report({ report_id: "R-together2", analyses: { A: saved }, stale_analysis_ids: ["A"] });
+  const done = report({ report_id: "R-together2", report_version: 8, analyses: { A: saved, B: saved }, stale_analysis_ids: ["A"] });
+  const p = port([{ ok: false, code: "analysis_failed", status: 500 }, { ok: true, value: done }, done]);
+  await settleAnalyses(p.src, caller, r, ["A", "B"]);
+  assert.deepEqual(writes(p)[0].args[3], ["A", "B"]);
+  assert.deepEqual(writes(p)[1].args[3], ["B"]);
+});

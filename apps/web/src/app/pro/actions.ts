@@ -6,7 +6,9 @@ import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
 import { emptyProfile, PROFILE_FIELDS, profileProblem, profileToTags, splitItems } from "@/lib/pro-profile";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoresInput } from "@/lib/dto";
-import { EXAM, csatOpen } from "@/lib/exam";
+import { CSAT_EXAM, EXAM, csatOpen, proCsatEnabled } from "@/lib/exam";
+import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
+import type { ProvisionalFormState } from "../reports/me/provisional-actions";
 import type { ProPrintDto, ProStudentInput } from "@/lib/pro-dto";
 import type { ScoreFormState } from "../reports/me/actions";
 import type { ScoreDefaults } from "../reports/me/score-form";
@@ -156,6 +158,68 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
     await src.candidates(caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
   } catch (e) {
     if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
+    const t = failText(e);
+    if (t) return fail(t);
+    throw e;
+  }
+  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+const PROVISIONAL_MESSAGE: Record<string, string> = {
+  invalid_choice: "국어·수학 선택과목을 목록에서 골라 주세요.",
+  invalid_inquiry: "탐구 과목을 목록에서 골라 주세요.",
+  duplicate_inquiry: "탐구 두 과목은 서로 달라야 합니다.",
+  invalid_score: "원점수 범위를 확인해 주세요. 국어·수학·영어는 0~100, 한국사·탐구·제2외국어/한문은 0~50입니다.",
+  invalid_integer: "원점수는 정수로 넣어 주세요.",
+  invalid_second_language: "제2외국어/한문 과목과 원점수(0~50)를 확인해 주세요. 보지 않았으면 과목을 '미응시'로 두세요.",
+  score_stage_closed: "지금은 수능 가채점 성적을 입력할 수 있는 기간이 아닙니다. 입력 횟수는 쓰이지 않았습니다.",
+  score_input_version_conflict: "다른 화면에서 이 학생의 성적이 먼저 저장되었습니다. 화면을 새로 고쳐 확인해 주세요.",
+};
+
+/**
+ * 전문가용 학생 수능 가채점 저장(2026-11-21 대표님 결정: 오픈 때 개인용과 함께). 원점수는 개인용과 같은 형식으로
+ * 그 학생의 pro.score.create(stage provisional) → pro.overall.analyze 로 저장한다. 교사 본인 계정(개인용 경로)에는
+ * 절대 저장하지 않는다. 학생×가채점 단계 입력 1회 + 정정 1회(서버). 가채점은 대학 환산을 하지 않으므로 대학 찾기는 부르지 않는다.
+ * 서버가 원점수 경로를 알기 전(JUNGSI_PRO_CSAT_ENABLED 꺼짐)에는 서버로 보내지 않는다.
+ */
+export async function submitStudentProvisional(prev: ProvisionalFormState, fd: FormData): Promise<ProvisionalFormState> {
+  const int = (k: string) => {
+    const v = String(fd.get(k) ?? "").trim();
+    return v === "" ? undefined : Number(v);
+  };
+  const values: ProvisionalValues = {
+    korean_choice: String(fd.get("korean_choice") ?? "") || undefined, korean: int("korean"),
+    math_choice: String(fd.get("math_choice") ?? "") || undefined, math: int("math"),
+    inq1: String(fd.get("inq1") ?? "") || undefined, inq1_raw: int("inq1_raw"),
+    inq2: String(fd.get("inq2") ?? "") || undefined, inq2_raw: int("inq2_raw"),
+    english: int("english"), history: int("history"),
+    sl_subject: String(fd.get("sl_subject") ?? "") || undefined, sl_raw: int("sl_raw"),
+  };
+  const fail = (error: string): ProvisionalFormState => ({ error, values, attempt: (prev?.attempt ?? 0) + 1 });
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
+  const entry = Number(fd.get("entry_version"));
+  if (!proCsatEnabled() || !csatOpen()) return fail("지금은 이 화면에서 수능 가채점을 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 화면을 새로 고쳐 주세요.");
+  if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(entry)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
+  const built = buildProvisionalScores(values, CSAT_EXAM);
+  if (!built.ok) return fail(built.error);
+  if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 원점수를 확인하고 '이대로 저장'을 눌러 주세요.");
+  const caller = await getCaller();
+  const src = proSource();
+  let step = "성적 저장";
+  try {
+    const saved = await src.createScore(caller, orgId, studentId, { exam_id: CSAT_EXAM.exam_id, pack_version: CSAT_EXAM.pack_version, stage: "provisional", scores: built.scores, expected_entry_version: entry }, `${key}:profile`);
+    if (!saved.ok) {
+      // 서버가 계산 단계에서 정상 거절한 경우만 입력 1회가 쓰인다(형식 오류는 저장 전에 422 로 막혀 쓰이지 않는다)
+      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code))
+        return fail(`넣은 원점수로는 정상적인 계산이 되지 않았습니다. 학생 화면을 새로 고쳐 남은 입력 횟수를 확인해 주세요. 다 썼으면 정정은 고객센터에 요청해 주세요. (문의 번호 ${saved.code})`);
+      return fail(PROVISIONAL_MESSAGE[saved.code] ?? SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (문의 번호 ${saved.code})`);
+    }
+    step = "예상 위치 계산";
+    const p = saved.value.profile;
+    const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
+    if (!r.ok) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
+  } catch (e) {
+    if (step !== "성적 저장" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);
     if (t) return fail(t);
     throw e;

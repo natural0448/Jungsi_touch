@@ -1,10 +1,10 @@
 import "server-only";
 import { headers as incomingHeaders } from "next/headers";
 import { professionalMutationOrigin } from "../professional-bff-origin";
-import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
+import type { ProfileDto, ProvisionalScoresInput, ReportDto, ScoresInput } from "@/lib/dto";
 import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
-import { computeOverall } from "./synthetic-report";
+import { computeOverall, computeProvisional } from "./synthetic-report";
 import { buildTips } from "./synthetic-tips";
 import { apiMode } from "./index";
 import { AccessDenied, ConnectionError, type Caller, type Result } from "./source";
@@ -26,7 +26,7 @@ export interface ProSource {
   updateStudent(caller: Caller, orgId: string, studentId: string, input: ProStudentInput, expectedVersion: number, key: string): Promise<Result<ProStudentDto>>;
   scoreStatus(caller: Caller, orgId: string, studentId: string, examId: string, packVersion: string, stage: string): Promise<ProScoreStatusDto | null>;
   /** pro.score.create — 학생×시험×단계 입력 1회. 성적표에 없는 점수의 정상 거절도 1회 사용(422) */
-  createScore(caller: Caller, orgId: string, studentId: string, body: { exam_id: string; pack_version: string; stage: string; scores: ScoresInput; expected_entry_version: number }, key: string): Promise<Result<{ profile: ProfileDto }>>;
+  createScore(caller: Caller, orgId: string, studentId: string, body: { exam_id: string; pack_version: string; stage: string; scores: ScoresInput | ProvisionalScoresInput; expected_entry_version: number }, key: string): Promise<Result<{ profile: ProfileDto }>>;
   /** pro.overall.analyze — 저장한 성적으로 전체 위치(새 리포트 판) */
   analyzeOverall(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<{ report: ReportDto }>>;
   listReports(caller: Caller, orgId: string, studentId: string): Promise<ProStudentReportPageDto>;
@@ -141,7 +141,9 @@ const liveSource: ProSource = {
 /* ── synthetic(화면 제작용 메모리) ── */
 
 /** 입력 횟수는 단계(모의평가·가채점·실채점)마다 따로 센다(운영 정책과 같음) */
-type SynScore = { entry: Map<string, number>; profile: (ProfileDto & { scores: ScoresInput; stage: string }) | null; reports: ProStudentReportDto[]; keys: Map<string, unknown> };
+type SynScore = { entry: Map<string, number>; profile: (ProfileDto & { scores: ScoresInput | ProvisionalScoresInput; stage: string }) | null; reports: ProStudentReportDto[]; keys: Map<string, unknown> };
+/** 수능 가채점 원점수 입력인가(국어에 원점수 칸이 있다) */
+const isRawScores = (s: ScoresInput | ProvisionalScoresInput): s is ProvisionalScoresInput => "raw_score" in s.korean;
 type SynStore = { students: ProStudentDto[]; keys: Map<string, ProStudentDto>; used: number; scores: Map<string, SynScore> };
 const syn: SynStore = ((globalThis as { __jtProSyn?: SynStore }).__jtProSyn ??= { students: seed(), keys: new Map(), used: 3, scores: new Map() });
 syn.scores ??= new Map();
@@ -235,7 +237,7 @@ const synSource: ProSource = {
     if (!x.profile || x.profile.profile_id !== profileId) return { ok: false, code: "profile_not_found", status: 404 };
     const n = x.reports.length + 1;
     const now = new Date().toISOString();
-    const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: `syn-pro-report-${id}-${x.profile.stage}`, report_version: n, profile_id: profileId, updated_at: now, overall: computeOverall(x.profile.scores) };
+    const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: `syn-pro-report-${id}-${x.profile.stage}`, report_version: n, profile_id: profileId, updated_at: now, overall: isRawScores(x.profile.scores) ? computeProvisional(x.profile.scores) : computeOverall(x.profile.scores) };
     x.reports.push({ org_id: orgId, student_id: id, report_id: report.report_id, revision_id: n, exam_id: x.profile.scores.exam_id, stage: x.profile.stage, profile_id: profileId, published_result: report, counseling_reasons: [], created_at_utc: now });
     const value = { report };
     x.keys.set(key, value);
@@ -254,13 +256,16 @@ const synSource: ProSource = {
     if (!x.profile || x.profile.profile_id !== profileId) return { ok: false, code: "profile_not_found", status: 404 };
     const last = x.reports.at(-1);
     if (!last) return { ok: false, code: "initial_overall_report_required", status: 409 };
+    // 가채점 원점수 성적은 대학 환산을 하지 않는다(운영 서버 professional_exam_unavailable 409와 같음)
+    const scores = x.profile.scores;
+    if (isRawScores(scores)) return { ok: false, code: "professional_exam_unavailable", status: 409 };
     const overall = last.published_result.overall;
-    const analyses = Object.fromEntries(CATALOG.map((o) => [o.offering_id, assess(o, x.profile!.scores, overall)]));
+    const analyses = Object.fromEntries(CATALOG.map((o) => [o.offering_id, assess(o, scores, overall)]));
     const candidates = buildCandidates(analyses);
     const now = new Date().toISOString();
     const n = x.reports.length + 1;
     const report: ReportDto = { ...last.published_result, report_version: n, updated_at: now, analyses, candidates, shortlist: last.published_result.shortlist ?? {} };
-    x.reports.push({ ...last, revision_id: n, published_result: report, counseling_reasons: buildTips(analyses, x.profile.scores), created_at_utc: now });
+    x.reports.push({ ...last, revision_id: n, published_result: report, counseling_reasons: buildTips(analyses, scores), created_at_utc: now });
     const value = { org_id: orgId, student_id: id, candidates };
     x.keys.set(key, value);
     return { ok: true, value };

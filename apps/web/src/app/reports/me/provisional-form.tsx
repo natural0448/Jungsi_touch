@@ -15,9 +15,21 @@ import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } 
 */
 const REQUIRED = ["korean_choice", "math_choice", "inq1", "inq2", "korean", "math", "english", "history", "inq1_raw", "inq2_raw"] as const;
 
-/** 개인용 2페이지 전용(서버 액션이 본인 계정에 저장한다). idem: 이 화면의 요청 키(두 번 눌러도 한 번만 저장) */
-export function ProvisionalForm({ examLabel, idem, defaults = {}, update }: { examLabel: string; idem: string; defaults?: ProvisionalValues; update?: { reportId: string; version: number } }) {
-  const [state, action, pending] = useActionState<ProvisionalFormState, FormData>(submitProvisional, null);
+/**
+ * 개인용 2페이지(기본: 본인 계정에 저장)와 전문가용 학생 화면이 같이 쓴다. 전문가용은 submit 에 학생 저장 동작을,
+ * hidden 에 기관·학생·입력 판을, subject 에 학생 이름을 넘긴다(확인 창에 크게 보인다).
+ * idem: 이 화면의 요청 키(두 번 눌러도 한 번만 저장)
+ */
+export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit = submitProvisional, hidden, subject }: {
+  examLabel: string;
+  idem: string;
+  defaults?: ProvisionalValues;
+  update?: { reportId: string; version: number };
+  submit?: (prev: ProvisionalFormState, fd: FormData) => Promise<ProvisionalFormState>;
+  hidden?: Record<string, string>;
+  subject?: string;
+}) {
+  const [state, action, pending] = useActionState<ProvisionalFormState, FormData>(submit, null);
   const d: ProvisionalValues = state?.values ?? defaults;
   const [raw, setRaw] = useState<Record<string, string>>(() => ({
     english: d.english?.toString() ?? "",
@@ -218,6 +230,7 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update }: { ex
 
       <input ref={confirmRef} type="hidden" name="confirm" defaultValue="" />
       <input type="hidden" name="idem" value={idem} />
+      {hidden && Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       {update && (
         <>
           <input type="hidden" name="report_id" value={update.reportId} />
@@ -228,7 +241,7 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update }: { ex
         <p className="sf-confirm-note">저장하기 전에 넣은 점수를 한 번 더 보여 드립니다.</p>
         <div className="sf-acts">
           <button className="btn p" type="button" disabled={pending} onClick={openReview}>
-            {pending ? "저장하는 중" : "가채점 저장하고 예상 위치 보기"}
+            {pending ? "저장하는 중" : subject ? `${subject} 학생 가채점 저장하고 예상 위치 보기` : "가채점 저장하고 예상 위치 보기"}
           </button>
         </div>
       </div>
@@ -239,12 +252,13 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update }: { ex
       <dialog ref={dialogRef} className="sf-dialog" aria-labelledby="pf-dialog-h" onClose={() => setReview(null)}>
         {review && (
           <div className="sf-dialog-in">
-            <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : "이 원점수로 저장할까요?"}</h3>
+            <h3 id="pf-dialog-h">{review.problem ? "입력을 확인해 주세요" : subject ? "이 학생의 원점수로 저장할까요?" : "이 원점수로 저장할까요?"}</h3>
             {review.problem ? (
               <p className="sf-dialog-problem">{review.problem}</p>
             ) : (
               <>
-                <p><b>저장하면 가채점 단계의 입력 1회를 사용합니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
+                {subject && <p className="sf-dialog-subject">{subject}</p>}
+                <p><b>저장하면 {subject ? "이 학생의 " : ""}가채점 단계의 입력 1회를 사용합니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
                 <dl className="sf-dialog-rows">
                   {review.rows.map(([k, v]) => (
                     <div key={k}>

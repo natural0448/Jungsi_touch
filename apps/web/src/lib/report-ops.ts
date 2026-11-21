@@ -408,6 +408,23 @@ export async function settleAnalyses(src: JungsiSource, caller: Caller, report: 
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return report;
   let current = report;
+  // 없는 행과 옛 자료판 행을 한 요청으로 보낸다(2026-11-21 운영 '자료 없음': 둘을 나눠 보내면 서버의 저장 한도 비우기가
+  // 둘째 요청을 저장할 때 첫째 요청에서 막 계산한 행(번호가 작은 강원대 0000002·국민대 새 PK)을 지웠다. 리포트 79판까지 확인).
+  // 한 요청 안의 행은 서버가 지우지 않는다. 함께 보낼 옛 자료판 행이 없으면 예전처럼 없는 행만 보낸다.
+  const missing0 = targets.filter((id) => !current.analyses?.[id]);
+  const stale0 = new Set(current.stale_analysis_ids ?? []);
+  const staleWith = targets.filter((id) => stale0.has(id) && current.analyses?.[id]);
+  if (missing0.length && staleWith.length) {
+    const scope = `${staleWith.join(",")}@${await analysesFingerprint(current, staleWith)}+${missing0.join(",")}`;
+    if (recheckTries("analyses", current, scope, true) < 1) {
+      const base = current;
+      const intent = await stableIntent(base, scope);
+      current = await settleStep(src, caller, base, () => refreshAnalyses(src, caller, base, [...missing0, ...staleWith], intent));
+      markRechecked("analyses", base, current, scope, true);
+      logSettle("analyses_together", { missing: missing0.length, stale: staleWith.length, still_missing: missing0.filter((id) => !current.analyses?.[id]).length });
+    }
+  }
+  // 함께 보낸 요청이 실패했으면(연결 오류 등) 없는 행만 한 번 더 보낸다
   if (targets.some((id) => !current.analyses?.[id])) {
     const base = current;
     current = await settleStep(src, caller, base, () => ensureAnalyses(src, caller, base, targets));

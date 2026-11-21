@@ -4,7 +4,8 @@ import { useActionState, useState } from "react";
 import { CATEGORY } from "@/components/offering-parts";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { GRADE_RUMOR_NOTE, tipLine, tipsByOffering, tipTitle } from "@/lib/pro-tips";
-import { OverallCard, PositionChart, SubjectsSheet } from "../../../../reports/me/report-view";
+import { isProvisionalOverall } from "@/lib/dto";
+import { OverallCard, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../../reports/me/report-view";
 import { PrintButton } from "../../../../reports/me/print/print-button";
 import { exportStudentReport, type PrintState } from "../../../actions";
 
@@ -77,10 +78,21 @@ export function PrintSheet({ fields }: { fields: Record<string, string> }) {
             <div><dt>기관</dt><dd>{w.organization_name}</dd></div>
           </dl>
         </header>
-        <OverallCard a={a} fold={false} />
-        <h2>과목별 결과</h2>
-        <SubjectsSheet a={a} second={false} />
-        <PositionChart a={a} />
+        {isProvisionalOverall(a) ? (
+          // 수능 가채점: 개인용 인쇄본과 같은 추정 범위 표시(표준점수 확정 전이라 환산·판정 없음)
+          <>
+            <ProvisionalOverallCard a={a} />
+            <h2>과목별 예상 성적</h2>
+            <ProvisionalSubjectsSheet a={a} />
+          </>
+        ) : (
+          <>
+            <OverallCard a={a} fold={false} />
+            <h2>과목별 결과</h2>
+            <SubjectsSheet a={a} second={false} />
+            <PositionChart a={a} />
+          </>
+        )}
         <h2>담은 학교 <span className="num">{shortlist.length}</span></h2>
         {shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>
