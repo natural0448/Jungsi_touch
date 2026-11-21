@@ -1,31 +1,14 @@
-import type { AssessmentDto, BandCode, Category, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
+import type { AssessmentDto, OverallResultDto, ReasonDto, StatisticsDto } from "@/lib/dto";
+import { BAND, CATEGORY } from "@/lib/decision-labels";
+import { decisionBasisText } from "@/lib/picked-view";
 import { referenceAdvantage } from "@/lib/reference-advantage";
 import { pctText, seoulDate } from "@/lib/format";
 import { POSITION_NONE_DESC, POSITION_NONE_LABEL, positionNoteOf, positionNoteShort } from "@/lib/position-note";
 
 /* 3·4페이지(와 2페이지 유료 부분)가 같이 쓰는 모집단위 칸. 응답 모양은 assessment·statistics DTO */
 
-/** 학과마다의 지원 판단(assessment.category). 색과 함께 점 모양으로도 구분, 빨강은 '지원 조건 미충족'에만.
- * desc 는 입시 용어에 익숙하지 않은 사용자(수험생·학부모)를 위한 쉬운 풀이 — 기준 점수는 적지 않는다 */
-export const CATEGORY: Record<Category, { cls: string; label: string; desc: string }> = {
-  challenge: { cls: "reach", label: "도전", desc: "지금 점수보다 다소 높아 결과를 장담하기 어렵지만, 지원해 볼 수 있는 범위입니다." },
-  core: { cls: "core", label: "핵심 검토", desc: "올해 적극적으로 검토해 볼 만한 범위입니다." },
-  room: { cls: "safe", label: "여유 후보", desc: "내 점수에 비교적 여유가 있는 범위입니다. 그래도 합격이 보장되는 것은 아닙니다." },
-  outside: { cls: "out", label: "검토 범위 밖", desc: "올해 기준으로는 지원 검토 범위에 들지 않습니다. 지원 자체가 불가능하다는 뜻은 아닙니다." },
-  pending: { cls: "check", label: "판단 보류", desc: "판단에 필요한 자료가 아직 갖춰지지 않아 결론을 내리지 않았습니다." },
-  ineligible: { cls: "inel", label: "지원 조건 미충족", desc: "이 전형이 요구하는 지원 조건(과목·자격)을 충족하지 않습니다." },
-};
-
-/** 7단계 판정(assessment.band). 예상 합격권 폭의 15%·30% 를 경계로 가른다. 색은 기존 세 묶음(여유·핵심·도전)을 그대로 쓴다 */
-export const BAND: Record<BandCode, { cls: string; label: string; desc: string }> = {
-  stable: { cls: "safe", label: "안정", desc: "예상 합격권보다 충분히 앞선 위치입니다. 그래도 합격이 보장되는 것은 아닙니다." },
-  downward: { cls: "safe", label: "하향", desc: "예상 합격권보다 조금 앞선 위치입니다." },
-  target: { cls: "core", label: "적정", desc: "예상 합격권 안에서 앞쪽 절반에 드는 위치입니다." },
-  aspirational: { cls: "core", label: "소신", desc: "예상 합격권 안에서 뒤쪽 절반에 드는 위치입니다." },
-  upward: { cls: "reach", label: "상향", desc: "예상 합격권에서 조금 벗어난 위치입니다." },
-  challenge: { cls: "reach", label: "도전", desc: "예상 합격권에서 꽤 벗어나 결과를 장담하기 어려운 위치입니다." },
-  outside: { cls: "out", label: "불가", desc: "합격선보다 크게 낮은 위치입니다(7단계 중 가장 아래). 지원 자격과는 관계없으며, 지원은 할 수 있습니다." },
-};
+/** 지원가능성 이름·풀이(CATEGORY·BAND)는 lib/decision-labels 에 두고 여기서 다시 내보낸다(2페이지 표·시험과 같은 값) */
+export { BAND, CATEGORY };
 /** 화면에 보일 판정 이름·풀이. 7단계가 오면 그것을, 아니면 기존 category 를 쓴다 */
 export const decisionOf = (a: AssessmentDto) => (a.status === "ready" && a.band && BAND[a.band.code] ? BAND[a.band.code] : CATEGORY[a.category]);
 
@@ -82,6 +65,10 @@ export const scoreOf = (a: AssessmentDto) => a.conversion?.converted_score ?? a.
 /** 지원 판단 칸의 보류 이유. 참고 코드가 판단 이유로 오면 '판단 기준 확인 중'으로 바꿔 보인다 */
 export const decisionReasonCode = (a: AssessmentDto) => (a.reason_code === REFERENCE_CODE ? "reference_decision_pending" : a.reason_code);
 
+/** 판단 근거 한 문장(2페이지 표·인쇄본). 배지(CategoryBadge)와 같은 규칙으로 고른다 — lib/picked-view */
+export const decisionBasis = (a: AssessmentDto, overall?: OverallResultDto | null) =>
+  decisionBasisText(a, overall, (code) => reasonText(code === REFERENCE_CODE ? "reference_decision_pending" : code));
+
 /** 참고 기준 판정을 보일지. 정식 판정이 난 곳(ready)·자격 미충족에는 보이지 않는다 */
 export const referenceBandOf = (a: AssessmentDto) => (a.status !== "ready" && a.status !== "ineligible" && a.reference_band && BAND[a.reference_band.code] ? a.reference_band : null);
 /**
@@ -121,7 +108,8 @@ export function CategoryLegend() {
 
 export type Cell = AssessmentDto | null | "need";
 
-export function ScoreCell({ a }: { a: Cell }) {
+/** plain: '참고' 꼬리표를 달지 않는다(2페이지 핵심 지원 학교 표, 대표님 요청 2026-11-21 — 그 학교 환산 방식으로 계산한 점수다) */
+export function ScoreCell({ a, plain = false }: { a: Cell; plain?: boolean }) {
   if (a === "need") return <span className="need">성적 입력 필요</span>;
   if (!a) return <span className="need">분석 대기</span>;
   const score = scoreOf(a);
@@ -129,7 +117,7 @@ export function ScoreCell({ a }: { a: Cell }) {
   return (
     <span className="score">
       <b className="num">{score}</b>
-      {isReferenceScore(a) && <small className="ref">참고</small>}
+      {!plain && isReferenceScore(a) && <small className="ref">참고</small>}
       {a.converted_percentile && <small>상위 {pctText(a.converted_percentile)}%</small>}
     </span>
   );

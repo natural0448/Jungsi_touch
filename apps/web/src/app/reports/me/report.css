@@ -132,11 +132,25 @@
 .et .rp-abs{margin:0;display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--ink-2)}
 .et .rp-abs b{color:var(--ink)}
 .et .rp-abs small{color:var(--muted)}
-.et .rp-short{min-width:560px}
-.et .rp-short tbody th{font-weight:800;color:var(--ink);background:none}
-.et .rp-short tbody th small{font-weight:600;color:var(--ink-2)}
-.et .rp-short .stale-tag{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:11px;font-weight:700;color:var(--muted)}
-.et .rp-short .why{white-space:normal;min-width:220px;color:var(--ink-2)}
+.et .rp-short{min-width:720px;width:100%;table-layout:fixed}
+.et .rp-short col.c-name{width:22%}
+.et .rp-short col.c-score{width:13%}
+.et .rp-short col.c-st{width:12%}
+.et .rp-short col.c-adv{width:17%}
+.et .rp-short.names{min-width:0;table-layout:auto}
+.et .rp-short tbody th{font-weight:800;color:var(--ink);background:none;white-space:normal;word-break:keep-all}
+/* 모집단위명은 학교 이름 아래 줄에 본문 크기로(대표님 요청 2026-11-21, 글자 기준 본문15·보조13·배지12) */
+.et .rp-short tbody th .uni{display:block}
+.et .rp-short tbody th .dept{display:block;margin-top:2px;font-size:15px;font-weight:700;color:var(--deep);line-height:1.4}
+.et .rp-short .stale-tag{display:inline-block;margin-top:4px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:12px;font-weight:700;color:var(--muted)}
+.et .rp-short .why{white-space:normal;min-width:240px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+/* 가·나·다군 묶음 */
+.et .rp-picked{display:grid;gap:14px}
+.et .rp-group{display:grid;gap:6px}
+.et .rp-group h3{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:900;color:var(--deep)}
+.et .rp-group h3 small{font-size:13px;font-weight:700;color:var(--muted)}
+.et .rp-group-empty{margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
+.et .rp-picked.print .rp-group{break-inside:avoid}
 .et .rp-empty{border:1.5px dashed var(--jt-field);border-radius:var(--r-card);padding:18px 20px;background:var(--sub)}
 .et .rp-empty p{margin:0 0 10px;font-size:13px;color:var(--ink-2)}
 .et .rp-empty .acts{display:flex;gap:8px;flex-wrap:wrap}

@@ -116,7 +116,7 @@ async function PastPicked({ src, caller, report }: { src: JungsiSource; caller: 
   return (
     <section className="rp-sec" aria-label="그때 담은 학교">
       <h3>그때 담은 학교 <span className="num">{items.length}</span></h3>
-      <PickedTable items={items} />
+      <PickedTable items={items} overall={report.overall?.overall} />
     </section>
   );
 }

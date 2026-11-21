@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { AdvantageCell, plainReason, reasonText, ScoreCell, StatusCell } from "@/components/offering-parts";
-import type { OverallAnalysisDto } from "@/lib/dto";
+import { AdvantageCell, decisionBasis, ScoreCell, StatusCell } from "@/components/offering-parts";
+import type { OverallAnalysisDto, OverallResultDto } from "@/lib/dto";
+import { groupPicked, PICK_GROUP_LIMIT } from "@/lib/picked-view";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import { pctText } from "@/lib/format";
@@ -586,50 +587,89 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
   );
 }
 
-/** 핵심 지원 학교 표(report.shortlist + report.analyses). 성적을 바꾼 뒤 아직 다시 확인하지 않은 항목은 표시한다 */
-export function PickedTable({ items, print = false }: { items: PickedItem[]; print?: boolean }) {
+/**
+ * 핵심 지원 학교 표(report.shortlist + report.analyses). 가·나·다군으로 나눠 보인다(대표님 요청 2026-11-21).
+ * 지원가능성·환산 유불리·판단 근거는 3·4페이지와 같은 부품·규칙이다 — 전체 위치(overall)를 넘겨야 참고 유불리와
+ * 합격선 대비 위치(전체 위치로 견줌)가 같게 나온다. 성적을 바꾼 뒤 아직 다시 확인하지 않은 항목은 표시한다.
+ * pending: 수능 가채점 리포트(3·4페이지와 같이 가채점 판정 준비 중) — 담은 학교 이름만 군별로 보이고 점수·판정 칸은 두지 않는다
+ */
+export function PickedTable({ items, overall, print = false, pending = false }: { items: PickedItem[]; overall?: OverallResultDto | null; print?: boolean; pending?: boolean }) {
+  const { groups, other } = groupPicked(items);
+  const sections = [
+    ...groups.map((g) => ({ key: g.group, title: `${g.group}군`, items: g.items, count: true })),
+    ...(other.length ? [{ key: "other", title: "모집군 확인 필요", items: other, count: false }] : []),
+  ];
   return (
-    <div className="tblwrap">
-      <table className="tb rp-short">
-        <thead>
-          <tr>
-            <th scope="col">대학 · 모집단위</th>
-            <th scope="col" className="r">내 환산점수</th>
-            <th scope="col">지원가능성</th>
-            <th scope="col" className="r">환산 유불리</th>
-            {print && <th scope="col">판단 근거</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((s) => {
-            const a = s.assessment;
-            // 판단 구간 같은 내부 기준 수치는 인쇄본에도 적지 않는다(최종 관리자 지시 2026-10-07)
-            const why = a && a.status === "ready" ? (a.recommendation_reasons?.length ? plainReason(a.recommendation_reasons[0]) : null) : null;
-            return (
-              <tr key={s.offering_id}>
-                <th scope="row">
-                  {s.offering ? s.offering.university_name : "지금 목록에서 찾을 수 없는 모집단위"}
-                  {s.offering && <small> {s.offering.department} · {s.offering.group}군</small>}
-                  {s.entry.assessment_status === "needs_revalidation" && <span className="stale-tag">다시 확인 필요</span>}
-                </th>
-                <td className="r"><ScoreCell a={a} /></td>
-                <td><StatusCell a={a} /></td>
-                <td className="r"><AdvantageCell a={a} /></td>
-                {print && (
-                  <td className="why">
-                    {!a ? "─" : a.status !== "ready" ? reasonText(a.reason_code) : why ?? "─"}
-                  </td>
+    <div className={print ? "rp-picked print" : "rp-picked"}>
+      {sections.map((sec) => (
+        <section key={sec.key} className="rp-group" aria-label={sec.title}>
+          <h3>
+            {sec.title}
+            {sec.count && <small className="num">{sec.items.length}/{PICK_GROUP_LIMIT}</small>}
+          </h3>
+          {sec.items.length === 0 ? (
+            <p className="rp-group-empty">아직 담은 학교가 없습니다.</p>
+          ) : (
+            <div className="tblwrap">
+              <table className={pending ? "tb rp-short names" : "tb rp-short"}>
+                {/* 군마다 표가 따로라 칸 너비를 고정해 세 표의 칸을 맞춘다 */}
+                {!pending && (
+                  <colgroup>
+                    <col className="c-name" />
+                    <col className="c-score" />
+                    <col className="c-st" />
+                    <col className="c-adv" />
+                    <col />
+                  </colgroup>
                 )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p className="rp-short-note">
-        내 환산점수는 그 대학이 정한 과목 비율대로 다시 계산한 점수(대학마다 만점이 달라 서로 비교하지 않음),
-        환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 얼마나 오르내리는지입니다(%p: 상위 %가 몇 %만큼 바뀌는지, 예 +0.5%p는 상위 5.6%→5.1%).
-        지원 가부는 지원가능성 판단을 보세요 — 각 학과를 누르면 가능성 보기에서 자세한 설명이 열립니다.
-      </p>
+                <thead>
+                  <tr>
+                    <th scope="col">대학 · 모집단위</th>
+                    {!pending && (
+                      <>
+                        <th scope="col" className="r">내 환산점수</th>
+                        <th scope="col">지원가능성</th>
+                        <th scope="col" className="r">환산 유불리</th>
+                        <th scope="col">판단 근거</th>
+                      </>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sec.items.map((s) => {
+                    const a = s.assessment;
+                    return (
+                      <tr key={s.offering_id}>
+                        <th scope="row">
+                          <span className="uni">{s.offering ? s.offering.university_name : "지금 목록에서 찾을 수 없는 모집단위"}</span>
+                          {s.offering && <span className="dept">{s.offering.department}</span>}
+                          {!pending && s.entry.assessment_status === "needs_revalidation" && <span className="stale-tag">다시 확인 필요</span>}
+                        </th>
+                        {!pending && (
+                          <>
+                            <td className="r"><ScoreCell a={a} plain /></td>
+                            <td><StatusCell a={a} overall={overall} /></td>
+                            <td className="r"><AdvantageCell a={a} overall={overall} /></td>
+                            {/* 판단 구간 같은 내부 기준 수치는 적지 않는다(최종 관리자 지시 2026-10-07) */}
+                            <td className="why">{a ? decisionBasis(a, overall) : "─"}</td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ))}
+      {!pending && (
+        <p className="rp-short-note">
+          내 환산점수는 그 대학이 정한 과목 비율대로 다시 계산한 점수(대학마다 만점이 달라 서로 비교하지 않음),
+          환산 유불리는 전체 성적 기준과 견줘 그 대학 계산 방식에서 내 위치가 얼마나 오르내리는지입니다(%p: 상위 %가 몇 %만큼 바뀌는지, 예 +0.5%p는 상위 5.6%→5.1%).
+          지원가능성은 안정 → 하향 → 적정 → 소신 → 상향 → 도전 → 불가 순서이며 합격 확률이 아닙니다. 학과마다 자세한 설명은 가능성 보기에서 그 학과를 펼치면 볼 수 있습니다.
+        </p>
+      )}
     </div>
   );
 }

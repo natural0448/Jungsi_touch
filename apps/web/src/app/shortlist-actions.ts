@@ -5,6 +5,7 @@ import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { MAYBE_SAVED, connectionText } from "@/lib/connection-text";
 import { loadMine } from "@/lib/report-ops";
 import { setPick } from "@/lib/shortlist";
+import { PICK_GROUP_LIMIT } from "@/lib/picked-view";
 
 export type PickResult = { error: string | null };
 
@@ -24,8 +25,8 @@ export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickR
     const report = await loadMine(src, caller);
     if (!report) return { error: `${failed}. 내 성적 리포트를 먼저 열어 주세요.` };
     const st = await setPick(src, caller, report, id, selected);
-    // 같은 모집군(가·나·다)에는 4개까지만 담는다(서버 판단, 2026-11-18). 다시 눌러도 같으므로 무엇을 하면 되는지 알린다
-    if (st.kind === "failed" && (st.code === "shortlist_limit_exceeded" || st.code === "shortlist_group_limit_exceeded")) return { error: "같은 모집군에는 4개까지 담을 수 있습니다. 담은 곳 하나를 빼고 다시 담아 주세요." };
+    // 같은 모집군(가·나·다)에는 5개까지만 담는다(서버 판단, 2026-11-18 4개 → 2026-11-21 대표님 요청 5개). 다시 눌러도 같으므로 무엇을 하면 되는지 알린다
+    if (st.kind === "failed" && (st.code === "shortlist_limit_exceeded" || st.code === "shortlist_group_limit_exceeded")) return { error: `같은 모집군에는 ${PICK_GROUP_LIMIT}개까지 담을 수 있습니다. 담은 곳 하나를 빼고 다시 담아 주세요.` };
     if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (문의 번호 ${st.code})` };
     if (st.kind === "score_required") return { error: `${failed}. 성적 확인이 끝난 뒤 담을 수 있습니다.` };
     if (st.kind === "none") return { error: `${failed}. 리포트를 찾지 못했습니다.` };

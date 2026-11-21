@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { AssessmentDto, ComboPositionDto, OverallAnalysisDto, ProfileDto, ProvisionalScoresInput, ReportDto, ScoresInput, ShortlistEntryDto, SubjectResultDto } from "@/lib/dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
+import { PICK_GROUP_LIMIT } from "@/lib/picked-view";
 import { absoluteGrade, CSAT_EXAM, EXAM, MOCK_EXAM, INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, SECOND_LANGUAGE_SUBJECTS } from "@/lib/exam";
 
 /*
@@ -295,11 +296,11 @@ export function setPick(reportId: string, offeringId: string, selected: boolean,
     if (!CATALOG.some((o) => o.offering_id === offeringId)) return "offering_not_found";
     const old = r.shortlist?.[offeringId];
     if (old && old.selected === selected) return r; // 같은 상태 쓰기
-    // 서버와 같은 한도: 같은 모집군에 4개까지(이미 더 담긴 것은 그대로, 빼기는 언제나)
+    // 서버와 같은 한도: 같은 모집군에 5개까지(2026-11-21, 전에는 4개. 이미 더 담긴 것은 그대로, 빼기는 언제나)
     if (selected) {
       const group = CATALOG.find((o) => o.offering_id === offeringId)?.group;
       const same = Object.entries(r.shortlist ?? {}).filter(([id, e]) => id !== offeringId && e.selected && CATALOG.find((o) => o.offering_id === id)?.group === group).length;
-      if (same >= 4) return "shortlist_limit_exceeded";
+      if (same >= PICK_GROUP_LIMIT) return "shortlist_limit_exceeded";
     }
     // 담는 곳은 화면에서 분석을 본 모집행이다. 합성은 그 분석을 렌더링 중에 저장하지 못하므로 여기서 함께 남긴다
     const a = analysesFor(p.scores, [offeringId])[offeringId];

@@ -43,9 +43,18 @@ export default async function Page() {
   try {
     const status = await src.readScoreInputStatus(caller, EXAM.exam_id);
     const reportId = status.current_report_id;
-    snap = reportId ? await src.exportReport(caller, reportId) : null;
-    // 고정된 revision 의 shortlist·analyses 를 그대로 쓴다. 이름만 offering.read 로 붙인다
-    if (snap) shortlist = await readPicks(src, caller, snap.report);
+    // 리포트 읽기(report.read)도 함께 받는다: 참고 기준 7단계·지난 합격선 같은 판정 표시는 서버가 읽기 응답에만 붙이고
+    // 인쇄용 고정본(report.export)에는 없다. 같은 판일 때만 그 분석으로 바꿔 2페이지 화면과 같은 판정을 인쇄한다(2026-11-21)
+    const [exported, read] = reportId
+      ? await Promise.all([src.exportReport(caller, reportId), src.readReport(caller, reportId).catch(() => null)])
+      : [null, null];
+    snap = exported;
+    if (snap) {
+      const same = !!read && read.report_id === snap.report.report_id && read.report_version === snap.report.report_version;
+      const base = same && read ? { ...snap.report, analyses: read.analyses } : snap.report;
+      // 고정된 revision 의 shortlist 를 그대로 쓴다. 이름만 offering.read 로 붙인다
+      shortlist = await readPicks(src, caller, base);
+    }
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (!(e instanceof AccessDenied)) throw e;
@@ -108,11 +117,14 @@ export default async function Page() {
 
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
         {isProvisionalOverall(a) ? (
-          <p className="rp-foot">가채점 판정 준비 중 — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다.</p>
+          <>
+            <p className="rp-foot">가채점 판정 준비 중 — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다.</p>
+            {shortlist.length > 0 && <PickedTable items={shortlist} pending print />}
+          </>
         ) : shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>
         ) : (
-          <PickedTable items={shortlist} print />
+          <PickedTable items={shortlist} overall={a.overall} print />
         )}
         <footer className="pr-foot">
           지원가능성은 합격 확률이 아닙니다. 대학마다 만점과 반영 방식이 달라 다른 대학의 환산점수와 크기를 비교할 수 없습니다. 모의지원 서비스에서 모집군·지원 조건·모집인원 변경을 다시 확인하세요.

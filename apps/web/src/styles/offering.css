@@ -58,7 +58,7 @@
 .et .tray .names{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
 .et .tray .names span{padding:3px 9px;border-radius:12px;background:var(--sub);font-size:12px;color:var(--ink-2)}
 .et .tray .names .none{background:none;color:var(--muted);padding:3px 0}
-/* 군별 담은 수(2026-11-22): 가군 2/4 · 나군 1/4 · 다군 0/4 · 전체 3/12. 다 찬 군은 진하게 */
+/* 군별 담은 수(2026-11-22): 가군 2/5 · 나군 1/5 · 다군 0/5 · 전체 3/15(한도 2026-11-21). 다 찬 군은 진하게 */
 .et .tray .quota{display:flex;gap:4px 10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
 .et .tray .quota span+span::before{content:"·";margin-right:10px;color:var(--muted)}
 .et .tray .quota b{color:var(--ink);font-weight:800}
