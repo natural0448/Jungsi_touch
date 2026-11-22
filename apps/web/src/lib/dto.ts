@@ -318,6 +318,11 @@ export interface ReferenceBandDto {
   upper_code?: BandCode;
   upper_label?: string;
   source?: string;
+  /**
+   * 개인용 4페이지 가채점 판정 행만(서버 dep_r29b, 2026-11-23): 이 대학 방식 환산점수(소수 둘째 자리 문자열).
+   * central = 가운데 추정 점수(구간 점수·계산 불가면 null), low·high = 과목 표준점수 범위 끝 조합의 최저·최고(가운데 포함)
+   */
+  school_score?: { central: string | null; low: string; high: string };
   /** 전문가용 가채점 판정 행만(서버 dep_pro_r27): 중앙 추정 점수의 단계 안 위치. 이 대학 환산점수 단위 문자열 */
   position?: { score: string; better_gap: string | null; worse_gap: string | null; share_pct: number | null };
 }

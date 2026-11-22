@@ -3,7 +3,16 @@ import type { OfferingDto, ReportDto } from "@/lib/dto";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
 import { PROVISIONAL_JUDGED_TEXT, PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
 import { CsatBadge } from "@/components/csat-badge";
+import type { ReferenceBandDto } from "@/lib/dto";
 import { ConditionsBlock, Detail } from "./parts";
+
+/** 펼친 상세의 가채점 환산점수 한 줄(서버 dep_r29b) */
+function csatScoreLine(band: ReferenceBandDto): string | null {
+  const s = band.school_score;
+  if (!s) return null;
+  const range = s.low === s.high ? s.low : `${s.low}~${s.high}`;
+  return s.central !== null ? `내 환산점수(이 대학 방식) 가운데 추정 ${s.central}, 범위 ${range}.` : `내 환산점수(이 대학 방식) ${range}.`;
+}
 
 /*
   4페이지·2페이지 펼친 상세에서 '내 리포트'로 그리는 카드. 서버 화면과 브라우저 화면(전문가용 인쇄 print-sheet → report-view)이
@@ -22,7 +31,7 @@ export function cellOf(report: ReportDto | null, id: string): Cell {
 export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
   if (report && provisionalOnly(report)) {
     const band = report.provisional_bands?.[o.offering_id];
-    if (band) return <p className="ps-prov-detail"><b>수능 가채점 판정</b> <CsatBadge band={band} /> — {PROVISIONAL_JUDGED_TEXT}</p>;
+    if (band) return <p className="ps-prov-detail"><b>수능 가채점 판정</b> <CsatBadge band={band} /> {csatScoreLine(band)} — {PROVISIONAL_JUDGED_TEXT}</p>;
     return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
   }
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;

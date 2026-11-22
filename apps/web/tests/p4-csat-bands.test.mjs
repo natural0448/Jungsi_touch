@@ -40,7 +40,7 @@ test("provisionalBands: 요청한 모집단위의 source g 판정만, 쓴 뒤 �
       calls.push({ id, ver, ids, key });
       return { ok: true, value: { ...prov(ver + 1), candidates: { reference_university_groups: [
         { university_id: "u", university_name: "u", offerings: [
-          row("2027:1", g("target")), row("2027:2", g("stable", { upper_code: "target" })),
+          row("2027:1", g("target")), row("2027:2", g("stable", { upper_code: "target", school_score: { central: null, low: "633.75", high: "663.75" } })),
           row("2027:3", { ...g("target"), source: "a" }), row("2027:9", g("outside")), row("2027:4", { basis: "reference_percentile", code: "target" }),
         ] },
       ] } } };
@@ -49,6 +49,7 @@ test("provisionalBands: 요청한 모집단위의 source g 판정만, 쓴 뒤 �
   const got = await provisionalBands(globalThis.__reportOpsFixture.src, caller, prov(), ["2027:2", "2027:1", "2027:3", "2027:4", "2027:2"]);
   assert.deepEqual(Object.keys(got.bands).sort(), ["2027:1", "2027:2"]);
   assert.equal(got.bands["2027:2"].upper_code, "target");
+  assert.deepEqual(got.bands["2027:2"].school_score, { central: null, low: "633.75", high: "663.75" });
   assert.equal(got.version, 4);
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0].ids, ["2027:1", "2027:2", "2027:3", "2027:4"]);
