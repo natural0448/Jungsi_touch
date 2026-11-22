@@ -74,7 +74,8 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
         reports = (await src.listReports(caller, svc.org_id, studentId)).items;
         // 고른 리포트가 없으면 지금 단계의 현재 성적 리포트, 없으면 가장 최근 리포트(전환 뒤 9월 리포트는 지난 기록으로 남는다)
         const want = reportParam && validId(reportParam) ? reportParam : (status?.current_report_id ?? reports[0]?.report_id);
-        shown = want ? (reports.find((r) => r.report_id === want) ?? (await src.readReport(caller, svc.org_id, studentId, want))) : null;
+        // 담은 학교(shortlist)는 리포트 읽기(pro.report.read)에만 지금 값이 붙는다. 목록 항목은 저장 당시 값이라 담기가 보이지 않았다(2026-11-23)
+        shown = want ? ((await src.readReport(caller, svc.org_id, studentId, want)) ?? reports.find((r) => r.report_id === want) ?? null) : null;
       }
     }
   } catch (e) {

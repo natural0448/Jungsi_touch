@@ -33,6 +33,25 @@ export function counselYearOf(r: Row): CounselYear {
 export async function counselYears(
   items: readonly { offering_id: string; university_name: string }[],
   readyOf: () => Promise<Ready | null> = displayReady,
+  budgetMs = COUNSEL_YEARS_BUDGET_MS,
+): Promise<Record<string, CounselYear[] | null>> {
+  // 2026-11-23 운영: 담은 학교가 생기자 학생 화면이 100초 넘게 끝나지 않았다(정리본 읽기가 응답하지 않음 → '담는 중…'에서 멈춤).
+  // 정리본 읽기는 시간 상한 안에서만 기다리고, 넘으면 지난 학년도 문장 없이 화면을 그린다
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<Record<string, CounselYear[] | null>>((resolve) => {
+    timer = setTimeout(() => resolve({}), budgetMs);
+  });
+  try {
+    return await Promise.race([readYears(items, readyOf), late]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+/** 상담 자료(1페이지 정리본) 읽기 시간 상한 */
+export const COUNSEL_YEARS_BUDGET_MS = 2500;
+async function readYears(
+  items: readonly { offering_id: string; university_name: string }[],
+  readyOf: () => Promise<Ready | null>,
 ): Promise<Record<string, CounselYear[] | null>> {
   const ok = items.filter((i) => ID.test(i.offering_id) && typeof i.university_name === "string" && i.university_name.length > 0 && i.university_name.length <= 100).slice(0, MAX);
   if (ok.length === 0) return {};

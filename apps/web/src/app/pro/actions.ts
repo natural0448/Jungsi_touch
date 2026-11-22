@@ -235,7 +235,17 @@ export async function submitStudentProvisional(prev: ProvisionalFormState, fd: F
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
 }
 
-export type ProActionState = { error: string } | null;
+export type ProActionState = { error: string; done?: undefined } | { done: string; error?: undefined } | null;
+
+/**
+ * 담기·빼기 성공 뒤(2026-11-23 대표님 지적: '담는 중…'에서 멈춘 채 리포트에 바로 보이지 않았다).
+ * 전에는 학생 화면 전체로 다시 이동해 그 화면(유리한 대학 찾기 수백 줄·상담 자료)을 다 그릴 때까지 버튼이 '담는 중'이었다.
+ * 이제 버튼은 바로 '담음'으로 바뀌고, 화면 새로 그리기는 버튼 쪽에서 뒤에서 한다. 스크립트 없는 양식 제출은 예전처럼 이동한다
+ */
+async function doneOrBack(path: string, done: string): Promise<ProActionState> {
+  if ((await headers()).has("next-action")) return { done };
+  redirect(`/jeongsi${path}`);
+}
 
 /** 유리한 대학 찾기: 지금 학생의 최근 성적(profile)으로 pro.candidates. 결과는 새 리포트 판에 남는다 */
 export async function findCandidates(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
@@ -266,7 +276,7 @@ export async function addStudentBookmark(_prev: ProActionState, fd: FormData): P
     if (t) return { error: t };
     throw e;
   }
-  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+  return doneOrBack(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`, "담음");
 }
 
 /** 담은 학교 빼기(2026-11-13, pro.bookmark.remove). 서버는 지우지 않고 뺀 기록을 쌓는다. 이미 빠졌으면 그대로 돌아간다 */
@@ -282,7 +292,7 @@ export async function removeStudentBookmark(_prev: ProActionState, fd: FormData)
     if (t) return { error: t };
     throw e;
   }
-  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+  return doneOrBack(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`, "뺌");
 }
 
 export type PrintState = { ok: true; data: ProPrintDto } | { ok: false; error: string } | null;
