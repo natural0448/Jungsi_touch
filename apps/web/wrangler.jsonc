@@ -46,7 +46,7 @@
     // 화면이 요청마다 지금 시각과 비교해 고르므로(lib/exam.ts csatOpen) 전환 전에 배포해도 그 시각까지는 9월 화면 그대로다.
     // JUNGSI_EXAM_ID·JUNGSI_PACK_VERSION = 수능 가채점(전환 뒤 지금 시험), JUNGSI_PAST_* = 9월 모의평가(전환 전 지금 시험, 뒤에는 지난 기록)
     "JUNGSI_EXAM_ID": "2027-csat-provisional",
-    "JUNGSI_PACK_VERSION": "20261121.csat-provisional-v51.v1",
+    "JUNGSI_PACK_VERSION": "20261122.csat-provisional-v52.v1",
     "JUNGSI_PAST_EXAM_ID": "2027-september-mock",
     "JUNGSI_PAST_PACK_VERSION": "20260930.v1",
     "JUNGSI_CSAT_OPENS_AT": "2026-11-21T12:00:00Z",
