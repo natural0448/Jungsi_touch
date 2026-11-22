@@ -318,6 +318,8 @@ export interface ReferenceBandDto {
   upper_code?: BandCode;
   upper_label?: string;
   source?: string;
+  /** 전문가용 가채점 판정 행만(서버 dep_pro_r27): 중앙 추정 점수의 단계 안 위치. 이 대학 환산점수 단위 문자열 */
+  position?: { score: string; better_gap: string | null; worse_gap: string | null; share_pct: number | null };
 }
 
 /** candidates.reference_threshold_summary(dep_r15). complete=false 면 서버가 이번 요청에서 일부를 미뤘다(deferred) */

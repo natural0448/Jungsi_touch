@@ -25,6 +25,9 @@ import { findCandidates, submitStudentProvisional, submitStudentScores } from ".
 import { ActionButton } from "../../action-button";
 import { CandidatesView, PickedList } from "../../candidates-view";
 import { ProfileView } from "../../profile-view";
+import { ChoiceGuideView, CounselPicked, CsatCandidates, guideOf } from "../../counsel-view";
+import { counselSchools, csatRows, offeringIndex, pickedIds } from "@/lib/pro-counsel-view";
+import { counselYears } from "@/lib/pro-counsel-data";
 import { StudentForm } from "../../student-form";
 import "../../../reports/me/report.css";
 import "../../pro.css";
@@ -98,6 +101,17 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   const tagOf = (r: { report_id: string; revision_id: number }) =>
     status && r.report_id === status.current_report_id && r.revision_id === curRev ? (status.correction_used > 0 && status.correction_used >= status.correction_granted ? "정정 입력 횟수 소진" : "현재 성적") : null;
   // 담은 학교의 이름은 같은 판의 후보 목록에서 찾는다(별도 조회 없음)
+  // 가채점 학교별 판정(서버 dep_pro_r27, source g). 없으면 빈 목록 → '가채점 판정 준비 중'
+  const csat = provisional ? csatRows(shown?.published_result.candidates) : [];
+  const pickedList = shown ? pickedIds(shown.published_result.shortlist) : [];
+  const known = offeringIndex(shown?.published_result.candidates);
+  // 상담 팁의 지난 학년도 문장(1페이지 정리본, 서비스 API 를 부르지 않는다). 읽지 못하면 그 문장만 빠진다
+  const years = shown && pickedList.length
+    ? await counselYears(pickedList.flatMap((id) => (known.get(id) ? [{ offering_id: id, university_name: known.get(id)!.university_name }] : []))).catch(() => ({}))
+    : {};
+  const counsel = shown ? counselSchools(shown.published_result, provisional, pickedList, years) : [];
+  const guide = guideOf(counsel);
+  const printHref = shown ? `/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}` : "";
   const names = new Map(
     [...(shown?.published_result.candidates?.basic_university_groups.flatMap((g) => g.offerings) ?? []), ...(shown?.published_result.candidates?.wildcards ?? [])].map((it) => [it.offering.offering_id, it.offering]),
   );
@@ -206,19 +220,38 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
                 <PositionChart a={a} />
               </>
             )}
-                        <div className="pro-sechd">
-              <Link className="btn" href={`/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}`}>
-                상담 리포트 인쇄·PDF
-              </Link>
+            {/* 학생용(지금 인쇄 그대로)·선생님용(학교마다 상담 팁·최종 3개 선택 가이드, 2026-11-22 대표님 결정) */}
+            <div className="pro-sechd">
+              <Link className="btn" href={printHref}>학생용 리포트 인쇄·PDF</Link>
+              <Link className="btn" href={`${printHref}&view=teacher`}>선생님용 리포트 인쇄·PDF</Link>
             </div>
           </section>
         )}
 
         {shown && a && provisional && (
           <section className="pro-sec" aria-labelledby="cand-h">
-            <h2 id="cand-h">유리한 대학 찾기</h2>
-            {/* 가채점 성적은 표준점수 확정 전이라 학교별 환산·판정을 하지 않는다(서버도 대학 분석을 막는다). 개인용과 같은 말 */}
-            <p className="pro-note"><b>가채점 판정 준비 중</b> — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다. 담아 둔 학교는 그대로 남아 있습니다.</p>
+            <div className="pro-sechd">
+              <h2 id="cand-h">유리한 대학 찾기 <small className="pro-note">수능 가채점 기준</small></h2>
+              {/* 가채점 학교별 7단계(서버 dep_pro_r27). 판정이 없을 때만 찾기 버튼 — 서버가 아직 못 내면 409 로 돌아와 아래 문구가 남는다 */}
+              {svc.role === "teacher" && !student.archived && csat.length === 0 && proCsatEnabled() && (
+                <ActionButton
+                  act={findCandidates}
+                  primary
+                  label="이 학생에게 유리한 대학 찾기"
+                  busy="찾는 중…"
+                  fields={{ org_id: svc.org_id, student_id: student.student_id, profile_id: shown.profile_id, profile_version: shown.profile_id, idem: crypto.randomUUID() }}
+                />
+              )}
+            </div>
+            {csat.length > 0 ? (
+              <CsatCandidates
+                rows={csat}
+                shortlist={shown.published_result.shortlist ?? {}}
+                fields={svc.role === "teacher" && !student.archived ? { org_id: svc.org_id, student_id: student.student_id, report_id: shown.report_id } : null}
+              />
+            ) : (
+              <p className="pro-note"><b>가채점 판정 준비 중</b> — 가채점 성적으로 학교별 판정을 아직 만들지 못했습니다. {svc.role === "teacher" && !student.archived ? "위 버튼으로 한 번 찾아 주세요. 그래도 안 되면 잠시 뒤 다시 열어 주세요." : "담당 교사가 찾으면 여기에 보입니다."} 담아 둔 학교는 그대로 남아 있습니다.</p>
+            )}
           </section>
         )}
 
@@ -255,7 +288,21 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           </section>
         )}
 
-        {shown && (
+        {shown && guide && (
+          <section className="pro-sec" aria-labelledby="guide-h">
+            <h2 id="guide-h">최종 3개 선택 가이드 <small className="pro-note">가·나·다군 하나씩 고를 때</small></h2>
+            <ChoiceGuideView g={guide} />
+          </section>
+        )}
+
+        {shown && provisional && (
+          <section className="pro-sec" aria-labelledby="picked-h">
+            <h2 id="picked-h">담은 학교 <small className="pro-note">줄 아래 &lsquo;상담 팁&rsquo;을 펼치면 학교별 안내가 보입니다</small></h2>
+            <CounselPicked schools={counsel} missing={pickedList.filter((id) => !known.has(id))} fields={svc.role === "teacher" && !student.archived ? { org_id: svc.org_id, student_id: student.student_id, report_id: shown.report_id } : null} />
+          </section>
+        )}
+
+        {shown && !provisional && (
           <section className="pro-sec" aria-labelledby="picked-h">
             <h2 id="picked-h">담은 학교</h2>
             <PickedList shortlist={shown.published_result.shortlist ?? {}} analyses={shown.published_result.analyses ?? {}} names={names} reasons={shown.counseling_reasons ?? []} fields={svc.role === "teacher" && !student.archived ? { org_id: svc.org_id, student_id: student.student_id, report_id: shown.report_id } : null} />

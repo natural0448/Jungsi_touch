@@ -89,12 +89,13 @@ test("before the cutover time nothing is sent even when switched on", async () =
   assert.equal(f.calls.length, 0);
 });
 
-test("raw scores go to that student's pro.score.create (stage provisional), then overall only", async () => {
+// 2026-11-22 대표님 결정: 가채점도 저장 때 학교별 7단계 대학 찾기를 자동 1회(서버 dep_pro_r27). 같은 학생·같은 성적으로만
+test("raw scores go to that student's pro.score.create (stage provisional), then overall, then candidates once", async () => {
   const f = fake();
   await withEnv({ ...CSAT, ...OPEN, JUNGSI_PRO_CSAT_ENABLED: "1" }, async () => {
     await assert.rejects(actions.submitStudentProvisional(null, form()), (e) => e.message === "REDIRECT" && e.path === "/pro/students/invented-student?org=invented-org");
   });
-  assert.deepEqual(f.calls.map((c) => c[0]), ["createScore", "analyzeOverall"]);
+  assert.deepEqual(f.calls.map((c) => c[0]), ["createScore", "analyzeOverall", "candidates"]);
   const [, , org, student, body, key] = f.calls[0];
   assert.equal(org, "invented-org");
   assert.equal(student, "invented-student");
@@ -116,6 +117,8 @@ test("raw scores go to that student's pro.score.create (stage provisional), then
   });
   const [, , o2, s2, profileId, version, key2] = f.calls[1];
   assert.deepEqual([o2, s2, profileId, version, key2], ["invented-org", "invented-student", "invented-profile", "invented-profile", "00000000-0000-4000-8000-000000000001:overall"]);
+  const [, , o3, s3, p3, v3, key3] = f.calls[2];
+  assert.deepEqual([o3, s3, p3, v3, key3], ["invented-org", "invented-student", "invented-profile", "invented-profile", "00000000-0000-4000-8000-000000000001:candidates"]);
 });
 
 test("form problems and a missing confirmation never reach the server", async () => {
@@ -147,5 +150,6 @@ test("student page wires the provisional form only to the student save action be
   const acts = readFileSync(new URL("../src/app/pro/actions.ts", import.meta.url), "utf8");
   const body = acts.slice(acts.indexOf("export async function submitStudentProvisional"), acts.indexOf("export type ProActionState"));
   assert.doesNotMatch(body, /createScoreProfile|\bsource\(\)/);
-  assert.doesNotMatch(body, /\.candidates\(/);
+  // 대학 찾기는 전문가용 pro.candidates(proSource)로 이 학생 성적만(개인용 source 를 쓰지 않는다)
+  assert.match(body, /src\.candidates\(caller, orgId, studentId, p\.profile_id/);
 });

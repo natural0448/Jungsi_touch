@@ -181,7 +181,7 @@ const PROVISIONAL_MESSAGE: Record<string, string> = {
 /**
  * 전문가용 학생 수능 가채점 저장(2026-11-21 대표님 결정: 오픈 때 개인용과 함께). 원점수는 개인용과 같은 형식으로
  * 그 학생의 pro.score.create(stage provisional) → pro.overall.analyze 로 저장한다. 교사 본인 계정(개인용 경로)에는
- * 절대 저장하지 않는다. 학생×가채점 단계 입력 1회 + 정정 1회(서버). 가채점은 대학 환산을 하지 않으므로 대학 찾기는 부르지 않는다.
+ * 절대 저장하지 않는다. 학생×가채점 단계 입력 1회 + 정정 1회(서버). 대학 찾기는 학교별 가채점 7단계 판정으로 한 번 부른다(2026-11-22).
  * 서버가 원점수 경로를 알기 전(JUNGSI_PRO_CSAT_ENABLED 꺼짐)에는 서버로 보내지 않는다.
  */
 export async function submitStudentProvisional(prev: ProvisionalFormState, fd: FormData): Promise<ProvisionalFormState> {
@@ -224,6 +224,8 @@ export async function submitStudentProvisional(prev: ProvisionalFormState, fd: F
     const p = saved.value.profile;
     const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
     if (!r.ok) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
+    // 학교별 가채점 판정(서버 dep_pro_r27)도 저장 때 자동 1회(11-13 결정과 같은 규칙). 서버가 아직 못 내면(409) 화면에 찾기 버튼이 남는다
+    await src.candidates(caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
   } catch (e) {
     if (step !== "성적 저장" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);

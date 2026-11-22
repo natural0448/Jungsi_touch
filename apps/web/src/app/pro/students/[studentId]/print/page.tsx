@@ -20,6 +20,7 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   const sp = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
   const orgId = one(sp.org), reportId = one(sp.report), rev = one(sp.rev);
+  const teacher = one(sp.view) === "teacher";
   const orgs = await proAccess();
   const ok = orgs?.some((o) => String(o.org_id) === orgId) && validId(studentId) && validId(reportId) && /^[1-9]\d{0,5}$/.test(rev);
   const back = `/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`;
@@ -35,7 +36,8 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
   return (
     <div className="wrap pg-body pr pro">
       <div className="pr-tools"><Link className="btn" href={back}>돌아가기</Link></div>
-      <PrintSheet fields={{ org_id: orgId, student_id: studentId, report_id: reportId, revision_id: rev, idem: crypto.randomUUID() }} />
+      {/* view=teacher: 선생님용(학교마다 상담 팁·최종 3개 선택 가이드, 학교 단위 쪽 나눔). 없으면 학생용(지금 인쇄 그대로) */}
+      <PrintSheet teacher={teacher} fields={{ org_id: orgId, student_id: studentId, report_id: reportId, revision_id: rev, idem: crypto.randomUUID() }} />
     </div>
   );
 }

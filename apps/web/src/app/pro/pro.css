@@ -109,3 +109,24 @@
 .et .pr-pick legend small{margin-left:6px;font-size:12px;font-weight:600;color:var(--muted)}
 .et .pr-pick label{display:flex;gap:6px;align-items:center;font-size:13px}
 .et .pro-picked{display:inline-flex;gap:6px;align-items:center}
+/* 선생님용 상담 팁·최종 3개 선택 가이드(2026-11-22) */
+.et .pc-tips{display:grid;gap:8px}
+.et .pc-tips>summary{cursor:pointer;font-weight:800;color:var(--deep)}
+.et .pc-part h4{margin:6px 0 2px;font-size:13px;font-weight:900;color:var(--deep)}
+.et .pc-part ul,.et .pc-caution,.et .pc-guide ul{display:grid;gap:4px;margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--ink)}
+.et .pc-caution{color:var(--ink-2);font-size:12.5px}
+.et .pc-phase2{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.et .pc-guide{display:grid;gap:10px;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--sub)}
+.et .pc-guide-g h4{margin:0 0 4px;font-size:14px;font-weight:900;color:var(--deep)}
+.et .pc-guide b{margin-right:4px;color:var(--brand)}
+.et .pc-reach>summary{cursor:pointer;font-size:13px;font-weight:800;color:var(--ink-2)}
+.et .pc-teacher-band{margin:0;padding:8px 12px;border-radius:var(--r-sm);background:#FFF1E8;color:#C2410C;font-size:13px;font-weight:800}
+.et .pc-school{display:grid;gap:8px;margin-top:12px}
+.et .pc-school h2{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.et .pc-g{font-size:12px;font-weight:800;color:var(--muted)}
+.et .pc-years td,.et .pc-years th{white-space:nowrap}
+@media print{
+  .et .pc-school{break-before:page;page-break-before:always}
+  .et .pc-print-guide{break-inside:avoid-page}
+  .et .pc-guide{background:none}
+}
