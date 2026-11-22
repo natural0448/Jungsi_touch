@@ -7,7 +7,7 @@ import { loadPrintExtras } from "@/app/admissions/possibilities/print-extras";
 import type { Extras } from "@/app/admissions/possibilities/extras-actions";
 import { FAVORITE_LIMIT } from "@/lib/favorites";
 import { setProFavorite } from "@/lib/pro-favorites";
-import { loadProStudent, proP4 } from "@/lib/pro-p4";
+import { loadProForAction, proP4 } from "@/lib/pro-p4";
 import { PICK_GROUP_LIMIT, PICK_TOTAL_LIMIT } from "@/lib/picked-view";
 
 /*
@@ -37,7 +37,7 @@ export async function proToggleFavorite(fd: FormData): Promise<Result> {
   if (!s) return { error: "화면을 새로 열어 다시 눌러 주세요." };
   try {
     const caller = await getCaller();
-    const got = await loadProStudent(caller, s.org, s.student);
+    const got = await loadProForAction(caller, s.org, s.student, s.report);
     if (got.kind !== "ok") return { error: `${failed}. 화면을 새로 열어 다시 눌러 주세요.` };
     const v = got.view;
     if (!v.canEdit) return { error: "담당 교사만 즐겨찾기를 바꿀 수 있습니다." };
@@ -69,7 +69,7 @@ export async function proTogglePick(fd: FormData): Promise<Result> {
   if (!s) return { error: `${failed}. 화면을 새로 열어 다시 눌러 주세요.` };
   try {
     const caller = await getCaller();
-    const got = await loadProStudent(caller, s.org, s.student);
+    const got = await loadProForAction(caller, s.org, s.student, s.report);
     if (got.kind !== "ok" || !got.view.shown) return { error: `${failed}. 성적을 먼저 저장해 주세요.` };
     const v = got.view, shown = got.view.shown;
     if (!v.canEdit) return { error: "담당 교사만 담을 수 있습니다." };
@@ -83,7 +83,9 @@ export async function proTogglePick(fd: FormData): Promise<Result> {
       const items = r.search?.items ?? [];
       const group = items.find((o) => o.offering_id === s.id)?.group;
       if (!group) return { error: "지금 목록에서 찾을 수 없는 모집단위입니다." };
-      if (items.filter((o) => picked.includes(o.offering_id) && o.group === group).length >= PICK_GROUP_LIMIT) {
+      // 카탈로그는 한 모집단위를 여러 줄(지표별)로 둘 수 있어 번호로 한 번씩만 센다(2026-11-23: 가군 3곳인데 5곳 한도로 막혔다)
+      const sameGroup = new Set(items.filter((o) => picked.includes(o.offering_id) && o.group === group).map((o) => o.offering_id));
+      if (sameGroup.size >= PICK_GROUP_LIMIT) {
         return { error: `같은 모집군에는 ${PICK_GROUP_LIMIT}개까지 담을 수 있습니다. 담은 곳 하나를 빼고 다시 담아 주세요.` };
       }
       const res = await src.addBookmark(caller, v.svc.org_id, v.student.student_id, shown.report_id, s.id, crypto.randomUUID());

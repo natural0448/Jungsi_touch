@@ -58,6 +58,29 @@ export async function loadProStudent(caller: Caller, orgParam: string, studentId
   }
 }
 
+/**
+ * 담기·별표 버튼용 가벼운 읽기(2026-11-23: 담기 응답이 14초 — 입력 단계·리포트 목록까지 읽었다).
+ * 기관·학생(담당·보관 여부)과 버튼이 보낸 리포트 하나만 읽는다. 리포트는 지금 담은 값이 붙은 pro.report.read.
+ */
+export async function loadProForAction(caller: Caller, orgParam: string, studentId: string, reportId: string): Promise<ProStudentLoad> {
+  const orgs = await proAccess();
+  const org = orgs?.find((o) => String(o.org_id) === orgParam);
+  if (!org || !validId(studentId) || !validId(reportId)) return { kind: "not_found" };
+  const src = proSource();
+  try {
+    const [session, student] = await Promise.all([src.session(caller), src.readStudent(caller, String(org.org_id), studentId)]);
+    const svc = session.organizations.find((o) => o.org_id === String(org.org_id));
+    if (!svc || !student) return { kind: "not_found" };
+    const shown = await src.readReport(caller, svc.org_id, studentId, reportId);
+    const report = shown ? reportOf(shown) : null;
+    return { kind: "ok", view: { org, svc, student, stage: null, status: null, reports: shown ? [shown] : [], shown, report, canEdit: svc.role === "teacher" && !student.archived } };
+  } catch (e) {
+    if (e instanceof ConnectionError) return { kind: "connection", error: e };
+    if (e instanceof AccessDenied) return { kind: "not_found" };
+    throw e;
+  }
+}
+
 /** 전문가용 리포트 → 개인용 화면 코드가 읽는 리포트 모양 */
 export function reportOf(r: ProStudentReportDto): ReportDto {
   return { ...r.published_result, report_id: r.report_id, report_version: r.revision_id, profile_id: r.profile_id };

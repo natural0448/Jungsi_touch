@@ -361076,6 +361076,13 @@
         "PAGE-02"
       ],
       "summary": "전문가용 ③: 화면 그리기용 계산 요청(저장 안 함)은 설정된 BFF 출처만 확인한다(본체 경유 페이지 요청은 Sec-Fetch-Site 도 바뀌어 professional_csrf_failed)."
+    },
+    {
+      "date": "2026-11-23",
+      "requirements": [
+        "PAGE-02"
+      ],
+      "summary": "전문가용 담기: 같은 군 5곳은 모집단위 번호로 한 번씩만 센다(카탈로그 지표별 줄 중복으로 3곳에서 막혔다). 담기·별표는 학생·리포트만 읽어 빠르게."
     }
   ],
   "p1_recruitment_score_review_verification": {
