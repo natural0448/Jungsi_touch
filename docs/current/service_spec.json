@@ -361062,6 +361062,13 @@
         "PAGE-02"
       ],
       "summary": "전문가용 ③ 가능성 보기: 화면을 그리며 보내는 학교별 판정·검색 요청(저장 안 함)은 페이지 요청의 같은 사이트 표시로 출처를 확인한다(Origin 헤더가 없어 막혔다)."
+    },
+    {
+      "date": "2026-11-23",
+      "requirements": [
+        "PAGE-02"
+      ],
+      "summary": "전문가용 ③: 화면 그리기용 계산 요청은 Origin 을 보지 않고 Sec-Fetch-Site 만 확인(본체가 넘길 때 Origin 이 바뀐다). 실패하면 사유 코드를 기록하고 안내에 문의 번호를 붙인다."
     }
   ],
   "p1_recruitment_score_review_verification": {

@@ -117,7 +117,14 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
     if (e instanceof ConnectionError || e instanceof AccessDenied) out = { search: null, bands: {}, failed: e.code };
     else throw e;
   }
-  if (!out.failed) {
+  if (out.failed) {
+    // 운영 확인용(성적·학생 이름 없음): 실패 사유 코드만
+    try {
+      console.info(`[pro-p4] failed code=${out.failed} mode=${req.search ? "search" : "ids"}`);
+    } catch {
+      // 기록 실패는 화면에 영향 없음
+    }
+  } else {
     memo.delete(mk);
     memo.set(mk, { at: Date.now(), v: out });
     while (memo.size > MAX) memo.delete(memo.keys().next().value as string);

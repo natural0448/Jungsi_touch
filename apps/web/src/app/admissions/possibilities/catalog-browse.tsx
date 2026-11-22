@@ -132,7 +132,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       <div className="wrap pg-body ps">
         <section className="gate flat">
           <h2>지금은 목록을 불러오지 못했습니다</h2>
-          <p>잠시 뒤 다시 열어 주세요. 담은 학교와 즐겨찾기는 그대로 남아 있습니다.</p>
+          <p>잠시 뒤 다시 열어 주세요. 담은 학교와 즐겨찾기는 그대로 남아 있습니다. <small>(문의 번호 {proFailed})</small></p>
           <div className="acts"><Link className="btn" href={link({})}>다시 열기</Link></div>
         </section>
       </div>

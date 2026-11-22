@@ -113,6 +113,7 @@ test("render origin: same-site page loads and typed URLs pass, cross-site or for
   assert.deepEqual(professionalRenderOrigin(cfg, h({ "sec-fetch-site": "none" })), { ok: true, origin: cfg });
   assert.deepEqual(professionalRenderOrigin(cfg, h({})), { ok: true, origin: cfg });
   assert.equal(professionalRenderOrigin(cfg, h({ "sec-fetch-site": "cross-site" })).ok, false);
-  assert.equal(professionalRenderOrigin(cfg, h({ origin: "https://evil.example" })).ok, false);
+  // Origin 은 본체가 바꿔 붙일 수 있어 보지 않는다(Sec-Fetch-Site 만)
+  assert.equal(professionalRenderOrigin(cfg, h({ origin: "https://evil.example", "sec-fetch-site": "cross-site" })).ok, false);
   assert.equal(professionalRenderOrigin(undefined, h({})).ok, false);
 });

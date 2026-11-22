@@ -19,8 +19,8 @@ export function professionalRenderOrigin(
   } catch {
     return { ok: false, status: 503, code: "pro_bff_origin_not_configured" };
   }
-  const origin = incoming.get("origin");
-  if (origin && origin !== configured) return { ok: false, status: 403, code: "professional_csrf_failed" };
+  // 페이지 요청은 본체가 정시터치로 넘기며 Origin 을 바꿔 붙일 수 있어(2026-11-23 운영: ③ 판정 요청이 보내지지 않았다)
+  // Origin 은 보지 않고 브라우저의 출처 표시(Sec-Fetch-Site)만 본다
   const site = incoming.get("sec-fetch-site");
   if (site && site !== "same-origin" && site !== "same-site" && site !== "none") return { ok: false, status: 403, code: "professional_csrf_failed" };
   return { ok: true, origin: configured };
