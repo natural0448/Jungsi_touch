@@ -361055,6 +361055,13 @@
         "PAGE-02"
       ],
       "summary": "전문가용 학생 탭 ②·③·④ 페이지 파일(favorable·possibilities·report)이 ship63 에 빠져 404 였던 것을 넣는다(배포 복사가 새 폴더를 만들지 않았다)."
+    },
+    {
+      "date": "2026-11-23",
+      "requirements": [
+        "PAGE-02"
+      ],
+      "summary": "전문가용 ③ 가능성 보기: 화면을 그리며 보내는 학교별 판정·검색 요청(저장 안 함)은 페이지 요청의 같은 사이트 표시로 출처를 확인한다(Origin 헤더가 없어 막혔다)."
     }
   ],
   "p1_recruitment_score_review_verification": {

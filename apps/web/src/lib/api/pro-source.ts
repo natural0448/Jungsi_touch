@@ -1,6 +1,6 @@
 import "server-only";
 import { headers as incomingHeaders } from "next/headers";
-import { professionalMutationOrigin } from "../professional-bff-origin";
+import { professionalMutationOrigin, professionalRenderOrigin } from "../professional-bff-origin";
 import type { ProfileDto, ProvisionalScoresInput, ReportDto, ScoresInput } from "@/lib/dto";
 import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProP4Dto, ProP4Search, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
@@ -95,8 +95,9 @@ async function get<T>(caller: Caller, path: string): Promise<T | null> {
   if (!res.ok) throw new Error(`정시터치 전문가용 API ${res.status} ${(await code(res)) ?? ""}`);
   return ((await res.json()) as ProEnvelope<T>).data;
 }
-async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
-  const proof = professionalMutationOrigin(process.env.JUNGSI_PRO_BFF_ORIGIN, await incomingHeaders());
+async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: string, body: unknown, key: string, render = false): Promise<Result<T>> {
+  // render: 화면을 그리며 보내는 계산 요청(③ 판정·검색, 저장 안 함) — professionalRenderOrigin
+  const proof = (render ? professionalRenderOrigin : professionalMutationOrigin)(process.env.JUNGSI_PRO_BFF_ORIGIN, await incomingHeaders());
   if (!proof.ok) {
     if (proof.status === 503) throw new ConnectionError("unconfigured", proof.code);
     throw new AccessDenied(403, proof.code);
@@ -124,7 +125,7 @@ const liveSource: ProSource = {
   listReports: async (caller, orgId, id) =>
     (await get<ProStudentReportPageDto>(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
   readReport: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
-  analyzeP4: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/university-analysis`, body, key),
+  analyzeP4: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/university-analysis`, body, key, true),
   candidates: (caller, orgId, id, profileId, v, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/candidates`, { profile_id: profileId, filters: {}, expected_profile_version: v }, key),
   listBookmarks: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks${qs({ report_id: reportId })}`),
