@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { FAVORITE_LIMIT, setFavorite } from "@/lib/favorites";
+import { proToggleFavorite } from "@/app/pro/p4-actions";
 
 export type FavoriteResult = { error: string | null };
 
@@ -11,6 +12,8 @@ export type FavoriteResult = { error: string | null };
  * 빼기는 번호만으로 한다(카탈로그에서 빠진 모집단위도 뺄 수 있어야 한다).
  */
 export async function toggleFavorite(_prev: FavoriteResult, fd: FormData): Promise<FavoriteResult> {
+  // 전문가용 학생 탭에서 누른 별표(2026-11-23): 그 학생의 즐겨찾기로
+  if (fd.get("pro_org")) return proToggleFavorite(fd);
   const id = String(fd.get("offering_id") ?? "");
   const on = fd.get("on") === "1";
   if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(id)) return { error: "화면을 새로 열어 다시 눌러 주세요." };

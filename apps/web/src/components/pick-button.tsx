@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { togglePick, type PickResult } from "@/app/shortlist-actions";
 import { enqueue } from "@/lib/client-queue";
+import { ProScopeFields } from "@/components/pro-scope";
 
 const INITIAL: PickResult = { error: null };
 // 여러 곳을 빠르게 담아도 한 번에 하나씩 보낸다(같은 계정 요청 겹침 방지, 2026-11-21)
@@ -15,6 +16,7 @@ export function PickButton({ id, on, variant = "pill" }: { id: string; on: boole
     <form action={action} className={variant === "wild" ? "pick-wild" : undefined}>
       <input type="hidden" name="offering_id" value={id} />
       <input type="hidden" name="selected" value={on ? "0" : "1"} />
+      <ProScopeFields />
       {variant === "pill" ? (
         <button className={`pick${on ? " on" : ""}`} aria-pressed={on} disabled={pending}>
           {on ? "담음" : "담기"}

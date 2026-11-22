@@ -603,6 +603,94 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
   );
 }
 
+/*
+  수능 가채점 리포트의 반영 조합별 표준점수 합(2026-11-23 대표님 요청: 전문가용 정시 리포트에도 개인용처럼).
+  가채점은 과목 표준점수가 범위(낮음·가운데·높음)라 조합 합도 '가운데 값'과 '범위'로 보인다(서버가 준 과목 범위를 더하기만 한다).
+  탐구 1과목은 두 과목 중 높은 과목(가운데·낮음·높음 끝마다 높은 쪽). 하나라도 범위가 없으면 그 조합은 '─'.
+*/
+export function ProvisionalComboScores({ a }: { a: OverallAnalysisDto }) {
+  type T = { low: number; central: number; high: number };
+  const tri = (area: string): T | null => {
+    const r = a.subjects.find((x) => x.area === area)?.standard_score_range;
+    return r && [r.low, r.central, r.high].every((v) => typeof v === "number" && Number.isFinite(v)) ? { low: r.low, central: r.central, high: r.high } : null;
+  };
+  const k = tri("korean"), m = tri("math"), q1 = tri("inquiry1"), q2 = tri("inquiry2");
+  const add = (...v: (T | null)[]): T | null => (v.some((x) => x === null) ? null : (v as T[]).reduce((x, y) => ({ low: x.low + y.low, central: x.central + y.central, high: x.high + y.high })));
+  const q2sum = add(q1, q2);
+  const q1best: T | null = q1 && q2 ? { low: Math.max(q1.low, q2.low), central: Math.max(q1.central, q2.central), high: Math.max(q1.high, q2.high) } : null;
+  const groups: { title: string; rows: [string, T | null][] }[] = [
+    { title: "국어·수학 함께", rows: [["국어 + 수학 + 탐구(2과목)", add(k, m, q2sum)], ["국어 + 수학 + 탐구(1과목)", add(k, m, q1best)], ["국어 + 수학", add(k, m)]] },
+    { title: "국어 또는 수학 + 탐구", rows: [["국어 + 탐구(2과목)", add(k, q2sum)], ["수학 + 탐구(2과목)", add(m, q2sum)], ["국어 + 탐구(1과목)", add(k, q1best)], ["수학 + 탐구(1과목)", add(m, q1best)]] },
+  ];
+  return (
+    <section className="rp-chart" aria-label="반영 조합별 예상 표준점수 합">
+      <header>
+        <h3>반영 조합별 예상 표준점수 합</h3>
+        <small>가채점 원점수로 추정한 과목 표준점수를 자주 쓰는 반영 조합별로 더한 값입니다 · 큰 숫자는 가운데 값, 아래는 범위 · 탐구 1과목은 두 과목 중 높은 과목 · 대학별 실제 환산점수와는 다릅니다</small>
+      </header>
+      <div className="rp-combo-wrap">
+        {groups.map((g) => (
+          <div key={g.title} className="tblwrap">
+            <table className="tb rp-combo">
+              <thead>
+                <tr>
+                  <th scope="col">{g.title}</th>
+                  <th scope="col" className="r">예상 표준점수 합</th>
+                </tr>
+              </thead>
+              <tbody>
+                {g.rows.map(([label, v]) => (
+                  <tr key={label}>
+                    <th scope="row">{label}</th>
+                    <td className="r">
+                      {v === null ? "─" : (
+                        <>
+                          <b className="num">{v.central}</b>
+                          {v.low !== v.high && <small className="rs-range"> {v.low}~{v.high}</small>}
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/*
+  수능 가채점 리포트의 위치 그래프(2026-11-23). 과목 줄은 예상 백분위 범위를 상위 %로 바꿔(100 − 백분위) 띠로,
+  전체 줄은 서버가 준 추정 상위누백 범위(좋은 끝~나쁜 끝)를 띠로 그린다. 점은 좋은 쪽 끝이다. 새로 계산하는 값은 없다.
+*/
+export function ProvisionalPositionChart({ a }: { a: OverallAnalysisDto }) {
+  const top = (p: number | null | undefined) => (typeof p === "number" && Number.isFinite(p) ? String(Math.max(0, Math.min(100, 100 - p))) : null);
+  const rows = a.subjects.map((s) => {
+    const r = s.percentile_range;
+    return { s, best: r ? top(r.high) : null, worst: r ? top(r.low) : null };
+  });
+  const o = a.overall;
+  const range = o.top_percent_range ?? null;
+  const max = scaleMax([...rows.flatMap((r) => [r.best, r.worst]), range?.best, range?.worst]);
+  return (
+    <section className="rp-chart" aria-label="가채점 위치 그래프">
+      <header>
+        <h3>위치 그래프</h3>
+        <small>왼쪽일수록 상위권 · 띠는 가채점 원점수로 추정한 범위(좋은 끝~나쁜 끝), 점은 좋은 쪽 끝</small>
+      </header>
+      <ScaleNote max={max} />
+      <Axis max={max} />
+      {rows.map(({ s, best, worst }) => (
+        <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={best} excl={worst} max={max} waitText="추정 없음" />
+      ))}
+      <ChartRow label="전체" max={max} sub="국·수·탐2 · 추정" strong incl={range?.best ?? null} excl={range?.worst ?? null} waitText="추정 없음" />
+      <p className="pc-note">과목 줄은 그 과목을 본 응시자 중의 예상 위치(예상 백분위 범위), 전체 줄은 국·수·탐2 예상 표준점수 합으로 본 추정 상위누백 범위입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다. 성적표가 배부되면 실채점으로 다시 확인해 주세요.</p>
+    </section>
+  );
+}
+
 /**
  * 핵심 지원 학교 표(report.shortlist + report.analyses). 가·나·다군으로 나눠 보인다(대표님 요청 2026-11-21).
  * 지원가능성·환산 유불리·판단 근거는 3·4페이지와 같은 부품·규칙이다 — 전체 위치(overall)를 넘겨야 참고 유불리와

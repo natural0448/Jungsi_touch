@@ -63,7 +63,7 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
 
 
 /** 핵심 지원 학교 띠. 개수와 이 목록에 있는 이름은 바로, 목록에 없는 곳의 이름만 뒤이어(shortlist-tray-stream.tsx) */
-export function MineTray({ report, items, src, caller }: { report: ReportDto | null; items: OfferingDto[]; src: JungsiSource; caller: Caller }) {
+export function MineTray({ report, items, src, caller, links }: { report: ReportDto | null; items: OfferingDto[]; src: JungsiSource; caller: Caller; links?: { other: string; report: string; reportLabel?: string } }) {
   if (!report) return null;
-  return <StreamTray report={report} known={items} src={src} caller={caller} other="PAGE-04" />;
+  return <StreamTray report={report} known={items} src={src} caller={caller} other="PAGE-04" links={links} />;
 }

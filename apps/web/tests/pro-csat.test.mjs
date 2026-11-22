@@ -143,7 +143,8 @@ test("server refusal is explained and overall is not attempted", async () => {
 });
 
 test("student page wires the provisional form only to the student save action behind the switch", () => {
-  const page = readFileSync(new URL("../src/app/pro/students/[studentId]/page.tsx", import.meta.url), "utf8");
+  // 2026-11-23 탭 개편: 학생 화면 본문은 student-view.tsx(① 성적 입력·④ 정시 리포트가 함께 쓴다)
+  const page = readFileSync(new URL("../src/app/pro/students/[studentId]/student-view.tsx", import.meta.url), "utf8");
   assert.match(page, /submit=\{submitStudentProvisional\}/);
   assert.doesNotMatch(page, /submitProvisional\b/);
   assert.match(page, /proCsatEnabled\(\) && csatOpen\(\)/);

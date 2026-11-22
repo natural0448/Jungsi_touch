@@ -10,7 +10,7 @@ import type { PickedItem } from "@/lib/shortlist";
   모집군이 필요해(대표님 요청 2026-11-22) 이름과 함께 모두 받은 뒤 띠를 한 번에 그린다. 부르는 쪽은 Suspense(fallback 없음)로 감싸
   목록은 띠를 기다리지 않는다. 받지 못한 곳은 '지금 목록에서 찾을 수 없는 모집단위'로 두고 전체 수에만 센다.
 */
-export async function StreamTray({ report, known, src, caller, other }: { report: ReportDto; known: OfferingDto[]; src: JungsiSource; caller: Caller; other: "PAGE-03" | "PAGE-04" }) {
+export async function StreamTray({ report, known, src, caller, other, links }: { report: ReportDto; known: OfferingDto[]; src: JungsiSource; caller: Caller; other: "PAGE-03" | "PAGE-04"; links?: { other: string; report: string; reportLabel?: string } }) {
   const byId = new Map(known.map((o) => [o.offering_id, o]));
   const entries = Object.entries(report.shortlist ?? {}).filter(([, e]) => e && typeof e === "object" && e.selected);
   const item = (id: string, entry: ShortlistEntryDto, offering: OfferingDto | null): PickedItem => ({ offering, offering_id: id, entry, assessment: report.analyses?.[id] ?? null });
@@ -27,5 +27,5 @@ export async function StreamTray({ report, known, src, caller, other }: { report
       }
     }),
   );
-  return <ShortlistTray items={items} other={other} />;
+  return <ShortlistTray items={items} other={other} links={links} />;
 }

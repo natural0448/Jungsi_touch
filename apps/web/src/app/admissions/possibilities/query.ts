@@ -12,6 +12,8 @@ export const LIMIT = 30;
 export interface CatalogDestination {
   path: string;
   catalogView: boolean;
+  /** 늘 붙이는 주소 값(전문가용 학생 탭의 기관 번호 org 등, 2026-11-23) */
+  params?: Record<string, string>;
 }
 
 export interface Query {
@@ -76,6 +78,7 @@ export function hrefWith(cur: Query, patch: Partial<Query>, destination: Catalog
   const next = { ...cur, ...patch };
   if (!("cursor" in patch) && ("university_q" in patch || "department_q" in patch || "region" in patch || "group" in patch || "fav" in patch || "st" in patch)) next.cursor = undefined;
   const u = new URLSearchParams();
+  for (const [k, v] of Object.entries(destination.params ?? {})) u.set(k, v);
   if (destination.catalogView) u.set("view", "catalog");
   const names = { university_q: "university", department_q: "unit", region: "region", group: "group", cursor: "cursor", open: "open" } as const;
   for (const k of Object.keys(names) as (keyof typeof names)[]) {

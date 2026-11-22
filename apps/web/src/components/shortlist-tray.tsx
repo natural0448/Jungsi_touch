@@ -10,7 +10,8 @@ import { groupCounts, PICK_GROUP_LIMIT, PICK_TOTAL_LIMIT } from "@/lib/picked-vi
  * 군별 담은 수를 '가군 2/5 · 나군 1/5 · 다군 0/5 · 전체 3/15'로 함께 보인다(대표님 요청 2026-11-22, 한도 11-21).
  * 이름·모집군은 띠를 그리기 전에 모두 받아 한 번에 그린다(shortlist-tray-stream.tsx)
  */
-export function ShortlistTray({ items, other }: { items: PickedItem[]; other: "PAGE-03" | "PAGE-04" }) {
+/** links: 전문가용 학생 탭(2026-11-23)은 같은 띠를 그 학생의 ②·④ 탭 주소로 잇는다 */
+export function ShortlistTray({ items, other, links }: { items: PickedItem[]; other: "PAGE-03" | "PAGE-04"; links?: { other: string; report: string; reportLabel?: string } }) {
   const to = page(other);
   const counts = groupCounts(items);
   return (
@@ -41,8 +42,8 @@ export function ShortlistTray({ items, other }: { items: PickedItem[]; other: "P
               <span className="none">담은 곳이 없습니다. 담기를 누르세요.</span>
             )}
           </span>
-          <Link className="btn" href={to.path}>{to.label}에서도 같은 목록</Link>
-          <Link className="btn p" href={page("PAGE-02").path}>리포트에서 정리</Link>
+          <Link className="btn" href={links?.other ?? to.path}>{to.label}에서도 같은 목록</Link>
+          <Link className="btn p" href={links?.report ?? page("PAGE-02").path}>{links?.reportLabel ?? "리포트에서 정리"}</Link>
         </div>
       </div>
     </div>

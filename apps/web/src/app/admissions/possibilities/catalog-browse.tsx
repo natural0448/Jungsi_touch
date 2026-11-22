@@ -7,7 +7,7 @@ import Link from "@/components/link";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
-import type { CatalogSearchDto, OfferingDto, ReportDto } from "@/lib/dto";
+import type { CatalogSearchDto, OfferingDto, ReferenceBandDto, ReportDto } from "@/lib/dto";
 import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, toggleStatus, type StatusKey } from "@/lib/status-filter";
 import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
@@ -24,16 +24,35 @@ import { MineBasis, MineCells, MineConds, MineDetail, MineLegend, MineTray, cell
 import { GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
 import "./possibilities.css";
 
-export async function CatalogBrowse({ src, caller, sp, route, features, catalogView = false }: {
+/**
+ * 전문가용 학생 탭 ③(2026-11-23 대표님 결정: 개인용 4페이지와 완벽하게 같게). 같은 화면 코드를 쓰고 자료만 그 학생 것으로 바꾼다.
+ * - 리포트·별표: 그 학생의 리포트(담은 학교 포함)·학생별 즐겨찾기
+ * - 검색·판정: 선생님 계정은 개인용 검색(이용권 회원 전용)을 쓸 수 없어 전문가용 서버가 검색과 학교별 판정을 함께 한다(dep_pro_r28)
+ * - 별표·담기·펼친 상세 버튼은 페이지가 감싼 ProScopeProvider 로 학생 쪽에 저장된다
+ */
+export interface ProBrowse {
+  path: string;
+  params: Record<string, string>;
+  report: ReportDto | null;
+  favorites: Favorites | null;
+  search: (q: { university_q?: string; department_q?: string; region?: string; group?: string; cursor?: string }) => Promise<{ search: CatalogSearchDto<OfferingDto> | null; bands: Record<string, ReferenceBandDto>; failed: string | null }>;
+  byIds: (ids: string[]) => Promise<{ bands: Record<string, ReferenceBandDto> }>;
+  /** 띠의 이름·군(담은 곳이 지금 목록에 없을 때) */
+  picked: OfferingDto[];
+  tray: { other: string; report: string; reportLabel?: string };
+}
+
+export async function CatalogBrowse({ src, caller, sp, route, features, catalogView = false, pro }: {
   src: JungsiSource;
   caller: Caller;
   sp: Parameters<typeof parseQuery>[0];
   route: PageRoute;
   features: string[];
   catalogView?: boolean;
+  pro?: ProBrowse;
 }) {
   const cur = parseQuery(sp);
-  const destination: CatalogDestination = { path: route.path, catalogView };
+  const destination: CatalogDestination = pro ? { path: pro.path, catalogView: false, params: pro.params } : { path: route.path, catalogView };
   const link = (patch: Partial<Query>) => hrefWith(cur, patch, destination);
   // 검색과 내 리포트를 함께 보내고, 보이는 모집단위의 분석까지 끝낸 뒤 목록을 한 번에 그린다
   // (2026-11-21 대표님 지적: '아직 내 성적으로 분석하지 않았습니다' 띠·'분석 대기'·'불러오는 중' 칸이 고객에게 보이면 안 된다).
@@ -42,12 +61,23 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 펼친 모집행의 2027 모집 정보·발행 기준은 화면에서 펼친 뒤 따로 받는다(item-shell.tsx · extras-actions.ts)
   // 리포트 번호 힌트가 있으면 리포트 읽기를 검색과 함께 먼저 보내고, 입력 상태는 검색 뒤에 보낸다(동시 2건 유지, 2026-11-18)
   // 즐겨찾기(별표)는 본체 DB 에서 따로 읽는다(서비스 API 와 별개). '즐겨찾기만 보기'에서는 검색 대신 별표한 모집단위를 보인다
-  const favoring = myFavorites();
+  const favoring = pro ? Promise.resolve(pro.favorites) : myFavorites();
+  // 전문가용: 검색과 판정을 한 번에 받는다(즐겨찾기만 보기는 별표 사본 + 번호로 판정)
+  let proBands: Record<string, ReferenceBandDto> | null = null;
+  let proFailed: string | null = null;
   // 서버는 한 번에 훑는 범위가 정해져 있어, 조건에 맞는 행이 뒤쪽에 있으면 빈 쪽과 다음 커서만 준다(예: 지역=제주).
   // 빈 쪽을 '결과 없음'으로 보이지 않도록 다음 커서를 몇 번까지 대신 따라간다(2026-11-19 운영 확인)
-  const searching = cur.fav ? favoring.then((f) => favoriteResult(f, cur)) : skipEmptyPages(src, caller, toSearch(cur));
+  const searching = cur.fav
+    ? favoring.then((f) => favoriteResult(f, cur))
+    : pro
+    ? pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: cur.cursor }).then((r) => {
+      proBands = r.bands;
+      proFailed = r.failed;
+      return r.search ?? { status: "ready" as const, reason_code: null, items: [], matching_offering_count: null, matching_school_count: null, catalog_version: null, as_of: null, next_cursor: null };
+    })
+    : skipEmptyPages(src, caller, toSearch(cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
-  const mine = startMine(src, caller, searching);
+  const mine = pro ? searching.then(() => ({ ok: true as const, report: pro.report })) : startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
   try {
     res = await searching;
@@ -82,9 +112,32 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     return <PaidGate kind={m.error.status === 401 ? "login" : "paid"} route={route} features={features} />;
   }
   // 부정확 입력 상태(2026-11-22 대표님 결정): 분석·지원가능성 없이 안내와 정정 길만 보인다(직접 주소로 들어와도 같다)
-  if (!m.report && inaccurateSeen(caller)) return <div className="wrap pg-body ps"><InaccurateNotice name={await memberName()} correctHref={`${page("PAGE-02").path}?correct=1`} back /></div>;
+  if (!pro && !m.report && inaccurateSeen(caller)) return <div className="wrap pg-body ps"><InaccurateNotice name={await memberName()} correctHref={`${page("PAGE-02").path}?correct=1`} back /></div>;
   // 보이는 모집단위의 분석을 채우고 옛 자료판 분석은 다시 확인한다. 끝난 뒤에 한 번에 그린다
-  let report = m.report ? await settleAnalyses(src, caller, m.report, items.map((o) => o.offering_id)) : null;
+  let report = pro ? m.report : m.report ? await settleAnalyses(src, caller, m.report, items.map((o) => o.offering_id)) : null;
+  // 전문가용 검색이 답하지 못하면(연결·한도) 빈 결과 대신 차분한 안내 한 줄
+  // 전문가용은 학생 성적으로 검색·판정을 함께 한다 — 성적이 없으면 먼저 입력하도록 안내한다
+  if (pro && proFailed === "no_report" && !cur.fav) {
+    return (
+      <div className="wrap pg-body ps">
+        <section className="gate flat">
+          <h2>이 학생의 성적을 먼저 저장해 주세요</h2>
+          <p>① 성적 입력에서 성적을 저장하면 대학·학과를 검색하고 모집단위마다 학생의 환산점수·지원가능성을 볼 수 있습니다.</p>
+        </section>
+      </div>
+    );
+  }
+  if (pro && proFailed && proFailed !== "no_report" && !cur.fav) {
+    return (
+      <div className="wrap pg-body ps">
+        <section className="gate flat">
+          <h2>지금은 목록을 불러오지 못했습니다</h2>
+          <p>잠시 뒤 다시 열어 주세요. 담은 학교와 즐겨찾기는 그대로 남아 있습니다.</p>
+          <div className="acts"><Link className="btn" href={link({})}>다시 열기</Link></div>
+        </section>
+      </div>
+    );
+  }
   // 지원가능성 필터(2026-11-22): 고른 단계만 모은다. 성적이 없으면(리포트 없음) 필터를 쓰지 않는다
   let shown = items;
   let nextCursor = res.next_cursor;
@@ -93,8 +146,13 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const provisional = provisionalOnly(report);
   // 수능 가채점 학교별 판정(서버 dep_r29, 2026-11-23): 보이는 모집단위만 판정을 받아 붙인다. 받지 못하면 '가채점 판정 준비 중'
   if (provisional && report) {
-    const got = await provisionalBands(src, caller, report, items.map((o) => o.offering_id));
-    report = { ...report, report_version: got.version, provisional_bands: got.bands };
+    if (pro) {
+      const bands = cur.fav ? (await pro.byIds(items.map((o) => o.offering_id))).bands : (proBands ?? {});
+      report = { ...report, provisional_bands: bands };
+    } else {
+      const got = await provisionalBands(src, caller, report, items.map((o) => o.offering_id));
+      report = { ...report, report_version: got.version, provisional_bands: got.bands };
+    }
   }
   const provisionalJudged = provisional && Object.keys(report?.provisional_bands ?? {}).length > 0;
   if (cur.st && report && !provisional) {
@@ -129,13 +187,14 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   return (
     <>
 
-      <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />
+      {!pro && <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />}
       <div className="wrap pg-body ps">
         <MineBasis report={report} />
         {provisional && <ProvisionalPendingNote judged={provisionalJudged} />}
 
         <section className="filter" aria-label="검색 조건">
-          <Form action={route.path} prefetch={false} className="search" role="search">
+          <Form action={destination.path} prefetch={false} className="search" role="search">
+            {Object.entries(destination.params ?? {}).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
             <label className="field">
               <span>대학명</span>
               <input type="search" name="university" defaultValue={cur.university_q} placeholder="예: 강원대, 홍익대" maxLength={40} />
@@ -291,7 +350,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
 
       {/* 띠는 담은 곳의 이름·모집군을 모두 받은 뒤 한 번에 그린다. 목록은 띠를 기다리지 않는다 */}
       <Suspense fallback={null}>
-        <MineTray report={report} items={items} src={src} caller={caller} />
+        <MineTray report={report} items={pro ? [...items, ...pro.picked] : items} src={src} caller={caller} links={pro?.tray} />
       </Suspense>
     </>
   );

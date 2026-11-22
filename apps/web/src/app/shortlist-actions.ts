@@ -6,6 +6,7 @@ import { MAYBE_SAVED, connectionText } from "@/lib/connection-text";
 import { loadMine } from "@/lib/report-ops";
 import { setPick } from "@/lib/shortlist";
 import { PICK_GROUP_LIMIT } from "@/lib/picked-view";
+import { proTogglePick } from "@/app/pro/p4-actions";
 
 export type PickResult = { error: string | null };
 
@@ -15,6 +16,8 @@ export type PickResult = { error: string | null };
  * 바뀌지 않았으면 그 이유를 돌려줘 버튼 옆에 보인다(예전에는 조용히 무시해 담긴 줄 알 수 있었다).
  */
 export async function togglePick(_prev: PickResult, fd: FormData): Promise<PickResult> {
+  // 전문가용 학생 탭에서 누른 담기(2026-11-23): 그 학생 리포트의 담은 학교로
+  if (fd.get("pro_org")) return proTogglePick(fd);
   const id = String(fd.get("offering_id") ?? "");
   const selected = fd.get("selected") === "1";
   const failed = selected ? "담지 못했습니다" : "빼지 못했습니다";

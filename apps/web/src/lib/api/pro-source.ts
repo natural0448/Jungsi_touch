@@ -2,7 +2,7 @@ import "server-only";
 import { headers as incomingHeaders } from "next/headers";
 import { professionalMutationOrigin } from "../professional-bff-origin";
 import type { ProfileDto, ProvisionalScoresInput, ReportDto, ScoresInput } from "@/lib/dto";
-import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
+import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProP4Dto, ProP4Search, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
 import { computeOverall, computeProvisional } from "./synthetic-report";
 import { buildTips } from "./synthetic-tips";
@@ -31,6 +31,8 @@ export interface ProSource {
   analyzeOverall(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<{ report: ReportDto }>>;
   listReports(caller: Caller, orgId: string, studentId: string): Promise<ProStudentReportPageDto>;
   readReport(caller: Caller, orgId: string, studentId: string, reportId: string): Promise<ProStudentReportDto | null>;
+  /** pro.university.analyze(가채점 4페이지, 서버 dep_pro_r28) — 검색 조건 또는 모집단위 번호(30개까지)로 학교별 판정. 저장하지 않는다 */
+  analyzeP4(caller: Caller, orgId: string, studentId: string, body: { profile_id: string; expected_profile_version: string | number; offering_ids?: string[]; search?: ProP4Search }, key: string): Promise<Result<ProP4Dto>>;
   /** pro.candidates — 저장한 성적으로 유리한 대학 찾기(새 리포트 판에 남는다) */
   candidates(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<ProCandidatesDto>>;
   listBookmarks(caller: Caller, orgId: string, studentId: string, reportId?: string): Promise<ProBookmarksDto | null>;
@@ -122,6 +124,7 @@ const liveSource: ProSource = {
   listReports: async (caller, orgId, id) =>
     (await get<ProStudentReportPageDto>(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
   readReport: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
+  analyzeP4: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/university-analysis`, body, key),
   candidates: (caller, orgId, id, profileId, v, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/candidates`, { profile_id: profileId, filters: {}, expected_profile_version: v }, key),
   listBookmarks: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks${qs({ report_id: reportId })}`),
@@ -248,6 +251,10 @@ const synSource: ProSource = {
   },
   async readReport(_c, _orgId, id, reportId) {
     return [...synScore(id).reports].reverse().find((r) => r.report_id === reportId) ?? null;
+  },
+  // 화면 제작용 합성 응답은 가채점 학교별 판정을 만들지 않는다(4페이지는 '가채점 판정 준비 중')
+  async analyzeP4() {
+    return { ok: false, code: "professional_exam_unavailable", status: 409 };
   },
   async candidates(_c, orgId, id, profileId, _v, key) {
     const x = synScore(id);

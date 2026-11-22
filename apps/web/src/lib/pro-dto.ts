@@ -3,7 +3,7 @@
   서버 구현(develop 00c8d795, supabase/functions/jungsi-pro-api · professional_projection.ts)과 같은 필드 이름을 쓴다. 기관·학생 권한은 서버가 판단한다.
 */
 
-import type { CandidatesDto, ReportDto, ShortlistEntryDto, SnapshotDto } from "@/lib/dto";
+import type { CandidatesDto, CatalogSearchDto, OfferingDto, ReportDto, ShortlistEntryDto, SnapshotDto } from "@/lib/dto";
 
 export type ProRole = "org_admin" | "teacher" | "viewer";
 
@@ -153,6 +153,25 @@ export interface ProCandidatesDto {
   org_id: string;
   student_id: string;
   candidates: CandidatesDto;
+}
+
+/**
+ * pro.university.analyze 의 가채점 4페이지 응답(서버 dep_pro_r28, 2026-11-23). 저장하지 않고 응답에만 싣는다.
+ * candidates.reference_university_groups: 요청한 모집단위의 학교별 7단계(source g, school_score·position)
+ * search: 개인용 offerings.search 와 같은 형식(검색으로 부른 경우·번호 목록이면 그 모집단위들)
+ */
+export interface ProP4Dto {
+  org_id: string;
+  student_id: string;
+  candidates?: CandidatesDto;
+  search?: CatalogSearchDto<OfferingDto>;
+}
+export interface ProP4Search {
+  university_q?: string;
+  department_q?: string;
+  region?: string;
+  group?: string;
+  cursor?: string;
 }
 
 /** student_bookmarks — 학생별 담은 학교 */

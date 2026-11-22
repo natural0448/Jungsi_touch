@@ -6,6 +6,8 @@ import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
 import { enqueue } from "@/lib/client-queue";
 import { loadExtras, type Extras, type P1Year } from "./extras-actions";
+import { loadProExtras } from "@/app/pro/p4-actions";
+import { useProScope } from "@/components/pro-scope";
 import { Published, Recruit, sameRelease } from "./recruit-parts";
 import { P1YearsContext } from "./p1-year-cell";
 
@@ -19,6 +21,9 @@ export function useOfferingExtras(o: OfferingDto, initialOpen: boolean) {
   // 1페이지 성적만 먼저(따로 fetch). undefined = 받는 중, null = 저장본 없음 → extras.p1 을 쓴다
   const [p1Fast, setP1Fast] = useState<P1Year[] | null | undefined>(undefined);
   const asked = useRef(false);
+  // 전문가용 학생 화면에서는 같은 자료를 학생 쪽 권한 없이 읽는다(선생님 계정은 개인용 모집 정보 조회 권한이 없을 수 있다)
+  const pro = useProScope();
+  const load = pro ? loadProExtras : loadExtras;
   const fetchOnce = () => {
     if (asked.current) return;
     asked.current = true;
@@ -27,7 +32,7 @@ export function useOfferingExtras(o: OfferingDto, initialOpen: boolean) {
       .then((b: { p1?: P1Year[] | null }) => setP1Fast(Array.isArray(b.p1) ? b.p1 : null))
       .catch(() => setP1Fast(null));
     // 정시터치 서버 조회(모집 정보·발행 기준)는 다른 펼치기·담기와 겹치지 않게 차례로 보낸다
-    enqueue(() => loadExtras(o.offering_id, o.university_name))
+    enqueue(() => load(o.offering_id, o.university_name))
       .then(setExtras)
       .catch(() => setExtras({ ok: false, code: "request_failed" }));
   };
