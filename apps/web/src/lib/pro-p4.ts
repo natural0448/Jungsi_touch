@@ -1,7 +1,7 @@
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
-import type { CatalogSearchDto, OfferingDto, ReferenceBandDto, ReportDto } from "@/lib/dto";
+import type { CatalogSearchDto, OfferingDto, ReferenceBandDto, ReferenceUniversityGroupDto, ReportDto } from "@/lib/dto";
 import { EXAM, stageOf, type InputStage } from "@/lib/exam";
 import type { ProOrganization, ProP4Search, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess, type ProOrg } from "@/lib/pro-access";
@@ -98,6 +98,8 @@ const memo = new Map<string, { at: number; v: P4Result }>();
 export interface P4Result {
   search: CatalogSearchDto<OfferingDto> | null;
   bands: Record<string, ReferenceBandDto>;
+  /** 서버가 준 학교별 판정 묶음 그대로(④ 정시 리포트가 담은 학교의 이름·판정·위치를 채울 때) */
+  groups: ReferenceUniversityGroupDto[];
   /** 서버가 답하지 못했다(연결·한도·준비 안 됨). 검색 모드면 화면이 차분한 안내 한 줄로 바꾼다 */
   failed: string | null;
 }
@@ -115,7 +117,7 @@ async function keyOf(parts: unknown): Promise<string> {
  */
 export async function proP4(caller: Caller, v: ProStudentView, req: { offering_ids?: string[]; search?: ProP4Search }): Promise<P4Result> {
   const shown = v.shown;
-  if (!shown) return { search: null, bands: {}, failed: "no_report" };
+  if (!shown) return { search: null, bands: {}, groups: [], failed: "no_report" };
   const body = { profile_id: shown.profile_id, expected_profile_version: shown.profile_id, ...req };
   const mk = JSON.stringify([v.svc.org_id, v.student.student_id, shown.report_id, shown.profile_id, req]);
   const hit = memo.get(mk);
@@ -124,7 +126,7 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
   try {
     const r = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk]));
     if (!r.ok) {
-      out = { search: null, bands: {}, failed: r.code };
+      out = { search: null, bands: {}, groups: [], failed: r.code };
     } else {
       const bands: Record<string, ReferenceBandDto> = {};
       for (const g of r.value.candidates?.reference_university_groups ?? []) {
@@ -134,10 +136,10 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
           if (typeof id === "string" && b && b.basis === "reference_threshold" && b.source === "g" && BAND_CODES.has(b.code)) bands[id] = b;
         }
       }
-      out = { search: r.value.search ?? null, bands, failed: null };
+      out = { search: r.value.search ?? null, bands, groups: r.value.candidates?.reference_university_groups ?? [], failed: null };
     }
   } catch (e) {
-    if (e instanceof ConnectionError || e instanceof AccessDenied) out = { search: null, bands: {}, failed: e.code };
+    if (e instanceof ConnectionError || e instanceof AccessDenied) out = { search: null, bands: {}, groups: [], failed: e.code };
     else throw e;
   }
   if (out.failed) {

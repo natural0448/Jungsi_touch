@@ -18,7 +18,7 @@ import { MOCK_EXAM } from "@/lib/exam";
 const EXAM_MOCK_ID = () => MOCK_EXAM.exam_id;
 import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../reports/me/report-view";
 import { StudentBar, StudentTabs } from "./student-frame";
-import { proTabHref } from "@/lib/pro-p4";
+import { proP4, proTabHref } from "@/lib/pro-p4";
 import { ProvisionalForm } from "../../../reports/me/provisional-form";
 import { ScoreForm } from "../../../reports/me/score-form";
 import { StageSteps } from "../../../reports/me/stage-steps";
@@ -107,12 +107,25 @@ export async function StudentView({ params, searchParams }: { params: Promise<{ 
   // 담은 학교의 이름은 같은 판의 후보 목록에서 찾는다(별도 조회 없음)
   // 가채점 학교별 판정(서버 dep_pro_r27, source g). 없으면 빈 목록 → '가채점 판정 준비 중'
   const pickedList = shown ? pickedIds(shown.published_result.shortlist) : [];
-  const known = offeringIndex(shown?.published_result.candidates);
+  // ④: ③에서 담은 곳이 ②의 추천 목록(저장된 후보)에 없으면 이름·판정·위치를 전문가용 서버에서 받아 채운다(2026-11-23)
+  let pub = shown?.published_result;
+  if (tab === "report" && shown && pub && provisional) {
+    const listed = offeringIndex(pub.candidates);
+    const missing = pickedList.filter((id) => !listed.has(id)).slice(0, 30);
+    if (missing.length) {
+      const extra = await proP4(caller, { org, svc, student, stage, status, reports, shown, report: null, canEdit: false }, { offering_ids: missing });
+      if (extra.groups.length) {
+        const base = pub.candidates ?? { status: "pending", reason_code: null, basic_university_groups: [], wildcards: [], pending_offerings: [], outside_offerings: [], ineligible_offerings: [], catalog_version: null };
+        pub = { ...pub, candidates: { ...base, reference_university_groups: [...(base.reference_university_groups ?? []), ...extra.groups] } };
+      }
+    }
+  }
+  const known = offeringIndex(pub?.candidates);
   // 상담 팁의 지난 학년도 문장(1페이지 정리본, 서비스 API 를 부르지 않는다). 읽지 못하면 그 문장만 빠진다
   const years = shown && pickedList.length
     ? await counselYears(pickedList.flatMap((id) => (known.get(id) ? [{ offering_id: id, university_name: known.get(id)!.university_name }] : []))).catch(() => ({}))
     : {};
-  const counsel = shown ? counselSchools(shown.published_result, provisional, pickedList, years) : [];
+  const counsel = shown && pub ? counselSchools(pub, provisional, pickedList, years) : [];
   const guide = guideOf(counsel);
   const printHref = shown ? `/pro/students/${encodeURIComponent(student.student_id)}/print?org=${encodeURIComponent(svc.org_id)}&report=${encodeURIComponent(shown.report_id)}&rev=${shown.revision_id}` : "";
   const names = new Map(
