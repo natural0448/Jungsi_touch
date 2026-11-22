@@ -22,7 +22,7 @@ import { RunAnalysis } from "@/components/run-analysis";
 import { BookLoading } from "@/components/book-loading";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
-import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "./report-view";
+import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "./report-view";
 import { PastRecords, pastHref } from "./past-records";
 import { InputStatus, NoInput, canInput } from "./rights";
 import { CorrectionPanel } from "./correction";
@@ -295,6 +295,9 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
             <section aria-labelledby="sub-h" className="rp-sec">
               <h2 id="sub-h">과목별 예상 성적</h2>
               <ProvisionalSubjectsSheet a={a} />
+              {/* 2026-11-23 대표님 요청: 전문가용 정시 리포트와 같이 위치 그래프·반영 조합별 합산(가채점은 가운데 값·범위) */}
+              <ProvisionalPositionChart a={a} />
+              <ProvisionalComboScores a={a} />
             </section>
           </>
         ) : (
