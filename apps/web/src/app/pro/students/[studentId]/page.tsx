@@ -313,14 +313,16 @@ export default async function Page({ params, searchParams }: PageProps<"/pro/stu
           <section className="pro-sec" aria-labelledby="hist-h">
             <h2 id="hist-h">저장한 리포트</h2>
             <ul className="pro-hist">
-              {reports.map((r) => (
-                <li key={`${r.report_id}-${r.revision_id}`}>
+              {/* 같은 리포트의 판(저장·판정 계산마다 오른다)은 한 줄로(2026-11-23: 가채점 저장 직후 같은 시각 줄이 두 번 보였다).
+                  '열기'는 리포트 번호로만 열고, 목록은 최신 판이 먼저 온다 */}
+              {reports.filter((r, i) => reports.findIndex((x) => x.report_id === r.report_id) === i).map((r) => (
+                <li key={r.report_id}>
                   <span>
                     <span className="num">{seoulDateTime(r.created_at_utc)}</span> 저장 · {r.stage === "provisional" ? "수능 가채점" : r.stage === "final" ? "수능 실채점" : "9월 모의평가"}
                     {tagOf(r) && <span className="rp-tag">{tagOf(r)}</span>}
                     {pastOf(r) && <span className="rp-tag">지난 기록</span>}
                   </span>
-                  {shown?.report_id === r.report_id && shown.revision_id === r.revision_id ? (
+                  {shown?.report_id === r.report_id ? (
                     <span className="cur">보는 중</span>
                   ) : (
                     <Link className="btn" href={`${self}&report=${encodeURIComponent(r.report_id)}`}>열기</Link>
