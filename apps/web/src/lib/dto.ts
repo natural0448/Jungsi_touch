@@ -575,6 +575,11 @@ export interface ReportDto {
   stale_analysis_ids?: string[];
   /** 저장된 후보 목록이 지금 자료판과 다른 판으로 만들어졌는지 */
   candidates_stale?: boolean;
+  /**
+   * 화면 서버만 붙이는 값(서버 응답에는 없다). 4페이지 수능 가채점 판정: 모집단위 → 7단계 판정(source g).
+   * university.analyze 응답에만 실려 오는 것을 report-ops provisionalBands 가 모은다(서버 dep_r29, 2026-11-23)
+   */
+  provisional_bands?: Record<string, ReferenceBandDto>;
 }
 
 /** snapshot — report.export. 고정된 revision 의 상담 리포트 */

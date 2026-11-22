@@ -1,7 +1,8 @@
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
-import { PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
+import { PROVISIONAL_JUDGED_TEXT, PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
+import { CsatBadge } from "@/components/csat-badge";
 import { ConditionsBlock, Detail } from "./parts";
 
 /*
@@ -19,7 +20,11 @@ export function cellOf(report: ReportDto | null, id: string): Cell {
 /** 펼친 카드의 환산·누백·판단 카드 */
 /** acts=false: 2페이지 핵심 지원 학교 표에서 펼칠 때(담기·'내 성적 리포트에서 보기' 줄 없음) */
 export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
-  if (report && provisionalOnly(report)) return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
+  if (report && provisionalOnly(report)) {
+    const band = report.provisional_bands?.[o.offering_id];
+    if (band) return <p className="ps-prov-detail"><b>수능 가채점 판정</b> <CsatBadge band={band} /> — {PROVISIONAL_JUDGED_TEXT}</p>;
+    return <p className="ps-prov-detail"><b>가채점 판정 준비 중</b> — {PROVISIONAL_PENDING_TEXT}</p>;
+  }
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
 }
 

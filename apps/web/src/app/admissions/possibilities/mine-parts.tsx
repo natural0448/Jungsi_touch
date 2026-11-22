@@ -8,6 +8,7 @@ export { cellOf, MineConds, MineDetail } from "./mine-detail";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
 import { cellOf } from "./mine-detail";
 import { PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
+import { CsatBadge } from "@/components/csat-badge";
 
 /*
   4페이지에서 '내 리포트'가 있어야 그릴 수 있는 칸들.
@@ -42,7 +43,9 @@ const NO_DATA = <span className="need" title="이 모집단위는 아직 분석 
 export function MineCells({ report, id }: { report: ReportDto | null; id: string }) {
   const a = cellOf(report, id);
   if (report && provisionalOnly(report)) {
-    return <><span className="c-score r">{DASH}</span><span className="c-st">{PROV}</span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
+    // 서버 dep_r29(2026-11-23): 이 모집단위의 학교별 가채점 판정이 붙었으면 7단계 배지, 없으면 '가채점 판정 준비 중'
+    const band = report.provisional_bands?.[id];
+    return <><span className="c-score r">{DASH}</span><span className="c-st">{band ? <CsatBadge band={band} /> : PROV}</span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
   }
   if (a === null) {
     return <><span className="c-score r">{NO_DATA}</span><span className="c-st">{NO_DATA}</span><span className="c-adv r">{NO_DATA}</span><span className="c-pick">{report && <PickButton id={id} on={pickedIds(report).has(id)} />}</span></>;

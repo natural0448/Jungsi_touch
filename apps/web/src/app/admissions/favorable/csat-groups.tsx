@@ -1,20 +1,10 @@
 import { StarButton } from "@/components/star-button";
-import { BAND } from "@/components/offering-parts";
-import type { ReferenceBandDto } from "@/lib/dto";
-import { csatBandText, csatUpper } from "@/lib/provisional-view";
+import { CsatBadge } from "@/components/csat-badge";
+import { csatUpper } from "@/lib/provisional-view";
 import type { ReferenceUniversity } from "@/lib/reference-view";
 import { ReferenceFieldDetails } from "./reference-field";
 
-/** 가채점 7단계 배지. 한 단계면 '적정', 중앙 없이 범위면 '적정~소신'(색은 좋은 끝 단계) */
-function CsatBadge({ band }: { band?: ReferenceBandDto | null }) {
-  if (!band || !BAND[band.code]) return null;
-  const tone = BAND[band.code];
-  const upper = csatUpper(band);
-  const title = upper
-    ? `가채점 점수 범위에 따라 ${BAND[band.code].label}부터 ${BAND[upper].label}까지 나옵니다. 지원 자격은 모집요강에서 확인하세요`
-    : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`;
-  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}</span>;
-}
+// 가채점 7단계 배지는 components/csat-badge.tsx(4페이지와 함께 쓴다)
 
 /**
  * 수능 가채점 리포트의 3번째 화면 목록(dep_r22). 9모 참고 목록과 같은 대학 → 계열 → 학과 묶음·배지·즐겨찾기로 그리되,

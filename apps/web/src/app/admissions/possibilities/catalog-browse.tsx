@@ -12,7 +12,7 @@ import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, to
 import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { provisionalOnly, settleAnalyses, startMine } from "@/lib/report-ops";
+import { provisionalBands, provisionalOnly, settleAnalyses, startMine } from "@/lib/report-ops";
 import { ProvisionalPendingNote } from "@/components/provisional-pending";
 import { InaccurateNotice } from "@/components/inaccurate-notice";
 import { inaccurateSeen } from "@/lib/report-ref";
@@ -89,8 +89,14 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   let shown = items;
   let nextCursor = res.next_cursor;
   let scanned: number | null = null;
-  // 수능 가채점 리포트(2026-11-23 전환): 학교별 판정이 아직 없어 분석 요청·지원가능성 필터를 쓰지 않는다(검색·모집 정보는 그대로)
+  // 수능 가채점 리포트(2026-11-23 전환): 9모 분석 요청·지원가능성 필터는 쓰지 않는다(검색·모집 정보는 그대로)
   const provisional = provisionalOnly(report);
+  // 수능 가채점 학교별 판정(서버 dep_r29, 2026-11-23): 보이는 모집단위만 판정을 받아 붙인다. 받지 못하면 '가채점 판정 준비 중'
+  if (provisional && report) {
+    const got = await provisionalBands(src, caller, report, items.map((o) => o.offering_id));
+    report = { ...report, report_version: got.version, provisional_bands: got.bands };
+  }
+  const provisionalJudged = provisional && Object.keys(report?.provisional_bands ?? {}).length > 0;
   if (cur.st && report && !provisional) {
     const want = new Set<StatusKey>(cur.st);
     const hit = (r: ReportDto, o: OfferingDto) => want.has(statusKeyOf(r.analyses?.[o.offering_id] ?? null, r.overall?.overall));
@@ -126,7 +132,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />
       <div className="wrap pg-body ps">
         <MineBasis report={report} />
-        {provisional && <ProvisionalPendingNote />}
+        {provisional && <ProvisionalPendingNote judged={provisionalJudged} />}
 
         <section className="filter" aria-label="검색 조건">
           <Form action={route.path} prefetch={false} className="search" role="search">

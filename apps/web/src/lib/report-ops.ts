@@ -1,6 +1,6 @@
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
-import type { AssessmentDto, CandidatesDto, OfferingDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
+import type { AssessmentDto, CandidatesDto, OfferingDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
 
@@ -194,6 +194,60 @@ export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: 
     const body = { expected_version: r.report_version, offering_ids: missing };
     return src.analyzeUniversities(caller, r.report_id, r.report_version, missing, await key("ua", r, body));
   });
+}
+
+/*
+  4페이지 수능 가채점 판정(서버 dep_r29, 2026-11-23). 보이는 모집단위를 university.analyze 로 보내면 서버가 3페이지와 같은
+  계산·같은 판정 묶음으로 그 모집단위만 7단계(안정~불가 모두)를 판정해 응답의 candidates.reference_university_groups
+  (행 reference_band, basis reference_threshold, source "g")에 싣는다. 리포트에 저장되지 않아 report.read 에는 없다.
+  - 판정이 없는 모집단위(산식 결속 대기·예외 표시 17곳·이 성적 조합으로 계산 불가)는 응답에 없다 → '가채점 판정 준비 중'.
+  - 실패(연결 오류·409 두 번·옛 서버)는 빈 표 → 지금처럼 '가채점 판정 준비 중'. 오류 화면은 없다.
+  - 같은 리포트·같은 모집단위 묶음은 이 Worker 메모리에 15분 둔다(성적·판정 묶음이 바뀌면 리포트도 바뀐다).
+  - 요청마다 리포트 판이 하나 오른다(3페이지 candidates.build 와 같다). 그래서 쓴 뒤의 판을 함께 돌려준다.
+*/
+// reference-percentile thresholdBandOf 와 같은 검사(시험의 모듈 대체 목록을 늘리지 않으려고 여기 둔다)
+const P4_BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"]);
+const thresholdBandOf = (b: ReferenceBandDto | null | undefined): ReferenceBandDto | null =>
+  b && b.basis === "reference_threshold" && typeof b.code === "string" && P4_BAND_CODES.has(b.code) ? b : null;
+const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; at: number }>();
+export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number }> {
+  const none = { bands: {}, version: report.report_version };
+  if (!provisionalOnly(report)) return none;
+  const targets = canonicalOfferingIds(ids).slice(0, 100);
+  if (targets.length === 0) return none;
+  const mk = JSON.stringify([report.report_id, report.profile_id, targets]);
+  const hit = provisionalMemo.get(mk);
+  if (hit && Date.now() - hit.at <= REFERENCE_TTL_MS) return { bands: hit.bands, version: report.report_version };
+  let state: ReportState;
+  try {
+    state = await retryOnConflict(src, caller, report, async (r) => {
+      const body = { expected_version: r.report_version, offering_ids: targets };
+      return src.analyzeUniversities(caller, r.report_id, r.report_version, targets, await key("uap", r, body));
+    });
+  } catch (e) {
+    logSettle("p4_csat_failed", { thrown: true });
+    return none;
+  }
+  if (state.kind !== "ready") {
+    logSettle("p4_csat_failed", { thrown: false, conflict: state.kind === "failed" && state.code === "revision_conflict" });
+    return none;
+  }
+  const want = new Set(targets);
+  const bands: Record<string, ReferenceBandDto> = {};
+  for (const g of state.report.candidates?.reference_university_groups ?? []) {
+    for (const it of g.offerings ?? []) {
+      const id = it.offering?.offering_id;
+      const b = thresholdBandOf(it.reference_band);
+      if (typeof id === "string" && want.has(id) && b && b.source === "g") bands[id] = b;
+    }
+  }
+  logSettle("p4_csat", { asked: targets.length, judged: Object.keys(bands).length });
+  if (Object.keys(bands).length) {
+    provisionalMemo.delete(mk);
+    provisionalMemo.set(mk, { bands, at: Date.now() });
+    while (provisionalMemo.size > REFERENCE_MAX) provisionalMemo.delete(provisionalMemo.keys().next().value as string);
+  }
+  return { bands, version: Math.max(report.report_version, state.report.report_version) };
 }
 
 /** 후보가 아직 없으면 candidates.build 로 만든다 */
