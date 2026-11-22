@@ -266,3 +266,18 @@
   .et .rf-hd,.et .rf-fg>summary{flex-wrap:wrap}
   .et .rf-fg>summary .rf-best{flex-basis:100%;text-align:right}
 }
+
+/* 9월 모의평가 기준으로 보기(2026-11-22): 입구 한 줄과 읽기 전용 머리 띠 */
+.et .fv-past-entry{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;font-size:13px;color:var(--muted)}
+.et .fv-past{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:10px}
+.et .fv-past-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.et .fv-past-meta .btn{margin-left:auto}
+.et .fv-past-tag,.et .fv-past-cur{display:inline-block;padding:1px 8px;border-radius:10px;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700}
+.et .fv-past-cur{margin-left:8px}
+.et .fv-past .fv-note{margin:0}
+.et .fv-past-list{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.et .fv-past-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+.et .fv-past-list .on{font-size:12px;font-weight:700;color:var(--brand)}
+@media (max-width:640px){
+  .et .fv-past-meta .btn{margin-left:0}
+}

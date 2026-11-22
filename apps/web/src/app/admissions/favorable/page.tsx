@@ -22,7 +22,11 @@ import { RunAnalysis } from "@/components/run-analysis";
 import type { StatsPromise } from "@/components/stats-slot";
 import { viewPath } from "@/lib/content-view";
 import { lockFor, page } from "@/lib/routes";
-import { FILTERS, hrefWith, parseQuery } from "./query";
+import { FILTERS, hrefWith, parseQuery, pastFavorableHref, type Query } from "./query";
+import { csatOpen, MOCK_EXAM } from "@/lib/exam";
+import { isProvisionalOverall, type OwnReportListDto } from "@/lib/dto";
+import { choosePastReport, hasMockReports } from "@/lib/past-mock";
+import { seoulDateTime } from "@/lib/format";
 import { bestDelta, SchoolCard } from "./school-card";
 import { ReferenceWildcardDeck, WildcardDeck } from "./wildcard";
 import { ReferenceGroups } from "./reference-groups";
@@ -65,13 +69,21 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
       {head}
       {/* 필터·검색·다음 쪽처럼 목록이 바뀌면 key 가 바뀌어 다시 책 넘김을 보인다(펼치기 open 만 바뀌면 그대로, 2026-11-21) */}
       <Suspense key={listKey(sp)} fallback={<BookLoading name={name} kind={catalogView ? "possibilities" : "favorable"} />}>
-        {catalogView ? <CatalogBrowse src={src} caller={caller} sp={sp} route={route} features={FEATURES} catalogView /> : <Body src={src} caller={caller} sp={sp} />}
+        {catalogView ? (
+          <CatalogBrowse src={src} caller={caller} sp={sp} route={route} features={FEATURES} catalogView />
+        ) : csatOpen() && parseQuery(sp).past ? (
+          <PastBody src={src} caller={caller} sp={sp} />
+        ) : (
+          <Body src={src} caller={caller} sp={sp} />
+        )}
       </Suspense>
     </>
   );
 }
 
-async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp: Awaited<PageProps<"/admissions/favorable">["searchParams"]> }) {
+type SP = Awaited<PageProps<"/admissions/favorable">["searchParams"]>;
+
+async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp: SP }) {
   const p3 = page("PAGE-03");
   const cur = parseQuery(sp);
   let state: ReportState;
@@ -98,6 +110,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       <>
         <div className="wrap pg-body fv">
           <ScoreBasis overall={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
+          <PastEntrySlot src={src} caller={caller} />
           <section className="gate flat">
             <h2>성적을 넣으면 유리한 학교를 찾아 드립니다</h2>
             <p>성적 없이 대학·학과를 둘러보려면 {p3.label}에서 검색하세요. 모집 정보는 성적 없이도 볼 수 있습니다.</p>
@@ -126,6 +139,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       return (
         <div className="wrap pg-body fv">
           <ScoreBasis overall={report.overall} emptyText="" />
+          <PastEntrySlot src={src} caller={caller} />
           <ProvisionalPendingGate catalogHref={`${route.path}?view=catalog`} />
         </div>
       );
@@ -137,6 +151,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
         <MemberMark kind="recommend" path={viewPath(route.path, sp)} />
         <div className="wrap pg-body fv">
           <ScoreBasis overall={report.overall} emptyText="" />
+          <PastEntrySlot src={src} caller={caller} />
           <section className="fv-main fv-refmode" aria-label="유리한 대학">
             <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
           </section>
@@ -147,12 +162,68 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       </>
     );
   }
+  return <ReportBody src={src} caller={caller} sp={sp} cur={cur} report={report} />;
+}
+
+/** 9월 기준 보기에서 연 리포트와 고를 수 있는 9월 리포트 목록 */
+interface PastView {
+  items: OwnReportListDto["items"];
+  reportId: string;
+  savedAt: string | null;
+}
+
+/**
+ * 9월 모의평가 기준으로 보기(2026-11-22 대표님 결정). 수능 가채점 전환 뒤에도 9월 리포트를 저장한 회원은
+ * 그 리포트로 찾은 3페이지를 읽기 전용으로 본다(2페이지 지난 기록과 같은 방식).
+ * - 목록(report.list-own, exam_id=9월)에 있는 리포트만 연다. 가채점 리포트는 그리지 않는다.
+ * - 후보 목록은 candidates.build 를 한 번 시도하고(settleCandidates), 거절·실패면 리포트에 저장된 기본 목록으로 그린다.
+ * - 담기·빼기·분석 계산은 하지 않는다(지금의 리포트를 바꾸지 않는다). 별표(즐겨찾기)는 리포트와 무관해 그대로 둔다.
+ * - 어떤 실패에도 오류 화면·요청 제한 안내 대신 차분한 안내와 돌아가기 링크를 보인다.
+ */
+async function PastBody({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp: SP }) {
+  const cur = parseQuery(sp);
+  let list: OwnReportListDto;
+  try {
+    list = await src.listOwnReports(caller, { exam_id: MOCK_EXAM.exam_id, limit: 20 });
+  } catch (e) {
+    if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
+    if (!(e instanceof ConnectionError)) logSettleError("p3-past-list", e);
+    return <PastUnavailable />;
+  }
+  const { items, chosen } = choosePastReport(list?.items, MOCK_EXAM.exam_id, cur.report);
+  if (!chosen) return <PastUnavailable empty />;
+  let report: ReportDto | null;
+  try {
+    report = await src.readReport(caller, chosen.report_id);
+  } catch (e) {
+    if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;
+    if (!(e instanceof ConnectionError)) logSettleError("p3-past-read", e);
+    return <PastUnavailable />;
+  }
+  if (!report || !report.overall || isProvisionalOverall(report.overall) || provisionalOnly(report)) return <PastUnavailable />;
+  // 저장 시각은 후보를 만들기 전에 읽은 값으로 보인다
+  const past: PastView = { items, reportId: report.report_id, savedAt: report.updated_at ?? chosen.updated_at ?? null };
+  try {
+    // 9월 리포트로 candidates.build 를 시도한다. 15분 안에 같은 리포트로 받은 목록이 있으면 다시 만들지 않는다(reuse).
+    // 서버가 거절하거나(닫힌 단계 등) 실패하면 settleCandidates 는 받은 리포트를 그대로 돌려준다 — 저장된 기본 목록으로 그린다
+    report = await settleCandidates(src, caller, report, { reuse: true });
+  } catch (e) {
+    logSettleError("p3-past-candidates", e);
+  }
+  return <ReportBody src={src} caller={caller} sp={sp} cur={{ ...cur, past: true, report: past.reportId }} report={report} past={past} />;
+}
+
+async function ReportBody({ src, caller, sp, cur, report, past }: { src: JungsiSource; caller: Caller; sp: SP; cur: Query; report: ReportDto; past?: PastView }) {
+  const p3 = page("PAGE-03");
+  const strip = past ? <PastStrip past={past} /> : <PastEntrySlot src={src} caller={caller} />;
   const c = report.candidates;
+  if (!c && past) return <PastUnavailable strip={strip} />;
   if (!c) {
     return (
       <>
         <div className="wrap pg-body fv">
           <ScoreBasis overall={report.overall} emptyText="" />
+          {strip}
           <RunAnalysis
             title="유리한 학교 목록을 아직 만들지 못했습니다"
             desc="화면을 열 때 자동으로 만들었지만 이번에는 끝나지 않았습니다. 누르면 저장한 성적으로 학교 목록과 와일드카드를 다시 만듭니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
@@ -209,7 +280,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     refWild = referenceWildcards(refPool);
     // 서버 문턱 판정 행(dep_r15)은 누백 없이 온다. 와일드카드 카드는 누백·유불리를 바로 보이므로, 고른 카드 중 아직 계산하지 않은 곳만
     // (최대 4곳) 그리기 전에 내 성적으로 계산해 정확한 값으로 그린다. 목록의 학과들은 계열을 펼칠 때 계산한다(reference-field.tsx)
-    const wildPending = [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
+    // 9월 기준 보기(읽기 전용)에서는 계산하지 않는다(리포트에 쓰지 않는다). 계산 전 카드는 문턱 판정만으로 그린다
+    const wildPending = past ? [] : [...refWild.featured, ...refWild.rest].filter((w) => w.pending).map((w) => w.offering.offering_id);
     if (wildPending.length > 0) {
       const settled = await settleAnalyses(src, caller, report, wildPending);
       viewVersion = Math.max(viewVersion, settled.report_version);
@@ -225,6 +297,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     refUniversities = [];
   }
   const refWildCount = refWild.featured.length + refWild.rest.length;
+  // 9월 기준 보기에서 기본 목록·와일드카드·대학 목록이 모두 비면(후보를 만들지 못했을 때) 차분한 안내로 대신한다
+  if (past && referenceMode && refGroups.length === 0) return <PastUnavailable strip={strip} />;
   const tail = (
     <>
       {(outsideCount > 0 || ineligibleCount > 0) && (
@@ -245,6 +319,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       <MemberMark kind="recommend" path={view} />
       <div className="wrap pg-body fv">
         <ScoreBasis overall={report.overall} emptyText="" />
+        {strip}
 
         {/* '후보 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).
             옛 자료판 후보는 화면을 열 때 서버가 조용히 다시 확인한다(report-ops settleCandidates) */}
@@ -278,7 +353,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
                 </div>
               </section>
             ) : (
-              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} outsideBand={refPool.outsideBand} p3Label={p3.label} reportId={report.report_id} reportVersion={viewVersion} />
+              <ReferenceGroups universities={refUniversities} favs={favs} below={refPool.below} noCutoff={refPool.noCutoff} ineligible={refPool.ineligible} outsideBand={refPool.outsideBand} p3Label={p3.label} reportId={report.report_id} reportVersion={viewVersion} readOnly={!!past} />
             )}
             {tail}
           </section>
@@ -328,7 +403,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
             ) : (
               <div className="fv-list">
                 {shown.map((g) => (
-                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} favs={favs} stats={stats} statsKey={qk} />
+                  <SchoolCard key={g.university_id} g={g} cur={cur} picked={picked} favs={favs} stats={stats} statsKey={qk} canPick={!past} />
                 ))}
               </div>
             )}
@@ -340,15 +415,94 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           </section>
 
           <aside className="fv-side" aria-label="와일드카드">
-            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} favs={favs} stats={stats} statsKey={qk} canPick analysisPending={report.analysis_status?.status === "pending"} />
+            <WildcardDeck picks={wildcards} selection={c?.wildcard_selection} picked={picked} favs={favs} stats={stats} statsKey={qk} canPick={!past} analysisPending={report.analysis_status?.status === "pending"} />
           </aside>
         </div>
         )}
       </div>
-      <Suspense key={qk} fallback={null}>
-        <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />
-      </Suspense>
+      {/* 담은 학교 띠(담기·빼기)는 지금의 리포트용이다. 9월 기준 보기에서는 두지 않는다 */}
+      {!past && (
+        <Suspense key={qk} fallback={null}>
+          <StreamTray report={report} known={known} src={src} caller={caller} other="PAGE-03" />
+        </Suspense>
+      )}
     </>
+  );
+}
+
+/** 이 회원에게 9월 모의평가 리포트가 있는가(1개만 읽는다). 어떤 실패에도 false — 링크를 숨기고 오류는 보이지 않는다 */
+async function hasPastMockReport(src: JungsiSource, caller: Caller): Promise<boolean> {
+  try {
+    return hasMockReports(await src.listOwnReports(caller, { exam_id: MOCK_EXAM.exam_id, limit: 1 }), MOCK_EXAM.exam_id);
+  } catch {
+    return false;
+  }
+}
+
+/** '9월 모의평가 기준으로 보기' 입구. 수능 가채점 전환 뒤, 9월 리포트를 저장한 회원에게만 보인다. 확인을 기다리는 동안은 아무것도 그리지 않는다 */
+function PastEntrySlot({ src, caller }: { src: JungsiSource; caller: Caller }) {
+  if (!csatOpen()) return null;
+  return (
+    <Suspense fallback={null}>
+      <PastEntry src={src} caller={caller} />
+    </Suspense>
+  );
+}
+async function PastEntry({ src, caller }: { src: JungsiSource; caller: Caller }) {
+  if (!(await hasPastMockReport(src, caller))) return null;
+  return (
+    <p className="fv-past-entry">
+      <Link prefetch={false} className="btn" href={pastFavorableHref()}>9월 모의평가 기준으로 보기</Link>
+      <span>저장한 9월 모의평가 성적으로 찾은 학교를 읽기 전용으로 봅니다.</span>
+    </p>
+  );
+}
+
+/** 9월 기준 보기의 머리 띠: 어떤 기준인지, 저장 시각, 돌아가기, 9월 리포트가 여럿이면 고르기 */
+function PastStrip({ past }: { past: PastView }) {
+  return (
+    <section className="fv-past" aria-label="9월 모의평가 기준 보기">
+      <div className="fv-past-meta">
+        <span className="fv-past-tag">9월 모의평가 기준 · 지난 기록 · 읽기 전용</span>
+        {past.savedAt && <span><span className="num">{seoulDateTime(past.savedAt)}</span> 저장</span>}
+        <Link prefetch={false} className="btn" href={route.path}>수능 가채점 기준으로 돌아가기</Link>
+      </div>
+      <p className="fv-note">9월 모의평가 때 저장한 성적으로 찾은 학교입니다. 이 화면에서는 학교를 담거나 빼지 않으며 지금의 수능 가채점 리포트는 바뀌지 않습니다. 별표(즐겨찾기)는 그대로 쓸 수 있습니다.</p>
+      {past.items.length > 1 && (
+        <ul className="fv-past-list" aria-label="저장한 9월 모의평가 리포트">
+          {past.items.map((i) => (
+            <li key={i.report_id}>
+              <span>
+                <span className="num">{seoulDateTime(i.updated_at)}</span> 저장
+                {i.is_current && <span className="fv-past-cur">마지막 9월 성적</span>}
+              </span>
+              {i.report_id === past.reportId ? <span className="on">보는 중</span> : <Link prefetch={false} className="btn" href={pastFavorableHref(i.report_id)}>열기</Link>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/** 9월 기준 목록을 그릴 수 없을 때의 차분한 안내(오류 화면·요청 제한 안내를 보이지 않는다) */
+function PastUnavailable({ strip, empty }: { strip?: React.ReactNode; empty?: boolean }) {
+  return (
+    <div className="wrap pg-body fv">
+      {strip}
+      <section className="gate flat">
+        <h2>{empty ? "저장한 9월 모의평가 리포트가 없습니다" : "9월 기준 추천 목록을 지금 불러올 수 없습니다"}</h2>
+        <p>
+          {empty
+            ? "9월 모의평가 성적을 저장한 적이 없어 9월 기준으로 볼 학교 목록이 없습니다."
+            : "잠시 뒤 다시 열어 주세요. 저장한 9월 리포트의 성적과 담아 둔 학교는 내 성적 리포트의 지난 기록에서 볼 수 있습니다."}
+        </p>
+        <div className="acts">
+          <Link prefetch={false} className="btn p" href={route.path}>수능 가채점 기준으로 돌아가기</Link>
+          {!empty && <Link prefetch={false} className="btn" href={`${page("PAGE-02").path}?past=1`}>지난 기록 보기</Link>}
+        </div>
+      </section>
+    </div>
   );
 }
 

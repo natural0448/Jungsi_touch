@@ -14,3 +14,22 @@ export function hasMockReports(list: Pick<OwnReportListDto, "items"> | null | un
 export function studentHasMockReports(rows: readonly { exam_id?: string | null; stage?: string | null }[] | null | undefined, mockExamId: string): boolean {
   return !!rows && rows.some((r) => r.exam_id === mockExamId || r.stage === "mock");
 }
+
+type PastItem = OwnReportListDto["items"][number];
+
+/**
+ * 3페이지 '9월 모의평가 기준으로 보기'(2026-11-22 대표님 결정)에서 열 리포트를 고른다.
+ * 목록(report.list-own, exam_id=9월)에 있는 9월 리포트만 대상이다. 최근 저장이 먼저.
+ * 주소의 report 가 목록에 있으면 그것, 아니면 '마지막 9월 성적'(is_current), 그것도 없으면 가장 최근 저장.
+ */
+export function choosePastReport<T extends Pick<PastItem, "report_id" | "updated_at"> & { exam_id?: string | null; is_current?: boolean | null }>(
+  items: readonly T[] | null | undefined,
+  mockExamId: string,
+  requested?: string | null,
+): { items: T[]; chosen: T | null } {
+  const list = (Array.isArray(items) ? items : [])
+    .filter((i) => i && typeof i.report_id === "string" && (!i.exam_id || i.exam_id === mockExamId))
+    .sort((a, b) => String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")));
+  const chosen = (requested ? list.find((i) => i.report_id === requested) : undefined) ?? list.find((i) => i.is_current) ?? list[0] ?? null;
+  return { items: list, chosen };
+}

@@ -22,7 +22,8 @@ export function bestDelta(g: Group): number | null {
  * 응답에 학교 분류가 없으므로 학교에 색을 칠하지 않고, 색이 있는 판단은 학과마다 따로 붙인다(REQ-05).
  * '찾은 이유'는 서버가 만든 학과별 이유(recommendation_reasons, 1.7.0)를 그대로 쓰고, 없으면 응답 숫자만으로 적는다.
  */
-export function SchoolCard({ g, cur, picked, favs, stats, statsKey }: { g: Group; cur: Query; picked: Set<string>; favs: Set<string> | null; stats: StatsPromise; statsKey: string }) {
+/** canPick=false: 9월 기준 보기(읽기 전용)처럼 담기 버튼을 두지 않는 화면 */
+export function SchoolCard({ g, cur, picked, favs, stats, statsKey, canPick = true }: { g: Group; cur: Query; picked: Set<string>; favs: Set<string> | null; stats: StatsPromise; statsKey: string; canPick?: boolean }) {
   const open = cur.open === g.university_id;
   const counts = new Map<Category, number>();
   for (const o of g.offerings) counts.set(o.assessment.category, (counts.get(o.assessment.category) ?? 0) + 1);
@@ -129,7 +130,7 @@ export function SchoolCard({ g, cur, picked, favs, stats, statsKey }: { g: Group
                   <span className="c-adv r"><AdvantageCell a={a} /></span>
                   <span className="c-pick">
                     {favs && <StarButton id={o.offering_id} on={favs.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}
-                    <PickButton id={o.offering_id} on={picked.has(o.offering_id)} />
+                    {canPick && <PickButton id={o.offering_id} on={picked.has(o.offering_id)} />}
                   </span>
                 </div>
                 <SchoolReflectedLine a={a} compact />
