@@ -31,6 +31,7 @@ import { bestDelta, SchoolCard } from "./school-card";
 import { ReferenceWildcardDeck, WildcardDeck } from "./wildcard";
 import { ReferenceGroups } from "./reference-groups";
 import { CsatGroups } from "./csat-groups";
+import { CsatCandidates } from "./csat-candidates";
 import { csatView } from "@/lib/provisional-view";
 import { referenceGroups } from "@/lib/reference-percentile";
 import { referencePool, referenceUniversities, referenceWildcards } from "@/lib/reference-view";
@@ -153,6 +154,8 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           <ScoreBasis overall={report.overall} emptyText="" />
           <PastEntrySlot src={src} caller={caller} />
           <section className="fv-main fv-refmode" aria-label="유리한 대학">
+            {/* 가채점 후보(도전·핵심·여유, 2026-11-23 대표님 결정) — 아래 7단계 목록과 같은 판정으로 묶는다 */}
+            <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} />
             <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
           </section>
         </div>

@@ -11,15 +11,15 @@ import { ReferenceFieldDetails } from "./reference-field";
  * 가채점에는 누백·지난해 합격선 위치·환산 유불리가 없어 그 줄은 두지 않는다. 계열을 펼칠 때 계산(university.analyze)도 하지 않는다
  * (가채점 4페이지 상세는 아직 보류).
  */
-export function CsatGroups({ universities, favs, outsideBand, p3Label }: { universities: ReferenceUniversity[]; favs: Set<string> | null; outsideBand: number; p3Label: string }) {
+export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, lead, note = true, hid = "csat-t" }: { universities: ReferenceUniversity[]; favs: Set<string> | null; outsideBand: number; p3Label: string; heading?: string; lead?: string; note?: boolean; hid?: string }) {
   if (universities.length === 0) return null;
   return (
-    <section className="fv-ref" aria-labelledby="csat-t">
+    <section className="fv-ref" aria-labelledby={hid}>
       <div className="fv-sec-hd">
-        <h2 id="csat-t">
-          가채점으로 본 지원에 유리한 대학 <span className="num">{universities.length}</span>
+        <h2 id={hid}>
+          {heading ?? "가채점으로 본 지원에 유리한 대학"} <span className="num">{universities.length}</span>
         </h2>
-        <span>가채점 성적을 학교마다 그 대학 방식으로 계산해 안정~상향에 드는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다.</span>
+        <span>{lead ?? "가채점 성적을 학교마다 그 대학 방식으로 계산해 안정~상향에 드는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다."}</span>
       </div>
       <div className="fv-ref-list">
         {universities.map((u) => (
@@ -69,11 +69,11 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label }: { unive
           </article>
         ))}
       </div>
-      <p className="fv-ref-note">
+      {note && <p className="fv-ref-note">
         가채점 원점수로 추정한 표준점수·백분위를 학교마다 그 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 추정이 한 값으로 모이지 않으면 범위(예: 적정~소신)로 보입니다.
         실채점 성적이 나오면 달라질 수 있고, 합격 가능성 판정이 아니며 올해 모집인원·지원자에 따라 달라집니다.
         {outsideBand > 0 && <> 판정이 도전·불가인 {outsideBand}곳은 넣지 않았습니다.</>} 목록에 없는 학과는 {p3Label}에서 검색할 수 있습니다.
-      </p>
+      </p>}
     </section>
   );
 }

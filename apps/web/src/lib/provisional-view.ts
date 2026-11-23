@@ -67,3 +67,52 @@ export function csatView(c: CandidatesDto | null | undefined): CsatView {
     judged: gSummary && n(sum!.judged) > 0 ? n(sum!.judged) : items.length,
   };
 }
+
+/*
+  가채점 참고 후보(2026-11-23 대표님 결정, 담당자 검토안 reference_candidate_policy: '가채점 참고 후보').
+  학교별 가채점 7단계를 기본 후보 3그룹으로 묶는다: 안정·하향 → 여유, 적정 → 핵심, 소신·상향 → 도전. 도전·불가는 넣지 않는다.
+  범위 판정(적정~소신 등)은 두 끝이 같은 그룹일 때만 넣고, 그룹이 다르거나 한 끝이 빠지는 그룹이면 보류(넣지 않음)한다.
+  정식 판정(status ready)의 기본 후보와 다르며 화면에는 '가채점 후보'로 보인다('참고' 꼬리표 없음, 11-22 결정).
+*/
+export type CsatCandidateGroup = "challenge" | "core" | "room";
+export const CSAT_CANDIDATE_GROUP: Record<BandCode, CsatCandidateGroup | null> = {
+  stable: "room", downward: "room", target: "core", aspirational: "challenge", upward: "challenge", challenge: null, outside: null,
+};
+export const CSAT_CANDIDATE_LABEL: Record<CsatCandidateGroup, string> = { challenge: "도전", core: "핵심", room: "여유" };
+export interface CsatCandidateView {
+  groups: Record<CsatCandidateGroup, ReferenceUniversity[]>;
+  counts: Record<CsatCandidateGroup, number>;
+  /** 범위가 두 그룹에 걸쳐 보류한 학과 수 */
+  held: number;
+}
+export function csatCandidateGroupOf(b: ReferenceBandDto): CsatCandidateGroup | null {
+  const g = CSAT_CANDIDATE_GROUP[b.code];
+  if (!g) return null;
+  const u = csatUpper(b);
+  if (u && CSAT_CANDIDATE_GROUP[u] !== g) return null;
+  return g;
+}
+export function csatCandidateView(c: CandidatesDto | null | undefined): CsatCandidateView {
+  const by: Record<CsatCandidateGroup, ReferenceItem[]> = { challenge: [], core: [], room: [] };
+  let held = 0;
+  try {
+    for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
+      const band = csatBandOf(it.reference_band);
+      if (!band || !CSAT_CANDIDATE_GROUP[band.code]) continue;
+      const g = csatCandidateGroupOf(band);
+      if (!g) {
+        held++;
+        continue;
+      }
+      by[g].push({ offering: it.offering, reference_percentile: null, advantage: null, margin: null, band, pending: false });
+    }
+  } catch {
+    return { groups: { challenge: [], core: [], room: [] }, counts: { challenge: 0, core: 0, room: 0 }, held: 0 };
+  }
+  const uni = (items: ReferenceItem[]) => (items.length ? referenceUniversities({ items, below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 }) : []);
+  return {
+    groups: { challenge: uni(by.challenge), core: uni(by.core), room: uni(by.room) },
+    counts: { challenge: by.challenge.length, core: by.core.length, room: by.room.length },
+    held,
+  };
+}

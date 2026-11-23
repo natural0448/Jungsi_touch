@@ -2,6 +2,7 @@ import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
 import { ConditionsBlock, CsatDetail, Detail } from "./parts";
+import { csatExceptionView } from "@/lib/csat-exceptions";
 
 /*
   4페이지·2페이지 펼친 상세에서 '내 리포트'로 그리는 카드. 서버 화면과 브라우저 화면(전문가용 인쇄 print-sheet → report-view)이
@@ -20,7 +21,7 @@ export function cellOf(report: ReportDto | null, id: string): Cell {
 export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
   if (report && provisionalOnly(report)) {
     // 2026-11-23 대표님 요청: 9월 모의평가 때와 같은 상세 카드(가채점 값으로)
-    return <CsatDetail o={o} band={report.provisional_bands?.[o.offering_id] ?? null} extras={null} picked={pickedIds(report).has(o.offering_id)} acts={acts} />;
+    return <CsatDetail o={o} band={report.provisional_bands?.[o.offering_id] ?? null} exception={csatExceptionView(o.offering_id, report.overall)} extras={null} picked={pickedIds(report).has(o.offering_id)} acts={acts} />;
   }
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
 }

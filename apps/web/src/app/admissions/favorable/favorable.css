@@ -281,3 +281,9 @@
 @media (max-width:640px){
   .et .fv-past-meta .btn{margin-left:0}
 }
+/* 가채점 참고 후보(2026-11-23): 그룹마다 접고 펼친다 */
+.et .fv-csat-cands{display:grid;gap:10px;margin-top:22px}
+.et .fv-cand-g{border:1px solid var(--line);border-radius:var(--r-card);padding:10px 14px;background:var(--bg)}
+.et .fv-cand-g>summary{cursor:pointer;font-size:15px;color:var(--deep);list-style-position:inside}
+.et .fv-cand-g>summary b{font-weight:900;margin-right:4px}
+.et .fv-cand-g .fv-ref{margin-top:10px}

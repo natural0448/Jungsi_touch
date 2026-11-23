@@ -1,3 +1,5 @@
+import type { ExceptionView } from "@/lib/csat-exceptions";
+import { exceptionCls } from "@/lib/csat-exceptions";
 import Link from "@/components/link";
 import { ADVANTAGE_WORD, BAND, CATEGORY, CategoryBadge, decisionOf, referenceBandOf, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
@@ -84,7 +86,8 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
  * - 지원가능성: 학교별 가채점 7단계(범위면 '적정~소신')와 단계 안 위치
  * - 대학 안 내 위치·환산 유불리: 가채점 곡선 계산(다음 단계) 전이라 보류로 보인다
  */
-export function CsatDetail({ o, band, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
+export function CsatDetail({ o, band, exception = null, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
+  const ex = band ? null : exception;
   const p2 = page("PAGE-02").path;
   const s = band?.school_score ?? null;
   const range = s ? (s.low === s.high ? s.low : `${s.low}~${s.high}`) : null;
@@ -94,7 +97,7 @@ export function CsatDetail({ o, band, extras, picked, acts = true }: { o: Offeri
   const items = [
     { k: "점수 변환", ok: !!s, label: s ? "가채점 추정" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
     { k: "대학 안 내 위치", ok: false, label: undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
-    { k: "지원 판단", ok: !!band, label: band ? "판정" : undefined, why: "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
+    { k: "지원 판단", ok: !!band || ex?.kind === "minimum", label: band ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
   ];
   return (
     <>
@@ -147,6 +150,11 @@ export function CsatDetail({ o, band, extras, picked, acts = true }: { o: Offeri
                 </p>
               )}
               <p>가채점 원점수로 추정한 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다.</p>
+            </>
+          ) : ex ? (
+            <>
+              <div><span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span></div>
+              <p>{ex.desc}</p>
             </>
           ) : (
             <>

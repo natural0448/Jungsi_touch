@@ -1,0 +1,43 @@
+import type { CandidatesDto } from "@/lib/dto";
+import { CSAT_CANDIDATE_LABEL, csatCandidateView, type CsatCandidateGroup } from "@/lib/provisional-view";
+import { CsatGroups } from "./csat-groups";
+
+/*
+  가채점 후보(2026-11-23 대표님 결정, 담당자 검토안의 '가채점 참고 후보' — 화면에는 '참고' 꼬리표를 달지 않는다, 11-22 결정). 학교별 가채점 7단계를 도전·핵심·여유로 묶어 기본 후보 자리에 보인다
+  (안정·하향 → 여유, 적정 → 핵심, 소신·상향 → 도전, 범위가 두 그룹에 걸치면 보류). 정식 판정 후보가 아니라 가채점 판정으로 고른 후보다.
+  그룹마다 3페이지 참고 목록과 같은 대학 → 계열 → 학과 묶음·배지·별표로 그린다. 핵심만 펼친 채로 시작한다.
+*/
+const ORDER: CsatCandidateGroup[] = ["challenge", "core", "room"];
+const LEAD: Record<CsatCandidateGroup, string> = {
+  challenge: "가채점 판정이 소신·상향인 학과입니다. 점수 변동에 따라 결과가 크게 달라질 수 있는 도전 지원 후보입니다.",
+  core: "가채점 판정이 적정인 학과입니다. 지원의 중심으로 검토할 후보입니다.",
+  room: "가채점 판정이 안정·하향인 학과입니다. 안정적으로 검토할 수 있는 후보입니다.",
+};
+
+export function CsatCandidates({ c, favs, p3Label }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string }) {
+  const v = csatCandidateView(c);
+  const total = v.counts.challenge + v.counts.core + v.counts.room;
+  if (total === 0) return null;
+  return (
+    <section className="fv-csat-cands" aria-labelledby="csat-cand-t">
+      <div className="fv-sec-hd">
+        <h2 id="csat-cand-t">가채점 후보</h2>
+        <span>
+          가채점 성적을 학교마다 그 대학 방식으로 계산한 판정으로 도전 <b className="num">{v.counts.challenge}</b> · 핵심 <b className="num">{v.counts.core}</b> · 여유{" "}
+          <b className="num">{v.counts.room}</b>개 학과를 골랐습니다. 성적표가 나오면 정식 후보로 다시 확인해 주세요.
+        </span>
+      </div>
+      {ORDER.map((g) =>
+        v.groups[g].length ? (
+          <details key={g} className="fv-cand-g" open={g === "core"}>
+            <summary>
+              <b>{CSAT_CANDIDATE_LABEL[g]}</b> <span className="num">{v.counts[g]}</span>개 학과 · <span className="num">{v.groups[g].length}</span>개 대학
+            </summary>
+            <CsatGroups universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} />
+          </details>
+        ) : null,
+      )}
+      {v.held > 0 && <p className="fv-ref-note">가채점 점수 범위에 따라 판정이 두 그룹에 걸친 {v.held}개 학과는 후보에 넣지 않았습니다. 아래 유리한 대학 목록에서 확인할 수 있습니다.</p>}
+    </section>
+  );
+}

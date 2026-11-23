@@ -15,6 +15,7 @@ import { proFavorites } from "@/lib/pro-favorites";
 import { loadProStudent, proTabHref } from "@/lib/pro-p4";
 import { page } from "@/lib/routes";
 import { CsatGroups } from "../../../../admissions/favorable/csat-groups";
+import { CsatCandidates } from "../../../../admissions/favorable/csat-candidates";
 import { findCandidates } from "../../../actions";
 import { ActionButton } from "../../../action-button";
 import { StudentBar, StudentTabs } from "../student-frame";
@@ -84,6 +85,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <ScoreBasis overall={report.overall} emptyText="" />
           {csat.universities.length > 0 ? (
             <section className="fv-main fv-refmode" aria-label="유리한 대학">
+              <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} />
               <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
             </section>
           ) : (
