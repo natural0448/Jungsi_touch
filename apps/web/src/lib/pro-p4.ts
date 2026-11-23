@@ -1,3 +1,4 @@
+import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete } from "@/lib/report-pure";
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
@@ -94,7 +95,7 @@ export function proTabHref(orgId: string, studentId: string, tab: "" | "favorabl
 
 /* ── ③ 가채점 판정·검색 ── */
 const TTL_MS = 15 * 60_000, MAX = 300;
-const memo = new Map<string, { at: number; v: P4Result }>();
+const memo = new Map<string, { at: number; v: P4Result; ttl: number }>();
 export interface P4Result {
   search: CatalogSearchDto<OfferingDto> | null;
   bands: Record<string, ReferenceBandDto>;
@@ -121,10 +122,16 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
   const body = { profile_id: shown.profile_id, expected_profile_version: shown.profile_id, ...req };
   const mk = JSON.stringify([v.svc.org_id, v.student.student_id, shown.report_id, shown.profile_id, req]);
   const hit = memo.get(mk);
-  if (hit && Date.now() - hit.at <= TTL_MS) return hit.v;
+  if (hit && Date.now() - hit.at <= hit.ttl) return hit.v;
   let out: P4Result;
   try {
-    const r = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk]));
+    let r = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk]));
+    // 서버(dep_pro_r32)가 곡선·총점 분포를 시간 안에 다 못 읽었으면 complete=false. 잠시 뒤 한 번만 다른 키로 다시 받는다(2026-11-23)
+    if (r.ok && r.value.candidates?.reference_threshold_summary?.complete === false) {
+      await new Promise((res) => setTimeout(res, 1500));
+      const again = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk, "again"])).catch(() => null);
+      if (again?.ok) r = again;
+    }
     if (!r.ok) {
       out = { search: null, bands: {}, groups: [], failed: r.code };
     } else {
@@ -151,7 +158,8 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
     }
   } else {
     memo.delete(mk);
-    memo.set(mk, { at: Date.now(), v: out });
+    // 위치·유불리가 덜 찬 결과(서버가 곡선을 아직 다 못 읽음)는 짧게만 기억한다(2026-11-23)
+    memo.set(mk, { at: Date.now(), v: out, ttl: csatBandsIncomplete(out.bands) ? CSAT_INCOMPLETE_TTL_MS : TTL_MS });
     while (memo.size > MAX) memo.delete(memo.keys().next().value as string);
   }
   return out;

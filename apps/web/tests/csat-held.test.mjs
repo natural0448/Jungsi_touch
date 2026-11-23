@@ -36,3 +36,12 @@ test("4P gain shows school_gain only for judged bands", () => {
   assert.ok(b.includes("band && !band.held ? band.school_gain"));
   assert.ok(!/참고/.test(b));
 });
+test("incomplete csat bands are remembered only briefly", async () => {
+  const { csatBandsIncomplete, CSAT_INCOMPLETE_TTL_MS } = await import("../src/lib/report-pure.ts");
+  const sc = { central: "1.00", low: "1.00", high: "1.00" };
+  assert.equal(CSAT_INCOMPLETE_TTL_MS, 30000);
+  assert.equal(csatBandsIncomplete({ a: { school_score: sc } }), true); // 위치 없음
+  assert.equal(csatBandsIncomplete({ a: { school_score: sc, school_rank: { central: "5.00", best: "1.00", worst: "9.00" } } }), true); // 유불리 하나도 없음
+  assert.equal(csatBandsIncomplete({ a: { school_score: sc, school_rank: { central: "5.00", best: "1.00", worst: "9.00" }, school_gain: { central: "+1.00", low: "+0.50", high: "+2.00" } }, b: { school_score: sc, school_rank: { central: "5.00", best: "1.00", worst: "9.00" } } }), false);
+  assert.equal(csatBandsIncomplete({}), false);
+});

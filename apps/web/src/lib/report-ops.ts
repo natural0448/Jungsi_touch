@@ -2,7 +2,7 @@ import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, OfferingDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
-import { pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, pickedIds, provisionalOnly } from "@/lib/report-pure";
 
 // 브라우저 화면도 쓰는 읽기 전용 판단은 report-pure 에 둔다(서버 전용 모듈이 브라우저 묶음에 끌려가지 않게, 2026-11-22)
 export { pickedIds, provisionalOnly };
@@ -209,7 +209,7 @@ export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: 
 const P4_BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"]);
 const thresholdBandOf = (b: ReferenceBandDto | null | undefined): ReferenceBandDto | null =>
   b && b.basis === "reference_threshold" && typeof b.code === "string" && P4_BAND_CODES.has(b.code) ? b : null;
-const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; at: number }>();
+const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; at: number; ttl: number }>();
 export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number }> {
   const none = { bands: {}, version: report.report_version };
   if (!provisionalOnly(report)) return none;
@@ -217,13 +217,22 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   if (targets.length === 0) return none;
   const mk = JSON.stringify([report.report_id, report.profile_id, targets]);
   const hit = provisionalMemo.get(mk);
-  if (hit && Date.now() - hit.at <= REFERENCE_TTL_MS) return { bands: hit.bands, version: report.report_version };
+  if (hit && Date.now() - hit.at <= hit.ttl) return { bands: hit.bands, version: report.report_version };
   let state: ReportState;
-  try {
-    state = await retryOnConflict(src, caller, report, async (r) => {
+  const ask = (attempt: number) =>
+    retryOnConflict(src, caller, report, async (r) => {
       const body = { expected_version: r.report_version, offering_ids: targets };
-      return src.analyzeUniversities(caller, r.report_id, r.report_version, targets, await key("uap", r, body));
+      // 다시 받을 때는 다른 요청 키(같은 키면 서버가 앞 응답을 그대로 돌려준다)
+      return src.analyzeUniversities(caller, r.report_id, r.report_version, targets, await key(attempt ? `uap${attempt}` : "uap", r, body));
     });
+  try {
+    state = await ask(0);
+    // 서버(dep_r32)가 곡선·총점 분포를 시간 안에 다 못 읽었으면 complete=false. 뒤에서 마저 읽으므로 잠시 뒤 한 번만 다시 받는다(2026-11-23)
+    if (state.kind === "ready" && state.report.candidates?.reference_threshold_summary?.complete === false) {
+      await new Promise((r) => setTimeout(r, 1500));
+      const again = await ask(1).catch(() => null);
+      if (again && again.kind === "ready") state = again;
+    }
   } catch (e) {
     logSettle("p4_csat_failed", { thrown: true });
     return none;
@@ -244,7 +253,8 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   logSettle("p4_csat", { asked: targets.length, judged: Object.keys(bands).length });
   if (Object.keys(bands).length) {
     provisionalMemo.delete(mk);
-    provisionalMemo.set(mk, { bands, at: Date.now() });
+    // 위치·유불리가 덜 찬 결과(서버가 곡선을 아직 다 못 읽음)는 짧게만 기억한다(2026-11-23)
+    provisionalMemo.set(mk, { bands, at: Date.now(), ttl: csatBandsIncomplete(bands) ? CSAT_INCOMPLETE_TTL_MS : REFERENCE_TTL_MS });
     while (provisionalMemo.size > REFERENCE_MAX) provisionalMemo.delete(provisionalMemo.keys().next().value as string);
   }
   return { bands, version: Math.max(report.report_version, state.report.report_version) };
