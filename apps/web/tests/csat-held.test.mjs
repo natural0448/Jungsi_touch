@@ -29,3 +29,10 @@ test("4P position card reads school_rank only from judged (not held) bands", () 
   assert.ok(src.includes("const rk = judged?.school_rank"));
   assert.ok(src.includes("상위 {rk.central ?? rkRange"));
 });
+test("4P gain shows school_gain only for judged bands", () => {
+  const p = readFileSync(new URL("../src/app/admissions/possibilities/parts.tsx", import.meta.url), "utf8");
+  const b = readFileSync(new URL("../src/components/csat-badge.tsx", import.meta.url), "utf8");
+  assert.ok(p.includes("const gain = csatGainView(judged)"));
+  assert.ok(b.includes("band && !band.held ? band.school_gain"));
+  assert.ok(!/참고/.test(b));
+});

@@ -1,3 +1,4 @@
+import { csatGainView } from "@/components/csat-badge";
 import type { ExceptionView } from "@/lib/csat-exceptions";
 import { exceptionCls } from "@/lib/csat-exceptions";
 import Link from "@/components/link";
@@ -99,6 +100,8 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
   // 대학 안 내 위치(서버 dep_r30): 판정과 같은 누적 도수에서 읽은 동점 포함 상위누백. 보류 모집단위는 보이지 않는다
   const rk = judged?.school_rank && (judged.school_rank.central ?? judged.school_rank.best ?? judged.school_rank.worst) ? judged.school_rank : null;
   const rkRange = rk && rk.best && rk.worst && rk.best !== rk.worst ? `${rk.best}~${rk.worst}` : null;
+  // 환산 유불리(서버 dep_r31). 보류 모집단위는 csatGainView 가 null
+  const gain = csatGainView(judged);
   const items = [
     { k: "점수 변환", ok: !!s, label: s ? "가채점 추정" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
     { k: "대학 안 내 위치", ok: !!rk, label: rk ? "가채점 추정" : undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
@@ -186,8 +189,21 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
         </section>
         <section className="card" aria-label="환산 유불리">
           <h3>환산 유불리</h3>
-          <div className="big hold">준비 중</div>
-          <p>가채점 성적의 환산 유불리(전체 위치와 대학 안 위치의 차이)는 준비하고 있습니다.</p>
+          {gain ? (
+            <>
+              <div className={`big num ${gain.tone}`}><span className="advw">{gain.tone === "up" ? "유리" : gain.tone === "down" ? "불리" : "비슷"}</span> {gain.text}<small>%p</small></div>
+              <p>
+                {gain.range && <>범위 {gain.range}%p · </>}
+                <span className="tag">가채점 추정</span>
+              </p>
+              <p>국·수·탐2 표준점수 합으로 본 전체 위치(상위 %)에서 이 대학 방식 환산점수로 본 위치(상위 %)를 뺀 값입니다. +면 이 대학 방식이 내게 유리, −면 불리합니다. 합격 가능성 판단과는 별개입니다.</p>
+            </>
+          ) : (
+            <>
+              <div className="big hold">준비 중</div>
+              <p>이 모집단위는 가채점 환산 유불리를 비교할 자료가 아직 없습니다.</p>
+            </>
+          )}
         </section>
       </div>
       {acts && (

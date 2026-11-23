@@ -32,3 +32,28 @@ export function CsatBadge({ band }: { band?: ReferenceBandDto | null }) {
     : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`;
   return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}</span>;
 }
+
+/** 가채점 환산 유불리 보기 값(서버 dep_r31 school_gain). 보류 모집단위(held)·값 없음이면 null */
+export function csatGainView(band?: ReferenceBandDto | null): { tone: "up" | "down" | "even"; text: string; range: string | null } | null {
+  const g = band && !band.held ? band.school_gain : null;
+  if (!g) return null;
+  const main = g.central ?? null;
+  const mid = main !== null ? Number(main) : (Number(g.low) + Number(g.high)) / 2;
+  if (!Number.isFinite(mid)) return null;
+  const tone = Math.abs(mid) < 0.1 ? "even" : mid > 0 ? "up" : "down";
+  const range = g.low !== g.high ? `${g.low}~${g.high}` : null;
+  return { tone, text: main ?? range ?? g.low, range: main !== null ? range : null };
+}
+const GAIN_WORD = { up: "유리", down: "불리", even: "비슷" } as const;
+/** 4페이지 목록의 '환산 유불리' 칸(가채점). 9월 칸과 같은 모양 */
+export function CsatAdvantage({ band }: { band?: ReferenceBandDto | null }) {
+  const v = csatGainView(band);
+  if (!v) return null;
+  const width = Math.min(50, (Math.abs(Number(v.text.split("~")[0])) / 0.6) * 50);
+  return (
+    <span className="adv" title={v.range ? `가채점 범위에 따라 ${v.range}%p` : undefined}>
+      <span className="bar" aria-hidden="true">{v.tone !== "even" && <i className={v.tone} style={{ width: `${width}%` }} />}</span>
+      <span className={`v num ${v.tone}`}><b className="advw">{GAIN_WORD[v.tone]}</b> {v.text}%p</span>
+    </span>
+  );
+}

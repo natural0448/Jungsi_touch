@@ -9,7 +9,7 @@ export { cellOf, MineConds, MineDetail } from "./mine-detail";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
 import { cellOf } from "./mine-detail";
 import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
-import { CsatBadge, CsatScore } from "@/components/csat-badge";
+import { CsatAdvantage, CsatBadge, CsatScore, csatGainView } from "@/components/csat-badge";
 import { csatExceptionView } from "@/lib/csat-exceptions";
 import { exceptionCls } from "@/lib/csat-exceptions";
 
@@ -52,7 +52,7 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
     // 예외 17곳(담당자 출시 자료 11-23): 7단계 대신 허용된 이름만(최저충족·최저미충족·최저 확인 대기·판정 준비 중)
     const ex = band ? null : csatExceptionView(id, report.overall);
     if (ex) return <><span className="c-score r">{DASH}</span><span className="c-st"><span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span></span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
-    return <><span className="c-score r">{band?.school_score ? <CsatScore band={band} /> : DASH}</span><span className="c-st">{band ? <CsatBadge band={band} /> : PROV}</span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
+    return <><span className="c-score r">{band?.school_score ? <CsatScore band={band} /> : DASH}</span><span className="c-st">{band ? <CsatBadge band={band} /> : PROV}</span><span className="c-adv r">{csatGainView(band) ? <CsatAdvantage band={band} /> : DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
   }
   if (a === null) {
     return <><span className="c-score r">{NO_DATA}</span><span className="c-st">{NO_DATA}</span><span className="c-adv r">{NO_DATA}</span><span className="c-pick">{report && <PickButton id={id} on={pickedIds(report).has(id)} />}</span></>;
