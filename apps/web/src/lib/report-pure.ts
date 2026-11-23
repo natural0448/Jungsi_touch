@@ -20,6 +20,17 @@ export function pickedIds(report: ReportDto | null): Set<string> {
 export function provisionalOnly(r: ReportDto | null | undefined): boolean {
   return !!r?.overall && (r.overall.score_basis === "provisional_estimate" || r.overall.input_kind === "provisional_raw");
 }
+/** 수능 실채점 리포트(성적표 표준점수, 서버 score_basis actual_csat). 12-14 전환 뒤 */
+export function csatFinalOnly(r: ReportDto | null | undefined): boolean {
+  return !!r?.overall && r.overall.score_basis === "actual_csat";
+}
+/**
+ * 학교별 수능 판정 화면(7단계·내 환산점수·대학 안 위치·유불리·필터·담은 학교 표)을 쓰는 리포트 — 가채점과 실채점.
+ * 성적 표시(과목표·범위·위치 그래프)는 provisionalOnly 로 따로 가른다(실채점은 9월과 같은 표준점수 화면)
+ */
+export function csatJudged(r: ReportDto | null | undefined): boolean {
+  return provisionalOnly(r) || csatFinalOnly(r);
+}
 
 /*
   가채점 4페이지 판정 결과가 '덜 찬' 것인지(2026-11-23 대표님 지적: 첫 요청에서 유불리가 빠짐).

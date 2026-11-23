@@ -84,7 +84,7 @@ test("2페이지 표는 3·4페이지처럼 그리기 전에 분석을 맞추고
   assert.match(page, /settleAnalyses\(src, caller, report, ids\)/);
   assert.match(page, /<PickedTable items=\{items\} overall=\{current\.overall\?\.overall\} report=\{current\} \/>/);
   const fin = src("../src/app/reports/me/final/page.tsx");
-  assert.match(fin, /provisional \? <CsatPicked src=\{src\} caller=\{caller\} report=\{report\} \/> : <Picked src=\{src\} caller=\{caller\} report=\{report\} \/>/);
+  assert.match(fin, /judgedCsat \? <CsatPicked src=\{src\} caller=\{caller\} report=\{report\} \/> : <Picked src=\{src\} caller=\{caller\} report=\{report\} \/>/);
   const print = src("../src/app/reports/me/print/page.tsx");
   assert.match(print, /<PickedTable items=\{shortlist\} overall=\{a\.overall\} print detailOf=\{detailOf\} \/>/);
   assert.match(print, /<CsatPickedTable items=\{shortlist\} bands=\{csatBands\} a=\{a\} print \/>/);

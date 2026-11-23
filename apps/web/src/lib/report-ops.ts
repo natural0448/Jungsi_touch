@@ -2,10 +2,10 @@ import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource, type StatusScanRequest } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, OfferingDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
-import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, csatJudged, pickedIds, provisionalOnly } from "@/lib/report-pure";
 
 // 브라우저 화면도 쓰는 읽기 전용 판단은 report-pure 에 둔다(서버 전용 모듈이 브라우저 묶음에 끌려가지 않게, 2026-11-22)
-export { pickedIds, provisionalOnly };
+export { csatJudged, pickedIds, provisionalOnly };
 
 /*
   3·4페이지(와 2페이지 유료 부분)가 리포트에 묶인 분석을 쓰는 방법.
@@ -186,7 +186,7 @@ export function newerVersion(read: ReportDto, written: ReportDto): ReportDto {
 
 /** 보이는 모집행 중 아직 분석이 없는 것만 university.analyze 로 채운다(한 번에 100개까지) */
 export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<ReportState> {
-  if (provisionalOnly(report)) return { kind: "ready", report };
+  if (csatJudged(report)) return { kind: "ready", report };
   const targets = canonicalOfferingIds(ids);
   return retryOnConflict(src, caller, report, async (r) => {
     const missing = targets.filter((id) => !r.analyses?.[id]).slice(0, 100);
@@ -215,7 +215,7 @@ const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto
  * 받지 못하면 null(화면은 앞 방식으로 쪽마다 확인한다). 판정 있는 행의 점수·위치·유불리는 bands 에.
  */
 export async function provisionalScan(src: JungsiSource, caller: Caller, report: ReportDto, scan: StatusScanRequest): Promise<{ offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean } | null> {
-  if (!provisionalOnly(report)) return null;
+  if (!csatJudged(report)) return null;
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
       const body = { expected_version: r.report_version, status_scan: scan };
@@ -250,7 +250,7 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
 
 export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number }> {
   const none = { bands: {}, version: report.report_version };
-  if (!provisionalOnly(report)) return none;
+  if (!csatJudged(report)) return none;
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return none;
   const mk = JSON.stringify([report.report_id, report.profile_id, targets]);
@@ -496,7 +496,7 @@ export async function analysesFingerprint(report: ReportDto, ids: string[]): Pro
 
 /** 보이는 모집단위의 분석을 채우고(없는 것만), 옛 자료판 분석이면 다시 확인한 리포트를 돌려준다 */
 export async function settleAnalyses(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<ReportDto> {
-  if (provisionalOnly(report)) return report;
+  if (csatJudged(report)) return report;
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return report;
   let current = report;

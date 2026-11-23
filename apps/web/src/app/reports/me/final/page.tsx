@@ -14,7 +14,7 @@ import { isInaccurate } from "@/lib/score-validity";
 import { readPicks } from "@/lib/shortlist";
 import { PICK_GROUP_LIMIT, PICK_TOTAL_LIMIT } from "@/lib/picked-view";
 import { pickedIds, provisionalBands } from "@/lib/report-ops";
-import { provisionalOnly } from "@/lib/report-pure";
+import { csatJudged, provisionalOnly } from "@/lib/report-pure";
 import { REPORT_TAB, lockFor, page } from "@/lib/routes";
 import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
 import { CsatPickedDetails, CsatPickedTable } from "../csat-picked";
@@ -70,6 +70,8 @@ export default async function Page() {
   }
   const a = report.overall;
   const provisional = provisionalOnly(report);
+  // 담은 학교 표는 가채점·실채점 모두 학교별 수능 판정 표
+  const judgedCsat = csatJudged(report);
   const picked = [...pickedIds(report)];
   return (
     <>
@@ -97,7 +99,7 @@ export default async function Page() {
             </div>
           ) : (
             <Suspense fallback={<BookLoading compact text="담은 학교의 판정을 모으고 있습니다." />}>
-              {provisional ? <CsatPicked src={src} caller={caller} report={report} /> : <Picked src={src} caller={caller} report={report} />}
+              {judgedCsat ? <CsatPicked src={src} caller={caller} report={report} /> : <Picked src={src} caller={caller} report={report} />}
             </Suspense>
           )}
         </section>

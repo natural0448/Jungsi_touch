@@ -7,7 +7,7 @@ import type { Caller, JungsiSource } from "@/lib/api";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
 // 펼친 상세·지원 조건·칸 값은 브라우저 화면(전문가용 인쇄)도 쓰므로 서버 전용 모듈 없는 mine-detail.tsx 에 둔다(2026-11-22 ship54 빌드 실패)
 export { cellOf, MineConds, MineDetail } from "./mine-detail";
-import { pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { csatJudged, pickedIds } from "@/lib/report-pure";
 import { cellOf } from "./mine-detail";
 import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
 import { CsatAdvantage, CsatBadge, CsatScore, csatGainView } from "@/components/csat-badge";
@@ -49,7 +49,7 @@ const NO_DATA = <span className="need" title="이 모집단위는 아직 분석 
 /** 한 줄의 내 환산점수·지원가능성·환산 유불리·담기 칸 */
 export function MineCells({ report, id }: { report: ReportDto | null; id: string }) {
   const a = cellOf(report, id);
-  if (report && provisionalOnly(report)) {
+  if (report && csatJudged(report)) {
     // 서버 dep_r29(2026-11-23): 이 모집단위의 학교별 가채점 판정이 붙었으면 7단계 배지, 없으면 '가채점 판정 준비 중'
     const band = heldBand(id, report.provisional_bands?.[id]);
     // 예외 17곳(담당자 출시 자료 11-23): 7단계 대신 허용된 이름만(최저충족·최저미충족·최저 확인 대기·판정 준비 중)

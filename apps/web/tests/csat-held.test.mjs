@@ -66,5 +66,12 @@ test("4P detail shows range stages (Q3) and gain out-of-support reason (Q4)", ()
   const p = readFileSync(new URL("../src/app/admissions/possibilities/parts.tsx", import.meta.url), "utf8");
   assert.ok(p.includes("judged.range_codes"));
   assert.ok(p.includes('judged?.gain_note === "comparison_total_out_of_support"'));
-  assert.ok(p.includes("가채점 총점이 유불리 비교 범위를 벗어났습니다"));
+  assert.ok(p.includes("총점이 유불리 비교 범위를 벗어났습니다"));
+});
+test("final CSAT reports use the same school judgment screens; provisional unchanged", async () => {
+  const { csatJudged, csatFinalOnly, provisionalOnly } = await import("../src/lib/report-pure.ts");
+  const prov = { overall: { score_basis: "provisional_estimate" } }, fin = { overall: { score_basis: "actual_csat" } }, mock = { overall: { score_basis: "mock_exam" } };
+  assert.equal(csatJudged(prov), true); assert.equal(csatFinalOnly(prov), false); assert.equal(provisionalOnly(prov), true);
+  assert.equal(csatJudged(fin), true); assert.equal(csatFinalOnly(fin), true); assert.equal(provisionalOnly(fin), false);
+  assert.equal(csatJudged(mock), false); assert.equal(csatJudged(null), false);
 });

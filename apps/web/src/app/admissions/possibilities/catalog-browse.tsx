@@ -13,7 +13,7 @@ import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, to
 import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { provisionalBands, provisionalOnly, provisionalScan, settleAnalyses, startMine } from "@/lib/report-ops";
+import { csatJudged, provisionalBands, provisionalScan, settleAnalyses, startMine } from "@/lib/report-ops";
 import { csatNoJudgmentView } from "@/lib/csat-conditions";
 import { ProvisionalPendingNote } from "@/components/provisional-pending";
 import { InaccurateNotice } from "@/components/inaccurate-notice";
@@ -149,7 +149,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   let nextCursor = res.next_cursor;
   let scanned: number | null = null;
   // 수능 가채점 리포트(2026-11-23 전환): 9모 분석 요청·지원가능성 필터는 쓰지 않는다(검색·모집 정보는 그대로)
-  const provisional = provisionalOnly(report);
+  // 학교별 수능 판정 화면(가채점·실채점)
+  const provisional = csatJudged(report);
   // 수능 가채점 학교별 판정(서버 dep_r29, 2026-11-23): 보이는 모집단위만 판정을 받아 붙인다. 받지 못하면 '가채점 판정 준비 중'
   if (provisional && report) {
     if (pro) {

@@ -14,7 +14,8 @@ import { BookLoading } from "@/components/book-loading";
 import { memberName } from "@/lib/member-name";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
 import type { ReportDto, StatisticsDto } from "@/lib/dto";
-import { loadMineEager, logSettleError, pickedIds, provisionalOnly, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
+import { csatFinalOnly } from "@/lib/report-pure";
+import { csatJudged, loadMineEager, logSettleError, pickedIds, provisionalOnly, settleAnalyses, settleCandidates, type ReportState } from "@/lib/report-ops";
 import { ProvisionalPendingGate } from "@/components/provisional-pending";
 import { InaccurateNotice } from "@/components/inaccurate-notice";
 import { inaccurateSeen } from "@/lib/report-ref";
@@ -129,7 +130,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   // 수능 가채점 리포트(2026-11-23 전환). candidates.build 응답에 학교별 가채점 7단계(source g 행, dep_r22)가 오면
   // 9모 참고 목록과 같은 대학 → 계열 → 학과 목록·배지로 그린다. 판정 행이 하나도 없으면(판정 Secret 이 없을 때 등)
   // 지금처럼 '가채점 판정 준비 중'. 가채점에는 누백·합격선 위치·유불리·와일드카드가 없어 그 부분은 그리지 않는다
-  if (provisionalOnly(report)) {
+  if (csatJudged(report)) {
     let csat: ReturnType<typeof csatView> = { universities: [], outsideBand: 0, judged: 0 };
     try {
       csat = csatView(report.candidates);
@@ -155,7 +156,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
           <PastEntrySlot src={src} caller={caller} />
           <section className="fv-main fv-refmode" aria-label="유리한 대학">
             {/* 가채점 후보(도전·핵심·여유, 2026-11-23 대표님 결정) — 아래 7단계 목록과 같은 판정으로 묶는다 */}
-            <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} />
+            <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} final={csatFinalOnly(report)} />
             <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
           </section>
         </div>

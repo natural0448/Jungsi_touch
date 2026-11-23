@@ -3,7 +3,7 @@ import Link from "@/components/link";
 import { CsatAdvantage, CsatBadge, CsatScore, csatGainView } from "@/components/csat-badge";
 import { heldBand } from "@/lib/csat-held";
 import { csatExceptionView, exceptionCls } from "@/lib/csat-exceptions";
-import type { OverallAnalysisDto, ReferenceBandDto } from "@/lib/dto";
+import { isCsatFinalOverall, type OverallAnalysisDto, type ReferenceBandDto } from "@/lib/dto";
 import type { PickedItem } from "@/lib/shortlist";
 import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
 import { page } from "@/lib/routes";
@@ -83,7 +83,7 @@ export function CsatPickedTable({ items, bands, a, print = false }: { items: Pic
         </div>
       )}
       <p className="rp-foot">
-        모두 가채점 원점수로 추정한 값입니다. 내 환산점수는 이 대학 방식 점수(대학마다 만점·반영 방식이 달라 학교끼리 크기를 비교하지 않습니다),
+        {isCsatFinalOverall(a) ? "모두 성적표(실채점) 성적으로 계산한 값입니다. " : "모두 가채점 원점수로 추정한 값입니다. "}내 환산점수는 이 대학 방식 점수(대학마다 만점·반영 방식이 달라 학교끼리 크기를 비교하지 않습니다),
         대학 안 내 위치는 그 점수로 본 전체 응시자 중 위치(같은 점수 포함), 환산 유불리는 국·수·탐2 합으로 본 전체 위치에서 대학 안 위치를 뺀 값(+면 유리)입니다.
         지원가능성은 합격 확률이 아닙니다.
       </p>
@@ -95,7 +95,7 @@ export function CsatPickedTable({ items, bands, a, print = false }: { items: Pic
 export function csatDetailOf(it: PickedItem, bands: Record<string, ReferenceBandDto>, a: OverallAnalysisDto): ReactNode {
   if (!it.offering) return null;
   const band = heldBand(it.offering_id, bands[it.offering_id]) ?? null;
-  return <CsatDetail o={it.offering} band={band} exception={csatExceptionView(it.offering_id, a)} noJudgment={csatNoJudgmentView(it.offering_id, a)} c1={csatC1Score(it.offering_id, a)} extras={null} picked acts={false} />;
+  return <CsatDetail o={it.offering} band={band} exception={csatExceptionView(it.offering_id, a)} noJudgment={csatNoJudgmentView(it.offering_id, a)} c1={csatC1Score(it.offering_id, a)} extras={null} picked acts={false} final={isCsatFinalOverall(a)} />;
 }
 
 /**

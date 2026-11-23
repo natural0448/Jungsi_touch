@@ -5,7 +5,7 @@ import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import { isProvisionalOverall, type SnapshotDto } from "@/lib/dto";
+import { isCsatFinalOverall, isCsatJudgedOverall, isProvisionalOverall, type SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { EXAM, MOCK_EXAM } from "@/lib/exam";
 import { pastHref } from "../past-records";
@@ -83,7 +83,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
       const base = same && read ? { ...snap.report, analyses: read.analyses } : snap.report;
       // 고정된 revision 의 shortlist 를 그대로 쓴다. 이름만 offering.read 로 붙인다
       shortlist = await readPicks(src, caller, base);
-      if (isProvisionalOverall(base.overall) && read && same && shortlist.length) {
+      if (isCsatJudgedOverall(base.overall) && read && same && shortlist.length) {
         csatBands = (await provisionalBands(src, caller, read, shortlist.map((s) => s.offering_id)).catch(() => ({ bands: {} }))).bands;
       }
     }
@@ -166,7 +166,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
         )}
 
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
-        {isProvisionalOverall(a) ? (
+        {isCsatJudgedOverall(a) ? (
           <>
             {shortlist.length === 0 ? <p className="rp-foot">담은 학교가 없습니다.</p> : (
               <>

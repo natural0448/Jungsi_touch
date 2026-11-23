@@ -8,23 +8,26 @@ import { CsatGroups } from "./csat-groups";
   그룹마다 3페이지 참고 목록과 같은 대학 → 계열 → 학과 묶음·배지·별표로 그린다. 핵심만 펼친 채로 시작한다.
 */
 const ORDER: CsatCandidateGroup[] = ["challenge", "core", "room"];
-const LEAD: Record<CsatCandidateGroup, string> = {
-  challenge: "가채점 판정이 소신·상향인 학과입니다. 점수 변동에 따라 결과가 크게 달라질 수 있는 도전 지원 후보입니다.",
-  core: "가채점 판정이 적정인 학과입니다. 지원의 중심으로 검토할 후보입니다.",
-  room: "가채점 판정이 안정·하향인 학과입니다. 안정적으로 검토할 수 있는 후보입니다.",
-};
+const lead = (exam: string): Record<CsatCandidateGroup, string> => ({
+  challenge: `${exam} 판정이 소신·상향인 학과입니다. 점수 변동에 따라 결과가 크게 달라질 수 있는 도전 지원 후보입니다.`,
+  core: `${exam} 판정이 적정인 학과입니다. 지원의 중심으로 검토할 후보입니다.`,
+  room: `${exam} 판정이 안정·하향인 학과입니다. 안정적으로 검토할 수 있는 후보입니다.`,
+});
 
-export function CsatCandidates({ c, favs, p3Label }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string }) {
+/** final: 수능 실채점 리포트(12-14 전환 뒤) */
+export function CsatCandidates({ c, favs, p3Label, final = false }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string; final?: boolean }) {
   const v = csatCandidateView(c);
+  const EXAM = final ? "실채점" : "가채점";
+  const LEAD = lead(EXAM);
   const total = v.counts.challenge + v.counts.core + v.counts.room;
   if (total === 0) return null;
   return (
     <section className="fv-csat-cands" aria-labelledby="csat-cand-t">
       <div className="fv-sec-hd">
-        <h2 id="csat-cand-t">가채점 후보</h2>
+        <h2 id="csat-cand-t">{EXAM} 후보</h2>
         <span>
-          가채점 성적을 학교마다 그 대학 방식으로 계산한 판정으로 도전 <b className="num">{v.counts.challenge}</b> · 핵심 <b className="num">{v.counts.core}</b> · 여유{" "}
-          <b className="num">{v.counts.room}</b>개 학과를 골랐습니다. 성적표가 나오면 정식 후보로 다시 확인해 주세요.
+          {EXAM} 성적을 학교마다 그 대학 방식으로 계산한 판정으로 도전 <b className="num">{v.counts.challenge}</b> · 핵심 <b className="num">{v.counts.core}</b> · 여유{" "}
+          <b className="num">{v.counts.room}</b>개 학과를 골랐습니다.{final ? "" : " 성적표가 나오면 정식 후보로 다시 확인해 주세요."}
         </span>
       </div>
       {ORDER.map((g) =>

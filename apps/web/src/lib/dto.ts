@@ -248,6 +248,14 @@ export const PROVISIONAL_SCORE_BASIS = "provisional_estimate";
 export function isProvisionalOverall(a: OverallAnalysisDto | null | undefined): boolean {
   return !!a && (a.score_basis === PROVISIONAL_SCORE_BASIS || a.input_kind === "provisional_raw");
 }
+/** 수능 실채점 성적(서버 score_basis actual_csat) */
+export function isCsatFinalOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return !!a && a.score_basis === "actual_csat";
+}
+/** 학교별 수능 판정 화면을 쓰는 성적(가채점·실채점) */
+export function isCsatJudgedOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return isProvisionalOverall(a) || isCsatFinalOverall(a);
+}
 
 export interface ShortlistEntryDto {
   selected: boolean;
