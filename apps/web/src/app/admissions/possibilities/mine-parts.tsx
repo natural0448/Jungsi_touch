@@ -7,7 +7,7 @@ import type { OfferingDto, ReportDto } from "@/lib/dto";
 export { cellOf, MineConds, MineDetail } from "./mine-detail";
 import { pickedIds, provisionalOnly } from "@/lib/report-pure";
 import { cellOf } from "./mine-detail";
-import { PROVISIONAL_PENDING_TEXT } from "@/components/provisional-pending";
+import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
 import { CsatBadge, CsatScore } from "@/components/csat-badge";
 
 /*
@@ -26,11 +26,12 @@ export function MineBasis({ report }: { report: ReportDto | null }) {
 }
 
 export function MineLegend({ report }: { report: ReportDto | null }) {
-  return report && !provisionalOnly(report) ? <CategoryLegend /> : null;
+  // 가채점도 9월과 같은 범례(2026-11-23)
+  return report ? <CategoryLegend /> : null;
 }
 
-/** 수능 가채점 리포트의 칸(2026-11-23 전환): 학교별 가채점 판정 자료가 아직 없다 */
-const PROV = <span className="need" title={PROVISIONAL_PENDING_TEXT}>가채점 판정 준비 중</span>;
+/** 수능 가채점 리포트에서 판정이 없는 모집단위(9월과 같은 '판정 근거 부족', 2026-11-23) */
+const PROV = <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
 const DASH = <span className="need" aria-label="해당 없음">─</span>;
 
 // '이 범위 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).

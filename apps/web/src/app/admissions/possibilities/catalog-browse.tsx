@@ -64,6 +64,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const favoring = pro ? Promise.resolve(pro.favorites) : myFavorites();
   // 전문가용: 검색과 판정을 한 번에 받는다(즐겨찾기만 보기는 별표 사본 + 번호로 판정)
   let proBands: Record<string, ReferenceBandDto> | null = null;
+  // 필터로 다음 쪽을 이어 받을 때 쪽마다 받은 판정(전문가용 검색은 검색과 판정을 함께 준다)
+  const proPageBands = new WeakMap<object, Record<string, ReferenceBandDto>>();
+  const proBandsOf = (p: object) => proPageBands.get(p) ?? null;
   let proFailed: string | null = null;
   // 서버는 한 번에 훑는 범위가 정해져 있어, 조건에 맞는 행이 뒤쪽에 있으면 빈 쪽과 다음 커서만 준다(예: 지역=제주).
   // 빈 쪽을 '결과 없음'으로 보이지 않도록 다음 커서를 몇 번까지 대신 따라간다(2026-11-19 운영 확인)
@@ -155,6 +158,49 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     }
   }
   const provisionalJudged = provisional && Object.keys(report?.provisional_bands ?? {}).length > 0;
+  // 수능 가채점 지원가능성 필터(2026-11-23 대표님 요청: 9월과 같은 화면). 판정 단계로, 판정 없는 곳은 '판정 근거 부족'
+  if (cur.st && report && provisional) {
+    const want = new Set<StatusKey>(cur.st);
+    const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => (bands?.[id]?.code as StatusKey | undefined) ?? "none";
+    if (cur.fav) {
+      const r = report;
+      shown = items.filter((o) => want.has(keyOf(r.provisional_bands, o.offering_id)));
+      scanned = items.length;
+    } else {
+      const base = report;
+      const picked: OfferingDto[] = [];
+      const bandsAll: Record<string, ReferenceBandDto> = { ...(base.provisional_bands ?? {}) };
+      let page = res, scannedN = 0, pages = 0, empty = 0;
+      for (;;) {
+        const its = page.items ?? [];
+        if (its.length) {
+          const b = pages === 0 ? (base.provisional_bands ?? {}) : pro ? (proBandsOf(page) ?? {}) : (await provisionalBands(src, caller, base, its.map((o) => o.offering_id))).bands;
+          Object.assign(bandsAll, b);
+          scannedN += its.length;
+          pages++;
+          for (const o of its) if (want.has(keyOf(bandsAll, o.offering_id))) picked.push(o);
+        } else empty++;
+        if (picked.length >= LIMIT || !page.next_cursor || pages >= SCAN_PAGES || empty >= SCAN_EMPTY_HOPS) break;
+        try {
+          if (pro) {
+            const r = await pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: page.next_cursor });
+            if (!r.search) break;
+            proPageBands.set(r.search, r.bands);
+            page = r.search;
+          } else {
+            page = await src.searchOfferings(caller, { ...toSearch(cur), cursor: page.next_cursor });
+          }
+        } catch (e) {
+          if (e instanceof ConnectionError || e instanceof AccessDenied) break;
+          throw e;
+        }
+      }
+      report = { ...base, provisional_bands: bandsAll };
+      shown = picked;
+      nextCursor = page.next_cursor;
+      scanned = scannedN;
+    }
+  }
   if (cur.st && report && !provisional) {
     const want = new Set<StatusKey>(cur.st);
     const hit = (r: ReportDto, o: OfferingDto) => want.has(statusKeyOf(r.analyses?.[o.offering_id] ?? null, r.overall?.overall));
@@ -190,7 +236,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       {!pro && <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />}
       <div className="wrap pg-body ps">
         <MineBasis report={report} />
-        {provisional && <ProvisionalPendingNote judged={provisionalJudged} />}
+        {/* 가채점 판정을 하나도 받지 못했을 때만 안내 한 줄(판정이 있으면 9월과 같은 화면, 2026-11-23) */}
+        {provisional && !provisionalJudged && <ProvisionalPendingNote />}
 
         <section className="filter" aria-label="검색 조건">
           <Form action={destination.path} prefetch={false} className="search" role="search">
@@ -212,7 +259,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
           </Form>
           <ChipRow label="지역" cur={cur} destination={destination} k="region" items={REGIONS.map((r) => ({ v: r, label: r }))} />
           <ChipRow label="모집군" cur={cur} destination={destination} k="group" items={GROUPS.map((g) => ({ v: g, label: `${g}군` }))} />
-          {report && !provisional && <StatusChips cur={cur} destination={destination} />}
+          {report && <StatusChips cur={cur} destination={destination} />}
           {favs && (
             <div className="cfilter">
               <span className="lab">즐겨찾기</span>

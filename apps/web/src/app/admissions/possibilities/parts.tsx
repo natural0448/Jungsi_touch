@@ -2,11 +2,11 @@ import Link from "@/components/link";
 import { ADVANTAGE_WORD, BAND, CATEGORY, CategoryBadge, decisionOf, referenceBandOf, EnrichedReasonList, PickButton, decisionReasonCode, isReferenceScore, reasonText, scoreOf, type Cell } from "@/components/offering-parts";
 import { DATA_KIND, POPULATION, scoreBasisLabel } from "@/lib/analysis-labels";
 import type { ReactNode } from "react";
-import type { AssessmentDto, OfferingDto, OverallResultDto, SubjectResultDto } from "@/lib/dto";
+import type { AssessmentDto, OfferingDto, OverallResultDto, ReferenceBandDto, SubjectResultDto } from "@/lib/dto";
 import { referenceAdvantage } from "@/lib/reference-advantage";
 import { CONDITION_MARK_TEXT, conditionLines, formal105Notice } from "@/lib/eligibility-conditions";
 import { yearCutoffLines } from "@/lib/year-cutoffs";
-import { POSITION_LINE_DESC, POSITION_NONE_DESC, positionNoteOf } from "@/lib/position-note";
+import { POSITION_LINE_DESC, POSITION_NONE_DESC, POSITION_NONE_LABEL, positionNoteOf } from "@/lib/position-note";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
 import { SchoolReflectedLine } from "@/components/school-reflected";
@@ -67,6 +67,100 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
       )}
       <AdoptedEvidence a={a} />
       <Years a={a} overall={overall ?? null} />
+      {acts && (
+        <div className="acts">
+          <PickButton id={o.offering_id} on={picked} variant="wide" />
+          <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
+        </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * 수능 가채점 리포트의 펼친 상세(2026-11-23 대표님 요청: 9월 모의평가 때와 같은 화면·분석). 9월 상세와 같은 배치
+ * (계산 준비 상태 → 내 환산점수 · 대학 안 내 위치 · 지원가능성 · 환산 유불리 → 담기)로, 가채점 값으로 채운다.
+ * - 내 환산점수: 이 대학 방식 환산점수 가운데 추정과 범위(서버 school_score)
+ * - 지원가능성: 학교별 가채점 7단계(범위면 '적정~소신')와 단계 안 위치
+ * - 대학 안 내 위치·환산 유불리: 가채점 곡선 계산(다음 단계) 전이라 보류로 보인다
+ */
+export function CsatDetail({ o, band, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
+  const p2 = page("PAGE-02").path;
+  const s = band?.school_score ?? null;
+  const range = s ? (s.low === s.high ? s.low : `${s.low}~${s.high}`) : null;
+  const tone = band ? BAND[band.code] : null;
+  const upper = band?.upper_code && band.upper_code !== band.code ? BAND[band.upper_code] : null;
+  const pos = band?.position ?? null;
+  const items = [
+    { k: "점수 변환", ok: !!s, label: s ? "가채점 추정" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
+    { k: "대학 안 내 위치", ok: false, label: undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
+    { k: "지원 판단", ok: !!band, label: band ? "판정" : undefined, why: "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
+  ];
+  return (
+    <>
+      {extras}
+      <ul className="strip" aria-label="계산 준비 상태">
+        {items.map((i) => (
+          <li key={i.k} className={i.ok ? "ok" : "hold"}>
+            <b>{i.k}</b> {i.ok ? i.label ?? "준비됨" : "보류"}
+            {!i.ok && <small> · {i.why}</small>}
+          </li>
+        ))}
+      </ul>
+      <div className="four">
+        <section className="card" aria-label="내 환산점수">
+          <h3>내 환산점수</h3>
+          {s ? (
+            <>
+              <div className="big num">{s.central ?? range}</div>
+              <p>
+                {s.central !== null && s.low !== s.high && <>범위 {range} · </>}
+                <span className="tag">학교 수능 반영분</span> <span className="tag">가채점 추정</span>
+              </p>
+              <p>가채점 원점수로 추정한 표준점수·백분위를 이 대학 방식으로 계산한 값입니다. 성적표가 나오면 달라질 수 있습니다.</p>
+            </>
+          ) : (
+            <>
+              <div className="big hold">계산 보류</div>
+              <p>가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다(반영 과목·선택과목 조건 등).</p>
+            </>
+          )}
+        </section>
+        <section className="card" aria-label="대학 안 내 위치">
+          <h3>대학 안 내 위치</h3>
+          <div className="big hold">준비 중</div>
+          <p>가채점 성적으로 이 대학 환산 분포에서의 위치를 계산하는 기능을 준비하고 있습니다.</p>
+        </section>
+        <section className="card" aria-label="지원가능성">
+          <h3>지원가능성</h3>
+          {band && tone ? (
+            <>
+              <div>
+                <span className={`st ${tone.cls}`} title={tone.desc}>{upper ? `${tone.label}~${upper.label}` : tone.label}</span>
+              </div>
+              <p>{tone.desc}</p>
+              {upper && <p>가채점 점수 범위에 따라 {tone.label}부터 {upper.label}까지 나옵니다.</p>}
+              {pos && (pos.better_gap || pos.worse_gap) && (
+                <p>
+                  {pos.better_gap && <>한 단계 위까지 {pos.better_gap}점 더 필요 · </>}
+                  {pos.worse_gap && <>한 단계 아래로 내려가기 전까지 {pos.worse_gap}점 여유</>}
+                </p>
+              )}
+              <p>가채점 원점수로 추정한 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다.</p>
+            </>
+          ) : (
+            <>
+              <div><span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span></div>
+              <p>이 모집단위는 가채점 판정 근거가 아직 없어 단계를 내지 않았습니다. 반영 과목·선택과목 조건이 맞지 않거나 자료를 맞추는 중일 수 있습니다.</p>
+            </>
+          )}
+        </section>
+        <section className="card" aria-label="환산 유불리">
+          <h3>환산 유불리</h3>
+          <div className="big hold">준비 중</div>
+          <p>가채점 성적의 환산 유불리는 대학 안 내 위치와 함께 준비하고 있습니다.</p>
+        </section>
+      </div>
       {acts && (
         <div className="acts">
           <PickButton id={o.offering_id} on={picked} variant="wide" />
