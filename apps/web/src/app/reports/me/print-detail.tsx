@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto, OverallResultDto, SubjectResultDto } from "@/lib/dto";
 import { ConditionsBlock, Detail } from "@/app/admissions/possibilities/parts";
@@ -13,7 +14,8 @@ const NOT_LOADED: Extras = { ok: false, code: "not_loaded" };
  * 브라우저 인쇄는 닫힌 details 의 내용을 찍지 않으므로 여기서는 details·접기 단추를 쓰지 않는다.
  * 상담 리포트 인쇄(서버 화면)와 전문가용 학생 인쇄(브라우저 화면)가 함께 쓴다.
  */
-export function PrintDetail({ o, a, extras, subjects, overall, examType }: { o: OfferingDto; a: Cell; extras: Extras | null | undefined; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null; examType?: string | null }) {
+/** csat: 수능 가채점 리포트면 4페이지 가채점 상세(CsatDetail)를 9월 상세 대신 넣는다(2026-11-24 대표님 지적: 가채점 인쇄본에 학과 상세가 없었다) */
+export function PrintDetail({ o, a, extras, subjects, overall, examType, csat }: { o: OfferingDto; a: Cell; extras: Extras | null | undefined; subjects?: SubjectResultDto[]; overall?: OverallResultDto | null; examType?: string | null; csat?: ReactNode }) {
   return (
     <div className="ps rp-ps pr-detail">
       <div className="detail">
@@ -22,8 +24,8 @@ export function PrintDetail({ o, a, extras, subjects, overall, examType }: { o: 
           a={a}
           extras={extras ?? NOT_LOADED}
           p1Fast={null}
-          detail={<Detail o={o} a={a} extras={null} picked={false} subjects={subjects} overall={overall} examType={examType} acts={false} />}
-          conds={<ConditionsBlock a={a} subjects={subjects} />}
+          detail={csat ?? <Detail o={o} a={a} extras={null} picked={false} subjects={subjects} overall={overall} examType={examType} acts={false} />}
+          conds={csat ? undefined : <ConditionsBlock a={a} subjects={subjects} />}
         />
       </div>
     </div>

@@ -89,6 +89,7 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
  * - 지원가능성: 학교별 가채점 7단계(범위면 '적정~소신')와 단계 안 위치
  * - 대학 안 내 위치: 서버 dep_r30 school_rank(동점 포함 상위누백). 환산 유불리는 아직 보류
  */
+const STAGE_ORDER = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"] as const;
 export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = null, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; noJudgment?: NoJudgmentView | null; c1?: C1Score | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
   // 판정 보류 모집단위(lib/csat-held.ts): 환산점수만 보이고 단계는 내지 않는다
   const judged = band && !band.held ? band : null;
@@ -180,12 +181,21 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
                 <p>가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
               )}
-              {pos && (pos.better_gap || pos.worse_gap) && (
-                <p>
-                  {pos.better_gap && <>한 단계 위까지 {pos.better_gap}점 더 필요 · </>}
-                  {pos.worse_gap && <>한 단계 아래로 내려가기 전까지 {pos.worse_gap}점 여유</>}
-                </p>
-              )}
+              {pos && (pos.better_gap || pos.worse_gap) && (() => {
+                // 왜 이 단계인지(2026-11-24 대표님 지적): 내 환산점수와 이 학교 단계 경계 점수를 숫자로 보인다(서버 dep_r37b position)
+                const i = STAGE_ORDER.indexOf(judged.code as (typeof STAGE_ORDER)[number]);
+                const betterName = i > 0 ? BAND[STAGE_ORDER[i - 1]].label : null;
+                const worseName = i >= 0 && i < STAGE_ORDER.length - 1 ? BAND[STAGE_ORDER[i + 1]].label : null;
+                const plus = (x: string, y: string) => (Math.round((Number(x) + Number(y)) * 100) / 100).toFixed(2);
+                const minus = (x: string, y: string) => (Math.round((Number(x) - Number(y)) * 100) / 100).toFixed(2);
+                return (
+                  <p className="why">
+                    <b>왜 {tone.label}인가요?</b> 내 환산점수(가운데 추정) <b className="num">{pos.score}</b>점
+                    {pos.better_gap && betterName && <> · {betterName} 기준 <b className="num">{plus(pos.score, pos.better_gap)}</b>점까지 <b className="num">{pos.better_gap}</b>점 부족</>}
+                    {pos.worse_gap && worseName && <> · {worseName}(으)로 내려가는 <b className="num">{minus(pos.score, pos.worse_gap)}</b>점까지 <b className="num">{pos.worse_gap}</b>점 여유</>}
+                  </p>
+                );
+              })()}
               <p>가채점 원점수로 추정한 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다.</p>
             </>
           ) : ex ? (
@@ -208,7 +218,18 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               <p>
                 {gain.tone === "split" ? <>가채점 결과에 따라 이 대학 방식이 유리할 수도, 불리할 수도 있는 범위입니다. 성적표가 나오면 한쪽으로 정해집니다.</> : gain.range && <>범위 {gain.range}%p</>}
               </p>
-              <p>국·수·탐2 표준점수 합으로 본 전체 위치(상위 %)에서 이 대학 방식 환산점수로 본 위치(상위 %)를 뺀 값입니다. +면 이 대학 방식이 내게 유리, −면 불리합니다. 합격 가능성 판단과는 별개입니다.</p>
+              {judged?.school_gain?.central && rk?.central && (() => {
+                // 유불리가 무엇과 무엇의 차이인지(2026-11-24 대표님 지적): 유불리 = 총점 위치 − 학교 위치 이므로 총점 위치 = 학교 위치 + 유불리
+                const school = Number(rk.central), g = Number(judged.school_gain!.central);
+                const total = (Math.round((school + g) * 100) / 100).toFixed(2);
+                return (
+                  <p className="why">
+                    <b>무엇을 비교했나요?</b> 국·수·탐2 표준점수 합으로 줄 세우면 상위 <b className="num">{total}</b>%, 이 대학 방식 환산점수로 줄 세우면 상위 <b className="num">{rk.central}</b>% →{" "}
+                    {g > 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(g).toFixed(2)}</b>%p 더 앞에 섭니다(유리).</> : g < 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(g).toFixed(2)}</b>%p 더 뒤에 섭니다(불리).</> : <>두 위치가 같습니다.</>}
+                  </p>
+                );
+              })()}
+              <p>이 대학이 과목마다 다른 비중·변환점수를 써서, 같은 성적이라도 줄 세운 순서가 달라지는 정도입니다. 합격 가능성(지원가능성)과는 별개이며, 유리해도 합격선에 못 미치면 불가일 수 있습니다.</p>
             </>
           ) : judged?.gain_note === "comparison_total_out_of_support" ? (
             <>

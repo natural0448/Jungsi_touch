@@ -411,3 +411,20 @@
 .et .rp-cp thead th:nth-child(4) { width: 19%; }
 .et .rp-cp thead th:nth-child(5) { width: 19%; }
 .et .rp-cp thead th:nth-child(n+3) { text-align: right; }
+
+/* 담은 학교별 가채점 상세(2026-11-24) — 리포트 탭은 접고, 인쇄본은 펼친다 */
+.et .rp-cpd { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 18px; }
+.et .rp-cpd > h3 { margin: 0; font-size: 15px; font-weight: 800; }
+.et .rp-cpd-i { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); min-width: 0; }
+.et .rp-cpd-i > summary, .et .rp-cpd-i > h4 { padding: 12px 14px; font-size: 14px; font-weight: 500; margin: 0; }
+.et .rp-cpd-i > summary { cursor: pointer; }
+.et .rp-cpd-i > summary b, .et .rp-cpd-i > h4 b { font-weight: 800; }
+.et .rp-cpd-i small { color: var(--ink-2); font-size: 13px; }
+.et .rp-cpd-i .detail { padding: 0 14px 14px; }
+/* 인쇄본(상담 리포트) 표는 쪽 폭에 맞춘다 — 가로 넘김 막대가 생기지 않게(2026-11-24) */
+.et .pr .rp-cp-scroll { overflow-x: visible; }
+.et .pr .rp-cp table { min-width: 0; font-size: 13px; }
+.et .pr .rp-cp td.r { white-space: normal; }
+.et .pr .rp-cp .adv .bar { display: none; }
+.et .pr .rp-cp .adv .v { min-width: 0; white-space: normal; }
+.et .pr .rp-cpd-i { break-inside: avoid-page; }

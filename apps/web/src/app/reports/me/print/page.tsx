@@ -12,7 +12,7 @@ import { pastHref } from "../past-records";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { isInaccurate } from "@/lib/score-validity";
 import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
-import { CsatPickedTable } from "../csat-picked";
+import { CsatPickedDetails, CsatPickedTable } from "../csat-picked";
 import { provisionalBands } from "@/lib/report-ops";
 import { REPORT_TAB } from "@/lib/routes";
 import type { ReferenceBandDto } from "@/lib/dto";
@@ -115,7 +115,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
   const a = snap.report.overall;
   // 담은 학교 전부의 상세를 펼친 채로 인쇄한다(대표님 결정 2026-11-22). 펼친 상세에 쓰는 자료(2027 모집 정보·발행 기준·
   // 학년도별 대학 발표 성적)를 여기서 미리 받는다 — 최대 15곳, 서버 동시 요청 2 이하(print-extras.ts). 가채점 리포트는 판정 준비 중이라 받지 않는다
-  const offerings = isProvisionalOverall(a) ? [] : shortlist.flatMap((s) => (s.offering ? [s.offering] : []));
+  // 2026-11-24: 가채점 리포트도 학교별 상세(모집 정보·연도별 입결 포함)를 붙이므로 같은 자료를 받는다
+  const offerings = shortlist.flatMap((s) => (s.offering ? [s.offering] : []));
   const extras: Record<string, Extras> = offerings.length ? await loadPrintExtras(src, caller, offerings) : {};
   const detailOf = (s: PickedItem) =>
     s.offering ? <PrintDetail o={s.offering} a={s.assessment} extras={extras[s.offering_id]} subjects={a.subjects} overall={a.overall} examType={a.exam?.exam_type ?? null} /> : null;
@@ -167,7 +168,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
         {isProvisionalOverall(a) ? (
           <>
-            {shortlist.length === 0 ? <p className="rp-foot">담은 학교가 없습니다.</p> : <CsatPickedTable items={shortlist} bands={csatBands} a={a} print />}
+            {shortlist.length === 0 ? <p className="rp-foot">담은 학교가 없습니다.</p> : (
+              <>
+                <CsatPickedTable items={shortlist} bands={csatBands} a={a} print />
+                <CsatPickedDetails items={shortlist} bands={csatBands} a={a} print wrap={(s, detail) => <PrintDetail o={s.offering!} a={s.assessment} extras={extras[s.offering_id]} csat={detail} />} />
+              </>
+            )}
           </>
         ) : shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>

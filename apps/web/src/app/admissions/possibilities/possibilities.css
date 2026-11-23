@@ -222,3 +222,5 @@
 .et .ps-prov{margin:8px 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--sub);font-size:13px;line-height:1.6;color:var(--ink-2)}
 .et .ps-prov b{color:var(--deep)}
 .et .ps-prov-detail{margin:0;font-size:13px;line-height:1.6;color:var(--ink-2)}
+.et .ps .card p.why{padding:8px 10px;border-radius:var(--r-sm);background:var(--sub);color:var(--ink)}
+.et .ps .card p.why b{font-weight:800}

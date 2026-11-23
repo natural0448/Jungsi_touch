@@ -56,7 +56,7 @@ test("상담 리포트 인쇄: 담은 학교마다 표의 한 줄 아래에 상�
   const detail = code(src("../src/app/reports/me/print-detail.tsx"));
   assert.doesNotMatch(detail, /"use client"/);
   assert.doesNotMatch(detail, /<details|<summary/);
-  assert.match(detail, /<ExtrasBody[\s\S]*detail=\{<Detail [^>]*acts=\{false\} \/>\}[\s\S]*conds=\{<ConditionsBlock /);
+  assert.match(detail, /<ExtrasBody[\s\S]*detail=\{(?:csat \?\? )?<Detail [^>]*acts=\{false\} \/>\}[\s\S]*conds=\{(?:csat \? undefined : )?<ConditionsBlock /);
 
   const css = src("../src/app/reports/me/report.css");
   assert.match(css, /\.et \.pr-sheet \.pr-unit\{break-inside:avoid/);

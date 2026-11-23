@@ -55,7 +55,8 @@ export function CsatAdvantage({ band }: { band?: ReferenceBandDto | null }) {
   const width = Math.min(50, (Math.abs(Number(v.text.split("~")[0])) / 0.6) * 50);
   return (
     <span className="adv" title={v.range ? `가채점 범위에 따라 ${v.range}%p` : undefined}>
-      <span className="bar" aria-hidden="true">{(v.tone === "up" || v.tone === "down") && <i className={v.tone} style={{ width: `${width}%` }} />}</span>
+      {/* 갈림이면 0 을 가운데 둔 막대가 뜻이 없어 틀째 숨긴다(자리는 남겨 줄 맞춤 유지, 11-24 대표님 지적) */}
+      <span className="bar" aria-hidden="true" style={v.tone === "split" ? { visibility: "hidden" } : undefined}>{(v.tone === "up" || v.tone === "down") && <i className={v.tone} style={{ width: `${width}%` }} />}</span>
       <span className={`v num ${v.tone}`}><b className="advw">{CSAT_GAIN_WORD[v.tone]}</b> {v.text}%p</span>
     </span>
   );

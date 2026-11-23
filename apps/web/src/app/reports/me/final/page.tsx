@@ -17,7 +17,7 @@ import { pickedIds, provisionalBands } from "@/lib/report-ops";
 import { provisionalOnly } from "@/lib/report-pure";
 import { REPORT_TAB, lockFor, page } from "@/lib/routes";
 import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
-import { CsatPickedTable } from "../csat-picked";
+import { CsatPickedDetails, CsatPickedTable } from "../csat-picked";
 import { Picked } from "../picked-section";
 import "@/app/admissions/possibilities/possibilities.css";
 import "../report.css";
@@ -137,5 +137,10 @@ async function CsatPicked({ src, caller, report }: { src: JungsiSource; caller: 
     return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요. (문의 번호 {e.code})</p>;
   }
   const { bands } = await provisionalBands(src, caller, report, items.map((it) => it.offering_id)).catch(() => ({ bands: {} }));
-  return <CsatPickedTable items={items} bands={bands} a={report.overall!} />;
+  return (
+    <>
+      <CsatPickedTable items={items} bands={bands} a={report.overall!} />
+      <CsatPickedDetails items={items} bands={bands} a={report.overall!} />
+    </>
+  );
 }

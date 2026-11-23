@@ -7,6 +7,8 @@ import type { OverallAnalysisDto, ReferenceBandDto } from "@/lib/dto";
 import type { PickedItem } from "@/lib/shortlist";
 import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
 import { page } from "@/lib/routes";
+import type { ReactNode } from "react";
+import { CsatDetail } from "@/app/admissions/possibilities/parts";
 
 /*
   리포트 탭(2026-11-23 대표님 결정, 5번째 탭)·인쇄본의 '담은 학교' 표 — 수능 가채점 리포트.
@@ -85,6 +87,43 @@ export function CsatPickedTable({ items, bands, a, print = false }: { items: Pic
         대학 안 내 위치는 그 점수로 본 전체 응시자 중 위치(같은 점수 포함), 환산 유불리는 국·수·탐2 합으로 본 전체 위치에서 대학 안 위치를 뺀 값(+면 유리)입니다.
         지원가능성은 합격 확률이 아닙니다.
       </p>
+    </div>
+  );
+}
+
+/** 담은 학교 하나의 가채점 상세 카드(4페이지 펼친 상세와 같음, 담기 단추 없음) */
+export function csatDetailOf(it: PickedItem, bands: Record<string, ReferenceBandDto>, a: OverallAnalysisDto): ReactNode {
+  if (!it.offering) return null;
+  const band = heldBand(it.offering_id, bands[it.offering_id]) ?? null;
+  return <CsatDetail o={it.offering} band={band} exception={csatExceptionView(it.offering_id, a)} noJudgment={csatNoJudgmentView(it.offering_id, a)} c1={csatC1Score(it.offering_id, a)} extras={null} picked acts={false} />;
+}
+
+/**
+ * 담은 학교별 상세(2026-11-24 대표님 지적: 리포트·인쇄본에 학과 상세가 없었다). 표 아래에 학교마다 4페이지와 같은 상세 카드를 붙인다.
+ * 인쇄본(print)은 접지 않고 모두 펼치고, 리포트 탭은 학교마다 접어 둔다. wrap 이 있으면 카드를 감싼다(인쇄본: 모집 정보·연도별 입결)
+ */
+export function CsatPickedDetails({ items, bands, a, print = false, wrap }: { items: PickedItem[]; bands: Record<string, ReferenceBandDto>; a: OverallAnalysisDto; print?: boolean; wrap?: (it: PickedItem, detail: ReactNode) => ReactNode }) {
+  const rows = items.filter((it) => it.offering);
+  if (!rows.length) return null;
+  return (
+    <div className="rp-cpd">
+      <h3>학교별 상세</h3>
+      {rows.map((it) => {
+        const o = it.offering!;
+        const title = <><b>{o.university_name}</b> {o.department}{o.track && <small> · {o.track}</small>}{o.group && <small> · {o.group}군</small>}</>;
+        const body = wrap ? wrap(it, csatDetailOf(it, bands, a)) : <div className="ps rp-ps"><div className="detail">{csatDetailOf(it, bands, a)}</div></div>;
+        return print ? (
+          <section key={it.offering_id} className="rp-cpd-i" aria-label={`${o.university_name} ${o.department} 상세`}>
+            <h4>{title}</h4>
+            {body}
+          </section>
+        ) : (
+          <details key={it.offering_id} className="rp-cpd-i">
+            <summary>{title}</summary>
+            {body}
+          </details>
+        );
+      })}
     </div>
   );
 }
