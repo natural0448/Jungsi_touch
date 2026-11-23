@@ -13,6 +13,9 @@ import { INQUIRY_SUBJECTS } from "./exam";
 const SCIENCE_PAIR = new Set([29,30,49,52,53,56,66,73,74,76,79,80,81,84,85,86,88,89,96,97,102,103,107,109,112,113,1854,1855,2090,2102,6365,6366,7924,7925,7927,7939,7943,7954,7956,7959,10216,10217,10218,10219,10220,10221,10222,10231,10232,10233,10234].map((n) => `2027:${1000000000 + n}`));
 const SECOND_LANG_REQUIRED = new Set([750,751,753,755,762,763,764,771,772,779,781,783,784,785,787,792,797,803,804,8023,8024,8025,8026,10600,10601,10602,10603,10609].map((n) => `2027:${1000000000 + n}`));
 
+// K1 Guide 122-2027-R04/R05에는 과탐 두 과목 외에 수학 선택과 탐구 분야 조건도 있다.
+const ULSAN_MEDICINE = new Set(["2027:1000004553", "2027:1000010771"]);
+
 const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
@@ -22,7 +25,22 @@ export type NoJudgmentView = { label: "지원 조건 미충족" | "비교 기준
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined): NoJudgmentView | null {
   if (!a) return null;
   const by = new Map(a.subjects.map((s) => [s.area, s]));
-  if (SCIENCE_PAIR.has(offeringId) && [by.get("inquiry1"), by.get("inquiry2")].some((s) => kindOf(s) === "social")) {
+  const inquiry = [by.get("inquiry1"), by.get("inquiry2")];
+  const hasSocialInquiry = inquiry.some((s) => kindOf(s) === "social");
+  if (ULSAN_MEDICINE.has(offeringId)) {
+    const math = by.get("math")?.choice?.replace(/\s+/g, "");
+    const [first, second] = inquiry;
+    const sameScienceField = first && second && SCIENCE.has(first.subject) && SCIENCE.has(second.subject)
+      && first.subject.replace(/[ⅠⅡ]$/, "") === second.subject.replace(/[ⅠⅡ]$/, "");
+    if (math === "확률과통계" || hasSocialInquiry || sameScienceField) {
+      return {
+        label: "지원 조건 미충족",
+        cls: "inel",
+        desc: "울산대 의예과는 미적분 또는 기하와 서로 다른 분야의 과학탐구 2과목이 필요합니다. 같은 분야 I·II 조합은 인정하지 않습니다.",
+      };
+    }
+  }
+  if (SCIENCE_PAIR.has(offeringId) && hasSocialInquiry) {
     return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 과학탐구 2과목만 반영합니다. 사회탐구 응시로는 점수가 계산되지 않습니다." };
   }
   if (SECOND_LANG_REQUIRED.has(offeringId) && !a.second_language) {
