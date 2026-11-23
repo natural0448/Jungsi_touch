@@ -318,6 +318,8 @@ export interface ReferenceBandDto {
   upper_code?: BandCode;
   upper_label?: string;
   source?: string;
+  /** 화면 전용: 판정 보류 모집단위(lib/csat-held.ts). 환산점수만 쓰고 단계는 쓰지 않는다 */
+  held?: boolean;
   /**
    * 개인용 4페이지 가채점 판정 행만(서버 dep_r29b, 2026-11-23): 이 대학 방식 환산점수(소수 둘째 자리 문자열).
    * central = 가운데 추정 점수(구간 점수·계산 불가면 null), low·high = 과목 표준점수 범위 끝 조합의 최저·최고(가운데 포함)

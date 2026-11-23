@@ -1,3 +1,4 @@
+import { isCsatHeld } from "./csat-held";
 import type { AssessmentDto, BandCode, CandidatesDto, OfferingDto, ReferenceBandDto, ShortlistEntryDto } from "./dto";
 import type { CounselSchool, CounselYear } from "./pro-counsel";
 
@@ -22,7 +23,7 @@ export function csatRows(c: CandidatesDto | null | undefined): CsatRow[] {
   for (const g of c?.reference_university_groups ?? []) {
     for (const it of g.offerings ?? []) {
       const b = it.reference_band;
-      if (!b || b.basis !== "reference_threshold" || b.source !== "g" || !code(b.code)) continue;
+      if (!b || b.basis !== "reference_threshold" || b.source !== "g" || !code(b.code) || isCsatHeld(it.offering?.offering_id)) continue;
       out.push({ offering: it.offering, band: b });
     }
   }

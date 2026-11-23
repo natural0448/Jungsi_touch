@@ -1,3 +1,4 @@
+import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
 import type { ReferenceBandDto } from "@/lib/dto";
 import { BAND } from "@/lib/decision-labels";
 import { csatBandText, csatUpper } from "@/lib/provisional-view";
@@ -23,6 +24,7 @@ export function CsatScore({ band }: { band?: ReferenceBandDto | null }) {
 
 export function CsatBadge({ band }: { band?: ReferenceBandDto | null }) {
   if (!band || !BAND[band.code]) return null;
+  if (band.held) return <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
   const tone = BAND[band.code];
   const upper = csatUpper(band);
   const title = upper

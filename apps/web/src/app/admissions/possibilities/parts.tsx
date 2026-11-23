@@ -87,17 +87,19 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
  * - 대학 안 내 위치·환산 유불리: 가채점 곡선 계산(다음 단계) 전이라 보류로 보인다
  */
 export function CsatDetail({ o, band, exception = null, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
+  // 판정 보류 모집단위(lib/csat-held.ts): 환산점수만 보이고 단계는 내지 않는다
+  const judged = band && !band.held ? band : null;
   const ex = band ? null : exception;
   const p2 = page("PAGE-02").path;
   const s = band?.school_score ?? null;
   const range = s ? (s.low === s.high ? s.low : `${s.low}~${s.high}`) : null;
-  const tone = band ? BAND[band.code] : null;
-  const upper = band?.upper_code && band.upper_code !== band.code ? BAND[band.upper_code] : null;
-  const pos = band?.position ?? null;
+  const tone = judged ? BAND[judged.code] : null;
+  const upper = judged?.upper_code && judged.upper_code !== judged.code ? BAND[judged.upper_code] : null;
+  const pos = judged?.position ?? null;
   const items = [
     { k: "점수 변환", ok: !!s, label: s ? "가채점 추정" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
     { k: "대학 안 내 위치", ok: false, label: undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
-    { k: "지원 판단", ok: !!band || ex?.kind === "minimum", label: band ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
+    { k: "지원 판단", ok: !!judged || ex?.kind === "minimum", label: judged ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
   ];
   return (
     <>
@@ -136,7 +138,7 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
         </section>
         <section className="card" aria-label="지원가능성">
           <h3>지원가능성</h3>
-          {band && tone ? (
+          {judged && tone ? (
             <>
               <div>
                 <span className={`st ${tone.cls}`} title={tone.desc}>{upper ? `${tone.label}~${upper.label}` : tone.label}</span>

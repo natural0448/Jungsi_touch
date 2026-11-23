@@ -1,3 +1,4 @@
+import { isCsatHeld } from "./csat-held";
 import type { BandCode, CandidatesDto, ReferenceBandDto } from "./dto";
 import { referenceGroups, thresholdBandOf } from "./reference-percentile";
 import { LISTED_BANDS, referenceUniversities, type ReferenceItem, type ReferenceUniversity } from "./reference-view";
@@ -49,7 +50,7 @@ export function csatView(c: CandidatesDto | null | undefined): CsatView {
   const items: ReferenceItem[] = [];
   try {
     for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
-      const band = csatBandOf(it.reference_band);
+      const band = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
       if (!band || !LISTED_BANDS.includes(band.code)) continue;
       items.push({ offering: it.offering, reference_percentile: null, advantage: null, margin: null, band, pending: false });
     }
@@ -97,7 +98,7 @@ export function csatCandidateView(c: CandidatesDto | null | undefined): CsatCand
   let held = 0;
   try {
     for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
-      const band = csatBandOf(it.reference_band);
+      const band = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
       if (!band || !CSAT_CANDIDATE_GROUP[band.code]) continue;
       const g = csatCandidateGroupOf(band);
       if (!g) {

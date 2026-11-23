@@ -1,3 +1,4 @@
+import { heldBand } from "@/lib/csat-held";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
 import { ScoreBasis } from "@/components/score-basis";
 import { StreamTray } from "@/components/shortlist-tray-stream";
@@ -47,7 +48,7 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
   const a = cellOf(report, id);
   if (report && provisionalOnly(report)) {
     // 서버 dep_r29(2026-11-23): 이 모집단위의 학교별 가채점 판정이 붙었으면 7단계 배지, 없으면 '가채점 판정 준비 중'
-    const band = report.provisional_bands?.[id];
+    const band = heldBand(id, report.provisional_bands?.[id]);
     // 예외 17곳(담당자 출시 자료 11-23): 7단계 대신 허용된 이름만(최저충족·최저미충족·최저 확인 대기·판정 준비 중)
     const ex = band ? null : csatExceptionView(id, report.overall);
     if (ex) return <><span className="c-score r">{DASH}</span><span className="c-st"><span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span></span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;

@@ -1,3 +1,4 @@
+import { isCsatHeld } from "@/lib/csat-held";
 import { StarButton } from "@/components/star-button";
 import { FAVORITE_LIMIT, myFavorites, type Favorites } from "@/lib/favorites";
 import { FieldTag } from "@/components/field-tag";
@@ -161,7 +162,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 수능 가채점 지원가능성 필터(2026-11-23 대표님 요청: 9월과 같은 화면). 판정 단계로, 판정 없는 곳은 '판정 근거 부족'
   if (cur.st && report && provisional) {
     const want = new Set<StatusKey>(cur.st);
-    const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => (bands?.[id]?.code as StatusKey | undefined) ?? "none";
+    const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => (bands?.[id] && !isCsatHeld(id) ? (bands[id].code as StatusKey) : "none");
     if (cur.fav) {
       const r = report;
       shown = items.filter((o) => want.has(keyOf(r.provisional_bands, o.offering_id)));
