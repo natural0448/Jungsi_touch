@@ -1,3 +1,4 @@
+import { REPORT_TAB } from "@/lib/routes";
 import Link from "@/components/link";
 import type { PickedItem } from "@/lib/shortlist";
 import { page } from "@/lib/routes";
@@ -43,7 +44,7 @@ export function ShortlistTray({ items, other, links }: { items: PickedItem[]; ot
             )}
           </span>
           <Link className="btn" href={links?.other ?? to.path}>{to.label}에서도 같은 목록</Link>
-          <Link className="btn p" href={links?.report ?? page("PAGE-02").path}>{links?.reportLabel ?? "리포트에서 정리"}</Link>
+          <Link className="btn p" href={links?.report ?? REPORT_TAB.path}>{links?.reportLabel ?? "리포트에서 정리"}</Link>
         </div>
       </div>
     </div>

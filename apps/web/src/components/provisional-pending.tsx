@@ -18,7 +18,7 @@ export function ProvisionalPendingGate({ catalogHref }: { overall?: OverallAnaly
       <h2 id="prov-pend-h">{PROVISIONAL_PENDING_TITLE}</h2>
       <p>{PROVISIONAL_PENDING_TEXT}</p>
       <div className="acts">
-        <Link className="btn p" href={page("PAGE-02").path}>내 성적 리포트</Link>
+        <Link className="btn p" href={page("PAGE-02").path}>{page("PAGE-02").label}</Link>
         <Link className="btn" href={catalogHref}>전국 대학·학과 보기</Link>
       </div>
     </section>

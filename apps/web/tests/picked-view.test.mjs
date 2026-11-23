@@ -79,13 +79,15 @@ test("판단 근거: 정식 판정·자격 미충족·내 입력 이유", () => 
 const src = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 
 test("2페이지 표는 3·4페이지처럼 그리기 전에 분석을 맞추고(settleAnalyses) 전체 위치를 넘긴다; 가채점 리포트는 준비 중", () => {
-  const page = src("../src/app/reports/me/page.tsx");
+  // 2026-11-23 담은 학교는 5번째 탭 '리포트'(reports/me/final)로 옮겼다. 9월 표는 picked-section.tsx, 가채점 표는 csat-picked.tsx
+  const page = src("../src/app/reports/me/picked-section.tsx");
   assert.match(page, /settleAnalyses\(src, caller, report, ids\)/);
   assert.match(page, /<PickedTable items=\{items\} overall=\{current\.overall\?\.overall\} report=\{current\} \/>/);
-  assert.match(page, /<Picked src=\{src\} caller=\{caller\} report=\{report\} pending \/>/);
+  const fin = src("../src/app/reports/me/final/page.tsx");
+  assert.match(fin, /provisional \? <CsatPicked src=\{src\} caller=\{caller\} report=\{report\} \/> : <Picked src=\{src\} caller=\{caller\} report=\{report\} \/>/);
   const print = src("../src/app/reports/me/print/page.tsx");
   assert.match(print, /<PickedTable items=\{shortlist\} overall=\{a\.overall\} print detailOf=\{detailOf\} \/>/);
-  assert.match(print, /<PickedTable items=\{shortlist\} pending print \/>/);
+  assert.match(print, /<CsatPickedTable items=\{shortlist\} bands=\{csatBands\} a=\{a\} print \/>/);
   const view = src("../src/app/reports/me/report-view.tsx");
   assert.match(view, /<ScoreCell a=\{a\} plain \/>/); // 환산점수 아래 '참고' 꼬리표 없음
   assert.match(view, /<StatusCell a=\{a\} overall=\{overall\} plain \/>/);
@@ -121,7 +123,7 @@ test("2페이지 핵심 지원 학교 표: 줄을 펼치면 4페이지 상세 �
   assert.match(src("../src/app/admissions/possibilities/mine-detail.tsx"), /acts=\{acts\} \/>;/);
   // 지금 화면·지난 기록 모두 리포트를 넘긴다(가채점 pending 표는 넘기지 않는다)
   assert.match(src("../src/app/reports/me/past-records.tsx"), /<PickedTable items=\{items\} overall=\{report\.overall\?\.overall\} report=\{report\} \/>/);
-  const page = src("../src/app/reports/me/page.tsx");
+  const page = src("../src/app/reports/me/picked-section.tsx");
   assert.match(page, /<PickedTable items=\{items\} pending \/>/);
 });
 

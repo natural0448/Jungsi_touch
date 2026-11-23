@@ -24,12 +24,19 @@ const byId = new Map(catalog.pages.map((p) => [p.id, p]));
 if (catalog.pages.length !== DISPLAY_ORDER.length || DISPLAY_ORDER.some((id) => !byId.has(id))) {
   throw new Error("경로 계약의 소비자 화면과 표시 순서가 다릅니다");
 }
+/**
+ * 화면 이름 바꾸기(대표님 결정 2026-11-23): 2번째 탭은 '성적 입력'. 담은 학교·리포트 출력은 5번째 탭 '리포트'(REPORT_TAB)로 옮겼다.
+ * 경로 계약(화면 ID·주소·회원 범위)은 그대로다.
+ */
+const LABEL: Partial<Record<string, string>> = { "PAGE-02": "성적 입력" };
+/** 5번째 탭 '리포트'. 경로 계약의 PAGE-02 아래 주소라 회원 범위·잠금도 PAGE-02 와 같다 */
+export const REPORT_TAB = { path: "/reports/me/final", label: "리포트" } as const;
 export const PAGES: PageRoute[] = DISPLAY_ORDER.map((id, i) => {
   const p = byId.get(id)!;
   return {
     id: p.id,
     number: i + 1,
-    label: p.label,
+    label: LABEL[p.id] ?? p.label,
     path: p.path,
     member_tiers: p.member_tiers as MemberTier[],
   };

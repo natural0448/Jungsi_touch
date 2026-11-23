@@ -11,6 +11,7 @@ import { useProAdmin } from "./pro-role";
 const SHORT: Record<string, string> = {
   "대학 발표 입시결과": "입시결과",
   "내 성적 리포트": "내 리포트",
+  "성적 입력": "성적 입력",
   "전체 대학·학과 가능성 보기": "가능성 보기",
   "유리한 대학 찾기": "유리한 대학",
 };
@@ -45,7 +46,10 @@ export function Tabs({ items: personal }: { items: { href: string; label: string
       {items.map((t) => {
         // 전문가용: 학생 화면·인쇄는 '학생 목록' 아래로 본다(정시 기본 안내만 따로)
         const sub = (p: string) => path === p || path.startsWith(`${p}/`);
-        const on = pro ? (t.href === "/pro" ? !sub("/pro/guide") && !sub("/pro/management") : sub(t.href)) : path === t.href || path.startsWith(`${t.href}/`);
+        // 개인용: 더 긴 주소의 탭이 맞으면 그 탭만(성적 입력 /reports/me 와 리포트 /reports/me/final). 인쇄본(/reports/me/print)은 리포트 탭
+        const at = path === "/reports/me/print" || path.startsWith("/reports/me/print/") ? "/reports/me/final" : path;
+        const hit = (h: string) => at === h || at.startsWith(`${h}/`);
+        const on = pro ? (t.href === "/pro" ? !sub("/pro/guide") && !sub("/pro/management") : sub(t.href)) : hit(t.href) && !items.some((o) => o.href.length > t.href.length && hit(o.href));
         const why = t.lock === "login" ? "로그인 필요" : t.lock === "paid" ? "이용권 필요" : null;
         const body = (
           <>

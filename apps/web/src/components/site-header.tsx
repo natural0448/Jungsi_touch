@@ -2,7 +2,7 @@ import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
 import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
-import { PAGES, ROOT_REDIRECT, lockFor } from "@/lib/routes";
+import { PAGES, REPORT_TAB, ROOT_REDIRECT, lockFor, page } from "@/lib/routes";
 import { Tabs, UserChip } from "./tabs";
 
 /**
@@ -10,7 +10,8 @@ import { Tabs, UserChip } from "./tabs";
  * 잠금 표시는 서버가 알려 준 회원 등급(session.read)으로만 그린다.
  */
 export function SiteHeader({ session, down = false }: { session: Session | null; down?: boolean }) {
-  const tabs = PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) }));
+  // 5번째 탭 '리포트'(2026-11-23): 잠금은 PAGE-02(성적 입력)와 같다
+  const tabs = [...PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) })), { href: REPORT_TAB.path, label: REPORT_TAB.label, lock: lockFor(session, page("PAGE-02")) }];
   return (
     <header>
       <div className="jt-util">

@@ -25,6 +25,7 @@ const NOTICES: [string, Notice][] = [
   ["/admissions/results", { title: "대학 발표 입시결과를 불러오고 있습니다", desc: "대학이 발표한 지난 3개 학년도 결과를 한 번에 확인하는 중입니다." }],
   ["/admissions/possibilities", { kind: "possibilities" }],
   ["/admissions/favorable", { kind: "favorable" }],
+  ["/reports/me/final", { title: "리포트를 불러오고 있습니다", desc: "담은 학교의 판정과 내 성적을 모으는 중입니다." }],
   ["/reports/me", { title: "내 성적 리포트를 불러오고 있습니다", desc: "저장한 성적과 과목별 결과를 확인하는 중입니다." }],
 ];
 const DEFAULT_NOTICE: Notice = { title: "화면을 불러오고 있습니다", desc: BOOK_SUB };

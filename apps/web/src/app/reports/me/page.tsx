@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import Link from "@/components/link";
 import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
-import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source, type Caller, type JungsiSource } from "@/lib/api";
+import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { ReportDto, ScoreInputStatusDto } from "@/lib/dto";
 import { EXAM, MOCK_EXAM, csatOpen, examTitle, examTypeLabel, stageOf } from "@/lib/exam";
 import { isProvisionalReport, provisionalDefaults } from "@/lib/provisional-report";
@@ -14,15 +14,12 @@ import { seoulDateTime } from "@/lib/format";
 import { loginHref } from "@/lib/links";
 import { PaidGate } from "@/components/paid-gate";
 import { correctionExhausted } from "@/lib/superseded";
-import { readPicks } from "@/lib/shortlist";
-import { PICK_GROUP_LIMIT, PICK_TOTAL_LIMIT } from "@/lib/picked-view";
-import { PROVISIONAL_PENDING_TITLE } from "@/components/provisional-pending";
-import { finishEagerReport, logSettleError, pickedIds, rememberCurrentReport, settleAnalyses, startEagerReport } from "@/lib/report-ops";
-import { RunAnalysis } from "@/components/run-analysis";
+import { PICK_TOTAL_LIMIT } from "@/lib/picked-view";
+import { finishEagerReport, pickedIds, rememberCurrentReport, startEagerReport } from "@/lib/report-ops";
 import { BookLoading } from "@/components/book-loading";
 import { viewPath } from "@/lib/content-view";
-import { lockFor, page } from "@/lib/routes";
-import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "./report-view";
+import { REPORT_TAB, lockFor, page } from "@/lib/routes";
+import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "./report-view";
 import { PastRecords, pastHref } from "./past-records";
 import { InputStatus, NoInput, canInput } from "./rights";
 import { CorrectionPanel } from "./correction";
@@ -313,91 +310,17 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           </>
         )}
 
+        {/* 담은 학교·리포트 출력은 5번째 탭 '리포트'로 옮겼다(2026-11-23 대표님 결정) */}
         <section aria-labelledby="sl-h" className="rp-sec">
           <div className="rp-sechd">
             <h2 id="sl-h">
-              핵심 지원 학교 <span className="num">{pickedList.length}/{PICK_TOTAL_LIMIT}</span>
+              담은 학교 <span className="num">{pickedList.length}/{PICK_TOTAL_LIMIT}</span>
             </h2>
-            <Link className="btn p" href={`${route.path}/print`}>상담 리포트 인쇄용 보기</Link>
+            <Link className="btn p" href={REPORT_TAB.path}>리포트에서 보기·출력</Link>
           </div>
-          {provisional ? (
-            // 학교별 가채점 판정 자료가 아직 없다(서버 provisional_stage_unavailable). 3·4페이지와 같은 말로 둔다
-            <>
-              <div className="rp-empty">
-                <p><b>{PROVISIONAL_PENDING_TITLE}</b> — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성 판정(안정·하향·적정·소신·상향·도전·불가)을 아직 하지 않습니다. 담아 둔 학교는 그대로 남아 있습니다.</p>
-                <div className="acts">
-                  <Link className="btn" href={page("PAGE-03").path}>{page("PAGE-03").label}</Link>
-                </div>
-              </div>
-              {/* 담은 학교 이름만 군별로(판정 칸 없음). 가채점 리포트는 분석을 계산하지 않는다(report-ops provisionalOnly) */}
-              {pickedList.length > 0 && (
-                <Suspense fallback={<BookLoading compact text="담은 학교를 불러오고 있습니다." />}>
-                  <Picked src={src} caller={caller} report={report} pending />
-                </Suspense>
-              )}
-            </>
-          ) : pickedList.length === 0 ? (
-            <div className="rp-empty">
-              <p>아직 담은 학교가 없습니다. 아래 화면에서 마음에 드는 모집단위를 담으면 여기에 모입니다. 가·나·다군마다 {PICK_GROUP_LIMIT}곳, 모두 {PICK_TOTAL_LIMIT}곳까지 담을 수 있습니다.</p>
-              <div className="acts">
-                <Link className="btn" href={page("PAGE-04").path}>{page("PAGE-04").label}</Link>
-                <Link className="btn" href={page("PAGE-03").path}>{page("PAGE-03").label}</Link>
-              </div>
-            </div>
-          ) : (
-            <Suspense fallback={<BookLoading compact text="담은 학교를 불러오고 있습니다." />}>
-              <Picked src={src} caller={caller} report={report} />
-            </Suspense>
-          )}
-          <p className="rp-foot">모의지원 서비스에서 각 모집단위의 모집군·지원 조건·모집인원 변경을 다시 확인하세요. 정시터치는 외부 서비스에 성적을 보내거나 자동으로 등록하지 않습니다.</p>
+          <p className="rp-foot">담은 학교의 판정·환산점수·대학 안 위치·유불리와 상담용 리포트 출력은 <b>{REPORT_TAB.label}</b> 탭에 모았습니다.</p>
         </section>
       </div>
-    </>
-  );
-}
-
-/**
- * 담은 학교 표. 이름은 offering.read 로 받는다. 받지 못하면 이 자리에만 연결 안내를 보인다(위 리포트는 그대로).
- * 3·4페이지와 같은 판정을 보이려고(대표님 요청 2026-11-21) 그리기 전에 settleAnalyses 를 거친다 — 분석이 없는 곳은 계산하고,
- * 옛 자료판으로 계산된 분석(stale_analysis_ids)은 같은 성적으로 다시 확인한다. 서버는 옛 분석에는 참고 기준 7단계(reference_band)를
- * 붙이지 않으므로, 이것을 거치지 않으면 3·4페이지에서 '안정'인 학과가 여기서는 '판정 근거 부족'으로 남았다.
- * 이미 지금 자료판으로 분석된 곳은 다시 계산하지 않는다(같은 요청 키 → 서버가 중복 실행하지 않음). 실패해도 받은 리포트로 그린다
- */
-async function Picked({ src, caller, report, pending = false }: { src: JungsiSource; caller: Caller; report: ReportDto; pending?: boolean }) {
-  const ids = [...pickedIds(report)];
-  let current = report;
-  if (!pending) {
-    try {
-      current = await settleAnalyses(src, caller, report, ids);
-    } catch (e) {
-      logSettleError("report-picked", e);
-    }
-  }
-  let items;
-  let failed: ConnectionError | AccessDenied | null = null;
-  try {
-    items = await readPicks(src, caller, current);
-  } catch (e) {
-    if (!(e instanceof ConnectionError || e instanceof AccessDenied)) throw e;
-    failed = e;
-  }
-  if (failed instanceof ConnectionError) return <ConnectionNotice e={failed} />;
-  if (failed || !items) return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요.{failed ? ` (문의 번호 ${failed.code})` : ""}</p>;
-  if (pending) return <PickedTable items={items} pending />;
-  // 자동 계산이 끝내 닿지 않은 곳(연결 실패·한도)만 버튼으로 남긴다
-  const unanalyzed = ids.filter((id) => !current.analyses?.[id]);
-  return (
-    <>
-      {unanalyzed.length > 0 && (
-        <RunAnalysis
-          ids={unanalyzed}
-          title={`담은 학교 ${unanalyzed.length}곳을 지금 성적으로 분석할 수 있습니다`}
-          desc="누르면 이 리포트의 성적으로 그 학교만 분석합니다. 성적을 다시 저장하지 않으며 입력 횟수는 줄지 않습니다."
-          label="지금 성적으로 분석"
-          busy="분석하는 중…"
-        />
-      )}
-      <PickedTable items={items} overall={current.overall?.overall} report={current} />
     </>
   );
 }

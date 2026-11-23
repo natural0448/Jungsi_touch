@@ -1,3 +1,4 @@
+import { REPORT_TAB } from "@/lib/routes";
 import { csatGainView } from "@/components/csat-badge";
 import type { ExceptionView } from "@/lib/csat-exceptions";
 import { exceptionCls } from "@/lib/csat-exceptions";
@@ -73,7 +74,7 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
       {acts && (
         <div className="acts">
           <PickButton id={o.offering_id} on={picked} variant="wide" />
-          <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
+          <Link className="btn" href={REPORT_TAB.path}>리포트에서 보기</Link>
         </div>
       )}
     </>
@@ -91,7 +92,6 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
   // 판정 보류 모집단위(lib/csat-held.ts): 환산점수만 보이고 단계는 내지 않는다
   const judged = band && !band.held ? band : null;
   const ex = band ? null : exception;
-  const p2 = page("PAGE-02").path;
   const s = band?.school_score ?? null;
   const range = s ? (s.low === s.high ? s.low : `${s.low}~${s.high}`) : null;
   const tone = judged ? BAND[judged.code] : null;
@@ -209,7 +209,7 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
       {acts && (
         <div className="acts">
           <PickButton id={o.offering_id} on={picked} variant="wide" />
-          <Link className="btn" href={p2}>내 성적 리포트에서 보기</Link>
+          <Link className="btn" href={REPORT_TAB.path}>리포트에서 보기</Link>
         </div>
       )}
     </>

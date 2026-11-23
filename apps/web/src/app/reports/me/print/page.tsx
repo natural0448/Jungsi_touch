@@ -11,8 +11,11 @@ import { EXAM, MOCK_EXAM } from "@/lib/exam";
 import { pastHref } from "../past-records";
 import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { isInaccurate } from "@/lib/score-validity";
-import { page } from "@/lib/routes";
-import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
+import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
+import { CsatPickedTable } from "../csat-picked";
+import { provisionalBands } from "@/lib/report-ops";
+import { REPORT_TAB } from "@/lib/routes";
+import type { ReferenceBandDto } from "@/lib/dto";
 import { PrintDetail } from "../print-detail";
 import { loadPrintExtras } from "@/app/admissions/possibilities/print-extras";
 import type { Extras } from "@/app/admissions/possibilities/extras-actions";
@@ -37,7 +40,7 @@ const REPORT_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 export default async function Page({ searchParams }: { searchParams: Promise<{ report?: string | string[] }> }) {
   const sp = await searchParams;
   const wanted = typeof sp.report === "string" && REPORT_ID.test(sp.report) ? sp.report : null;
-  const back = wanted ? pastHref(wanted) : page("PAGE-02").path;
+  const back = wanted ? pastHref(wanted) : REPORT_TAB.path;
   const caller = await getCaller();
   const src = source();
   const paidOnly = (
@@ -56,6 +59,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
   // 인쇄할 리포트는 계정의 현재 리포트(2026-11-04 사용자 결정). 정정 입력 뒤에는 정정한 리포트다(2026-10-28 사용자 결정)
   let snap: SnapshotDto | null = null;
   let shortlist: PickedItem[] = [];
+  // 가채점 리포트: 담은 학교의 학교별 판정(4페이지와 같은 university.analyze, 2026-11-23 리포트 탭)
+  let csatBands: Record<string, ReferenceBandDto> = {};
   try {
     let reportId: string | null;
     if (wanted) {
@@ -78,6 +83,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
       const base = same && read ? { ...snap.report, analyses: read.analyses } : snap.report;
       // 고정된 revision 의 shortlist 를 그대로 쓴다. 이름만 offering.read 로 붙인다
       shortlist = await readPicks(src, caller, base);
+      if (isProvisionalOverall(base.overall) && read && same && shortlist.length) {
+        csatBands = (await provisionalBands(src, caller, read, shortlist.map((s) => s.offering_id)).catch(() => ({ bands: {} }))).bands;
+      }
     }
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
@@ -143,6 +151,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
             <ProvisionalOverallCard a={a} fold={false} />
             <h2>과목별 예상 성적</h2>
             <ProvisionalSubjectsSheet a={a} />
+            <ProvisionalComboScores a={a} />
+            <ProvisionalPositionChart a={a} />
           </>
         ) : (
           <>
@@ -157,8 +167,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
         <h2>핵심 지원 학교 <span className="num">{shortlist.length}</span></h2>
         {isProvisionalOverall(a) ? (
           <>
-            <p className="rp-foot">가채점 판정 준비 중 — 가채점 성적은 표준점수가 확정되기 전이라 학교별 환산점수와 지원가능성을 아직 계산하지 않습니다.</p>
-            {shortlist.length > 0 && <PickedTable items={shortlist} pending print />}
+            {shortlist.length === 0 ? <p className="rp-foot">담은 학교가 없습니다.</p> : <CsatPickedTable items={shortlist} bands={csatBands} a={a} print />}
           </>
         ) : shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>

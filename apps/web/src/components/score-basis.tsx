@@ -35,7 +35,7 @@ export function ScoreBasis({ overall, emptyText }: { overall: OverallAnalysisDto
           가채점 기준 추정 상위누백 <b className="num">{top ? `${top}%` : "─"}</b>
           {top && <span className="est">추정</span>}
         </span>
-        <Link className="btn go" href={p2}>내 성적 리포트</Link>
+        <Link className="btn go" href={p2}>{page("PAGE-02").label}</Link>
       </section>
     );
   }
