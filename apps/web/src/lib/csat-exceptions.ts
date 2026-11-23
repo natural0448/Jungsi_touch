@@ -6,7 +6,7 @@ import { INQUIRY_SUBJECTS } from "./exam";
   표시 투영 project_display_state.ts, 성균관대 최저 판정 evaluate_skku094_minimum.v2.ts).
   - 17곳은 가채점 일반 7단계·자동 후보에서 빠진다(서버 판정 묶음 v5p234_v52 에도 없다).
   - 화면에는 허용된 이름·안내만 보낸다. 원본 사유(official_scope_reason)·곡선 지문은 서버 쪽에만 둔다.
-  - 수능 성분·우수 3영역 점수는 서버가 점수를 줄 때까지 '판정 준비 중'(project_display_state 의 pending).
+  - 수능 반영분·우수 3영역 7행은 7단계 없이 점수만(csat-conditions csatC1Score, 담당자 C1 11-23). 보류 6행은 근거별 이름(J1 ⑥).
   - 성균관대 4곳은 과목별 가채점 등급 범위 안의 모든 경우가 같은 답일 때만 최저충족·최저미충족, 아니면 '최저 확인 대기'.
 */
 
@@ -39,10 +39,23 @@ export const CSAT_EXCEPTIONS: Readonly<Record<string, ExceptionMode>> = {
 
 export type ExceptionView =
   | { kind: "minimum"; label: "최저충족" | "최저미충족"; desc: string }
-  | { kind: "pending"; label: "판정 준비 중" | "최저 확인 대기"; desc: string };
+  | { kind: "pending"; label: string; desc: string };
+
+/**
+ * 담당자 11-23 회신 J1 ⑥: 보류 6행의 화면 이름(근거별). 원본 사유 문장은 서버에만 둔다.
+ * 울산대 3행은 2027 이 전형 모집 인원 0명 → '이번 전형 모집 없음'
+ */
+const HELD_LABEL: Readonly<Record<string, { label: string; desc: string }>> = {
+  "2027:1000002877": { label: "환산 방식 확인", desc: "모집요강에 가산점을 반영하는 순서가 명시되어 있지 않아 대학에 확인이 필요합니다." },
+  "2027:1000006932": { label: "지원 조건 확인", desc: "이 전형은 지원 자격이 따로 정해져 있어 모집요강에서 지원 조건을 확인해 주세요." },
+  "2027:1000008661": { label: "이월 선발 조건 확인", desc: "이 전형은 다른 전형에서 이월된 인원으로 선발하는 조건부 모집입니다. 모집요강에서 확인해 주세요." },
+  "2027:1000010768": { label: "이번 전형 모집 없음", desc: "2027 이 전형의 수능 위주 모집 인원이 0명입니다." },
+  "2027:1000010769": { label: "이번 전형 모집 없음", desc: "2027 이 전형의 수능 위주 모집 인원이 0명입니다." },
+  "2027:1000010770": { label: "이번 전형 모집 없음", desc: "2027 이 전형의 수능 위주 모집 인원이 0명입니다." },
+};
 
 const DESC: Record<ExceptionMode, string> = {
-  csat_component_only: "이 전형은 수능 외 평가가 함께 반영되어 가채점 7단계 판정을 내지 않습니다. 수능 성분 점수는 준비 중입니다.",
+  csat_component_only: "이 전형은 수능 외 평가가 함께 반영되어 7단계 판정을 내지 않습니다. 수능 반영분 점수만 보입니다.",
   student_selected_three_score_reference: "이 전형은 성적이 좋은 3영역을 골라 반영하는 방식이라 가채점 7단계 판정을 내지 않습니다. 이 방식의 점수는 준비 중입니다.",
   csat_minimum_only: "이 전형은 수능 최저 기준 충족 여부만 봅니다. 가채점 7단계 판정을 내지 않습니다.",
   existing_held_no_curve: "이 전형은 반영 방법 확인이 끝나지 않아 가채점 판정을 보류했습니다.",
@@ -148,7 +161,12 @@ export function csatExceptionView(offeringId: string, a: OverallAnalysisDto | nu
       ? { kind: "minimum", label: r, desc: r === "최저충족" ? "가채점 등급으로 이 전형의 수능 최저 기준을 충족합니다. 7단계 판정은 내지 않습니다." : "가채점 등급으로는 이 전형의 수능 최저 기준에 미치지 못합니다. 7단계 판정은 내지 않습니다." }
       : { kind: "pending", label: "최저 확인 대기", desc: "가채점 등급 범위에 따라 수능 최저 충족 여부가 갈리거나 입력이 부족해 아직 정하지 않았습니다. 성적표가 나오면 확정됩니다." };
   }
-  return { kind: "pending", label: "판정 준비 중", desc: DESC[mode] };
+  const held = HELD_LABEL[offeringId];
+  if (held) return { kind: "pending", ...held };
+  // 수능 반영분·우수 3영역 7행: 점수는 csat-conditions csatC1Score 로 따로 보인다(7단계는 내지 않는다)
+  if (mode === "csat_component_only") return { kind: "pending", label: "수능 반영분 점수", desc: DESC[mode] };
+  if (mode === "student_selected_three_score_reference") return { kind: "pending", label: "우수 3영역 점수", desc: DESC[mode] };
+  return { kind: "pending", label: "비교 기준 확인 필요", desc: DESC[mode] };
 }
 
 /** 배지 색: 최저충족=안정 색, 최저미충족=조건 미충족 색, 대기=확인 색 */

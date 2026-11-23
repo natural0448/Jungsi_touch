@@ -1,3 +1,4 @@
+import { csatC1Score, csatNoJudgmentView, type NoJudgmentView } from "@/lib/csat-conditions";
 import { heldBand } from "@/lib/csat-held";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
 import { ScoreBasis } from "@/components/score-basis";
@@ -36,6 +37,8 @@ export function MineLegend({ report }: { report: ReportDto | null }) {
 /** 수능 가채점 리포트에서 판정이 없는 모집단위(9월과 같은 '판정 근거 부족', 2026-11-23) */
 const PROV = <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
 const DASH = <span className="need" aria-label="해당 없음">─</span>;
+/** 판정 없음 사유(담당자 D1 11-23): 지원 조건 미충족 / 비교 기준 확인 필요 */
+const noJudgmentBadge = (v: NoJudgmentView | null) => (v ? <span className={`st ${v.cls}`} title={v.desc}>{v.label}</span> : PROV);
 
 // '이 범위 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).
 // 첫 분석·옛 자료판 재확인은 화면을 그리기 전에 서버가 조용히 끝낸다(report-ops settleAnalyses)
@@ -51,8 +54,9 @@ export function MineCells({ report, id }: { report: ReportDto | null; id: string
     const band = heldBand(id, report.provisional_bands?.[id]);
     // 예외 17곳(담당자 출시 자료 11-23): 7단계 대신 허용된 이름만(최저충족·최저미충족·최저 확인 대기·판정 준비 중)
     const ex = band ? null : csatExceptionView(id, report.overall);
-    if (ex) return <><span className="c-score r">{DASH}</span><span className="c-st"><span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span></span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
-    return <><span className="c-score r">{band?.school_score ? <CsatScore band={band} /> : DASH}</span><span className="c-st">{band ? <CsatBadge band={band} /> : PROV}</span><span className="c-adv r">{csatGainView(band) ? <CsatAdvantage band={band} /> : DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
+    const c1 = band ? null : csatC1Score(id, report.overall);
+    if (ex) return <><span className="c-score r">{c1 ? <span className="score" title={c1.label}><b className="num">{c1.central ?? `${c1.low}~${c1.high}`}</b>{c1.central !== null && c1.low !== c1.high && <small>{c1.low}~{c1.high}</small>}</span> : DASH}</span><span className="c-st"><span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span></span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
+    return <><span className="c-score r">{band?.school_score ? <CsatScore band={band} /> : DASH}</span><span className="c-st">{band ? <CsatBadge band={band} /> : noJudgmentBadge(csatNoJudgmentView(id, report.overall))}</span><span className="c-adv r">{csatGainView(band) ? <CsatAdvantage band={band} /> : DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
   }
   if (a === null) {
     return <><span className="c-score r">{NO_DATA}</span><span className="c-st">{NO_DATA}</span><span className="c-adv r">{NO_DATA}</span><span className="c-pick">{report && <PickButton id={id} on={pickedIds(report).has(id)} />}</span></>;

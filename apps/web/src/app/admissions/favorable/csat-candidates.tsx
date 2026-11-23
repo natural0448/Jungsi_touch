@@ -37,7 +37,7 @@ export function CsatCandidates({ c, favs, p3Label }: { c: CandidatesDto | null |
           </details>
         ) : null,
       )}
-      {v.held > 0 && <p className="fv-ref-note">가채점 점수 범위에 따라 판정이 두 그룹에 걸친 {v.held}개 학과는 후보에 넣지 않았습니다. 아래 유리한 대학 목록에서 확인할 수 있습니다.</p>}
+      {v.held > 0 && <p className="fv-ref-note">점수 범위에 따라 판정이 두 그룹에 걸친 {v.held}개 학과는 자동 추천 기준 밖입니다. 아래 유리한 대학 목록에서 확인할 수 있습니다.</p>}
     </section>
   );
 }

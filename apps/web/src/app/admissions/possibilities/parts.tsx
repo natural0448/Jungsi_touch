@@ -1,3 +1,4 @@
+import type { C1Score, NoJudgmentView } from "@/lib/csat-conditions";
 import { REPORT_TAB } from "@/lib/routes";
 import { csatGainView } from "@/components/csat-badge";
 import type { ExceptionView } from "@/lib/csat-exceptions";
@@ -88,7 +89,7 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
  * - 지원가능성: 학교별 가채점 7단계(범위면 '적정~소신')와 단계 안 위치
  * - 대학 안 내 위치: 서버 dep_r30 school_rank(동점 포함 상위누백). 환산 유불리는 아직 보류
  */
-export function CsatDetail({ o, band, exception = null, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
+export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = null, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; noJudgment?: NoJudgmentView | null; c1?: C1Score | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
   // 판정 보류 모집단위(lib/csat-held.ts): 환산점수만 보이고 단계는 내지 않는다
   const judged = band && !band.held ? band : null;
   const ex = band ? null : exception;
@@ -103,8 +104,8 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
   // 환산 유불리(서버 dep_r31). 보류 모집단위는 csatGainView 가 null
   const gain = csatGainView(judged);
   const items = [
-    { k: "점수 변환", ok: !!s, label: s ? "가채점 추정" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
-    { k: "대학 안 내 위치", ok: !!rk, label: rk ? "가채점 추정" : undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
+    { k: "점수 변환", ok: !!s || !!c1, label: s || c1 ? "계산됨" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
+    { k: "대학 안 내 위치", ok: !!rk, label: rk ? "계산됨" : undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
     { k: "지원 판단", ok: !!judged || ex?.kind === "minimum", label: judged ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
   ];
   return (
@@ -113,7 +114,7 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
       <ul className="strip" aria-label="계산 준비 상태">
         {items.map((i) => (
           <li key={i.k} className={i.ok ? "ok" : "hold"}>
-            <b>{i.k}</b> {i.ok ? i.label ?? "준비됨" : "보류"}
+            <b>{i.k}</b> {i.ok ? i.label ?? "준비됨" : "—"}
             {!i.ok && <small> · {i.why}</small>}
           </li>
         ))}
@@ -126,14 +127,24 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
               <div className="big num">{s.central ?? range}</div>
               <p>
                 {s.central !== null && s.low !== s.high && <>범위 {range} · </>}
-                <span className="tag">학교 수능 반영분</span> <span className="tag">가채점 추정</span>
+                <span className="tag">학교 수능 반영분</span>
               </p>
               <p>가채점 원점수로 추정한 표준점수·백분위를 이 대학 방식으로 계산한 값입니다. 성적표가 나오면 달라질 수 있습니다.</p>
             </>
+          ) : c1 ? (
+            // 담당자 C1(11-23): 예외 7곳은 7단계 없이 수능 반영분·우수 3영역 점수만
+            <>
+              <div className="big num">{c1.central ?? `${c1.low}~${c1.high}`}</div>
+              <p>
+                {c1.central !== null && c1.low !== c1.high && <>범위 {c1.low}~{c1.high} · </>}
+                <span className="tag">{c1.label}</span>
+              </p>
+              <p>이 전형은 수능 외 평가가 함께 반영되거나 3영역을 골라 반영해, 수능 부분 점수만 계산했습니다.</p>
+            </>
           ) : (
             <>
-              <div className="big hold">계산 보류</div>
-              <p>가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다(반영 과목·선택과목 조건 등).</p>
+              <div className="big hold">—</div>
+              <p>{noJudgment?.label === "지원 조건 미충족" ? noJudgment.desc : "지금 성적으로 이 대학 환산점수를 계산하지 못했습니다(반영 과목·선택과목 조건 등)."}</p>
             </>
           )}
         </section>
@@ -147,7 +158,6 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
               </div>
               <p>
                 {rk.central !== null && rkRange && <>범위 상위 {rkRange}% · </>}
-                <span className="tag">가채점 추정</span>
               </p>
               <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다 — 판단은 <b>지원가능성</b> 칸이 담당합니다.</span>
             </>
@@ -182,8 +192,8 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
             </>
           ) : (
             <>
-              <div><span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span></div>
-              <p>이 모집단위는 가채점 판정 근거가 아직 없어 단계를 내지 않았습니다. 반영 과목·선택과목 조건이 맞지 않거나 자료를 맞추는 중일 수 있습니다.</p>
+              <div><span className={`st ${noJudgment?.cls ?? "check"}`} title={noJudgment?.desc ?? POSITION_NONE_DESC}>{noJudgment?.label ?? POSITION_NONE_LABEL}</span></div>
+              <p>{noJudgment?.desc ?? "이 모집단위는 판정 근거가 아직 없어 단계를 내지 않았습니다."}</p>
             </>
           )}
         </section>
@@ -194,7 +204,6 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
               <div className={`big num ${gain.tone}`}><span className="advw">{gain.tone === "up" ? "유리" : gain.tone === "down" ? "불리" : "비슷"}</span> {gain.text}<small>%p</small></div>
               <p>
                 {gain.range && <>범위 {gain.range}%p · </>}
-                <span className="tag">가채점 추정</span>
               </p>
               <p>국·수·탐2 표준점수 합으로 본 전체 위치(상위 %)에서 이 대학 방식 환산점수로 본 위치(상위 %)를 뺀 값입니다. +면 이 대학 방식이 내게 유리, −면 불리합니다. 합격 가능성 판단과는 별개입니다.</p>
             </>

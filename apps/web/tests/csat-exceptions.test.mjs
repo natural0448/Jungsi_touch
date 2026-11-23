@@ -65,8 +65,11 @@ test("grade ranges: same answer across every case, otherwise wait", () => {
 test("17 rows and labels only (no source reasons on screen)", () => {
   assert.equal(Object.keys(CSAT_EXCEPTIONS).length, 17);
   assert.equal(Object.values(CSAT_EXCEPTIONS).filter((m) => m === "csat_minimum_only").length, 4);
-  assert.equal(csatExceptionView("2027:1000002877", null).label, "판정 준비 중");
-  assert.equal(csatExceptionView("2027:1000003567", null).label, "판정 준비 중");
+  assert.equal(csatExceptionView("2027:1000002877", null).label, "환산 방식 확인"); // 담당자 J1 ⑥
+  assert.equal(csatExceptionView("2027:1000010768", null).label, "이번 전형 모집 없음");
+  assert.equal(csatExceptionView("2027:1000008661", null).label, "이월 선발 조건 확인");
+  assert.equal(csatExceptionView("2027:1000003567", null).label, "수능 반영분 점수");
+  assert.equal(csatExceptionView("2027:1000007388", null).label, "우수 3영역 점수");
   assert.equal(csatExceptionView("2027:1000000064", null), null);
   const src = readFileSync(new URL("../src/lib/csat-exceptions.ts", import.meta.url), "utf8");
   assert.ok(!src.includes("official_scope_reason\":"), "no source reasons");

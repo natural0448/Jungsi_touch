@@ -124,11 +124,10 @@ export function ProvisionalOverallCard({ a, fold = true }: { a: OverallAnalysisD
         {total && total.low !== total.high && <p className="tie">가운데 값 <b className="num">{total.central}</b>점</p>}
       </div>
       <div className="n">
-        <small>가채점 기준 추정 상위누백</small>
+        <small>상위누백</small>
         {top ? (
           <>
             <b className="num big">{top}%</b>
-            <span className="est">추정</span>
             <p className="tie">전체 응시자를 국어·수학·탐구 2과목 표준점수 합 순서로 줄 세웠을 때 내가 위에서 몇 % 안에 드는지를, 가채점 원점수로 추정한 범위입니다.</p>
             {fold ? (
               <details className="tie-more">
@@ -158,7 +157,7 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
   const sl = (a.second_language ?? null) as { subject: string; grade: number | null; raw_score?: number } | null;
   const na = <span className="rs-na" aria-label="해당 없음">─</span>;
   // 이 원점수에 추정이 없는 칸은 '추정 없음'으로 확정 표시한다(계산 중이 아니다)
-  const none = <span className="rs-na">추정 없음</span>;
+  const none = <span className="rs-na">—</span>;
   const raw = (s?: (typeof a.subjects)[number]) => (typeof s?.raw_score === "number" ? <b className="num">{s.raw_score}</b> : na);
   const span = (r: { low: number; high: number } | null | undefined, unit = "") => (spanText(r) ? <b className="num">{spanText(r)}{unit}</b> : none);
   // 가운데 백분위(percentile_at_central)가 온 과목은 '표준점수 121 · 백분위 83' 한 값씩, 범위는 작은 보조 줄로만(2026-11-22 대표님 결정).
@@ -222,7 +221,7 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{sl && typeof sl.raw_score === "number" ? <b className="num">{sl.raw_score}</b> : na}</td>
           </tr>
           <tr className="key">
-            <th scope="row">{central ? <>표준점수<small className="sf-rowsub">가채점 추정 · 가운데 값</small></> : "예상 표준점수"}</th>
+            <th scope="row">{central ? <>표준점수<small className="sf-rowsub">가운데 값</small></> : "예상 표준점수"}</th>
             <td className="na">{na}</td>
             <td>{std(k)}</td>
             <td>{std(m)}</td>
@@ -232,7 +231,7 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td className="na">{na}</td>
           </tr>
           <tr className={central ? "key" : undefined}>
-            <th scope="row">{central ? <>백분위<small className="sf-rowsub">가채점 추정 · 가운데 표준점수 기준</small></> : "예상 백분위"}</th>
+            <th scope="row">{central ? <>백분위<small className="sf-rowsub">가운데 표준점수 기준</small></> : "예상 백분위"}</th>
             <td className="na">{na}</td>
             <td>{pctl(k)}</td>
             <td>{pctl(m)}</td>
@@ -683,9 +682,9 @@ export function ProvisionalPositionChart({ a }: { a: OverallAnalysisDto }) {
       <ScaleNote max={max} />
       <Axis max={max} />
       {rows.map(({ s, best, worst }) => (
-        <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={best} excl={worst} max={max} waitText="추정 없음" />
+        <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={best} excl={worst} max={max} waitText="—" />
       ))}
-      <ChartRow label="전체" max={max} sub="국·수·탐2 · 추정" strong incl={range?.best ?? null} excl={range?.worst ?? null} waitText="추정 없음" />
+      <ChartRow label="전체" max={max} sub="국·수·탐2" strong incl={range?.best ?? null} excl={range?.worst ?? null} waitText="—" />
       <p className="pc-note">과목 줄은 그 과목을 본 응시자 중의 예상 위치(예상 백분위 범위), 전체 줄은 국·수·탐2 예상 표준점수 합으로 본 추정 상위누백 범위입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다. 성적표가 배부되면 실채점으로 다시 확인해 주세요.</p>
     </section>
   );

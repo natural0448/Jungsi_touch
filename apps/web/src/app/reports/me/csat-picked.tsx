@@ -1,3 +1,4 @@
+import { csatC1Score, csatNoJudgmentView } from "@/lib/csat-conditions";
 import Link from "@/components/link";
 import { CsatAdvantage, CsatBadge, CsatScore, csatGainView } from "@/components/csat-badge";
 import { heldBand } from "@/lib/csat-held";
@@ -50,6 +51,8 @@ export function CsatPickedTable({ items, bands, a, print = false }: { items: Pic
                     const band = heldBand(it.offering_id, bands[it.offering_id]);
                     const ex = band ? null : csatExceptionView(it.offering_id, a);
                     const rank = rankText(band);
+                    const c1 = band ? null : csatC1Score(it.offering_id, a);
+                    const nj = band || ex ? null : csatNoJudgmentView(it.offering_id, a);
                     return (
                       <tr key={it.offering_id}>
                         <th scope="row">
@@ -57,11 +60,11 @@ export function CsatPickedTable({ items, bands, a, print = false }: { items: Pic
                           {o.track && <small> · {o.track}</small>}
                         </th>
                         <td>
-                          {band ? <CsatBadge band={band} /> : ex ? <span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span> : <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>}
+                          {band ? <CsatBadge band={band} /> : ex ? <span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span> : <span className={`st ${nj?.cls ?? "check"}`} title={nj?.desc ?? POSITION_NONE_DESC}>{nj?.label ?? POSITION_NONE_LABEL}</span>}
                         </td>
-                        <td className="r">{band?.school_score ? <CsatScore band={band} /> : "─"}</td>
-                        <td className="r num">{rank ?? "─"}</td>
-                        <td className="r">{csatGainView(band) ? <CsatAdvantage band={band} /> : "─"}</td>
+                        <td className="r">{band?.school_score ? <CsatScore band={band} /> : c1 ? <span className="score" title={c1.label}><b className="num">{c1.central ?? `${c1.low}~${c1.high}`}</b></span> : "—"}</td>
+                        <td className="r num">{rank ?? "—"}</td>
+                        <td className="r">{csatGainView(band) ? <CsatAdvantage band={band} /> : "—"}</td>
                       </tr>
                     );
                   })}
