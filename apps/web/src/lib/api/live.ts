@@ -425,6 +425,8 @@ export const liveSource: JungsiSource = {
   readOffering: (caller, id) => orNull(call<OfferingDetailDto>(caller, `/offerings/${enc(id)}`)),
   analyzeUniversities: (caller, reportId, expected, ids, key) =>
     write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/university-results`, { expected_version: expected, offering_ids: ids }, key, true),
+  scanUniversities: (caller, reportId, expected, scan, key) =>
+    write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/university-results`, { expected_version: expected, status_scan: scan }, key, true),
   buildCandidates: (caller, reportId, expected, key) => write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/candidates`, { expected_version: expected }, key, true),
   updateShortlist: (caller, reportId, id, selected, expected, key) =>
     write<ReportDto>(caller, "PUT", `/reports/${enc(reportId)}/shortlist/${enc(id)}`, { selected, expected_version: expected }, key),

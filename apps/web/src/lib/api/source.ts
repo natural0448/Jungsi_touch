@@ -106,6 +106,8 @@ export interface JungsiSource {
   readOffering(caller: Caller, offeringId: string): Promise<OfferingDetailDto | null>;
   /** university.analyze (유료·본인·확인 성적). report.analyses 를 갱신한 리포트 */
   analyzeUniversities(caller: Caller, reportId: string, expectedVersion: number, offeringIds: string[], idempotencyKey: string): Promise<Result<ReportDto>>;
+  /** 서버 dep_r38: 가채점 4페이지 지원가능성 필터 — 전국(지역·모집군 조건 안) 판정에서 고른 단계 모집단위 한 쪽 */
+  scanUniversities(caller: Caller, reportId: string, expectedVersion: number, scan: StatusScanRequest, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** candidates.build (유료·본인·확인 성적). report.candidates 를 갱신한 리포트 */
   buildCandidates(caller: Caller, reportId: string, expectedVersion: number, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** shortlist.update (유료·본인). report.shortlist 를 갱신한 리포트. 해제도 selected=false 로 남는다 */
@@ -138,4 +140,13 @@ export interface ForecastRevisionRef {
   expected_revision: number;
   base_result_hash: string;
   policy_version: string;
+}
+
+/** 서버 dep_r38 status_scan 요청. codes = 7단계 코드와 "none"(판정 없음) */
+export interface StatusScanRequest {
+  codes: string[];
+  after?: string;
+  limit?: number;
+  region?: string;
+  group?: string;
 }

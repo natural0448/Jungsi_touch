@@ -278,6 +278,12 @@ export const syntheticSource: JungsiSource = {
     return typeof r === "string" ? fail(r) : { ok: true, value: r };
   },
 
+  // 합성 자료에는 전국 판정이 없다 — 화면은 앞 방식(쪽마다 확인)으로 돌아간다
+  async scanUniversities() {
+    await requirePaid();
+    return fail("invalid_offering_ids");
+  },
+
   async buildCandidates(_caller, reportId, expected, key) {
     await requirePaid();
     const r = await buildCands(reportId, expected, key);

@@ -540,6 +540,8 @@ export interface CandidatesDto {
   wildcard_selection?: WildcardSelectionDto | null;
   reference_university_groups?: ReferenceUniversityGroupDto[] | null; // 없거나 비면 영역을 숨긴다
   reference_threshold_summary?: ReferenceThresholdSummaryDto | null;
+  /** 서버 dep_r38: 4페이지 지원가능성 필터 응답(고른 단계 모집단위 한 쪽, 판정 있는 행의 값은 reference_university_groups) */
+  status_scan?: { matched: number; next_after: string | null; complete: boolean; offerings: OfferingDto[] } | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
   ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)

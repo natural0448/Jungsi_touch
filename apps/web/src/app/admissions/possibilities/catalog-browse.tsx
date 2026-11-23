@@ -13,7 +13,8 @@ import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, to
 import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { provisionalBands, provisionalOnly, settleAnalyses, startMine } from "@/lib/report-ops";
+import { provisionalBands, provisionalOnly, provisionalScan, settleAnalyses, startMine } from "@/lib/report-ops";
+import { csatNoJudgmentView } from "@/lib/csat-conditions";
 import { ProvisionalPendingNote } from "@/components/provisional-pending";
 import { InaccurateNotice } from "@/components/inaccurate-notice";
 import { inaccurateSeen } from "@/lib/report-ref";
@@ -79,7 +80,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       proFailed = r.failed;
       return r.search ?? { status: "ready" as const, reason_code: null, items: [], matching_offering_count: null, matching_school_count: null, catalog_version: null, as_of: null, next_cursor: null };
     })
-    : skipEmptyPages(src, caller, toSearch(cur));
+    // 서버 지원가능성 필터의 다음 쪽(st:…)은 검색 커서가 아니다 — 검색은 첫 쪽(건수·기준일)만 받는다
+    : skipEmptyPages(src, caller, toSearch(cur.cursor?.startsWith("st:") ? { ...cur, cursor: undefined } : cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
   const mine = pro ? searching.then(() => ({ ok: true as const, report: pro.report })) : startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
@@ -160,9 +162,58 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   }
   const provisionalJudged = provisional && Object.keys(report?.provisional_bands ?? {}).length > 0;
   // 수능 가채점 지원가능성 필터(2026-11-23 대표님 요청: 9월과 같은 화면). 판정 단계로, 판정 없는 곳은 '판정 근거 부족'
-  if (cur.st && report && provisional) {
+  // 판정 없는 곳은 화면 규칙으로 '지원 조건 미충족'과 '판정 근거 부족'을 나눈다(2026-11-24: 미충족이 필터에 잡히지 않았다)
+  const overallA = report?.overall ?? null;
+  const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey =>
+    bands?.[id] && !isCsatHeld(id) ? (bands[id].code as StatusKey) : csatNoJudgmentView(id, overallA)?.label === "지원 조건 미충족" ? "ineligible" : "none";
+  // 서버 dep_r38 전국 필터(2026-11-24 대표님 지적: 120개만 보고 멈췄다). 대학·학과 검색어가 없고 즐겨찾기 보기가 아닐 때만
+  let scanDone = false;
+  if (cur.st && report && provisional && !pro && !cur.fav && !cur.university_q && !cur.department_q) {
     const want = new Set<StatusKey>(cur.st);
-    const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => (bands?.[id] && !isCsatHeld(id) ? (bands[id].code as StatusKey) : "none");
+    const STAGES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"];
+    const codes = [...new Set(cur.st.flatMap((k) => (STAGES.includes(k) ? [k] : k === "none" || k === "ineligible" ? ["none"] : [])))];
+    const client = cur.st.includes("none") || cur.st.includes("ineligible");
+    if (codes.length) {
+      const base = report;
+      const picked: OfferingDto[] = [];
+      const bandsAll: Record<string, ReferenceBandDto> = { ...(base.provisional_bands ?? {}) };
+      let after = cur.cursor?.startsWith("st:") ? cur.cursor.slice(3) : undefined;
+      let next: string | null = null, matched = 0, ok = true;
+      for (let hop = 0; hop < 10; hop++) {
+        const got = await provisionalScan(src, caller, base, { codes, ...(after ? { after } : {}), limit: client ? 600 : LIMIT, ...(cur.region ? { region: cur.region } : {}), ...(cur.group ? { group: cur.group } : {}) });
+        if (!got) { ok = false; break; }
+        matched = got.matched;
+        Object.assign(bandsAll, got.bands);
+        let last: string | null = null;
+        for (const o of got.offerings) {
+          if (picked.length >= LIMIT) break;
+          last = o.offering_id;
+          if (want.has(keyOf(bandsAll, o.offering_id))) picked.push(o);
+        }
+        if (picked.length >= LIMIT) { next = last; break; }
+        if (!got.next) { next = null; break; }
+        after = got.next;
+        next = got.next;
+      }
+      if (ok) {
+        // 판정 있는 행 가운데 점수·위치가 빠진 것(서버가 한 번에 100개까지)만 4페이지 판정으로 채운다
+        const missing = picked.map((o) => o.offering_id).filter((id) => !bandsAll[id]?.school_score && keyOf(bandsAll, id) !== "none" && keyOf(bandsAll, id) !== "ineligible");
+        if (missing.length) Object.assign(bandsAll, (await provisionalBands(src, caller, base, missing)).bands);
+        report = { ...base, provisional_bands: bandsAll };
+        shown = picked;
+        nextCursor = next ? `st:${next}` : null;
+        scanned = matched;
+        scanDone = true;
+      }
+    } else {
+      shown = [];
+      nextCursor = null;
+      scanned = 0;
+      scanDone = true;
+    }
+  }
+  if (cur.st && report && provisional && !scanDone) {
+    const want = new Set<StatusKey>(cur.st);
     if (cur.fav) {
       const r = report;
       shown = items.filter((o) => want.has(keyOf(r.provisional_bands, o.offering_id)));
@@ -293,9 +344,11 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                 )}
                 {/* 날짜만(YYYY-MM-DD)이든 시각까지(ISO)든 'YYYY.MM.DD'로 보인다(10-24 QA: 'T14:51:47Z'가 그대로 보였다) */}
                 {asOfDate(res.as_of) && <small> · {asOfDate(res.as_of)} 기준</small>}
-                {cur.st && scanned !== null && (
+                {cur.st && scanned !== null && (scanDone ? (
+                  <small className="st-scan"> · 지원가능성 {cur.st.map((k) => STATUS_LABEL[k]).join("·")}: 전국{cur.region ? `(${cur.region})` : ""} 모집단위에서 찾았습니다{cur.st.every((k) => !["none", "ineligible"].includes(k)) && <> — 모두 <b className="num">{scanned}</b>개</>}</small>
+                ) : (
                   <small className="st-scan"> · 지원가능성 {cur.st.map((k) => STATUS_LABEL[k]).join("·")}: 모집단위 <b className="num">{scanned}</b>개를 확인해 <b className="num">{shown.length}</b>개</small>
-                )}
+                ))}
               </span>
               <MineLegend report={report} />
             </div>

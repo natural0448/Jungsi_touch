@@ -87,7 +87,7 @@ export async function getCaller(): Promise<Caller> {
 }
 
 export { AccessDenied, ConnectionError } from "./source";
-export type { Caller, ForecastRevisionRef, JungsiSource, OfferingSearchQuery, Result } from "./source";
+export type { Caller, ForecastRevisionRef, JungsiSource, OfferingSearchQuery, Result, StatusScanRequest } from "./source";
 
 /** 화면 첫머리의 로그인 상태. 연결이 안 되면 down 으로 돌려 화면이 연결 대기를 그리게 한다 */
 export async function sessionOrDown(src: JungsiSource, caller: Caller) {

@@ -1,5 +1,5 @@
 import "server-only";
-import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
+import { AccessDenied, ConnectionError, type Caller, type JungsiSource, type StatusScanRequest } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, OfferingDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
 import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, pickedIds, provisionalOnly } from "@/lib/report-pure";
@@ -210,6 +210,44 @@ const P4_BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "
 const thresholdBandOf = (b: ReferenceBandDto | null | undefined): ReferenceBandDto | null =>
   b && b.basis === "reference_threshold" && typeof b.code === "string" && P4_BAND_CODES.has(b.code) ? b : null;
 const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; at: number; ttl: number }>();
+/**
+ * 서버 dep_r38(2026-11-24 대표님 지적: 지원가능성 필터가 120개만 보고 멈췄다): 전국 판정에서 고른 단계 모집단위 한 쪽.
+ * 받지 못하면 null(화면은 앞 방식으로 쪽마다 확인한다). 판정 있는 행의 점수·위치·유불리는 bands 에.
+ */
+export async function provisionalScan(src: JungsiSource, caller: Caller, report: ReportDto, scan: StatusScanRequest): Promise<{ offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean } | null> {
+  if (!provisionalOnly(report)) return null;
+  const ask = (attempt: number) =>
+    retryOnConflict(src, caller, report, async (r) => {
+      const body = { expected_version: r.report_version, status_scan: scan };
+      return src.scanUniversities(caller, r.report_id, r.report_version, scan, await key(attempt ? `uas${attempt}` : "uas", r, body));
+    });
+  let state: ReportState;
+  try {
+    state = await ask(0);
+    if (state.kind === "ready" && state.report.candidates?.status_scan?.complete === false) {
+      await new Promise((r) => setTimeout(r, 1500));
+      const again = await ask(1).catch(() => null);
+      if (again && again.kind === "ready") state = again;
+    }
+  } catch {
+    logSettle("p4_scan_failed", { thrown: true });
+    return null;
+  }
+  if (state.kind !== "ready") return null;
+  const sc = state.report.candidates?.status_scan;
+  if (!sc || !Array.isArray(sc.offerings)) return null;
+  const bands: Record<string, ReferenceBandDto> = {};
+  for (const g of state.report.candidates?.reference_university_groups ?? []) {
+    for (const it of g.offerings ?? []) {
+      const id = it.offering?.offering_id;
+      const b = thresholdBandOf(it.reference_band);
+      if (typeof id === "string" && b && b.source === "g") bands[id] = b;
+    }
+  }
+  logSettle("p4_scan", { matched: sc.matched, page: sc.offerings.length });
+  return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete };
+}
+
 export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number }> {
   const none = { bands: {}, version: report.report_version };
   if (!provisionalOnly(report)) return none;
