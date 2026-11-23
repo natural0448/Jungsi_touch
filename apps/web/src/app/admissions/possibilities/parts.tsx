@@ -177,6 +177,9 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               </div>
               <p>{tone.desc}</p>
               {upper && <p>가채점 점수 범위에 따라 {tone.label}부터 {upper.label}까지 나옵니다.</p>}
+              {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
+                <p>가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
+              )}
               {pos && (pos.better_gap || pos.worse_gap) && (
                 <p>
                   {pos.better_gap && <>한 단계 위까지 {pos.better_gap}점 더 필요 · </>}
@@ -206,6 +209,11 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 {gain.tone === "split" ? <>가채점 결과에 따라 이 대학 방식이 유리할 수도, 불리할 수도 있는 범위입니다. 성적표가 나오면 한쪽으로 정해집니다.</> : gain.range && <>범위 {gain.range}%p</>}
               </p>
               <p>국·수·탐2 표준점수 합으로 본 전체 위치(상위 %)에서 이 대학 방식 환산점수로 본 위치(상위 %)를 뺀 값입니다. +면 이 대학 방식이 내게 유리, −면 불리합니다. 합격 가능성 판단과는 별개입니다.</p>
+            </>
+          ) : judged?.gain_note === "comparison_total_out_of_support" ? (
+            <>
+              <div className="big hold">—</div>
+              <p>가채점 총점이 유불리 비교 범위를 벗어났습니다. 국·수·탐2 합이 비교에 쓰는 전체 분포의 가장 높은 점수보다 높아 유불리를 계산하지 않았습니다. 환산점수·대학 안 위치·지원가능성은 그대로 볼 수 있습니다.</p>
             </>
           ) : (
             <>

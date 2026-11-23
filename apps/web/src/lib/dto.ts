@@ -335,6 +335,10 @@ export interface ReferenceBandDto {
    * 국·수·탐2 총점 상위누백 − 이 대학 환산 상위누백. 양수면 유리. central = 가운데 분기, low·high = 끝 조합의 최소·최대
    */
   school_gain?: { central: string | null; low: string; high: string };
+  /** 서버 dep_r37(11-24, 담당자 Q3): 가운데 판정일 때 가채점 점수 범위 안에서 가능한 가장 좋은·나쁜 단계 */
+  range_codes?: { best: string; worst: string };
+  /** 서버 dep_r37(11-24, 담당자 Q4): 유불리를 내지 않은 사유 — 국·수·탐2 합이 비교 분포 밖 */
+  gain_note?: "comparison_total_out_of_support";
   /** 전문가용 가채점 판정 행만(서버 dep_pro_r27): 중앙 추정 점수의 단계 안 위치. 이 대학 환산점수 단위 문자열 */
   position?: { score: string; better_gap: string | null; worse_gap: string | null; share_pct: number | null };
 }

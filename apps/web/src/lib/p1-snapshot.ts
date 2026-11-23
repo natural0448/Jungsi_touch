@@ -566,17 +566,36 @@ const norm = (s: string) => s.normalize("NFC").replace(/\s+/g, "").toLowerCase()
 export type SearchResult = { total_schools: number; total_units: number; total_pending: number; page: number; pages: number; schools: { school: School; rows: Row[]; keys: Set<string> }[] };
 /** 쉼표(, ， 、)로 나눈 여러 검색어. 하나라도 맞으면 찾는다(10-24: "강원대, 홍익대"가 한 글자열로 취급돼 0건이었다) */
 const terms = (s?: string) => (s ?? "").split(/[,，、]/).map(norm).filter(Boolean).slice(0, 10);
-const anyHit = (qs: string[], hay: string[]) => qs.some(q => hay.some(h => norm(h).includes(q)));
+type PreparedSearch = {
+  schoolNames: string[][];
+  units: (readonly [number, string, string[], string[], string[], string[]])[];
+};
+// A new immutable index gets its own search fields. Do not retain previous index generations.
+const preparedSearches = new WeakMap<Index, PreparedSearch>();
+function preparedSearch(ix: Index): PreparedSearch {
+  const cached = preparedSearches.get(ix);
+  if (cached) return cached;
+  const prepared: PreparedSearch = {
+    schoolNames: ix.schools.map(s => s.names.map(norm)),
+    units: ix.units.map(([si, key, deps, groups, regions, names]) => [
+      si, key, deps.split("\n").map(norm), groups.split("\n").map(g => g.replace(/군$/, "")),
+      regions.split("\n"), names.split("\n").map(norm),
+    ] as const),
+  };
+  preparedSearches.set(ix, prepared);
+  return prepared;
+}
+const anyHit = (qs: string[], hay: string[]) => qs.some(q => hay.some(h => h.includes(q)));
 export async function searchSnapshot(ready: Ready, q: { university?: string; unit?: string; region?: string; group?: string; page?: number }): Promise<SearchResult> {
   const ix = await index(ready), uq = terms(q.university), dq = terms(q.unit);
-  const schoolHit = ix.schools.map(s => !uq.length || anyHit(uq, s.names));
+  const search = preparedSearch(ix);
+  const schoolHit = search.schoolNames.map(names => !uq.length || anyHit(uq, names));
   const matched = new Map<number, Set<string>>(); let units = 0, pending = 0;
-  for (const [si, key, deps, groups, regions, names] of ix.units) {
-    if (!schoolHit[si] && !(uq.length && anyHit(uq, names.split("\n")))) continue;
-    if (dq.length && !anyHit(dq, deps.split("\n"))) continue;
-    // 발표 표기가 '다'와 '다군'으로 섞여 있어 '군'을 떼고 비교한다(10-24 QA)
-    if (q.group && !groups.split("\n").some(g => g.replace(/군$/, "") === q.group)) continue;
-    if (q.region && !regions.split("\n").includes(q.region)) continue;
+  for (const [si, key, deps, groups, regions, names] of search.units) {
+    if (!schoolHit[si] && !anyHit(uq, names)) continue;
+    if (dq.length && !anyHit(dq, deps)) continue;
+    if (q.group && !groups.includes(q.group)) continue;
+    if (q.region && !regions.includes(q.region)) continue;
     let set = matched.get(si); if (!set) matched.set(si, set = new Set()); set.add(key);
     if (key.startsWith("ob:")) pending++; else units++;
   }

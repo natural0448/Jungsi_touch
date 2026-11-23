@@ -62,3 +62,9 @@ test("gain range across zero is not called 유리/불리", async () => {
   assert.ok(b.includes('split: "가채점에 따라 갈림"'));
   assert.ok(b.includes('if (tone === "split" && range) return { tone, text: range, range: null }'));
 });
+test("4P detail shows range stages (Q3) and gain out-of-support reason (Q4)", () => {
+  const p = readFileSync(new URL("../src/app/admissions/possibilities/parts.tsx", import.meta.url), "utf8");
+  assert.ok(p.includes("judged.range_codes"));
+  assert.ok(p.includes('judged?.gain_note === "comparison_total_out_of_support"'));
+  assert.ok(p.includes("가채점 총점이 유불리 비교 범위를 벗어났습니다"));
+});
