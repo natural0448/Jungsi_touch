@@ -2,13 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// 가채점 판정 보류: 정수 넘침 8곳만(H1 861곳은 11-23 새 경계로 해제)
+// 가채점 판정 보류: 11-23 저녁 K1 적용으로 모두 해제(H1 861·정수 넘침 8)
 const { isCsatHeld, CSAT_HELD_COUNT, heldBand } = await import("../src/lib/csat-held.ts");
 test("held list", () => {
-  assert.equal(CSAT_HELD_COUNT, 8);
+  assert.equal(CSAT_HELD_COUNT, 0);
   assert.ok(!isCsatHeld("2027:1000001750")); // 가톨릭대 의예과(H1 새 경계로 해제)
-  assert.ok(isCsatHeld("2027:1000001854")); // 건국대(글로컬) 의예과(정수 넘침)
-  assert.ok(isCsatHeld("2027:1000010771")); // 울산대 의예과(정수 넘침)
+  assert.ok(!isCsatHeld("2027:1000001854")); // 건국대(글로컬) 의예과(K1 정정판으로 해제)
+  assert.ok(!isCsatHeld("2027:1000010771")); // 울산대 의예과(K1 정정판으로 해제)
   assert.ok(!isCsatHeld("2027:1000002062")); // 가천대 건축학부
   assert.ok(!isCsatHeld(null));
 });
@@ -19,8 +19,7 @@ test("held rows are dropped where bands enter the screen", () => {
 });
 test("heldBand keeps the score, marks held", () => {
   const b = { basis: "reference_threshold", code: "stable", label: "안정", source: "g", school_score: { central: "587.72", low: "565.07", high: "607.21" } };
-  assert.equal(heldBand("2027:1000001854", b).held, true);
-  assert.equal(heldBand("2027:1000001854", b).school_score.central, "587.72");
+  assert.equal(heldBand("2027:1000001854", b), b); // 보류 없음 → 그대로
   assert.equal(heldBand("2027:1000002062", b), b);
   assert.equal(heldBand("2027:1000001854", null), undefined);
 });
