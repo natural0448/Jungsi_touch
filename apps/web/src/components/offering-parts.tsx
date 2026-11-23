@@ -97,10 +97,11 @@ export function CategoryBadge({ a, overall }: { a: AssessmentDto; overall?: Over
   return <span className={`st ${c.cls}`} title={c.desc}>{c.label}</span>;
 }
 
-export function CategoryLegend() {
+/** csat: 수능(가채점·실채점) 판정 화면 — '합격선 대비 위치'를 쓰지 않는다(2026-11-24 대표님) */
+export function CategoryLegend({ csat = false }: { csat?: boolean } = {}) {
   return (
     <span className="legend" aria-label="지원가능성 표시">
-      {[...Object.values(BAND), { cls: "pos near", label: "합격선 대비 위치" }, { cls: "check", label: POSITION_NONE_LABEL }, CATEGORY.ineligible].map((c) => (
+      {[...Object.values(BAND), ...(csat ? [] : [{ cls: "pos near", label: "합격선 대비 위치" }]), { cls: "check", label: POSITION_NONE_LABEL }, CATEGORY.ineligible].map((c) => (
         <span key={c.label} className={`st ${c.cls}`} title={"desc" in c ? c.desc : undefined}>{c.label}</span>
       ))}
     </span>

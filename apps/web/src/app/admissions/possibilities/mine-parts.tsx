@@ -31,7 +31,7 @@ export function MineBasis({ report }: { report: ReportDto | null }) {
 
 export function MineLegend({ report }: { report: ReportDto | null }) {
   // 가채점도 9월과 같은 범례(2026-11-23)
-  return report ? <CategoryLegend /> : null;
+  return report ? <CategoryLegend csat={csatJudged(report)} /> : null;
 }
 
 /** 수능 가채점 리포트에서 판정이 없는 모집단위(9월과 같은 '판정 근거 부족', 2026-11-23) */

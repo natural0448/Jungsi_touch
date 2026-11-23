@@ -501,7 +501,8 @@ function StatusChips({ cur, destination }: { cur: Query; destination: CatalogDes
         <Link href={link({ st: undefined, open: undefined })} className={on.size ? undefined : "on"} aria-current={on.size ? undefined : "true"} scroll={false}>
           전체
         </Link>
-        {STATUS_KEYS.map((k) => (
+        {/* '합격선 대비 위치'·'그 밖'은 필터로 쓰지 않는다(2026-11-24 대표님) */}
+        {STATUS_KEYS.filter((k) => k !== "line" && k !== "other").map((k) => (
           <Link key={k} href={link({ st: toggleStatus(cur.st, k), open: undefined })} className={on.has(k) ? "on" : undefined} aria-pressed={on.has(k)} scroll={false}>
             {STATUS_LABEL[k]}
           </Link>
