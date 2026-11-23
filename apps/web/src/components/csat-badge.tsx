@@ -44,6 +44,8 @@ export function csatGainView(band?: ReferenceBandDto | null): { tone: CsatGainTo
   const tone = csatGainTone(main, g.low, g.high);
   if (!tone) return null;
   const range = g.low !== g.high ? `${g.low}~${g.high}` : null;
+  // 갈림이면 가운데 값 대신 0 을 사이에 둔 범위 자체를 보인다(가운데 값만 보이면 한쪽으로 읽힌다)
+  if (tone === "split" && range) return { tone, text: range, range: null };
   return { tone, text: main ?? range ?? g.low, range: main !== null ? range : null };
 }
 /** 4페이지 목록의 '환산 유불리' 칸(가채점). 9월 칸과 같은 모양 */

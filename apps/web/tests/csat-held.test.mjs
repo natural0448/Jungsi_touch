@@ -54,4 +54,5 @@ test("gain range across zero is not called 유리/불리", async () => {
   assert.equal(csatGainTone(null, "-0.05", "+3.00"), "up");
   const b = readFileSync(new URL("../src/components/csat-badge.tsx", import.meta.url), "utf8");
   assert.ok(b.includes('split: "가채점에 따라 갈림"'));
+  assert.ok(b.includes('if (tone === "split" && range) return { tone, text: range, range: null }'));
 });
