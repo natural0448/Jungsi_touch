@@ -35,3 +35,17 @@ export function csatBandsIncomplete(bands: Record<string, ReferenceBandDto> | nu
 }
 /** 덜 찬 결과를 기억하는 시간 */
 export const CSAT_INCOMPLETE_TTL_MS = 30_000;
+
+/*
+  환산 유불리 방향(가채점). 범위가 0 을 사이에 두면(한 끝 −0.1 이하, 다른 끝 +0.1 이상) 'split' — 화면은 '가채점에 따라 갈림'.
+  2026-11-23 대표님 결정: 가야대 간호학과 −12.87~+4.09 가 가운데 값으로 '불리'로 보이던 것.
+*/
+export type CsatGainTone = "up" | "down" | "even" | "split";
+export function csatGainTone(central: string | null | undefined, low: string, high: string): CsatGainTone | null {
+  const lo = Math.min(Number(low), Number(high));
+  const hi = Math.max(Number(low), Number(high));
+  const mid = central != null ? Number(central) : (lo + hi) / 2;
+  if (!Number.isFinite(mid)) return null;
+  if (Number.isFinite(lo) && Number.isFinite(hi) && lo <= -0.1 && hi >= 0.1) return "split";
+  return Math.abs(mid) < 0.1 ? "even" : mid > 0 ? "up" : "down";
+}

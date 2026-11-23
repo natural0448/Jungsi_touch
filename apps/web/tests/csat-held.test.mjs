@@ -44,3 +44,14 @@ test("incomplete csat bands are remembered only briefly", async () => {
   assert.equal(csatBandsIncomplete({ a: { school_score: sc, school_rank: { central: "5.00", best: "1.00", worst: "9.00" }, school_gain: { central: "+1.00", low: "+0.50", high: "+2.00" } }, b: { school_score: sc, school_rank: { central: "5.00", best: "1.00", worst: "9.00" } } }), false);
   assert.equal(csatBandsIncomplete({}), false);
 });
+test("gain range across zero is not called 유리/불리", async () => {
+  const { csatGainTone } = await import("../src/lib/report-pure.ts");
+  assert.equal(csatGainTone(null, "-12.87", "+4.09"), "split"); // 가야대 간호학과
+  assert.equal(csatGainTone("-3.00", "-12.87", "+4.09"), "split");
+  assert.equal(csatGainTone(null, "-5.00", "-1.00"), "down");
+  assert.equal(csatGainTone("+2.00", "+0.50", "+3.00"), "up");
+  assert.equal(csatGainTone("+0.05", "+0.05", "+0.05"), "even");
+  assert.equal(csatGainTone(null, "-0.05", "+3.00"), "up");
+  const b = readFileSync(new URL("../src/components/csat-badge.tsx", import.meta.url), "utf8");
+  assert.ok(b.includes('split: "가채점에 따라 갈림"'));
+});

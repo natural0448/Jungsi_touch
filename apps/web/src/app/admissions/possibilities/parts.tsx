@@ -1,6 +1,6 @@
 import type { C1Score, NoJudgmentView } from "@/lib/csat-conditions";
 import { REPORT_TAB } from "@/lib/routes";
-import { csatGainView } from "@/components/csat-badge";
+import { CSAT_GAIN_WORD, csatGainView } from "@/components/csat-badge";
 import type { ExceptionView } from "@/lib/csat-exceptions";
 import { exceptionCls } from "@/lib/csat-exceptions";
 import Link from "@/components/link";
@@ -201,9 +201,9 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
           <h3>환산 유불리</h3>
           {gain ? (
             <>
-              <div className={`big num ${gain.tone}`}><span className="advw">{gain.tone === "up" ? "유리" : gain.tone === "down" ? "불리" : "비슷"}</span> {gain.text}<small>%p</small></div>
+              <div className={`big num ${gain.tone}`}><span className="advw">{CSAT_GAIN_WORD[gain.tone]}</span> {gain.text}<small>%p</small></div>
               <p>
-                {gain.range && <>범위 {gain.range}%p</>}
+                {gain.tone === "split" ? <>가채점 결과에 따라 이 대학 방식이 유리할 수도, 불리할 수도 있는 범위입니다. 성적표가 나오면 한쪽으로 정해집니다.</> : gain.range && <>범위 {gain.range}%p</>}
               </p>
               <p>국·수·탐2 표준점수 합으로 본 전체 위치(상위 %)에서 이 대학 방식 환산점수로 본 위치(상위 %)를 뺀 값입니다. +면 이 대학 방식이 내게 유리, −면 불리합니다. 합격 가능성 판단과는 별개입니다.</p>
             </>

@@ -39,6 +39,7 @@
 .et .adv .v.up{color:var(--safe)}
 .et .adv .v.down{color:var(--ink-2)}
 .et .adv .v.even{color:var(--fit)}
+.et .adv .v.split{color:var(--ink-2);white-space:normal}
 .et .adv .bar{position:relative;width:64px;height:8px;border-radius:4px;background:var(--sub-2);flex:none}
 .et .adv .bar::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
 .et .adv .bar i{position:absolute;top:0;bottom:0;border-radius:4px}

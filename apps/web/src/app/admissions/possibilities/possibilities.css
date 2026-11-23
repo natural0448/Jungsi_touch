@@ -107,6 +107,8 @@
 .et .ps .card .big.up{color:var(--safe)}
 .et .ps .card .big.down{color:var(--ink-2)}
 .et .ps .card .big.even{color:var(--fit)}
+.et .ps .card .big.split{color:var(--ink-2)}
+.et .ps .card .big.split .advw{display:block;font-size:15px;color:var(--muted)}
 .et .ps .card p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.6}
 .et .ps .card .note{font-size:12px;color:var(--muted)}
 .et .ps .card p small{font-size:12px;color:var(--muted)}
