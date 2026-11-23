@@ -403,3 +403,11 @@
   .et .rp-cp th, .et .rp-cp td { padding: 6px 8px; }
   .et .rp-cp-g { break-inside: avoid; }
 }
+/* 군별 표끼리 칸 너비를 같게(2026-11-23) */
+.et .rp-cp table { table-layout: fixed; }
+.et .rp-cp thead th:nth-child(1) { width: 34%; }
+.et .rp-cp thead th:nth-child(2) { width: 13%; }
+.et .rp-cp thead th:nth-child(3) { width: 15%; }
+.et .rp-cp thead th:nth-child(4) { width: 19%; }
+.et .rp-cp thead th:nth-child(5) { width: 19%; }
+.et .rp-cp thead th:nth-child(n+3) { text-align: right; }

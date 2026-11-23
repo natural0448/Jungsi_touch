@@ -361153,6 +361153,13 @@
         "PAGE-02"
       ],
       "summary": "리포트 탭·인쇄본의 가채점 담은 학교 표 모양(군별 표 줄·간격·오른쪽 정렬·인쇄 크기)."
+    },
+    {
+      "date": "2026-11-23",
+      "requirements": [
+        "PAGE-02"
+      ],
+      "summary": "리포트 탭 가채점 담은 학교 표: 군별 표끼리 칸 너비를 같게(고정 너비)."
     }
   ],
   "p1_recruitment_score_review_verification": {
