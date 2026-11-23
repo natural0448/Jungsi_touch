@@ -1,5 +1,5 @@
 /* 2페이지 · 내 성적 리포트 — 성적 입력, 전체 위치, 과목 결과, 핵심 지원 학교, 인쇄 */
-.et .rp{display:grid;gap:16px;padding-bottom:40px}
+.et .rp{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding-bottom:40px}
 .et .rp-note{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--brand-soft);font-size:13px}
 
 /* ── 성적 입력: 수능 성적표와 같은 가로 표 ──
@@ -123,7 +123,7 @@
 .et .rp-overall .tie{margin:6px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6}
 .et .rp-overall .tie-more{margin-top:6px}
 .et .rp-overall .tie-more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--touch)}
-.et .rp-sec{display:grid;gap:10px}
+.et .rp-sec{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .et .rp-sec h2,.et .pr-sheet h2{font-size:18px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
 .et .rp-sec h2::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:var(--touch);vertical-align:.25em}
 .et .rp-sec h2 .num{color:var(--muted);font-weight:700}
@@ -383,7 +383,7 @@
 .et .rp-sheet .rs-range{display:block;margin-top:1px;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
 
 /* 리포트 탭·인쇄본의 가채점 담은 학교 표(csat-picked.tsx, 2026-11-23) */
-.et .rp-cp { display: grid; gap: 18px; }
+.et .rp-cp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .et .rp-cp-g h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
 .et .rp-cp-g h3 .num { color: var(--ink-2); font-weight: 700; margin-left: 4px; }
 .et .rp-cp-scroll { overflow-x: auto; }
