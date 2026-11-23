@@ -157,7 +157,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 <small>%</small>
               </div>
               <p>
-                {rk.central !== null && rkRange && <>범위 상위 {rkRange}% · </>}
+                {rk.central !== null && rkRange && <>범위 상위 {rkRange}%</>}
               </p>
               <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다 — 판단은 <b>지원가능성</b> 칸이 담당합니다.</span>
             </>
@@ -203,7 +203,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
             <>
               <div className={`big num ${gain.tone}`}><span className="advw">{gain.tone === "up" ? "유리" : gain.tone === "down" ? "불리" : "비슷"}</span> {gain.text}<small>%p</small></div>
               <p>
-                {gain.range && <>범위 {gain.range}%p · </>}
+                {gain.range && <>범위 {gain.range}%p</>}
               </p>
               <p>국·수·탐2 표준점수 합으로 본 전체 위치(상위 %)에서 이 대학 방식 환산점수로 본 위치(상위 %)를 뺀 값입니다. +면 이 대학 방식이 내게 유리, −면 불리합니다. 합격 가능성 판단과는 별개입니다.</p>
             </>
