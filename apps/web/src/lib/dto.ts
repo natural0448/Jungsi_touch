@@ -325,6 +325,11 @@ export interface ReferenceBandDto {
    * central = 가운데 추정 점수(구간 점수·계산 불가면 null), low·high = 과목 표준점수 범위 끝 조합의 최저·최고(가운데 포함)
    */
   school_score?: { central: string | null; low: string; high: string };
+  /**
+   * 개인용 4페이지 가채점 판정 행만(서버 dep_r30, 2026-11-23): 대학 안 내 위치 — 이 대학 환산점수의 동점 포함 상위누백(%).
+   * central = 가운데 점수, best = 가장 좋은 끝(최고 점수), worst = 가장 나쁜 끝(최저 점수). 곡선 밖이면 null
+   */
+  school_rank?: { central: string | null; best: string | null; worst: string | null };
   /** 전문가용 가채점 판정 행만(서버 dep_pro_r27): 중앙 추정 점수의 단계 안 위치. 이 대학 환산점수 단위 문자열 */
   position?: { score: string; better_gap: string | null; worse_gap: string | null; share_pct: number | null };
 }

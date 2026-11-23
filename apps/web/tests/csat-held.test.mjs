@@ -24,3 +24,8 @@ test("heldBand keeps the score, marks held", () => {
   assert.equal(heldBand("2027:1000002062", b), b);
   assert.equal(heldBand("2027:1000001750", null), undefined);
 });
+test("4P position card reads school_rank only from judged (not held) bands", () => {
+  const src = readFileSync(new URL("../src/app/admissions/possibilities/parts.tsx", import.meta.url), "utf8");
+  assert.ok(src.includes("const rk = judged?.school_rank"));
+  assert.ok(src.includes("상위 {rk.central ?? rkRange"));
+});

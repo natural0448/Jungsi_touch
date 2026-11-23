@@ -84,7 +84,7 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
  * (계산 준비 상태 → 내 환산점수 · 대학 안 내 위치 · 지원가능성 · 환산 유불리 → 담기)로, 가채점 값으로 채운다.
  * - 내 환산점수: 이 대학 방식 환산점수 가운데 추정과 범위(서버 school_score)
  * - 지원가능성: 학교별 가채점 7단계(범위면 '적정~소신')와 단계 안 위치
- * - 대학 안 내 위치·환산 유불리: 가채점 곡선 계산(다음 단계) 전이라 보류로 보인다
+ * - 대학 안 내 위치: 서버 dep_r30 school_rank(동점 포함 상위누백). 환산 유불리는 아직 보류
  */
 export function CsatDetail({ o, band, exception = null, extras, picked, acts = true }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; extras: ReactNode; picked: boolean; acts?: boolean }) {
   // 판정 보류 모집단위(lib/csat-held.ts): 환산점수만 보이고 단계는 내지 않는다
@@ -96,9 +96,12 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
   const tone = judged ? BAND[judged.code] : null;
   const upper = judged?.upper_code && judged.upper_code !== judged.code ? BAND[judged.upper_code] : null;
   const pos = judged?.position ?? null;
+  // 대학 안 내 위치(서버 dep_r30): 판정과 같은 누적 도수에서 읽은 동점 포함 상위누백. 보류 모집단위는 보이지 않는다
+  const rk = judged?.school_rank && (judged.school_rank.central ?? judged.school_rank.best ?? judged.school_rank.worst) ? judged.school_rank : null;
+  const rkRange = rk && rk.best && rk.worst && rk.best !== rk.worst ? `${rk.best}~${rk.worst}` : null;
   const items = [
     { k: "점수 변환", ok: !!s, label: s ? "가채점 추정" : undefined, why: "가채점 성적으로 이 대학 환산점수를 계산하지 못했습니다" },
-    { k: "대학 안 내 위치", ok: false, label: undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
+    { k: "대학 안 내 위치", ok: !!rk, label: rk ? "가채점 추정" : undefined, why: "가채점 성적의 대학 안 위치는 준비 중입니다" },
     { k: "지원 판단", ok: !!judged || ex?.kind === "minimum", label: judged ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : "이 모집단위의 가채점 판정 근거가 아직 없습니다" },
   ];
   return (
@@ -133,8 +136,24 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
         </section>
         <section className="card" aria-label="대학 안 내 위치">
           <h3>대학 안 내 위치</h3>
-          <div className="big hold">준비 중</div>
-          <p>가채점 성적으로 이 대학 환산 분포에서의 위치를 계산하는 기능을 준비하고 있습니다.</p>
+          {rk ? (
+            <>
+              <div className="big num">
+                상위 {rk.central ?? rkRange ?? rk.best ?? rk.worst}
+                <small>%</small>
+              </div>
+              <p>
+                {rk.central !== null && rkRange && <>범위 상위 {rkRange}% · </>}
+                <span className="tag">가채점 추정</span>
+              </p>
+              <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다 — 판단은 <b>지원가능성</b> 칸이 담당합니다.</span>
+            </>
+          ) : (
+            <>
+              <div className="big hold">준비 중</div>
+              <p>가채점 성적으로 이 대학 환산 분포에서의 위치를 계산하지 못했습니다.</p>
+            </>
+          )}
         </section>
         <section className="card" aria-label="지원가능성">
           <h3>지원가능성</h3>
@@ -168,7 +187,7 @@ export function CsatDetail({ o, band, exception = null, extras, picked, acts = t
         <section className="card" aria-label="환산 유불리">
           <h3>환산 유불리</h3>
           <div className="big hold">준비 중</div>
-          <p>가채점 성적의 환산 유불리는 대학 안 내 위치와 함께 준비하고 있습니다.</p>
+          <p>가채점 성적의 환산 유불리(전체 위치와 대학 안 위치의 차이)는 준비하고 있습니다.</p>
         </section>
       </div>
       {acts && (
