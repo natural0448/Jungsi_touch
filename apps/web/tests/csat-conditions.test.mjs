@@ -43,3 +43,12 @@ test("C1: 예외 7곳 점수(조선대 상위 3영역 평균 × 7 / 3)", () => {
   const src = readFileSync(new URL("../src/lib/csat-conditions.ts", import.meta.url), "utf8");
   assert.ok(!/참고|추정/.test(src.split("*/")[1] ?? ""), "no 참고·추정 tags in screen strings");
 });
+test("D1 confirms unmet conditions and server minimum reasons (2026-11-24)", () => {
+  const mk = (math, i1, i2) => ({ subjects: [{ area: "math", choice: math, subject: "수학" }, { area: "inquiry1", subject: i1 }, { area: "inquiry2", subject: i2 }], second_language: null });
+  const social = mk("미적분", "생활과 윤리", "사회·문화"), prob = mk("확률과 통계", "물리학Ⅰ", "화학Ⅰ"), sci = mk("미적분", "물리학Ⅰ", "화학Ⅰ");
+  assert.equal(csatNoJudgmentView("2027:1000002003", sci).label, "지원 조건 미충족"); // 대구한의대 한의예(인문): 사탐·확통
+  assert.equal(csatNoJudgmentView("2027:1000007090", sci).label, "지원 조건 미충족"); // 동의대 한의예(확률과통계)
+  assert.equal(csatNoJudgmentView("2027:1000000709", social, "unmet").label, "수능 최저 미충족");
+  assert.equal(csatNoJudgmentView("2027:1000008020", social, "partial").label, "수능 최저 충족 여부 갈림");
+  assert.notEqual(csatNoJudgmentView("2027:1000000297", prob).label, "비교 기준 확인 필요"); // 미적분·기하 지정
+});

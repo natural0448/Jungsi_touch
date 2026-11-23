@@ -42,7 +42,7 @@ test("상담 리포트 인쇄: 담은 학교마다 표의 한 줄 아래에 상�
   assert.match(page, /<PrintDetail o=\{s\.offering\} a=\{s\.assessment\} extras=\{extras\[s\.offering_id\]\}/);
   assert.match(page, /import "@\/app\/admissions\/possibilities\/possibilities\.css";/);
   // 가채점 리포트: 4페이지와 같은 학교별 판정 표(2026-11-23 리포트 탭)
-  assert.match(page, /<CsatPickedTable items=\{shortlist\} bands=\{csatBands\} a=\{a\} print \/>/);
+  assert.match(page, /<CsatPickedTable items=\{shortlist\} bands=\{csatBands\} a=\{a\} print min=\{csatMin\} \/>/);
   // 지난 기록(?report=)도 같은 화면이 그린다
   assert.match(page, /const wanted = typeof sp\.report === "string"/);
 

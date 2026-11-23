@@ -68,7 +68,7 @@ test("provisionalBands: 실패·9모 리포트·빈 요청은 빈 표(오류 화
     async readReport() { return null; },
   };
   const failed = await provisionalBands(src, caller, { ...prov(), report_id: "r2" }, ["2027:1"]);
-  assert.deepEqual(failed, { bands: {}, version: 3 });
+  assert.deepEqual(failed, { bands: {}, version: 3, min: {} });
   const thrown = await provisionalBands({ async analyzeUniversities() { throw new Error("down"); } }, caller, { ...prov(), report_id: "r3" }, ["2027:1"]);
   assert.deepEqual(thrown.bands, {});
   const mock = await provisionalBands(src, caller, { report_id: "r4", report_version: 1, profile_id: "p", overall: { input_kind: "raw", score_basis: "mock" } }, ["2027:1"]);

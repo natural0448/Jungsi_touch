@@ -87,7 +87,7 @@ test("2페이지 표는 3·4페이지처럼 그리기 전에 분석을 맞추고
   assert.match(fin, /judgedCsat \? <CsatPicked src=\{src\} caller=\{caller\} report=\{report\} \/> : <Picked src=\{src\} caller=\{caller\} report=\{report\} \/>/);
   const print = src("../src/app/reports/me/print/page.tsx");
   assert.match(print, /<PickedTable items=\{shortlist\} overall=\{a\.overall\} print detailOf=\{detailOf\} \/>/);
-  assert.match(print, /<CsatPickedTable items=\{shortlist\} bands=\{csatBands\} a=\{a\} print \/>/);
+  assert.match(print, /<CsatPickedTable items=\{shortlist\} bands=\{csatBands\} a=\{a\} print min=\{csatMin\} \/>/);
   const view = src("../src/app/reports/me/report-view.tsx");
   assert.match(view, /<ScoreCell a=\{a\} plain \/>/); // 환산점수 아래 '참고' 꼬리표 없음
   assert.match(view, /<StatusCell a=\{a\} overall=\{overall\} plain \/>/);

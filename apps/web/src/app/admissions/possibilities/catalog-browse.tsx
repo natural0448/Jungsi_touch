@@ -15,6 +15,7 @@ import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
 import { csatJudged, provisionalBands, provisionalScan, settleAnalyses, startMine } from "@/lib/report-ops";
 import { csatNoJudgmentView } from "@/lib/csat-conditions";
+import type { CsatMinimum } from "@/lib/dto";
 import { ProvisionalPendingNote } from "@/components/provisional-pending";
 import { InaccurateNotice } from "@/components/inaccurate-notice";
 import { inaccurateSeen } from "@/lib/report-ref";
@@ -158,15 +159,20 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       report = { ...report, provisional_bands: bands };
     } else {
       const got = await provisionalBands(src, caller, report, items.map((o) => o.offering_id));
-      report = { ...report, report_version: got.version, provisional_bands: got.bands };
+      report = { ...report, report_version: got.version, provisional_bands: got.bands, provisional_min: got.min };
     }
   }
   const provisionalJudged = provisional && Object.keys(report?.provisional_bands ?? {}).length > 0;
   // 수능 가채점 지원가능성 필터(2026-11-23 대표님 요청: 9월과 같은 화면). 판정 단계로, 판정 없는 곳은 '판정 근거 부족'
   // 판정 없는 곳은 화면 규칙으로 '지원 조건 미충족'과 '판정 근거 부족'을 나눈다(2026-11-24: 미충족이 필터에 잡히지 않았다)
   const overallA = report?.overall ?? null;
-  const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey =>
-    bands?.[id] && !isCsatHeld(id) ? (bands[id].code as StatusKey) : csatNoJudgmentView(id, overallA)?.label === "지원 조건 미충족" ? "ineligible" : "none";
+  // 판정 없는 곳의 수능 최저 사유(서버 2026-11-24) — 최저 미충족·갈림도 '지원 조건 미충족' 필터에 넣는다
+  const minAll: Record<string, CsatMinimum> = { ...(report?.provisional_min ?? {}) };
+  const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => {
+    if (bands?.[id] && !isCsatHeld(id)) return bands[id].code as StatusKey;
+    const v = csatNoJudgmentView(id, overallA, minAll[id]);
+    return v && v.cls === "inel" ? "ineligible" : "none";
+  };
   // 서버 dep_r38 전국 필터(2026-11-24 대표님 지적: 120개만 보고 멈췄다). 대학·학과 검색어가 없고 즐겨찾기 보기가 아닐 때만
   let scanDone = false;
   if (cur.st && report && provisional && !pro && !cur.fav && !cur.university_q && !cur.department_q) {
@@ -185,6 +191,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         if (!got) { ok = false; break; }
         matched = got.matched;
         Object.assign(bandsAll, got.bands);
+        Object.assign(minAll, got.min);
         let last: string | null = null;
         for (const o of got.offerings) {
           if (picked.length >= LIMIT) break;
@@ -199,8 +206,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       if (ok) {
         // 판정 있는 행 가운데 점수·위치가 빠진 것(서버가 한 번에 100개까지)만 4페이지 판정으로 채운다
         const missing = picked.map((o) => o.offering_id).filter((id) => !bandsAll[id]?.school_score && keyOf(bandsAll, id) !== "none" && keyOf(bandsAll, id) !== "ineligible");
-        if (missing.length) Object.assign(bandsAll, (await provisionalBands(src, caller, base, missing)).bands);
-        report = { ...base, provisional_bands: bandsAll };
+        if (missing.length) { const m = await provisionalBands(src, caller, base, missing); Object.assign(bandsAll, m.bands); Object.assign(minAll, m.min); }
+        report = { ...base, provisional_bands: bandsAll, provisional_min: minAll };
         shown = picked;
         nextCursor = next ? `st:${next}` : null;
         scanned = matched;

@@ -138,11 +138,11 @@ async function CsatPicked({ src, caller, report }: { src: JungsiSource; caller: 
     if (!(e instanceof AccessDenied)) throw e;
     return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요. (문의 번호 {e.code})</p>;
   }
-  const { bands } = await provisionalBands(src, caller, report, items.map((it) => it.offering_id)).catch(() => ({ bands: {} }));
+  const { bands, min } = await provisionalBands(src, caller, report, items.map((it) => it.offering_id)).catch(() => ({ bands: {}, min: {} }));
   return (
     <>
-      <CsatPickedTable items={items} bands={bands} a={report.overall!} />
-      <CsatPickedDetails items={items} bands={bands} a={report.overall!} />
+      <CsatPickedTable items={items} bands={bands} a={report.overall!} min={min} />
+      <CsatPickedDetails items={items} bands={bands} a={report.overall!} min={min} />
     </>
   );
 }

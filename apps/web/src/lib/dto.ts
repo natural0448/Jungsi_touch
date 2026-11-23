@@ -549,6 +549,9 @@ export interface CandidatesDto {
   reference_university_groups?: ReferenceUniversityGroupDto[] | null; // 없거나 비면 영역을 숨긴다
   reference_threshold_summary?: ReferenceThresholdSummaryDto | null;
   /** 서버 dep_r38: 4페이지 지원가능성 필터 응답(고른 단계 모집단위 한 쪽, 판정 있는 행의 값은 reference_university_groups) */
+  /** 서버 2026-11-24: 수능 최저·최소 기준 미달(확정)·갈림 모집단위 */
+  csat_minimum_unmet?: string[] | null;
+  csat_minimum_partial?: string[] | null;
   status_scan?: { matched: number; next_after: string | null; complete: boolean; offerings: OfferingDto[] } | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
@@ -611,6 +614,8 @@ export interface ReportDto {
    * university.analyze 응답에만 실려 오는 것을 report-ops provisionalBands 가 모은다(서버 dep_r29, 2026-11-23)
    */
   provisional_bands?: Record<string, ReferenceBandDto>;
+  /** 서버 2026-11-24: 판정 없는 모집단위의 수능 최저 사유 — unmet(미달 확정)·partial(가채점에 따라 갈림). 화면 전용 */
+  provisional_min?: Record<string, CsatMinimum>;
 }
 
 /** snapshot — report.export. 고정된 revision 의 상담 리포트 */
@@ -852,3 +857,6 @@ export interface SampleReportDto {
     persisted: false;
   };
 }
+
+/** 판정 없는 모집단위의 수능 최저 사유(서버 2026-11-24) */
+export type CsatMinimum = "unmet" | "partial";

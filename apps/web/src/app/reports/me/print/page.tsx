@@ -5,7 +5,7 @@ import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import { isCsatFinalOverall, isCsatJudgedOverall, isProvisionalOverall, type SnapshotDto } from "@/lib/dto";
+import { isCsatFinalOverall, isCsatJudgedOverall, isProvisionalOverall, type CsatMinimum, type SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { EXAM, MOCK_EXAM } from "@/lib/exam";
 import { pastHref } from "../past-records";
@@ -61,6 +61,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
   let shortlist: PickedItem[] = [];
   // 가채점 리포트: 담은 학교의 학교별 판정(4페이지와 같은 university.analyze, 2026-11-23 리포트 탭)
   let csatBands: Record<string, ReferenceBandDto> = {};
+  let csatMin: Record<string, CsatMinimum> = {};
   try {
     let reportId: string | null;
     if (wanted) {
@@ -84,7 +85,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
       // 고정된 revision 의 shortlist 를 그대로 쓴다. 이름만 offering.read 로 붙인다
       shortlist = await readPicks(src, caller, base);
       if (isCsatJudgedOverall(base.overall) && read && same && shortlist.length) {
-        csatBands = (await provisionalBands(src, caller, read, shortlist.map((s) => s.offering_id)).catch(() => ({ bands: {} }))).bands;
+        const got = await provisionalBands(src, caller, read, shortlist.map((s) => s.offering_id)).catch(() => ({ bands: {}, min: {} }));
+        csatBands = got.bands;
+        csatMin = got.min;
       }
     }
   } catch (e) {
@@ -170,8 +173,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
           <>
             {shortlist.length === 0 ? <p className="rp-foot">담은 학교가 없습니다.</p> : (
               <>
-                <CsatPickedTable items={shortlist} bands={csatBands} a={a} print />
-                <CsatPickedDetails items={shortlist} bands={csatBands} a={a} print wrap={(s, detail) => <PrintDetail o={s.offering!} a={s.assessment} extras={extras[s.offering_id]} csat={detail} />} />
+                <CsatPickedTable items={shortlist} bands={csatBands} a={a} print min={csatMin} />
+                <CsatPickedDetails items={shortlist} bands={csatBands} a={a} print min={csatMin} wrap={(s, detail) => <PrintDetail o={s.offering!} a={s.assessment} extras={extras[s.offering_id]} csat={detail} />} />
               </>
             )}
           </>
