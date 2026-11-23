@@ -381,3 +381,25 @@
 .et .rp-sheet .rs-mid{display:block;font-size:11px;color:var(--muted)}
 /* 가운데 값으로 보일 때 낮음~높음 범위 보조 줄(보조 글자 13px, 2026-11-22) */
 .et .rp-sheet .rs-range{display:block;margin-top:1px;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* 리포트 탭·인쇄본의 가채점 담은 학교 표(csat-picked.tsx, 2026-11-23) */
+.et .rp-cp { display: grid; gap: 18px; }
+.et .rp-cp-g h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+.et .rp-cp-g h3 .num { color: var(--ink-2); font-weight: 700; margin-left: 4px; }
+.et .rp-cp-scroll { overflow-x: auto; }
+.et .rp-cp table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; }
+.et .rp-cp th, .et .rp-cp td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+.et .rp-cp thead th { font-size: 13px; font-weight: 700; color: var(--ink-2); background: var(--sub); border-top: 1px solid var(--line); white-space: nowrap; }
+.et .rp-cp tbody th { font-weight: 500; }
+.et .rp-cp tbody th b { font-weight: 800; }
+.et .rp-cp tbody th small { color: var(--ink-2); font-size: 13px; }
+.et .rp-cp td.r { text-align: right; white-space: nowrap; }
+.et .rp-cp td .score { display: inline-flex; flex-direction: column; align-items: flex-end; }
+.et .rp-cp td .score small { font-size: 12px; color: var(--ink-2); }
+.et .rp-cp td .adv { justify-content: flex-end; }
+.et .rp-cp .acts { margin-top: 4px; }
+@media print {
+  .et .rp-cp table { min-width: 0; font-size: 12px; }
+  .et .rp-cp th, .et .rp-cp td { padding: 6px 8px; }
+  .et .rp-cp-g { break-inside: avoid; }
+}
