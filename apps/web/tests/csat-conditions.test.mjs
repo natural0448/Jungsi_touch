@@ -72,7 +72,8 @@ test("담당자 v3 판정 보류(서버 csat_withheld → overall.provisional_sc
     "2027:1000002512": { reason: "non_csat_components_missing", score_kind: "csat_component", central_score: "180.00" },
     "2027:1000000012": { reason: "comparison_axis_unverified", score_kind: "university_score", central_score: "612.34" },
   } };
-  assert.equal(csatNoJudgmentView("2027:1000002512", a)?.label, "수능 반영분만 계산");
+  assert.equal(csatNoJudgmentView("2027:1000002512", a)?.label, "환산점수만 제공");
+  assert.match(csatNoJudgmentView("2027:1000002512", a)?.desc ?? "", /이 환산점수를 바탕으로 직접 검토/);
   assert.equal(csatNoJudgmentView("2027:1000000012", a)?.label, "비교 기준 확인 필요");
   assert.deepEqual(csatC1Score("2027:1000002512", a), { label: "수능 반영분 점수", central: "180.00", low: "180.00", high: "180.00" });
   assert.equal(csatC1Score("2027:1000000012", a)?.label, "대학 환산점수");

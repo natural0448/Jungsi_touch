@@ -42,7 +42,7 @@ const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
 
-export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "수능 반영분만 계산" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
+export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "환산점수만 제공" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
 /** 판정·예외 이름이 없는 모집단위의 사유. 리포트가 없으면 null */
 /** min: 서버가 알려 준 수능 최저 사유(2026-11-24) — unmet 미달 확정, partial 가채점 점수에 따라 충족 여부 갈림 */
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
@@ -53,7 +53,8 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
   if (min === "partial") return { label: "수능 최저 충족 여부 갈림", cls: "inel", desc: "가채점 점수 범위에 따라 이 모집단위의 수능 최저학력기준을 넘기도 하고 못 넘기도 합니다. 성적표가 나오면 정해집니다." };
   const display = a.provisional_school_display?.[offeringId];
   if (display?.reason === "non_csat_components_missing") {
-    return { label: "수능 반영분만 계산", cls: "check", desc: "이 전형에는 수능 외에 반영하는 성적이 있습니다. 전체 전형점수와 지원판정은 표시하지 않습니다." };
+    // 대표님 2026-11-24: 정시터치는 학생부를 받지 않는다 — 학생부 등 반영 전형은 환산점수만 공개하고, 다른 영역은 이 점수를 바탕으로 검토하도록 안내
+    return { label: "환산점수만 제공", cls: "check", desc: "이 전형은 수능 외에 학생부 등 다른 영역도 반영합니다. 정시터치는 학생부 성적을 받지 않아 지원가능성 판정 없이 수능 환산점수만 보여 드립니다. 다른 반영 영역은 이 환산점수를 바탕으로 직접 검토해 주세요." };
   }
   if (display?.reason === "comparison_axis_unverified") {
     return { label: "비교 기준 확인 필요", cls: "check", desc: "이 모집단위의 과거 입결과 올해 성적을 같은 기준에서 비교할 수 있는지 확인 중입니다." };
