@@ -37,7 +37,7 @@ export function fillCount(r: Pick<Row, "ad">): number | null {
   return integerOf(cell.v);
 }
 
-/** 충원 발표 열 표시용 인원: 검증값이 없으면 정본의 인원(명) 원문값을 보인다(확인 대기 포함). 추정 탈락자 계산에는 쓰지 않는다. */
+/** 충원 발표 열 표시용 인원(2026-11-24 명세 PAGE-01): 검증값이 없으면 정본의 인원(명) 원문값을 보인다(확인 대기 포함). 추정 탈락자 계산에는 쓰지 않는다. */
 export function shownFillCount(r: Pick<Row, "ad">): number | null {
   const verified = fillCount(r);
   if (verified !== null) return verified;
