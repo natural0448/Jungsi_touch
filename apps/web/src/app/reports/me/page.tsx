@@ -42,7 +42,7 @@ const FEATURES = ["수능(모의평가) 성적을 넣으면 전체 응시자 중
 // 2026-11-23 0시 수능 가채점 전환 뒤 문구(lib/exam csatOpen). 전환 전에는 위 문구 그대로다
 const CSAT_FEATURES = ["수능 가채점 원점수를 넣으면 전체 응시자 중 내 예상 위치(범위)", "과목마다 예상 표준점수 · 백분위 · 등급 범위", "저장한 9월 모의평가 리포트는 지난 기록으로 그대로"];
 const DESC = "수능(모의평가) 성적을 넣으면 전체 응시자 중 내 위치를 보여 드립니다. 이용권이 있으면 담아 둔 학교의 분석까지 한 장으로 정리합니다.";
-const CSAT_DESC = "수능 가채점 원점수를 넣으면 전체 응시자 중 내 예상 위치를 범위로 보여 드립니다. 저장한 9월 모의평가 리포트는 지난 기록에서 볼 수 있습니다.";
+const CSAT_DESC = "수능 가채점 원점수를 넣으면 예상 표준점수 합과 가채점 모형 기준 추정 상위누백을 보여 드립니다. 저장한 9월 모의평가 리포트는 지난 기록에서 볼 수 있습니다.";
 export const metadata: Metadata = { title: route.label };
 
 /**
@@ -288,13 +288,13 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         {provisional ? (
           <>
             <StageSteps stage={stage} finalOpen={status.stage_state === "open"} />
-            <ProvisionalOverallCard a={a} />
+            <ProvisionalOverallCard a={a} single />
             <section aria-labelledby="sub-h" className="rp-sec">
               <h2 id="sub-h">과목별 예상 성적</h2>
-              <ProvisionalSubjectsSheet a={a} />
+              <ProvisionalSubjectsSheet a={a} single />
               {/* 2026-11-23 대표님 요청: 전문가용 정시 리포트와 같이 위치 그래프·반영 조합별 합산(가채점은 가운데 값·범위) */}
-              <ProvisionalPositionChart a={a} />
-              <ProvisionalComboScores a={a} />
+              <ProvisionalPositionChart a={a} single />
+              <ProvisionalComboScores a={a} single />
             </section>
           </>
         ) : (

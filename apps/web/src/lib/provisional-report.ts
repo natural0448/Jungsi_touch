@@ -159,3 +159,24 @@ export function provisionalDefaults(r: ReportDto): ProvisionalValues {
     inq2_raw: raw(by.inquiry2?.raw_score),
   };
 }
+
+/**
+ * 2026-11-24 담당자 단일 대표값. 서버(v330~)가 준 provisional_representative 를 그대로 쓰고,
+ * 옛 응답이라 없으면 네 과목(국·수·탐2) 가운데 표준점수가 모두 있을 때의 합만 대표 총점으로 두고 누백은 비운다(사유 표시).
+ */
+export function provisionalRepresentative(a: OverallAnalysisDto) {
+  const rep = a.provisional_representative;
+  if (rep && typeof rep === "object") return rep;
+  const areas = ["korean", "math", "inquiry1", "inquiry2"];
+  let sum: number | null = 0;
+  for (const area of areas) {
+    const c = a.subjects.find((x) => x.area === area)?.standard_score_range?.central;
+    if (typeof c !== "number" || !Number.isSafeInteger(c)) { sum = null; break; }
+    sum += c;
+  }
+  return {
+    estimated_standard_score_sum: sum,
+    estimated_top_percent: null,
+    unavailable_reason: sum === null ? "missing_central_score" as const : "rank_curve_unavailable" as const,
+  };
+}

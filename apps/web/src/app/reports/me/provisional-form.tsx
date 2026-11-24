@@ -11,7 +11,7 @@ import { submitProvisional, type ProvisionalFormState, type ProvisionalValues } 
   - 표 틀은 성적표 입력과 같다(한국사·국어·수학·영어·탐구 1·2·제2외국어/한문).
   - 영어·한국사·제2외국어/한문은 절대평가라 원점수로 등급이 확정된다 — 넣는 즉시 보여 준다(평가원 고정 구간).
     저장되는 등급은 서버가 같은 구간으로 다시 정한다. 화면 값은 입력을 돕는 표시다.
-  - 국어·수학·탐구의 표준점수·등급은 저장 뒤 서버가 가채점 변환표로 추정한 범위로 보여 준다(입력 칸에는 '예상치' 자리만).
+  - 국어·수학·탐구의 표준점수·등급은 저장 뒤 서버가 가채점 변환표로 추정한 대표값으로 보여 준다(2026-11-24 담당자 단일 대표값, 입력 칸에는 '예상치' 자리만).
   - 국어·수학 선택과목은 필수다(선택과목마다 변환표가 다르다, 서버 dep_r19c).
   - 제2외국어/한문도 필수다(2026-11-22 대표님 결정). 기본값은 '선택하세요'(빈 값)이고, 응시하지 않았으면 '미응시'를 직접 고른다.
     과목을 골랐으면 원점수가 있어야 저장된다. 검사는 lib/second-language.ts 를 화면·서버 액션이 같이 쓴다.
@@ -158,7 +158,7 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
         <div>
           <p className="sf-kicker">성적 입력 · 수능 가채점</p>
           <h2>{examLabel}</h2>
-          <p>채점표로 맞혀 본 <b>원점수</b>를 과목마다 넣어 주세요. 저장하면 국어·수학·탐구의 표준점수·백분위·등급을 가채점 변환표로 추정한 <b>범위</b>로 보여 드립니다.</p>
+          <p>채점표로 맞혀 본 <b>원점수</b>를 과목마다 넣어 주세요. 저장하면 국어·수학·탐구의 예상 표준점수·백분위·등급을 가채점 변환표로 추정한 <b>대표값</b>으로 보여 드립니다.</p>
         </div>
         <p className={`sf-prog${filled === REQUIRED.length ? " done" : ""}`} aria-live="polite">
           <span className="bar" aria-hidden="true"><i style={{ width: `${(filled / REQUIRED.length) * 100}%` }} /></span>
@@ -276,7 +276,7 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
 
       <ul className="sf-legend">
         <li><i className="k in" />넣는 칸 · 과목별 원점수(맞힌 점수). 국어·수학·영어 100점, 한국사·탐구·제2외국어/한문 50점 만점. 제2외국어/한문은 응시하지 않았어도 &apos;미응시&apos;를 꼭 골라 주세요(일부 대학 판정이 달라집니다).</li>
-        <li><i className="k calc" />국어·수학·탐구의 예상 표준점수·백분위·등급은 저장하면 정시터치 가채점 변환표로 추정한 범위로 보여 드립니다(성적표의 실제 값과 다를 수 있습니다).</li>
+        <li><i className="k calc" />국어·수학·탐구의 예상 표준점수·백분위·등급은 저장하면 정시터치 가채점 변환표로 추정한 대표값으로 보여 드립니다(성적표의 실제 값과 다를 수 있습니다).</li>
         <li><i className="k na" />영어·한국사·제2외국어/한문은 절대평가라 표준점수가 없고, 넣은 원점수로 등급이 바로 정해집니다(영어 90점·한국사 40점·제2외국어/한문 45점 이상이 1등급, 이후 영어 10점·나머지 5점마다 한 등급).</li>
       </ul>
 

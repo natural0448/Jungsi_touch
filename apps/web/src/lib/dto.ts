@@ -241,6 +241,12 @@ export interface OverallAnalysisDto {
   /* 수능 가채점(score_basis provisional_estimate, input_kind provisional_raw)에서만 온다. 그때 total_standard_score 는 null */
   input_kind?: string;
   total_standard_range?: ProvisionalTripleDto;
+  /** 2026-11-24 담당자 단일 대표값(jungsi-api v330~). 예상 표준점수 합 하나와 가채점 모형 기준 추정 상위누백 하나. 옛 서버 응답에는 없다 */
+  provisional_representative?: {
+    estimated_standard_score_sum: number | null;
+    estimated_top_percent: string | null;
+    unavailable_reason: "missing_central_score" | "rank_curve_unavailable" | "outside_central_support" | null;
+  } | null;
 }
 
 /** 수능 가채점 원점수로 만든 전체 분석인가(서버 PROVISIONAL_SCORE_BASIS). 이때 표준점수 칸은 범위로만 온다 */

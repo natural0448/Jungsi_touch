@@ -8,7 +8,8 @@ import { groupPicked, PICK_GROUP_LIMIT } from "@/lib/picked-view";
 import { DATA_KIND, overallWaitLabel } from "@/lib/analysis-labels";
 import { AREA_LABEL } from "@/lib/exam";
 import { pctText } from "@/lib/format";
-import { provisionalReason, provisionalSubjectView, spanText, topRangeText, tripleText } from "@/lib/provisional-report";
+import { centralPercentile, provisionalReason, provisionalRepresentative, provisionalSubjectView, spanText, topRangeText, tripleText } from "@/lib/provisional-report";
+import { projectP2ProvisionalCombination, projectP2ProvisionalSubject, projectP2ProvisionalSummary } from "@/lib/p2-representative-view";
 import type { PickedItem } from "@/lib/shortlist";
 
 /* 2페이지 리포트의 전체 성적 부분 — 일반·유료 모두 보는 범위(REQ-02). 인쇄 화면도 같은 부품을 쓴다 */
@@ -100,7 +101,28 @@ export function OverallCard({ a, fold = true }: { a: OverallAnalysisDto; fold?: 
   - 과목: 원점수 · 예상 표준점수 범위 · 예상 백분위·등급 범위. 화면이 다시 계산하지 않는다.
   - 계산하지 않은 곳은 사유 문장(provisional_conversion_unavailable 등)을 그대로 보인다.
 */
-export function ProvisionalOverallCard({ a, fold = true }: { a: OverallAnalysisDto; fold?: boolean }) {
+/*
+  single(개인용, 2026-11-24 담당자 단일 대표값): 예상 표준점수 합 하나와 가채점 모형 기준 추정 상위누백 하나만.
+  범위 숫자·범위 설명은 보이지 않는다. 전문가용은 single 없이 지금처럼 범위로 보인다.
+*/
+export function ProvisionalOverallCard({ a, fold = true, single = false }: { a: OverallAnalysisDto; fold?: boolean; single?: boolean }) {
+  if (single) {
+    const v = projectP2ProvisionalSummary(provisionalRepresentative(a));
+    return (
+      <section className="rp-overall" aria-label="가채점 기준 전체 성적 위치">
+        <div className="n">
+          <small>{v.scoreLabel}</small>
+          {v.scorePoint !== null ? <><b className="num big">{v.scorePoint}</b><span className="unit">점</span></> : <b className="wait">─</b>}
+        </div>
+        <div className="n">
+          <small>{v.rankLabel}</small>
+          {v.rankText !== "—" ? <b className="num big">{v.rankText}</b> : <b className="wait">─</b>}
+          <p className="tie">{v.rankDetail}</p>
+          <p className="tie">가채점 추정이라 공식 성적이 아니며, 수능 성적표가 배부되면 실채점 성적으로 다시 확인해야 합니다. 합격 가능성을 뜻하지 않습니다.</p>
+        </div>
+      </section>
+    );
+  }
   const o = a.overall;
   const total = a.total_standard_range ?? o.total_standard_score_range ?? null;
   const top = o.status === "estimated_range" ? topRangeText(o.top_percent_range) : null;
@@ -150,7 +172,7 @@ export function ProvisionalOverallCard({ a, fold = true }: { a: OverallAnalysisD
 }
 
 /** 가채점 성적표: 입력 성적표와 같은 틀. 상대평가 과목은 원점수와 예상 범위, 절대평가는 원점수로 정해진 등급 */
-export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
+export function ProvisionalSubjectsSheet({ a, single = false }: { a: OverallAnalysisDto; single?: boolean }) {
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const k = by.get("korean"), m = by.get("math"), q1 = by.get("inquiry1"), q2 = by.get("inquiry2");
   const g = a.absolute_grades;
@@ -176,7 +198,20 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
     if (v.mode === "range") return v.percentileRange ? <b className="num">{v.percentileRange}</b> : none;
     return none;
   };
-  const grade = (s?: (typeof a.subjects)[number]) => span(s?.grade_range);
+  const grade = (s?: (typeof a.subjects)[number]) => {
+    if (!single) return span(s?.grade_range);
+    // 대표 등급: 양 끝 등급이 같을 때만. 다르면 비운다(담당자 2026-11-24)
+    const g = s ? projectP2ProvisionalSubject({ grade_range: s.grade_range ?? null }).grade : "—";
+    return typeof g === "number" ? <b className="num">{g}</b> : none;
+  };
+  const stdOne = (s?: (typeof a.subjects)[number]) => {
+    const c = s?.standard_score_range?.central;
+    return typeof c === "number" && Number.isFinite(c) ? <b className="num">{c}</b> : none;
+  };
+  const pctlOne = (s?: (typeof a.subjects)[number]) => {
+    const p = centralPercentile(s);
+    return p !== null ? <b className="num">{p}</b> : none;
+  };
   return (
     <div className="rp-sheet" role="group" aria-label="가채점 과목별 예상 성적표">
       <table>
@@ -221,23 +256,23 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
             <td>{sl && typeof sl.raw_score === "number" ? <b className="num">{sl.raw_score}</b> : na}</td>
           </tr>
           <tr className="key">
-            <th scope="row">{central ? <>표준점수<small className="sf-rowsub">가운데 값</small></> : "예상 표준점수"}</th>
+            <th scope="row">{single ? <>표준점수<small className="sf-rowsub">예상 대표값</small></> : central ? <>표준점수<small className="sf-rowsub">가운데 값</small></> : "예상 표준점수"}</th>
             <td className="na">{na}</td>
-            <td>{std(k)}</td>
-            <td>{std(m)}</td>
+            <td>{single ? stdOne(k) : std(k)}</td>
+            <td>{single ? stdOne(m) : std(m)}</td>
             <td className="na">{na}</td>
-            <td>{std(q1)}</td>
-            <td>{std(q2)}</td>
+            <td>{single ? stdOne(q1) : std(q1)}</td>
+            <td>{single ? stdOne(q2) : std(q2)}</td>
             <td className="na">{na}</td>
           </tr>
-          <tr className={central ? "key" : undefined}>
-            <th scope="row">{central ? <>백분위<small className="sf-rowsub">가운데 표준점수 기준</small></> : "예상 백분위"}</th>
+          <tr className={central || single ? "key" : undefined}>
+            <th scope="row">{single ? <>백분위<small className="sf-rowsub">대표 표준점수 기준</small></> : central ? <>백분위<small className="sf-rowsub">가운데 표준점수 기준</small></> : "예상 백분위"}</th>
             <td className="na">{na}</td>
-            <td>{pctl(k)}</td>
-            <td>{pctl(m)}</td>
+            <td>{single ? pctlOne(k) : pctl(k)}</td>
+            <td>{single ? pctlOne(m) : pctl(m)}</td>
             <td className="na">{na}</td>
-            <td>{pctl(q1)}</td>
-            <td>{pctl(q2)}</td>
+            <td>{single ? pctlOne(q1) : pctl(q1)}</td>
+            <td>{single ? pctlOne(q2) : pctl(q2)}</td>
             <td className="na">{na}</td>
           </tr>
           <tr>
@@ -253,7 +288,9 @@ export function ProvisionalSubjectsSheet({ a }: { a: OverallAnalysisDto }) {
         </tbody>
       </table>
       <p className="rp-sheet-note">
-        {central
+        {single
+          ? "표준점수는 가채점 변환표로 추정한 대표값이고, 백분위는 그 표준점수에 대응하는 값입니다. 등급은 하나로 정해질 때만 보이고, 정해지지 않으면 —로 둡니다. 모두 가채점 추정이라 성적표의 실제 값과 다를 수 있습니다. "
+          : central
           ? "표준점수는 가채점 변환표로 낮게·가운데·높게 추정한 값 중 가운데 값이고, 백분위는 그 가운데 표준점수에 대응하는 값입니다. 작은 글씨 '범위'는 낮음~높음이며, 등급은 예상 범위입니다. 모두 가채점 추정이라 성적표의 실제 값과 다를 수 있습니다."
           : "예상 표준점수·백분위·등급은 가채점 변환표로 추정한 범위입니다(낮음~높음). 성적표의 실제 값과 다를 수 있습니다."}
         영어·한국사·제2외국어/한문은 절대평가라 원점수로 등급이 정해지며 총점(국·수·탐2)과 전체 위치에 넣지 않습니다.
@@ -607,7 +644,7 @@ export function ComboScores({ a }: { a: OverallAnalysisDto }) {
   가채점은 과목 표준점수가 범위(낮음·가운데·높음)라 조합 합도 '가운데 값'과 '범위'로 보인다(서버가 준 과목 범위를 더하기만 한다).
   탐구 1과목은 두 과목 중 높은 과목(가운데·낮음·높음 끝마다 높은 쪽). 하나라도 범위가 없으면 그 조합은 '─'.
 */
-export function ProvisionalComboScores({ a }: { a: OverallAnalysisDto }) {
+export function ProvisionalComboScores({ a, single = false }: { a: OverallAnalysisDto; single?: boolean }) {
   type T = { low: number; central: number; high: number };
   const tri = (area: string): T | null => {
     const r = a.subjects.find((x) => x.area === area)?.standard_score_range;
@@ -625,7 +662,9 @@ export function ProvisionalComboScores({ a }: { a: OverallAnalysisDto }) {
     <section className="rp-chart" aria-label="반영 조합별 예상 표준점수 합">
       <header>
         <h3>반영 조합별 예상 표준점수 합</h3>
-        <small>가채점 원점수로 추정한 과목 표준점수를 자주 쓰는 반영 조합별로 더한 값입니다 · 큰 숫자는 가운데 값, 아래는 범위 · 탐구 1과목은 두 과목 중 높은 과목 · 대학별 실제 환산점수와는 다릅니다</small>
+        <small>{single
+          ? "가채점 원점수로 추정한 과목 대표 표준점수를 자주 쓰는 반영 조합별로 더한 값입니다 · 탐구 1과목은 두 과목 중 높은 과목 · 대학별 실제 환산점수와는 다릅니다"
+          : "가채점 원점수로 추정한 과목 표준점수를 자주 쓰는 반영 조합별로 더한 값입니다 · 큰 숫자는 가운데 값, 아래는 범위 · 탐구 1과목은 두 과목 중 높은 과목 · 대학별 실제 환산점수와는 다릅니다"}</small>
       </header>
       <div className="rp-combo-wrap">
         {groups.map((g) => (
@@ -642,7 +681,9 @@ export function ProvisionalComboScores({ a }: { a: OverallAnalysisDto }) {
                   <tr key={label}>
                     <th scope="row">{label}</th>
                     <td className="r">
-                      {v === null ? "─" : (
+                      {v === null ? "─" : single ? (
+                        <b className="num">{projectP2ProvisionalCombination([v.central]).replace("점", "")}</b>
+                      ) : (
                         <>
                           <b className="num">{v.central}</b>
                           {v.low !== v.high && <small className="rs-range"> {v.low}~{v.high}</small>}
@@ -664,7 +705,30 @@ export function ProvisionalComboScores({ a }: { a: OverallAnalysisDto }) {
   수능 가채점 리포트의 위치 그래프(2026-11-23). 과목 줄은 예상 백분위 범위를 상위 %로 바꿔(100 − 백분위) 띠로,
   전체 줄은 서버가 준 추정 상위누백 범위(좋은 끝~나쁜 끝)를 띠로 그린다. 점은 좋은 쪽 끝이다. 새로 계산하는 값은 없다.
 */
-export function ProvisionalPositionChart({ a }: { a: OverallAnalysisDto }) {
+export function ProvisionalPositionChart({ a, single = false }: { a: OverallAnalysisDto; single?: boolean }) {
+  if (single) {
+    // 단일 대표값: 과목은 대표 표준점수의 백분위로 본 위치(100 − 백분위) 한 점, 전체는 가채점 모형 기준 추정 상위누백 한 점
+    const one = (p: number | null) => (p === null ? null : String(Math.max(0, Math.min(100, 100 - p))));
+    const subjects = a.subjects.map((s) => ({ s, at: one(centralPercentile(s)) }));
+    const rank = projectP2ProvisionalSummary(provisionalRepresentative(a)).rankPoint;
+    const total = rank === null ? null : String(rank);
+    const max = scaleMax([...subjects.map((r) => r.at), total]);
+    return (
+      <section className="rp-chart" aria-label="가채점 위치 그래프">
+        <header>
+          <h3>위치 그래프</h3>
+          <small>왼쪽일수록 상위권 · 점은 가채점 대표값으로 본 위치</small>
+        </header>
+        <ScaleNote max={max} />
+        <Axis max={max} />
+        {subjects.map(({ s, at }) => (
+          <ChartRow key={s.area} label={AREA_LABEL[s.area] ?? s.area} sub={s.area === "korean" || s.area === "math" ? (s.choice ?? undefined) : s.subject} incl={at} excl={at} max={max} waitText="—" />
+        ))}
+        <ChartRow label="전체" max={max} sub="국·수·탐2" strong incl={total} excl={total} waitText="—" />
+        <p className="pc-note">과목 줄은 그 과목 응시자 중 대표 표준점수의 백분위로 본 위치, 전체 줄은 국·수·탐2 예상 표준점수 합으로 본 가채점 모형 기준 추정 상위누백입니다. 비교하는 집단이 서로 달라 줄끼리 길이를 견주지 않습니다. 성적표가 배부되면 실채점으로 다시 확인해 주세요.</p>
+      </section>
+    );
+  }
   const top = (p: number | null | undefined) => (typeof p === "number" && Number.isFinite(p) ? String(Math.max(0, Math.min(100, 100 - p))) : null);
   const rows = a.subjects.map((s) => {
     const r = s.percentile_range;

@@ -108,10 +108,10 @@ export default async function Page() {
           <h2 id="fn-sc">내 성적</h2>
           {provisional ? (
             <>
-              <ProvisionalOverallCard a={a} />
-              <ProvisionalSubjectsSheet a={a} />
-              <ProvisionalComboScores a={a} />
-              <ProvisionalPositionChart a={a} />
+              <ProvisionalOverallCard a={a} single />
+              <ProvisionalSubjectsSheet a={a} single />
+              <ProvisionalComboScores a={a} single />
+              <ProvisionalPositionChart a={a} single />
             </>
           ) : (
             <>

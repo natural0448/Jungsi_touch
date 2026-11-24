@@ -152,11 +152,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
         {isProvisionalOverall(a) ? (
           // 수능 가채점 리포트(2026-11-23 전환): 원점수로 추정한 범위만. 학교별 판정은 아직 없다
           <>
-            <ProvisionalOverallCard a={a} fold={false} />
+            <ProvisionalOverallCard a={a} fold={false} single />
             <h2>과목별 예상 성적</h2>
-            <ProvisionalSubjectsSheet a={a} />
-            <ProvisionalComboScores a={a} />
-            <ProvisionalPositionChart a={a} />
+            <ProvisionalSubjectsSheet a={a} single />
+            <ProvisionalComboScores a={a} single />
+            <ProvisionalPositionChart a={a} single />
           </>
         ) : (
           <>

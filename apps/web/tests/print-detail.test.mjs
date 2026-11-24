@@ -73,7 +73,8 @@ test("상세 카드 안에는 접힌 설명(details·접기 단추)이 없다 �
   assert.doesNotMatch(body.slice(body.indexOf("export function ExtrasBody")), /<details|<summary|useState/);
   // 인쇄에서는 전체 위치 설명('이 숫자는 어떻게 계산했나요?')도 펼친다
   assert.match(src("../src/app/reports/me/print/page.tsx"), /<OverallCard a=\{a\} fold=\{false\} \/>/);
-  assert.match(src("../src/app/reports/me/print/page.tsx"), /<ProvisionalOverallCard a=\{a\} fold=\{false\} \/>/);
+  // 개인용 가채점 인쇄는 단일 대표값(2026-11-24 담당자) — 범위 설명 접기 자체가 없다
+  assert.match(src("../src/app/reports/me/print/page.tsx"), /<ProvisionalOverallCard a=\{a\} fold=\{false\} single \/>/);
 });
 
 test("전문가용 학생 인쇄: 인쇄본을 만들 때 상세 자료까지 받아, 담은 학교마다 한 줄 아래에 상세를 펼친 채로", () => {
@@ -89,4 +90,16 @@ test("전문가용 학생 인쇄: 인쇄본을 만들 때 상세 자료까지 �
   assert.match(act, /loadPrintExtras\(source\(\), await getCaller\(\), /);
   // 학생 성적·리포트는 이 동작으로 보내지 않는다(모집단위 번호·대학 이름만)
   assert.doesNotMatch(act, /exportReport|readReport|scores/);
+});
+
+test("개인용 가채점 단일 대표값(2026-11-24 담당자): 내 성적·리포트·인쇄는 single, 전문가용은 범위 그대로", () => {
+  for (const f of ["../src/app/reports/me/page.tsx", "../src/app/reports/me/final/page.tsx", "../src/app/reports/me/print/page.tsx"]) {
+    const s = src(f);
+    for (const c of ["ProvisionalOverallCard", "ProvisionalSubjectsSheet", "ProvisionalComboScores", "ProvisionalPositionChart"]) {
+      assert.match(s, new RegExp("<" + c + " a=\{a\}[^>]* single />"), f + " " + c);
+    }
+  }
+  for (const f of ["../src/app/pro/students/[studentId]/student-view.tsx", "../src/app/pro/students/[studentId]/print/print-sheet.tsx"]) {
+    assert.doesNotMatch(src(f), / single \/>/, f);
+  }
 });
