@@ -175,7 +175,13 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 판정 없는 곳은 화면 규칙으로 '지원 조건 미충족'과 '판정 근거 부족'을 나눈다(2026-11-24: 미충족이 필터에 잡히지 않았다)
   const overallA = report?.overall ?? null;
   const pointBased = !pro && isProvisionalOverall(overallA);
-  const provisionalJudged = provisional && Object.values(report?.provisional_bands ?? {}).some((b) => !pointBased || !personalCsatPoint(b)?.held);
+  // 2026-11-24: 보류(학생부 반영·비교 기준 확인 필요)·수능 최저 사유도 서버가 판단을 마친 것이라 '준비 중' 안내를 띄우지 않는다
+  // (강원대처럼 보이는 행이 모두 보류인 학교에서 '표준점수 확정 전이라 판정 안 함'으로 잘못 보였다)
+  const provisionalJudged = provisional && (
+    Object.keys(report?.provisional_bands ?? {}).length > 0 ||
+    Object.keys(report?.overall?.provisional_school_display ?? {}).length > 0 ||
+    Object.keys(report?.provisional_min ?? {}).length > 0
+  );
   // 판정 없는 곳의 수능 최저 사유(서버 2026-11-24) — 최저 미충족·갈림도 '지원 조건 미충족' 필터에 넣는다
   const minAll: Record<string, CsatMinimum> = { ...(report?.provisional_min ?? {}) };
   // 서버 v334~: 7단계를 내지 않은 모집단위의 가운데 환산점수·사유(담당자 v3, 2026-11-24)
