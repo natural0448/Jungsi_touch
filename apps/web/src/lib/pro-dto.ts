@@ -172,6 +172,10 @@ export interface ProP4Search {
   region?: string;
   group?: string;
   cursor?: string;
+  /** 서버 dep_pro_r38: 지원가능성 필터 — 쉼표로 이은 7단계 코드·none, 다음 위치, 한 쪽 개수(문자열) */
+  st?: string;
+  after?: string;
+  limit?: string;
 }
 
 /** student_bookmarks — 학생별 담은 학교 */

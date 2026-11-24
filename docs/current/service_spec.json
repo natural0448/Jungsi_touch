@@ -361272,6 +361272,13 @@
         "PAGE-03"
       ],
       "summary": "서버가 알려 준 응시 과목 조건 미충족도 지원 조건 미충족으로 확정한다."
+    },
+    {
+      "date": "2026-11-23",
+      "requirements": [
+        "PAGE-03"
+      ],
+      "summary": "전문가용 4페이지도 서버 전국 지원가능성 필터와 수능 최저·과목 조건 사유를 개인용과 같게 쓴다."
     }
   ],
   "p1_recruitment_score_review_verification": {
