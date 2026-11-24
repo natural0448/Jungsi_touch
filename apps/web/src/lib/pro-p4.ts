@@ -135,6 +135,12 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
   let out: P4Result;
   try {
     let r = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk]));
+    // 2026-11-24: 새 서버 판이 처음 깨어날 때 자원 한도(546)로 실패한 적이 있다 — 1초 뒤 다른 키로 한 번만 다시 묻는다
+    if (!r.ok && r.code === "request_failed") {
+      await new Promise((res) => setTimeout(res, 1000));
+      const again = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk, "retry"])).catch(() => null);
+      if (again) r = again;
+    }
     // 서버(dep_pro_r32)가 곡선·총점 분포를 시간 안에 다 못 읽었으면 complete=false. 잠시 뒤 한 번만 다른 키로 다시 받는다(2026-11-23)
     if (r.ok && r.value.candidates?.reference_threshold_summary?.complete === false) {
       await new Promise((res) => setTimeout(res, 1500));

@@ -109,6 +109,9 @@ export async function proTogglePick(fd: FormData): Promise<Result> {
  */
 export async function loadProExtras(offeringId: string, university = ""): Promise<Extras> {
   if (!/^[A-Za-z0-9._:-]{1,128}$/.test(offeringId) || typeof university !== "string" || university.length > 100) return { ok: false, code: "invalid_request" };
-  const got = await loadPrintExtras(source(), await getCaller(), [{ offering_id: offeringId, university_name: university }]);
-  return got[offeringId] ?? { ok: false, code: "request_failed" };
+  // 2026-11-24: 선생님 계정의 개인용 서버 조회가 요청 한도(429) 재시도에 묶여 펼친 상세가 끝없이 '모으고 있습니다'였다.
+  // 6초 안에 못 받으면 모집 정보·발행 기준은 '미공개'로 그리고 판정 카드는 바로 보인다(인쇄본과 같은 확정 표시)
+  const timeout = new Promise<null>((r) => setTimeout(() => r(null), 6000));
+  const got = await Promise.race([loadPrintExtras(source(), await getCaller(), [{ offering_id: offeringId, university_name: university }]), timeout]);
+  return got?.[offeringId] ?? { ok: false, code: "request_timeout" };
 }

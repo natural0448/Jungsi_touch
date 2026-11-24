@@ -23,7 +23,9 @@ export async function loadProPrintExtras(items: { offering_id: string; universit
     .slice(0, PRINT_MAX)
     .map((i) => ({ offering_id: i.offering_id, university_name: i.university_name }));
   if (ok.length === 0) return {};
-  return loadPrintExtras(source(), await getCaller(), ok);
+  // 2026-11-24: 선생님 계정 조회가 요청 한도 재시도에 묶이면 인쇄가 끝없이 기다렸다 — 20초 안에 못 받으면 모두 '미공개'로 그린다
+  const timeout = new Promise<Record<string, Extras>>((r) => setTimeout(() => r({}), 20000));
+  return Promise.race([loadPrintExtras(source(), await getCaller(), ok), timeout]);
 }
 
 /**
