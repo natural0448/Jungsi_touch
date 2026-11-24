@@ -49,7 +49,7 @@ export function parseAdigaFill(text: string | null): AdigaFill | null {
   let doc: unknown;
   try { doc = JSON.parse(text); } catch { return null; }
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) return null;
-  const { format, cells, ranks, fills } = doc as { format?: unknown; cells?: unknown; ranks?: unknown; fills?: unknown };
+  const { format, cells, ranks, fills, confirmed } = doc as { format?: unknown; cells?: unknown; ranks?: unknown; fills?: unknown; confirmed?: unknown };
   if (format !== ADIGA_FILL_FORMAT || !cells || typeof cells !== "object" || Array.isArray(cells)) return null;
   const entries = Object.entries(cells as Record<string, unknown>);
   if (entries.length === 0 || entries.length > MAX) return null;
@@ -100,6 +100,17 @@ export function parseAdigaFill(text: string | null): AdigaFill | null {
       out.set(`F|${k}`, v);
     }
   }
+  // 2026-11-24 담당자 회신12 03·03c: 정본 칸이 이미 보이는 실제 충원 인원(명)과 같은 값이면 '확인된 실제 충원 인원'으로 올린다.
+  // 값이 다르면 아무것도 바꾸지 않는다(관측 ID·원문 좌표는 데이터팀 결속 자료에 있다). 키: 학년도|PK|전형|군
+  if (confirmed !== undefined) {
+    if (!confirmed || typeof confirmed !== "object" || Array.isArray(confirmed)) return null;
+    const cs = Object.entries(confirmed as Record<string, unknown>);
+    if (cs.length > MAX) return null;
+    for (const [k, v] of cs) {
+      if (!RANK_KEY.test(k) || typeof v !== "string" || !/^\d{1,6}$/.test(v)) return null;
+      out.set(`C|${k}`, v);
+    }
+  }
   return out;
 }
 
@@ -120,6 +131,11 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
     // 이전 KV의 값은 정본이 미발표로 판정한 칸을 덮지 않는다.
     if (r.rk.s !== OFFICIAL_NOT_PUBLISHED && (r.rk.v ?? "").trim() === "" && rank !== undefined) {
       next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
+    }
+    const confirmedPeople = fill.get(`C|${key}`);
+    if (confirmedPeople !== undefined && r.ad.u === "명" && r.ad.s !== OFFICIAL_NOT_PUBLISHED && r.ad.s !== "verified_official" &&
+      (r.ad.v ?? "").trim().replace(/\.0+$/, "") === confirmedPeople) {
+      next = { ...(next ?? r), ad: { ...r.ad, s: ADIGA_FILL_STATUS, r: null, l: "충원인원" } };
     }
     if (r.ad.s !== OFFICIAL_NOT_PUBLISHED && (r.ad.v ?? "").trim() === "" && people !== undefined) {
       const missing = people === "undisclosed" || people === "unavailable";

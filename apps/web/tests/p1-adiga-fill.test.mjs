@@ -144,3 +144,18 @@ test("정본이 공식 미발표(not_published)인 충원 칸에는 KV 숫자를
   const [p] = applyAdigaFill([row(2025, 900)], fill);
   assert.equal(p.ad.v, "7");
 });
+
+test("담당자 회신12 확인 충원 인원(confirmed): 정본 값과 같을 때만 확인된 실제 충원 인원으로 올리고, 다르면 그대로", () => {
+  const doc = JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2024|1|50%컷": "1" }, confirmed: { "2024|1000002513|수능(일반학생전형)|다": "37" } });
+  const fill = parseAdigaFill(doc);
+  const cell = (v, s = "pending_metadata") => ({ v, s, r: "SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING", u: "명", l: "충원 합격 인원", at: null, ctx: null });
+  const none = { v: null, s: "pending_value_missing", r: null, u: null, l: null, at: null, ctx: null };
+  const row = (ad) => ({ y: 2024, pk: "1000002513", t: "수능(일반학생전형)", g: "다", rk: none, ad, c50: { ...none, v: "x" }, c70: { ...none, v: "x" }, alt: { e: [] } });
+  const [same] = applyAdigaFill([row(cell("37"))], fill);
+  assert.equal(same.ad.s, "screen_adiga_fill");
+  assert.equal(same.ad.l, "충원인원");
+  assert.equal(same.ad.v, "37");
+  const [diff] = applyAdigaFill([row(cell("36"))], fill);
+  assert.equal(diff.ad.s, "pending_metadata");
+  assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2024|1|50%컷": "1" }, confirmed: { "2024|1|x|다": "3.5" } })), null);
+});
