@@ -1,6 +1,6 @@
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource, type StatusScanRequest } from "@/lib/api";
-import type { AssessmentDto, CandidatesDto, CsatMinimum, OfferingDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
+import type { AssessmentDto, CandidatesDto, CsatMinimum, OfferingDto, OverallAnalysisDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
 import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, csatJudged, pickedIds, provisionalOnly } from "@/lib/report-pure";
 
@@ -209,7 +209,23 @@ export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: 
 const P4_BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"]);
 const thresholdBandOf = (b: ReferenceBandDto | null | undefined): ReferenceBandDto | null =>
   b && b.basis === "reference_threshold" && typeof b.code === "string" && P4_BAND_CODES.has(b.code) ? b : null;
-const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; at: number; ttl: number }>();
+const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: SchoolDisplay; at: number; ttl: number }>();
+type SchoolDisplay = NonNullable<OverallAnalysisDto["provisional_school_display"]>;
+/** 2026-11-24 담당자 v3: 서버가 7단계를 내지 않은 모집단위(candidates.csat_withheld) → 모집단위별 가운데 환산점수·사유 */
+export function schoolDisplayOf(c: CandidatesDto | null | undefined): SchoolDisplay {
+  const out: SchoolDisplay = {};
+  for (const x of c?.csat_withheld ?? []) {
+    if (!x || typeof x.offering_id !== "string") continue;
+    if (x.reason !== "comparison_axis_unverified" && x.reason !== "non_csat_components_missing") continue;
+    out[x.offering_id] = { reason: x.reason, score_kind: x.score_kind === "csat_component" ? "csat_component" : "university_score", central_score: typeof x.central_score === "string" ? x.central_score : null };
+  }
+  return out;
+}
+/** 리포트 전체 분석(overall)에 보류 표시를 더한 사본. 더할 것이 없으면 그대로 */
+export function withSchoolDisplay<T extends OverallAnalysisDto | null | undefined>(a: T, d: SchoolDisplay | null | undefined): T {
+  if (!a || !d || Object.keys(d).length === 0) return a;
+  return { ...a, provisional_school_display: { ...(a.provisional_school_display ?? {}), ...d } };
+}
 /** 응답의 수능 최저 사유 목록 → 모집단위별 */
 function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMinimum> {
   const out: Record<string, CsatMinimum> = {};
@@ -223,7 +239,7 @@ function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMini
  * 서버 dep_r38(2026-11-24 대표님 지적: 지원가능성 필터가 120개만 보고 멈췄다): 전국 판정에서 고른 단계 모집단위 한 쪽.
  * 받지 못하면 null(화면은 앞 방식으로 쪽마다 확인한다). 판정 있는 행의 점수·위치·유불리는 bands 에.
  */
-export async function provisionalScan(src: JungsiSource, caller: Caller, report: ReportDto, scan: StatusScanRequest): Promise<{ offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean; min: Record<string, CsatMinimum> } | null> {
+export async function provisionalScan(src: JungsiSource, caller: Caller, report: ReportDto, scan: StatusScanRequest): Promise<{ offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean; min: Record<string, CsatMinimum>; display: SchoolDisplay } | null> {
   if (!csatJudged(report)) return null;
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
@@ -254,17 +270,17 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
     }
   }
   logSettle("p4_scan", { matched: sc.matched, page: sc.offerings.length });
-  return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min: minimumOf(state.report.candidates) };
+  return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min: minimumOf(state.report.candidates), display: schoolDisplayOf(state.report.candidates) };
 }
 
-export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number; min: Record<string, CsatMinimum> }> {
-  const none = { bands: {}, version: report.report_version, min: {} };
+export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number; min: Record<string, CsatMinimum>; display: SchoolDisplay }> {
+  const none = { bands: {}, version: report.report_version, min: {}, display: {} };
   if (!csatJudged(report)) return none;
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return none;
   const mk = JSON.stringify([report.report_id, report.profile_id, targets]);
   const hit = provisionalMemo.get(mk);
-  if (hit && Date.now() - hit.at <= hit.ttl) return { bands: hit.bands, version: report.report_version, min: hit.min };
+  if (hit && Date.now() - hit.at <= hit.ttl) return { bands: hit.bands, version: report.report_version, min: hit.min, display: hit.display };
   let state: ReportState;
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
@@ -298,13 +314,14 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
     }
   }
   logSettle("p4_csat", { asked: targets.length, judged: Object.keys(bands).length });
-  if (Object.keys(bands).length) {
+  const display = schoolDisplayOf(state.report.candidates);
+  if (Object.keys(bands).length || Object.keys(display).length) {
     provisionalMemo.delete(mk);
     // 위치·유불리가 덜 찬 결과(서버가 곡선을 아직 다 못 읽음)는 짧게만 기억한다(2026-11-23)
-    provisionalMemo.set(mk, { bands, min: minimumOf(state.report.candidates), at: Date.now(), ttl: csatBandsIncomplete(bands) ? CSAT_INCOMPLETE_TTL_MS : REFERENCE_TTL_MS });
+    provisionalMemo.set(mk, { bands, min: minimumOf(state.report.candidates), display, at: Date.now(), ttl: csatBandsIncomplete(bands) ? CSAT_INCOMPLETE_TTL_MS : REFERENCE_TTL_MS });
     while (provisionalMemo.size > REFERENCE_MAX) provisionalMemo.delete(provisionalMemo.keys().next().value as string);
   }
-  return { bands, version: Math.max(report.report_version, state.report.report_version), min: minimumOf(state.report.candidates) };
+  return { bands, version: Math.max(report.report_version, state.report.report_version), min: minimumOf(state.report.candidates), display };
 }
 
 /** 후보가 아직 없으면 candidates.build 로 만든다 */

@@ -66,3 +66,14 @@ test("SNU type I (담당자 R4): second language required, score = 국1.0+수1.2
   assert.equal(c.central, "372.80");
   assert.equal(csatNoJudgmentView("2027:1000000747", with2).label, "유형Ⅰ 점수만 계산");
 });
+
+test("담당자 v3 판정 보류(서버 csat_withheld → overall.provisional_school_display): 사유 이름과 가운데 환산점수", () => {
+  const a = { subjects: [], absolute_grades: {}, provisional_school_display: {
+    "2027:1000002512": { reason: "non_csat_components_missing", score_kind: "csat_component", central_score: "180.00" },
+    "2027:1000000012": { reason: "comparison_axis_unverified", score_kind: "university_score", central_score: "612.34" },
+  } };
+  assert.equal(csatNoJudgmentView("2027:1000002512", a)?.label, "수능 반영분만 계산");
+  assert.equal(csatNoJudgmentView("2027:1000000012", a)?.label, "비교 기준 확인 필요");
+  assert.deepEqual(csatC1Score("2027:1000002512", a), { label: "수능 반영분 점수", central: "180.00", low: "180.00", high: "180.00" });
+  assert.equal(csatC1Score("2027:1000000012", a)?.label, "대학 환산점수");
+});

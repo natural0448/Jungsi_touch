@@ -247,6 +247,12 @@ export interface OverallAnalysisDto {
     estimated_top_percent: string | null;
     unavailable_reason: "missing_central_score" | "rank_curve_unavailable" | "outside_central_support" | null;
   } | null;
+  /** Server-projected score for a held personal preliminary judgment. */
+  provisional_school_display?: Record<string, {
+    reason: "non_csat_components_missing" | "comparison_axis_unverified";
+    score_kind: "csat_component" | "university_score";
+    central_score: string | null;
+  }>;
 }
 
 /** 수능 가채점 원점수로 만든 전체 분석인가(서버 PROVISIONAL_SCORE_BASIS). 이때 표준점수 칸은 범위로만 온다 */
@@ -334,6 +340,8 @@ export interface ReferenceBandDto {
   source?: string;
   /** 승인된 대표 성적 한 건으로 계산한 개인용 가채점 판정임을 표시한다. */
   judgment_basis?: "central" | "interval";
+  /** false 면 3페이지 자동 후보에 넣지 않는다(충남대 2행: 같은 비교 집단 가운데 유불리가 유리일 때만) */
+  automatic_candidate?: boolean;
   /** 화면 전용: 판정 보류 모집단위(lib/csat-held.ts). 환산점수만 쓰고 단계는 쓰지 않는다 */
   held?: boolean;
   /**
@@ -564,6 +572,8 @@ export interface CandidatesDto {
   csat_condition_unmet?: string[] | null;
   /** 서버 2026-11-24: 가채점 탐구 표준점수 추정 끝이 과목 상한을 넘어 계산하지 않은 모집단위 */
   csat_inquiry_cap?: string[] | null;
+  /** 2026-11-24 담당자 v3(서버 v334~): 7단계를 내지 않은 모집단위와 가운데 환산점수·사유 */
+  csat_withheld?: { offering_id: string; reason: string; score_kind: string; central_score: string | null }[] | null;
   status_scan?: { matched: number; next_after: string | null; complete: boolean; offerings: OfferingDto[] } | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)

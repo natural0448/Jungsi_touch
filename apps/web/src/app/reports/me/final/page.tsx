@@ -13,7 +13,7 @@ import { seoulDateTime } from "@/lib/format";
 import { isInaccurate } from "@/lib/score-validity";
 import { readPicks } from "@/lib/shortlist";
 import { PICK_GROUP_LIMIT, PICK_TOTAL_LIMIT } from "@/lib/picked-view";
-import { pickedIds, provisionalBands } from "@/lib/report-ops";
+import { pickedIds, provisionalBands, withSchoolDisplay } from "@/lib/report-ops";
 import { csatJudged, provisionalOnly } from "@/lib/report-pure";
 import { REPORT_TAB, lockFor, page } from "@/lib/routes";
 import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
@@ -138,11 +138,13 @@ async function CsatPicked({ src, caller, report }: { src: JungsiSource; caller: 
     if (!(e instanceof AccessDenied)) throw e;
     return <p className="rp-note">담은 학교를 열 권한을 확인하지 못했습니다. 다시 로그인해 주세요. (문의 번호 {e.code})</p>;
   }
-  const { bands, min } = await provisionalBands(src, caller, report, items.map((it) => it.offering_id)).catch(() => ({ bands: {}, min: {} }));
+  const { bands, min, display } = await provisionalBands(src, caller, report, items.map((it) => it.offering_id)).catch(() => ({ bands: {}, min: {}, display: {} }));
+  // 서버가 7단계를 내지 않은 모집단위의 환산점수·사유(담당자 v3, 2026-11-24)
+  const a = withSchoolDisplay(report.overall, display)!;
   return (
     <>
-      <CsatPickedTable single items={items} bands={bands} a={report.overall!} min={min} />
-      <CsatPickedDetails single items={items} bands={bands} a={report.overall!} min={min} />
+      <CsatPickedTable single items={items} bands={bands} a={a} min={min} />
+      <CsatPickedDetails single items={items} bands={bands} a={a} min={min} />
     </>
   );
 }

@@ -42,7 +42,7 @@ const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
 
-export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
+export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "수능 반영분만 계산" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
 /** 판정·예외 이름이 없는 모집단위의 사유. 리포트가 없으면 null */
 /** min: 서버가 알려 준 수능 최저 사유(2026-11-24) — unmet 미달 확정, partial 가채점 점수에 따라 충족 여부 갈림 */
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
@@ -51,6 +51,13 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
   if (min === "condition") return MISMATCH("이 모집단위는 2027 반영 과목(과학탐구 분야·과목, 수학 선택 등)이 정해져 있습니다.");
   if (min === "cap") return { label: "탐구 점수 환산 범위 확인", cls: "check", desc: "가채점으로 추정한 탐구 표준점수가 이 대학 환산표의 범위를 넘어 이 대학 방식 점수를 계산하지 않았습니다. 성적표가 나오면 확정 점수로 계산됩니다." };
   if (min === "partial") return { label: "수능 최저 충족 여부 갈림", cls: "inel", desc: "가채점 점수 범위에 따라 이 모집단위의 수능 최저학력기준을 넘기도 하고 못 넘기도 합니다. 성적표가 나오면 정해집니다." };
+  const display = a.provisional_school_display?.[offeringId];
+  if (display?.reason === "non_csat_components_missing") {
+    return { label: "수능 반영분만 계산", cls: "check", desc: "이 전형에는 수능 외에 반영하는 성적이 있습니다. 전체 전형점수와 지원판정은 표시하지 않습니다." };
+  }
+  if (display?.reason === "comparison_axis_unverified") {
+    return { label: "비교 기준 확인 필요", cls: "check", desc: "이 모집단위의 과거 입결과 올해 성적을 같은 기준에서 비교할 수 있는지 확인 중입니다." };
+  }
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const inquiry = [by.get("inquiry1"), by.get("inquiry2")];
   const hasSocialInquiry = inquiry.some((s) => kindOf(s) === "social");
@@ -174,7 +181,7 @@ const pctOf = (s?: SubjectResultDto): Pct => {
   return r && Number.isInteger(r.low) && Number.isInteger(r.high) ? [Math.min(r.low, r.high), Math.max(r.low, r.high)] : null;
 };
 
-export type C1Score = { label: "수능 반영분 점수" | "우수 3영역 점수" | "유형Ⅰ 수능 반영분 점수"; central: string | null; low: string; high: string };
+export type C1Score = { label: "수능 반영분 점수" | "대학 환산점수" | "우수 3영역 점수" | "유형Ⅰ 수능 반영분 점수"; central: string | null; low: string; high: string };
 /** 예외 7곳이면 가채점 성적으로 계산한 점수(범위), 아니면 null */
 /*
   서울대 간호·식품영양·의류 유형Ⅰ(담당자 통합 회신 11-24 R4, snu_type1_provisional_score.ts 를 옮김 — 식은 바꾸지 않는다).
@@ -200,6 +207,11 @@ function snuType1Score(a: OverallAnalysisDto): C1Score | null {
   return { label: "유형Ⅰ 수능 반영분 점수", central: dec2(c, 10), low: dec2(lo, 10), high: dec2(hiN, 10) };
 }
 export function csatC1Score(offeringId: string, a: OverallAnalysisDto | null | undefined): C1Score | null {
+  const display = a?.provisional_school_display?.[offeringId];
+  const central = display?.central_score;
+  if (display && typeof central === "string" && /^[+-]?\d{1,12}(?:\.\d{1,12})?$/.test(central)) {
+    return { label: display.score_kind === "csat_component" ? "수능 반영분 점수" : "대학 환산점수", central, low: central, high: central };
+  }
   if (SNU_TYPE1.has(offeringId)) return a && a.second_language ? snuType1Score(a) : null;
   const rule = C1_RULES[offeringId];
   if (!rule || !a) return null;

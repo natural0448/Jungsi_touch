@@ -5,7 +5,7 @@ import { PASS_HREF } from "@/lib/links";
 import type { Metadata } from "next";
 import Link from "@/components/link";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
-import { isCsatFinalOverall, isCsatJudgedOverall, isProvisionalOverall, type CsatMinimum, type SnapshotDto } from "@/lib/dto";
+import { isCsatFinalOverall, isCsatJudgedOverall, isProvisionalOverall, type CsatMinimum, type OverallAnalysisDto, type SnapshotDto } from "@/lib/dto";
 import { seoulDate } from "@/lib/format";
 import { EXAM, MOCK_EXAM } from "@/lib/exam";
 import { pastHref } from "../past-records";
@@ -13,7 +13,7 @@ import { readPicks, type PickedItem } from "@/lib/shortlist";
 import { isInaccurate } from "@/lib/score-validity";
 import { ComboScores, OverallCard, PickedTable, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../report-view";
 import { CsatPickedDetails, CsatPickedTable } from "../csat-picked";
-import { provisionalBands } from "@/lib/report-ops";
+import { provisionalBands, withSchoolDisplay } from "@/lib/report-ops";
 import { REPORT_TAB } from "@/lib/routes";
 import type { ReferenceBandDto } from "@/lib/dto";
 import { PrintDetail } from "../print-detail";
@@ -62,6 +62,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
   // 가채점 리포트: 담은 학교의 학교별 판정(4페이지와 같은 university.analyze, 2026-11-23 리포트 탭)
   let csatBands: Record<string, ReferenceBandDto> = {};
   let csatMin: Record<string, CsatMinimum> = {};
+  let csatDisplay: NonNullable<OverallAnalysisDto["provisional_school_display"]> = {};
   try {
     let reportId: string | null;
     if (wanted) {
@@ -85,9 +86,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
       // 고정된 revision 의 shortlist 를 그대로 쓴다. 이름만 offering.read 로 붙인다
       shortlist = await readPicks(src, caller, base);
       if (isCsatJudgedOverall(base.overall) && read && same && shortlist.length) {
-        const got = await provisionalBands(src, caller, read, shortlist.map((s) => s.offering_id)).catch(() => ({ bands: {}, min: {} }));
+        const got = await provisionalBands(src, caller, read, shortlist.map((s) => s.offering_id)).catch(() => ({ bands: {}, min: {}, display: {} }));
         csatBands = got.bands;
         csatMin = got.min;
+        csatDisplay = got.display;
       }
     }
   } catch (e) {
@@ -115,7 +117,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
       </div>
     );
   }
-  const a = snap.report.overall;
+  // 서버가 7단계를 내지 않은 모집단위의 환산점수·사유(담당자 v3, 2026-11-24)
+  const a = withSchoolDisplay(snap.report.overall, csatDisplay);
   // 담은 학교 전부의 상세를 펼친 채로 인쇄한다(대표님 결정 2026-11-22). 펼친 상세에 쓰는 자료(2027 모집 정보·발행 기준·
   // 학년도별 대학 발표 성적)를 여기서 미리 받는다 — 최대 15곳, 서버 동시 요청 2 이하(print-extras.ts). 가채점 리포트는 판정 준비 중이라 받지 않는다
   // 2026-11-24: 가채점 리포트도 학교별 상세(모집 정보·연도별 입결 포함)를 붙이므로 같은 자료를 받는다

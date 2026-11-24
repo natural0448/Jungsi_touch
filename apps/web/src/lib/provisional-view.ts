@@ -54,6 +54,8 @@ export function csatView(c: CandidatesDto | null | undefined, pointBased = false
       const raw = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
       const band = pointBased ? personalCsatPoint(raw) : raw;
       if (!band || (pointBased && band.held) || !LISTED_BANDS.includes(band.code)) continue;
+      // 충남대 2행처럼 같은 비교 집단 가운데 유불리가 유리가 아니면 자동 후보에 넣지 않는다(담당자 v3, 서버가 false 로 표시)
+      if (pointBased && raw?.automatic_candidate === false) continue;
       items.push({ offering: it.offering, reference_percentile: null, advantage: null, margin: null, band, pending: false });
     }
   } catch {
@@ -103,6 +105,7 @@ export function csatCandidateView(c: CandidatesDto | null | undefined, pointBase
       const raw = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
       const band = pointBased ? personalCsatPoint(raw) : raw;
       if (pointBased && band?.held) { held++; continue; }
+      if (pointBased && raw?.automatic_candidate === false) continue;
       if (!band || !CSAT_CANDIDATE_GROUP[band.code]) continue;
       const g = csatCandidateGroupOf(band);
       if (!g) {

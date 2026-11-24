@@ -10,12 +10,12 @@ import Link from "@/components/link";
 import { MemberMark } from "@/components/member-mark";
 import { PaidGate } from "@/components/paid-gate";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource } from "@/lib/api";
-import type { CatalogSearchDto, OfferingDto, ReferenceBandDto, ReportDto } from "@/lib/dto";
+import type { CatalogSearchDto, OfferingDto, OverallAnalysisDto, ReferenceBandDto, ReportDto } from "@/lib/dto";
 import { SCAN_EMPTY_HOPS, SCAN_PAGES, STATUS_KEYS, STATUS_LABEL, statusKeyOf, toggleStatus, type StatusKey } from "@/lib/status-filter";
 import { Suspense } from "react";
 import { asOfDate } from "@/lib/format";
 import { REGIONS } from "@/lib/regions";
-import { csatJudged, provisionalBands, provisionalScan, settleAnalyses, startMine } from "@/lib/report-ops";
+import { csatJudged, provisionalBands, provisionalScan, settleAnalyses, startMine, withSchoolDisplay } from "@/lib/report-ops";
 import { csatNoJudgmentView } from "@/lib/csat-conditions";
 import type { CsatMinimum } from "@/lib/dto";
 import { ProvisionalPendingNote } from "@/components/provisional-pending";
@@ -165,7 +165,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       report = { ...report, provisional_bands: got.bands, provisional_min: got.min };
     } else {
       const got = await provisionalBands(src, caller, report, items.map((o) => o.offering_id));
-      report = { ...report, report_version: got.version, provisional_bands: got.bands, provisional_min: got.min };
+      report = { ...report, report_version: got.version, provisional_bands: got.bands, provisional_min: got.min, overall: withSchoolDisplay(report.overall, got.display) };
     }
   }
 
@@ -176,6 +176,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const provisionalJudged = provisional && Object.values(report?.provisional_bands ?? {}).some((b) => !pointBased || !personalCsatPoint(b)?.held);
   // 판정 없는 곳의 수능 최저 사유(서버 2026-11-24) — 최저 미충족·갈림도 '지원 조건 미충족' 필터에 넣는다
   const minAll: Record<string, CsatMinimum> = { ...(report?.provisional_min ?? {}) };
+  // 서버 v334~: 7단계를 내지 않은 모집단위의 가운데 환산점수·사유(담당자 v3, 2026-11-24)
+  const dispAll: NonNullable<OverallAnalysisDto["provisional_school_display"]> = { ...(report?.overall?.provisional_school_display ?? {}) };
   const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => {
     const raw = bands?.[id];
     const band = pointBased ? personalCsatPoint(raw) : raw;
@@ -205,7 +207,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
           // 전문가용: 같은 일을 전문가용 서버 검색(st)으로
           const r = await pro.scan(q);
           const nextAfter = r.search?.next_cursor?.startsWith("st:") ? r.search.next_cursor.slice(3) : null;
-          got = r.failed || !r.search ? null : { offerings: r.search.items ?? [], bands: r.bands, matched: r.search.matching_offering_count ?? 0, next: nextAfter, complete: true, min: r.min };
+          got = r.failed || !r.search ? null : { offerings: r.search.items ?? [], bands: r.bands, matched: r.search.matching_offering_count ?? 0, next: nextAfter, complete: true, min: r.min, display: {} };
         } else {
           got = await provisionalScan(src, caller, base, q);
         }
@@ -214,6 +216,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         if (!got.complete) scanPartial = true;
         Object.assign(bandsAll, got.bands);
         Object.assign(minAll, got.min);
+        Object.assign(dispAll, got.display);
         let last: string | null = null;
         for (const o of got.offerings) {
           if (picked.length >= LIMIT) break;
@@ -228,8 +231,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       if (ok) {
         // 판정 있는 행 가운데 점수·위치가 빠진 것(서버가 한 번에 100개까지)만 4페이지 판정으로 채운다
         const missing = picked.map((o) => o.offering_id).filter((id) => !bandsAll[id]?.school_score && keyOf(bandsAll, id) !== "none" && keyOf(bandsAll, id) !== "ineligible");
-        if (missing.length) { const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing); Object.assign(bandsAll, m.bands); Object.assign(minAll, m.min); }
-        report = { ...base, provisional_bands: bandsAll, provisional_min: minAll };
+        if (missing.length) { const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing); Object.assign(bandsAll, m.bands); Object.assign(minAll, m.min); if ("display" in m) Object.assign(dispAll, m.display); }
+        report = { ...base, provisional_bands: bandsAll, provisional_min: minAll, overall: withSchoolDisplay(base.overall, dispAll) };
         shown = picked;
         nextCursor = next ? `st:${next}` : null;
         scanned = matched;
