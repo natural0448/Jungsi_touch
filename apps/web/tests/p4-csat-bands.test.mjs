@@ -61,19 +61,30 @@ test("provisionalBands: 요청한 모집단위의 source g 판정만, 쓴 뒤 �
   assert.equal(again.version, 4);
 });
 
-test("provisionalBands: 실패·9모 리포트·빈 요청은 빈 표(오류 화면 없음)", async () => {
+// 2026-11-25: 실패하면 1.5초 뒤 한 번만 다시 묻고, 그래도 못 받으면 그 모집단위를 'unloaded'(판정 다시 불러오기)로 표시한다
+test("provisionalBands: 실패는 한 번 다시 묻고 unloaded, 9모 리포트·빈 요청은 빈 표(오류 화면 없음)", async () => {
   let n = 0;
   const src = {
     async analyzeUniversities() { n++; return { ok: false, code: "score_input_transition_pending", status: 503 }; },
     async readReport() { return null; },
   };
   const failed = await provisionalBands(src, caller, { ...prov(), report_id: "r2" }, ["2027:1"]);
-  assert.deepEqual(failed, { bands: {}, version: 3, min: {}, display: {} });
+  assert.deepEqual(failed, { bands: {}, version: 3, min: { "2027:1": "unloaded" }, display: {} });
   const thrown = await provisionalBands({ async analyzeUniversities() { throw new Error("down"); } }, caller, { ...prov(), report_id: "r3" }, ["2027:1"]);
   assert.deepEqual(thrown.bands, {});
+  assert.deepEqual(thrown.min, { "2027:1": "unloaded" });
   const mock = await provisionalBands(src, caller, { report_id: "r4", report_version: 1, profile_id: "p", overall: { input_kind: "raw", score_basis: "mock" } }, ["2027:1"]);
   assert.deepEqual(mock.bands, {});
   const empty = await provisionalBands(src, caller, { ...prov(), report_id: "r5" }, []);
   assert.deepEqual(empty.bands, {});
-  assert.equal(n, 1);
+  assert.equal(n, 2);
+});
+test("provisionalBands: 첫 요청이 일시 장애면 두 번째 응답의 판정을 쓴다", async () => {
+  let n = 0;
+  const ok = { ok: true, value: { ...prov(), report_id: "r6", report_version: 4, candidates: { reference_university_groups: [{ offerings: [{ offering: { offering_id: "2027:1" }, reference_band: { basis: "reference_threshold", source: "g", code: "stable" } }] }] } } };
+  const src = { async analyzeUniversities() { n++; return n === 1 ? { ok: false, code: "score_input_policy_unavailable", status: 503 } : ok; }, async readReport() { return null; } };
+  const got = await provisionalBands(src, caller, { ...prov(), report_id: "r6" }, ["2027:1"]);
+  assert.equal(n, 2);
+  assert.equal(got.bands["2027:1"]?.code, "stable");
+  assert.deepEqual(got.min, {});
 });

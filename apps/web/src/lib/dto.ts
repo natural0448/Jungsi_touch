@@ -881,4 +881,5 @@ export interface SampleReportDto {
 }
 
 /** 판정 없는 모집단위의 수능 최저 사유(서버 2026-11-24) */
-export type CsatMinimum = "unmet" | "partial" | "condition" | "cap";
+/** unloaded: 화면이 이 모집단위의 판정을 서버에서 받지 못함(일시 장애, 2026-11-25) — 판정 없음 사유가 아니다 */
+export type CsatMinimum = "unmet" | "partial" | "condition" | "cap" | "unloaded";

@@ -333,6 +333,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         <MineBasis report={report} single={pointBased} />
         {/* 가채점 판정을 하나도 받지 못했을 때만 안내 한 줄(판정이 있으면 9월과 같은 화면, 2026-11-23) */}
         {provisional && !provisionalJudged && <ProvisionalPendingNote />}
+        {provisional && Object.values(minAll).includes("unloaded") && (
+          <p className="ps-prov" role="alert"><b>판정을 잠시 불러오지 못했습니다</b> — 서버 응답이 늦어 이 화면의 지원가능성 판정을 받지 못했습니다. 화면을 새로 고치면 다시 받아 옵니다.</p>
+        )}
 
         <section className="filter" aria-label="검색 조건">
           <Form action={destination.path} prefetch={false} className="search" role="search">

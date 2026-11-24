@@ -260,6 +260,8 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
   return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min: minimumOf(state.report.candidates), display: schoolDisplayOf(state.report.candidates) };
 }
 
+/** 판정을 받지 못한 모집단위(화면은 '판정 다시 불러오기'로 보인다) */
+const unloaded = (ids: readonly string[]): Record<string, CsatMinimum> => Object.fromEntries(ids.map((id) => [id, "unloaded" as const]));
 export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number; min: Record<string, CsatMinimum>; display: SchoolDisplay }> {
   const none = { bands: {}, version: report.report_version, min: {}, display: {} };
   if (!csatJudged(report)) return none;
@@ -276,7 +278,12 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
       return src.analyzeUniversities(caller, r.report_id, r.report_version, targets, await key(attempt ? `uap${attempt}` : "uap", r, body));
     });
   try {
-    state = await ask(0);
+    state = await ask(0).catch(() => null as unknown as ReportState);
+    // 2026-11-25: 일시 장애(11-24 22:09 운영 503 score_input_policy_unavailable, 23초)면 1.5초 뒤 다른 키로 한 번만 다시 받는다
+    if (!state || state.kind !== "ready") {
+      await new Promise((r) => setTimeout(r, 1500));
+      state = await ask(2);
+    }
     // 서버(dep_r32)가 곡선·총점 분포를 시간 안에 다 못 읽었으면 complete=false. 뒤에서 마저 읽으므로 잠시 뒤 한 번만 다시 받는다(2026-11-23)
     if (state.kind === "ready" && state.report.candidates?.reference_threshold_summary?.complete === false) {
       await new Promise((r) => setTimeout(r, 1500));
@@ -285,11 +292,11 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
     }
   } catch (e) {
     logSettle("p4_csat_failed", { thrown: true });
-    return none;
+    return { ...none, min: unloaded(targets) };
   }
   if (state.kind !== "ready") {
     logSettle("p4_csat_failed", { thrown: false, conflict: state.kind === "failed" && state.code === "revision_conflict" });
-    return none;
+    return { ...none, min: unloaded(targets) };
   }
   const want = new Set(targets);
   const bands: Record<string, ReferenceBandDto> = {};
