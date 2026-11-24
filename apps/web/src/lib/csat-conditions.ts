@@ -42,13 +42,14 @@ const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
 
-export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
+export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
 /** 판정·예외 이름이 없는 모집단위의 사유. 리포트가 없으면 null */
 /** min: 서버가 알려 준 수능 최저 사유(2026-11-24) — unmet 미달 확정, partial 가채점 점수에 따라 충족 여부 갈림 */
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
   if (!a) return null;
   if (min === "unmet") return { label: "수능 최저 미충족", cls: "inel", desc: "이 모집단위의 수능 최저학력기준(또는 의약 계열 최소 기준)을 지금 성적으로는 넘지 못합니다. 기준을 넘지 못하면 합격할 수 없습니다." };
   if (min === "condition") return MISMATCH("이 모집단위는 2027 반영 과목(과학탐구 분야·과목, 수학 선택 등)이 정해져 있습니다.");
+  if (min === "cap") return { label: "탐구 점수 환산 범위 확인", cls: "check", desc: "가채점으로 추정한 탐구 표준점수가 이 대학 환산표의 범위를 넘어 이 대학 방식 점수를 계산하지 않았습니다. 성적표가 나오면 확정 점수로 계산됩니다." };
   if (min === "partial") return { label: "수능 최저 충족 여부 갈림", cls: "inel", desc: "가채점 점수 범위에 따라 이 모집단위의 수능 최저학력기준을 넘기도 하고 못 넘기도 합니다. 성적표가 나오면 정해집니다." };
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const inquiry = [by.get("inquiry1"), by.get("inquiry2")];

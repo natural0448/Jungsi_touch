@@ -89,6 +89,13 @@ export function Detail({ o, a, extras, picked, subjects, overall, examType, acts
  * - 지원가능성: 학교별 가채점 7단계(범위면 '적정~소신')와 단계 안 위치
  * - 대학 안 내 위치: 서버 dep_r30 school_rank(동점 포함 상위누백). 환산 유불리는 아직 보류
  */
+/** 받침에 맞춘 조사 '으로/로'(ㄹ 받침은 '로') — '상향(으)로'를 '상향으로'·'불가로'처럼 */
+const euro = (w: string): string => {
+  const c = w.charCodeAt(w.length - 1) - 0xac00;
+  if (c < 0 || c > 11171) return "(으)로";
+  const jong = c % 28;
+  return jong === 0 || jong === 8 ? "로" : "으로";
+};
 const STAGE_ORDER = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"] as const;
 /** final: 수능 실채점 리포트(12-14 전환 뒤). 같은 화면에 성적표 확정 값이라 범위·추정 문구 대신 확정 문구 */
 export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = null, extras, picked, acts = true, final = false }: { o: OfferingDto; band: ReferenceBandDto | null; exception?: ExceptionView | null; noJudgment?: NoJudgmentView | null; c1?: C1Score | null; extras: ReactNode; picked: boolean; acts?: boolean; final?: boolean }) {
@@ -194,7 +201,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                   <p className="why">
                     <b>왜 {tone.label}인가요?</b> 내 환산점수{final ? "" : "(가운데 추정)"} <b className="num">{pos.score}</b>점
                     {pos.better_gap && betterName && <> · {betterName} 기준 <b className="num">{plus(pos.score, pos.better_gap)}</b>점까지 <b className="num">{pos.better_gap}</b>점 부족</>}
-                    {pos.worse_gap && worseName && <> · {worseName}(으)로 내려가는 <b className="num">{minus(pos.score, pos.worse_gap)}</b>점까지 <b className="num">{pos.worse_gap}</b>점 여유</>}
+                    {pos.worse_gap && worseName && <> · {worseName}{euro(worseName)} 내려가는 <b className="num">{minus(pos.score, pos.worse_gap)}</b>점까지 <b className="num">{pos.worse_gap}</b>점 여유</>}
                   </p>
                 );
               })()}

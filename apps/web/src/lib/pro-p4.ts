@@ -110,6 +110,7 @@ function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMini
   const out: Record<string, CsatMinimum> = {};
   for (const id of c?.csat_minimum_partial ?? []) out[id] = "partial";
   for (const id of c?.csat_condition_unmet ?? []) out[id] = "condition";
+  for (const id of c?.csat_inquiry_cap ?? []) out[id] = "cap";
   for (const id of c?.csat_minimum_unmet ?? []) out[id] = "unmet";
   return out;
 }

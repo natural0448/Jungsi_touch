@@ -179,6 +179,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   };
   // 서버 dep_r38 전국 필터(2026-11-24 대표님 지적: 120개만 보고 멈췄다). 대학·학과 검색어가 없고 즐겨찾기 보기가 아닐 때만
   let scanDone = false;
+  // 서버가 시간 한도 안에 전국 판정을 다 못 했으면(complete=false) '없습니다'로 단정하지 않는다(개발팀 검토 11-24)
+  let scanPartial = false;
   if (cur.st && report && provisional && !cur.fav && !cur.university_q && !cur.department_q) {
     const want = new Set<StatusKey>(cur.st);
     const STAGES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"];
@@ -203,6 +205,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         }
         if (!got) { ok = false; break; }
         matched = got.matched;
+        if (!got.complete) scanPartial = true;
         Object.assign(bandsAll, got.bands);
         Object.assign(minAll, got.min);
         let last: string | null = null;
@@ -393,6 +396,12 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                 <h2>{cur.st ? "확인한 범위에는 고른 지원가능성이 없습니다" : "아직 찾는 중입니다"}</h2>
                 <p>{cur.st ? `모집단위 ${scanned ?? 0}개를 내 성적으로 확인했지만 고른 단계에 드는 곳이 없었습니다. 목록 뒤쪽에서 이어서 찾을 수 있습니다.` : "조건에 맞는 모집단위를 목록 뒤쪽에서 더 찾아야 합니다. 결과가 없다는 뜻이 아닙니다."}</p>
                 <div className="acts"><Link className="btn p" href={link({ cursor: nextCursor, open: undefined })}>{cur.st ? "이어서 찾기" : "계속 찾기"}</Link></div>
+              </section>
+            ) : groups.length === 0 && scanPartial ? (
+              <section className="gate flat">
+                <h2>아직 전국을 다 확인하지 못했습니다</h2>
+                <p>내 성적으로 전국 모집단위를 판정하는 중 시간이 부족해 일부만 확인했습니다. 결과가 없다는 뜻이 아닙니다. 잠시 뒤 다시 찾아 주세요.</p>
+                <div className="acts"><Link className="btn p" href={link({ open: undefined })}>다시 찾기</Link></div>
               </section>
             ) : groups.length === 0 ? (
               <section className="gate flat">
