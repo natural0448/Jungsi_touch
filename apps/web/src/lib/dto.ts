@@ -552,6 +552,8 @@ export interface CandidatesDto {
   /** 서버 2026-11-24: 수능 최저·최소 기준 미달(확정)·갈림 모집단위 */
   csat_minimum_unmet?: string[] | null;
   csat_minimum_partial?: string[] | null;
+  /** 서버 2026-11-24: 응시 과목 조건(과탐 분야·생명과학 등) 미충족 모집단위 */
+  csat_condition_unmet?: string[] | null;
   status_scan?: { matched: number; next_after: string | null; complete: boolean; offerings: OfferingDto[] } | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
@@ -859,4 +861,4 @@ export interface SampleReportDto {
 }
 
 /** 판정 없는 모집단위의 수능 최저 사유(서버 2026-11-24) */
-export type CsatMinimum = "unmet" | "partial";
+export type CsatMinimum = "unmet" | "partial" | "condition";

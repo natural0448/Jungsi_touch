@@ -40,6 +40,7 @@ export type NoJudgmentView = { label: "지원 조건 미충족" | "수능 최저
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
   if (!a) return null;
   if (min === "unmet") return { label: "수능 최저 미충족", cls: "inel", desc: "이 모집단위의 수능 최저학력기준(또는 의약 계열 최소 기준)을 지금 성적으로는 넘지 못합니다. 기준을 넘지 못하면 합격할 수 없습니다." };
+  if (min === "condition") return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위의 2027 응시 과목 조건(과학탐구 분야·과목, 수학 선택 등)에 지금 응시 과목이 맞지 않아 점수가 계산되지 않습니다. 모집요강의 반영 과목을 확인해 주세요." };
   if (min === "partial") return { label: "수능 최저 충족 여부 갈림", cls: "inel", desc: "가채점 점수 범위에 따라 이 모집단위의 수능 최저학력기준을 넘기도 하고 못 넘기도 합니다. 성적표가 나오면 정해집니다." };
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const inquiry = [by.get("inquiry1"), by.get("inquiry2")];
