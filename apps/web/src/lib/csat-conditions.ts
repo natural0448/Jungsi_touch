@@ -25,6 +25,14 @@ const SCIENCE_ONLY_2 = new Set([29,30,49,52,53,56,66,73,74,76,79,80,81,84,85,86,
 // D1 반영 탐구 영역이 사회뿐(대구한의대 한의예과 인문 2003), 수학 '확률과 통계'만 지정(2003, 동의대 한의예과 확률과통계 7090)
 const SOCIAL_ONLY = new Set([2003].map((n) => `2027:${1000000000 + n}`));
 const MATH_PROB_ONLY = new Set([2003, 7090].map((n) => `2027:${1000000000 + n}`));
+/*
+  2026-11-24 담당자 통합 회신(R1 대조 1,379건): 반영 영역·과목 수만으로 지원 자격을 단정하지 않는다. 지원 자격으로 확인된 조건만
+  '지원 조건 미충족'(부산대 47 과학탐구 1과목 이상 필수, 성신여대 간호(인문) 사회탐구 1과목 이상 필수, 앞서 승인한 SCIENCE_PAIR 51·
+  제2외국어 28·울산대 의예), 나머지 반영 과목 기반은 '반영 과목 불일치'(대표님 결정). 부산대 47·의약 5는 수학 지정에서 뺐다(확률과 통계 허용)
+*/
+const PNU_SCIENCE_1 = new Set([631, 632, 633, 638, 646, 650, 662, 663, 665, 670, 672, 675, 679, 680, 681, 682, 683, 686, 687, 699, 700, 708, 713, 714, 715, 716, 717, 718, 721, 726, 728, 740, 741, 745, 746, 6423, 6424, 8009, 8011, 8013, 8014, 8015, 8016, 8017, 8018, 10544, 11359].map((n) => `2027:${1000000000 + n}`));
+const SUNGSHIN_SOCIAL_1 = new Set([3844].map((n) => `2027:${1000000000 + n}`));
+const MISMATCH = (desc: string): NoJudgmentView => ({ label: "반영 과목 불일치", cls: "inel", desc: desc + " 지금 응시 과목으로는 이 대학 방식 점수를 계산할 수 없습니다. 지원 가능 여부는 모집요강에서 확인하세요." });
 const MATH_CALC_GEOM = new Set([297,309,310,321,322,542,749,754,758,759,760,761,765,766,767,768,773,774,775,776,777,780,782,786,789,795,796,798,799,801,802,805,807,808,809,810,811,812,813,845,922,925,933,941,942,953,959,960,963,964,965,968,970,971,972,995,996,1000,1008,1009,1010,1011,1014,1016,1017,1099,1101,1112,1124,1125,1140,1141,1185,1186,1188,1193,1194,1201,1202,1323,1324,1325,1326,1334,1335,1347,1348,1357,1414,1415,1424,1433,1435,1439,1442,2004,2037,2090,2102,2331,2339,2441,2442,2469,2470,2834,2835,2844,2845,3107,4335,4496,4553,4726,4727,4735,4736,4917,4918,4927,4928,4943,4944,5206,6224,6235,6239,6427,6432,6443,6444,6445,6500,6507,7089,7220,7222,7403,7641,7986,8002,8022,9231,9776,9777,10088,10089,10090,10091,10092,10093,10094,10255,10269,10270,10271,10272,10273,10274,10275,10340,10341,10342,10343,10344,10345,10404,10405,10406,10407,10408,10409,10604,10605,10606,10607,10608,10735,10736,10737,10738,10739,10740,10741,10771,10798,10799,10800,10801,10802,10803,10823,10824,10825,10865,10866,10867,10882,10883,10884,10885,10886,10887,10888,10946,10947,10948,10949,10950,10951,10960,10961,10962,10963,10973,10974,10975,10976,10977,10978,10979,11354].map((n) => `2027:${1000000000 + n}`));
 
 // K1 Guide 122-2027-R04/R05에는 과탐 두 과목 외에 수학 선택과 탐구 분야 조건도 있다.
@@ -34,13 +42,13 @@ const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
 
-export type NoJudgmentView = { label: "지원 조건 미충족" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
+export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
 /** 판정·예외 이름이 없는 모집단위의 사유. 리포트가 없으면 null */
 /** min: 서버가 알려 준 수능 최저 사유(2026-11-24) — unmet 미달 확정, partial 가채점 점수에 따라 충족 여부 갈림 */
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
   if (!a) return null;
   if (min === "unmet") return { label: "수능 최저 미충족", cls: "inel", desc: "이 모집단위의 수능 최저학력기준(또는 의약 계열 최소 기준)을 지금 성적으로는 넘지 못합니다. 기준을 넘지 못하면 합격할 수 없습니다." };
-  if (min === "condition") return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위의 2027 응시 과목 조건(과학탐구 분야·과목, 수학 선택 등)에 지금 응시 과목이 맞지 않아 점수가 계산되지 않습니다. 모집요강의 반영 과목을 확인해 주세요." };
+  if (min === "condition") return MISMATCH("이 모집단위는 2027 반영 과목(과학탐구 분야·과목, 수학 선택 등)이 정해져 있습니다.");
   if (min === "partial") return { label: "수능 최저 충족 여부 갈림", cls: "inel", desc: "가채점 점수 범위에 따라 이 모집단위의 수능 최저학력기준을 넘기도 하고 못 넘기도 합니다. 성적표가 나오면 정해집니다." };
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const inquiry = [by.get("inquiry1"), by.get("inquiry2")];
@@ -60,23 +68,25 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
   }
   const scienceCount = inquiry.filter((s) => kindOf(s) === "science").length;
   const mathChoice = by.get("math")?.choice?.replace(/\s+/g, "");
-  if (MATH_PROB_ONLY.has(offeringId) && mathChoice && mathChoice !== "확률과통계") {
-    return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 수학 확률과 통계 응시자를 모집합니다. 미적분·기하 응시로는 지원 조건에 맞지 않습니다." };
+  // 지원 자격으로 확인된 조건(담당자 R4)
+  if (PNU_SCIENCE_1.has(offeringId) && scienceCount < 1) {
+    return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 사회/과학탐구 2과목 중 과학탐구(과목 I 이상) 1과목 이상을 필수로 합니다." };
   }
-  if (SOCIAL_ONLY.has(offeringId) && inquiry.some((s) => kindOf(s) === "science")) {
-    return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 사회탐구만 반영합니다. 과학탐구 응시로는 지원 조건에 맞지 않습니다." };
-  }
-  if (MATH_CALC_GEOM.has(offeringId) && mathChoice === "확률과통계") {
-    return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 수학 미적분 또는 기하를 지정합니다. 확률과 통계 응시로는 지원 조건에 맞지 않습니다." };
-  }
-  if ((SCIENCE_ONLY_2.has(offeringId) && scienceCount < 2) || (SCIENCE_ONLY_1.has(offeringId) && scienceCount < 1)) {
-    return { label: "지원 조건 미충족", cls: "inel", desc: SCIENCE_ONLY_2.has(offeringId) ? "이 모집단위는 2027 모집요강에서 과학탐구 2과목만 반영합니다. 사회탐구 응시 과목은 점수에 들어가지 않습니다." : "이 모집단위는 2027 모집요강에서 과학탐구만 반영합니다. 사회탐구 응시로는 점수가 계산되지 않습니다." };
+  if (SUNGSHIN_SOCIAL_1.has(offeringId) && inquiry.every((s) => kindOf(s) === "science")) {
+    return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 사회탐구 1과목 이상 응시를 필수로 합니다(지정과목 미응시 시 선발 제외)." };
   }
   if (SCIENCE_PAIR.has(offeringId) && hasSocialInquiry) {
     return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 과학탐구 2과목만 반영합니다. 사회탐구 응시로는 점수가 계산되지 않습니다." };
   }
   if (SECOND_LANG_REQUIRED.has(offeringId) && !a.second_language) {
     return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 제2외국어/한문 응시가 필요합니다." };
+  }
+  // 반영 과목 기반(지원 자격은 단정하지 않음)
+  if (MATH_PROB_ONLY.has(offeringId) && mathChoice && mathChoice !== "확률과통계") return MISMATCH("이 모집단위는 2027 모집요강에서 수학 확률과 통계를 반영합니다.");
+  if (SOCIAL_ONLY.has(offeringId) && inquiry.some((s) => kindOf(s) === "science")) return MISMATCH("이 모집단위는 2027 모집요강에서 사회탐구를 반영합니다.");
+  if (MATH_CALC_GEOM.has(offeringId) && mathChoice === "확률과통계") return MISMATCH("이 모집단위는 2027 모집요강에서 수학 미적분 또는 기하를 반영합니다.");
+  if ((SCIENCE_ONLY_2.has(offeringId) && scienceCount < 2) || (SCIENCE_ONLY_1.has(offeringId) && scienceCount < 1)) {
+    return MISMATCH(SCIENCE_ONLY_2.has(offeringId) ? "이 모집단위는 2027 모집요강에서 과학탐구 2과목을 점수에 반영합니다." : "이 모집단위는 2027 모집요강에서 과학탐구를 점수에 반영합니다.");
   }
   return { label: "비교 기준 확인 필요", cls: "check", desc: "이 모집단위는 지금 성적으로 학교 점수 또는 합격권 기준을 비교할 자료가 아직 맞춰지지 않았습니다. 반영 과목·선택과목 조건도 모집요강에서 확인해 주세요." };
 }

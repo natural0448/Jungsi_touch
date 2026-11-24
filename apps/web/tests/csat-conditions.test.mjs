@@ -46,9 +46,13 @@ test("C1: 예외 7곳 점수(조선대 상위 3영역 평균 × 7 / 3)", () => {
 test("D1 confirms unmet conditions and server minimum reasons (2026-11-24)", () => {
   const mk = (math, i1, i2) => ({ subjects: [{ area: "math", choice: math, subject: "수학" }, { area: "inquiry1", subject: i1 }, { area: "inquiry2", subject: i2 }], second_language: null });
   const social = mk("미적분", "생활과 윤리", "사회·문화"), prob = mk("확률과 통계", "물리학Ⅰ", "화학Ⅰ"), sci = mk("미적분", "물리학Ⅰ", "화학Ⅰ");
-  assert.equal(csatNoJudgmentView("2027:1000002003", sci).label, "지원 조건 미충족"); // 대구한의대 한의예(인문): 사탐·확통
-  assert.equal(csatNoJudgmentView("2027:1000007090", sci).label, "지원 조건 미충족"); // 동의대 한의예(확률과통계)
+  assert.equal(csatNoJudgmentView("2027:1000002003", sci).label, "반영 과목 불일치"); // 대구한의대 한의예(인문): 반영 과목 기반(담당자 R1: 지원 자격 단정 안 함)
+  assert.equal(csatNoJudgmentView("2027:1000007090", sci).label, "반영 과목 불일치"); // 동의대 한의예(확률과통계)
+  assert.equal(csatNoJudgmentView("2027:1000000631", social).label, "지원 조건 미충족"); // 부산대: 과학탐구 1과목 이상 필수(확인됨)
+  assert.notEqual(csatNoJudgmentView("2027:1000000631", mk("확률과 통계", "생활과 윤리", "물리학Ⅰ")).label, "지원 조건 미충족"); // 부산대: 과탐 1과목·확통 허용
+  assert.equal(csatNoJudgmentView("2027:1000003844", sci).label, "지원 조건 미충족"); // 성신여대 간호(인문): 사회탐구 1과목 이상 필수
+  assert.notEqual(csatNoJudgmentView("2027:1000003844", mk("미적분", "사회·문화", "물리학Ⅰ")).label, "지원 조건 미충족");
   assert.equal(csatNoJudgmentView("2027:1000000709", social, "unmet").label, "수능 최저 미충족");
   assert.equal(csatNoJudgmentView("2027:1000008020", social, "partial").label, "수능 최저 충족 여부 갈림");
-  assert.notEqual(csatNoJudgmentView("2027:1000000297", prob).label, "비교 기준 확인 필요"); // 미적분·기하 지정
+  assert.equal(csatNoJudgmentView("2027:1000000297", prob).label, "반영 과목 불일치"); // 미적분·기하 반영(지원 자격 단정 안 함)
 });
