@@ -263,6 +263,25 @@ export async function findCandidates(_prev: ProActionState, fd: FormData): Promi
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
 }
 
+/**
+ * 2026-11-24 대표님 결정: ② 탭을 열었는데 저장 때 자동 찾기가 실패해 결과가 아예 없으면 화면이 한 번 알아서 다시 찾는다.
+ * 계산은 버튼(findCandidates)과 같고, 끝나면 학생 화면으로 옮기지 않고 그 자리에서 새로 그린다
+ */
+export async function autoFindCandidates(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), profileId = String(fd.get("profile_id") ?? "");
+  const pv = String(fd.get("profile_version") ?? ""), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 아래 버튼을 눌러 주세요." };
+  try {
+    const r = await proSource().candidates(await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
+    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `자동으로 찾지 못했습니다. 아래 버튼으로 다시 찾아 주세요. (문의 번호 ${r.code})` };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { error: t };
+    return { error: "자동으로 찾지 못했습니다. 아래 버튼으로 다시 찾아 주세요." };
+  }
+  return { done: "찾음" };
+}
+
 /** 학생별 담기(찜). 고정된 리포트 판에 결속된다 */
 export async function addStudentBookmark(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
   const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), reportId = String(fd.get("report_id") ?? "");

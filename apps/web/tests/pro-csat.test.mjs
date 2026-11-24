@@ -154,3 +154,37 @@ test("student page wires the provisional form only to the student save action be
   // 대학 찾기는 전문가용 pro.candidates(proSource)로 이 학생 성적만(개인용 source 를 쓰지 않는다)
   assert.match(body, /src\.candidates\(caller, orgId, studentId, p\.profile_id/);
 });
+
+// 2026-11-24 대표님 결정: ② 유리한 대학 찾기에 결과가 아예 없으면 열 때 한 번 자동으로 찾는다(버튼과 같은 계산, 화면 이동 없음)
+function autoForm(extra = {}) {
+  const fd = new FormData();
+  const v = { org_id: "invented-org", student_id: "invented-student", profile_id: "invented-profile", profile_version: "invented-profile", idem: "00000000-0000-4000-8000-000000000002", ...extra };
+  for (const [k, x] of Object.entries(v)) fd.set(k, x);
+  return fd;
+}
+test("auto find calls pro.candidates once for that student and stays on the page", async () => {
+  const f = fake();
+  const r = await actions.autoFindCandidates(null, autoForm());
+  assert.deepEqual(r, { done: "찾음" });
+  assert.deepEqual(f.calls, [["candidates", { accessToken: "invented" }, "invented-org", "invented-student", "invented-profile", "invented-profile", "00000000-0000-4000-8000-000000000002"]]);
+});
+test("auto find failure is explained with the button fallback and never throws", async () => {
+  fake({ async candidates() { return { ok: false, code: "csat_provisional_unavailable", status: 503 }; } });
+  const r = await actions.autoFindCandidates(null, autoForm());
+  assert.match(r.error, /아래 버튼/);
+  fake({ async candidates() { throw new Error("boom"); } });
+  const r2 = await actions.autoFindCandidates(null, autoForm());
+  assert.match(r2.error, /아래 버튼/);
+  const f = fake();
+  const r3 = await actions.autoFindCandidates(null, autoForm({ idem: "bad" }));
+  assert.ok(r3.error);
+  assert.equal(f.calls.length, 0);
+});
+test("favorable tab auto-finds only when the report has no candidates at all, for editors", () => {
+  const page = readFileSync(new URL("../src/app/pro/students/[studentId]/favorable/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /v\.canEdit && provisionalOnly\(report\) && proCsatEnabled\(\) && report\.candidates == null \? \(\s*<AutoFind act=\{autoFindCandidates\}/);
+  const comp = readFileSync(new URL("../src/app/pro/auto-find.tsx", import.meta.url), "utf8");
+  // 같은 성적으로는 탭에서 한 번만(실패해도 되풀이하지 않는다)
+  assert.match(comp, /sessionStorage\.getItem\(k\)/);
+  assert.match(comp, /sessionStorage\.setItem\(k, "1"\)/);
+});
