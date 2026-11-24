@@ -17,7 +17,7 @@ export function Recruit({ o, rec, conds }: { o: OfferingDto; rec: RecruitmentDto
       <span>2027 모집군<b>{o.group}군</b></span>
       {r ? (
         <>
-          <span>최초 인원<b className="num">{r.initial_count ?? wait("미공개")}</b></span>
+          <span>{r.count_status === "initial_guide_published" ? "요강 기준" : "최초 인원"}<b className="num">{r.initial_count ?? wait("미공개")}{r.count_status === "initial_guide_published" && r.initial_count !== null && "명"}</b></span>
           <span>이월·변경<b className="num">{r.rollover_change === null ? wait("미공개") : signed(r.rollover_change)}</b></span>
           <span>최종 인원<b className="num">{r.final_count ?? wait("미확정")}</b></span>
         </>

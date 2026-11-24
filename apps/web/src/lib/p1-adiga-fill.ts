@@ -114,17 +114,16 @@ export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
   return rows.map((r) => {
     if (r.pk === null || r.y >= 2027) return r;
     let next: Row | null = null;
-    // 예비번호·충원 칸이 모두 비었을 때만 원문 확인된 예비번호로 채운다
-    // 모집군은 화면 자료에 '가'·'가군' 두 표기가 있어 '가'로 맞춘다
+    // 학년도·PK·전형·군이 같은 검수된 발표값만 각 빈 칸에 채운다.
     const key = `${r.y}|${r.pk}|${r.t ?? ""}|${(r.g ?? "").replace(/군$/, "")}`;
     const rank = fill.get(`R|${key}`), people = fill.get(`F|${key}`);
-    // 정본이 공식 미발표(not_published)라고 확인한 칸에는 KV를 붙이지 않는다(담당자 v46 검토 2026-11-20: 정본 발행 뒤 옛 KV 숫자가 다시 보이지 않게)
-    const officialNone = r.rk?.s === OFFICIAL_NOT_PUBLISHED || r.ad?.s === OFFICIAL_NOT_PUBLISHED;
-    if (!officialNone && (r.rk?.v ?? "").trim() === "" && (r.ad?.v ?? "").trim() === "") {
-      // 담당자가 원문으로 확인한 예비번호가 먼저, 없으면 대학어디가 충원인원, 발표 안 함·자료 없음은 사유만
-      if (rank !== undefined) next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
-      else if (people === "undisclosed" || people === "unavailable") next = { ...r, ad: { v: null, s: ADIGA_FILL_STATUS, r: FILL_UNDISCLOSED, u: null, l: "충원인원", at: null, ctx: null } };
-      else if (people !== undefined) next = { ...r, ad: { v: people, s: ADIGA_FILL_STATUS, r: null, u: "명", l: "충원인원", at: null, ctx: null } };
+    // 이전 KV의 값은 정본이 미발표로 판정한 칸을 덮지 않는다.
+    if (r.rk.s !== OFFICIAL_NOT_PUBLISHED && (r.rk.v ?? "").trim() === "" && rank !== undefined) {
+      next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
+    }
+    if (r.ad.s !== OFFICIAL_NOT_PUBLISHED && (r.ad.v ?? "").trim() === "" && people !== undefined) {
+      const missing = people === "undisclosed" || people === "unavailable";
+      next = { ...(next ?? r), ad: { v: missing ? null : people, s: ADIGA_FILL_STATUS, r: missing ? FILL_UNDISCLOSED : null, u: missing ? null : "명", l: "충원인원", at: null, ctx: null } };
     }
     const code = fill.get(`S|${key}`);
     let addedStats = false;

@@ -7,16 +7,16 @@ import { ScrollHint } from "./scroll-hint";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
-  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 대학 발표 성적 ①·②.
-  충원인원(2026-11-16 대표님 결정): 최종 합격 예비번호 = 충원인원으로 보고 한 열에 숫자로 넣는다. 원문 명칭이 달라도 넣고,
-  '의미 확인 중' 같은 꼬리표는 붙이지 않는다. 추정 탈락자는 이 숫자로 계산한다. 1페이지에 추정 상위 누백(참고)은 보이지 않는다(같은 날).
+  모집인원 · 경쟁률 · 추정 총 지원자 · 충원 발표 · 추정 탈락자 · 대학 발표 성적 ①·②.
+  충원 발표 한 열에서 실제 충원 인원(명)과 최종 합격 예비번호(번)를 각각 표시한다.
+  1페이지에 추정 상위 누백(참고)은 보이지 않는다(2026-11-16 결정).
   값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
   발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
   고르는 규칙은 lib/p1-published-stats.ts). ① 은 50%컷 자리, ② 는 70%컷 자리로 통계마다 칸이 고정된다(같은 날 정정). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
   '확인 중' 꼬리표·확인 사유는 보이지 않는다(2026-11-04 사용자 결정, 자료의 status·reason 은 보존). 예비번호는 '번'.
   추정 2열만 계산하고 발표 칸을 덮지 않는다: 추정 총 지원자 = 모집인원×경쟁률(반올림),
-  추정 탈락자 = 추정 총 지원자 − (모집인원 + 충원인원)(2026-11-16 대표님 결정, 11-02 예비번호 산식 대체).
-  추정 탈락자는 표에 보이는 예비번호(정수, '번')가 있을 때만 계산한다.
+  추정 탈락자 = 추정 총 지원자 − (모집인원 + 실제 충원 인원).
+  실제 충원 인원이 비어 있으면 추정 탈락자도 빈칸으로 둔다.
   휴대폰처럼 표가 넘치면 학년도 열을 왼쪽에 고정하고 옆으로 넘기라는 안내를 보인다(scroll-hint.tsx, 2026-11-02).
 */
 
@@ -99,7 +99,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
               <th scope="col" className="r">모집인원</th>
               <th scope="col" className="r">경쟁률</th>
               <th scope="col" className="r derived">추정 총 지원자</th>
-              <th scope="col" className="r">충원인원</th>
+              <th scope="col" className="r">충원 발표</th>
               <th scope="col" className="r derived">추정 탈락자</th>
               <th scope="col" className="r">대학 발표 성적 ①</th>
               <th scope="col" className="r">대학 발표 성적 ②</th>
@@ -109,7 +109,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
             {years.flatMap((y) =>
               byYear.get(y)!.map((r, i) => {
                 const none = noRecruit(r);
-                const dv = none ? { applicants: null, dropped: null, fill: null } : derived(r);
+                const dv = none ? { applicants: null, dropped: null, fill: null, rank: null } : derived(r);
                 const ps = publishedStats(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
@@ -128,7 +128,12 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                     <td className="r derived">
                       {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
-                    <td className="r">{none ? null : dv.fill !== null ? <b className="num">{dv.fill}</b> : r.ad.r === FILL_UNDISCLOSED || r.ad.s === OFFICIAL_NOT_PUBLISHED || r.rk.s === OFFICIAL_NOT_PUBLISHED ? <small className="rs-bs">미발표</small> : null}</td>
+                    <td className="r">
+                      {dv.fill !== null && <><b className="num">{dv.fill}</b><small> 명</small></>}
+                      {dv.fill !== null && dv.rank !== null && <small> · </small>}
+                      {dv.rank !== null && <><b className="num">{dv.rank}</b><small> 번</small></>}
+                      {!none && dv.fill === null && dv.rank === null && (r.ad.r === FILL_UNDISCLOSED || r.ad.s === OFFICIAL_NOT_PUBLISHED || r.rk.s === OFFICIAL_NOT_PUBLISHED) && <small className="rs-bs">미발표</small>}
+                    </td>
                     <td className="r derived">
                       {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>

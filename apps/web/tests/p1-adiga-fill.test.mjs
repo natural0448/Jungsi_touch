@@ -54,15 +54,16 @@ test("표 형식이 하나라도 어긋나면 표 전체를 쓰지 않는다", (
   assert.equal(parseAdigaFill(doc({ "2026|1|70%컷": "642.5" })).get("2026|1|70%컷"), "642.5");
 });
 
-test("원문으로 확인된 최종 합격 예비번호(ranks)는 예비번호·충원 칸이 모두 빈 행에만 채운다(2026-11-19)", () => {
+test("원문으로 확인된 최종 합격 예비번호(ranks)는 예비번호 칸이 비어 있으면 같은 PK·전형·군에서 채운다", () => {
   const text = JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ranks: { "2024|1000000501|수능(일반전형)|다": "13" } });
   const fill = parseAdigaFill(text);
   const [r] = applyAdigaFill([row(2024, "1000000501")], fill);
   assert.equal(r.rk.v, "13");
   assert.equal(r.rk.u, "번");
-  // 이미 값이 있으면, 다른 전형·군이면 채우지 않는다
+  // 기존 실제 인원은 보존하고, 다른 전형·군에는 붙이지 않는다
   const [kept] = applyAdigaFill([row(2024, "1000000501", { ad: { ...empty(), v: "5", u: "명" } })], fill);
-  assert.equal(kept.rk.v, null);
+  assert.equal(kept.rk.v, "13");
+  assert.equal(kept.ad.v, "5");
   const [other] = applyAdigaFill([row(2024, "1000000501", { g: "나" })], fill);
   assert.equal(other.rk.v, null);
   // ranks 형식이 어긋나면 표 전체를 쓰지 않는다
@@ -71,7 +72,7 @@ test("원문으로 확인된 최종 합격 예비번호(ranks)는 예비번호·
   }
 });
 
-test("대학어디가 충원인원(fills, 0 포함)은 예비번호보다 뒤, 빈 행에만 '명'으로 채운다(2026-11-19)", () => {
+test("대학어디가 충원인원(fills, 0 포함)은 별도의 빈 인원 칸에 '명'으로 채운다", () => {
   const k = "2025|1000000777|수능(일반전형)|다";
   const fill = parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, fills: { [k]: "7", "2025|1000000778|수능(일반전형)|다": "0" } }));
   const [a, b] = applyAdigaFill([row(2025, "1000000777"), row(2025, "1000000778")], fill);
@@ -81,7 +82,8 @@ test("대학어디가 충원인원(fills, 0 포함)은 예비번호보다 뒤, �
   const both = parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, ranks: { [k]: "13" }, fills: { [k]: "7" } }));
   const [c] = applyAdigaFill([row(2025, "1000000777")], both);
   assert.equal(c.rk.v, "13");
-  assert.equal(c.ad.v, null);
+  assert.equal(c.ad.v, "7");
+  assert.equal(c.ad.u, "명");
   assert.equal(parseAdigaFill(JSON.stringify({ format: ADIGA_FILL_FORMAT, cells: { "2026|1|50%컷": "600" }, fills: { [k]: "-1" } })), null);
 });
 
