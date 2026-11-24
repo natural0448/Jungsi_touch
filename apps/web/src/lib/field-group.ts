@@ -13,8 +13,8 @@ import data from "./field-groups-2027.json";
 export const FIELD_GROUPS = ["인문", "사회", "교육", "공학", "자연", "의약", "예체능", "자유전공"] as const;
 export type FieldGroupName = (typeof FIELD_GROUPS)[number];
 /** 계열 값의 근거. free 는 모집단위 이름에 자유·자율·무전공이 적힌 별도 유형 */
-export type FieldBasis = "2025" | "guide2027" | "draft2027" | "free";
-export const FIELD_BASIS_NOTE: Record<FieldBasis, string | null> = { "2025": "2025 분류 기준", guide2027: "2027 모집요강 계열", draft2027: "2027 요강 초안 기준", free: null };
+export type FieldBasis = "2025" | "guide2027" | "draft2027" | "free" | "name2027";
+export const FIELD_BASIS_NOTE: Record<FieldBasis, string | null> = { "2025": "2025 분류 기준", guide2027: "2027 모집요강 계열", draft2027: "2027 요강 초안 기준", free: null, name2027: "학과 이름 기준" };
 export interface FieldGroup {
   name: FieldGroupName;
   basis: FieldBasis;
@@ -28,6 +28,9 @@ export const FIELD_UNKNOWN = "기타";
 
 const BY_PK = new Map<number, FieldGroupName>();
 for (const name of FIELD_GROUPS) for (const pk of (data.groups as Record<string, number[]>)[name] ?? []) BY_PK.set(pk, name);
+// 2026-11-24 대표님 '실제로 미분류 계열은 없다': R2 자료에 없는 모집단위는 화면팀이 학과 이름·본체 학과 계열로 붙인 값(name_2027)
+const NAMED = new Set<number>();
+for (const name of FIELD_GROUPS) for (const pk of ((data as { name_2027?: Record<string, number[]> }).name_2027 ?? {})[name] ?? []) if (!BY_PK.has(pk)) { BY_PK.set(pk, name); NAMED.add(pk); }
 const GUIDE = new Set<number>(data.guide_2027 as number[]);
 const DRAFT = new Set<number>(data.draft_2027 as number[]);
 
@@ -38,7 +41,7 @@ export function fieldGroupOf(offeringId: string): FieldGroup | null {
   const pk = Number(m[2]);
   const name = BY_PK.get(pk);
   if (!name) return null;
-  const basis: FieldBasis = name === "자유전공" ? "free" : GUIDE.has(pk) ? "guide2027" : DRAFT.has(pk) ? "draft2027" : "2025";
+  const basis: FieldBasis = name === "자유전공" ? "free" : GUIDE.has(pk) ? "guide2027" : DRAFT.has(pk) ? "draft2027" : NAMED.has(pk) ? "name2027" : "2025";
   return { name, basis, note: FIELD_BASIS_NOTE[basis], provisional: basis === "2025" };
 }
 

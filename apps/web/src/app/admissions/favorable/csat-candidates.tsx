@@ -1,5 +1,7 @@
 import type { CandidatesDto } from "@/lib/dto";
 import { CSAT_CANDIDATE_LABEL, csatCandidateView, type CsatCandidateGroup } from "@/lib/provisional-view";
+import Link from "@/components/link";
+import { page } from "@/lib/routes";
 import { CsatGroups } from "./csat-groups";
 
 /*
@@ -8,6 +10,8 @@ import { CsatGroups } from "./csat-groups";
   그룹마다 3페이지 참고 목록과 같은 대학 → 계열 → 학과 묶음·배지·별표로 그린다. 핵심만 펼친 채로 시작한다.
 */
 const ORDER: CsatCandidateGroup[] = ["challenge", "core", "room"];
+/** 그룹 → 4페이지 지원가능성 필터 단계(전국을 빠짐없이 찾는다) */
+const STAGES: Record<CsatCandidateGroup, string> = { challenge: "aspirational,upward", core: "target", room: "stable,downward" };
 const lead = (exam: string): Record<CsatCandidateGroup, string> => ({
   challenge: `${exam} 판정이 소신·상향인 학과입니다. 점수 변동에 따라 결과가 크게 달라질 수 있는 도전 지원 후보입니다.`,
   core: `${exam} 판정이 적정인 학과입니다. 지원의 중심으로 검토할 후보입니다.`,
@@ -15,11 +19,15 @@ const lead = (exam: string): Record<CsatCandidateGroup, string> => ({
 });
 
 /** final: 수능 실채점 리포트(12-14 전환 뒤) */
-export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = false }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string; final?: boolean; pointBased?: boolean }) {
+export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = false, allHref }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string; final?: boolean; pointBased?: boolean; allHref?: (st: string) => string }) {
   const v = csatCandidateView(c, pointBased);
   const EXAM = final ? "실채점" : "가채점";
   const LEAD = lead(EXAM);
   const total = v.counts.challenge + v.counts.core + v.counts.room;
+  // 3페이지 응답에는 크기 상한이 있어 학과가 많으면 일부만 온다(2026-11-24 대표님: '전체 보기'로 4페이지 단계 필터에 연결)
+  const sum = c?.reference_threshold_summary;
+  const cut = !!sum && ((typeof sum.delivered === "number" && typeof sum.listed === "number" && sum.delivered < sum.listed) || sum.complete === false);
+  const p4 = page("PAGE-04").path;
   if (total === 0) return null;
   return (
     <section className="fv-csat-cands" aria-labelledby="csat-cand-t">
@@ -37,6 +45,10 @@ export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = f
               <b>{CSAT_CANDIDATE_LABEL[g]}</b> <span className="num">{v.counts[g]}</span>개 학과 · <span className="num">{v.groups[g].length}</span>개 대학
             </summary>
             <CsatGroups pointBased={pointBased} universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} />
+            <p className="fv-ref-note">
+              {cut ? "학과가 많아 이 목록에는 일부만 보입니다. " : ""}
+              <Link href={allHref ? allHref(STAGES[g]) : `${p4}?st=${STAGES[g]}`}>{CSAT_CANDIDATE_LABEL[g]} 단계 학과 전국에서 모두 보기 →</Link>
+            </p>
           </details>
         ) : null,
       )}

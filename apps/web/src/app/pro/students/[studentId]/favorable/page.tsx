@@ -85,7 +85,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <ScoreBasis overall={report.overall} emptyText="" />
           {csat.universities.length > 0 ? (
             <section className="fv-main fv-refmode" aria-label="유리한 대학">
-              <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} />
+              <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} allHref={(st) => proTabHref(orgParam, studentId, "possibilities", `st=${st}`)} />
               <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
             </section>
           ) : (
