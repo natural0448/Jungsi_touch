@@ -92,8 +92,8 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           ) : (
             <>
               {/* 성적 저장 때 자동으로 한 번 찾는다. 결과가 없을 때만 찾기 버튼(담당 교사) */}
-              {/* 2026-11-24: 결과가 아예 없으면(저장 때 찾기 실패) 열 때 한 번 자동으로 찾는다. 실패하면 버튼·안내가 그대로 */}
-              {v.canEdit && provisionalOnly(report) && proCsatEnabled() && report.candidates == null ? (
+              {/* 2026-11-24: 대학 찾기 결과(판정 요약)가 아예 없으면(저장 때 찾기 실패 — 전체 위치 판은 빈 후보 칸만 가진다) 열 때 한 번 자동으로 찾는다 */}
+              {v.canEdit && provisionalOnly(report) && proCsatEnabled() && !report.candidates?.reference_threshold_summary ? (
                 <AutoFind act={autoFindCandidates} fields={{ org_id: v.svc.org_id, student_id: v.student.student_id, profile_id: v.shown.profile_id, profile_version: v.shown.profile_id, idem: crypto.randomUUID() }}>
                   <div className="pro-sechd">
                     <ActionButton act={findCandidates} primary label="이 학생에게 유리한 대학 찾기" busy="찾는 중…" fields={{ org_id: v.svc.org_id, student_id: v.student.student_id, profile_id: v.shown.profile_id, profile_version: v.shown.profile_id, idem: crypto.randomUUID() }} />

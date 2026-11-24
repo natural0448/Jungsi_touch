@@ -152,7 +152,7 @@ test("student page wires the provisional form only to the student save action be
   const body = acts.slice(acts.indexOf("export async function submitStudentProvisional"), acts.indexOf("export type ProActionState"));
   assert.doesNotMatch(body, /createScoreProfile|\bsource\(\)/);
   // 대학 찾기는 전문가용 pro.candidates(proSource)로 이 학생 성적만(개인용 source 를 쓰지 않는다)
-  assert.match(body, /src\.candidates\(caller, orgId, studentId, p\.profile_id/);
+  assert.match(body, /candidatesWarm\(src, caller, orgId, studentId, p\.profile_id/);
 });
 
 // 2026-11-24 대표님 결정: ② 유리한 대학 찾기에 결과가 아예 없으면 열 때 한 번 자동으로 찾는다(버튼과 같은 계산, 화면 이동 없음)
@@ -182,9 +182,29 @@ test("auto find failure is explained with the button fallback and never throws",
 });
 test("favorable tab auto-finds only when the report has no candidates at all, for editors", () => {
   const page = readFileSync(new URL("../src/app/pro/students/[studentId]/favorable/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /v\.canEdit && provisionalOnly\(report\) && proCsatEnabled\(\) && report\.candidates == null \? \(\s*<AutoFind act=\{autoFindCandidates\}/);
+  assert.match(page, /v\.canEdit && provisionalOnly\(report\) && proCsatEnabled\(\) && !report\.candidates\?\.reference_threshold_summary \? \(\s*<AutoFind act=\{autoFindCandidates\}/);
   const comp = readFileSync(new URL("../src/app/pro/auto-find.tsx", import.meta.url), "utf8");
   // 같은 성적으로는 탭에서 한 번만(실패해도 되풀이하지 않는다)
   assert.match(comp, /sessionStorage\.getItem\(k\)/);
   assert.match(comp, /sessionStorage\.setItem\(k, "1"\)/);
+});
+
+// 2026-11-24 운영: 서버가 처음 깨어날 때 CPU 한도(546 → request_failed)로 대학 찾기가 실패 — ③ 판정으로 깨운 뒤 다른 키로 한 번만 다시
+test("cold-start failure warms the server with a light p4 request, then retries candidates once with a new key", async () => {
+  let n = 0;
+  const f = fake({
+    async candidates(...args) { f.calls.push(["candidates", ...args]); return ++n === 1 ? { ok: false, code: "request_failed", status: 546 } : { ok: true, value: {} }; },
+    async analyzeP4(...args) { f.calls.push(["analyzeP4", ...args]); return { ok: true, value: {} }; },
+  });
+  const r = await actions.autoFindCandidates(null, autoForm());
+  assert.deepEqual(r, { done: "찾음" });
+  assert.deepEqual(f.calls.map((c) => c[0]), ["candidates", "analyzeP4", "candidates"]);
+  assert.equal(f.calls[1][4].search.university_q, "서울대학교");
+  assert.equal(f.calls[2][6], "00000000-0000-4000-8000-000000000002:retry");
+});
+test("a real refusal is not retried", async () => {
+  const f = fake({ async candidates(...args) { f.calls.push(["candidates", ...args]); return { ok: false, code: "professional_access_denied", status: 403 }; } });
+  const r = await actions.autoFindCandidates(null, autoForm());
+  assert.ok(r.error);
+  assert.deepEqual(f.calls.map((c) => c[0]), ["candidates"]);
 });

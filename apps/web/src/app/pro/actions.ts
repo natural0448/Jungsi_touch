@@ -157,7 +157,7 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
     if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
     step = "대학 찾기";
     // 실패해도 저장·전체 위치는 끝났다. 학생 화면에 '찾기' 버튼이 남아 한 번 더 할 수 있다
-    await src.candidates(caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
+    await candidatesWarm(src, caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
   } catch (e) {
     if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);
@@ -225,7 +225,7 @@ export async function submitStudentProvisional(prev: ProvisionalFormState, fd: F
     const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
     if (!r.ok) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
     // 학교별 가채점 판정(서버 dep_pro_r27)도 저장 때 자동 1회(11-13 결정과 같은 규칙). 서버가 아직 못 내면(409) 화면에 찾기 버튼이 남는다
-    await src.candidates(caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
+    await candidatesWarm(src, caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
   } catch (e) {
     if (step !== "성적 저장" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);
@@ -242,6 +242,26 @@ export type ProActionState = { error: string; done?: undefined } | { done: strin
  * 전에는 학생 화면 전체로 다시 이동해 그 화면(유리한 대학 찾기 수백 줄·상담 자료)을 다 그릴 때까지 버튼이 '담는 중'이었다.
  * 이제 버튼은 바로 '담음'으로 바뀌고, 화면 새로 그리기는 버튼 쪽에서 뒤에서 한다. 스크립트 없는 양식 제출은 예전처럼 이동한다
  */
+/**
+ * 2026-11-24 운영: 전문가용 서버가 한동안 요청이 없다 깨어나는 첫 요청에서 대학 찾기가 CPU 시간 한도(2초, 546)에 걸린다
+ * (판정 묶음·시험팩·카탈로그를 처음 읽는 비용). 실패하면 가벼운 ③ 판정 요청(한 대학 검색, 저장하지 않음)으로 서버가
+ * 자료를 먼저 읽게 한 뒤 다른 요청 키로 한 번만 다시 찾는다. 계산과 결과는 그대로다
+ */
+async function candidatesWarm(
+  src: ReturnType<typeof proSource>,
+  caller: Awaited<ReturnType<typeof getCaller>>,
+  orgId: string,
+  studentId: string,
+  profileId: string,
+  pv: string | number,
+  key: string,
+) {
+  const r = await src.candidates(caller, orgId, studentId, profileId, pv, key);
+  if (r.ok || r.code !== "request_failed") return r;
+  await src.analyzeP4(caller, orgId, studentId, { profile_id: profileId, expected_profile_version: pv, search: { university_q: "서울대학교" } }, `${key}:warm`).catch(() => null);
+  return src.candidates(caller, orgId, studentId, profileId, pv, `${key}:retry`);
+}
+
 async function doneOrBack(path: string, done: string): Promise<ProActionState> {
   if ((await headers()).has("next-action")) return { done };
   redirect(`/jeongsi${path}`);
@@ -253,7 +273,7 @@ export async function findCandidates(_prev: ProActionState, fd: FormData): Promi
   const pv = String(fd.get("profile_version") ?? ""), key = String(fd.get("idem") ?? "");
   if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
-    const r = await proSource().candidates(await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
+    const r = await candidatesWarm(proSource(), await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
     if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `대학을 찾지 못했습니다. (문의 번호 ${r.code})` };
   } catch (e) {
     const t = failText(e);
@@ -272,7 +292,7 @@ export async function autoFindCandidates(_prev: ProActionState, fd: FormData): P
   const pv = String(fd.get("profile_version") ?? ""), key = String(fd.get("idem") ?? "");
   if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 아래 버튼을 눌러 주세요." };
   try {
-    const r = await proSource().candidates(await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
+    const r = await candidatesWarm(proSource(), await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
     if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `자동으로 찾지 못했습니다. 아래 버튼으로 다시 찾아 주세요. (문의 번호 ${r.code})` };
   } catch (e) {
     const t = failText(e);
