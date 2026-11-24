@@ -4,7 +4,7 @@
   추정 탈락자 = 추정 총 지원자 − (모집인원 + 충원인원)(실제 충원 인원이 발표된 경우).
 */
 import { ratioText } from "./format";
-import { ADIGA_FILL_STATUS } from "./p1-adiga-fill";
+import { ADIGA_FILL_STATUS, OFFICIAL_NOT_PUBLISHED } from "./p1-adiga-fill";
 import { rankDisplayModel } from "./p1-field-qualification";
 import type { Cell, Row } from "./p1-shape";
 
@@ -34,6 +34,15 @@ export function fillCount(r: Pick<Row, "ad">): number | null {
   const cell = r.ad;
   if (cell.u !== "명") return null;
   if (cell.s !== "verified_official" && !(cell.s === ADIGA_FILL_STATUS && cell.l === "충원인원")) return null;
+  return integerOf(cell.v);
+}
+
+/** 충원 발표 열 표시용 인원: 검증값이 없으면 정본의 인원(명) 원문값을 보인다(확인 대기 포함). 추정 탈락자 계산에는 쓰지 않는다. */
+export function shownFillCount(r: Pick<Row, "ad">): number | null {
+  const verified = fillCount(r);
+  if (verified !== null) return verified;
+  const cell = r.ad;
+  if (cell.u !== "명" || cell.s === OFFICIAL_NOT_PUBLISHED) return null;
   return integerOf(cell.v);
 }
 

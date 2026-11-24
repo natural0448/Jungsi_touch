@@ -11,7 +11,7 @@ registerHooks({ resolve(specifier, context, next) {
   }
   return next(specifier, context);
 } });
-const { derived } = await import("../src/lib/p1-derived.ts");
+const { derived, shownFillCount } = await import("../src/lib/p1-derived.ts");
 
 const cell = (v, u, s = "verified_official") => ({ v, s, r: null, u, l: null });
 const none = cell(null, null, "unpublished");
@@ -44,4 +44,14 @@ test("verified zero and integer-valued count text retain count semantics", () =>
   assert.equal(derived(row(cap, ratio, none, cell("0", "명"))).dropped, 106);
   assert.equal(derived(row(cap, ratio, none, cell("12.0", "명"))).fill, 12);
   assert.equal(derived(row(cap, ratio, cell("12", "명"))).rank, null);
+});
+
+test("pending people counts stay visible in the fill column but never feed estimated non-admits", () => {
+  const pending = cell("6", "명", "pending_metadata");
+  const r = row(cell("5", "명"), cell("4.2", "대1"), cell("6", "번", "pending_metadata"), pending);
+  assert.equal(shownFillCount(r), 6);
+  assert.equal(derived(r).fill, null);
+  assert.equal(derived(r).dropped, null);
+  assert.equal(shownFillCount(row(cell("5", "명"), cell("4", "대1"), none, cell("3", "명", "not_published"))), null);
+  assert.equal(shownFillCount(row(cell("5", "명"), cell("4", "대1"), none, cell("12", "명"))), 12);
 });

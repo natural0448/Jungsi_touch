@@ -1,6 +1,6 @@
 import { asOfDate, ratioText } from "@/lib/format";
 import { FILL_UNDISCLOSED, noRecruit, OFFICIAL_NOT_PUBLISHED, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
-import { derived } from "@/lib/p1-derived";
+import { derived, shownFillCount } from "@/lib/p1-derived";
 import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
 import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
 import { ScrollHint } from "./scroll-hint";
@@ -111,6 +111,7 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                 const none = noRecruit(r);
                 const dv = none ? { applicants: null, dropped: null, fill: null, rank: null } : derived(r);
                 const ps = publishedStats(r);
+                const shownFill = none ? null : shownFillCount(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
                 const historicalConditions = historicalConditionLabel(r, all);
@@ -129,10 +130,10 @@ export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: 
                       {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
                     <td className="r">
-                      {dv.fill !== null && <><b className="num">{dv.fill}</b><small> 명</small></>}
-                      {dv.fill !== null && dv.rank !== null && <small> · </small>}
+                      {shownFill !== null && <><b className="num">{shownFill}</b><small> 명</small></>}
+                      {shownFill !== null && dv.rank !== null && <small> · </small>}
                       {dv.rank !== null && <><b className="num">{dv.rank}</b><small> 번</small></>}
-                      {!none && dv.fill === null && dv.rank === null && (r.ad.r === FILL_UNDISCLOSED || r.ad.s === OFFICIAL_NOT_PUBLISHED || r.rk.s === OFFICIAL_NOT_PUBLISHED) && <small className="rs-bs">미발표</small>}
+                      {!none && shownFill === null && dv.rank === null && (r.ad.r === FILL_UNDISCLOSED || r.ad.s === OFFICIAL_NOT_PUBLISHED || r.rk.s === OFFICIAL_NOT_PUBLISHED) && <small className="rs-bs">미발표</small>}
                     </td>
                     <td className="r derived">
                       {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
