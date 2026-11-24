@@ -1,8 +1,8 @@
-import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete } from "@/lib/report-pure";
+import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, schoolDisplayOf } from "@/lib/report-pure";
 import "server-only";
 import { AccessDenied, ConnectionError, type Caller } from "@/lib/api";
 import { proSource, validId } from "@/lib/api/pro-source";
-import type { CandidatesDto, CatalogSearchDto, CsatMinimum, OfferingDto, ReferenceBandDto, ReferenceUniversityGroupDto, ReportDto } from "@/lib/dto";
+import type { CandidatesDto, CatalogSearchDto, CsatMinimum, OfferingDto, OverallAnalysisDto, ReferenceBandDto, ReferenceUniversityGroupDto, ReportDto } from "@/lib/dto";
 import { EXAM, stageOf, type InputStage } from "@/lib/exam";
 import type { ProOrganization, ProP4Search, ProScoreStatusDto, ProStudentDto, ProStudentReportDto } from "@/lib/pro-dto";
 import { proAccess, type ProOrg } from "@/lib/pro-access";
@@ -105,6 +105,8 @@ export interface P4Result {
   failed: string | null;
   /** 판정 없는 모집단위의 수능 최저·응시 과목 사유(서버 dep_pro_r38) */
   min: Record<string, CsatMinimum>;
+  /** 2026-11-24 담당자 v3(서버 dep_pro_r39): 7단계를 내지 않은 모집단위의 가운데 환산점수·사유 */
+  display: NonNullable<OverallAnalysisDto["provisional_school_display"]>;
 }
 function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMinimum> {
   const out: Record<string, CsatMinimum> = {};
@@ -128,7 +130,7 @@ async function keyOf(parts: unknown): Promise<string> {
  */
 export async function proP4(caller: Caller, v: ProStudentView, req: { offering_ids?: string[]; search?: ProP4Search }): Promise<P4Result> {
   const shown = v.shown;
-  if (!shown) return { search: null, bands: {}, groups: [], failed: "no_report", min: {} };
+  if (!shown) return { search: null, bands: {}, groups: [], failed: "no_report", min: {}, display: {} };
   const body = { profile_id: shown.profile_id, expected_profile_version: shown.profile_id, ...req };
   const mk = JSON.stringify([v.svc.org_id, v.student.student_id, shown.report_id, shown.profile_id, req]);
   const hit = memo.get(mk);
@@ -149,7 +151,7 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
       if (again?.ok) r = again;
     }
     if (!r.ok) {
-      out = { search: null, bands: {}, groups: [], failed: r.code, min: {} };
+      out = { search: null, bands: {}, groups: [], failed: r.code, min: {}, display: {} };
     } else {
       const bands: Record<string, ReferenceBandDto> = {};
       for (const g of r.value.candidates?.reference_university_groups ?? []) {
@@ -159,10 +161,10 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
           if (typeof id === "string" && b && b.basis === "reference_threshold" && b.source === "g" && BAND_CODES.has(b.code)) bands[id] = b;
         }
       }
-      out = { search: r.value.search ?? null, bands, groups: r.value.candidates?.reference_university_groups ?? [], failed: null, min: minimumOf(r.value.candidates) };
+      out = { search: r.value.search ?? null, bands, groups: r.value.candidates?.reference_university_groups ?? [], failed: null, min: minimumOf(r.value.candidates), display: schoolDisplayOf(r.value.candidates) };
     }
   } catch (e) {
-    if (e instanceof ConnectionError || e instanceof AccessDenied) out = { search: null, bands: {}, groups: [], failed: e.code, min: {} };
+    if (e instanceof ConnectionError || e instanceof AccessDenied) out = { search: null, bands: {}, groups: [], failed: e.code, min: {}, display: {} };
     else throw e;
   }
   if (out.failed) {

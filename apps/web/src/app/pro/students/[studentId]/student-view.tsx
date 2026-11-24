@@ -19,6 +19,7 @@ const EXAM_MOCK_ID = () => MOCK_EXAM.exam_id;
 import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../reports/me/report-view";
 import { StudentBar, StudentTabs } from "./student-frame";
 import { proP4, proTabHref } from "@/lib/pro-p4";
+import { withSchoolDisplay } from "@/lib/report-pure";
 import { ProvisionalForm } from "../../../reports/me/provisional-form";
 import { ScoreForm } from "../../../reports/me/score-form";
 import { StageSteps } from "../../../reports/me/stage-steps";
@@ -118,6 +119,8 @@ export async function StudentView({ params, searchParams }: { params: Promise<{ 
         const base = pub.candidates ?? { status: "pending", reason_code: null, basic_university_groups: [], wildcards: [], pending_offerings: [], outside_offerings: [], ineligible_offerings: [], catalog_version: null };
         pub = { ...pub, candidates: { ...base, reference_university_groups: [...(base.reference_university_groups ?? []), ...extra.groups] } };
       }
+      // 서버가 7단계를 내지 않은 모집단위의 환산점수·사유(담당자 v3, 서버 dep_pro_r39)
+      if (pub && Object.keys(extra.display).length) pub = { ...pub, overall: withSchoolDisplay(pub.overall, extra.display) };
     }
   }
   const known = offeringIndex(pub?.candidates);

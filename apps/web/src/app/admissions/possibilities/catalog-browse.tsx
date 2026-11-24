@@ -40,10 +40,10 @@ export interface ProBrowse {
   params: Record<string, string>;
   report: ReportDto | null;
   favorites: Favorites | null;
-  search: (q: { university_q?: string; department_q?: string; region?: string; group?: string; cursor?: string }) => Promise<{ search: CatalogSearchDto<OfferingDto> | null; bands: Record<string, ReferenceBandDto>; failed: string | null; min: Record<string, CsatMinimum> }>;
-  byIds: (ids: string[]) => Promise<{ bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum> }>;
+  search: (q: { university_q?: string; department_q?: string; region?: string; group?: string; cursor?: string }) => Promise<{ search: CatalogSearchDto<OfferingDto> | null; bands: Record<string, ReferenceBandDto>; failed: string | null; min: Record<string, CsatMinimum>; display?: NonNullable<OverallAnalysisDto["provisional_school_display"]> }>;
+  byIds: (ids: string[]) => Promise<{ bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display?: NonNullable<OverallAnalysisDto["provisional_school_display"]> }>;
   /** 지원가능성 필터(서버 dep_pro_r38) */
-  scan: (q: { codes: string[]; after?: string; limit: number; region?: string; group?: string }) => Promise<{ search: CatalogSearchDto<OfferingDto> | null; bands: Record<string, ReferenceBandDto>; failed: string | null; min: Record<string, CsatMinimum> }>;
+  scan: (q: { codes: string[]; after?: string; limit: number; region?: string; group?: string }) => Promise<{ search: CatalogSearchDto<OfferingDto> | null; bands: Record<string, ReferenceBandDto>; failed: string | null; min: Record<string, CsatMinimum>; display?: NonNullable<OverallAnalysisDto["provisional_school_display"]> }>;
   /** 띠의 이름·군(담은 곳이 지금 목록에 없을 때) */
   picked: OfferingDto[];
   tray: { other: string; report: string; reportLabel?: string };
@@ -72,6 +72,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 전문가용: 검색과 판정을 한 번에 받는다(즐겨찾기만 보기는 별표 사본 + 번호로 판정)
   let proBands: Record<string, ReferenceBandDto> | null = null;
   let proMin: Record<string, CsatMinimum> = {};
+  let proDisplay: NonNullable<OverallAnalysisDto["provisional_school_display"]> = {};
   // 필터로 다음 쪽을 이어 받을 때 쪽마다 받은 판정(전문가용 검색은 검색과 판정을 함께 준다)
   const proPageBands = new WeakMap<object, Record<string, ReferenceBandDto>>();
   const proBandsOf = (p: object) => proPageBands.get(p) ?? null;
@@ -84,6 +85,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     ? pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: cur.cursor?.startsWith("st:") ? undefined : cur.cursor }).then((r) => {
       proBands = r.bands;
       proMin = r.min;
+      proDisplay = r.display ?? {};
       proFailed = r.failed;
       return r.search ?? { status: "ready" as const, reason_code: null, items: [], matching_offering_count: null, matching_school_count: null, catalog_version: null, as_of: null, next_cursor: null };
     })
@@ -161,8 +163,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 수능 가채점 학교별 판정(서버 dep_r29, 2026-11-23): 보이는 모집단위만 판정을 받아 붙인다. 받지 못하면 '가채점 판정 준비 중'
   if (provisional && report) {
     if (pro) {
-      const got = cur.fav ? await pro.byIds(items.map((o) => o.offering_id)) : { bands: proBands ?? {}, min: proMin };
-      report = { ...report, provisional_bands: got.bands, provisional_min: got.min };
+      const got = cur.fav ? await pro.byIds(items.map((o) => o.offering_id)) : { bands: proBands ?? {}, min: proMin, display: proDisplay };
+      report = { ...report, provisional_bands: got.bands, provisional_min: got.min, overall: withSchoolDisplay(report.overall, got.display) };
     } else {
       const got = await provisionalBands(src, caller, report, items.map((o) => o.offering_id));
       report = { ...report, report_version: got.version, provisional_bands: got.bands, provisional_min: got.min, overall: withSchoolDisplay(report.overall, got.display) };
@@ -207,7 +209,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
           // 전문가용: 같은 일을 전문가용 서버 검색(st)으로
           const r = await pro.scan(q);
           const nextAfter = r.search?.next_cursor?.startsWith("st:") ? r.search.next_cursor.slice(3) : null;
-          got = r.failed || !r.search ? null : { offerings: r.search.items ?? [], bands: r.bands, matched: r.search.matching_offering_count ?? 0, next: nextAfter, complete: true, min: r.min, display: {} };
+          got = r.failed || !r.search ? null : { offerings: r.search.items ?? [], bands: r.bands, matched: r.search.matching_offering_count ?? 0, next: nextAfter, complete: true, min: r.min, display: r.display ?? {} };
         } else {
           got = await provisionalScan(src, caller, base, q);
         }
@@ -231,7 +233,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       if (ok) {
         // 판정 있는 행 가운데 점수·위치가 빠진 것(서버가 한 번에 100개까지)만 4페이지 판정으로 채운다
         const missing = picked.map((o) => o.offering_id).filter((id) => !bandsAll[id]?.school_score && keyOf(bandsAll, id) !== "none" && keyOf(bandsAll, id) !== "ineligible");
-        if (missing.length) { const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing); Object.assign(bandsAll, m.bands); Object.assign(minAll, m.min); if ("display" in m) Object.assign(dispAll, m.display); }
+        if (missing.length) { const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing); Object.assign(bandsAll, m.bands); Object.assign(minAll, m.min); if (m.display) Object.assign(dispAll, m.display); }
         report = { ...base, provisional_bands: bandsAll, provisional_min: minAll, overall: withSchoolDisplay(base.overall, dispAll) };
         shown = picked;
         nextCursor = next ? `st:${next}` : null;

@@ -46,7 +46,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
     report: v.report,
     favorites,
     search: (q) => proP4(caller, v, { search: Object.fromEntries(Object.entries(q).filter(([, x]) => typeof x === "string" && x !== "")) }),
-    byIds: async (ids) => (ids.length ? proP4(caller, v, { offering_ids: ids.slice(0, 30) }) : { bands: {}, min: {} }),
+    byIds: async (ids) => (ids.length ? proP4(caller, v, { offering_ids: ids.slice(0, 30) }) : { bands: {}, min: {}, display: {} }),
     // 지원가능성 필터(서버 dep_pro_r38): 전국 판정에서 고른 단계 모집단위 한 쪽
     scan: (q) => proP4(caller, v, { search: { st: q.codes.join(","), limit: String(q.limit), ...(q.after ? { after: q.after } : {}), ...(q.region ? { region: q.region } : {}), ...(q.group ? { group: q.group } : {}) } }),
     picked: pickedItems,

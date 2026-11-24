@@ -211,21 +211,8 @@ const thresholdBandOf = (b: ReferenceBandDto | null | undefined): ReferenceBandD
   b && b.basis === "reference_threshold" && typeof b.code === "string" && P4_BAND_CODES.has(b.code) ? b : null;
 const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: SchoolDisplay; at: number; ttl: number }>();
 type SchoolDisplay = NonNullable<OverallAnalysisDto["provisional_school_display"]>;
-/** 2026-11-24 담당자 v3: 서버가 7단계를 내지 않은 모집단위(candidates.csat_withheld) → 모집단위별 가운데 환산점수·사유 */
-export function schoolDisplayOf(c: CandidatesDto | null | undefined): SchoolDisplay {
-  const out: SchoolDisplay = {};
-  for (const x of c?.csat_withheld ?? []) {
-    if (!x || typeof x.offering_id !== "string") continue;
-    if (x.reason !== "comparison_axis_unverified" && x.reason !== "non_csat_components_missing") continue;
-    out[x.offering_id] = { reason: x.reason, score_kind: x.score_kind === "csat_component" ? "csat_component" : "university_score", central_score: typeof x.central_score === "string" ? x.central_score : null };
-  }
-  return out;
-}
-/** 리포트 전체 분석(overall)에 보류 표시를 더한 사본. 더할 것이 없으면 그대로 */
-export function withSchoolDisplay<T extends OverallAnalysisDto | null | undefined>(a: T, d: SchoolDisplay | null | undefined): T {
-  if (!a || !d || Object.keys(d).length === 0) return a;
-  return { ...a, provisional_school_display: { ...(a.provisional_school_display ?? {}), ...d } };
-}
+export { schoolDisplayOf, withSchoolDisplay } from "@/lib/report-pure";
+import { schoolDisplayOf } from "@/lib/report-pure";
 /** 응답의 수능 최저 사유 목록 → 모집단위별 */
 function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMinimum> {
   const out: Record<string, CsatMinimum> = {};

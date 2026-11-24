@@ -1,4 +1,4 @@
-import type { ReferenceBandDto, ReportDto } from "./dto";
+import type { CandidatesDto, OverallAnalysisDto, ReferenceBandDto, ReportDto } from "./dto";
 
 /*
   리포트를 읽기만 하는 작은 판단들. 서버 전용 report-ops 와 브라우저 화면(전문가용 인쇄 print-sheet 등)이 함께 쓴다.
@@ -59,4 +59,22 @@ export function csatGainTone(central: string | null | undefined, low: string, hi
   if (!Number.isFinite(mid)) return null;
   if (Number.isFinite(lo) && Number.isFinite(hi) && lo <= -0.1 && hi >= 0.1) return "split";
   return Math.abs(mid) < 0.1 ? "even" : mid > 0 ? "up" : "down";
+}
+
+/* 2026-11-24 담당자 v3: 서버 candidates.csat_withheld → 리포트 전체 분석의 provisional_school_display(개인용·전문가용 같이 쓴다) */
+type SchoolDisplay = NonNullable<OverallAnalysisDto["provisional_school_display"]>;
+/** 2026-11-24 담당자 v3: 서버가 7단계를 내지 않은 모집단위(candidates.csat_withheld) → 모집단위별 가운데 환산점수·사유 */
+export function schoolDisplayOf(c: CandidatesDto | null | undefined): SchoolDisplay {
+  const out: SchoolDisplay = {};
+  for (const x of c?.csat_withheld ?? []) {
+    if (!x || typeof x.offering_id !== "string") continue;
+    if (x.reason !== "comparison_axis_unverified" && x.reason !== "non_csat_components_missing") continue;
+    out[x.offering_id] = { reason: x.reason, score_kind: x.score_kind === "csat_component" ? "csat_component" : "university_score", central_score: typeof x.central_score === "string" ? x.central_score : null };
+  }
+  return out;
+}
+/** 리포트 전체 분석(overall)에 보류 표시를 더한 사본. 더할 것이 없으면 그대로 */
+export function withSchoolDisplay<T extends OverallAnalysisDto | null | undefined>(a: T, d: SchoolDisplay | null | undefined): T {
+  if (!a || !d || Object.keys(d).length === 0) return a;
+  return { ...a, provisional_school_display: { ...(a.provisional_school_display ?? {}), ...d } };
 }
