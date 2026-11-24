@@ -56,3 +56,13 @@ test("D1 confirms unmet conditions and server minimum reasons (2026-11-24)", () 
   assert.equal(csatNoJudgmentView("2027:1000008020", social, "partial").label, "수능 최저 충족 여부 갈림");
   assert.equal(csatNoJudgmentView("2027:1000000297", prob).label, "반영 과목 불일치"); // 미적분·기하 반영(지원 자격 단정 안 함)
 });
+test("SNU type I (담당자 R4): second language required, score = 국1.0+수1.2+탐0.8 − 감점", () => {
+  const sub = (area, subject, r) => ({ area, subject, standard_score: null, standard_score_range: { low: r[0], central: r[1], high: r[2] } });
+  const base = { subjects: [sub("korean", "국어", [120, 125, 130]), { ...sub("math", "수학", [120, 125, 130]), choice: "확률과 통계" }, sub("inquiry1", "생활과 윤리", [60, 62, 64]), sub("inquiry2", "사회·문화", [60, 62, 64])], absolute_grades: { 영어: 2, 한국사: 4 } };
+  assert.equal(csatNoJudgmentView("2027:1000000747", { ...base, second_language: null }).label, "지원 조건 미충족");
+  const with2 = { ...base, second_language: { subject: "일본어Ⅰ", grade: 3 } };
+  const c = csatC1Score("2027:1000000747", with2);
+  // 가운데: 10*125+12*125+8*124 − (영어2 5 + 한국사4 4 + 제2외3 5) = 3742−14 = 3728 → 372.80
+  assert.equal(c.central, "372.80");
+  assert.equal(csatNoJudgmentView("2027:1000000747", with2).label, "유형Ⅰ 점수만 계산");
+});

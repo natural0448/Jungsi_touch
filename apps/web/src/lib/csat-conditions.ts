@@ -42,7 +42,7 @@ const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
 
-export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
+export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요"; cls: string; desc: string };
 /** 판정·예외 이름이 없는 모집단위의 사유. 리포트가 없으면 null */
 /** min: 서버가 알려 준 수능 최저 사유(2026-11-24) — unmet 미달 확정, partial 가채점 점수에 따라 충족 여부 갈림 */
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
@@ -70,6 +70,12 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
   const scienceCount = inquiry.filter((s) => kindOf(s) === "science").length;
   const mathChoice = by.get("math")?.choice?.replace(/\s+/g, "");
   // 지원 자격으로 확인된 조건(담당자 R4)
+  if (SNU_TYPE1.has(offeringId) && a.second_language) {
+    return { label: "유형Ⅰ 점수만 계산", cls: "check", desc: "서울대 유형Ⅰ(사탐·확통 등) 수능 반영분 점수만 계산했습니다. 유형Ⅰ 지원자끼리의 위치와 7단계 판정은 대학 자료가 연결된 뒤 보입니다." };
+  }
+  if (SNU_TYPE1.has(offeringId) && !a.second_language) {
+    return { label: "지원 조건 미충족", cls: "inel", desc: "서울대 이 모집단위는 과탐 2과목·미적분/기하(유형Ⅱ-2)가 아니면 유형Ⅰ로 지원하며, 유형Ⅰ은 제2외국어/한문 응시가 필요합니다. 응시했다면 성적 입력에 제2외국어/한문 등급을 넣어 주세요." };
+  }
   if (PNU_SCIENCE_1.has(offeringId) && scienceCount < 1) {
     return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 사회/과학탐구 2과목 중 과학탐구(과목 I 이상) 1과목 이상을 필수로 합니다." };
   }
@@ -168,9 +174,33 @@ const pctOf = (s?: SubjectResultDto): Pct => {
   return r && Number.isInteger(r.low) && Number.isInteger(r.high) ? [Math.min(r.low, r.high), Math.max(r.low, r.high)] : null;
 };
 
-export type C1Score = { label: "수능 반영분 점수" | "우수 3영역 점수"; central: string | null; low: string; high: string };
+export type C1Score = { label: "수능 반영분 점수" | "우수 3영역 점수" | "유형Ⅰ 수능 반영분 점수"; central: string | null; low: string; high: string };
 /** 예외 7곳이면 가채점 성적으로 계산한 점수(범위), 아니면 null */
+/*
+  서울대 간호·식품영양·의류 유형Ⅰ(담당자 통합 회신 11-24 R4, snu_type1_provisional_score.ts 를 옮김 — 식은 바꾸지 않는다).
+  국어 표준점수×1.0 + 수학×1.2 + 탐구 두 과목 합×0.8 − 영어·한국사·제2외국어/한문 등급 감점(점수/10). 유형Ⅱ-2 판정이 있으면 그쪽이 먼저(서버 판정).
+  제2외국어/한문 미응시는 유형Ⅰ 요구조건 미충족. 이 점수에는 누백·7단계를 붙이지 않는다(유형Ⅰ 곡선·경계 결속 전).
+*/
+const SNU_TYPE1 = new Set(["2027:1000000747", "2027:1000000778", "2027:1000000790"]);
+const SNU_EN = [0, 5, 20, 40, 60, 80, 100, 120, 140], SNU_HI = [0, 0, 0, 4, 8, 12, 16, 20, 24], SNU_L2 = [0, 0, 5, 10, 15, 20, 25, 30, 35];
+function snuType1Score(a: OverallAnalysisDto): C1Score | null {
+  const by = new Map(a.subjects.map((s) => [s.area, s]));
+  const rng = (s?: SubjectResultDto): [number, number, number] | null => {
+    if (!s) return null;
+    const r = s.standard_score_range;
+    if (r) return [r.low, r.central, r.high];
+    return typeof s.standard_score === "number" ? [s.standard_score, s.standard_score, s.standard_score] : null;
+  };
+  const k = rng(by.get("korean")), m = rng(by.get("math")), q1 = rng(by.get("inquiry1")), q2 = rng(by.get("inquiry2"));
+  const en = a.absolute_grades?.영어, hi = a.absolute_grades?.한국사, l2 = a.second_language?.grade;
+  if (!k || !m || !q1 || !q2 || !en || !hi || !l2) return null;
+  const ded = SNU_EN[en - 1] + SNU_HI[hi - 1] + SNU_L2[l2 - 1];
+  const at = (i: 0 | 1 | 2) => 10 * k[i] + 12 * m[i] + 8 * (q1[i] + q2[i]) - ded;
+  const lo = at(0), c = at(1), hiN = at(2);
+  return { label: "유형Ⅰ 수능 반영분 점수", central: dec2(c, 10), low: dec2(lo, 10), high: dec2(hiN, 10) };
+}
 export function csatC1Score(offeringId: string, a: OverallAnalysisDto | null | undefined): C1Score | null {
+  if (SNU_TYPE1.has(offeringId)) return a && a.second_language ? snuType1Score(a) : null;
   const rule = C1_RULES[offeringId];
   if (!rule || !a) return null;
   const by = new Map(a.subjects.map((s) => [s.area, s]));
