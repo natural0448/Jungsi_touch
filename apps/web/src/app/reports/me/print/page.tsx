@@ -173,8 +173,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
           <>
             {shortlist.length === 0 ? <p className="rp-foot">담은 학교가 없습니다.</p> : (
               <>
-                <CsatPickedTable items={shortlist} bands={csatBands} a={a} print min={csatMin} />
-                <CsatPickedDetails items={shortlist} bands={csatBands} a={a} print min={csatMin} wrap={(s, detail) => <PrintDetail o={s.offering!} a={s.assessment} extras={extras[s.offering_id]} csat={detail} />} />
+                <CsatPickedTable single items={shortlist} bands={csatBands} a={a} print min={csatMin} />
+                <CsatPickedDetails single items={shortlist} bands={csatBands} a={a} print min={csatMin} wrap={(s, detail) => <PrintDetail o={s.offering!} a={s.assessment} extras={extras[s.offering_id]} csat={detail} />} />
               </>
             )}
           </>

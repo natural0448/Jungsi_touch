@@ -332,6 +332,8 @@ export interface ReferenceBandDto {
   upper_code?: BandCode;
   upper_label?: string;
   source?: string;
+  /** 승인된 대표 성적 한 건으로 계산한 개인용 가채점 판정임을 표시한다. */
+  judgment_basis?: "central" | "interval";
   /** 화면 전용: 판정 보류 모집단위(lib/csat-held.ts). 환산점수만 쓰고 단계는 쓰지 않는다 */
   held?: boolean;
   /**

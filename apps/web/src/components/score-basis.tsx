@@ -5,9 +5,10 @@ import { examTypeLabel } from "@/lib/exam";
 import { isProvisionalOverall, type OverallAnalysisDto } from "@/lib/dto";
 import { provisionalTopText, tripleText } from "@/lib/provisional-report";
 import { page } from "@/lib/routes";
+import { projectP2ProvisionalSummary } from "@/lib/p2-representative-view";
 
 /** 내 성적 기준 줄(report.overall). 리포트가 없으면 성적 입력 안내 */
-export function ScoreBasis({ overall, emptyText }: { overall: OverallAnalysisDto | null; emptyText: string }) {
+export function ScoreBasis({ overall, emptyText, single = false }: { overall: OverallAnalysisDto | null; emptyText: string; single?: boolean }) {
   const p2 = page("PAGE-02").path;
   if (!overall) {
     return (
@@ -20,6 +21,18 @@ export function ScoreBasis({ overall, emptyText }: { overall: OverallAnalysisDto
     );
   }
   const o = overall.overall;
+  if (single && isProvisionalOverall(overall)) {
+    const point = projectP2ProvisionalSummary(overall.provisional_representative);
+    return (
+      <section className="basis" aria-label="내 성적 기준">
+        <span className="lab">내 성적 기준</span>
+        <span className="it">{overall.exam.academic_year}학년도 {examTypeLabel(overall.exam.exam_type)}</span>
+        <span className="it">{point.scoreLabel} <b className="num">{point.scoreText}</b></span>
+        <span className="it" title={point.rankDetail}>{point.rankLabel} <b className="num">{point.rankText}</b></span>
+        <Link className="btn go" href={p2}>{page("PAGE-02").label}</Link>
+      </section>
+    );
+  }
   // 수능 가채점 리포트(2026-11-23 전환): 예상 표준점수 합과 추정 상위누백을 범위로만 적는다
   if (isProvisionalOverall(overall)) {
     const total = tripleText(overall.total_standard_range ?? o.total_standard_score_range ?? null);

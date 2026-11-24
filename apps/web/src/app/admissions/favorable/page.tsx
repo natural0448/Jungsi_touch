@@ -111,7 +111,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     return (
       <>
         <div className="wrap pg-body fv">
-          <ScoreBasis overall={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
+          <ScoreBasis single overall={null} emptyText="유리한 대학 찾기는 확인된 성적으로 계산합니다. 성적을 넣으면 학교 목록과 와일드카드가 나옵니다." />
           <PastEntrySlot src={src} caller={caller} />
           <section className="gate flat">
             <h2>성적을 넣으면 유리한 학교를 찾아 드립니다</h2>
@@ -133,14 +133,14 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
   if (csatJudged(report)) {
     let csat: ReturnType<typeof csatView> = { universities: [], outsideBand: 0, judged: 0 };
     try {
-      csat = csatView(report.candidates);
+      csat = csatView(report.candidates, !csatFinalOnly(report));
     } catch (e) {
       logSettleError("p3-csat", e);
     }
     if (csat.universities.length === 0) {
       return (
         <div className="wrap pg-body fv">
-          <ScoreBasis overall={report.overall} emptyText="" />
+          <ScoreBasis single overall={report.overall} emptyText="" />
           <PastEntrySlot src={src} caller={caller} />
           <ProvisionalPendingGate catalogHref={`${route.path}?view=catalog`} />
         </div>
@@ -152,12 +152,12 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
       <>
         <MemberMark kind="recommend" path={viewPath(route.path, sp)} />
         <div className="wrap pg-body fv">
-          <ScoreBasis overall={report.overall} emptyText="" />
+          <ScoreBasis single overall={report.overall} emptyText="" />
           <PastEntrySlot src={src} caller={caller} />
           <section className="fv-main fv-refmode" aria-label="유리한 대학">
             {/* 가채점 후보(도전·핵심·여유, 2026-11-23 대표님 결정) — 아래 7단계 목록과 같은 판정으로 묶는다 */}
-            <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} final={csatFinalOnly(report)} />
-            <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
+            <CsatCandidates pointBased={!csatFinalOnly(report)} c={report.candidates} favs={favs} p3Label={p3.label} final={csatFinalOnly(report)} />
+            <CsatGroups pointBased={!csatFinalOnly(report)} universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
           </section>
         </div>
         <Suspense key={hrefWith(cur, {})} fallback={null}>
@@ -226,7 +226,7 @@ async function ReportBody({ src, caller, sp, cur, report, past }: { src: JungsiS
     return (
       <>
         <div className="wrap pg-body fv">
-          <ScoreBasis overall={report.overall} emptyText="" />
+          <ScoreBasis single overall={report.overall} emptyText="" />
           {strip}
           <RunAnalysis
             title="유리한 학교 목록을 아직 만들지 못했습니다"
@@ -322,7 +322,7 @@ async function ReportBody({ src, caller, sp, cur, report, past }: { src: JungsiS
     <>
       <MemberMark kind="recommend" path={view} />
       <div className="wrap pg-body fv">
-        <ScoreBasis overall={report.overall} emptyText="" />
+        <ScoreBasis single overall={report.overall} emptyText="" />
         {strip}
 
         {/* '후보 다시 확인' 띠·버튼은 두지 않는다(2026-11-21 대표님 지적: 자료판이 바뀔 때마다 모든 고객에게 떴다).

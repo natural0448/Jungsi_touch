@@ -1,4 +1,6 @@
 import { isCsatHeld } from "@/lib/csat-held";
+import { isProvisionalOverall } from "@/lib/dto";
+import { personalCsatPoint } from "@/lib/personal-csat-point";
 import { StarButton } from "@/components/star-button";
 import { FAVORITE_LIMIT, myFavorites, type Favorites } from "@/lib/favorites";
 import { FieldTag } from "@/components/field-tag";
@@ -166,14 +168,18 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       report = { ...report, report_version: got.version, provisional_bands: got.bands, provisional_min: got.min };
     }
   }
-  const provisionalJudged = provisional && Object.keys(report?.provisional_bands ?? {}).length > 0;
+
   // 수능 가채점 지원가능성 필터(2026-11-23 대표님 요청: 9월과 같은 화면). 판정 단계로, 판정 없는 곳은 '판정 근거 부족'
   // 판정 없는 곳은 화면 규칙으로 '지원 조건 미충족'과 '판정 근거 부족'을 나눈다(2026-11-24: 미충족이 필터에 잡히지 않았다)
   const overallA = report?.overall ?? null;
+  const pointBased = !pro && isProvisionalOverall(overallA);
+  const provisionalJudged = provisional && Object.values(report?.provisional_bands ?? {}).some((b) => !pointBased || !personalCsatPoint(b)?.held);
   // 판정 없는 곳의 수능 최저 사유(서버 2026-11-24) — 최저 미충족·갈림도 '지원 조건 미충족' 필터에 넣는다
   const minAll: Record<string, CsatMinimum> = { ...(report?.provisional_min ?? {}) };
   const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => {
-    if (bands?.[id] && !isCsatHeld(id)) return bands[id].code as StatusKey;
+    const raw = bands?.[id];
+    const band = pointBased ? personalCsatPoint(raw) : raw;
+    if (band && !band.held && !isCsatHeld(id)) return band.code as StatusKey;
     const v = csatNoJudgmentView(id, overallA, minAll[id]);
     return v && v.cls === "inel" ? "ineligible" : "none";
   };
@@ -311,7 +317,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
 
       {!pro && <MemberMark kind={cur.open ? "analysis" : "possibility"} path={view} />}
       <div className="wrap pg-body ps">
-        <MineBasis report={report} />
+        <MineBasis report={report} single={pointBased} />
         {/* 가채점 판정을 하나도 받지 못했을 때만 안내 한 줄(판정이 있으면 9월과 같은 화면, 2026-11-23) */}
         {provisional && !provisionalJudged && <ProvisionalPendingNote />}
 
@@ -447,7 +453,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                             cells={
                               <>
                                 <span className="c-grp"><span className="grp">{o.group}</span></span>
-                                <MineCells report={report} id={o.offering_id} />
+                                <MineCells report={report} id={o.offering_id} single={pointBased} />
                                 {star(o)}
                               </>
                             }
@@ -457,7 +463,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                                 <span>{o.group}군</span>
                               </span>
                             }
-                            detail={<MineDetail report={report} o={o} />}
+                            detail={<MineDetail report={report} o={o} single={pointBased} />}
                             conds={<MineConds report={report} o={o} />}
                           />
                         );

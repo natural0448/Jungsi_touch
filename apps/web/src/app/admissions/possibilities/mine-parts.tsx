@@ -1,5 +1,6 @@
 import { csatC1Score, csatNoJudgmentView, type NoJudgmentView } from "@/lib/csat-conditions";
 import { heldBand } from "@/lib/csat-held";
+import { personalCsatPoint, personalCsatScore } from "@/lib/personal-csat-point";
 import { AdvantageCell, CategoryLegend, PickButton, ScoreCell, StatusCell, type Cell } from "@/components/offering-parts";
 import { ScoreBasis } from "@/components/score-basis";
 import { StreamTray } from "@/components/shortlist-tray-stream";
@@ -25,8 +26,8 @@ import { exceptionCls } from "@/lib/csat-exceptions";
 const SCORE_EMPTY = "검색과 모집 정보는 지금 볼 수 있고, 성적을 넣으면 모집단위마다 내 분석이 붙습니다.";
 
 /** 내 성적 기준 줄 */
-export function MineBasis({ report }: { report: ReportDto | null }) {
-  return <ScoreBasis overall={report?.overall ?? null} emptyText={SCORE_EMPTY} />;
+export function MineBasis({ report, single = false }: { report: ReportDto | null; single?: boolean }) {
+  return <ScoreBasis single={single} overall={report?.overall ?? null} emptyText={SCORE_EMPTY} />;
 }
 
 export function MineLegend({ report }: { report: ReportDto | null }) {
@@ -47,14 +48,16 @@ const noJudgmentBadge = (v: NoJudgmentView | null) => (v ? <span className={`st 
 const NO_DATA = <span className="need" title="이 모집단위는 아직 분석 자료에 연결되지 않아 내 성적으로 계산하지 않았습니다">자료 없음</span>;
 
 /** 한 줄의 내 환산점수·지원가능성·환산 유불리·담기 칸 */
-export function MineCells({ report, id }: { report: ReportDto | null; id: string }) {
+export function MineCells({ report, id, single = false }: { report: ReportDto | null; id: string; single?: boolean }) {
   const a = cellOf(report, id);
   if (report && csatJudged(report)) {
     // 서버 dep_r29(2026-11-23): 이 모집단위의 학교별 가채점 판정이 붙었으면 7단계 배지, 없으면 '가채점 판정 준비 중'
-    const band = heldBand(id, report.provisional_bands?.[id]);
+    const raw = heldBand(id, report.provisional_bands?.[id]);
+    const band = single ? personalCsatPoint(raw) : raw;
     // 예외 17곳(담당자 출시 자료 11-23): 7단계 대신 허용된 이름만(최저충족·최저미충족·최저 확인 대기·판정 준비 중)
     const ex = band ? null : csatExceptionView(id, report.overall);
-    const c1 = band ? null : csatC1Score(id, report.overall);
+    const c1Base = band ? null : csatC1Score(id, report.overall);
+    const c1 = single ? personalCsatScore(c1Base) : c1Base;
     if (ex) return <><span className="c-score r">{c1 ? <span className="score" title={c1.label}><b className="num">{c1.central ?? `${c1.low}~${c1.high}`}</b>{c1.central !== null && c1.low !== c1.high && <small>{c1.low}~{c1.high}</small>}</span> : DASH}</span><span className="c-st"><span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span></span><span className="c-adv r">{DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
     return <><span className="c-score r">{band?.school_score ? <CsatScore band={band} /> : c1 ? <span className="score" title={c1.label}><b className="num">{c1.central ?? `${c1.low}~${c1.high}`}</b>{c1.central !== null && c1.low !== c1.high && <small>{c1.low}~{c1.high}</small>}</span> : DASH}</span><span className="c-st">{band ? <CsatBadge band={band} /> : noJudgmentBadge(csatNoJudgmentView(id, report.overall, report.provisional_min?.[id]))}</span><span className="c-adv r">{csatGainView(band) ? <CsatAdvantage band={band} /> : DASH}</span><span className="c-pick"><PickButton id={id} on={pickedIds(report).has(id)} /></span></>;
   }

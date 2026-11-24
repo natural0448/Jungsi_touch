@@ -2,8 +2,9 @@ import { csatC1Score, csatNoJudgmentView } from "@/lib/csat-conditions";
 import Link from "@/components/link";
 import { CsatAdvantage, CsatBadge, CsatScore, csatGainView } from "@/components/csat-badge";
 import { heldBand } from "@/lib/csat-held";
+import { personalCsatPoint, personalCsatScore } from "@/lib/personal-csat-point";
 import { csatExceptionView, exceptionCls } from "@/lib/csat-exceptions";
-import { isCsatFinalOverall, type CsatMinimum, type OverallAnalysisDto, type ReferenceBandDto } from "@/lib/dto";
+import { isCsatFinalOverall, isProvisionalOverall, type CsatMinimum, type OverallAnalysisDto, type ReferenceBandDto } from "@/lib/dto";
 import type { PickedItem } from "@/lib/shortlist";
 import { POSITION_NONE_DESC, POSITION_NONE_LABEL } from "@/lib/position-note";
 import { page } from "@/lib/routes";
@@ -26,7 +27,7 @@ function rankText(b?: ReferenceBandDto | null): string | null {
   return r.central && range ? `상위 ${main}% (${range})` : range ? `상위 ${range}%` : `상위 ${main}%`;
 }
 
-export function CsatPickedTable({ items, bands, a, print = false, min = {} }: { items: PickedItem[]; bands: Record<string, ReferenceBandDto>; a: OverallAnalysisDto; print?: boolean; min?: Record<string, CsatMinimum> }) {
+export function CsatPickedTable({ items, bands, a, print = false, min = {}, single = false }: { items: PickedItem[]; bands: Record<string, ReferenceBandDto>; a: OverallAnalysisDto; print?: boolean; min?: Record<string, CsatMinimum>; single?: boolean }) {
   const p4 = page("PAGE-03").path;
   return (
     <div className="rp-cp">
@@ -50,10 +51,13 @@ export function CsatPickedTable({ items, bands, a, print = false, min = {} }: { 
                 <tbody>
                   {rows.map((it) => {
                     const o = it.offering!;
-                    const band = heldBand(it.offering_id, bands[it.offering_id]);
+                    const raw = heldBand(it.offering_id, bands[it.offering_id]);
+                    const point = single && isProvisionalOverall(a);
+                    const band = point ? personalCsatPoint(raw) : raw;
                     const ex = band ? null : csatExceptionView(it.offering_id, a);
                     const rank = rankText(band);
-                    const c1 = band ? null : csatC1Score(it.offering_id, a);
+                    const c1Base = band ? null : csatC1Score(it.offering_id, a);
+                    const c1 = point ? personalCsatScore(c1Base) : c1Base;
                     const nj = band || ex ? null : csatNoJudgmentView(it.offering_id, a, min[it.offering_id]);
                     return (
                       <tr key={it.offering_id}>
@@ -92,17 +96,20 @@ export function CsatPickedTable({ items, bands, a, print = false, min = {} }: { 
 }
 
 /** 담은 학교 하나의 가채점 상세 카드(4페이지 펼친 상세와 같음, 담기 단추 없음) */
-export function csatDetailOf(it: PickedItem, bands: Record<string, ReferenceBandDto>, a: OverallAnalysisDto, min: Record<string, CsatMinimum> = {}): ReactNode {
+export function csatDetailOf(it: PickedItem, bands: Record<string, ReferenceBandDto>, a: OverallAnalysisDto, min: Record<string, CsatMinimum> = {}, single = false): ReactNode {
   if (!it.offering) return null;
-  const band = heldBand(it.offering_id, bands[it.offering_id]) ?? null;
-  return <CsatDetail o={it.offering} band={band} exception={csatExceptionView(it.offering_id, a)} noJudgment={csatNoJudgmentView(it.offering_id, a, min[it.offering_id])} c1={csatC1Score(it.offering_id, a)} extras={null} picked acts={false} final={isCsatFinalOverall(a)} />;
+  const raw = heldBand(it.offering_id, bands[it.offering_id]);
+  const point = single && isProvisionalOverall(a);
+  const band = (point ? personalCsatPoint(raw) : raw) ?? null;
+  const c1 = csatC1Score(it.offering_id, a);
+  return <CsatDetail o={it.offering} band={band} exception={csatExceptionView(it.offering_id, a)} noJudgment={csatNoJudgmentView(it.offering_id, a, min[it.offering_id])} c1={point ? personalCsatScore(c1) : c1} extras={null} picked acts={false} final={isCsatFinalOverall(a)} />;
 }
 
 /**
  * 담은 학교별 상세(2026-11-24 대표님 지적: 리포트·인쇄본에 학과 상세가 없었다). 표 아래에 학교마다 4페이지와 같은 상세 카드를 붙인다.
  * 인쇄본(print)은 접지 않고 모두 펼치고, 리포트 탭은 학교마다 접어 둔다. wrap 이 있으면 카드를 감싼다(인쇄본: 모집 정보·연도별 입결)
  */
-export function CsatPickedDetails({ items, bands, a, print = false, wrap, min = {} }: { items: PickedItem[]; bands: Record<string, ReferenceBandDto>; a: OverallAnalysisDto; print?: boolean; wrap?: (it: PickedItem, detail: ReactNode) => ReactNode; min?: Record<string, CsatMinimum> }) {
+export function CsatPickedDetails({ items, bands, a, print = false, wrap, min = {}, single = false }: { items: PickedItem[]; bands: Record<string, ReferenceBandDto>; a: OverallAnalysisDto; print?: boolean; wrap?: (it: PickedItem, detail: ReactNode) => ReactNode; min?: Record<string, CsatMinimum>; single?: boolean }) {
   const rows = items.filter((it) => it.offering);
   if (!rows.length) return null;
   return (
@@ -111,7 +118,7 @@ export function CsatPickedDetails({ items, bands, a, print = false, wrap, min = 
       {rows.map((it) => {
         const o = it.offering!;
         const title = <><b>{o.university_name}</b> {o.department}{o.track && <small> · {o.track}</small>}{o.group && <small> · {o.group}군</small>}</>;
-        const body = wrap ? wrap(it, csatDetailOf(it, bands, a, min)) : <div className="ps rp-ps"><div className="detail">{csatDetailOf(it, bands, a, min)}</div></div>;
+        const body = wrap ? wrap(it, csatDetailOf(it, bands, a, min, single)) : <div className="ps rp-ps"><div className="detail">{csatDetailOf(it, bands, a, min, single)}</div></div>;
         return print ? (
           <section key={it.offering_id} className="rp-cpd-i" aria-label={`${o.university_name} ${o.department} 상세`}>
             <h4>{title}</h4>

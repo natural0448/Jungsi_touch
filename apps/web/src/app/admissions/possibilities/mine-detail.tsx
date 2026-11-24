@@ -1,5 +1,6 @@
 import { csatC1Score, csatNoJudgmentView } from "@/lib/csat-conditions";
 import { heldBand } from "@/lib/csat-held";
+import { personalCsatPoint, personalCsatScore } from "@/lib/personal-csat-point";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto, ReportDto } from "@/lib/dto";
 import { csatFinalOnly, csatJudged, pickedIds } from "@/lib/report-pure";
@@ -20,10 +21,12 @@ export function cellOf(report: ReportDto | null, id: string): Cell {
 
 /** 펼친 카드의 환산·누백·판단 카드 */
 /** acts=false: 2페이지 핵심 지원 학교 표에서 펼칠 때(담기·'내 성적 리포트에서 보기' 줄 없음) */
-export function MineDetail({ report, o, acts = true }: { report: ReportDto | null; o: OfferingDto; acts?: boolean }) {
+export function MineDetail({ report, o, acts = true, single = false }: { report: ReportDto | null; o: OfferingDto; acts?: boolean; single?: boolean }) {
   if (report && csatJudged(report)) {
     // 2026-11-23 대표님 요청: 9월 모의평가 때와 같은 상세 카드(가채점 값으로)
-    return <CsatDetail o={o} band={heldBand(o.offering_id, report.provisional_bands?.[o.offering_id]) ?? null} exception={csatExceptionView(o.offering_id, report.overall)} noJudgment={csatNoJudgmentView(o.offering_id, report.overall, report.provisional_min?.[o.offering_id])} c1={csatC1Score(o.offering_id, report.overall)} extras={null} picked={pickedIds(report).has(o.offering_id)} acts={acts} final={csatFinalOnly(report)} />;
+    const raw = heldBand(o.offering_id, report.provisional_bands?.[o.offering_id]);
+    const c1 = csatC1Score(o.offering_id, report.overall);
+    return <CsatDetail o={o} band={(single ? personalCsatPoint(raw) : raw) ?? null} exception={csatExceptionView(o.offering_id, report.overall)} noJudgment={csatNoJudgmentView(o.offering_id, report.overall, report.provisional_min?.[o.offering_id])} c1={single ? personalCsatScore(c1) : c1} extras={null} picked={pickedIds(report).has(o.offering_id)} acts={acts} final={csatFinalOnly(report)} />;
   }
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
 }

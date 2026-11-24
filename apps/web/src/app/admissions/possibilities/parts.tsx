@@ -233,7 +233,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 const total = (Math.round((school + g) * 100) / 100).toFixed(2);
                 return (
                   <p className="why">
-                    <b>무엇을 비교했나요?</b> 국·수·탐2 표준점수 합으로 줄 세우면 상위 <b className="num">{total}</b>%, 이 대학 방식 환산점수로 줄 세우면 상위 <b className="num">{rk.central}</b>% →{" "}
+                    <b>무엇을 비교했나요?</b> 이 대학의 유불리 비교 집단에서 국·수·탐2 표준점수 합으로 줄 세우면 상위 <b className="num">{total}</b>%, 같은 집단에서 이 대학 방식 환산점수로 줄 세우면 상위 <b className="num">{rk.central}</b>% →{" "}
                     {g > 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(g).toFixed(2)}</b>%p 더 앞에 섭니다(유리).</> : g < 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(g).toFixed(2)}</b>%p 더 뒤에 섭니다(불리).</> : <>두 위치가 같습니다.</>}
                   </p>
                 );

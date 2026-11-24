@@ -1,4 +1,5 @@
 import { isCsatHeld } from "./csat-held";
+import { personalCsatPoint } from "./personal-csat-point";
 import type { BandCode, CandidatesDto, ReferenceBandDto } from "./dto";
 import { referenceGroups, thresholdBandOf } from "./reference-percentile";
 import { LISTED_BANDS, referenceUniversities, type ReferenceItem, type ReferenceUniversity } from "./reference-view";
@@ -46,12 +47,13 @@ export interface CsatView {
  * 가채점 판정 행만 골라 대학 → 계열 → 학과로 묶는다. 순서는 9모 참고 목록과 같다(적정·소신 → 상향 → 하향 → 안정).
  * 판정 행이 하나도 없으면 universities 는 빈 배열(화면은 '가채점 판정 준비 중')
  */
-export function csatView(c: CandidatesDto | null | undefined): CsatView {
+export function csatView(c: CandidatesDto | null | undefined, pointBased = false): CsatView {
   const items: ReferenceItem[] = [];
   try {
     for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
-      const band = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
-      if (!band || !LISTED_BANDS.includes(band.code)) continue;
+      const raw = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
+      const band = pointBased ? personalCsatPoint(raw) : raw;
+      if (!band || (pointBased && band.held) || !LISTED_BANDS.includes(band.code)) continue;
       items.push({ offering: it.offering, reference_percentile: null, advantage: null, margin: null, band, pending: false });
     }
   } catch {
@@ -59,7 +61,7 @@ export function csatView(c: CandidatesDto | null | undefined): CsatView {
   }
   const universities = items.length > 0 ? referenceUniversities({ items, below: 0, noCutoff: 0, ineligible: 0, outsideBand: 0 }) : [];
   const sum = c?.reference_threshold_summary;
-  const gSummary = !!sum && typeof sum === "object" && !!sum.sources && typeof sum.sources === "object" && CSAT_SOURCE in sum.sources;
+  const gSummary = !pointBased && !!sum && typeof sum === "object" && !!sum.sources && typeof sum.sources === "object" && CSAT_SOURCE in sum.sources;
   const by = gSummary && sum!.by_code && typeof sum!.by_code === "object" ? sum!.by_code : {};
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v > 0 ? v : 0);
   return {
@@ -93,12 +95,14 @@ export function csatCandidateGroupOf(b: ReferenceBandDto): CsatCandidateGroup | 
   if (u && CSAT_CANDIDATE_GROUP[u] !== g) return null;
   return g;
 }
-export function csatCandidateView(c: CandidatesDto | null | undefined): CsatCandidateView {
+export function csatCandidateView(c: CandidatesDto | null | undefined, pointBased = false): CsatCandidateView {
   const by: Record<CsatCandidateGroup, ReferenceItem[]> = { challenge: [], core: [], room: [] };
   let held = 0;
   try {
     for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
-      const band = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
+      const raw = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
+      const band = pointBased ? personalCsatPoint(raw) : raw;
+      if (pointBased && band?.held) { held++; continue; }
       if (!band || !CSAT_CANDIDATE_GROUP[band.code]) continue;
       const g = csatCandidateGroupOf(band);
       if (!g) {

@@ -15,8 +15,8 @@ const lead = (exam: string): Record<CsatCandidateGroup, string> => ({
 });
 
 /** final: 수능 실채점 리포트(12-14 전환 뒤) */
-export function CsatCandidates({ c, favs, p3Label, final = false }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string; final?: boolean }) {
-  const v = csatCandidateView(c);
+export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = false }: { c: CandidatesDto | null | undefined; favs: Set<string> | null; p3Label: string; final?: boolean; pointBased?: boolean }) {
+  const v = csatCandidateView(c, pointBased);
   const EXAM = final ? "실채점" : "가채점";
   const LEAD = lead(EXAM);
   const total = v.counts.challenge + v.counts.core + v.counts.room;
@@ -36,11 +36,11 @@ export function CsatCandidates({ c, favs, p3Label, final = false }: { c: Candida
             <summary>
               <b>{CSAT_CANDIDATE_LABEL[g]}</b> <span className="num">{v.counts[g]}</span>개 학과 · <span className="num">{v.groups[g].length}</span>개 대학
             </summary>
-            <CsatGroups universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} />
+            <CsatGroups pointBased={pointBased} universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} />
           </details>
         ) : null,
       )}
-      {v.held > 0 && <p className="fv-ref-note">점수 범위에 따라 판정이 두 그룹에 걸친 {v.held}개 학과는 자동 추천 기준 밖입니다. 아래 유리한 대학 목록에서 확인할 수 있습니다.</p>}
+      {v.held > 0 && <p className="fv-ref-note">{pointBased ? `대표 성적의 판정 근거가 없는 ${v.held}개 학과는 자동 추천에 포함되지 않습니다.` : `점수 범위에 따라 판정이 두 그룹에 걸친 ${v.held}개 학과는 자동 추천 기준 밖입니다. 아래 유리한 대학 목록에서 확인할 수 있습니다.`}</p>}
     </section>
   );
 }

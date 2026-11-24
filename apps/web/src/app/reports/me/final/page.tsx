@@ -141,8 +141,8 @@ async function CsatPicked({ src, caller, report }: { src: JungsiSource; caller: 
   const { bands, min } = await provisionalBands(src, caller, report, items.map((it) => it.offering_id)).catch(() => ({ bands: {}, min: {} }));
   return (
     <>
-      <CsatPickedTable items={items} bands={bands} a={report.overall!} min={min} />
-      <CsatPickedDetails items={items} bands={bands} a={report.overall!} min={min} />
+      <CsatPickedTable single items={items} bands={bands} a={report.overall!} min={min} />
+      <CsatPickedDetails single items={items} bands={bands} a={report.overall!} min={min} />
     </>
   );
 }
