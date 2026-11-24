@@ -1,7 +1,7 @@
 import type { CandidatesDto } from "@/lib/dto";
 import { CSAT_CANDIDATE_LABEL, csatCandidateView, type CsatCandidateGroup } from "@/lib/provisional-view";
 import Link from "@/components/link";
-import { page } from "@/lib/routes";
+import { PATH as POSSIBILITIES } from "../possibilities/query";
 import { CsatGroups } from "./csat-groups";
 
 /*
@@ -27,7 +27,8 @@ export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = f
   // 3페이지 응답에는 크기 상한이 있어 학과가 많으면 일부만 온다(2026-11-24 대표님: '전체 보기'로 4페이지 단계 필터에 연결)
   const sum = c?.reference_threshold_summary;
   const cut = !!sum && ((typeof sum.delivered === "number" && typeof sum.listed === "number" && sum.delivered < sum.listed) || sum.complete === false);
-  const p4 = page("PAGE-04").path;
+  // 전체 대학·학과 가능성 보기(지원가능성 필터). 3·4페이지 순서가 바뀌어 page 번호 대신 경로 상수를 쓴다
+  const p4 = POSSIBILITIES;
   if (total === 0) return null;
   return (
     <section className="fv-csat-cands" aria-labelledby="csat-cand-t">
