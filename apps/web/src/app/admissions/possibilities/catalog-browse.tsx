@@ -180,7 +180,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const provisionalJudged = provisional && (
     Object.keys(report?.provisional_bands ?? {}).length > 0 ||
     Object.keys(report?.overall?.provisional_school_display ?? {}).length > 0 ||
-    Object.keys(report?.provisional_min ?? {}).length > 0
+    Object.keys(report?.provisional_min ?? {}).length > 0 ||
+    // 전문가용 ③은 검색과 판정을 함께 받는다(리포트에는 판정이 없다)
+    (pro !== null && pro !== undefined && (Object.keys((proBands as Record<string, unknown> | null) ?? {}).length > 0 || Object.keys(proDisplay).length > 0 || Object.keys(proMin).length > 0))
   );
   // 판정 없는 곳의 수능 최저 사유(서버 2026-11-24) — 최저 미충족·갈림도 '지원 조건 미충족' 필터에 넣는다
   const minAll: Record<string, CsatMinimum> = { ...(report?.provisional_min ?? {}) };

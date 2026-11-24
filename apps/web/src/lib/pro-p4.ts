@@ -150,6 +150,13 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
       const again = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk, "again"])).catch(() => null);
       if (again?.ok) r = again;
     }
+    // 2026-11-24 운영: 모집단위는 왔는데 판정 요약이 아예 없는 응답(서버가 그 요청에서 판정을 돌리지 못함)이 15분 기억돼
+    // ③ 첫 쪽이 모두 '비교 기준 확인 필요'로 보였다 — 한 번만 다른 키로 다시 묻고, 그래도 없으면 기억하지 않는다
+    if (r.ok && (r.value.search?.items?.length ?? 0) > 0 && !r.value.candidates?.reference_threshold_summary) {
+      await new Promise((res) => setTimeout(res, 800));
+      const again = await proSource().analyzeP4(caller, v.svc.org_id, v.student.student_id, body, await keyOf(["p4", mk, "empty"])).catch(() => null);
+      if (again?.ok) r = again;
+    }
     if (!r.ok) {
       out = { search: null, bands: {}, groups: [], failed: r.code, min: {}, display: {} };
     } else {
@@ -174,6 +181,9 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
     } catch {
       // 기록 실패는 화면에 영향 없음
     }
+  } else if ((out.search?.items?.length ?? 0) > 0 && Object.keys(out.bands).length === 0 && Object.keys(out.display ?? {}).length === 0 && Object.keys(out.min).length === 0) {
+    // 판정이 하나도 붙지 않은 쪽은 기억하지 않는다(다음에 열면 다시 묻는다)
+    memo.delete(mk);
   } else {
     memo.delete(mk);
     // 위치·유불리가 덜 찬 결과(서버가 곡선을 아직 다 못 읽음)는 짧게만 기억한다(2026-11-23)
