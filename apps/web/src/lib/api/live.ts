@@ -196,7 +196,8 @@ async function sendContended(path: string, init: RequestInit): Promise<Response>
 const DEPENDENCY_RETRY_MS = 1500;
 async function sendOnceMore(path: string, init: RequestInit, replayable: boolean): Promise<Response> {
   const res = await sendContended(path, init);
-  if (!replayable || (res.status !== 503 && res.status !== 546)) return res;
+  // 502·504(앞단 게이트웨이 일시 실패)도 읽기 요청이면 한 번 더(2026-11-25)
+  if (!replayable || (res.status !== 503 && res.status !== 546 && res.status !== 502 && res.status !== 504)) return res;
   if (res.status === 503) {
     const code = ((await res.clone().json().catch(() => null)) as ErrBody)?.error?.code;
     if (code !== undefined && code !== "backend_dependency_unavailable") return res;
@@ -298,6 +299,9 @@ async function call<T>(caller: Caller, path: string, snapshot = false): Promise<
     await codeOf(res, path, request.sensitive);
     throw new Stale(pathTemplate(path));
   }
+  // 2026-11-25: 500·502·504 등 서버 쪽 실패는 연결 문제로 올린다(레이아웃이 '연결 대기' 안내를 띄움). 전에는 일반 예외가 되어
+  // 전체 오류 화면('정시터치를 열지 못했습니다', 오류 번호 3628493730)으로 떨어졌다(11-21~25 운영 16건, 11-25 19:42 등)
+  if (res.status >= 500) throw new ConnectionError("unavailable", (await codeOf(res, path, request.sensitive)) ?? "backend_unavailable");
   if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path, request.sensitive)) ?? ""}: ${pathTemplate(path)}`);
   return (await res.json()) as T;
 }
@@ -319,6 +323,9 @@ async function callBytes(caller: Caller, path: string): Promise<Uint8Array> {
   if (res.status === 546) {
     throw new ConnectionError("unavailable", (await codeOf(res, path, request.sensitive)) ?? "backend_worker_limit");
   }
+  // 2026-11-25: 500·502·504 등 서버 쪽 실패는 연결 문제로 올린다(레이아웃이 '연결 대기' 안내를 띄움). 전에는 일반 예외가 되어
+  // 전체 오류 화면('정시터치를 열지 못했습니다', 오류 번호 3628493730)으로 떨어졌다(11-21~25 운영 16건, 11-25 19:42 등)
+  if (res.status >= 500) throw new ConnectionError("unavailable", (await codeOf(res, path, request.sensitive)) ?? "backend_unavailable");
   if (!res.ok) throw new Error(`정시터치 API ${res.status} ${(await codeOf(res, path, request.sensitive)) ?? ""}: ${pathTemplate(path)}`);
   return new Uint8Array(await res.arrayBuffer());
 }
