@@ -1,0 +1,28 @@
+/* 이용 안내(2026-11-25) */
+.guide .g-sec { margin: 28px 0; }
+.guide .g-sec h2 { font-size: 19px; margin: 0 0 12px; text-wrap: balance; }
+.guide .g-lead { color: var(--ink-2); margin: 0 0 12px; }
+.guide .g-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.guide .g-step { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-card); background: var(--bg); }
+.guide .g-step > div { min-width: 0; }
+.guide .g-num { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 700; }
+.guide .g-step h3 { margin: 2px 0 4px; font-size: 16px; }
+.guide .g-step p { margin: 0; color: var(--ink); line-height: 1.6; }
+.guide .g-step .g-tip { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+.guide .g-table { overflow-x: auto; }
+.guide table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.guide th, .guide td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; line-height: 1.55; }
+.guide thead th { background: var(--sub); }
+.guide tbody th { background: var(--sub); white-space: nowrap; font-weight: 600; }
+.guide .g-bands, .guide .g-marks { display: grid; gap: 8px; margin: 0; }
+.guide .g-bands > div, .guide .g-marks > div { display: grid; grid-template-columns: minmax(110px, 180px) 1fr; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); }
+.guide dt { font-weight: 700; }
+.guide dd { margin: 0; color: var(--ink-2); line-height: 1.55; }
+.guide .g-band.safe dt { color: var(--safe); }
+.guide .g-band.core dt { color: var(--brand); }
+.guide .g-band.reach dt, .guide .g-band.out dt { color: var(--touch); }
+.guide .g-note { padding: 14px 16px; background: var(--sub); border-radius: var(--r-card); }
+.guide .g-note p { margin: 0; line-height: 1.6; }
+@media (max-width: 560px) {
+  .guide .g-bands > div, .guide .g-marks > div { grid-template-columns: 1fr; gap: 4px; }
+}

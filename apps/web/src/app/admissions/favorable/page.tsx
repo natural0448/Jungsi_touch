@@ -51,7 +51,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
     <PageHead
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
-      desc={catalogView ? "전국 대학과 학과를 검색하고 모집단위별 지원 정보를 확인하세요." : "전체 성적에서 출발해 환산에 유리한 학교를 찾고, 학교 안에서 학과마다 지원 범위를 따로 확인하세요."}
+      desc={catalogView ? "전국 대학과 학과를 검색하고 모집단위별 지원 정보를 확인하세요." : "내 성적으로 지원에 유리한 대학과 지원가능성을 봅니다. 관심 학교는 ★로 표시해 두면 다음 화면에서 학과별로 자세히 보고 담을 수 있습니다."}
       side={<Link prefetch={false} className="btn" href={catalogView ? route.path : `${route.path}?view=catalog`}>{catalogView ? "유리한 대학 추천 보기" : "전국 대학·학과 보기"}</Link>}
     />
   );

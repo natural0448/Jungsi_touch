@@ -30,12 +30,19 @@ if (catalog.pages.length !== DISPLAY_ORDER.length || DISPLAY_ORDER.some((id) => 
  */
 const LABEL: Partial<Record<string, string>> = { "PAGE-02": "성적 입력" };
 /** 5번째 탭 '리포트'. 경로 계약의 PAGE-02 아래 주소라 회원 범위·잠금도 PAGE-02 와 같다 */
-export const REPORT_TAB = { path: "/reports/me/final", label: "리포트" } as const;
+export const REPORT_TAB = { path: "/reports/me/final", label: "리포트", number: 6 } as const;
+/**
+ * 1번째 탭 '이용 안내'(대표님 결정 2026-11-25): 화면 사이의 관계(유리한 대학 찾기 → 즐겨찾기 → 전체 가능성 보기에서 담기 → 리포트)를
+ * 처음 쓰는 사람이 알 수 있게 한다. 회원이면 누구나 볼 수 있고(잠금 없음) 경로 계약 밖의 안내 화면이다.
+ */
+export const GUIDE_TAB = { path: "/guide", label: "이용 안내", number: 1 } as const;
+/** 안내를 한 번 본 사람은 정시터치 첫 진입에서 바로 하던 화면으로 간다(브라우저 쿠키, 서버 조회 없음) */
+export const GUIDE_SEEN_COOKIE = "jt_guide_seen";
 export const PAGES: PageRoute[] = DISPLAY_ORDER.map((id, i) => {
   const p = byId.get(id)!;
   return {
     id: p.id,
-    number: i + 1,
+    number: i + 2, // 1번은 이용 안내(GUIDE_TAB)
     label: LABEL[p.id] ?? p.label,
     path: p.path,
     member_tiers: p.member_tiers as MemberTier[],

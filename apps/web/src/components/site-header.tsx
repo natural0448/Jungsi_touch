@@ -2,7 +2,7 @@ import Link from "@/components/link";
 import type { Session } from "@/lib/dto";
 import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
-import { PAGES, REPORT_TAB, ROOT_REDIRECT, lockFor, page } from "@/lib/routes";
+import { GUIDE_TAB, PAGES, REPORT_TAB, lockFor, page } from "@/lib/routes";
 import { Tabs, UserChip } from "./tabs";
 
 /**
@@ -11,7 +11,8 @@ import { Tabs, UserChip } from "./tabs";
  */
 export function SiteHeader({ session, down = false }: { session: Session | null; down?: boolean }) {
   // 5번째 탭 '리포트'(2026-11-23): 잠금은 PAGE-02(성적 입력)와 같다
-  const tabs = [...PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) })), { href: REPORT_TAB.path, label: REPORT_TAB.label, lock: lockFor(session, page("PAGE-02")) }];
+  // 1번째 탭 '이용 안내'(2026-11-25): 잠금 없음
+  const tabs = [{ href: GUIDE_TAB.path, label: GUIDE_TAB.label, lock: null }, ...PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) })), { href: REPORT_TAB.path, label: REPORT_TAB.label, lock: lockFor(session, page("PAGE-02")) }];
   return (
     <header>
       <div className="jt-util">
@@ -22,8 +23,8 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
             <img src="https://edutouch.co.kr/brand/logo-horizontal.png" alt="EduTouch 에듀터치" width={550} height={108} />
           </a>
           <span className="jt-sep" aria-hidden="true" />
-          {/* 루트(/)는 서버가 1페이지로 돌려보낸다. 바로 1페이지로 걸어 한 번 더 오가지 않게 한다(11-11) */}
-          <Link prefetch={false} href={ROOT_REDIRECT} className="jt-name">
+          {/* 루트(/)는 처음 온 사람은 이용 안내로, 안내를 본 사람은 1페이지로 보낸다(2026-11-25) */}
+          <Link prefetch={false} href="/" className="jt-name">
             정시<em>터치</em>
           </Link>
           <div className="jt-user">

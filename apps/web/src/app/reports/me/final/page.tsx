@@ -33,7 +33,7 @@ export default async function Page() {
   const caller = await getCaller();
   const src = source();
   const { session, down } = await sessionOrDown(src, caller);
-  const head = <PageHead kicker="PAGE 5" title={REPORT_TAB.label} desc="담아 둔 학교와 내 성적을 한 장으로 정리하고, 상담용 리포트로 출력합니다." />;
+  const head = <PageHead kicker={`PAGE ${REPORT_TAB.number}`} title={REPORT_TAB.label} desc="담아 둔 학교와 내 성적을 한 장으로 정리하고, 상담용 리포트로 출력합니다." />;
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
   if (lockFor(session, p2) === "login" || !session) {
     return (

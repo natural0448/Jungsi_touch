@@ -20,7 +20,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     <PageHead
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
-      desc="보고 싶은 대학과 학과를 직접 검색하고, 모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리를 따로 확인하세요."
+      desc="대학과 학과를 직접 검색해 모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리를 확인하세요. 지원할 학과는 '담기'를 누르면 리포트에 모입니다."
       side={<Link prefetch={false} className="btn" href={page("PAGE-04").path}>유리한 대학 추천 다시 보기</Link>}
     />
   );
