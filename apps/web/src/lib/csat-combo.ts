@@ -33,5 +33,13 @@ export function csatComboNote(code: unknown, upper: unknown, tone: CsatGainTone 
   }
   return null;
 }
+/** 두 값이 엇갈려 보이는 조합(합격권 쪽인데 불리, 합격선 밖인데 유리)만 true — 목록에 해석 한 줄을 바로 붙인다(2026-11-25 대표님 결정) */
+export function csatComboConflict(code: unknown, upper: unknown, tone: CsatGainTone | null | undefined): boolean {
+  if (!isBand(code)) return false;
+  const range = isBand(upper) && upper !== code;
+  const good = GOOD.has(code) && (!range || GOOD.has(upper as Band));
+  const bad = !GOOD.has(code) && (!range || !GOOD.has(upper as Band));
+  return (tone === "down" && good) || (tone === "up" && bad);
+}
 /** 두 칸이 무엇을 재는지(목록 머리 안내) */
 export const CSAT_COMBO_HELP = "지원가능성은 이 대학 방식 점수가 예상 합격선에서 얼마나 떨어져 있는지, 환산 유불리는 이 대학 계산 방식이 내게 득인지 손해인지(국·수·탐 표준점수 합으로 줄 세울 때와 비교)입니다. 그래서 '하향인데 불리'처럼 함께 나올 수 있습니다.";

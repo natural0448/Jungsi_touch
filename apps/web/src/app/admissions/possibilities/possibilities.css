@@ -153,6 +153,8 @@
 .et .ps .pager{display:flex;justify-content:space-between}
 
 
+/* 지원가능성·유불리가 엇갈려 보이는 줄의 해석 한 줄(2026-11-25) */
+.et .ps .row>.c-combo{grid-row:2;grid-column:1 / -1;margin:-2px 0 2px;font-size:12px;line-height:1.5;color:var(--ink-2);padding-left:10px;border-left:2px solid var(--brand-soft)}
 .et .ps .mmeta{display:none;gap:10px;font-size:12px;color:var(--ink-2);align-items:center}
 
 /* 좁은 노트북: 유불리 막대를 빼고 숫자만 둔다(숫자가 담기 버튼과 겹치지 않게) */
@@ -173,6 +175,7 @@
   .et .ps .row>.c-score .score{align-items:flex-start}
   .et .ps .row>.c-st{grid-area:st;justify-self:end}
   .et .ps .row>.c-adv{grid-area:adv;text-align:left}
+  .et .ps .row>.c-combo{grid-row:auto;grid-column:1 / -1}
   .et .ps .row>.c-pick{grid-area:pick;justify-self:end}
   /* 핵심 지원 학교 띠는 휴대폰에서 한 줄로: 이름 목록은 접고 개수와 리포트 버튼만 */
   .et .ps .row>.mmeta{grid-area:meta;display:flex}

@@ -14,3 +14,12 @@ test("범위 판정·같은 방향·값 없음", () => {
   assert.equal(csatComboNote("target", undefined, null), null);
   assert.equal(csatComboNote("x", undefined, "up"), null);
 });
+
+import { csatComboConflict } from "../src/lib/csat-combo.ts";
+test("목록에 바로 붙이는 조합은 엇갈릴 때만", () => {
+  assert.equal(csatComboConflict("downward", undefined, "down"), true);
+  assert.equal(csatComboConflict("outside", undefined, "up"), true);
+  assert.equal(csatComboConflict("target", undefined, "up"), false);
+  assert.equal(csatComboConflict("outside", undefined, "down"), false);
+  assert.equal(csatComboConflict("downward", "outside", "down"), false);
+});
