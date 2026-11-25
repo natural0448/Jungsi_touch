@@ -159,7 +159,7 @@ export function PrintSheet({ fields, teacher = false }: { fields: Record<string,
               return (
                 <tbody key={id} className="pr-unit">
                   <tr>
-                    <td>{provisional ? (csat.get(id) ? <CsatBadge code={csat.get(id)!.code} upper={csat.get(id)!.upper_code} /> : "판정 없음") : x ? CATEGORY[x.category].label : "판단 보류"}</td>
+                    <td>{provisional ? (csat.get(id) ? <CsatBadge code={csat.get(id)!.code} upper={csat.get(id)!.upper_code} scope={csat.get(id)!.score_scope} /> : "판정 없음") : x ? CATEGORY[x.category].label : "판단 보류"}</td>
                     <th scope="row">{o ? `${o.university_name} ${o.department}` : id}</th>
                     <td className="r num">{x?.converted_score ?? "─"}</td>
                     <td className="r num">{x?.advantage ? `${x.advantage.delta_pp}%p` : "─"}</td>

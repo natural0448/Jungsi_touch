@@ -23,15 +23,18 @@ export function CsatScore({ band }: { band?: ReferenceBandDto | null }) {
   );
 }
 
+/** 학생부 등 함께 반영 전형의 수능 반영분 기준 판정 안내(서버 band.score_scope, 2026-11-25) */
+export const CSAT_SCOPE_NOTE = "이 전형은 학생부 등도 함께 반영합니다. 이 판정은 수능 반영분만으로 본 것이며, 학생부 등 다른 영역은 포함하지 않았습니다.";
 export function CsatBadge({ band }: { band?: ReferenceBandDto | null }) {
   if (!band || !BAND[band.code]) return null;
   if (band.held) return <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
   const tone = BAND[band.code];
   const upper = csatUpper(band);
-  const title = upper
+  const scope = band.score_scope === "csat_component" ? `${CSAT_SCOPE_NOTE} ` : "";
+  const title = scope + (upper
     ? `가채점 점수 범위에 따라 ${BAND[band.code].label}부터 ${BAND[upper].label}까지 나옵니다. 지원 자격은 모집요강에서 확인하세요`
-    : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`;
-  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}</span>;
+    : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`);
+  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}{scope && <small className="scope"> · 수능 기준</small>}</span>;
 }
 
 /** 가채점 환산 유불리 보기 값(서버 dep_r31 school_gain). 보류 모집단위(held)·값 없음이면 null */

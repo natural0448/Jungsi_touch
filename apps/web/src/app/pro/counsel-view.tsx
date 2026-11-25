@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { BAND } from "@/components/offering-parts";
+import { CSAT_SCOPE_NOTE } from "@/components/csat-badge";
 import type { ShortlistEntryDto } from "@/lib/dto";
 import { ratioText } from "@/lib/format";
 import { BAND_ORDER, choiceGuide, schoolCounsel, shortTag, type ChoiceGuide, type CounselSchool } from "@/lib/pro-counsel";
@@ -80,11 +81,13 @@ export function guideOf(schools: CounselSchool[]): ChoiceGuide | null {
 }
 
 /** 가채점 판정 배지(한 단계 또는 '적정~소신') */
-export function CsatBadge({ code, upper }: { code: string; upper?: string | null }) {
+export function CsatBadge({ code, upper, scope }: { code: string; upper?: string | null; scope?: string | null }) {
   const b = BAND[code as keyof typeof BAND];
   if (!b) return <span className="cat">판정 없음</span>;
   const u = upper && BAND[upper as keyof typeof BAND] && BAND_ORDER.indexOf(upper as never) > BAND_ORDER.indexOf(code as never) ? BAND[upper as keyof typeof BAND] : null;
-  return <span className={`cat ${b.cls}`} title={b.desc}>{u ? `${b.label}~${u.label}` : b.label}</span>;
+  // 2026-11-25 학생부 등 함께 반영 전형의 수능 반영분 기준 판정(서버 score_scope)
+  const csatOnly = scope === "csat_component";
+  return <span className={`cat ${b.cls}`} title={csatOnly ? `${CSAT_SCOPE_NOTE} ${b.desc}` : b.desc}>{u ? `${b.label}~${u.label}` : b.label}{csatOnly ? " · 수능 기준" : ""}</span>;
 }
 
 /** 단계 안 위치 짧은 말(목록 칸) */
@@ -117,7 +120,7 @@ export function CsatCandidates({ rows, shortlist, fields }: { rows: CsatRow[]; s
           const o = r.offering;
           return (
             <tr key={o.offering_id}>
-              <td><CsatBadge code={r.band.code} upper={r.band.upper_code} /></td>
+              <td><CsatBadge code={r.band.code} upper={r.band.upper_code} scope={r.band.score_scope} /></td>
               <th scope="row">
                 {o.university_name} {o.department}
                 <small>{[o.track, o.campus, o.region].filter(Boolean).join(" · ")}</small>

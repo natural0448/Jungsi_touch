@@ -346,6 +346,11 @@ export interface ReferenceBandDto {
   judgment_basis?: "central" | "interval";
   /** false 면 3페이지 자동 후보에 넣지 않는다(충남대 2행: 같은 비교 집단 가운데 유불리가 유리일 때만) */
   automatic_candidate?: boolean;
+  /**
+   * 2026-11-25 대표님 결정(서버 dep_r46): 학생부 등을 함께 반영하는 전형의 7단계를 수능 반영분만으로 판정한 행.
+   * 화면은 '수능 기준'을 함께 적고, 3페이지 자동 후보에는 오지 않는다(automatic_candidate=false)
+   */
+  score_scope?: "csat_component";
   /** 화면 전용: 판정 보류 모집단위(lib/csat-held.ts). 환산점수만 쓰고 단계는 쓰지 않는다 */
   held?: boolean;
   /**

@@ -1,6 +1,6 @@
 import type { C1Score, NoJudgmentView } from "@/lib/csat-conditions";
 import { REPORT_TAB } from "@/lib/routes";
-import { CSAT_GAIN_WORD, csatGainView } from "@/components/csat-badge";
+import { CSAT_GAIN_WORD, CSAT_SCOPE_NOTE, csatGainView } from "@/components/csat-badge";
 import type { ExceptionView } from "@/lib/csat-exceptions";
 import { exceptionCls } from "@/lib/csat-exceptions";
 import Link from "@/components/link";
@@ -191,8 +191,10 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
             <>
               <div>
                 <span className={`st ${tone.cls}`} title={tone.desc}>{upper ? `${tone.label}~${upper.label}` : tone.label}</span>
+                {judged.score_scope === "csat_component" && <small className="scope"> · 수능 기준</small>}
               </div>
               <p>{tone.desc}</p>
+              {judged.score_scope === "csat_component" && <p>{CSAT_SCOPE_NOTE}</p>}
               {upper && <p>가채점 점수 범위에 따라 {tone.label}부터 {upper.label}까지 나옵니다.</p>}
               {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
                 <p>가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
