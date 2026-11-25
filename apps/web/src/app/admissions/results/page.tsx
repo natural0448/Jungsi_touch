@@ -15,6 +15,7 @@ import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query
 import { groupUnits, latestOf } from "./snapshot-table";
 import { UnitList, type SumItem } from "./unit-row";
 import { applicantEligibilityLabel, r27Summary, unitKey } from "@/lib/p1-shape";
+import { verifiedInitial } from "@/lib/p1-stage-verified";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -52,10 +53,12 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   const cur = parseQuery(await searchParams);
   let snap: Current;
   let res: SearchResult | null = null;
+  let initial = new Set<string>();
   try {
     snap = await currentSnapshot(src, caller);
     if (snap.state === "ready")
       res = await searchSnapshot(snap.ready, { university: cur.university, unit: cur.unit, region: cur.region, group: cur.group, page: cur.page ? Number(cur.page) : 1 });
+    if (res) initial = await verifiedInitial(src, caller, res.schools.flatMap((x) => x.rows));
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
@@ -139,7 +142,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
                       {school.names.length > 1 && (
                         <p className="rs-names">학년도·자료마다 발표 대학명이 다릅니다: {school.names.join(" / ")}. 다른 이름의 행에는 그 해 발표명을 함께 적었습니다.</p>
                       )}
-                      <UnitList pub={snap.ready.pub} schoolId={school.id} schoolName={school.name} items={units.map(summaryOf)} />
+                      <UnitList pub={snap.ready.pub} schoolId={school.id} schoolName={school.name} items={units.map((u) => summaryOf(u, initial))} />
                     </section>
                   );
                 })}
@@ -168,15 +171,18 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
  * 2027 모집행(schema v2 의 r27_source)이 있으면 그 모집인원 원문을, 없으면 null('준비 중')을 넘긴다.
  * 과거 학년도는 담당자가 검토 확인한 연결만 같은 줄로 묶인다(lib/p1-shape linkR27).
  */
-function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
+function summaryOf(rows: Parameters<typeof latestOf>[0], initial: ReadonlySet<string>): SumItem {
   const l = latestOf(rows), r27 = rows.find((r) => r.y === 2027);
+  const s27 = r27 ? r27Summary(r27.q27) : null;
+  // 정리본에 단계가 없어도 모집 읽기로 최초 인원이 확인된 행은 '최초 모집'(lib/p1-stage-verified)
+  if (s27 && r27?.pk && initial.has(r27.pk) && s27.v !== null && !s27.carry) { s27.initial = true; s27.stageUnknown = false; }
   return {
     k: unitKey(l),
     // 모집군은 '가군·나군·다군'으로 통일해 보인다(발표 표기 '다'·'다군'이 섞여 있다, 10-24 사용자 결정)
     g: l.g ? l.g.replace(/^([가나다])군?$/, "$1군") : null,
     d: l.d,
     sub: [l.c, l.t, l.pk === null ? "학과 연결 확인 중" : null].filter(Boolean).join(" · "),
-    r27: r27 ? r27Summary(r27.q27) : null,
+    r27: s27,
     eligibility27: applicantEligibilityLabel(r27?.ae27),
     ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
   };
