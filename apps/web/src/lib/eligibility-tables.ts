@@ -20,7 +20,6 @@ const MAX_ROWS = 5000;
 
 let current: EligibilityTables = EMPTY;
 let loadedAt = 0;
-let inflight: Promise<void> | null = null;
 
 const strList = (v: unknown, ok: (s: string) => boolean) => Array.isArray(v) && v.length > 0 && v.length <= 10 && v.every((s) => typeof s === "string" && ok(s));
 const smallInt = (v: unknown) => Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 4;
@@ -67,22 +66,27 @@ export function setEligibilityTablesForTest(t: EligibilityTables | null): void {
   loadedAt = t ? Date.now() : 0;
 }
 
-/** 리포트를 읽기 전에 부른다. 10분 안에 읽은 적이 있으면 다시 읽지 않는다. 실패는 조용히 지난 표(없으면 빈 표)를 둔다 */
+/**
+ * 리포트를 읽기 전에 부른다. 10분 안에 읽은 적이 있으면 다시 읽지 않는다. 실패는 조용히 지난 표(없으면 빈 표)를 둔다.
+ * 2026-11-25: 진행 중인 읽기 하나를 여러 요청이 함께 기다리지 않는다. Cloudflare Workers 는 다른 요청이 시작한 I/O 를
+ * 기다리는 요청을 깨우지 못해 'Worker's code had hung'으로 끊는다(11-24 12:51·21:30, 11-25 15:52 운영 1·3페이지 3건).
+ * 요청마다 각자 읽고(KV 한 번, 가볍다), 3초 넘게 걸리면 기다리지 않는다.
+ */
 export async function ensureEligibilityTables(): Promise<void> {
   if (loadedAt && Date.now() - loadedAt < TTL_MS) return;
-  inflight ??= (async () => {
-    try {
-      const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-      const env = (await getCloudflareContext({ async: true })).env as Record<string, unknown>;
-      const kv = env.JT_SHARED_CACHE as { get(k: string, t: "text"): Promise<string | null> } | undefined;
-      if (!kv || typeof kv.get !== "function") return;
-      const parsed = parseEligibilityTables(await kv.get(ELIGIBILITY_TABLES_KEY, "text"));
-      if (parsed) { current = parsed; loadedAt = Date.now(); }
-    } catch {
-      /* 표를 못 읽어도 리포트는 그대로 보인다 */
-    } finally {
-      inflight = null;
-    }
-  })();
-  await inflight;
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const env = (await getCloudflareContext({ async: true })).env as Record<string, unknown>;
+    const kv = env.JT_SHARED_CACHE as { get(k: string, t: "text"): Promise<string | null> } | undefined;
+    if (!kv || typeof kv.get !== "function") return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const text = await Promise.race([
+      kv.get(ELIGIBILITY_TABLES_KEY, "text"),
+      new Promise<null>((done) => { timer = setTimeout(() => done(null), 3000); }),
+    ]).finally(() => clearTimeout(timer));
+    const parsed = parseEligibilityTables(text);
+    if (parsed) { current = parsed; loadedAt = Date.now(); }
+  } catch {
+    /* 표를 못 읽어도 리포트는 그대로 보인다 */
+  }
 }
