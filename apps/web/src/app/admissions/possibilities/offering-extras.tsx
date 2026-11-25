@@ -53,7 +53,7 @@ export function ExtrasBody({ o, a, extras, p1Fast, detail, conds }: { o: Offerin
   return (
     <>
       {/* 받지 못했으면 값이 없는 것과 같은 확정 표시(미공개)로 그린다. 문의 번호·'불러오지 못했습니다'는 보이지 않는다 */}
-      <Recruit o={o} rec={extras.ok ? extras.rec : null} conds={conds} />
+      <Recruit o={o} rec={extras.ok ? extras.rec : null} conds={conds} q27={extras.ok ? extras.q27 ?? null : null} />
       {extras.ok && <Published f={extras.pub} same={sameRelease(a, extras.pub)} />}
       <P1YearsContext.Provider value={p1Fast ? p1Fast : extras.ok ? extras.p1 : null}>{detail}</P1YearsContext.Provider>
     </>

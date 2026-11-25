@@ -4,12 +4,12 @@ import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { logContentView } from "@/lib/content-view";
 import type { ForecastPublicDto, RecruitmentDto } from "@/lib/dto";
 import { currentSnapshot } from "@/lib/p1-snapshot";
-import { p1Years, type P1Year } from "@/lib/p1-years";
+import { p1Quota27, p1Years, type P1Year } from "@/lib/p1-years";
 import { page } from "@/lib/routes";
 
 export type { P1Year };
 export type Extras =
-  | { ok: true; rec: RecruitmentDto | null; pub: ForecastPublicDto | null; p1: P1Year[] | null }
+  | { ok: true; rec: RecruitmentDto | null; pub: ForecastPublicDto | null; p1: P1Year[] | null; q27?: number | null }
   | { ok: false; code: string };
 
 
@@ -31,8 +31,10 @@ export async function loadExtras(offeringId: string, university = ""): Promise<E
       const snap = await currentSnapshot(src, caller);
       return snap.state === "ready" ? snap.ready : null;
     });
+    // 2026-11-25: 서버가 단계 없는 모집요강 인원을 '미공개'로 주는 행은 1페이지와 같은 2027 인원을 쓴다(저장본만 읽음)
+    const q27 = rec?.status === "ready" ? null : await p1Quota27(offeringId, university);
     await logContentView("analysis", `${page("PAGE-03").path}?open=${encodeURIComponent(offeringId)}`);
-    return { ok: true, rec, pub, p1 };
+    return { ok: true, rec, pub, p1, q27 };
   } catch (e) {
     if (e instanceof AccessDenied || e instanceof ConnectionError) return { ok: false, code: e.code };
     throw e;

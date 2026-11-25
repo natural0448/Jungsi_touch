@@ -1,6 +1,7 @@
 import { applyAdigaFill } from "@/lib/p1-adiga-fill";
 import { publishedStats } from "@/lib/p1-published-stats";
-import { displayReady, loadAdigaFill, pastRowsFor2027, type Ready } from "@/lib/p1-snapshot";
+import { quota27Count } from "@/lib/p1-shape";
+import { displayReady, loadAdigaFill, pastRowsFor2027, row2027For, type Ready } from "@/lib/p1-snapshot";
 
 /** 1페이지와 같은 학년도별 대학 발표 성적 ①② (3페이지 연도별 근거 칸) */
 export type P1Year = { year: number; stats: { label: string; value: string; unit: string | null }[] };
@@ -20,6 +21,19 @@ export async function p1Years(offeringId: string, university: string, readyOf: (
       year: r.y,
       stats: publishedStats(r).flatMap((s) => (s && s.cell.v ? [{ label: s.label, value: s.cell.v, unit: s.cell.u }] : [])),
     }));
+  } catch {
+    return null;
+  }
+}
+
+/** 1페이지와 같은 2027 모집인원(숫자). 스냅샷이 없거나 원문이 숫자가 아니면 null */
+export async function p1Quota27(offeringId: string, university: string, readyOf: () => Promise<Ready | null> = displayReady): Promise<number | null> {
+  const m = /^2027:([0-9]{1,12})$/.exec(offeringId);
+  if (!m || !university) return null;
+  try {
+    const ready = await readyOf();
+    if (!ready) return null;
+    return quota27Count((await row2027For(ready, university, m[1]))?.q27);
   } catch {
     return null;
   }

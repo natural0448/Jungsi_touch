@@ -623,6 +623,16 @@ export async function pastRowsFor2027(ready: Ready, university: string, pk27: st
   }
   return [];
 }
+/** 이 2027 모집행(1페이지 스냅샷의 2027 행). 없으면 null(2026-11-25 4페이지 모집 인원) */
+export async function row2027For(ready: Ready, university: string, pk27: string): Promise<Row | null> {
+  const ix = await index(ready), q = norm(university);
+  const exact = ix.schools.filter(s => s.names.some(n => norm(n) === q));
+  for (const s of exact.length ? exact : ix.schools.filter(s => s.names.some(n => norm(n).includes(q)))) {
+    const anchor = (await school(ready, s.id)).find(r => r.y === 2027 && r.pk === pk27);
+    if (anchor) return anchor;
+  }
+  return null;
+}
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
   return (await schoolUnitRows(ready, schoolId, [key]))[key] ?? [];
 }

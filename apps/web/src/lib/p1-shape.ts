@@ -191,3 +191,16 @@ export function publishedStatisticLabel(c: Cell): string {
     return `${c.p}%컷`;
   return "발표 기준 확인 중";
 }
+
+/**
+ * 4페이지 '모집 인원' 대체 값(2026-11-25). 서버 recruitment.read 는 최초·최종 단계 표시가 없는 모집요강 인원을
+ * pending 으로 주고 숫자를 싣지 않는다(전국 2027 Guide 4,489행 모두 단계 없음). 1페이지는 같은 인원을
+ * '모집 N명'으로 보이므로, 1페이지 스냅샷의 2027 행 원문을 같은 규칙(r27Summary)으로 쓴다.
+ * 이월 조건부·보류·0명·숫자 아님은 쓰지 않는다.
+ */
+export function quota27Count(q: Quota27 | undefined): number | null {
+  const s = r27Summary(q);
+  if (s.hold || s.carry || s.v === null) return null;
+  const n = Number(s.v);
+  return Number.isSafeInteger(n) && n > 0 ? n : null;
+}

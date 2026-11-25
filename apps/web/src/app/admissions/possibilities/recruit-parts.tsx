@@ -9,8 +9,9 @@ import { page } from "@/lib/routes";
    펼친 뒤 그 모집단위만 따로 받아(extras.tsx) 화면에서 그리므로 브라우저에서도 쓰는 부품이다 */
 
 /** conds: 지원 조건 묶음(parts.tsx ConditionsBlock). 모집 인원과 '대학 발표 입시결과 보기' 사이 빈 자리에 둔다(2026-11-22) */
-export function Recruit({ o, rec, conds }: { o: OfferingDto; rec: RecruitmentDto | null; conds?: ReactNode }) {
+export function Recruit({ o, rec, conds, q27 = null }: { o: OfferingDto; rec: RecruitmentDto | null; conds?: ReactNode; q27?: number | null }) {
   const r = rec?.status === "ready" ? rec.recruitment : null;
+  const guideCount = r ? null : q27;
   const wait = (t: string) => <span className="wait">{t}</span>;
   return (
     <div className="recruit">
@@ -21,6 +22,9 @@ export function Recruit({ o, rec, conds }: { o: OfferingDto; rec: RecruitmentDto
           <span>이월·변경<b className="num">{r.rollover_change === null ? wait("미공개") : signed(r.rollover_change)}</b></span>
           <span>최종 인원<b className="num">{r.final_count ?? wait("미확정")}</b></span>
         </>
+      ) : guideCount !== null ? (
+        // 2026-11-25: 최초·최종 단계 표시가 없는 모집요강 인원은 1페이지와 같은 숫자(lib/guide-quota, 0명은 표시하지 않음)
+        <span title="2027 모집요강의 인원입니다. 이월 반영 뒤 최종 인원은 대학 발표에 따라 달라질 수 있습니다">모집 인원<b className="num">{guideCount}명</b></span>
       ) : (
         // 값이 없으면 확정 표시 '미공개'(2026-11-21: '자료 준비 중' 같은 중간 문구를 고객에게 보이지 않는다)
         <span>모집 인원<b>{wait("미공개")}</b></span>
