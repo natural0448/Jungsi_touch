@@ -74,8 +74,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   let proMin: Record<string, CsatMinimum> = {};
   let proDisplay: NonNullable<OverallAnalysisDto["provisional_school_display"]> = {};
   // 필터로 다음 쪽을 이어 받을 때 쪽마다 받은 판정(전문가용 검색은 검색과 판정을 함께 준다)
-  const proPageBands = new WeakMap<object, Record<string, ReferenceBandDto>>();
-  const proBandsOf = (p: object) => proPageBands.get(p) ?? null;
+  const proPageDetails = new WeakMap<object, Pick<Awaited<ReturnType<ProBrowse["search"]>>, "bands" | "min" | "display">>();
   let proFailed: string | null = null;
   // 서버는 한 번에 훑는 범위가 정해져 있어, 조건에 맞는 행이 뒤쪽에 있으면 빈 쪽과 다음 커서만 준다(예: 지역=제주).
   // 빈 쪽을 '결과 없음'으로 보이지 않도록 다음 커서를 몇 번까지 대신 따라간다(2026-11-19 운영 확인)
@@ -192,7 +191,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     const raw = bands?.[id];
     const band = pointBased ? personalCsatPoint(raw) : raw;
     if (band && !band.held && !isCsatHeld(id)) return band.code as StatusKey;
-    const v = csatNoJudgmentView(id, overallA, minAll[id]);
+    const display = dispAll[id];
+    const rowOverall = overallA && display ? { ...overallA, provisional_school_display: { [id]: display } } : overallA;
+    const v = csatNoJudgmentView(id, rowOverall, minAll[id]);
     return v && v.cls === "inel" ? "ineligible" : "none";
   };
   // 서버 dep_r38 전국 필터(2026-11-24 대표님 지적: 120개만 보고 멈췄다). 대학·학과 검색어가 없고 즐겨찾기 보기가 아닐 때만
@@ -239,11 +240,19 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         next = got.next;
       }
       if (ok) {
-        // 판정 있는 행 가운데 점수·위치가 빠진 것(서버가 한 번에 100개까지)만 4페이지 판정으로 채운다
-        const missing = picked.map((o) => o.offering_id).filter((id) => !bandsAll[id]?.school_score && keyOf(bandsAll, id) !== "none" && keyOf(bandsAll, id) !== "ineligible");
-        if (missing.length) { const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing); Object.assign(bandsAll, m.bands); Object.assign(minAll, m.min); if (m.display) Object.assign(dispAll, m.display); }
-        report = { ...base, provisional_bands: bandsAll, provisional_min: minAll, overall: withSchoolDisplay(base.overall, dispAll) };
-        shown = picked;
+        // Also hydrate withheld rows with the existing by-ID detail path for this visible page only.
+        const missing = picked.map((o) => o.offering_id).filter((id) =>
+          !bandsAll[id]?.school_score && !dispAll[id]?.central_score && keyOf(bandsAll, id) !== "ineligible");
+        let revision = base.report_version;
+        if (missing.length) {
+          const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing);
+          if ("version" in m && typeof m.version === "number") revision = m.version;
+          Object.assign(bandsAll, m.bands);
+          Object.assign(minAll, m.min);
+          if (m.display) Object.assign(dispAll, m.display);
+        }
+        report = { ...base, report_version: revision, provisional_bands: bandsAll, provisional_min: minAll, overall: withSchoolDisplay(base.overall, dispAll) };
+        shown = picked.filter((o) => want.has(keyOf(bandsAll, o.offering_id)));
         nextCursor = next ? `st:${next}` : null;
         scanned = matched;
         scanDone = true;
@@ -269,8 +278,12 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       for (;;) {
         const its = page.items ?? [];
         if (its.length) {
-          const b = pages === 0 ? (base.provisional_bands ?? {}) : pro ? (proBandsOf(page) ?? {}) : (await provisionalBands(src, caller, base, its.map((o) => o.offering_id))).bands;
-          Object.assign(bandsAll, b);
+          const detail = pages === 0 ? null : pro ? proPageDetails.get(page) : await provisionalBands(src, caller, base, its.map((o) => o.offering_id));
+          if (detail) {
+            Object.assign(bandsAll, detail.bands);
+            Object.assign(minAll, detail.min);
+            if (detail.display) Object.assign(dispAll, detail.display);
+          }
           scannedN += its.length;
           pages++;
           for (const o of its) if (want.has(keyOf(bandsAll, o.offering_id))) picked.push(o);
@@ -280,7 +293,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
           if (pro) {
             const r = await pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: page.next_cursor });
             if (!r.search) break;
-            proPageBands.set(r.search, r.bands);
+            proPageDetails.set(r.search, r);
             page = r.search;
           } else {
             page = await src.searchOfferings(caller, { ...toSearch(cur), cursor: page.next_cursor });
@@ -290,7 +303,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
           throw e;
         }
       }
-      report = { ...base, provisional_bands: bandsAll };
+      report = { ...base, provisional_bands: bandsAll, provisional_min: minAll, overall: withSchoolDisplay(base.overall, dispAll) };
       shown = picked;
       nextCursor = page.next_cursor;
       scanned = scannedN;
