@@ -152,7 +152,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 {c1.central !== null && c1.low !== c1.high && <>범위 {c1.low}~{c1.high} · </>}
                 <span className="tag">{c1.label}</span>
               </p>
-              <p>이 전형은 수능 외 평가가 함께 반영되거나 3영역을 골라 반영해, 수능 부분 점수만 계산했습니다.</p>
+              <p>{c1.label === "대학 환산점수" ? "가채점 원점수로 추정한 표준점수·백분위를 이 대학 방식으로 계산한 값입니다. 7단계 판정을 내지 않은 까닭은 지원가능성 칸에 있습니다." : "이 전형은 수능 외 평가가 함께 반영되거나 3영역을 골라 반영해, 수능 부분 점수만 계산했습니다."}</p>
             </>
           ) : (
             <>

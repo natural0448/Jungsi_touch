@@ -1,3 +1,4 @@
+import { R23_NO_COMPARISON } from "./r23-comparison";
 import type { CsatMinimum, OverallAnalysisDto, SubjectResultDto } from "./dto";
 import { INQUIRY_SUBJECTS } from "./exam";
 
@@ -67,8 +68,13 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
     // 실채점 전환(대표님 11-24): 실채점 판정 자료가 붙기 전에는 확정 성적으로 계산한 대학별 환산점수만 공개
     return { label: "환산점수만 제공", cls: "check", desc: "확정 성적으로 계산한 이 대학 방식 환산점수입니다. 실채점 기준의 지원가능성 판정·위치·유불리는 대학별 비교 자료가 준비되는 대로 붙습니다." };
   }
+  if (display?.reason === "comparison_axis_unverified" && R23_NO_COMPARISON.has(offeringId)) {
+    return { label: "비교 자료 없음", cls: "check", desc: "이 대학 방식 환산점수는 계산했지만, 같은 기준으로 비교할 과거 합격 자료가 없어 지원가능성을 판정하지 않았습니다. 지원 자격과는 관계없습니다." };
+  }
   if (display?.reason === "comparison_axis_unverified") {
-    return { label: "비교 기준 확인 필요", cls: "check", desc: "이 모집단위의 과거 입결과 올해 성적을 같은 기준에서 비교할 수 있는지 확인 중입니다." };
+    return { label: "비교 기준 확인 필요", cls: "check", desc: display.central_rank
+      ? "환산점수와 대학 안 위치를 먼저 보여 드립니다. 과거 입결과 올해 성적을 같은 기준(감점 방식·만점 기준 등)으로 견줄 수 있는지 확인 중이라 7단계 판정은 내지 않습니다."
+      : "이 모집단위의 과거 입결과 올해 성적을 같은 기준에서 비교할 수 있는지 확인 중입니다." };
   }
   const by = new Map(a.subjects.map((s) => [s.area, s]));
   const inquiry = [by.get("inquiry1"), by.get("inquiry2")];

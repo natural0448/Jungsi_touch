@@ -89,3 +89,16 @@ test("final_cutoffs_pending shows converted score only; unloaded asks to reload"
   assert.match(v.desc, /확정 성적/);
   assert.equal(csatNoJudgmentView(pk, base, "unloaded").label, "판정 다시 불러오기");
 });
+
+// 2026-11-26 담당자 R23-2: 비교축 70행 중 13행은 환산점수 뒤 '비교 자료 없음', 위치가 있는 행은 위치를 먼저 보인다는 설명
+test("R23-2: 13행은 비교 자료 없음, 위치가 있는 비교 기준 확인 행은 위치 먼저 안내", () => {
+  const a = { subjects: [], absolute_grades: {}, provisional_school_display: {
+    "2027:1000000922": { reason: "comparison_axis_unverified", score_kind: "university_score", central_score: "900.00" },
+    "2027:1000000920": { reason: "comparison_axis_unverified", score_kind: "university_score", central_score: "915.83", central_rank: { basis: "university_score", top_percent: "4.50" } },
+  } };
+  assert.equal(csatNoJudgmentView("2027:1000000922", a)?.label, "비교 자료 없음");
+  assert.equal(csatC1Score("2027:1000000922", a)?.central, "900.00");
+  const v = csatNoJudgmentView("2027:1000000920", a);
+  assert.equal(v?.label, "비교 기준 확인 필요");
+  assert.match(v?.desc ?? "", /대학 안 위치를 먼저/);
+});
