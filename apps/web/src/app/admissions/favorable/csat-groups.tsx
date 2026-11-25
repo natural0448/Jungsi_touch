@@ -57,7 +57,7 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, 
                           <small>{[o.group ? `${o.group}군` : null, o.track].filter(Boolean).join(" · ")}</small>
                         </span>
                         <span className="rf-m">
-                          <CsatBadge band={band} />
+                          <CsatBadge band={band} id={o.offering_id} />
                           {band && upper && <small className="rf-adv">가채점 점수 범위에 따른 판정</small>}
                         </span>
                         {favs && <StarButton id={o.offering_id} on={favs.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}

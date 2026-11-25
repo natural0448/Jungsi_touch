@@ -66,7 +66,7 @@ export function CsatPickedTable({ items, bands, a, print = false, min = {}, sing
                           {o.track && <small> · {o.track}</small>}
                         </th>
                         <td>
-                          {band ? <CsatBadge band={band} /> : ex ? <span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span> : <span className={`st ${nj?.cls ?? "check"}`} title={nj?.desc ?? POSITION_NONE_DESC}>{nj?.label ?? POSITION_NONE_LABEL}</span>}
+                          {band ? <CsatBadge band={band} id={it.offering_id} /> : ex ? <span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span> : <span className={`st ${nj?.cls ?? "check"}`} title={nj?.desc ?? POSITION_NONE_DESC}>{nj?.label ?? POSITION_NONE_LABEL}</span>}
                         </td>
                         <td className="r">{band?.school_score ? <CsatScore band={band} /> : c1 ? <span className="score" title={c1.label}><b className="num">{c1.central ?? `${c1.low}~${c1.high}`}</b></span> : "—"}</td>
                         <td className="r num">{rank ?? "—"}</td>

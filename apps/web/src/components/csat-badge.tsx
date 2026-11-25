@@ -4,6 +4,7 @@ import { BAND } from "@/lib/decision-labels";
 import { csatBandText, csatUpper } from "@/lib/provisional-view";
 import { csatGainTone, type CsatGainTone } from "@/lib/report-pure";
 import { csatComboNote } from "@/lib/csat-combo";
+import { CSAT_SCOPE_BASIS_NOTE, CSAT_SCOPE_TAG, csatScopeBasis } from "@/lib/csat-scope-basis";
 
 /*
   수능 가채점 7단계 배지(3페이지 유리한 대학 찾기·4페이지 가능성 보기 공용, 2026-11-23 4페이지로 옮김).
@@ -26,18 +27,20 @@ export function CsatScore({ band }: { band?: ReferenceBandDto | null }) {
 
 /** 학생부 등 함께 반영 전형의 수능 반영분 기준 판정 안내(서버 band.score_scope, 2026-11-25) */
 export const CSAT_SCOPE_NOTE = "이 전형은 학생부 등도 함께 반영합니다. 이 판정은 수능 반영분만으로 본 것이며, 학생부 등 다른 영역은 포함하지 않았습니다.";
-export function CsatBadge({ band }: { band?: ReferenceBandDto | null }) {
+/** id: 모집단위 번호(수능 기준 판정의 근거 종류 꼬리표, 담당자 R23-4). 없으면 기본 꼬리표 */
+export function CsatBadge({ band, id }: { band?: ReferenceBandDto | null; id?: string }) {
   if (!band || !BAND[band.code]) return null;
   if (band.held) return <span className="st check" title={POSITION_NONE_DESC}>{POSITION_NONE_LABEL}</span>;
   const tone = BAND[band.code];
   const upper = csatUpper(band);
-  const scope = band.score_scope === "csat_component" ? `${CSAT_SCOPE_NOTE} ` : "";
+  const basis = band.score_scope === "csat_component" ? csatScopeBasis(id) : null;
+  const scope = basis ? `${CSAT_SCOPE_NOTE} ${CSAT_SCOPE_BASIS_NOTE[basis]} ` : "";
   // 2026-11-25: 유불리와 합친 한 줄 해석('하향인데 불리' 같은 조합이 모순으로 읽히지 않게)
   const combo = csatComboNote(band.code, band.upper_code, csatGainView(band)?.tone);
   const title = scope + (upper
     ? `가채점 점수 범위에 따라 ${BAND[band.code].label}부터 ${BAND[upper].label}까지 나옵니다. 지원 자격은 모집요강에서 확인하세요`
     : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`) + (combo ? ` ${combo}` : "");
-  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}{scope && <small className="scope"> · 수능 기준</small>}</span>;
+  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}{basis && <small className="scope"> · {CSAT_SCOPE_TAG[basis]}</small>}</span>;
 }
 
 /** 가채점 환산 유불리 보기 값(서버 dep_r31 school_gain). 보류 모집단위(held)·값 없음이면 null */

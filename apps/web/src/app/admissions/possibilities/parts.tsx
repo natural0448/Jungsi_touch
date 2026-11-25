@@ -1,4 +1,5 @@
 import type { C1Score, NoJudgmentView } from "@/lib/csat-conditions";
+import { CSAT_SCOPE_BASIS_NOTE, CSAT_SCOPE_TAG, csatScopeBasis } from "@/lib/csat-scope-basis";
 import { csatComboNote } from "@/lib/csat-combo";
 import { REPORT_TAB } from "@/lib/routes";
 import { CSAT_GAIN_WORD, CSAT_SCOPE_NOTE, csatGainView } from "@/components/csat-badge";
@@ -192,10 +193,10 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
             <>
               <div>
                 <span className={`st ${tone.cls}`} title={tone.desc}>{upper ? `${tone.label}~${upper.label}` : tone.label}</span>
-                {judged.score_scope === "csat_component" && <small className="scope"> · 수능 기준</small>}
+                {judged.score_scope === "csat_component" && <small className="scope"> · {CSAT_SCOPE_TAG[csatScopeBasis(o.offering_id)]}</small>}
               </div>
               <p>{tone.desc}</p>
-              {judged.score_scope === "csat_component" && <p>{CSAT_SCOPE_NOTE}</p>}
+              {judged.score_scope === "csat_component" && <p>{CSAT_SCOPE_NOTE} {CSAT_SCOPE_BASIS_NOTE[csatScopeBasis(o.offering_id)]}</p>}
               {(() => {
                 const note = csatComboNote(judged.code, judged.upper_code, gain?.tone);
                 return note ? <p className="why"><b>한 줄로 보면</b> {note} 지원가능성은 합격선과의 거리, 환산 유불리는 이 대학 계산 방식의 득실이라 따로 봅니다.</p> : null;

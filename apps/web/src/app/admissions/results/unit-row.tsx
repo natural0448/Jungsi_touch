@@ -110,7 +110,7 @@ function Item({ loader, schoolName, it }: { loader: SchoolLoader; schoolName: st
         </span>
         {it.ratio27 && <span className="rs-ratio" title="2027학년도 수능 영역별 반영비율">{it.ratio27}</span>}
         <span className="rs-sum">
-          {it.r27 ? <><span className="y num">2027</span><span><small>모집</small> <V c={it.r27} /></span></>
+          {it.r27 ? <><span className="y num">2027</span><span title={it.r27.initial ? "공식 모집요강에서 최초 모집 단계와 출처가 확인된 인원입니다" : undefined}><small>{it.r27.initial ? "최초 모집" : "모집"}</small> <V c={it.r27} /></span></>
             : <span>과거 발표 결과</span>}
         </span>
         <span className="go"><ChevronIcon /></span>
