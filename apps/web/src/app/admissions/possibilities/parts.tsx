@@ -111,11 +111,12 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
   // 대학 안 내 위치(서버 dep_r30): 판정과 같은 누적 도수에서 읽은 동점 포함 상위누백. 보류 모집단위는 보이지 않는다
   const rk = judged?.school_rank && (judged.school_rank.central ?? judged.school_rank.best ?? judged.school_rank.worst) ? judged.school_rank : null;
   const rkRange = rk && rk.best && rk.worst && rk.best !== rk.worst ? `${rk.best}~${rk.worst}` : null;
+  const withheldRank = !final && !rk ? c1?.centralRank : undefined;
   // 환산 유불리(서버 dep_r31). 보류 모집단위는 csatGainView 가 null
   const gain = csatGainView(judged);
   const items = [
     { k: "점수 변환", ok: !!s || !!c1, label: s || c1 ? "계산됨" : undefined, why: `${EXAM} 성적으로 이 대학 환산점수를 계산하지 못했습니다` },
-    { k: "대학 안 내 위치", ok: !!rk, label: rk ? "계산됨" : undefined, why: `${EXAM} 성적의 대학 안 위치는 준비 중입니다` },
+    { k: "대학 안 내 위치", ok: !!rk || !!withheldRank, label: rk || withheldRank ? "계산됨" : undefined, why: `${EXAM} 성적의 대학 안 위치는 준비 중입니다` },
     { k: "지원 판단", ok: !!judged || ex?.kind === "minimum", label: judged ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : `이 모집단위의 ${EXAM} 판정 근거가 아직 없습니다` },
   ];
   return (
@@ -170,6 +171,12 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 {rk.central !== null && rkRange && <>범위 상위 {rkRange}%</>}
               </p>
               <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다 — 판단은 <b>지원가능성</b> 칸이 담당합니다.</span>
+            </>
+          ) : withheldRank ? (
+            <>
+              <div className="big num">상위 {withheldRank.top_percent}<small>%</small></div>
+              <p>{withheldRank.basis === "csat_component" ? "수능 반영분 기준" : "대학 수능 환산 기준"} · 같은 점수 포함</p>
+              <span className="note">이 대학 방식으로 계산한 점수의 비교 모형 내 위치입니다. 전형의 최종 합격선과는 별도로 표시합니다.</span>
             </>
           ) : (
             <>

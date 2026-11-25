@@ -73,7 +73,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
       </>
     );
   }
-  const csat = provisionalOnly(report) ? csatView(report.candidates) : { universities: [], outsideBand: 0, judged: 0 };
+  const csat = provisionalOnly(report) ? csatView(report.candidates, true) : { universities: [], outsideBand: 0, judged: 0 };
   const favs = (await proFavorites(v.svc.org_id, v.student.student_id))?.ids ?? null;
   const known = csat.universities.flatMap((u) => u.fields.flatMap((f) => f.items.map((x) => x.offering)));
   const scope = { org_id: v.svc.org_id, student_id: v.student.student_id, report_id: v.shown.report_id };
@@ -86,8 +86,8 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <ScoreBasis overall={report.overall} emptyText="" />
           {csat.universities.length > 0 ? (
             <section className="fv-main fv-refmode" aria-label="유리한 대학">
-              <CsatCandidates c={report.candidates} favs={favs} p3Label={p3.label} allHref={(st) => proTabHref(orgParam, studentId, "possibilities", `st=${st}`)} />
-              <CsatGroups universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
+              <CsatCandidates pointBased c={report.candidates} favs={favs} p3Label={p3.label} allHref={(st) => proTabHref(orgParam, studentId, "possibilities", `st=${st}`)} />
+              <CsatGroups pointBased universities={csat.universities} favs={favs} outsideBand={csat.outsideBand} p3Label={p3.label} />
             </section>
           ) : (
             <>

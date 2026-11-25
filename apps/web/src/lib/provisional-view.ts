@@ -14,6 +14,20 @@ import { LISTED_BANDS, referenceUniversities, type ReferenceItem, type Reference
 */
 export const CSAT_SOURCE = "g";
 
+/** Consumer defense for authoritative server exclusions; eligibility is evaluated upstream. */
+export function blockedCsatRecommendationIds(c: CandidatesDto | null | undefined): Set<string> {
+  const blocked = new Set<string>();
+  for (const ids of [c?.csat_condition_unmet, c?.csat_minimum_unmet, c?.csat_minimum_partial]) {
+    if (Array.isArray(ids)) for (const id of ids) if (typeof id === "string") blocked.add(id);
+  }
+  if (Array.isArray(c?.ineligible_offerings)) {
+    for (const row of c.ineligible_offerings) {
+      if (typeof row?.offering_id === "string") blocked.add(row.offering_id);
+    }
+  }
+  return blocked;
+}
+
 /** 가채점 판정 행의 판정. source g · 문턱 판정 모양 · 7단계 코드일 때만(9모 행이 섞여 와도 쓰지 않는다) */
 export function csatBandOf(b: ReferenceBandDto | null | undefined): ReferenceBandDto | null {
   const t = thresholdBandOf(b);
@@ -49,13 +63,15 @@ export interface CsatView {
  */
 export function csatView(c: CandidatesDto | null | undefined, pointBased = false): CsatView {
   const items: ReferenceItem[] = [];
+  const blocked = blockedCsatRecommendationIds(c);
   try {
     for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
-      const raw = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
+      const id = it.offering?.offering_id;
+      if (typeof id !== "string" || blocked.has(id) || isCsatHeld(id)) continue;
+      const raw = csatBandOf(it.reference_band);
+      if (raw?.automatic_candidate === false) continue;
       const band = pointBased ? personalCsatPoint(raw) : raw;
-      if (!band || (pointBased && band.held) || !LISTED_BANDS.includes(band.code)) continue;
-      // 충남대 2행처럼 같은 비교 집단 가운데 유불리가 유리가 아니면 자동 후보에 넣지 않는다(담당자 v3, 서버가 false 로 표시)
-      if (pointBased && raw?.automatic_candidate === false) continue;
+      if (!band || band.held || !LISTED_BANDS.includes(band.code)) continue;
       items.push({ offering: it.offering, reference_percentile: null, advantage: null, margin: null, band, pending: false });
     }
   } catch {
@@ -100,12 +116,15 @@ export function csatCandidateGroupOf(b: ReferenceBandDto): CsatCandidateGroup | 
 export function csatCandidateView(c: CandidatesDto | null | undefined, pointBased = false): CsatCandidateView {
   const by: Record<CsatCandidateGroup, ReferenceItem[]> = { challenge: [], core: [], room: [] };
   let held = 0;
+  const blocked = blockedCsatRecommendationIds(c);
   try {
     for (const it of referenceGroups(c).flatMap((g) => g.offerings)) {
-      const raw = isCsatHeld(it.offering?.offering_id) ? null : csatBandOf(it.reference_band);
+      const id = it.offering?.offering_id;
+      if (typeof id !== "string" || blocked.has(id) || isCsatHeld(id)) continue;
+      const raw = csatBandOf(it.reference_band);
+      if (raw?.automatic_candidate === false) continue;
       const band = pointBased ? personalCsatPoint(raw) : raw;
-      if (pointBased && band?.held) { held++; continue; }
-      if (pointBased && raw?.automatic_candidate === false) continue;
+      if (band?.held) { held++; continue; }
       if (!band || !CSAT_CANDIDATE_GROUP[band.code]) continue;
       const g = csatCandidateGroupOf(band);
       if (!g) {

@@ -219,6 +219,7 @@ function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMini
   for (const id of c?.csat_minimum_partial ?? []) out[id] = "partial";
   for (const id of c?.csat_condition_unmet ?? []) out[id] = "condition";
   for (const id of c?.csat_inquiry_cap ?? []) out[id] = "cap";
+  for (const id of c?.csat_no_comparison ?? []) out[id] = "nocomp";
   for (const id of c?.csat_minimum_unmet ?? []) out[id] = "unmet";
   return out;
 }
@@ -581,11 +582,16 @@ export async function settleAnalyses(src: JungsiSource, caller: Caller, report: 
     (한 번 열 때 candidates.build 한 번). 목록은 Worker 메모리에 리포트별로 15분만 둔다.
   - dep_r13(목록이 리포트에 저장되던 예전 방식)과도 맞는다: 다시 읽은 리포트에 이미 참고 목록이 있으면 그것을 그대로 쓴다.
 */
-type ReferenceLists = Pick<CandidatesDto, "reference_university_groups" | "reference_threshold_summary">;
+type ReferenceLists = Pick<CandidatesDto,
+  "reference_university_groups" | "reference_threshold_summary" |
+  "csat_condition_unmet" | "csat_minimum_unmet" | "csat_minimum_partial" | "ineligible_offerings"
+>;
 const REFERENCE_TTL_MS = 15 * 60_000;
 const REFERENCE_MAX = 300;
 const referenceMemo = new Map<string, { lists: ReferenceLists; at: number }>();
-const memoKey = (r: ReportDto) => JSON.stringify([r.report_id, r.profile_id]);
+const referenceCacheVersion = "eligibility-v1";
+// 2026-11-25: 판 번호는 4페이지 조회마다 올라가 3페이지를 매번 새로 만들게 하므로 열쇠에 넣지 않는다(제외 정보는 성적·카탈로그가 같으면 같다)
+const memoKey = (r: ReportDto) => JSON.stringify([referenceCacheVersion, r.report_id, r.profile_id, r.candidates?.catalog_version ?? null]);
 
 function rememberReference(r: ReportDto, lists: ReferenceLists) {
   const k = memoKey(r);
@@ -611,7 +617,7 @@ function recallReference(r: ReportDto, ttl = REFERENCE_TTL_MS): ReferenceLists |
   앞 목록이 보일 수 있다(새 성적 저장·정정은 profile 이 바뀌어 바로 새로 만든다). 캐시 열쇠는 리포트·성적 번호라 그 주인만 닿는다.
 */
 export const P3_REUSE_TTL_MS = 10 * 60_000;
-const p3CacheUrl = (r: ReportDto) => `https://p3-reference.invalid/${encodeURIComponent(r.report_id)}/${encodeURIComponent(r.profile_id)}`;
+const p3CacheUrl = (r: ReportDto) => `https://p3-reference.invalid/${encodeURIComponent(memoKey(r))}`;
 function edgeCache(): Cache | null {
   try {
     const c = (globalThis as unknown as { caches?: { default?: Cache } }).caches;
@@ -647,19 +653,49 @@ async function rememberReferenceShared(r: ReportDto, lists: ReferenceLists) {
   }
 }
 
-/** 응답 후보에서 참고 목록만 꺼낸다. 목록이 없으면 null */
+/** Build replies may carry exclusions that stored report reads omit. */
 function referenceListsOf(c: CandidatesDto | null | undefined): ReferenceLists | null {
-  const groups = c?.reference_university_groups;
-  if (!Array.isArray(groups) || groups.length === 0) return null;
-  return { reference_university_groups: groups, reference_threshold_summary: c?.reference_threshold_summary ?? null };
+  if (!c) return null;
+  const groups = c.reference_university_groups;
+  const fields: ReferenceLists = {};
+  if (Array.isArray(groups) && groups.length > 0) {
+    fields.reference_university_groups = groups;
+    fields.reference_threshold_summary = c.reference_threshold_summary ?? null;
+  }
+  if (Array.isArray(c.csat_condition_unmet)) fields.csat_condition_unmet = c.csat_condition_unmet;
+  if (Array.isArray(c.csat_minimum_unmet)) fields.csat_minimum_unmet = c.csat_minimum_unmet;
+  if (Array.isArray(c.csat_minimum_partial)) fields.csat_minimum_partial = c.csat_minimum_partial;
+  if (Array.isArray(c.ineligible_offerings)) fields.ineligible_offerings = c.ineligible_offerings;
+  return Object.keys(fields).length ? fields : null;
 }
 
-/** 리포트에 참고 목록을 붙인다. 리포트에 이미 목록이 있으면(예전 방식) 그대로 둔다. 후보가 없으면 응답 후보를 쓴다 */
 function withReference(base: ReportDto, lists: ReferenceLists | null, fallback?: CandidatesDto | null): ReportDto {
   const c = base.candidates ?? fallback ?? null;
   if (!c) return base;
-  if (!lists || referenceListsOf(c)) return c === base.candidates ? base : { ...base, candidates: c };
-  return { ...base, candidates: { ...c, ...lists } };
+  if (!lists) return c === base.candidates ? base : { ...base, candidates: c };
+  const { reference_university_groups: groups, reference_threshold_summary: summary, ...exclusions } = lists;
+  const reference = !c.reference_university_groups?.length && groups
+    ? { reference_university_groups: groups, reference_threshold_summary: summary }
+    : {};
+  // A missing or empty list in one same-snapshot response cannot clear exclusions in another.
+  const mergeIds = (left: string[] | null | undefined, right: string[] | null | undefined) =>
+    left || right ? [...new Set([...(left ?? []), ...(right ?? [])])] : undefined;
+  const conditions = mergeIds(c.csat_condition_unmet, exclusions.csat_condition_unmet);
+  const minimums = mergeIds(c.csat_minimum_unmet, exclusions.csat_minimum_unmet);
+  const partials = mergeIds(c.csat_minimum_partial, exclusions.csat_minimum_partial);
+  const ineligible = c.ineligible_offerings || exclusions.ineligible_offerings
+    ? [...new Map([...(c.ineligible_offerings ?? []), ...(exclusions.ineligible_offerings ?? [])]
+      .map((row) => [row.offering_id, row] as const)).values()] : undefined;
+  return {
+    ...base,
+    candidates: {
+      ...c, ...reference,
+      csat_condition_unmet: conditions,
+      csat_minimum_unmet: minimums,
+      csat_minimum_partial: partials,
+      ineligible_offerings: ineligible,
+    },
+  };
 }
 
 const freshKey = () => `cbo-${crypto.randomUUID()}`;
@@ -670,7 +706,7 @@ const freshKey = () => `cbo-${crypto.randomUUID()}`;
  */
 export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean; shared?: boolean } = {}): Promise<ReportDto> {
   // 가채점 리포트도 보낸다(dep_r22). 판정 Secret 이 없으면 응답에 참고 묶음이 없고 3페이지는 '가채점 판정 준비 중'
-  if (opts.reuse) {
+  if (opts.reuse && !report.candidates_stale) {
     const lists = recallReference(report);
     if (lists && report.candidates) {
       logSettle("candidates", { sent: false, reused: true });
@@ -678,7 +714,7 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     }
   }
   // 2026-11-25: 평소 열 때도 같은 리포트·성적의 10분 안 목록을 다시 쓴다(화면 서버 기억 → Cloudflare 캐시)
-  if (opts.shared && report.candidates) {
+  if (opts.shared && report.candidates && !report.candidates_stale) {
     const lists = await recallReferenceShared(report);
     if (lists) {
       logSettle("candidates", { sent: false, reused: true, shared: true });
@@ -699,9 +735,15 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     if (res.ok) {
       const built = res.value;
       const lists = referenceListsOf(built.candidates);
-      if (lists) await rememberReferenceShared(built, lists);
+      if (lists?.reference_university_groups?.length) await rememberReferenceShared(built, lists);
       const read = await rereadOr(src, caller, built);
-      const out = withReference(read ? newerVersion(read, built) : built, lists, built.candidates);
+      const base = read ? newerVersion(read, built) : built;
+      const baseCatalog = base.candidates?.catalog_version;
+      const builtCatalog = built.candidates?.catalog_version;
+      const sameSnapshot = base.report_id === built.report_id && base.profile_id === built.profile_id
+        && base.report_version === built.report_version
+        && (!baseCatalog || !builtCatalog || baseCatalog === builtCatalog);
+      const out = sameSnapshot ? withReference(base, lists, built.candidates) : base;
       const sum = lists?.reference_threshold_summary;
       logSettle("candidates", { sent: true, attempt, rows: (lists?.reference_university_groups ?? []).reduce((n, g) => n + (g?.offerings?.length ?? 0), 0), complete: sum ? sum.complete !== false : true });
       return out;

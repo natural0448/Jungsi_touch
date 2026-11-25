@@ -226,6 +226,8 @@ export type PopulationScope = "whole_complete" | "required_rule_inputs_present";
 export type ScoreBasis = "actual_exam" | "mock_exam" | "year_equated_estimate";
 
 /** jungsi.overall-analysis/v1 — 리포트 안의 전체 분석 */
+export type WithheldSchoolRankDto = { basis: "csat_component" | "university_score"; top_percent: string };
+
 export interface OverallAnalysisDto {
   format: "jungsi.overall-analysis/v1";
   exam: { exam_id: string; academic_year: number; exam_type: string };
@@ -253,6 +255,7 @@ export interface OverallAnalysisDto {
     reason: "non_csat_components_missing" | "comparison_axis_unverified" | "final_cutoffs_pending";
     score_kind: "csat_component" | "university_score";
     central_score: string | null;
+    central_rank?: WithheldSchoolRankDto;
   }>;
 }
 
@@ -573,8 +576,10 @@ export interface CandidatesDto {
   csat_condition_unmet?: string[] | null;
   /** 서버 2026-11-24: 가채점 탐구 표준점수 추정 끝이 과목 상한을 넘어 계산하지 않은 모집단위 */
   csat_inquiry_cap?: string[] | null;
+  /** 2026-11-25 담당자 R21 B: 지원은 가능하나 이 성적 조합의 비교 모형 범위 밖(비교 자료 없음) */
+  csat_no_comparison?: string[] | null;
   /** 2026-11-24 담당자 v3(서버 v334~): 7단계를 내지 않은 모집단위와 가운데 환산점수·사유 */
-  csat_withheld?: { offering_id: string; reason: string; score_kind: string; central_score: string | null }[] | null;
+  csat_withheld?: { offering_id: string; reason: string; score_kind: string; central_score: string | null; central_rank?: WithheldSchoolRankDto }[] | null;
   status_scan?: { matched: number; next_after: string | null; complete: boolean; offerings: OfferingDto[] } | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
@@ -883,4 +888,4 @@ export interface SampleReportDto {
 
 /** 판정 없는 모집단위의 수능 최저 사유(서버 2026-11-24) */
 /** unloaded: 화면이 이 모집단위의 판정을 서버에서 받지 못함(일시 장애, 2026-11-25) — 판정 없음 사유가 아니다 */
-export type CsatMinimum = "unmet" | "partial" | "condition" | "cap" | "unloaded";
+export type CsatMinimum = "unmet" | "partial" | "condition" | "cap" | "nocomp" | "unloaded";
