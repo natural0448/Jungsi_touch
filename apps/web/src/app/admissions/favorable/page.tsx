@@ -97,7 +97,7 @@ async function Body({ src, caller, sp }: { src: JungsiSource; caller: Caller; sp
     // 열 때마다 후보(candidates.build)를 한 번 만들고 그 응답의 참고 목록으로 그린다(dep_r17, report-ops settleCandidates).
     // 그동안은 책 넘김 대기 화면이다. 서버 액션(담기·계열 펼침 계산) 뒤 다시 그릴 때는 방금 받은 목록을 다시 쓴다(한 번 열 때 한 번)
     const actionRender = (await headers()).has("next-action");
-    state = mine ? { kind: "ready", report: await settleCandidates(src, caller, mine, { reuse: actionRender }) } : { kind: "none" };
+    state = mine ? { kind: "ready", report: await settleCandidates(src, caller, mine, { reuse: actionRender, shared: true }) } : { kind: "none" };
   } catch (e) {
     if (e instanceof ConnectionError) return <ConnectionNotice e={e} />;
     if (e instanceof AccessDenied) return <PaidGate kind={e.status === 401 ? "login" : "paid"} route={route} features={FEATURES} />;

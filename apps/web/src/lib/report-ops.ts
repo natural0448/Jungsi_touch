@@ -593,15 +593,58 @@ function rememberReference(r: ReportDto, lists: ReferenceLists) {
   referenceMemo.set(k, { lists, at: Date.now() });
   while (referenceMemo.size > REFERENCE_MAX) referenceMemo.delete(referenceMemo.keys().next().value as string);
 }
-function recallReference(r: ReportDto): ReferenceLists | null {
+function recallReference(r: ReportDto, ttl = REFERENCE_TTL_MS): ReferenceLists | null {
   const k = memoKey(r);
   const hit = referenceMemo.get(k);
   if (!hit) return null;
-  if (Date.now() - hit.at > REFERENCE_TTL_MS) {
-    referenceMemo.delete(k);
+  if (Date.now() - hit.at > ttl) {
+    if (Date.now() - hit.at > REFERENCE_TTL_MS) referenceMemo.delete(k);
     return null;
   }
   return hit.lists;
+}
+
+/*
+  2026-11-25 3페이지 속도(운영 QA: 열 때마다 candidates.build 5.8초 + 다시 읽기 1.6초, 리포트 '저장 시각'도 매번 바뀜).
+  같은 리포트·같은 성적(profile)이면 학교별 판정 목록이 같다. 방금 받은 목록을 화면 서버 기억과 Cloudflare 캐시(같은 지역)에
+  P3_REUSE_TTL_MS 동안 두고, 그 안에 다시 열면 서버에 다시 만들게 하지 않는다. 판정 묶음을 바꾼 직후에는 길어야 이 시간만큼
+  앞 목록이 보일 수 있다(새 성적 저장·정정은 profile 이 바뀌어 바로 새로 만든다). 캐시 열쇠는 리포트·성적 번호라 그 주인만 닿는다.
+*/
+export const P3_REUSE_TTL_MS = 10 * 60_000;
+const p3CacheUrl = (r: ReportDto) => `https://p3-reference.invalid/${encodeURIComponent(r.report_id)}/${encodeURIComponent(r.profile_id)}`;
+function edgeCache(): Cache | null {
+  try {
+    const c = (globalThis as unknown as { caches?: { default?: Cache } }).caches;
+    return c?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+async function recallReferenceShared(r: ReportDto): Promise<ReferenceLists | null> {
+  const local = recallReference(r, P3_REUSE_TTL_MS);
+  if (local) return local;
+  const cache = edgeCache();
+  if (!cache) return null;
+  try {
+    const hit = await cache.match(p3CacheUrl(r));
+    if (!hit) return null;
+    const lists = (await hit.json()) as ReferenceLists;
+    if (!lists || !Array.isArray(lists.reference_university_groups) || lists.reference_university_groups.length === 0) return null;
+    rememberReference(r, lists);
+    return lists;
+  } catch {
+    return null;
+  }
+}
+async function rememberReferenceShared(r: ReportDto, lists: ReferenceLists) {
+  rememberReference(r, lists);
+  const cache = edgeCache();
+  if (!cache) return;
+  try {
+    await cache.put(p3CacheUrl(r), new Response(JSON.stringify(lists), { headers: { "content-type": "application/json", "cache-control": `private, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
+  } catch {
+    // 캐시에 못 넣어도 화면은 그대로
+  }
 }
 
 /** 응답 후보에서 참고 목록만 꺼낸다. 목록이 없으면 null */
@@ -625,12 +668,20 @@ const freshKey = () => `cbo-${crypto.randomUUID()}`;
  * 3페이지를 열 때 후보를 만든다(위 설명). reuse: 서버 액션 뒤 다시 그리기 — 방금 받은 목록이 있으면 candidates.build 를 부르지 않는다.
  * 어떤 실패에도 받은 리포트로 그린다(화면 전체를 깨지 않는다).
  */
-export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean } = {}): Promise<ReportDto> {
+export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean; shared?: boolean } = {}): Promise<ReportDto> {
   // 가채점 리포트도 보낸다(dep_r22). 판정 Secret 이 없으면 응답에 참고 묶음이 없고 3페이지는 '가채점 판정 준비 중'
   if (opts.reuse) {
     const lists = recallReference(report);
     if (lists && report.candidates) {
       logSettle("candidates", { sent: false, reused: true });
+      return withReference(report, lists);
+    }
+  }
+  // 2026-11-25: 평소 열 때도 같은 리포트·성적의 10분 안 목록을 다시 쓴다(화면 서버 기억 → Cloudflare 캐시)
+  if (opts.shared && report.candidates) {
+    const lists = await recallReferenceShared(report);
+    if (lists) {
+      logSettle("candidates", { sent: false, reused: true, shared: true });
       return withReference(report, lists);
     }
   }
@@ -648,7 +699,7 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     if (res.ok) {
       const built = res.value;
       const lists = referenceListsOf(built.candidates);
-      if (lists) rememberReference(built, lists);
+      if (lists) await rememberReferenceShared(built, lists);
       const read = await rereadOr(src, caller, built);
       const out = withReference(read ? newerVersion(read, built) : built, lists, built.candidates);
       const sum = lists?.reference_threshold_summary;
