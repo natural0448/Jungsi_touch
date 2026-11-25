@@ -7,7 +7,7 @@ import { LockIcon } from "@/components/icons";
 import { PageHead } from "@/components/page-head";
 import { AccessDenied, ConnectionError, getCaller, sessionOrDown, source } from "@/lib/api";
 import type { ReportDto, ScoreInputStatusDto } from "@/lib/dto";
-import { EXAM, MOCK_EXAM, csatOpen, examTitle, examTypeLabel, stageOf } from "@/lib/exam";
+import { EXAM, MOCK_EXAM, csatOpen, examTitle, examTypeLabel, finalOpen, stageOf } from "@/lib/exam";
 import { isProvisionalReport, provisionalDefaults } from "@/lib/provisional-report";
 import { AutoReopen } from "@/components/auto-reopen";
 import { seoulDateTime } from "@/lib/format";
@@ -20,7 +20,7 @@ import { BookLoading } from "@/components/book-loading";
 import { viewPath } from "@/lib/content-view";
 import { REPORT_TAB, lockFor, page } from "@/lib/routes";
 import { ComboScores, OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "./report-view";
-import { PastRecords, pastHref } from "./past-records";
+import { PastRecords, pastHref, pastKindOf } from "./past-records";
 import { InputStatus, NoInput, canInput } from "./rights";
 import { CorrectionPanel } from "./correction";
 import { canRequestCorrection, csatReleaseOn, myLatestCorrection } from "@/lib/correction";
@@ -75,9 +75,12 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
 
   const sp = await searchParams;
   // 지난 기록(전환 뒤): 저장한 9월 모의평가 리포트를 읽기 전용으로 본다(대표님 결정: 9월 기록은 남긴다)
-  if (csat && sp.past === "1") {
-    // 9월 리포트를 저장한 적이 없으면 지난 기록을 열지 않고 가채점 리포트 화면으로 돌려보낸다(2026-11-22 대표님 요청)
-    if (!(await hasPastMock(src, caller))) redirect(route.path);
+  // 2026-11-25: 실채점 전환 뒤에는 수능 가채점 리포트도 지난 기록(?past=csat)
+  const pastKind = pastKindOf(sp.past);
+  const fin = finalOpen();
+  if (csat && pastKind && (pastKind === "mock" || fin)) {
+    // 그 시험 리포트를 저장한 적이 없으면 지난 기록을 열지 않고 지금 리포트 화면으로 돌려보낸다(2026-11-22 대표님 요청)
+    if (!(await hasPastMock(src, caller, pastKind))) redirect(route.path);
     const want = typeof sp.report === "string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/.test(sp.report) ? sp.report : null;
     return (
       <>
@@ -85,7 +88,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
         <MemberMark kind="report" path={viewPath(route.path, sp)} />
         <div className="wrap pg-body rp">
           <Suspense fallback={<BookLoading compact text="지난 기록을 불러오고 있습니다." />}>
-            <PastRecords src={src} caller={caller} reportId={want} />
+            <PastRecords src={src} caller={caller} reportId={want} kind={pastKind} backLabel={fin ? "수능 실채점 리포트로 돌아가기" : "수능 가채점 리포트로 돌아가기"} />
           </Suspense>
         </div>
       </>
@@ -194,8 +197,13 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 전환 뒤 리포트는 수능 가채점 리포트다(9월 리포트는 지난 기록). 가채점 리포트는 범위로만 그린다
   const provisional = isProvisionalReport(report);
   // 지난 기록 · 9월 모의평가는 9월 리포트를 저장한 회원에게만(2026-11-22 대표님 요청). 목록 1개만, 실패하면 숨긴다
-  const pastMock = csat ? await hasPastMock(src, caller) : false;
-  const pastLink = pastMock ? <p className="rp-note"><Link href={pastHref()}>지난 기록 · {MOCK_EXAM.label} 리포트 보기</Link> — 저장한 9월 리포트를 읽기 전용으로 봅니다.</p> : null;
+  const [pastMock, pastCsat] = await Promise.all([csat ? hasPastMock(src, caller) : false, fin ? hasPastMock(src, caller, "csat") : false]);
+  const pastLink = pastMock || pastCsat ? (
+    <p className="rp-note">
+      {pastCsat && <><Link href={pastHref(undefined, "csat")}>지난 기록 · 수능 가채점 리포트 보기</Link> — 저장한 가채점 리포트를 읽기 전용으로 봅니다. </>}
+      {pastMock && <><Link href={pastHref()}>지난 기록 · {MOCK_EXAM.label} 리포트 보기</Link> — 저장한 9월 리포트를 읽기 전용으로 봅니다.</>}
+    </p>
+  ) : null;
 
   // 부정확 입력 상태: '○○님께서 부정확한 성적을 입력하여 성적 분석이 되지 않습니다' 문구와 정정 길만(2026-11-22 대표님 결정).
   // 승인된 정정 입력을 고르러 ?edit=1 로 온 경우만 아래 양식으로 간다
@@ -282,6 +290,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}
           {!inputOpen && correctHref && <Link className="btn" href={correctHref}>{canCorrect ? "성적 정정 요청" : "정정 요청 상태"}</Link>}
           {!csat && <Link className="btn" href={`${route.path}?preview=csat`}>수능 가채점 예상 성적 보기</Link>}
+          {pastCsat && <Link className="btn" href={pastHref(undefined, "csat")}>지난 기록 · 수능 가채점</Link>}
           {pastMock && <Link className="btn" href={pastHref()}>지난 기록 · 9월 모의평가</Link>}
         </div>
 

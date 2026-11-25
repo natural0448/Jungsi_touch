@@ -6,7 +6,7 @@ import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
 import { emptyProfile, PROFILE_FIELDS, profileProblem, profileToTags, splitItems } from "@/lib/pro-profile";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoresInput } from "@/lib/dto";
-import { CSAT_EXAM, EXAM, csatOpen, proCsatEnabled } from "@/lib/exam";
+import { CSAT_EXAM, EXAM, csatOpen, finalOpen, proCsatEnabled } from "@/lib/exam";
 import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
 import { badScoreText, MISSING_STANDARD, missingStandard, UNATTAINABLE_FIRST, unattainableRaw } from "@/lib/score-validity";
 import type { ProvisionalFormState } from "../reports/me/provisional-actions";
@@ -200,7 +200,8 @@ export async function submitStudentProvisional(prev: ProvisionalFormState, fd: F
   const fail = (error: string, field?: string): ProvisionalFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
   const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
   const entry = Number(fd.get("entry_version"));
-  if (!proCsatEnabled() || !csatOpen()) return fail("지금은 이 화면에서 수능 가채점을 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 화면을 새로 고쳐 주세요.");
+  // 2026-11-25: 수능 실채점 전환 뒤에는 가채점 원점수를 받지 않는다(학생 성적 입력은 표준점수 양식으로)
+  if (!proCsatEnabled() || !csatOpen() || finalOpen()) return fail("지금은 이 화면에서 수능 가채점을 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 화면을 새로 고쳐 주세요.");
   if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(entry)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
   // 제2외국어/한문 미선택·과목만 고르고 원점수 없음은 서버로 보내기 전에 막는다(학생 입력 횟수를 쓰지 않는다)
   const built = buildProvisionalScores(values, CSAT_EXAM);

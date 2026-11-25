@@ -132,7 +132,8 @@ test("지난 기록 · 9월 모의평가: 9월 리포트가 있을 때만", asyn
   const page = await src("../src/app/reports/me/page.tsx");
   assert.doesNotMatch(page, /\{csat && <Link className="btn" href=\{pastHref\(\)\}>/);
   assert.match(page, /pastMock && <Link className="btn" href=\{pastHref\(\)\}>/);
-  assert.match(page, /if \(!\(await hasPastMock\(src, caller\)\)\) redirect\(route\.path\)/);
+  // 2026-11-25: 실채점 전환 뒤 가채점 지난 기록과 함께 쓰도록 종류(pastKind)를 받는다
+  assert.match(page, /if \(!\(await hasPastMock\(src, caller, pastKind\)\)\) redirect\(route\.path\)/);
   const past = await src("../src/app/reports/me/past-records.tsx");
   assert.match(past, /limit: 1/);
   assert.match(past, /catch \{\s*return false;/);

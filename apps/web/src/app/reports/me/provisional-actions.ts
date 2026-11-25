@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
 import { csatReleaseOn } from "@/lib/correction";
 import { correctionInputClosed, provisionalClosed } from "@/lib/csat-release";
-import { CSAT_EXAM, csatOpen, csatOpensAt } from "@/lib/exam";
+import { CSAT_EXAM, csatOpen, csatOpensAt, finalOpen } from "@/lib/exam";
 import { seoulDateTime, seoulTime } from "@/lib/format";
 import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
 import { badScoreText, UNATTAINABLE_FIRST, unattainableRaw } from "@/lib/score-validity";
@@ -68,6 +68,8 @@ export async function submitProvisional(prev: ProvisionalFormState, fd: FormData
   };
   const fail = (error: string, field?: string): ProvisionalFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
   // 전환 전에 열려 있던 화면에서 보내도 서버로 보내지 않는다(입력 횟수를 쓰지 않는다)
+  // 2026-11-25: 수능 실채점 전환 뒤에는 가채점 원점수를 받지 않는다(가채점 리포트는 지난 기록으로 남는다)
+  if (finalOpen()) return fail("수능 가채점 입력은 실채점 전환과 함께 끝났습니다. 화면을 새로 고치면 성적표의 표준점수로 실채점 성적을 넣을 수 있습니다. 입력 횟수는 쓰이지 않았습니다.");
   if (!csatOpen()) return fail(`수능 가채점 입력은 ${seoulDateTime(csatOpensAt().toISOString())}부터 열립니다. 지금은 저장하지 않았고 입력 횟수도 쓰이지 않았습니다.`);
   // 제2외국어/한문 미선택·과목만 고르고 원점수 없음도 여기서 막는다(서버로 보내지 않아 입력 횟수를 쓰지 않는다)
   const built = buildProvisionalScores(values, CSAT_EXAM);

@@ -36,6 +36,24 @@ export function proCsatEnabled(): boolean {
   return process.env.JUNGSI_PRO_CSAT_ENABLED === "1";
 }
 
+/*
+  수능 가채점 → 수능 실채점 전환(2026-11-25 준비, 대표님 11-24 결정: 12-14 0시 KST 공개). 담당자 실행 안내대로 실채점은
+  별도 시험 ID(JUNGSI_FINAL_EXAM_ID, 예: 2027-csat)·별도 입력 범위로 받고, 가채점 리포트는 '지난 기록'으로 남긴다.
+  켜기 스위치(JUNGSI_FINAL_ENABLED=1)와 시각(JUNGSI_FINAL_OPENS_AT, 기본 12-14 0시 KST)이 둘 다 맞을 때만 실채점이 '지금 시험'이다.
+  스위치가 꺼져 있으면 시각이 지나도 가채점 그대로다(실채점 시험팩·정책 행이 서버에 닿기 전에 미리 배포해도 안전하게).
+*/
+export const FINAL_OPENS_AT_DEFAULT = "2026-12-13T15:00:00Z";
+/** 실채점 전환 시각. 값이 없거나 읽을 수 없으면 기본 시각 */
+export function finalOpensAt(): Date {
+  const v = process.env.JUNGSI_FINAL_OPENS_AT;
+  const d = v ? new Date(v) : null;
+  return d && Number.isFinite(d.getTime()) ? d : new Date(FINAL_OPENS_AT_DEFAULT);
+}
+/** 수능 실채점으로 전환됐는가(켜기 스위치 + 전환 시각, 가채점 전환이 먼저여야 한다) */
+export function finalOpen(now: Date = new Date()): boolean {
+  return process.env.JUNGSI_FINAL_ENABLED === "1" && csatOpen(now) && now.getTime() >= finalOpensAt().getTime();
+}
+
 /** 9월 모의평가(전환 뒤에는 지난 기록) */
 export const MOCK_EXAM = {
   get exam_id() {
@@ -60,16 +78,29 @@ export const CSAT_EXAM = {
   short: "수능 가채점",
 } as const;
 
-/** 지금 성적 입력에 쓰는 시험. 전환 시각 전에는 9월 모의평가, 뒤에는 수능 가채점 */
-export const EXAM = {
+/** 수능 실채점(성적표 표준점수 입력). 실채점 전환 뒤 '지금 시험' */
+export const FINAL_EXAM = {
   get exam_id() {
-    return csatOpen() ? CSAT_EXAM.exam_id : MOCK_EXAM.exam_id;
+    return process.env.JUNGSI_FINAL_EXAM_ID ?? "SYNTHETIC-2027-csat";
   },
   get pack_version() {
-    return csatOpen() ? CSAT_EXAM.pack_version : MOCK_EXAM.pack_version;
+    return process.env.JUNGSI_FINAL_PACK_VERSION ?? "SYNTHETIC-csat-final-pack-v1";
+  },
+  label: "2027학년도 대학수학능력시험",
+  short: "수능 실채점",
+} as const;
+
+/** 지금 성적 입력에 쓰는 시험. 9월 모의평가 → 수능 가채점(11-23) → 수능 실채점(스위치 + 12-14) */
+const current = () => (finalOpen() ? FINAL_EXAM : csatOpen() ? CSAT_EXAM : MOCK_EXAM);
+export const EXAM = {
+  get exam_id() {
+    return current().exam_id;
+  },
+  get pack_version() {
+    return current().pack_version;
   },
   get label() {
-    return csatOpen() ? CSAT_EXAM.label : MOCK_EXAM.label;
+    return current().label;
   },
 };
 

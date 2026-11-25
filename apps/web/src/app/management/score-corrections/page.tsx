@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PageHead } from "@/components/page-head";
 import { isEdutouchAdmin } from "@/lib/admin";
-import { EXAM, csatOpen } from "@/lib/exam";
+import { EXAM, csatOpen, finalOpen } from "@/lib/exam";
 import { PersonalForm, ProForm } from "./forms";
 import "../../pro/pro.css";
 
@@ -23,11 +23,11 @@ export default async function Page() {
       <div className="wrap pg-body pro">
         <section className="pro-sec" aria-labelledby="p-h">
           <h2 id="p-h">개인 회원</h2>
-          <PersonalForm examId={EXAM.exam_id} stage={csatOpen() ? "provisional" : "mock"} idem={crypto.randomUUID()} />
+          <PersonalForm examId={EXAM.exam_id} stage={finalOpen() ? "final" : csatOpen() ? "provisional" : "mock"} idem={crypto.randomUUID()} />
         </section>
         <section className="pro-sec" aria-labelledby="o-h">
           <h2 id="o-h">전문가용 학생</h2>
-          <ProForm examId={EXAM.exam_id} stage={csatOpen() ? "provisional" : "mock"} idem={crypto.randomUUID()} />
+          <ProForm examId={EXAM.exam_id} stage={finalOpen() ? "final" : csatOpen() ? "provisional" : "mock"} idem={crypto.randomUUID()} />
           <p className="pro-note">전문가용 정정은 기관 권한 DB 함수의 고객센터(support) 판정이 연결된 뒤 동작합니다. 지금은 연결 대기로 보일 수 있습니다.</p>
         </section>
         <p className="pro-note">승인 전에 고객센터 접수 내용과 대상(회원·학생·시험·단계)이 정확히 맞는지 확인하세요. 승인한 정정권은 되돌리거나 늘리지 않습니다.</p>
