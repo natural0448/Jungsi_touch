@@ -249,7 +249,8 @@ export interface OverallAnalysisDto {
   } | null;
   /** Server-projected score for a held personal preliminary judgment. */
   provisional_school_display?: Record<string, {
-    reason: "non_csat_components_missing" | "comparison_axis_unverified";
+    /** final_cutoffs_pending: 실채점 성적인데 실채점 판정 자료가 아직 없음(2026-11-25 실채점 전환 준비) */
+    reason: "non_csat_components_missing" | "comparison_axis_unverified" | "final_cutoffs_pending";
     score_kind: "csat_component" | "university_score";
     central_score: string | null;
   }>;

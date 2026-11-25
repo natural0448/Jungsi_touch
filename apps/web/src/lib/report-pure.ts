@@ -68,7 +68,7 @@ export function schoolDisplayOf(c: CandidatesDto | null | undefined): SchoolDisp
   const out: SchoolDisplay = {};
   for (const x of c?.csat_withheld ?? []) {
     if (!x || typeof x.offering_id !== "string") continue;
-    if (x.reason !== "comparison_axis_unverified" && x.reason !== "non_csat_components_missing") continue;
+    if (x.reason !== "comparison_axis_unverified" && x.reason !== "non_csat_components_missing" && x.reason !== "final_cutoffs_pending") continue;
     out[x.offering_id] = { reason: x.reason, score_kind: x.score_kind === "csat_component" ? "csat_component" : "university_score", central_score: typeof x.central_score === "string" ? x.central_score : null };
   }
   return out;

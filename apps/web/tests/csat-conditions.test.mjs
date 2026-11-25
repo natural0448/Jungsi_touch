@@ -78,3 +78,14 @@ test("담당자 v3 판정 보류(서버 csat_withheld → overall.provisional_sc
   assert.deepEqual(csatC1Score("2027:1000002512", a), { label: "수능 반영분 점수", central: "180.00", low: "180.00", high: "180.00" });
   assert.equal(csatC1Score("2027:1000000012", a)?.label, "대학 환산점수");
 });
+
+// 2026-11-25 실채점 전환 준비: 실채점 판정 자료 전(final_cutoffs_pending)은 '환산점수만 제공', 화면이 판정을 못 받은 행(unloaded)은 '판정 다시 불러오기'
+test("final_cutoffs_pending shows converted score only; unloaded asks to reload", () => {
+  const base = a("물리학Ⅰ", "화학Ⅰ");
+  const pk = "2027:1000099999";
+  const fin = { ...base, provisional_school_display: { [pk]: { reason: "final_cutoffs_pending", score_kind: "university_score", central_score: "500.00" } } };
+  const v = csatNoJudgmentView(pk, fin);
+  assert.equal(v.label, "환산점수만 제공");
+  assert.match(v.desc, /확정 성적/);
+  assert.equal(csatNoJudgmentView(pk, base, "unloaded").label, "판정 다시 불러오기");
+});

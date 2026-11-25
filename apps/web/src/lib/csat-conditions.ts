@@ -58,6 +58,10 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
     // 대표님 2026-11-24: 정시터치는 학생부를 받지 않는다 — 학생부 등 반영 전형은 환산점수만 공개하고, 다른 영역은 이 점수를 바탕으로 검토하도록 안내
     return { label: "환산점수만 제공", cls: "check", desc: "이 전형은 수능 외에 학생부 등 다른 영역도 반영합니다. 정시터치는 학생부 성적을 받지 않아 지원가능성 판정 없이 수능 환산점수만 보여 드립니다. 다른 반영 영역은 이 환산점수를 바탕으로 직접 검토해 주세요." };
   }
+  if (display?.reason === "final_cutoffs_pending") {
+    // 실채점 전환(대표님 11-24): 실채점 판정 자료가 붙기 전에는 확정 성적으로 계산한 대학별 환산점수만 공개
+    return { label: "환산점수만 제공", cls: "check", desc: "확정 성적으로 계산한 이 대학 방식 환산점수입니다. 실채점 기준의 지원가능성 판정·위치·유불리는 대학별 비교 자료가 준비되는 대로 붙습니다." };
+  }
   if (display?.reason === "comparison_axis_unverified") {
     return { label: "비교 기준 확인 필요", cls: "check", desc: "이 모집단위의 과거 입결과 올해 성적을 같은 기준에서 비교할 수 있는지 확인 중입니다." };
   }
