@@ -284,7 +284,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
       <div className="wrap pg-body rp">
         <div className="rp-meta">
           <span>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준</span>
-          <span>{seoulDateTime(report.updated_at)} 저장</span>
+          {/* 2026-11-25 편의성 QA: 3페이지 판정 목록을 만들 때도 리포트가 새로 쓰여 '저장'이 손님이 저장한 시각처럼 보였다 */}
+          <span>{seoulDateTime(report.updated_at)} 리포트 갱신</span>
           {tag && <span className="rp-tag">{tag}</span>}
           {/* 저장한 성적은 고치지 않는다 — 입력권이 남은 유료 회원만 새 성적으로 리포트의 새 판을 만든다 */}
           {inputOpen && <Link className="btn" href={`${route.path}?edit=1`}>새 성적 입력</Link>}

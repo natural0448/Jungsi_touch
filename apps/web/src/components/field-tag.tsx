@@ -14,8 +14,8 @@ export function FieldTag({ id }: { id: string }) {
   if (!f) return <span className="fg none">{FIELD_UNKNOWN}</span>;
   return (
     <span className="fg" title={TITLE[f.basis] ?? undefined}>
+      {/* 2026-11-25 편의성 QA: '2025 분류 기준' 같은 근거 글씨는 손님에게 뜻이 불분명해 숨기고 설명은 title 로만 */}
       {f.name}
-      {f.note && <small> · {f.note}</small>}
     </span>
   );
 }

@@ -40,7 +40,7 @@ export function ShortlistTray({ items, other, links }: { items: PickedItem[]; ot
                 </span>
               ))
             ) : (
-              <span className="none">담은 곳이 없습니다. 담기를 누르세요.</span>
+              <span className="none">{other === "PAGE-03" ? `담은 곳이 없습니다. ${to.label}에서 담기를 누르세요.` : "담은 곳이 없습니다. 담기를 누르세요."}</span>
             )}
           </span>
           <Link className="btn" href={links?.other ?? to.path}>{to.label}에서도 같은 목록</Link>

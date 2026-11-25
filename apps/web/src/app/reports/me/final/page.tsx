@@ -80,7 +80,7 @@ export default async function Page() {
       <div className="wrap pg-body rp">
         <div className="rp-meta">
           <span>{a.exam.academic_year}학년도 {examTypeLabel(a.exam.exam_type)} 기준</span>
-          <span>{seoulDateTime(report.updated_at)} 저장</span>
+          <span>{seoulDateTime(report.updated_at)} 리포트 갱신</span>
           <Link className="btn" href={p2.path}>성적 보기·고치기</Link>
           <Link className="btn p" href={`${p2.path}/print`}>리포트 출력</Link>
         </div>

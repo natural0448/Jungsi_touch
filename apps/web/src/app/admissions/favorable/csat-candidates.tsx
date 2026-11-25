@@ -45,7 +45,7 @@ export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = f
             <summary>
               <b>{CSAT_CANDIDATE_LABEL[g]}</b> <span className="num">{v.counts[g]}</span>개 학과 · <span className="num">{v.groups[g].length}</span>개 대학
             </summary>
-            <CsatGroups pointBased={pointBased} universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} />
+            <CsatGroups pointBased={pointBased} universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} compact />
             <p className="fv-ref-note">
               {cut ? "학과가 많아 이 목록에는 일부만 보입니다. " : ""}
               <Link href={allHref ? allHref(STAGES[g]) : `${p4}?st=${STAGES[g]}`}>{CSAT_CANDIDATE_LABEL[g]} 단계 학과 전국에서 모두 보기 →</Link>

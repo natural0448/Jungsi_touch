@@ -11,12 +11,13 @@ import { ReferenceFieldDetails } from "./reference-field";
  * 가채점에는 누백·지난해 합격선 위치·환산 유불리가 없어 그 줄은 두지 않는다. 계열을 펼칠 때 계산(university.analyze)도 하지 않는다
  * (가채점 4페이지 상세는 아직 보류).
  */
-export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, lead, note = true, hid = "csat-t", pointBased = false }: { universities: ReferenceUniversity[]; favs: Set<string> | null; outsideBand: number; p3Label: string; heading?: string; lead?: string; note?: boolean; hid?: string; pointBased?: boolean }) {
+export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, lead, note = true, hid = "csat-t", pointBased = false, compact = false }: { universities: ReferenceUniversity[]; favs: Set<string> | null; outsideBand: number; p3Label: string; heading?: string; lead?: string; note?: boolean; hid?: string; pointBased?: boolean; compact?: boolean }) {
   if (universities.length === 0) return null;
   return (
     <section className="fv-ref" aria-labelledby={hid}>
       <div className="fv-sec-hd">
-        <h2 id={hid}>
+        {/* compact: 위 묶음 줄이 이미 '핵심 103개 학과·32개 대학'을 보이므로 제목을 화면에서 빼고 읽기 프로그램용으로만 둔다(2026-11-25 편의성 QA) */}
+        <h2 id={hid} className={compact ? "sr-only" : undefined}>
           {heading ?? "가채점으로 본 지원에 유리한 대학"} <span className="num">{universities.length}</span>
         </h2>
         <span>{lead ?? "가채점 성적을 학교마다 그 대학 방식으로 계산해 안정~상향에 드는 학과를 보여 줍니다. 적정·소신에 드는 학교부터, 계열을 누르면 학과가 펼쳐집니다."}</span>
@@ -40,7 +41,7 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, 
                   <>
                     <b>{f.label}</b>
                     <span className="num">{f.items.length}개 학과</span>
-                    {f.provisional && <small>2025 분류 기준</small>}
+                    {/* 2025 분류 기준 표시는 숨김(2026-11-25 편의성 QA) */}
                     <span className="rf-best"><CsatBadge band={f.bestBand} /></span>
                   </>
                 }

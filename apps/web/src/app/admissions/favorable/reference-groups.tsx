@@ -67,7 +67,7 @@ export function ReferenceGroups({ universities, favs, below, noCutoff, ineligibl
                   <>
                     <b>{f.label}</b>
                     <span className="num">{f.items.length}개 학과</span>
-                    {f.provisional && <small>2025 분류 기준</small>}
+                    {/* 2025 분류 기준 표시는 숨김(2026-11-25 편의성 QA) */}
                     <span className="rf-best"><BandOrMargin band={f.bestBand} m={f.best} /></span>
                   </>
                 }
