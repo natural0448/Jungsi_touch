@@ -34,7 +34,16 @@ import { AccessDenied, ConnectionError, SnapshotChanged, type Caller, type Jungs
   어떤 실패도 합성 응답이나 일반 회원으로 바꾸지 않는다.
 */
 
-const base = () => `${process.env.JUNGSI_API_URL}/api/v1`;
+/*
+  2026-11-25 Cloudflare 전환 대비: 워커 비밀 설정 JUNGSI_API_URL_OVERRIDE 가 있으면 그 주소를 먼저 쓴다(배포 없이 전환·되돌림, 10초).
+  정해 둔 두 곳(Supabase 함수·Cloudflare 워커 jungsi-api-prod)의 https 주소만 받는다. 그 밖의 값은 무시하고 기본 주소를 쓴다.
+*/
+const OVERRIDE_OK = /^https:\/\/(?:ksrpnhvyfdwysrexdhrd\.supabase\.co\/functions\/v1\/jungsi-api|jungsi-api-prod\.edutouch-web\.workers\.dev\/jungsi-api)$/;
+export const apiBaseUrl = () => {
+  const o = process.env.JUNGSI_API_URL_OVERRIDE?.trim();
+  return o && OVERRIDE_OK.test(o) ? o : process.env.JUNGSI_API_URL;
+};
+const base = () => `${apiBaseUrl()}/api/v1`;
 /**
  * 경로에 넣는 번호(정리본 p1-public-history:…, 모집단위 2027:1000001753 등)의 ':' 는 그대로 둔다.
  * 운영 jungsi-api 는 경로 값을 풀지 않고 형식 검사를 해서 '%3A' 를 invalid_identifier(422)로 거절한다
