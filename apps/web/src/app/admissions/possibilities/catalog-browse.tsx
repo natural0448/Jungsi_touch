@@ -1,4 +1,5 @@
 import { isCsatHeld } from "@/lib/csat-held";
+import { CSAT_COMBO_HELP } from "@/lib/csat-combo";
 import { isProvisionalOverall } from "@/lib/dto";
 import { personalCsatPoint } from "@/lib/personal-csat-point";
 import { StarButton } from "@/components/star-button";
@@ -458,7 +459,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                       <span>군</span>
                       <span className="r">내 환산점수</span>
                       <span>지원가능성</span>
-                      <span className="r">환산 유불리</span>
+                      <span className="r" title={CSAT_COMBO_HELP}>환산 유불리 <small aria-hidden="true">ⓘ</small></span>
                       <span />
                       <span />
                       <span />

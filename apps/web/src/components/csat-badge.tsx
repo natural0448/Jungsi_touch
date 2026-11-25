@@ -3,6 +3,7 @@ import type { ReferenceBandDto } from "@/lib/dto";
 import { BAND } from "@/lib/decision-labels";
 import { csatBandText, csatUpper } from "@/lib/provisional-view";
 import { csatGainTone, type CsatGainTone } from "@/lib/report-pure";
+import { csatComboNote } from "@/lib/csat-combo";
 
 /*
   수능 가채점 7단계 배지(3페이지 유리한 대학 찾기·4페이지 가능성 보기 공용, 2026-11-23 4페이지로 옮김).
@@ -31,9 +32,11 @@ export function CsatBadge({ band }: { band?: ReferenceBandDto | null }) {
   const tone = BAND[band.code];
   const upper = csatUpper(band);
   const scope = band.score_scope === "csat_component" ? `${CSAT_SCOPE_NOTE} ` : "";
+  // 2026-11-25: 유불리와 합친 한 줄 해석('하향인데 불리' 같은 조합이 모순으로 읽히지 않게)
+  const combo = csatComboNote(band.code, band.upper_code, csatGainView(band)?.tone);
   const title = scope + (upper
     ? `가채점 점수 범위에 따라 ${BAND[band.code].label}부터 ${BAND[upper].label}까지 나옵니다. 지원 자격은 모집요강에서 확인하세요`
-    : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`);
+    : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`) + (combo ? ` ${combo}` : "");
   return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}{scope && <small className="scope"> · 수능 기준</small>}</span>;
 }
 
@@ -57,7 +60,7 @@ export function CsatAdvantage({ band }: { band?: ReferenceBandDto | null }) {
   if (!v) return null;
   const width = Math.min(50, (Math.abs(Number(v.text.split("~")[0])) / 0.6) * 50);
   return (
-    <span className="adv" title={v.range ? `가채점 범위에 따라 ${v.range}%p` : undefined}>
+    <span className="adv" title={[csatComboNote(band?.code, band?.upper_code, v.tone), v.range ? `가채점 범위에 따라 ${v.range}%p` : null].filter(Boolean).join(" ") || undefined}>
       {/* 갈림이면 0 을 가운데 둔 막대가 뜻이 없어 틀째 숨긴다(자리는 남겨 줄 맞춤 유지, 11-24 대표님 지적) */}
       <span className="bar" aria-hidden="true" style={v.tone === "split" ? { visibility: "hidden" } : undefined}>{(v.tone === "up" || v.tone === "down") && <i className={v.tone} style={{ width: `${width}%` }} />}</span>
       <span className={`v num ${v.tone}`}><b className="advw">{CSAT_GAIN_WORD[v.tone]}</b> {v.text}%p</span>

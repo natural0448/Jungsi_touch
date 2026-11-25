@@ -37,8 +37,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   try {
     session = await source().getSession(await getCaller());
   } catch (e) {
-    if (!(e instanceof ConnectionError)) throw e;
-    down = e;
+    // 2026-11-25: 어떤 예외든 전체 오류 화면 대신 연결 대기 안내(스스로 다시 엶). 원인은 서버 기록에 남긴다
+    if (!(e instanceof ConnectionError)) console.error("jt_layout_session_failed", e);
+    down = e instanceof ConnectionError ? e : new ConnectionError("unavailable", "session_unexpected");
   }
   return (
     <html lang="ko" className={montserrat.variable}>
@@ -60,7 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Suspense fallback={null}>
               <NavPending />
             </Suspense>
-            {down ? <ConnectionNotice e={down} /> : children}
+            {down ? <ConnectionNotice e={down} reopenUnavailable /> : children}
           </main>
           <footer className="jt-foot">
             <div className="wrap">

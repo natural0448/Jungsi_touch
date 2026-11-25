@@ -1,4 +1,5 @@
 import { StarButton } from "@/components/star-button";
+import { CSAT_COMBO_HELP } from "@/lib/csat-combo";
 import Link from "@/components/link";
 import { ChevronIcon } from "@/components/icons";
 import { AdvantageCell, CATEGORY, CategoryBadge, EnrichedReasonList, PickButton, ScoreCell } from "@/components/offering-parts";
@@ -106,7 +107,7 @@ export function SchoolCard({ g, cur, picked, favs, stats, statsKey, canPick = tr
             <span>군</span>
             <span className="r">내 환산점수</span>
             <span>지원가능성</span>
-            <span className="r">환산 유불리</span>
+            <span className="r" title={CSAT_COMBO_HELP}>환산 유불리 <small aria-hidden="true">ⓘ</small></span>
             <span />
           </div>
           {fields.map((f) => (

@@ -1,4 +1,5 @@
 import type { C1Score, NoJudgmentView } from "@/lib/csat-conditions";
+import { csatComboNote } from "@/lib/csat-combo";
 import { REPORT_TAB } from "@/lib/routes";
 import { CSAT_GAIN_WORD, CSAT_SCOPE_NOTE, csatGainView } from "@/components/csat-badge";
 import type { ExceptionView } from "@/lib/csat-exceptions";
@@ -195,6 +196,10 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               </div>
               <p>{tone.desc}</p>
               {judged.score_scope === "csat_component" && <p>{CSAT_SCOPE_NOTE}</p>}
+              {(() => {
+                const note = csatComboNote(judged.code, judged.upper_code, gain?.tone);
+                return note ? <p className="why"><b>한 줄로 보면</b> {note} 지원가능성은 합격선과의 거리, 환산 유불리는 이 대학 계산 방식의 득실이라 따로 봅니다.</p> : null;
+              })()}
               {upper && <p>가채점 점수 범위에 따라 {tone.label}부터 {upper.label}까지 나옵니다.</p>}
               {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
                 <p>가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
