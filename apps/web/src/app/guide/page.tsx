@@ -15,6 +15,15 @@ export const metadata: Metadata = { title: GUIDE_TAB.label };
   판정 단계 문구는 decision-labels 를 그대로 쓰고, '7단계 대신 나오는 표시'는 화면 문구(lib/csat-conditions.ts)와 같은 이름을 쓴다.
 */
 
+const IMG = "https://edutouch.co.kr/images/jeongsi-intro";
+/** 정시터치로 보는 것(움직이는 화면은 11-24 운영 화면을 예시 성적으로 녹화한 것, 본체 소개 화면과 같은 파일) */
+const SHOW = [
+  { t: "원점수만 넣으면, 과목별 예상 성적과 전국 내 위치", d: "가채점 원점수로 과목별 예상 표준점수·백분위·등급과 전체 응시자 중 내 위치(상위 몇 %)를 범위로 보여 드립니다.", img: "how-1-score.webp", alt: "성적 입력 화면에서 원점수를 넣고 과목별 예상 성적과 상위누백 범위를 보는 움직이는 화면, 예시 성적" },
+  { t: "내 성적에 유리한 대학을 먼저 추립니다", d: "대학마다 그 대학 방식으로 계산해 지원해 볼 만한 대학을 도전·핵심·여유로 나누고, 대학 → 계열 → 학과 순서로 펼쳐 봅니다.", img: "how-2-find.webp", alt: "유리한 대학 찾기에서 대학, 계열, 학과 순서로 펼쳐 판정을 보는 움직이는 화면, 예시 성적" },
+  { t: "가고 싶은 학과는 직접 찾아 7단계로", d: "대학·학과 이름으로 찾아 학과마다 환산점수, 지원가능성, 대학 안 위치, 환산 유불리를 확인합니다.", img: "how-3-search.webp", alt: "전체 대학·학과 가능성 보기에서 대학 이름으로 검색해 학과를 여는 움직이는 화면, 예시 성적" },
+  { t: "가·나·다군 계획을 한 장으로", d: "담은 학과의 판정·환산점수·대학 안 위치·유불리를 리포트 한 장에 모아 상담할 때 출력해 씁니다.", img: "how-4-report.webp", alt: "담은 학과를 리포트에서 한 장으로 보는 움직이는 화면, 예시 성적" },
+];
+
 const STAGES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"] as const;
 
 /** 7단계 대신 나오는 표시. 이름은 화면에 실제로 나오는 그대로 */
@@ -43,26 +52,67 @@ export default function GuidePage() {
     <div className="guide">
       <MarkGuideSeen />
 
-      <header className="wrap g-head">
-        <h1>정시터치 이용 안내</h1>
-        <p className="g-head-sub">수능 성적을 대학마다 그 대학의 계산 방식으로 환산해, 학과마다 내 위치를 보여 드립니다. 처음이라면 아래 순서대로 보시면 됩니다.</p>
-
-        <div className="g-table-wrap">
-          <table className="g-plan">
-            <caption>가채점과 실채점</caption>
-            <thead>
-              <tr><td /><th scope="col">수능 가채점</th><th scope="col">수능 실채점</th></tr>
-            </thead>
-            <tbody>
-              <tr><th scope="row">기간</th><td><b>11월 27일 ~ 12월 13일</b></td><td><b>12월 14일부터</b></td></tr>
-              <tr><th scope="row">이용</th><td><span className="g-free">무료 공개</span> 회원가입만 하면 이용권 없이 씁니다</td><td><span className="g-paid">이용권</span> 이용권이 있어야 씁니다</td></tr>
-              <tr><th scope="row">넣는 성적</th><td>시험지에 적어 온 원점수</td><td>12월 11일 받는 성적표의 표준점수·백분위·등급</td></tr>
-              <tr><th scope="row">결과</th><td>점수가 추정이라 낮게~높게 <b>범위</b>로 나옵니다. 유리한 대학은 묶음마다 10곳까지 보여 드립니다.</td><td>확정 성적이라 <b>한 값</b>으로 나옵니다. 대학 안 정확한 위치, 유불리 수치, 경계까지의 점수 차이, 지난 입시결과와의 비교까지 봅니다.</td></tr>
-            </tbody>
-          </table>
+      <section className="g-hero">
+        <div className="wrap g-hero-in">
+          <div className="g-hero-text">
+            <p className="g-hero-tag"><span className="g-free">가채점 무료 공개</span> 11월 27일 ~ 12월 13일</p>
+            <h1>내 점수, 대학마다<br /><em>그 대학 방식</em>으로 계산합니다</h1>
+            <p className="g-hero-sub">&ldquo;이 등급이면 여기&rdquo;가 아니라, 대학마다 다른 반영 비율과 계산식으로 내 환산점수를 내고 학과마다 지난 입시결과와 견줍니다.</p>
+            <div className="g-cta">
+              <Link className="g-btn p" href={input.path}>내 성적 넣고 시작하기</Link>
+              <Link className="g-btn ghost" href={favorable.path}>{favorable.label}</Link>
+            </div>
+          </div>
+          <figure className="g-hero-shot">
+            <img src={`${IMG}/find-pc.webp`} width={1400} height={695} alt="유리한 대학 찾기 화면: 가채점 성적으로 대학과 계열·학과별 판정을 보여 줌(예시 성적)" />
+            <figcaption>유리한 대학 찾기 · 예시 성적</figcaption>
+          </figure>
         </div>
-        <p className="g-plan-note">{results.label}는 언제나 로그인만 하면 볼 수 있습니다.</p>
-      </header>
+        <div className="wrap">
+          <ul className="g-facts">
+            <li><b>5,702</b><span>2027 정시 모집단위<br />전국 수록</span></li>
+            <li><b>7<small>단계</small></b><span>안정부터 불가까지<br />학과마다 지원가능성</span></li>
+            <li><b>3<small>개 학년도</small></b><span>대학이 발표한<br />2024~2026 입시결과</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <div className="wrap">
+        <section className="g-sec g-show" aria-labelledby="g-show">
+          <h2 id="g-show">정시터치로 보는 것</h2>
+          {SHOW.map((x, i) => (
+            <article key={x.img} className={`g-show-row${i % 2 ? " rev" : ""}`}>
+              <div className="g-show-text">
+                <span className="g-show-no">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{x.t}</h3>
+                <p>{x.d}</p>
+              </div>
+              <figure className="g-show-shot">
+                <img src={`${IMG}/${x.img}`} width={1026} height={510} alt={x.alt} loading="lazy" decoding="async" />
+              </figure>
+            </article>
+          ))}
+          <p className="g-note">화면은 예시 성적으로 본 것입니다. 보이는 판정과 점수는 예시 성적의 결과이며 합격 가능 여부가 아닙니다.</p>
+        </section>
+
+        <section className="g-sec" aria-labelledby="g-plan">
+          <h2 id="g-plan">가채점은 무료, 실채점은 이용권</h2>
+          <div className="g-table-wrap">
+            <table className="g-plan">
+              <thead>
+                <tr><td /><th scope="col"><span className="g-free">무료 공개</span><br />수능 가채점</th><th scope="col"><span className="g-paid">이용권</span><br />수능 실채점</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">기간</th><td><b>11월 27일 ~ 12월 13일</b></td><td><b>12월 14일부터</b></td></tr>
+                <tr><th scope="row">이용</th><td>회원가입만 하면 이용권 없이 씁니다</td><td>이용권이 있어야 씁니다</td></tr>
+                <tr><th scope="row">넣는 성적</th><td>시험지에 적어 온 원점수</td><td>12월 11일 받는 성적표의 표준점수·백분위·등급</td></tr>
+                <tr><th scope="row">결과</th><td>점수가 추정이라 낮게~높게 <b>범위</b>로 나옵니다. 유리한 대학은 묶음마다 10곳까지 보여 드립니다.</td><td>확정 성적이라 <b>한 값</b>으로 나옵니다. 대학 안 정확한 위치, 유불리 수치, 경계까지의 점수 차이, 지난 입시결과와의 비교까지 봅니다.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="g-note">{results.label}는 언제나 로그인만 하면 볼 수 있습니다.</p>
+        </section>
+      </div>
 
       <div className="wrap">
         <section className="g-sec" aria-labelledby="g-flow">
@@ -150,7 +200,7 @@ export default function GuidePage() {
               </tbody>
             </table>
           </div>
-          <p className="g-note">판정 옆에 &lsquo;· 수능 기준&rsquo;이 붙으면 학생부도 반영하는 전형을 수능 반영분만으로 판정한 것이고, &lsquo;· 유사 학과 기준&rsquo;이 붙으면 이 학과의 지난 합격선 대신 같은 캠퍼스의 비슷한 학과로 잡은 기준입니다. &lsquo;· 일반전형 기준&rsquo;은 지난 입시결과가 없는 의예과 전형(2027 신설 지역의사선발 등)을 같은 대학 의예과 일반전형 합격선으로 판정한 것입니다.</p>
+          <p className="g-note">판정 옆에 &lsquo;· 수능 기준&rsquo;이 붙으면 학생부도 반영하는 전형을 수능 반영분만으로 판정한 것이고, &lsquo;· 유사 학과 기준&rsquo;이 붙으면 이 학과의 지난 합격선 대신 같은 캠퍼스의 비슷한 학과로 잡은 기준입니다. &lsquo;· 일반전형 기준&rsquo;은 지난 입시결과가 없는 의예과·약학과·치의예과 전형(2027 신설 지역의사선발, 지역인재 등)을 같은 대학 같은 학과 일반전형 합격선으로 판정한 것입니다.</p>
         </section>
 
         <section className="g-sec" aria-labelledby="g-final">
@@ -180,10 +230,18 @@ export default function GuidePage() {
           </ol>
         </section>
 
-        <p className="g-end">
-          준비가 되었다면 <Link href={input.path}>{input.label}</Link>부터 시작하세요. 가채점 원점수만 있으면 됩니다.
-        </p>
+
       </div>
+
+      <section className="g-end">
+        <div className="wrap g-end-in">
+          <div>
+            <h2>가채점 원점수만 있으면 됩니다</h2>
+            <p>12월 13일까지는 가입만 하면 무료로, 대학마다 내 자리를 확인하세요.</p>
+          </div>
+          <Link className="g-btn p" href={input.path}>내 성적 넣고 시작하기</Link>
+        </div>
+      </section>
     </div>
   );
 }
