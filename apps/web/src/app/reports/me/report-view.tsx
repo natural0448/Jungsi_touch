@@ -200,9 +200,13 @@ export function ProvisionalSubjectsSheet({ a, single = false }: { a: OverallAnal
   };
   const grade = (s?: (typeof a.subjects)[number]) => {
     if (!single) return span(s?.grade_range);
-    // 대표 등급: 양 끝 등급이 같을 때만. 다르면 비운다(담당자 2026-11-24)
-    const g = s ? projectP2ProvisionalSubject({ grade_range: s.grade_range ?? null }).grade : "—";
-    return typeof g === "number" ? <b className="num">{g}</b> : none;
+    // 대표 등급: 양 끝 등급이 같으면 그 등급. 갈리면 서버가 보낸 대표 등급(과목별 표준점수 등급컷, 담당자 2026-11-26)과
+    // 가능한 범위를 작게 덧붙인다. 대표 등급이 없으면 비운다(담당자 2026-11-24)
+    const g = s ? projectP2ProvisionalSubject({ grade_range: s.grade_range ?? null, representative_grade: s.representative_grade ?? null }).grade : "—";
+    if (typeof g !== "number") return none;
+    const r = s?.grade_range;
+    const split = r && r.low !== r.high;
+    return <><b className="num">{g}</b>{split && <small className="rs-range">예상 · {Math.min(r.low, r.high)}~{Math.max(r.low, r.high)} 가능</small>}</>;
   };
   const stdOne = (s?: (typeof a.subjects)[number]) => {
     const c = s?.standard_score_range?.central;

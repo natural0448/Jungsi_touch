@@ -171,6 +171,8 @@ export interface SubjectResultDto {
    */
   percentile_at_central?: number | null;
   grade_range?: { low: number; high: number } | null;
+  /** 2026-11-26 가채점 대표 등급(표시용 예상, 서버 계산). 등급 범위가 한 등급이면 그 등급, 옛 응답·다른 시험팩은 없음 */
+  representative_grade?: number | null;
 }
 
 /** 가채점 범위(낮음·중앙·높음) */

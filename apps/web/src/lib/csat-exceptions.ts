@@ -39,6 +39,7 @@ export const CSAT_EXCEPTIONS: Readonly<Record<string, ExceptionMode>> = {
 
 export type ExceptionView =
   | { kind: "minimum"; label: "최저충족" | "최저미충족"; desc: string }
+  | { kind: "expected"; label: "최저충족 예상" | "최저미충족 예상"; desc: string }
   | { kind: "pending"; label: string; desc: string };
 
 /**
@@ -151,12 +152,111 @@ export function skkuMinimumFromAnalysis(offeringId: string, a: OverallAnalysisDt
   return out ?? null;
 }
 
+/* ─── 2026-11-26 담당자 provisional_grade_display.ts projectSkkuExpectedMinimum·formatExpectedMinimum 옮김 ───
+   등급 범위가 최저 기준(좋은 3영역 합 6 이내)을 가로지를 때만, 같은 리포트의 과목별 대표 등급(서버 계산)으로
+   '최저충족 예상'·'최저미충족 예상'을 보인다. 확정 판정(위 skkuMinimumLabel)이 나오면 그것을 쓴다.
+   예상은 표시만 한다(자동 추천·정렬·필터에 쓰지 않는다). 담당자 원본의 규칙 ID·Guide Q 확인은
+   화면에 그 값이 없어 모집단위 4곳 목록으로 대신한다. */
+export type ExpectedMinimum = {
+  label: "최저충족 예상" | "최저미충족 예상";
+  representative_grade_sum: number;
+  best_grade_sum: number;
+  worst_grade_sum: number;
+  maximum_grade_sum: 6;
+  optional_substitution_can_change_label: boolean;
+};
+function bestThreeSumTwice(grades: readonly number[], inquiry: number): number {
+  return [...grades, inquiry].sort((x, y) => x - y).slice(0, 3).reduce((t, g) => t + g, 0);
+}
+/** 담당자 projectSkkuExpectedMinimum 의 계산 부분(범위 best·worst 는 등급합×2) */
+export function projectSkkuExpectedMinimum(offeringId: string, best: number, worst: number, input: MinimumInput): ExpectedMinimum | null {
+  if (!SKKU.has(offeringId) || input.examId !== "2027-csat-provisional") return null;
+  if (!Number.isInteger(best) || !Number.isInteger(worst) || best < 6 || best > 12 || worst <= 12 || worst > 54) return null;
+  const { korean, math, english, koreanHistory, inquiry1, inquiry2 } = input;
+  const optional = input.secondForeignLanguageOrClassicalChinese;
+  if ([korean, math, english, koreanHistory, inquiry1, inquiry2].some((area) => area?.attendance === "not_attended") ||
+    (optional?.attendance === "not_attended" && optional.grade != null)) return null;
+  if (koreanHistory?.attendance !== "attended" && !validGrade(koreanHistory?.grade)) return null;
+  if (!inquiry1?.subjectId || !inquiry2?.subjectId || inquiry1.subjectId === inquiry2.subjectId ||
+    (inquiry1.kind !== "social" && inquiry1.kind !== "science") || (inquiry2.kind !== "social" && inquiry2.kind !== "science")) return null;
+  const k = korean?.grade, m = math?.grade, e = english?.grade, q1 = inquiry1.grade, q2 = inquiry2.grade;
+  if (!validGrade(k) || !validGrade(m) || !validGrade(e) || !validGrade(q1) || !validGrade(q2)) return null;
+  const core = [2 * k, 2 * m, 2 * e];
+  let inquiry = q1 + q2;
+  if (inquiry1.kind === "science") inquiry = Math.min(inquiry, 2 * q1);
+  if (inquiry2.kind === "science") inquiry = Math.min(inquiry, 2 * q2);
+  const replacement = optional?.grade;
+  if (validGrade(replacement)) inquiry = Math.min(inquiry, replacement + q1, replacement + q2);
+  else if (replacement != null) return null;
+  const sum = bestThreeSumTwice(core, inquiry);
+  const bestWithOptional = optional?.attendance !== "not_attended" && !validGrade(replacement)
+    ? bestThreeSumTwice(core, Math.min(inquiry, 1 + q1, 1 + q2))
+    : sum;
+  if (sum < best || sum > worst) return null;
+  return {
+    label: sum <= 12 ? "최저충족 예상" : "최저미충족 예상",
+    representative_grade_sum: sum / 2,
+    best_grade_sum: best / 2,
+    worst_grade_sum: worst / 2,
+    maximum_grade_sum: 6,
+    optional_substitution_can_change_label: bestWithOptional <= 12 && sum > 12,
+  };
+}
+export function formatExpectedMinimum(v: ExpectedMinimum): string {
+  const possible = v.label === "최저충족 예상" ? "등급에 따라 미충족 가능" : "등급에 따라 충족 가능";
+  const optional = v.optional_substitution_can_change_label ? " · 제2외국어·한문 미입력 기준, 대체 등급에 따라 달라질 수 있음" : "";
+  return `${v.label} (가채점 대표값 기준) · 대표 등급합 ${v.representative_grade_sum} · 가능 등급합 ${v.best_grade_sum}~${v.worst_grade_sum} · 기준 ${v.maximum_grade_sum} 이내 · ${possible}${optional}`;
+}
+/** 등급 범위 안 모든 조합의 좋은 3영역 합×2 최솟값·최댓값(skkuMinimumLabel 과 같은 계산). 입력이 모자라면 null */
+function skkuSumRangeTwice(k: number[], m: number[], q1: number[], q2: number[], e: number, kind1: string | null, kind2: string | null, replacement?: number): { best: number; worst: number } | null {
+  if (!kind1 || !kind2) return null;
+  let best = Infinity, worst = -Infinity;
+  for (const gk of k) for (const gm of m) for (const g1 of q1) for (const g2 of q2) {
+    let inq = g1 + g2;
+    if (kind1 === "science") inq = Math.min(inq, 2 * g1);
+    if (kind2 === "science") inq = Math.min(inq, 2 * g2);
+    const v = bestGradeSumTwice([2 * gk, 2 * gm, 2 * e], inq, g1, g2, replacement);
+    best = Math.min(best, v); worst = Math.max(worst, v);
+  }
+  return Number.isFinite(best) ? { best, worst } : null;
+}
+/** 가채점 리포트로 성균관대 최저 '예상'. 확정이 안 될 때만 쓰고, 대표 등급이 하나라도 없으면 null */
+export function skkuExpectedFromAnalysis(offeringId: string, a: OverallAnalysisDto | null | undefined): ExpectedMinimum | null {
+  if (!a || !SKKU.has(offeringId)) return null;
+  const by = new Map(a.subjects.map((s) => [s.area, s]));
+  const sk = by.get("korean"), sm = by.get("math"), s1 = by.get("inquiry1"), s2 = by.get("inquiry2");
+  const k = gradeSpan(sk), m = gradeSpan(sm), q1 = gradeSpan(s1), q2 = gradeSpan(s2);
+  const e = a.absolute_grades?.영어, h = a.absolute_grades?.한국사;
+  if (!k || !m || !q1 || !q2 || !validGrade(e) || !validGrade(h) || !sk || !sm || !s1 || !s2) return null;
+  const rk = sk.representative_grade, rm = sm.representative_grade, r1 = s1.representative_grade, r2 = s2.representative_grade;
+  if (!validGrade(rk) || !validGrade(rm) || !validGrade(r1) || !validGrade(r2)) return null;
+  const sl = a.second_language ?? null;
+  const optional: GradeArea = sl && validGrade(sl.grade) ? { attendance: "attended", grade: sl.grade } : { attendance: "not_attended", grade: null };
+  const replacement = validGrade(optional.grade) ? optional.grade : undefined;
+  const range = skkuSumRangeTwice(k, m, q1, q2, e, kindOf(s1), kindOf(s2), replacement);
+  if (!range) return null;
+  return projectSkkuExpectedMinimum(offeringId, range.best, range.worst, {
+    examId: a.exam.exam_id,
+    korean: { attendance: "attended", grade: rk },
+    math: { attendance: "attended", grade: rm },
+    english: { attendance: "attended", grade: e },
+    koreanHistory: { attendance: "attended", grade: h },
+    inquiry1: { attendance: "attended", grade: r1, subjectId: s1.subject, kind: kindOf(s1) },
+    inquiry2: { attendance: "attended", grade: r2, subjectId: s2.subject, kind: kindOf(s2) },
+    secondForeignLanguageOrClassicalChinese: optional,
+  });
+}
+
 /** 예외 17곳이면 화면 표시, 아니면 null */
 export function csatExceptionView(offeringId: string, a: OverallAnalysisDto | null | undefined): ExceptionView | null {
   const mode = CSAT_EXCEPTIONS[offeringId];
   if (!mode) return null;
   if (mode === "csat_minimum_only") {
     const r = skkuMinimumFromAnalysis(offeringId, a);
+    if (!r) {
+      const x = skkuExpectedFromAnalysis(offeringId, a);
+      if (x) return { kind: "expected", label: x.label, desc: formatExpectedMinimum(x) + ". 7단계 판정은 내지 않으며, 성적표가 나오면 확정됩니다." };
+    }
     return r
       ? { kind: "minimum", label: r, desc: r === "최저충족" ? "가채점 등급으로 이 전형의 수능 최저 기준을 충족합니다. 7단계 판정은 내지 않습니다." : "가채점 등급으로는 이 전형의 수능 최저 기준에 미치지 못합니다. 7단계 판정은 내지 않습니다." }
       : { kind: "pending", label: "최저 확인 대기", desc: "가채점 등급 범위에 따라 수능 최저 충족 여부가 갈리거나 입력이 부족해 아직 정하지 않았습니다. 성적표가 나오면 확정됩니다." };
@@ -170,4 +270,5 @@ export function csatExceptionView(offeringId: string, a: OverallAnalysisDto | nu
 }
 
 /** 배지 색: 최저충족=안정 색, 최저미충족=조건 미충족 색, 대기=확인 색 */
+// 예상(가채점 대표값)은 확정이 아니어서 확인 색을 쓴다
 export const exceptionCls = (v: ExceptionView): string => (v.kind === "minimum" ? (v.label === "최저충족" ? "safe" : "inel") : "check");
