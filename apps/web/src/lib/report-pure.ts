@@ -41,8 +41,12 @@ export function csatJudged(r: ReportDto | null | undefined): boolean {
 */
 export function csatBandsIncomplete(bands: Record<string, ReferenceBandDto> | null | undefined): boolean {
   const all = Object.values(bands ?? {});
-  if (all.some((b) => b?.school_score && !b.school_rank)) return true;
-  return all.some((b) => b?.school_rank) && !all.some((b) => b?.school_gain);
+  // 2026-11-26 무료 공개 응답은 위치·유불리 숫자 대신 구간(rank_bucket)·방향(gain_tone)만 온다. 같은 규칙을 그 칸으로 본다
+  // (숫자가 없다고 덜 찬 결과로 보면 30초마다 다시 요청하게 된다)
+  const rank = (b: ReferenceBandDto) => b.school_rank ?? (typeof b.rank_bucket === "number" ? b.rank_bucket : undefined);
+  const gain = (b: ReferenceBandDto) => b.school_gain ?? b.gain_tone;
+  if (all.some((b) => b?.school_score && rank(b) === undefined)) return true;
+  return all.some((b) => b && rank(b) !== undefined) && !all.some((b) => b && gain(b) !== undefined);
 }
 /** 덜 찬 결과를 기억하는 시간 */
 export const CSAT_INCOMPLETE_TTL_MS = 30_000;

@@ -19,6 +19,8 @@ export interface Session {
   format: "jungsi.session/v1";
   member_tier: MemberTier;
   entitlement_expires_at: string | null; // UTC Z
+  /** 2026-11-26: 가채점 무료 공개 기간 끝(UTC Z). 서버 스위치가 켜져 있고 기간 안일 때만 온다 */
+  free_provisional_until?: string;
 }
 
 /** offering — 모집행 기본 정보 */
@@ -370,6 +372,12 @@ export interface ReferenceBandDto {
   school_gain?: { central: string | null; low: string; high: string };
   /** 서버 dep_r37(11-24, 담당자 Q3): 가운데 판정일 때 가채점 점수 범위 안에서 가능한 가장 좋은·나쁜 단계 */
   range_codes?: { best: string; worst: string };
+  /** 2026-11-26 무료 공개(일반 회원) 응답: 숫자 대신 받는 값. 유료 응답에는 없다 */
+  gain_tone?: "up" | "down" | "even" | "split";
+  /** 대학 안 위치 구간 위 끝(상위 N% 안쪽, 1·3·5·10·20·30·50·100) */
+  rank_bucket?: number;
+  /** 같은 단계 점수대 안 위치(0 아래 ~ 100 위) */
+  position_share?: number;
   /** 서버 dep_r37(11-24, 담당자 Q4): 유불리를 내지 않은 사유 — 국·수·탐2 합이 비교 분포 밖 */
   gain_note?: "comparison_total_out_of_support";
   /** 전문가용 가채점 판정 행만(서버 dep_pro_r27): 중앙 추정 점수의 단계 안 위치. 이 대학 환산점수 단위 문자열 */
@@ -389,6 +397,8 @@ export interface ReferenceThresholdSummaryDto {
   sources?: Record<string, { policy_version: string; approval_version: string }>;
   by_code?: Record<string, number>;
   delivered_by_code?: Record<string, number>;
+  /** 2026-11-26 무료 공개: 3페이지 묶음마다 보이지 않은 대학 수 */
+  free_hidden_by_bucket?: { reach: number; core: number; safe: number };
 }
 
 export interface AssessmentDto {

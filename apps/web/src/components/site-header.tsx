@@ -3,6 +3,7 @@ import type { Session } from "@/lib/dto";
 import { untilDate } from "@/lib/format";
 import { PASS_HREF, edutouch, loginHref } from "@/lib/links";
 import { GUIDE_TAB, PAGES, REPORT_TAB, lockFor, page } from "@/lib/routes";
+import { freeProvisionalUntil } from "@/lib/free-provisional";
 import { Tabs, UserChip } from "./tabs";
 
 /**
@@ -13,6 +14,7 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
   // 5번째 탭 '리포트'(2026-11-23): 잠금은 PAGE-02(성적 입력)와 같다
   // 1번째 탭 '이용 안내'(2026-11-25): 잠금 없음
   const tabs = [{ href: GUIDE_TAB.path, label: GUIDE_TAB.label, lock: null }, ...PAGES.map((p) => ({ href: p.path, label: p.label, lock: lockFor(session, p) })), { href: REPORT_TAB.path, label: REPORT_TAB.label, lock: lockFor(session, page("PAGE-02")) }];
+  const freeUntil = freeProvisionalUntil(session);
   return (
     <header>
       <div className="jt-util">
@@ -42,6 +44,12 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
               ) : (
                 <span className="pass">관리자 이용</span>
               )
+            ) : freeUntil ? (
+              // 가채점 무료 공개 기간(2026-11-26 대표님 결정): 일반 회원도 가채점 판정을 쓴다
+              <>
+                <span className="pass free">가채점 무료<span className="pass-until"> {untilDate(freeUntil.toISOString())}까지</span></span>
+                <a className="btn t" href={PASS_HREF}>이용권 보기</a>
+              </>
             ) : (
               <>
                 <span className="pass off">일반 회원</span>
@@ -57,6 +65,13 @@ export function SiteHeader({ session, down = false }: { session: Session | null;
           <Tabs items={tabs} />
         </div>
       </nav>
+      {freeUntil && (
+        <div className="jt-free-strip" role="note">
+          <div className="wrap">
+            <b>{untilDate(freeUntil.toISOString())}까지 수능 가채점 판정 무료 공개</b> — 대학별 판정·유리한 대학 추천을 이용권 없이 볼 수 있습니다. 정확한 위치·유불리 숫자·상담 리포트와 12월 14일부터의 실채점 판정은 이용권으로 이용합니다.
+          </div>
+        </div>
+      )}
     </header>
   );
 }

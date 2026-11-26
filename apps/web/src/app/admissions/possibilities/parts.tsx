@@ -14,6 +14,7 @@ import { referenceAdvantage } from "@/lib/reference-advantage";
 import { CONDITION_MARK_TEXT, conditionLines, formal105Notice } from "@/lib/eligibility-conditions";
 import { yearCutoffLines } from "@/lib/year-cutoffs";
 import { boundaryNote } from "@/lib/boundary-note";
+import { FREE_LOCK_NOTE } from "@/lib/free-provisional";
 import { POSITION_LINE_DESC, POSITION_NONE_DESC, POSITION_NONE_LABEL, positionNoteOf } from "@/lib/position-note";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
@@ -110,7 +111,10 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
   const range = s ? (s.low === s.high ? s.low : `${s.low}~${s.high}`) : null;
   const tone = judged ? BAND[judged.code] : null;
   const upper = judged?.upper_code && judged.upper_code !== judged.code ? BAND[judged.upper_code] : null;
-  const pos = judged?.position ?? null;
+  // 무료 공개 응답(2026-11-26)은 정확한 위치 대신 같은 단계 점수대 안 위치(position_share)만 온다
+  const freeView = !!judged && !judged.position && !judged.school_rank && (typeof judged.position_share === "number" || typeof judged.rank_bucket === "number" || !!judged.gain_tone);
+  const pos = judged?.position ?? (judged && typeof judged.position_share === "number" ? { score: "", better_gap: null, worse_gap: null, share_pct: judged.position_share } : null);
+  const rankBucket = judged && !judged.school_rank && typeof judged.rank_bucket === "number" ? judged.rank_bucket : null;
   // 대학 안 내 위치(서버 dep_r30): 판정과 같은 누적 도수에서 읽은 동점 포함 상위누백. 보류 모집단위는 보이지 않는다
   const rk = judged?.school_rank && (judged.school_rank.central ?? judged.school_rank.best ?? judged.school_rank.worst) ? judged.school_rank : null;
   const rkRange = rk && rk.best && rk.worst && rk.best !== rk.worst ? `${rk.best}~${rk.worst}` : null;
@@ -119,7 +123,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
   const gain = csatGainView(judged);
   const items = [
     { k: "점수 변환", ok: !!s || !!c1, label: s || c1 ? "계산됨" : undefined, why: `${EXAM} 성적으로 이 대학 환산점수를 계산하지 못했습니다` },
-    { k: "대학 안 내 위치", ok: !!rk || !!withheldRank, label: rk || withheldRank ? "계산됨" : undefined, why: `${EXAM} 성적의 대학 안 위치는 준비 중입니다` },
+    { k: "대학 안 내 위치", ok: !!rk || !!withheldRank || rankBucket !== null, label: rk || withheldRank || rankBucket !== null ? "계산됨" : undefined, why: `${EXAM} 성적의 대학 안 위치는 준비 중입니다` },
     { k: "지원 판단", ok: !!judged || ex?.kind === "minimum", label: judged ? "판정" : ex?.kind === "minimum" ? "수능 최저" : undefined, why: ex ? ex.desc : `이 모집단위의 ${EXAM} 판정 근거가 아직 없습니다` },
   ];
   return (
@@ -175,6 +179,13 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               </p>
               <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다 — 판단은 <b>지원가능성</b> 칸이 담당합니다.</span>
             </>
+          ) : rankBucket !== null ? (
+            // 무료 공개: 구간만(정확한 값은 실채점 이용권)
+            <>
+              <div className="big num">상위 {rankBucket}<small>% 안쪽</small></div>
+              <p className="lock-note">정확한 위치는 {FREE_LOCK_NOTE}</p>
+              <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 % 안쪽인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다.</span>
+            </>
           ) : withheldRank ? (
             <>
               <div className="big num">상위 {withheldRank.top_percent}<small>%</small></div>
@@ -222,6 +233,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                   <>
                     <p className="why"><b>왜 {tone.label}인가요?</b> {note.lead}</p>
                     {note.exact && <p className="why-num num">{note.exact}</p>}
+                    {!note.exact && freeView && <p className="why-num lock-note">정확한 점수 차이는 {FREE_LOCK_NOTE}</p>}
                   </>
                 );
               })()}
@@ -243,7 +255,8 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
           <h3>환산 유불리</h3>
           {gain ? (
             <>
-              <div className={`big num ${gain.tone}`}><span className="advw">{CSAT_GAIN_WORD[gain.tone]}</span> {gain.text}<small>%p</small></div>
+              <div className={`big num ${gain.tone}`}><span className="advw">{CSAT_GAIN_WORD[gain.tone]}</span>{gain.locked ? null : <> {gain.text}<small>%p</small></>}</div>
+              {gain.locked && <p className="lock-note">유불리 크기(%p)와 비교 근거는 {FREE_LOCK_NOTE}</p>}
               <p>
                 {gain.tone === "split" ? <>가채점 결과에 따라 이 대학 방식이 유리할 수도, 불리할 수도 있는 범위입니다. 성적표가 나오면 한쪽으로 정해집니다.</> : gain.range && <>범위 {gain.range}%p</>}
               </p>

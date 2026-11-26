@@ -46,7 +46,9 @@ export function CsatBadge({ band, id }: { band?: ReferenceBandDto | null; id?: s
 /** 가채점 환산 유불리 보기 값(서버 dep_r31 school_gain). 보류 모집단위(held)·값 없음이면 null */
 export type { CsatGainTone };
 export const CSAT_GAIN_WORD: Record<CsatGainTone, string> = { up: "유리", down: "불리", even: "비슷", split: "가채점에 따라 갈림" };
-export function csatGainView(band?: ReferenceBandDto | null): { tone: CsatGainTone; text: string; range: string | null } | null {
+export function csatGainView(band?: ReferenceBandDto | null): { tone: CsatGainTone; text: string; range: string | null; locked?: boolean } | null {
+  // 무료 공개 응답(2026-11-26): 숫자 없이 방향만(gain_tone). 숫자는 실채점 이용권
+  if (band && !band.held && !band.school_gain && band.gain_tone) return { tone: band.gain_tone, text: "", range: null, locked: true };
   const g = band && !band.held ? band.school_gain : null;
   if (!g) return null;
   const main = g.central ?? null;
@@ -61,12 +63,12 @@ export function csatGainView(band?: ReferenceBandDto | null): { tone: CsatGainTo
 export function CsatAdvantage({ band }: { band?: ReferenceBandDto | null }) {
   const v = csatGainView(band);
   if (!v) return null;
-  const width = Math.min(50, (Math.abs(Number(v.text.split("~")[0])) / 0.6) * 50);
+  const width = v.locked ? 0 : Math.min(50, (Math.abs(Number(v.text.split("~")[0])) / 0.6) * 50);
   return (
     <span className="adv" title={[csatComboNote(band?.code, band?.upper_code, v.tone), v.range ? `가채점 범위에 따라 ${v.range}%p` : null].filter(Boolean).join(" ") || undefined}>
       {/* 갈림이면 0 을 가운데 둔 막대가 뜻이 없어 틀째 숨긴다(자리는 남겨 줄 맞춤 유지, 11-24 대표님 지적) */}
       <span className="bar" aria-hidden="true" style={v.tone === "split" ? { visibility: "hidden" } : undefined}>{(v.tone === "up" || v.tone === "down") && <i className={v.tone} style={{ width: `${width}%` }} />}</span>
-      <span className={`v num ${v.tone}`}><b className="advw">{CSAT_GAIN_WORD[v.tone]}</b> {v.text}%p</span>
+      <span className={`v num ${v.tone}`}><b className="advw">{CSAT_GAIN_WORD[v.tone]}</b>{v.locked ? null : <> {v.text}%p</>}</span>
     </span>
   );
 }

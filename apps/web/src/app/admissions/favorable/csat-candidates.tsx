@@ -3,6 +3,7 @@ import { CSAT_CANDIDATE_LABEL, csatCandidateView, type CsatCandidateGroup } from
 import Link from "@/components/link";
 import { PATH as POSSIBILITIES } from "../possibilities/query";
 import { CsatGroups } from "./csat-groups";
+import { FREE_LOCK_NOTE } from "@/lib/free-provisional";
 
 /*
   가채점 후보(2026-11-23 대표님 결정, 담당자 검토안의 '가채점 참고 후보' — 화면에는 '참고' 꼬리표를 달지 않는다, 11-22 결정). 학교별 가채점 7단계를 도전·핵심·여유로 묶어 기본 후보 자리에 보인다
@@ -29,6 +30,9 @@ export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = f
   const cut = !!sum && ((typeof sum.delivered === "number" && typeof sum.listed === "number" && sum.delivered < sum.listed) || sum.complete === false);
   // 전체 대학·학과 가능성 보기(지원가능성 필터). 3·4페이지 순서가 바뀌어 page 번호 대신 경로 상수를 쓴다
   const p4 = POSSIBILITIES;
+  // 무료 공개(2026-11-26 대표님): 묶음마다 대학 10곳까지만 온다. 서버가 보이지 않은 대학 수를 알려 준다(reach·core·safe)
+  const hiddenRaw = sum?.free_hidden_by_bucket;
+  const hidden: Record<CsatCandidateGroup, number> = { challenge: hiddenRaw?.reach ?? 0, core: hiddenRaw?.core ?? 0, room: hiddenRaw?.safe ?? 0 };
   if (total === 0) return null;
   return (
     <section className="fv-csat-cands" aria-labelledby="csat-cand-t">
@@ -46,8 +50,9 @@ export function CsatCandidates({ c, favs, p3Label, final = false, pointBased = f
               <b>{CSAT_CANDIDATE_LABEL[g]}</b> <span className="num">{v.counts[g]}</span>개 학과 · <span className="num">{v.groups[g].length}</span>개 대학
             </summary>
             <CsatGroups pointBased={pointBased} universities={v.groups[g]} favs={favs} outsideBand={0} p3Label={p3Label} heading={`${CSAT_CANDIDATE_LABEL[g]} 후보`} lead={LEAD[g]} note={false} hid={`csat-cand-${g}`} compact />
+            {hidden[g] > 0 && <p className="fv-lock-note">이 묶음의 나머지 <b className="num">{hidden[g]}</b>개 대학은 {FREE_LOCK_NOTE}.</p>}
             <p className="fv-ref-note">
-              {cut ? "학과가 많아 이 목록에는 일부만 보입니다. " : ""}
+              {cut && !hidden[g] ? "학과가 많아 이 목록에는 일부만 보입니다. " : ""}
               <Link href={allHref ? allHref(STAGES[g]) : `${p4}?st=${STAGES[g]}`}>{CSAT_CANDIDATE_LABEL[g]} 단계 학과 전국에서 모두 보기 →</Link>
             </p>
           </details>

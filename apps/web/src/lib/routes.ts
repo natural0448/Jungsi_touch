@@ -1,4 +1,5 @@
 import catalog from "../../route_catalog.json";
+import { isFreeProvisional } from "./free-provisional";
 import type { MemberTier, Session } from "./dto";
 
 /*
@@ -61,7 +62,10 @@ export function page(id: string): PageRoute {
 export type Lock = "login" | "paid" | null;
 export function lockFor(session: Session | null, route: PageRoute): Lock {
   if (!session) return "login";
-  return route.member_tiers.includes(session.member_tier) ? null : "paid";
+  if (route.member_tiers.includes(session.member_tier)) return null;
+  // 가채점 무료 공개 기간: 3·4페이지를 일반 회원에게도 연다(서버가 가채점 판정만 허용하고 유료 값은 빼서 보낸다)
+  if (isFreeProvisional(session) && (route.id === "PAGE-03" || route.id === "PAGE-04")) return null;
+  return "paid";
 }
 
 /**

@@ -228,3 +228,4 @@
 .et .ps .card p.why{padding:8px 10px;border-radius:var(--r-sm);background:var(--sub);color:var(--ink)}
 .et .ps .card p.why b{font-weight:800}
 .et .ps .card p.why-num{margin-top:-4px;padding:0 10px;color:var(--muted);font-size:13px}
+.et .ps .card .lock-note{color:var(--muted);font-size:13px}

@@ -27,6 +27,9 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 .et .jt-user{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2)}
 .et .jt-user .pass{padding:2px 8px;border-radius:10px;background:var(--touch-soft);color:var(--touch);font-weight:700;font-size:12px;white-space:nowrap}
 .et .jt-user .pass.off{background:var(--sub-2);color:var(--muted)}
+.et .jt-user .pass.free{background:var(--touch-soft);color:var(--touch)}
+.et .jt-free-strip{background:var(--touch-soft);color:var(--ink);font-size:13px;line-height:1.55;padding:8px 0;border-bottom:1px solid var(--line)}
+.et .jt-free-strip b{color:var(--touch)}
 .et .jt-user .btn{height:32px}
 /* 좁은 휴대폰: 머리글 한 줄이 화면을 넘지 않게 줄인다(10-24 QA, 폭 320px에서 이용권 날짜가 화면 밖으로 밀렸다) */
 @media (max-width:400px){

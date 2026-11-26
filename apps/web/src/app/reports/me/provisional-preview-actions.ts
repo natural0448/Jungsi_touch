@@ -1,6 +1,7 @@
 "use server";
 
 import { getCaller, sessionOrDown, source } from "@/lib/api";
+import { isFreeProvisional } from "@/lib/free-provisional";
 import { INQUIRY_SUBJECTS, KOREAN_CHOICES, MATH_CHOICES, SECOND_LANGUAGE_SUBJECTS } from "@/lib/exam";
 import { PreviewError, previewConverter, type PreviewResult } from "@/lib/provisional-preview";
 
@@ -24,7 +25,7 @@ export async function previewProvisional(_prev: PreviewState, fd: FormData): Pro
   const values = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v)]));
   const caller = await getCaller();
   const { session, down } = await sessionOrDown(source(), caller);
-  if (down || session?.member_tier !== "paid") return { ok: false, message: "이용권 회원으로 로그인한 뒤 다시 시도해 주세요.", values };
+  if (down || (session?.member_tier !== "paid" && !isFreeProvisional(session))) return { ok: false, message: "이용권 회원으로 로그인한 뒤 다시 시도해 주세요.", values };
 
   const kc = String(fd.get("korean_choice") ?? ""), mc = String(fd.get("math_choice") ?? "");
   const i1 = String(fd.get("inq1") ?? ""), i2 = String(fd.get("inq2") ?? ""), sl = String(fd.get("sl_subject") ?? "");

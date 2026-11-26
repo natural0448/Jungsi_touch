@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { isFreeProvisional } from "@/lib/free-provisional";
 import { MemberMark } from "@/components/member-mark";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -70,7 +71,8 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   );
   if (down) return <>{head}<ConnectionNotice e={down} /></>;
   if (lockFor(session, route)) return <>{head}<LoginGate /></>;
-  const paid = session?.member_tier === "paid";
+  // 가채점 무료 공개 기간에는 일반 회원도 가채점 성적 입력·리포트를 쓴다(실채점은 서버가 막는다)
+  const paid = session?.member_tier === "paid" || isFreeProvisional(session);
   if (!paid) return <>{head}<PaidGate kind="paid" route={route} features={csat ? CSAT_FEATURES : FEATURES} /></>;
 
   const sp = await searchParams;

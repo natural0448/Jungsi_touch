@@ -1,4 +1,5 @@
 import { ConnectionNotice } from "@/components/connection-notice";
+import { isFreeProvisional } from "@/lib/free-provisional";
 import { MemberMark } from "@/components/member-mark";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -43,7 +44,7 @@ export default async function Page() {
       </>
     );
   }
-  if (session.member_tier !== "paid") return <>{head}<PaidGate kind="paid" route={p2} features={["담은 학교의 판정·환산점수·대학 안 위치·유불리를 한 장으로", "상담용 리포트 출력"]} /></>;
+  if (session.member_tier !== "paid" && !isFreeProvisional(session)) return <>{head}<PaidGate kind="paid" route={p2} features={["담은 학교의 판정·환산점수·대학 안 위치·유불리를 한 장으로", "상담용 리포트 출력"]} /></>;
 
   let report: ReportDto | null = null;
   try {

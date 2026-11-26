@@ -171,6 +171,7 @@
 /* 참고 누백(추정) 묶음 — 순위·판정 아님, 색 신호 없음 */
 .et .fv-ref{display:grid;gap:10px;margin-top:22px}
 .et .fv-ref-note{margin:0 2px;font-size:13px;color:var(--ink-2);line-height:1.6}
+.et .fv-lock-note{margin:6px 2px;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);background:var(--sub);font-size:13px;color:var(--muted);text-align:center}
 .et .fv-ref-list{display:grid;gap:12px}
 .et .rf{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 18px}
 .et .rf h3{font-size:16px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
