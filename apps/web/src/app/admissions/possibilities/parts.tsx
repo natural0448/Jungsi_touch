@@ -13,6 +13,7 @@ import type { AssessmentDto, OfferingDto, OverallResultDto, ReferenceBandDto, Su
 import { referenceAdvantage } from "@/lib/reference-advantage";
 import { CONDITION_MARK_TEXT, conditionLines, formal105Notice } from "@/lib/eligibility-conditions";
 import { yearCutoffLines } from "@/lib/year-cutoffs";
+import { boundaryNote } from "@/lib/boundary-note";
 import { POSITION_LINE_DESC, POSITION_NONE_DESC, POSITION_NONE_LABEL, positionNoteOf } from "@/lib/position-note";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { page } from "@/lib/routes";
@@ -205,19 +206,23 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
                 <p>가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
               )}
-              {pos && (pos.better_gap || pos.worse_gap) && (() => {
-                // 왜 이 단계인지(2026-11-24 대표님 지적): 내 환산점수와 이 학교 단계 경계 점수를 숫자로 보인다(서버 dep_r37b position)
+              {pos && !upper && (() => {
+                // 왜 이 단계인지(11-24 대표님 지적) → 11-26 대표님 결정: '몇 점 부족' 대신 위·아래 경계에 얼마나 가까운지를 말로,
+                // 정확한 점수는 따로 한 줄(무료 범위를 열 때 유료에만 보낼 줄). 서버 dep_r37b position(share_pct 포함)
                 const i = STAGE_ORDER.indexOf(judged.code as (typeof STAGE_ORDER)[number]);
-                const betterName = i > 0 ? BAND[STAGE_ORDER[i - 1]].label : null;
-                const worseName = i >= 0 && i < STAGE_ORDER.length - 1 ? BAND[STAGE_ORDER[i + 1]].label : null;
-                const plus = (x: string, y: string) => (Math.round((Number(x) + Number(y)) * 100) / 100).toFixed(2);
-                const minus = (x: string, y: string) => (Math.round((Number(x) - Number(y)) * 100) / 100).toFixed(2);
+                const note = boundaryNote({
+                  label: tone.label,
+                  better: i > 0 ? BAND[STAGE_ORDER[i - 1]].label : null,
+                  worse: i >= 0 && i < STAGE_ORDER.length - 1 ? BAND[STAGE_ORDER[i + 1]].label : null,
+                  pos,
+                  final,
+                });
+                if (!note) return null;
                 return (
-                  <p className="why">
-                    <b>왜 {tone.label}인가요?</b> 내 환산점수{final ? "" : "(가운데 추정)"} <b className="num">{pos.score}</b>점
-                    {pos.better_gap && betterName && <> · {betterName} 기준 <b className="num">{plus(pos.score, pos.better_gap)}</b>점까지 <b className="num">{pos.better_gap}</b>점 부족</>}
-                    {pos.worse_gap && worseName && <> · {worseName}{euro(worseName)} 내려가는 <b className="num">{minus(pos.score, pos.worse_gap)}</b>점까지 <b className="num">{pos.worse_gap}</b>점 여유</>}
-                  </p>
+                  <>
+                    <p className="why"><b>왜 {tone.label}인가요?</b> {note.lead}</p>
+                    {note.exact && <p className="why-num num">{note.exact}</p>}
+                  </>
                 );
               })()}
               <p>{final ? "성적표 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다." : "가채점 원점수로 추정한 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다."}</p>

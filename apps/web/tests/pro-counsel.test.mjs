@@ -29,8 +29,8 @@ test("position sentences use only server numbers", () => {
   const t = all(c);
   for (const v of ["704.94", "2.62", "4.61", "63"]) assert.ok(t.includes(v), v);
   assert.ok(t.includes("가운데"));
-  assert.ok(t.includes("한 단계 위인 하향에 2.62점 모자랍니다"));
-  assert.ok(t.includes("하향으로 판정됐을 자리"));
+  assert.ok(t.includes("한 단계 위인 하향 점수대와는 2.62점 차이입니다"));
+  assert.ok(!t.includes("모자랍니다") && !t.includes("부족"));
   assert.ok(t.includes("4.61점 이상 낮아지면 한 단계 아래인 소신으로"));
   assert.ok(t.includes("맨 아래 0, 맨 위 100"));
   assert.ok(!t.includes("경계"));
@@ -53,7 +53,7 @@ test("stable has no better boundary and outside no worse boundary; 0.00 reads as
   assert.ok(!st.chance.some((x) => x.includes("모자랍니다")));
   assert.ok(st.chance.some((x) => x.includes("하향으로 내려갑니다")));
   const up = schoolCounsel(school({ band: { code: "upward" }, position: { score: "648.50", better_gap: "0.00", worse_gap: "1.50", share_pct: 100 } }));
-  assert.ok(up.chance.some((x) => x.includes("소신과 0.1점도 차이 나지 않습니다") && x.includes("턱밑")));
+  assert.ok(up.chance.some((x) => x.includes("소신과 0.1점도 차이 나지 않는, 소신 바로 아래 점수입니다")));
   const edge = schoolCounsel(school({ position: { score: "1.00", better_gap: "1.00", worse_gap: "0.04", share_pct: 1 } }));
   assert.ok(edge.chance.some((x) => x.includes("아주 조금만(0.1점 미만) 낮아져도") && x.includes("맨 끝")));
   assert.ok(!all(edge).includes("경계"));

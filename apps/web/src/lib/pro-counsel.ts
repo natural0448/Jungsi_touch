@@ -142,10 +142,10 @@ export function schoolCounsel(s: CounselSchool): SchoolCounsel {
     if (zone && num(p.share_pct)) chance.push(`같은 ${label(b.code)} 안에서도 ${zoneWord}입니다. ${ro(label(b.code))} 판정되는 점수대를 맨 아래 0, 맨 위 100으로 놓으면 ${p.share_pct} 정도입니다.`);
     const better = idx(b.code) > 0 ? BAND_ORDER[idx(b.code) - 1] : null;
     const worse = idx(b.code) < 6 ? BAND_ORDER[idx(b.code) + 1] : null;
-    // 단계가 바뀌는 점수와 같으면 위 단계가 되지 못한다(점수 > 기준). 그래서 '더 높으면'이 아니라 '모자랍니다'로 쓴다
+    // 2026-11-26 대표님 결정: 수능이 끝나 바꿀 수 없는 '부족·모자람'은 쓰지 않고, 위 경계와의 거리(얼마나 경계에 있는지)로 쓴다
     if (better && p.better_gap && DEC.test(p.better_gap)) chance.push(tiny(p.better_gap)
-      ? `한 단계 위인 ${gwa(label(better))} 0.1점도 차이 나지 않습니다. ${label(better)} 바로 턱밑에 있는 점수입니다.`
-      : `한 단계 위인 ${label(better)}에 ${gapText(p.better_gap)} 모자랍니다. 이 대학 환산점수가 그보다 조금 더 높았다면 ${ro(label(better))} 판정됐을 자리입니다.`);
+      ? `한 단계 위인 ${gwa(label(better))} 0.1점도 차이 나지 않는, ${label(better)} 바로 아래 점수입니다.`
+      : `한 단계 위인 ${label(better)} 점수대와는 ${gapText(p.better_gap)} 차이입니다.`);
     if (worse && p.worse_gap && DEC.test(p.worse_gap)) chance.push(tiny(p.worse_gap)
       ? `반대로 아주 조금만(0.1점 미만) 낮아져도 한 단계 아래인 ${ro(label(worse))} 내려갑니다. ${label(b.code)} 판정의 맨 끝에 걸린 점수입니다.`
       : `반대로 ${gapText(p.worse_gap)} 이상 낮아지면 한 단계 아래인 ${ro(label(worse))} 내려갑니다.`);

@@ -227,3 +227,4 @@
 .et .ps-prov-detail{margin:0;font-size:13px;line-height:1.6;color:var(--ink-2)}
 .et .ps .card p.why{padding:8px 10px;border-radius:var(--r-sm);background:var(--sub);color:var(--ink)}
 .et .ps .card p.why b{font-weight:800}
+.et .ps .card p.why-num{margin-top:-4px;padding:0 10px;color:var(--muted);font-size:13px}
