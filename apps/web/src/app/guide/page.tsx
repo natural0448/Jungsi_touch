@@ -150,7 +150,7 @@ export default function GuidePage() {
               </tbody>
             </table>
           </div>
-          <p className="g-note">판정 옆에 &lsquo;· 수능 기준&rsquo;이 붙으면 학생부도 반영하는 전형을 수능 반영분만으로 판정한 것이고, &lsquo;· 유사 학과 기준&rsquo;이 붙으면 이 학과의 지난 합격선 대신 같은 캠퍼스의 비슷한 학과로 잡은 기준입니다.</p>
+          <p className="g-note">판정 옆에 &lsquo;· 수능 기준&rsquo;이 붙으면 학생부도 반영하는 전형을 수능 반영분만으로 판정한 것이고, &lsquo;· 유사 학과 기준&rsquo;이 붙으면 이 학과의 지난 합격선 대신 같은 캠퍼스의 비슷한 학과로 잡은 기준입니다. &lsquo;· 일반전형 기준&rsquo;은 지난 입시결과가 없는 의예과 전형(2027 신설 지역의사선발 등)을 같은 대학 의예과 일반전형 합격선으로 판정한 것입니다.</p>
         </section>
 
         <section className="g-sec" aria-labelledby="g-final">

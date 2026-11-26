@@ -5,6 +5,7 @@ import { csatBandText, csatUpper } from "@/lib/provisional-view";
 import { csatGainTone, type CsatGainTone } from "@/lib/report-pure";
 import { csatComboNote } from "@/lib/csat-combo";
 import { CSAT_SCOPE_BASIS_NOTE, CSAT_SCOPE_TAG, csatScopeBasis } from "@/lib/csat-scope-basis";
+import { isMedicalGeneralBasis, MEDICAL_GENERAL_NOTE, MEDICAL_GENERAL_TAG } from "@/lib/medical-general-basis";
 
 /*
   수능 가채점 7단계 배지(3페이지 유리한 대학 찾기·4페이지 가능성 보기 공용, 2026-11-23 4페이지로 옮김).
@@ -35,12 +36,13 @@ export function CsatBadge({ band, id }: { band?: ReferenceBandDto | null; id?: s
   const upper = csatUpper(band);
   const basis = band.score_scope === "csat_component" ? csatScopeBasis(id) : null;
   const scope = basis ? `${CSAT_SCOPE_NOTE} ${CSAT_SCOPE_BASIS_NOTE[basis]} ` : "";
+  const med = isMedicalGeneralBasis(id);
   // 2026-11-25: 유불리와 합친 한 줄 해석('하향인데 불리' 같은 조합이 모순으로 읽히지 않게)
   const combo = csatComboNote(band.code, band.upper_code, csatGainView(band)?.tone);
-  const title = scope + (upper
+  const title = (med ? `${MEDICAL_GENERAL_NOTE} ` : "") + scope + (upper
     ? `가채점 점수 범위에 따라 ${BAND[band.code].label}부터 ${BAND[upper].label}까지 나옵니다. 지원 자격은 모집요강에서 확인하세요`
     : `${tone.desc} 지원 자격은 모집요강에서 확인하세요`) + (combo ? ` ${combo}` : "");
-  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}{basis && <small className="scope"> · {CSAT_SCOPE_TAG[basis]}</small>}</span>;
+  return <span className={`st ${tone.cls}`} title={title}>{csatBandText(band)}{basis && <small className="scope"> · {CSAT_SCOPE_TAG[basis]}</small>}{med && <small className="scope"> · {MEDICAL_GENERAL_TAG}</small>}</span>;
 }
 
 /** 가채점 환산 유불리 보기 값(서버 dep_r31 school_gain). 보류 모집단위(held)·값 없음이면 null */
