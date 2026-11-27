@@ -72,9 +72,14 @@ function headers(caller: Caller, extra?: Record<string, string>) {
 async function send(path: string, init: RequestInit): Promise<Response> {
   const base = process.env.JUNGSI_PRO_API_URL;
   if (!base) throw new ConnectionError("unconfigured", "pro_api_not_configured");
+  // 2026-11-27 속도 측정(대표님 요청: 전문가용 느림): 경로 모양·상태·걸린 시간만 남긴다(기관·학생·리포트 번호는 가린다)
+  const t0 = Date.now();
   try {
-    return await fetch(`${base}/api/v1/pro${path}`, { ...init, cache: "no-store" });
+    const res = await fetch(`${base}/api/v1/pro${path}`, { ...init, cache: "no-store" });
+    console.log(`[pro-api] ${init.method ?? "GET"} ${path.split("?")[0].replace(/\/organizations\/[^/]+/, "/organizations/:org").replace(/\/[A-Za-z_-]*\d[A-Za-z0-9_.:-]*/g, "/:id")} ${res.status} ${Date.now() - t0}ms`);
+    return res;
   } catch {
+    console.log(`[pro-api] ${init.method ?? "GET"} failed ${Date.now() - t0}ms`);
     throw new ConnectionError("unavailable", "backend_unreachable");
   }
 }
