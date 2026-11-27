@@ -261,6 +261,34 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
   return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min: minimumOf(state.report.candidates), display: schoolDisplayOf(state.report.candidates) };
 }
 
+/* 2026-11-27 속도: 4페이지 30곳 판정의 데이터센터 공유(3페이지 p3 캐시와 같은 방식, 10분). 열쇠는 리포트·프로필·모집단위 묶음의 지문 */
+type P4Shared = { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: SchoolDisplay };
+async function p4CacheUrl(mk: string): Promise<string> {
+  const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("p4-v1\u0000" + mk)));
+  return "https://p4-provisional.invalid/" + [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function recallP4Shared(mk: string): Promise<P4Shared | null> {
+  const cache = edgeCache();
+  if (!cache) return null;
+  try {
+    const hit = await cache.match(await p4CacheUrl(mk));
+    if (!hit) return null;
+    const v = (await hit.json()) as P4Shared;
+    return v && typeof v.bands === "object" && v.bands && typeof v.min === "object" && typeof v.display === "object" ? v : null;
+  } catch {
+    return null;
+  }
+}
+async function rememberP4Shared(mk: string, v: P4Shared) {
+  const cache = edgeCache();
+  if (!cache) return;
+  try {
+    await cache.put(await p4CacheUrl(mk), new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": `private, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
+  } catch {
+    // 캐시에 못 넣어도 화면은 그대로
+  }
+}
+
 /** 판정을 받지 못한 모집단위(화면은 '판정 다시 불러오기'로 보인다) */
 const unloaded = (ids: readonly string[]): Record<string, CsatMinimum> => Object.fromEntries(ids.map((id) => [id, "unloaded" as const]));
 export async function provisionalBands(src: JungsiSource, caller: Caller, report: ReportDto, ids: string[]): Promise<{ bands: Record<string, ReferenceBandDto>; version: number; min: Record<string, CsatMinimum>; display: SchoolDisplay }> {
@@ -271,6 +299,13 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   const mk = JSON.stringify([report.report_id, report.profile_id, targets]);
   const hit = provisionalMemo.get(mk);
   if (hit && Date.now() - hit.at <= hit.ttl) return { bands: hit.bands, version: report.report_version, min: hit.min, display: hit.display };
+  // 2026-11-27 속도: 이 화면 서버 기억에 없으면 Cloudflare 캐시(같은 데이터센터의 다른 화면 서버가 받은 같은 리포트·성적·모집단위 묶음, 10분)
+  const shared = await recallP4Shared(mk);
+  if (shared) {
+    provisionalMemo.set(mk, { ...shared, at: Date.now(), ttl: REFERENCE_TTL_MS });
+    logSettle("p4_csat", { asked: targets.length, judged: Object.keys(shared.bands).length, shared: true });
+    return { ...shared, version: report.report_version };
+  }
   let state: ReportState;
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
@@ -314,6 +349,8 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
     provisionalMemo.delete(mk);
     // 위치·유불리가 덜 찬 결과(서버가 곡선을 아직 다 못 읽음)는 짧게만 기억한다(2026-11-23)
     provisionalMemo.set(mk, { bands, min: minimumOf(state.report.candidates), display, at: Date.now(), ttl: csatBandsIncomplete(bands) ? CSAT_INCOMPLETE_TTL_MS : REFERENCE_TTL_MS });
+    // 덜 찬 결과는 공유하지 않는다
+    if (!csatBandsIncomplete(bands)) await rememberP4Shared(mk, { bands, min: minimumOf(state.report.candidates), display });
     while (provisionalMemo.size > REFERENCE_MAX) provisionalMemo.delete(provisionalMemo.keys().next().value as string);
   }
   return { bands, version: Math.max(report.report_version, state.report.report_version), min: minimumOf(state.report.candidates), display };
