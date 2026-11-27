@@ -13,6 +13,7 @@ import { PrintDetail } from "../../../../reports/me/print-detail";
 import { loadProCounselData, loadProPrintExtras } from "./print-extras-action";
 import type { CounselYear } from "@/lib/pro-counsel";
 import { counselSchools, csatRows } from "@/lib/pro-counsel-view";
+import { confirmedIneligibleIds } from "@/lib/candidate-eligibility";
 import { ChoiceGuideView, CounselTips, CounselYearsTable, CsatBadge, guideOf } from "../../../counsel-view";
 
 type Counsel = { years: Record<string, CounselYear[] | null>; quotas: Record<string, number | null> };
@@ -86,7 +87,8 @@ export function PrintSheet({ fields, teacher = false }: { fields: Record<string,
   const showRef = shortlist.some((id) => refOf(id));
   const provisional = isProvisionalOverall(a);
   // 가채점 학교별 판정(서버 dep_pro_r27, source g). 학생용·선생님용 모두 담은 학교 표의 판정 칸에 쓴다
-  const csat = new Map(csatRows(cands).map((r) => [r.offering.offering_id, r.band]));
+  const ineligible = confirmedIneligibleIds(snapshot.report);
+  const csat = new Map(csatRows(cands, snapshot.report).map((r) => [r.offering.offering_id, r.band]));
   const counsel = teacher ? counselSchools(snapshot.report, provisional, shortlist, state.counsel?.years ?? {}, state.counsel?.quotas ?? {}) : [];
   const guide = teacher ? guideOf(counsel) : null;
   return (
@@ -159,7 +161,7 @@ export function PrintSheet({ fields, teacher = false }: { fields: Record<string,
               return (
                 <tbody key={id} className="pr-unit">
                   <tr>
-                    <td>{provisional ? (csat.get(id) ? <CsatBadge code={csat.get(id)!.code} upper={csat.get(id)!.upper_code} scope={csat.get(id)!.score_scope} /> : "판정 없음") : x ? CATEGORY[x.category].label : "판단 보류"}</td>
+                    <td>{ineligible.has(id) ? "지원 조건 미충족" : provisional ? (csat.get(id) ? <CsatBadge code={csat.get(id)!.code} upper={csat.get(id)!.upper_code} scope={csat.get(id)!.score_scope} /> : "판정 없음") : x ? CATEGORY[x.category].label : "판단 보류"}</td>
                     <th scope="row">{o ? `${o.university_name} ${o.department}` : id}</th>
                     <td className="r num">{x?.converted_score ?? "─"}</td>
                     <td className="r num">{x?.advantage ? `${x.advantage.delta_pp}%p` : "─"}</td>

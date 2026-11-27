@@ -1,6 +1,6 @@
 {
   "format": "jungsi.service-spec/v1",
-  "version": "1.9.176",
+  "version": "1.9.177",
   "baseline_commit": "87dba635ebc5119e53e9c7e3c5f456636a9c50e9",
   "status": "service_DB_code_accepted_frontend_and_live_pending",
   "current_documents": {
@@ -10056,6 +10056,18 @@
         "REQ-26"
       ],
       "symbols": []
+    },
+    {
+      "path": "apps/web/src/lib/candidate-eligibility.ts",
+      "layer": "presentation",
+      "status": "current_report_eligibility_veto_for_recommendation_wildcard_and_print",
+      "requirements": [
+        "REQ-04",
+        "REQ-05",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "symbols": []
     }
   ],
   "workflow": {
@@ -10769,7 +10781,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "외부 프런트 전담 개발자",
         "candidate_only": true,
@@ -10943,7 +10955,7 @@
         ],
         "preservation": "파일·브랜치·이전 결과 삭제 없음. 실제 자료·.env는 Git 제외. 리포트 확장/운영 배포 제외.",
         "verification_status": "service_DB_accepted_integrated_live_user_DB_Drive_and_external_frontend_pending",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "source_backend_commit": "adc684be2e9d22f8edad766d044b81894676036d",
         "owner": "서비스·DB 개발팀",
         "candidate_only": false,
@@ -11109,7 +11121,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "secured_backend_preparation_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-24",
           "REQ-25",
@@ -11128,7 +11140,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "accepted_on_develop_scoped_synthetic_verified",
         "contract_ref": "runtime_connection_preparation_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -11153,7 +11165,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "in_progress",
         "contract_ref": "supabase_deployment_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-12",
           "REQ-14",
@@ -11178,7 +11190,7 @@
         "branch": "feature/application-pre-data-platform",
         "status": "frontend_PR18_source_integrated_first_real_2027_local_conversion_PASS_metric_projection_prepared_general_publication_pending",
         "contract_ref": "official_history_db_display_contract",
-        "contract_version": "1.9.176",
+        "contract_version": "1.9.177",
         "requirements": [
           "REQ-01",
           "REQ-08",
@@ -361675,6 +361687,18 @@
         "PAGE-04"
       ],
       "summary": "대표님 속도 요청(11-27): 2페이지(내 성적 리포트)에서 지난 기록 확인(리포트 목록 1개)을 리포트를 다 받은 뒤가 아니라 입력 상태 뒤 리포트 읽기와 함께 보낸다(동시 2건 안). 회원 이름(본체 DB)도 처음부터 함께 받는다."
+    },
+    {
+      "date": "2026-11-27",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04",
+        "REQ-04",
+        "REQ-05",
+        "REQ-10",
+        "REQ-11"
+      ],
+      "summary": "리포트의 현행 응시 조건 미충족을 개인·전문가 추천, 와일드카드, 지원가능성 및 인쇄에 적용한다. 실채점의 탐구 기록 누락·중복은 확인 필요로 표시하며, 확정 미충족 모집행의 기존 환산점수와 수동 선택을 보존한다. 활성 Guide·응시조건·판정판을 함께 확인할 수 없는 수능 후보와 판정은 요청 간 캐시 재사용을 중단한다."
     }
   ],
   "p1_recruitment_score_review_verification": {

@@ -1,5 +1,6 @@
 import { isCsatHeld } from "./csat-held";
-import type { AssessmentDto, BandCode, CandidatesDto, OfferingDto, ReferenceBandDto, ShortlistEntryDto } from "./dto";
+import { blockedCandidateIds, confirmedIneligibleIds, type CandidateReport } from "./candidate-eligibility";
+import type { BandCode, CandidatesDto, OfferingDto, ReferenceBandDto, ShortlistEntryDto } from "./dto";
 import type { CounselSchool, CounselYear } from "./pro-counsel";
 
 /*
@@ -18,12 +19,14 @@ export interface CsatRow {
 }
 
 /** 가채점 판정 행(source g · 문턱 판정 · 7단계 코드)만. 9모 참고 행이 섞여 와도 쓰지 않는다 */
-export function csatRows(c: CandidatesDto | null | undefined): CsatRow[] {
+export function csatRows(c: CandidatesDto | null | undefined, report?: CandidateReport): CsatRow[] {
+  const blocked = blockedCandidateIds(c);
+  if (report) for (const id of confirmedIneligibleIds(report)) blocked.add(id);
   const out: CsatRow[] = [];
   for (const g of c?.reference_university_groups ?? []) {
     for (const it of g.offerings ?? []) {
       const b = it.reference_band;
-      if (!b || b.basis !== "reference_threshold" || b.source !== "g" || !code(b.code) || isCsatHeld(it.offering?.offering_id)) continue;
+      if (!b || b.held || b.basis !== "reference_threshold" || b.source !== "g" || !code(b.code) || !it.offering || blocked.has(it.offering.offering_id) || isCsatHeld(it.offering.offering_id)) continue;
       out.push({ offering: it.offering, band: b });
     }
   }
@@ -50,14 +53,14 @@ const position = (b: ReferenceBandDto | null | undefined) => {
  * 이름을 찾지 못한 모집단위는 넣지 않는다(이름 없이 문장을 만들지 않는다).
  */
 export function counselSchools(
-  report: { candidates?: CandidatesDto | null; analyses?: Record<string, AssessmentDto>; shortlist?: Record<string, ShortlistEntryDto> },
+  report: CandidateReport & { shortlist?: Record<string, ShortlistEntryDto> },
   provisional: boolean,
   ids: readonly string[] = pickedIds(report.shortlist),
   years: Record<string, CounselYear[] | null> = {},
   quotas: Record<string, number | null> = {},
 ): CounselSchool[] {
   const names = offeringIndex(report.candidates);
-  const csat = new Map(csatRows(report.candidates).map((r) => [r.offering.offering_id, r.band]));
+  const csat = new Map(csatRows(report.candidates, report).map((r) => [r.offering.offering_id, r.band]));
   const out: CounselSchool[] = [];
   for (const id of ids) {
     const o = names.get(id);

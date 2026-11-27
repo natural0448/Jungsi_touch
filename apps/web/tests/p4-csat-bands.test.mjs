@@ -17,6 +17,7 @@ const mocks = new Map([
   // 계정의 현재 리포트 번호(서버 입력 상태)만 대신한다. 브라우저 번호는 없다(2026-11-04)
   // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
   ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
+  ["@/lib/candidate-eligibility", new URL("../src/lib/candidate-eligibility.ts", import.meta.url).href],
   ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export async function currentReportId(){return globalThis.__reportOpsFixture.reportId}")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
@@ -54,11 +55,12 @@ test("provisionalBands: 요청한 모집단위의 source g 판정만, 쓴 뒤 �
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0].ids, ["2027:1", "2027:2", "2027:3", "2027:4"]);
   assert.match(calls[0].key, /^uap-/);
-  // 같은 리포트·같은 묶음은 다시 보내지 않는다(15분)
+  // 같은 리포트·같은 모집단위여도 권위 자료판을 확인할 수 없으면 새 요청으로 판정한다.
   const again = await provisionalBands(globalThis.__reportOpsFixture.src, caller, prov(4), ["2027:1", "2027:2", "2027:3", "2027:4"]);
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 2);
+  assert.notEqual(calls[0].key, calls[1].key);
   assert.deepEqual(Object.keys(again.bands).sort(), ["2027:1", "2027:2"]);
-  assert.equal(again.version, 4);
+  assert.equal(again.version, 5);
 });
 
 // 2026-11-25: 실패하면 1.5초 뒤 한 번만 다시 묻고, 그래도 못 받으면 그 모집단위를 'unloaded'(판정 다시 불러오기)로 표시한다

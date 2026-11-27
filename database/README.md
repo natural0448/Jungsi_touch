@@ -1,6 +1,6 @@
 # 정시터치 데이터 계층 개발 기준
 
-이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.176이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
+이 문서는 공통 명세 service_spec.json에서 생성한다. 현재 버전은 1.9.177이며 기획·라우팅·계층 문서를 같은 변경으로 갱신한다.
 
 이 폴더에는 실제 값이 없는 DB 구조·마이그레이션 코드만 추가할 수 있다. database/migrations/001_pre_data_platform.sql은 추가 정의만 제공한다. 자동 적용하지 않으며 기존 DB를 reset/drop/delete하지 않는다. 전용 jungsi_backend 스키마의 사용자/이용권/리포트 접근은 서버 역할과 SQL owner 조건으로 제한하고 anon/authenticated 직접 접근은 허용하지 않는다. schema_versions와 실제 11개 timestamptz/date 컬럼 형식을 함께 확인한다. 002_forecast_policy.sql은예상기준관리의추가테이블/권한/불변revision과발행저장계약이다. Python PostgresRepository 서비스 후보는 libpq 연결의 명시된 require·verify-ca·verify-full을 보존하고 미지정일 때 안전한 PGSSLMODE 또는 require를 사용한다. sslrootcert=system의 미지정 기본값은 verify-full이며 이보다 약한 명시 설정은 거절한다. disable·allow·prefer·알 수 없는 모드는 연결 전에 거절하며 모드가 명시되지 않은 libpq service 설정은 보류한다. GSS 설정을 낮추지 않고 연결의 실제 TLS 협상 여부가 확인되지 않으면 첫 쿼리 전에 중단한다. CA 설정과 인증·권한·RLS는 기존 값을 유지하며 비밀이나 연결 문자열을 기록하지 않는다. 모의 검증은 실제 인증서·DB 연결·배포 검수를 대신하지 않는다. 현재readiness는NOT_RUN이며실제적용·권한·동시성·멱등·게시검증이전에는운영준비완료로표시하지않는다. 원자료·성적·입결·환산표·곡선·모델·덤프·접속 비밀값은 여기에 복사하지 않는다.
 
@@ -78,4 +78,4 @@ PR13 adc684/74fd/947의493건·b66의530건·PR14 구현429/병합91과 문서81
 
 
 
-<!-- jungsi:generated spec_sha256=bd776145130c768888e4b72992b690e589206578cc43100d457f3cc4d5a327d6 -->
+<!-- jungsi:generated spec_sha256=897ea2aaa908284550c552e11a5f9d002e67b6a78c16fb563b445b53897f8847 -->

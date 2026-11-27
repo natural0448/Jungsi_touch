@@ -1,4 +1,5 @@
 import { isCsatHeld } from "./csat-held";
+import { blockedCandidateIds } from "./candidate-eligibility";
 import { personalCsatPoint } from "./personal-csat-point";
 import type { BandCode, CandidatesDto, ReferenceBandDto } from "./dto";
 import { referenceGroups, thresholdBandOf } from "./reference-percentile";
@@ -14,18 +15,8 @@ import { LISTED_BANDS, referenceUniversities, type ReferenceItem, type Reference
 */
 export const CSAT_SOURCE = "g";
 
-/** Consumer defense for authoritative server exclusions; eligibility is evaluated upstream. */
 export function blockedCsatRecommendationIds(c: CandidatesDto | null | undefined): Set<string> {
-  const blocked = new Set<string>();
-  for (const ids of [c?.csat_condition_unmet, c?.csat_minimum_unmet, c?.csat_minimum_partial]) {
-    if (Array.isArray(ids)) for (const id of ids) if (typeof id === "string") blocked.add(id);
-  }
-  if (Array.isArray(c?.ineligible_offerings)) {
-    for (const row of c.ineligible_offerings) {
-      if (typeof row?.offering_id === "string") blocked.add(row.offering_id);
-    }
-  }
-  return blocked;
+  return blockedCandidateIds(c);
 }
 
 /** 가채점 판정 행의 판정. source g · 문턱 판정 모양 · 7단계 코드일 때만(9모 행이 섞여 와도 쓰지 않는다) */

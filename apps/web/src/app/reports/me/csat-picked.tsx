@@ -1,4 +1,5 @@
 import { csatC1Score, csatNoJudgmentView } from "@/lib/csat-conditions";
+import { holdIneligibleBand, INELIGIBLE_CANDIDATE_NOTICE, isIneligibleAssessment } from "@/lib/candidate-eligibility";
 import Link from "@/components/link";
 import { CsatAdvantage, CsatBadge, CsatScore, csatGainView } from "@/components/csat-badge";
 import { heldBand } from "@/lib/csat-held";
@@ -51,14 +52,15 @@ export function CsatPickedTable({ items, bands, a, print = false, min = {}, sing
                 <tbody>
                   {rows.map((it) => {
                     const o = it.offering!;
-                    const raw = heldBand(it.offering_id, bands[it.offering_id]);
+                    const ineligible = isIneligibleAssessment(it.assessment);
+                    const raw = holdIneligibleBand(heldBand(it.offering_id, bands[it.offering_id]), ineligible);
                     const point = single && isProvisionalOverall(a);
                     const band = point ? personalCsatPoint(raw) : raw;
-                    const ex = band ? null : csatExceptionView(it.offering_id, a);
+                    const ex = band || ineligible ? null : csatExceptionView(it.offering_id, a);
                     const rank = rankText(band);
                     const c1Base = band ? null : csatC1Score(it.offering_id, a);
                     const c1 = point ? personalCsatScore(c1Base) : c1Base;
-                    const nj = band || ex ? null : csatNoJudgmentView(it.offering_id, a, min[it.offering_id]);
+                    const nj = ineligible ? INELIGIBLE_CANDIDATE_NOTICE : band || ex ? null : csatNoJudgmentView(it.offering_id, a, min[it.offering_id]);
                     return (
                       <tr key={it.offering_id}>
                         <th scope="row">
@@ -66,7 +68,7 @@ export function CsatPickedTable({ items, bands, a, print = false, min = {}, sing
                           {o.track && <small> · {o.track}</small>}
                         </th>
                         <td>
-                          {band ? <CsatBadge band={band} id={it.offering_id} /> : ex ? <span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span> : <span className={`st ${nj?.cls ?? "check"}`} title={nj?.desc ?? POSITION_NONE_DESC}>{nj?.label ?? POSITION_NONE_LABEL}</span>}
+                          {band && !ineligible ? <CsatBadge band={band} id={it.offering_id} /> : ex ? <span className={`st ${exceptionCls(ex)}`} title={ex.desc}>{ex.label}</span> : <span className={`st ${nj?.cls ?? "check"}`} title={nj?.desc ?? POSITION_NONE_DESC}>{nj?.label ?? POSITION_NONE_LABEL}</span>}
                         </td>
                         <td className="r">{band?.school_score ? <CsatScore band={band} /> : c1 ? <span className="score" title={c1.label}><b className="num">{c1.central ?? `${c1.low}~${c1.high}`}</b></span> : "—"}</td>
                         <td className="r num">{rank ?? "—"}</td>
@@ -98,11 +100,12 @@ export function CsatPickedTable({ items, bands, a, print = false, min = {}, sing
 /** 담은 학교 하나의 가채점 상세 카드(4페이지 펼친 상세와 같음, 담기 단추 없음) */
 export function csatDetailOf(it: PickedItem, bands: Record<string, ReferenceBandDto>, a: OverallAnalysisDto, min: Record<string, CsatMinimum> = {}, single = false): ReactNode {
   if (!it.offering) return null;
-  const raw = heldBand(it.offering_id, bands[it.offering_id]);
+  const ineligible = isIneligibleAssessment(it.assessment);
+  const raw = holdIneligibleBand(heldBand(it.offering_id, bands[it.offering_id]), ineligible);
   const point = single && isProvisionalOverall(a);
   const band = (point ? personalCsatPoint(raw) : raw) ?? null;
   const c1 = csatC1Score(it.offering_id, a);
-  return <CsatDetail o={it.offering} band={band} exception={csatExceptionView(it.offering_id, a)} noJudgment={csatNoJudgmentView(it.offering_id, a, min[it.offering_id])} c1={point ? personalCsatScore(c1) : c1} extras={null} picked acts={false} final={isCsatFinalOverall(a)} />;
+  return <CsatDetail o={it.offering} band={band} exception={ineligible ? null : csatExceptionView(it.offering_id, a)} noJudgment={ineligible ? INELIGIBLE_CANDIDATE_NOTICE : csatNoJudgmentView(it.offering_id, a, min[it.offering_id])} c1={point ? personalCsatScore(c1) : c1} extras={null} picked acts={false} final={isCsatFinalOverall(a)} />;
 }
 
 /**

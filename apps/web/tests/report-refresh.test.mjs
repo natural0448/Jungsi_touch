@@ -11,6 +11,7 @@ const mocks = new Map([
   ["@/lib/api", data(`export {AccessDenied,ConnectionError} from ${JSON.stringify(classesUrl)};export const getCaller=async()=>globalThis.__refreshFixture.caller;export const source=()=>globalThis.__refreshFixture.src;`)],
   // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
   ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
+  ["@/lib/candidate-eligibility", new URL("../src/lib/candidate-eligibility.ts", import.meta.url).href],
   ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export const currentReportId=async()=>globalThis.__refreshFixture.cookie;")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],

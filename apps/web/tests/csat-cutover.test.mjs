@@ -10,6 +10,7 @@ const mocks = new Map([
   ["@/lib/api", data(`export {AccessDenied, ConnectionError} from ${JSON.stringify(classesUrl)};`)],
   // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
   ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
+  ["@/lib/candidate-eligibility", new URL("../src/lib/candidate-eligibility.ts", import.meta.url).href],
   ["@/lib/report-ref", data("export async function currentReportId(){return null};export const screenReport=(c,r)=>r;")],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
   ["./format", new URL("../src/lib/format.ts", import.meta.url).href],
@@ -159,7 +160,7 @@ test("raw-score report: university.analyze stays blocked, candidates.build is se
     get: (_t, name) => async () => {
       calls.push(name);
       if (name === "buildCandidates") return { ok: true, value: built };
-      if (name === "readReport") return built;
+      if (name === "readReport" || name === "correctReport") return built;
       throw new Error(`unexpected ${String(name)}`);
     },
   });
@@ -174,17 +175,17 @@ test("raw-score report: university.analyze stays blocked, candidates.build is se
   assert.equal(ops.provisionalOnly({ ...provisionalReport, overall: { ...provisionalReport.overall, score_basis: "mock_exam", input_kind: undefined } }), false);
 });
 
-// 2026-11-25 3페이지 속도: 같은 리포트·같은 성적이면 10분 안에는 서버에 다시 만들게 하지 않는다(shared). 성적이 바뀌면 새로 만든다
-test("settleCandidates shared: same report and profile reuses the lists, a new profile rebuilds", async () => {
+// 같은 성적이라도 현재 응시조건판 결속이 없으면 수능 후보는 새로 확인한다.
+test("settleCandidates shared: CSAT always rebuilds when active admission rules are not bound", async () => {
   const calls = [];
   const lists = { reference_university_groups: [{ university_id: "u1", offerings: [{ offering: { offering_id: "2027:1" }, reference_band: { basis: "reference_threshold", source: "g", code: "stable" } }] }], reference_threshold_summary: { complete: true } };
   const base = { ...provisionalReport, report_id: "rp-shared", profile_id: "pf-1", report_version: 5, candidates: { status: "ready", reason_code: null, basic_university_groups: [], wildcards: [] } };
-  const built = { ...base, report_version: 6, candidates: { ...base.candidates, ...lists } };
+  let built = { ...base, report_version: 6, candidates: { ...base.candidates, ...lists } };
   const src = new Proxy({}, {
     get: (_t, name) => async () => {
       calls.push(name);
       if (name === "buildCandidates") return { ok: true, value: built };
-      if (name === "readReport") return built;
+      if (name === "readReport" || name === "correctReport") return built;
       throw new Error(`unexpected ${String(name)}`);
     },
   });
@@ -193,8 +194,10 @@ test("settleCandidates shared: same report and profile reuses the lists, a new p
   assert.deepEqual(calls, ["buildCandidates", "readReport"]);
   const again = await ops.settleCandidates(src, {}, { ...built, candidates: base.candidates }, { shared: true });
   assert.equal(again.candidates.reference_university_groups.length, 1);
-  assert.deepEqual(calls, ["buildCandidates", "readReport"]);
-  await ops.settleCandidates(src, {}, { ...base, profile_id: "pf-2" }, { shared: true });
-  assert.deepEqual(calls, ["buildCandidates", "readReport", "buildCandidates", "readReport"]);
+  assert.deepEqual(calls, ["buildCandidates", "readReport", "buildCandidates", "correctReport"]);
+  built = { ...built, profile_id: "pf-2" };
+  const newProfile = await ops.settleCandidates(src, {}, { ...base, profile_id: "pf-2" }, { shared: true });
+  assert.equal(newProfile.profile_id, "pf-2");
+  assert.deepEqual(calls, ["buildCandidates", "readReport", "buildCandidates", "correctReport", "buildCandidates", "readReport"]);
   assert.equal(ops.P3_REUSE_TTL_MS, 600000);
 });

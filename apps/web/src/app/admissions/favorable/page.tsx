@@ -34,6 +34,7 @@ import { ReferenceGroups } from "./reference-groups";
 import { CsatGroups } from "./csat-groups";
 import { CsatCandidates } from "./csat-candidates";
 import { csatView } from "@/lib/provisional-view";
+import { recommendableCandidates } from "@/lib/candidate-eligibility";
 import { referenceGroups } from "@/lib/reference-percentile";
 import { referencePool, referenceUniversities, referenceWildcards } from "@/lib/reference-view";
 import { CatalogBrowse } from "../possibilities/catalog-browse";
@@ -220,7 +221,7 @@ async function PastBody({ src, caller, sp }: { src: JungsiSource; caller: Caller
 async function ReportBody({ src, caller, sp, cur, report, past }: { src: JungsiSource; caller: Caller; sp: SP; cur: Query; report: ReportDto; past?: PastView }) {
   const p3 = page("PAGE-03");
   const strip = past ? <PastStrip past={past} /> : <PastEntrySlot src={src} caller={caller} />;
-  const c = report.candidates;
+  const c = report.candidates && recommendableCandidates(report.candidates, report);
   if (!c && past) return <PastUnavailable strip={strip} />;
   if (!c) {
     return (
@@ -260,7 +261,7 @@ async function ReportBody({ src, caller, sp, cur, report, past }: { src: JungsiS
   const stats = statsFor(src, caller, report, cur.open);
   // 필터·펼친 학교가 바뀌는 전환에서 집계 줄·띠가 학교 목록을 붙잡지 않게 조건을 경계의 key 로 준다(3페이지와 같은 이유)
   const qk = hrefWith(cur, {});
-  const known = [...(c.basic_university_groups ?? []).flatMap((g) => g.offerings ?? []), ...(c.wildcards ?? [])].map((i) => i?.offering).filter((o): o is NonNullable<typeof o> => Boolean(o));
+  const known = [...(report.candidates?.basic_university_groups ?? []).flatMap((g) => g.offerings ?? []), ...(report.candidates?.wildcards ?? [])].map((i) => i?.offering).filter((o): o is NonNullable<typeof o> => Boolean(o));
   const count = (f?: string) => groups.filter((g) => !f || g.offerings.some((o) => o.assessment.category === f)).length;
   const shown = groups.filter((g) => !cur.has || g.offerings.some((o) => o.assessment.category === cur.has));
   // 유료 데이터(유리한 학교 목록)를 그린 화면: 회원 식별 표시 + 조회 기록

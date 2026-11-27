@@ -1,6 +1,6 @@
 import type { AssessmentDto, EligibilityConditionsDto, SubjectResultDto } from "./dto";
 import { INQUIRY_SUBJECTS } from "./exam";
-import { eligibilityTables } from "./eligibility-tables";
+import { eligibilityTables, type Formal105Condition, type RequiredCondition } from "./eligibility-tables";
 
 /**
  * 지원 자격 조건(대표님 결정 2026-11-15). 서버가 요강 정본에서 확정된 필드만 보낸다.
@@ -14,10 +14,11 @@ export interface ConditionLine {
   mark: ConditionMark;
 }
 
-const DOMAIN_OF: Record<string, string> = Object.fromEntries(
-  INQUIRY_SUBJECTS.flatMap((g) => g.subjects.map((s) => [s, g.group.replace("탐구", "")])),
-);
 const squash = (s: string) => s.replace(/\s+/g, "");
+const inquiryKey = (s: unknown) => typeof s === "string" ? squash(s.normalize("NFKC")) : "";
+const DOMAIN_OF = new Map(
+  INQUIRY_SUBJECTS.flatMap((g) => g.subjects.map((s) => [inquiryKey(s), g.group.replace("탐구", "")] as const)),
+);
 
 function mathMark(choices: string[], subjects: SubjectResultDto[] | undefined): ConditionMark {
   const mine = subjects?.find((s) => s.area === "math")?.choice;
@@ -25,7 +26,7 @@ function mathMark(choices: string[], subjects: SubjectResultDto[] | undefined): 
   return choices.map(squash).includes(squash(mine)) ? "match" : "differ";
 }
 function inquiryMark(domains: string[], subjects: SubjectResultDto[] | undefined): ConditionMark {
-  const mine = (subjects ?? []).filter((s) => s.area === "inquiry1" || s.area === "inquiry2").map((s) => DOMAIN_OF[s.subject]);
+  const mine = (subjects ?? []).filter((s) => s.area === "inquiry1" || s.area === "inquiry2").map((s) => DOMAIN_OF.get(inquiryKey(s.subject)));
   if (!mine.length || mine.some((d) => !d)) return null;
   return mine.every((d) => domains.includes(d!)) ? "match" : "differ";
 }
@@ -61,7 +62,7 @@ export function conditionUnmet(a: AssessmentDto, subjects?: SubjectResultDto[]):
   if (!c || !subjects?.length) return false;
   if (c.math_choices?.length && mathMark(c.math_choices, subjects) === "differ") return true;
   if (c.inquiry_domains?.length) {
-    const mine = subjects.filter((s) => s.area === "inquiry1" || s.area === "inquiry2").map((s) => DOMAIN_OF[s.subject]);
+    const mine = subjects.filter((s) => s.area === "inquiry1" || s.area === "inquiry2").map((s) => DOMAIN_OF.get(inquiryKey(s.subject)));
     if (mine.length && mine.every((d) => d && !c.inquiry_domains!.includes(d))) return true;
   }
   return false;
@@ -90,22 +91,42 @@ export const CONDITION_MARK_TEXT: Record<"match" | "differ", string> = { match: 
  * 지정 과목 미응시를 '지원 조건 미충족'으로 본다(대표님 결정 2026-11-19: 요건으로 확인된 행에만 다시 켠다).
  * 확실히 어긋날 때만 미충족이다. 내 입력이 비었거나 과목 분류를 모르면 그대로 둔다.
  */
-const BASE = (name: string) => name.replace(/[ⅠⅡ]$/, "");
+const inquiryBase = (name: string) => name.replace(/I{1,2}$/, "");
+type RequiredScoreState = "met" | "unmet" | "unverified";
+
+function requiredScoreState(r: RequiredCondition | Formal105Condition, subjects: SubjectResultDto[] | undefined): RequiredScoreState {
+  if (!subjects?.length) return "unverified";
+  const mathChoices = "m" in r ? r.m : undefined;
+  const math = mathChoices ? mathMark(mathChoices, subjects) : "match";
+  if (math === "differ") return "unmet";
+
+  const minRecognized = r.n ?? 0;
+  const minScience = "s" in r ? (r.s ?? 0) : 0;
+  const restrictPair = "x" in r && r.x === 1;
+  if (minRecognized > 0 && !r.d) return "unverified";
+  if (minRecognized > 0 || minScience > 0 || restrictPair) {
+    const inq = subjects.filter((x) => x.area === "inquiry1" || x.area === "inquiry2");
+    const names = inq.map((s) => inquiryKey(s.subject));
+    const domains = names.map((name) => DOMAIN_OF.get(name));
+    // SubjectResultDto has no explicit attendance flag. An empty, unknown or
+    // duplicated record cannot prove that the prospective student took the required subject(s).
+    if (!inq.length || domains.some((domain) => !domain) || new Set(names).size !== inq.length ||
+        new Set(inq.map((s) => s.area)).size !== inq.length) return "unverified";
+
+    const recognized = r.d ? domains.filter((domain) => domain && r.d!.includes(domain)).length : 0;
+    const science = domains.filter((domain) => domain === "과학").length;
+    if (recognized < minRecognized || science < minScience) return "unmet";
+    if (restrictPair && names.length === 2 && science === 2 && inquiryBase(names[0]) === inquiryBase(names[1])) return "unmet";
+  }
+  return math === "match" ? "met" : "unverified";
+}
+
 export function requiredUnmet(offeringId: string, subjects: SubjectResultDto[] | undefined): boolean {
   const t = eligibilityTables();
-  const r = t.required[offeringId] ?? t.formal105[offeringId];
-  if (!r || !subjects?.length) return false;
-  if ("m" in r && r.m) {
-    const mine = subjects.find((x) => x.area === "math")?.choice;
-    if (mine && !r.m.map(squash).includes(squash(mine))) return true;
-  }
-  const inq = subjects.filter((x) => x.area === "inquiry1" || x.area === "inquiry2");
-  const domains = inq.map((x) => DOMAIN_OF[x.subject]);
-  if (inq.length === 0 || domains.some((d) => !d)) return false;
-  if (r.d && r.n !== undefined && domains.filter((d) => r.d!.includes(d!)).length < r.n) return true;
-  if ("s" in r && r.s !== undefined && domains.filter((d) => d === "과학").length < r.s) return true;
-  if ("x" in r && r.x && inq.length === 2 && domains.every((d) => d === "과학") && BASE(inq[0].subject) === BASE(inq[1].subject) && inq[0].subject !== inq[1].subject) return true;
-  return false;
+  const required = t.required[offeringId];
+  const formal = t.formal105[offeringId];
+  return (required !== undefined && requiredScoreState(required, subjects) === "unmet") ||
+    (formal !== undefined && requiredScoreState(formal, subjects) === "unmet");
 }
 
 /** withConditionUnmet 와 같은 모양으로, 92행 범위의 확인된 지원 필수 조건만 반영한다 */
@@ -132,12 +153,15 @@ export function withRequiredUnmet<R extends { overall?: { subjects?: SubjectResu
  */
 export interface Formal105Notice { score: "met" | "unverified"; text: string; documents: string }
 export function formal105Notice(offeringId: string, examType: string | null | undefined, subjects?: SubjectResultDto[]): Formal105Notice | null {
-  const r = eligibilityTables().formal105[offeringId];
+  const tables = eligibilityTables();
+  const r = tables.formal105[offeringId];
   if (!r) return null;
   const parts = ["2027 본수능 응시"];
   if (r.d && r.n) parts.push(`${r.d.map((d) => d + "탐구").join("·")} 중 ${r.n}과목`);
   const documents = r.g ? "학력과 지역인재 자격 증빙" : "학력(고교 졸업 또는 동등)";
   const final = examType === "csat_final" || examType === "csat";
-  const score = final && subjects?.length && !requiredUnmet(offeringId, subjects) ? "met" : "unverified";
+  const required = tables.required[offeringId];
+  const score = final && requiredScoreState(r, subjects) === "met" &&
+    (required === undefined || requiredScoreState(required, subjects) === "met") ? "met" : "unverified";
   return { score, text: parts.join(" · "), documents };
 }

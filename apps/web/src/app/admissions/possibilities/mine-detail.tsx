@@ -1,4 +1,5 @@
 import { csatC1Score, csatNoJudgmentView } from "@/lib/csat-conditions";
+import { holdIneligibleBand, INELIGIBLE_CANDIDATE_NOTICE, isConfirmedIneligible } from "@/lib/candidate-eligibility";
 import { heldBand } from "@/lib/csat-held";
 import { personalCsatPoint, personalCsatScore } from "@/lib/personal-csat-point";
 import type { Cell } from "@/components/offering-parts";
@@ -24,9 +25,10 @@ export function cellOf(report: ReportDto | null, id: string): Cell {
 export function MineDetail({ report, o, acts = true, single = false }: { report: ReportDto | null; o: OfferingDto; acts?: boolean; single?: boolean }) {
   if (report && csatJudged(report)) {
     // 2026-11-23 대표님 요청: 9월 모의평가 때와 같은 상세 카드(가채점 값으로)
-    const raw = heldBand(o.offering_id, report.provisional_bands?.[o.offering_id]);
+    const ineligible = isConfirmedIneligible(report, o.offering_id);
+    const raw = holdIneligibleBand(heldBand(o.offering_id, report.provisional_bands?.[o.offering_id]), ineligible);
     const c1 = csatC1Score(o.offering_id, report.overall);
-    return <CsatDetail o={o} band={(single ? personalCsatPoint(raw) : raw) ?? null} exception={csatExceptionView(o.offering_id, report.overall)} noJudgment={csatNoJudgmentView(o.offering_id, report.overall, report.provisional_min?.[o.offering_id])} c1={single ? personalCsatScore(c1) : c1} extras={null} picked={pickedIds(report).has(o.offering_id)} acts={acts} final={csatFinalOnly(report)} />;
+    return <CsatDetail o={o} band={(single ? personalCsatPoint(raw) : raw) ?? null} exception={ineligible ? null : csatExceptionView(o.offering_id, report.overall)} noJudgment={ineligible ? INELIGIBLE_CANDIDATE_NOTICE : csatNoJudgmentView(o.offering_id, report.overall, report.provisional_min?.[o.offering_id])} c1={single ? personalCsatScore(c1) : c1} extras={null} picked={pickedIds(report).has(o.offering_id)} acts={acts} final={csatFinalOnly(report)} />;
   }
   return <Detail o={o} a={cellOf(report, o.offering_id)} extras={null} picked={pickedIds(report).has(o.offering_id)} subjects={report?.overall?.subjects} overall={report?.overall?.overall} examType={report?.overall?.exam?.exam_type ?? null} acts={acts} />;
 }

@@ -22,6 +22,7 @@ import type {
   StatisticsDto,
 } from "@/lib/dto";
 import { withConditionUnmet, withRequiredUnmet } from "../eligibility-conditions";
+import { withCandidateEligibility } from "../candidate-eligibility";
 import { ensureEligibilityTables } from "../eligibility-tables";
 /** 서버 조건 목록 전체로 '지원 조건 미충족'을 보일지(2026-11-19 대표님 결정으로 끔).
  *  조건 목록은 지원 요건인지 가산·반영 항목인지 가려져 있지 않다. 대신 담당자가 요건으로 확인한 92행에만 켠다(withRequiredUnmet). */
@@ -396,7 +397,7 @@ const reportOfCached = cache(async (accessToken: string, reportId: string, _gen:
   // 지정 과목 미응시 표시(2026-11-18)는 CONDITION_UNMET_ENABLED 로 끄고 켠다. 서버 저장값은 바꾸지 않는다
   if (!r) return r;
   await ensureEligibilityTables();
-  return withRequiredUnmet(CONDITION_UNMET_ENABLED ? withConditionUnmet(r) : r);
+  return withCandidateEligibility(withRequiredUnmet(CONDITION_UNMET_ENABLED ? withConditionUnmet(r) : r));
 });
 const statusOf = (accessToken: string, examId: string, stage: string | undefined) => statusOfCached(accessToken, examId, stage, writeGeneration);
 const reportOf = (accessToken: string, reportId: string) => reportOfCached(accessToken, reportId, writeGeneration);
@@ -475,7 +476,7 @@ export const liveSource: JungsiSource = {
   analyzeOverall: (caller, body, key) => write<ReportDto>(caller, "POST", "/overall-reports", body, key),
   async correctReport(r) {
     await ensureEligibilityTables();
-    return withRequiredUnmet(CONDITION_UNMET_ENABLED ? withConditionUnmet(r) : r);
+    return withCandidateEligibility(withRequiredUnmet(CONDITION_UNMET_ENABLED ? withConditionUnmet(r) : r));
   },
   readReport: (caller, reportId) => (caller.accessToken ? reportOf(caller.accessToken, reportId) : orNull(call<ReportDto>(caller, `/reports/${enc(reportId)}`))),
   listOwnReports: (caller, q) => call<OwnReportListDto>(caller, `/me/reports${qs({ ...q })}`),

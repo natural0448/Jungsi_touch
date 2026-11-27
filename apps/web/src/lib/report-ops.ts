@@ -2,7 +2,8 @@ import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource, type StatusScanRequest } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, CsatMinimum, OfferingDto, OverallAnalysisDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
-import { CSAT_INCOMPLETE_TTL_MS, csatBandsIncomplete, csatJudged, pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { csatJudged, pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { confirmedIneligibleIds, holdIneligibleBand, withCandidateEligibility } from "@/lib/candidate-eligibility";
 
 // 브라우저 화면도 쓰는 읽기 전용 판단은 report-pure 에 둔다(서버 전용 모듈이 브라우저 묶음에 끌려가지 않게, 2026-11-22)
 export { csatJudged, pickedIds, provisionalOnly };
@@ -202,14 +203,13 @@ export async function ensureAnalyses(src: JungsiSource, caller: Caller, report: 
   (행 reference_band, basis reference_threshold, source "g")에 싣는다. 리포트에 저장되지 않아 report.read 에는 없다.
   - 판정이 없는 모집단위(산식 결속 대기·예외 표시 17곳·이 성적 조합으로 계산 불가)는 응답에 없다 → '가채점 판정 준비 중'.
   - 실패(연결 오류·409 두 번·옛 서버)는 빈 표 → 지금처럼 '가채점 판정 준비 중'. 오류 화면은 없다.
-  - 같은 리포트·같은 모집단위 묶음은 이 Worker 메모리에 15분 둔다(성적·판정 묶음이 바뀌면 리포트도 바뀐다).
+  - 활성 응시조건판을 확인할 수 없는 수능 판정은 이전 요청 결과를 다시 사용하지 않는다.
   - 요청마다 리포트 판이 하나 오른다(3페이지 candidates.build 와 같다). 그래서 쓴 뒤의 판을 함께 돌려준다.
 */
 // reference-percentile thresholdBandOf 와 같은 검사(시험의 모듈 대체 목록을 늘리지 않으려고 여기 둔다)
 const P4_BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"]);
 const thresholdBandOf = (b: ReferenceBandDto | null | undefined): ReferenceBandDto | null =>
   b && b.basis === "reference_threshold" && typeof b.code === "string" && P4_BAND_CODES.has(b.code) ? b : null;
-const provisionalMemo = new Map<string, { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: SchoolDisplay; at: number; ttl: number }>();
 type SchoolDisplay = NonNullable<OverallAnalysisDto["provisional_school_display"]>;
 export { schoolDisplayOf, withSchoolDisplay } from "@/lib/report-pure";
 import { schoolDisplayOf } from "@/lib/report-pure";
@@ -217,11 +217,23 @@ import { schoolDisplayOf } from "@/lib/report-pure";
 function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMinimum> {
   const out: Record<string, CsatMinimum> = {};
   for (const id of c?.csat_minimum_partial ?? []) out[id] = "partial";
-  for (const id of c?.csat_condition_unmet ?? []) out[id] = "condition";
   for (const id of c?.csat_inquiry_cap ?? []) out[id] = "cap";
   for (const id of c?.csat_no_comparison ?? []) out[id] = "nocomp";
   for (const id of c?.csat_minimum_unmet ?? []) out[id] = "unmet";
+  for (const id of c?.csat_condition_unmet ?? []) out[id] = "condition";
   return out;
+}
+
+function schoolConditions(input: ReportDto, result: ReportDto) {
+  const min = minimumOf(result.candidates);
+  const ineligible = confirmedIneligibleIds(result);
+  if (input.report_id === result.report_id && input.profile_id === result.profile_id && input.report_version === result.report_version) {
+    for (const id of confirmedIneligibleIds(input)) {
+      if (!result.analyses?.[id] && !result.stale_analysis_ids?.includes(id)) ineligible.add(id);
+    }
+  }
+  for (const id of ineligible) min[id] = "condition";
+  return min;
 }
 /**
  * 서버 dep_r38(2026-11-24 대표님 지적: 지원가능성 필터가 120개만 보고 멈췄다): 전국 판정에서 고른 단계 모집단위 한 쪽.
@@ -229,10 +241,10 @@ function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMini
  */
 export async function provisionalScan(src: JungsiSource, caller: Caller, report: ReportDto, scan: StatusScanRequest): Promise<{ offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean; min: Record<string, CsatMinimum>; display: SchoolDisplay } | null> {
   if (!csatJudged(report)) return null;
+  const request = crypto.randomUUID();
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
-      const body = { expected_version: r.report_version, status_scan: scan };
-      return src.scanUniversities(caller, r.report_id, r.report_version, scan, await key(attempt ? `uas${attempt}` : "uas", r, body));
+      return src.scanUniversities(caller, r.report_id, r.report_version, scan, await key("uas", r, { scan, request, attempt }));
     });
   let state: ReportState;
   try {
@@ -250,43 +262,16 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
   const sc = state.report.candidates?.status_scan;
   if (!sc || !Array.isArray(sc.offerings)) return null;
   const bands: Record<string, ReferenceBandDto> = {};
+  const min = schoolConditions(report, state.report);
   for (const g of state.report.candidates?.reference_university_groups ?? []) {
     for (const it of g.offerings ?? []) {
       const id = it.offering?.offering_id;
       const b = thresholdBandOf(it.reference_band);
-      if (typeof id === "string" && b && b.source === "g") bands[id] = b;
+      if (typeof id === "string" && b && b.source === "g") bands[id] = holdIneligibleBand(b, min[id] === "condition");
     }
   }
   logSettle("p4_scan", { matched: sc.matched, page: sc.offerings.length });
-  return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min: minimumOf(state.report.candidates), display: schoolDisplayOf(state.report.candidates) };
-}
-
-/* 2026-11-27 속도: 4페이지 30곳 판정의 데이터센터 공유(3페이지 p3 캐시와 같은 방식, 10분). 열쇠는 리포트·프로필·모집단위 묶음의 지문 */
-type P4Shared = { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: SchoolDisplay };
-async function p4CacheUrl(mk: string): Promise<string> {
-  const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("p4-v1\u0000" + mk)));
-  return "https://p4-provisional.invalid/" + [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-async function recallP4Shared(mk: string): Promise<P4Shared | null> {
-  const cache = edgeCache();
-  if (!cache) return null;
-  try {
-    const hit = await cache.match(await p4CacheUrl(mk));
-    if (!hit) return null;
-    const v = (await hit.json()) as P4Shared;
-    return v && typeof v.bands === "object" && v.bands && typeof v.min === "object" && typeof v.display === "object" ? v : null;
-  } catch {
-    return null;
-  }
-}
-async function rememberP4Shared(mk: string, v: P4Shared) {
-  const cache = edgeCache();
-  if (!cache) return;
-  try {
-    await cache.put(await p4CacheUrl(mk), new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": `private, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
-  } catch {
-    // 캐시에 못 넣어도 화면은 그대로
-  }
+  return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min, display: schoolDisplayOf(state.report.candidates) };
 }
 
 /** 판정을 받지 못한 모집단위(화면은 '판정 다시 불러오기'로 보인다) */
@@ -296,22 +281,11 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   if (!csatJudged(report)) return none;
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return none;
-  const mk = JSON.stringify([report.report_id, report.profile_id, targets]);
-  const hit = provisionalMemo.get(mk);
-  if (hit && Date.now() - hit.at <= hit.ttl) return { bands: hit.bands, version: report.report_version, min: hit.min, display: hit.display };
-  // 2026-11-27 속도: 이 화면 서버 기억에 없으면 Cloudflare 캐시(같은 데이터센터의 다른 화면 서버가 받은 같은 리포트·성적·모집단위 묶음, 10분)
-  const shared = await recallP4Shared(mk);
-  if (shared) {
-    provisionalMemo.set(mk, { ...shared, at: Date.now(), ttl: REFERENCE_TTL_MS });
-    logSettle("p4_csat", { asked: targets.length, judged: Object.keys(shared.bands).length, shared: true });
-    return { ...shared, version: report.report_version };
-  }
+  const request = crypto.randomUUID();
   let state: ReportState;
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
-      const body = { expected_version: r.report_version, offering_ids: targets };
-      // 다시 받을 때는 다른 요청 키(같은 키면 서버가 앞 응답을 그대로 돌려준다)
-      return src.analyzeUniversities(caller, r.report_id, r.report_version, targets, await key(attempt ? `uap${attempt}` : "uap", r, body));
+      return src.analyzeUniversities(caller, r.report_id, r.report_version, targets, await key("uap", r, { targets, request, attempt }));
     });
   try {
     state = await ask(0).catch(() => null as unknown as ReportState);
@@ -336,24 +310,17 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   }
   const want = new Set(targets);
   const bands: Record<string, ReferenceBandDto> = {};
+  const min = schoolConditions(report, state.report);
   for (const g of state.report.candidates?.reference_university_groups ?? []) {
     for (const it of g.offerings ?? []) {
       const id = it.offering?.offering_id;
       const b = thresholdBandOf(it.reference_band);
-      if (typeof id === "string" && want.has(id) && b && b.source === "g") bands[id] = b;
+      if (typeof id === "string" && want.has(id) && b && b.source === "g") bands[id] = holdIneligibleBand(b, min[id] === "condition");
     }
   }
   logSettle("p4_csat", { asked: targets.length, judged: Object.keys(bands).length });
   const display = schoolDisplayOf(state.report.candidates);
-  if (Object.keys(bands).length || Object.keys(display).length) {
-    provisionalMemo.delete(mk);
-    // 위치·유불리가 덜 찬 결과(서버가 곡선을 아직 다 못 읽음)는 짧게만 기억한다(2026-11-23)
-    provisionalMemo.set(mk, { bands, min: minimumOf(state.report.candidates), display, at: Date.now(), ttl: csatBandsIncomplete(bands) ? CSAT_INCOMPLETE_TTL_MS : REFERENCE_TTL_MS });
-    // 덜 찬 결과는 공유하지 않는다
-    if (!csatBandsIncomplete(bands)) await rememberP4Shared(mk, { bands, min: minimumOf(state.report.candidates), display });
-    while (provisionalMemo.size > REFERENCE_MAX) provisionalMemo.delete(provisionalMemo.keys().next().value as string);
-  }
-  return { bands, version: Math.max(report.report_version, state.report.report_version), min: minimumOf(state.report.candidates), display };
+  return { bands, version: Math.max(report.report_version, state.report.report_version), min, display };
 }
 
 /** 후보가 아직 없으면 candidates.build 로 만든다 */
@@ -649,9 +616,8 @@ function recallReference(r: ReportDto, ttl = REFERENCE_TTL_MS): ReferenceLists |
 
 /*
   2026-11-25 3페이지 속도(운영 QA: 열 때마다 candidates.build 5.8초 + 다시 읽기 1.6초, 리포트 '저장 시각'도 매번 바뀜).
-  같은 리포트·같은 성적(profile)이면 학교별 판정 목록이 같다. 방금 받은 목록을 화면 서버 기억과 Cloudflare 캐시(같은 지역)에
-  P3_REUSE_TTL_MS 동안 두고, 그 안에 다시 열면 서버에 다시 만들게 하지 않는다. 판정 묶음을 바꾼 직후에는 길어야 이 시간만큼
-  앞 목록이 보일 수 있다(새 성적 저장·정정은 profile 이 바뀌어 바로 새로 만든다). 캐시 열쇠는 리포트·성적 번호라 그 주인만 닿는다.
+  수능 판정 자료와 응시조건판은 성적·카탈로그와 독립적으로 바뀐다. 현재 읽기 응답은 두 판의 활성 결속을
+  전달하지 않으므로 수능 후보는 이전 요청 캐시를 쓰지 않는다. 다른 시험의 기존 재사용 조건은 유지한다.
 */
 export const P3_REUSE_TTL_MS = 10 * 60_000;
 const p3CacheUrl = (r: ReportDto) => `https://p3-reference.invalid/${encodeURIComponent(memoKey(r))}`;
@@ -742,18 +708,26 @@ const freshKey = () => `cbo-${crypto.randomUUID()}`;
  * 어떤 실패에도 받은 리포트로 그린다(화면 전체를 깨지 않는다).
  */
 export async function settleCandidates(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean; shared?: boolean } = {}): Promise<ReportDto> {
+  return withCandidateEligibility(await settleCandidateReport(src, caller, report, opts));
+}
+
+async function settleCandidateReport(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean; shared?: boolean }): Promise<ReportDto> {
+  const canReuse = !csatJudged(report) && !report.candidates_stale;
+  const fallback = (r: ReportDto) => {
+    const c = r.candidates;
+    if (!csatJudged(r) || !c) return r;
+    return { ...r, candidates: { ...c, basic_university_groups: [], wildcards: [], wildcard_selection: null,
+      reference_university_groups: [], reference_threshold_summary: null } };
+  };
   // 가채점 리포트도 보낸다(dep_r22). 판정 Secret 이 없으면 응답에 참고 묶음이 없고 3페이지는 '가채점 판정 준비 중'
-  if (opts.reuse && !report.candidates_stale) {
+  if (opts.reuse && canReuse) {
     const lists = recallReference(report);
     if (lists && report.candidates) {
       logSettle("candidates", { sent: false, reused: true });
       return withReference(report, lists);
     }
   }
-  // 2026-11-25: 평소 열 때도 같은 리포트·성적의 10분 안 목록을 다시 쓴다(화면 서버 기억 → Cloudflare 캐시)
-  // 2026-11-27 속도: 가채점·실채점 판정 리포트는 서버가 후보 기준값(basis)을 두지 않아 report.read 가 늘 candidates_stale 을 켠다.
-  // 그래서 11-25 의 10분 재사용이 한 번도 쓰이지 않고 열 때마다 다시 계산했다. 판정 리포트는 이 표시와 관계없이 같은 리포트·성적(열쇠)이면 다시 쓴다
-  if (opts.shared && report.candidates && (!report.candidates_stale || csatJudged(report))) {
+  if (opts.shared && report.candidates && canReuse) {
     const lists = await recallReferenceShared(report);
     if (lists) {
       logSettle("candidates", { sent: false, reused: true, shared: true });
@@ -768,13 +742,13 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     } catch (e) {
       if (!(e instanceof ConnectionError || e instanceof AccessDenied)) logSettleError("candidates-build", e);
       // 응답만 503 으로 끊겼으면 저장됐을 수 있어 다시 읽는다(참고 목록은 받지 못했으니 기본 목록만)
-      if (e instanceof ConnectionError && e.kind === "unavailable") return (await rereadOr(src, caller, current)) ?? current;
-      return current;
+      if (e instanceof ConnectionError && e.kind === "unavailable") return fallback((await rereadOr(src, caller, current)) ?? current);
+      return fallback(current);
     }
     if (res.ok) {
       const built = res.value;
       const lists = referenceListsOf(built.candidates);
-      if (lists?.reference_university_groups?.length) await rememberReferenceShared(built, lists);
+      if (canReuse && lists?.reference_university_groups?.length) await rememberReferenceShared(built, lists);
       // 2026-11-27 속도: 서버가 새 판을 쓰지 않았으면(판 번호 같음, 무료 회원 다시 열기) 다시 읽지 않는다(약 0.4초).
       // 받은 응답에 화면 보정(지원 조건 표시)을 바로 붙이고, 읽기에서만 붙는 표식(stale_analysis_ids·candidates_stale)은 방금 읽은 리포트 것을 쓴다
       const sameRevision = src.correctReport && built.report_id === current.report_id && built.report_version === current.report_version;
@@ -787,20 +761,21 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
       const sameSnapshot = base.report_id === built.report_id && base.profile_id === built.profile_id
         && base.report_version === built.report_version
         && (!baseCatalog || !builtCatalog || baseCatalog === builtCatalog);
-      const out = sameSnapshot ? withReference(base, lists, built.candidates) : base;
       const sum = lists?.reference_threshold_summary;
       logSettle("candidates", { sent: true, attempt, rows: (lists?.reference_university_groups ?? []).reduce((n, g) => n + (g?.offerings?.length ?? 0), 0), complete: sum ? sum.complete !== false : true });
-      return out;
+      if (!sameSnapshot) return fallback(base);
+      if (csatJudged(base)) return { ...base, candidates: built.candidates ?? null };
+      return withReference(base, lists, built.candidates);
     }
     if (res.code !== "revision_conflict" || attempt === 1) {
       logSettle("candidates", { sent: true, failed: true });
-      return current;
+      return fallback(current);
     }
     const fresh = await rereadOr(src, caller, current);
-    if (!fresh) return current;
+    if (!fresh) return fallback(current);
     current = conflictVersion(fresh, current);
   }
-  return current;
+  return fallback(current);
 }
 
 /** 리포트를 다시 읽는다. 실패하면 null(화면은 가진 리포트로 그린다) */

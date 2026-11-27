@@ -2,6 +2,7 @@ import { isCsatHeld } from "@/lib/csat-held";
 import { CSAT_COMBO_HELP } from "@/lib/csat-combo";
 import { isProvisionalOverall } from "@/lib/dto";
 import { personalCsatPoint } from "@/lib/personal-csat-point";
+import { isConfirmedIneligible } from "@/lib/candidate-eligibility";
 import { StarButton } from "@/components/star-button";
 import { FAVORITE_LIMIT, myFavorites, type Favorites } from "@/lib/favorites";
 import { FieldTag } from "@/components/field-tag";
@@ -193,6 +194,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 서버 v334~: 7단계를 내지 않은 모집단위의 가운데 환산점수·사유(담당자 v3, 2026-11-24)
   const dispAll: NonNullable<OverallAnalysisDto["provisional_school_display"]> = { ...(report?.overall?.provisional_school_display ?? {}) };
   const keyOf = (bands: Record<string, ReferenceBandDto> | undefined, id: string): StatusKey => {
+    if (report && isConfirmedIneligible(report, id)) return "ineligible";
     const raw = bands?.[id];
     const band = pointBased ? personalCsatPoint(raw) : raw;
     if (band && !band.held && !isCsatHeld(id)) return band.code as StatusKey;
