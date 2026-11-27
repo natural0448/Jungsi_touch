@@ -61,7 +61,8 @@ export class SnapshotChanged extends Error {
 }
 
 /** offerings.search 쿼리 (history.search 와 같은 조건, 기본 정보만) */
-export type OfferingSearchQuery = HistorySearchQuery;
+/** offset: 조건 없는 전체 목록의 '몇 번째부터'(서버 dep_r63, 커서·검색어·지역·군과 함께 쓰지 않는다) */
+export type OfferingSearchQuery = HistorySearchQuery & { offset?: number };
 
 /**
  * 화면이 데이터를 얻는 유일한 창구. 경로·모양은 develop 의 API_DTO 계약(lib/dto.ts)을 따른다.

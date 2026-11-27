@@ -431,6 +431,19 @@ async function publicCachePut(path: string, v: unknown): Promise<void> {
     // 캐시에 못 넣어도 화면은 그대로
   }
 }
+/** 캐시 칸 나누기용 회원 열쇠(JWT sub 의 SHA-256 앞 32자). 토큰 검증은 서버가 한다 — 여기서는 칸만 나눈다. 읽지 못하면 캐시를 쓰지 않는다 */
+async function subjectKey(caller: Caller): Promise<string | null> {
+  try {
+    const part = caller.accessToken?.split(".")[1];
+    if (!part) return null;
+    const sub = (JSON.parse(atob(part.replaceAll("-", "+").replaceAll("_", "/"))) as { sub?: unknown }).sub;
+    if (typeof sub !== "string" || !sub) return null;
+    const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("jt-search:" + sub)));
+    return [...d].slice(0, 16).map((b) => b.toString(16).padStart(2, "0")).join("");
+  } catch {
+    return null;
+  }
+}
 async function searchCacheGet(path: string): Promise<CatalogSearchDto<OfferingDto> | null> {
   const c = searchEdgeCache();
   if (!c) return null;
@@ -501,10 +514,14 @@ export const liveSource: JungsiSource = {
       // 회원과 묶이지 않는다(서버 catalog.ts: 판·쪽 번호·조건 지문). 같은 조건이면 데이터센터 캐시에서 5분 다시 쓴다.
       // 권한(유료·무료 기간) 확인은 페이지가 먼저 한다. 판이 바뀐 뒤 옛 커서는 서버가 409/422 로 돌려 화면이 처음부터 다시 보인다
       const path = `/offerings/search${qs({ ...q })}`;
-      const hit = await searchCacheGet(path);
+      // 2026-11-27 고침: 서버(current_public_catalog)의 다음 쪽 커서는 회원(subject)에 묶여 있다. 캐시를 회원 사이에 나누면
+      // 다른 회원이 받은 커서로 '다음 30개'를 눌러 '다음 목록을 여는 시간이 지났습니다'가 떴다 → 캐시 열쇠에 회원을 넣는다
+      const who = await subjectKey(caller);
+      const cacheKey = who ? `${path}${path.includes("?") ? "&" : "?"}__u=${who}` : null;
+      const hit = cacheKey ? await searchCacheGet(cacheKey) : null;
       if (hit) return hit;
       const got = await call<CatalogSearchDto<OfferingDto>>(caller, path);
-      if (got && got.status === "ready") await searchCachePut(path, got);
+      if (cacheKey && got && got.status === "ready") await searchCachePut(cacheKey, got);
       return got;
     } catch (error) {
       if (q.cursor && error instanceof Stale) throw new Error("invalid_cursor");

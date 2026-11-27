@@ -80,6 +80,10 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   let proFailed: string | null = null;
   // 서버는 한 번에 훑는 범위가 정해져 있어, 조건에 맞는 행이 뒤쪽에 있으면 빈 쪽과 다음 커서만 준다(예: 지역=제주).
   // 빈 쪽을 '결과 없음'으로 보이지 않도록 다음 커서를 몇 번까지 대신 따라간다(2026-11-19 운영 확인)
+  // 검색 목록(필터·즐겨찾기 없음, 검색어·지역·군은 있어도 됨): 서버가 맞는 수를 주고 offset 으로 아무 쪽이나 연다
+  // (전체 목록 dep_r63, 검색 dep_r64 — 대표님 요청 11-27 '검색할 때도 숫자 쪽')
+  const plainList = !pro && !cur.fav && !cur.st;
+  const plainPage = cur.cursor?.startsWith("pg:") ? Math.max(1, Math.min(10000, Number.parseInt(cur.cursor.slice(3), 10) || 1)) : 1;
   const searching = cur.fav
     ? favoring.then((f) => favoriteResult(f, cur))
     : pro
@@ -92,7 +96,10 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     })
     // 서버 지원가능성 필터의 다음 쪽(st:…)은 검색 커서가 아니다 — 검색은 첫 쪽(건수·기준일)만 받는다
     // 2026-11-27: 필터 쪽 번호(sp:N)도 검색 커서가 아니다 — 그대로 보내면 서버가 400 으로 거절했다
-    : skipEmptyPages(src, caller, toSearch(cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") ? { ...cur, cursor: undefined } : cur));
+    // 조건 없는 전체 목록의 쪽 번호(pg:N)는 서버 offset 으로 바로 그 쪽을 받는다(서버 dep_r63, 대표님 요청 11-27)
+    : plainList && cur.cursor?.startsWith("pg:")
+    ? skipEmptyPages(src, caller, { ...toSearch({ ...cur, cursor: undefined }), offset: (plainPage - 1) * LIMIT })
+    : skipEmptyPages(src, caller, toSearch(cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") || cur.cursor?.startsWith("pg:") ? { ...cur, cursor: undefined } : cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
   const mine = pro ? searching.then(() => ({ ok: true as const, report: pro.report })) : startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
@@ -352,6 +359,11 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       nextCursor = page.next_cursor;
       scanned = scannedN;
     }
+  }
+  // 검색 목록: 서버가 준 맞는 수로 쪽 번호(pg:N). 수가 없으면(옛 서버·조각 상한 초과) 아래 방식·'다음 30개'로 돌아간다
+  if (!pages && plainList && typeof res.matching_offering_count === "number") {
+    const total = Math.max(1, Math.ceil(res.matching_offering_count / LIMIT));
+    if (total > 1) pages = { current: Math.min(total, plainPage), total, href: (n) => link({ cursor: n > 1 ? `pg:${n}` : undefined, open: undefined }) };
   }
   // 검색만 한 목록(필터·즐겨찾기 없음): 서버 커서의 '몇 번째부터'로 쪽 번호를 만든다
   if (!pages && !cur.st && !cur.fav && !pro) {
