@@ -70,20 +70,59 @@ async function hintKey(src: JungsiSource, caller: Caller): Promise<string | null
 export async function rememberCurrentReport(src: JungsiSource, caller: Caller, id: string | null | undefined): Promise<void> {
   const key = await hintKey(src, caller);
   if (!key) return;
+  const prior = hints.get(key)?.id ?? null;
   hints.delete(key);
-  if (!id) return;
+  if (!id) {
+    if (prior) await hintEdge(key, null);
+    return;
+  }
   hints.set(key, { id, at: Date.now() });
   while (hints.size > HINT_MAX) hints.delete(hints.keys().next().value as string);
+  if (prior !== id) await hintEdge(key, id);
 }
 
-function recallHint(key: string): string | null {
+/*
+  2026-11-27(대표님 승인: 처음 여는 쪽 속도): 힌트를 화면 서버 메모리뿐 아니라 같은 데이터센터 캐시에도 둔다.
+  화면 서버가 다른 실행본으로 바뀌면 메모리 힌트가 없어 입력 상태 → 리포트 순서로 기다렸다(약 0.3초).
+  열쇠는 메모리와 같은 access token 의 SHA-256(토큰 원문은 두지 않는다), 값은 리포트 번호뿐, 30분. 브라우저·기기에는 두지 않는다(11-04 결정 그대로).
+  어느 리포트를 여는지는 지금처럼 입력 상태의 번호가 정한다(힌트가 틀리면 미리 읽은 것은 버린다).
+*/
+const hintUrl = (key: string) => "https://jt-report-hint.invalid/" + key;
+function hintCache(): Cache | null {
+  try {
+    return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+async function hintEdge(key: string, id: string | null): Promise<void> {
+  const c = hintCache();
+  if (!c || key === "synthetic") return;
+  try {
+    if (!id) await c.delete(hintUrl(key));
+    else await c.put(hintUrl(key), new Response(JSON.stringify({ id }), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${HINT_TTL_MS / 1000}` } }));
+  } catch {
+    // 힌트를 못 적어도 화면은 그대로(입력 상태 → 리포트 순서)
+  }
+}
+
+async function recallHint(key: string): Promise<string | null> {
   const h = hints.get(key);
-  if (!h) return null;
-  if (Date.now() - h.at > HINT_TTL_MS) {
+  if (h) {
+    if (Date.now() - h.at <= HINT_TTL_MS) return h.id;
     hints.delete(key);
     return null;
   }
-  return h.id;
+  const c = hintCache();
+  if (!c || key === "synthetic") return null;
+  try {
+    const hit = await c.match(hintUrl(key));
+    if (!hit) return null;
+    const v = (await hit.json()) as { id?: unknown };
+    return typeof v.id === "string" && /^[A-Za-z0-9._:-]{1,128}$/.test(v.id) ? v.id : null;
+  } catch {
+    return null;
+  }
 }
 
 export interface EagerReport {
@@ -94,7 +133,7 @@ export interface EagerReport {
 /** 힌트가 있으면 그 번호의 리포트를 먼저 보낸다. 입력 상태와 함께 부른다. 거절되지 않는다 */
 export async function startEagerReport(src: JungsiSource, caller: Caller): Promise<EagerReport> {
   const key = await hintKey(src, caller);
-  const hint = key ? recallHint(key) : null;
+  const hint = key ? await recallHint(key) : null;
   if (!hint) return { hint: null, pre: null };
   const pre = src.readReport(caller, hint);
   pre.catch(() => {}); // 힌트가 틀려 버릴 때 처리되지 않은 거절로 남지 않게(같으면 아래에서 그대로 기다린다)
