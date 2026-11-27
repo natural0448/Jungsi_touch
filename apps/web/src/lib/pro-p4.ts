@@ -41,14 +41,19 @@ export async function loadProStudent(caller: Caller, orgParam: string, studentId
   const src = proSource();
   try {
     const stageP = currentStage(caller);
-    const svc = (await src.session(caller)).organizations.find((o) => o.org_id === String(org.org_id));
+    // 2026-11-27 속도(대표님 요청: 전문가용 6~16초): 전문가용 서버 한 번에 약 1초라 서로 기다릴 필요 없는 것은 두 개씩 함께 보낸다
+    // (담기 버튼 loadProForAction 과 같은 동시 2건). 5번 차례 → 3번 차례
+    const [session, student] = await Promise.all([src.session(caller), src.readStudent(caller, String(org.org_id), studentId)]);
+    const svc = session.organizations.find((o) => o.org_id === String(org.org_id));
     if (!svc) return { kind: "not_found" };
-    const student = await src.readStudent(caller, svc.org_id, studentId);
     if (!student) return { kind: "not_found" };
     const stageSt = await stageP;
     const stage = stageSt ? stageOf(stageSt.stage) : null;
-    const status = stage ? await src.scoreStatus(caller, svc.org_id, studentId, EXAM.exam_id, EXAM.pack_version, stage) : null;
-    const reports = (await src.listReports(caller, svc.org_id, studentId)).items;
+    const [status, list] = await Promise.all([
+      stage ? src.scoreStatus(caller, svc.org_id, studentId, EXAM.exam_id, EXAM.pack_version, stage) : Promise.resolve(null),
+      src.listReports(caller, svc.org_id, studentId),
+    ]);
+    const reports = list.items;
     const want = reportParam && validId(reportParam) ? reportParam : (status?.current_report_id ?? reports[0]?.report_id);
     const shown = want ? ((await src.readReport(caller, svc.org_id, studentId, want)) ?? reports.find((r) => r.report_id === want) ?? null) : null;
     const report = shown ? reportOf(shown) : null;

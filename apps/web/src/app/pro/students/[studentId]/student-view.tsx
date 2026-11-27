@@ -69,14 +69,21 @@ export async function StudentView({ params, searchParams }: { params: Promise<{ 
   let stageSt: ScoreInputStatusDto | null = null;
   let stage: InputStage | null = null;
   try {
-    svc = (await src.session(caller)).organizations.find((o) => o.org_id === String(org.org_id));
+    // 2026-11-27 속도: 서로 기다릴 필요 없는 전문가용 서버 호출은 두 개씩 함께(lib/pro-p4.ts loadProStudent 와 같다)
+    const [session, readStudent] = await Promise.all([src.session(caller), src.readStudent(caller, String(org.org_id), studentId)]);
+    svc = session.organizations.find((o) => o.org_id === String(org.org_id));
     if (svc) {
-      student = await src.readStudent(caller, svc.org_id, studentId);
+      student = readStudent;
       if (student) {
         stageSt = await stageP;
         stage = stageSt ? stageOf(stageSt.stage) : null;
-        status = stage ? await src.scoreStatus(caller, svc.org_id, studentId, EXAM.exam_id, EXAM.pack_version, stage) : null;
-        reports = (await src.listReports(caller, svc.org_id, studentId)).items;
+        const sv = svc;
+        const [st, list] = await Promise.all([
+          stage ? src.scoreStatus(caller, sv.org_id, studentId, EXAM.exam_id, EXAM.pack_version, stage) : Promise.resolve(null),
+          src.listReports(caller, sv.org_id, studentId),
+        ]);
+        status = st;
+        reports = list.items;
         // 고른 리포트가 없으면 지금 단계의 현재 성적 리포트, 없으면 가장 최근 리포트(전환 뒤 9월 리포트는 지난 기록으로 남는다)
         const want = reportParam && validId(reportParam) ? reportParam : (status?.current_report_id ?? reports[0]?.report_id);
         // 담은 학교(shortlist)는 리포트 읽기(pro.report.read)에만 지금 값이 붙는다. 목록 항목은 저장 당시 값이라 담기가 보이지 않았다(2026-11-23)
