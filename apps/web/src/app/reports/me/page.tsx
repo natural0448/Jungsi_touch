@@ -118,8 +118,17 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   let corrP: ReturnType<typeof myLatestCorrection> = Promise.resolve(null);
   // 지난번 현재 리포트를 입력 상태와 동시에 읽어 둔다(2026-11-10 임시 단축, report-ops 참고). 여는 리포트는 아래 입력 상태가 정한다
   const eagerP = startEagerReport(src, caller);
+  // 2026-11-27 속도: 회원 이름(본체 DB, cache)은 처음부터 함께 받는다
+  memberName().catch(() => {});
+  // 지난 기록 확인(리포트 목록 1개)은 입력 상태 뒤 리포트 읽기와 함께 보낸다(전에는 리포트를 다 받은 뒤 차례로). 동시 2건을 넘지 않게 두 확인은 이어서
+  let pastP: Promise<[boolean, boolean]> = Promise.resolve([false, false]);
   try {
     status = await src.readScoreInputStatus(caller, EXAM.exam_id);
+    pastP = (async (): Promise<[boolean, boolean]> => {
+      const mock = csat ? await hasPastMock(src, caller) : false;
+      const pastCsat = fin ? await hasPastMock(src, caller, "csat") : false;
+      return [mock, pastCsat];
+    })();
     // 입력 상태만 있으면 되는 배부일·정정 요청 조회(에듀터치 DB)는 리포트를 기다리지 않고 함께 보낸다(2026-11-10 나눠 그리기)
     // 수능 성적표 배부일(본체 관리자 설정). 가채점 정정은 배부일 전날까지만 요청·입력한다(2026-10-29 사용자 결정)
     const st = status;
@@ -199,7 +208,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 전환 뒤 리포트는 수능 가채점 리포트다(9월 리포트는 지난 기록). 가채점 리포트는 범위로만 그린다
   const provisional = isProvisionalReport(report);
   // 지난 기록 · 9월 모의평가는 9월 리포트를 저장한 회원에게만(2026-11-22 대표님 요청). 목록 1개만, 실패하면 숨긴다
-  const [pastMock, pastCsat] = await Promise.all([csat ? hasPastMock(src, caller) : false, fin ? hasPastMock(src, caller, "csat") : false]);
+  const [pastMock, pastCsat] = await pastP;
   const pastLink = pastMock || pastCsat ? (
     <p className="rp-note">
       {pastCsat && <><Link href={pastHref(undefined, "csat")}>지난 기록 · 수능 가채점 리포트 보기</Link> — 저장한 가채점 리포트를 읽기 전용으로 봅니다. </>}

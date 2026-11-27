@@ -62,7 +62,7 @@ test("inputs: standard-score save reopens and 가채점 saves close after the fi
 test("past records: 가채점 reports become 지난 기록 only after the final switch", () => {
   const page = readFileSync(new URL("../src/app/reports/me/page.tsx", import.meta.url), "utf8");
   assert.match(page, /if \(csat && pastKind && \(pastKind === "mock" \|\| fin\)\)/);
-  assert.match(page, /fin \? hasPastMock\(src, caller, "csat"\) : false/);
+  assert.match(page, /fin \? await hasPastMock\(src, caller, "csat"\) : false/);
   const past = readFileSync(new URL("../src/app/reports/me/past-records.tsx", import.meta.url), "utf8");
   assert.match(past, /isProvisionalOverall\(report\.overall\) !== \(kind === "csat"\)/);
 });
