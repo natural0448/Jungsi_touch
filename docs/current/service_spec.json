@@ -361763,6 +361763,14 @@
         "PAGE-04"
       ],
       "summary": "전문가용 속도(11-27 실측: 화면마다 전문가용 서버를 5번 차례로, 한 번 약 1초): 세션·학생을 함께, 입력 상태·리포트 목록을 함께 보낸다(동시 2건, 담기 버튼과 같다). 5번 차례 → 3번 차례(lib/pro-p4.ts loadProStudent, student-view.tsx)."
+    },
+    {
+      "date": "2026-11-27",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "전문가용 서버 Cloudflare 이전(11-27 대표님 승인): 화면의 JUNGSI_PRO_API_URL 을 jungsi-pro-api-prod.edutouch-web.workers.dev/jungsi-pro-api 로. 서버 코드는 dep_pro_r50 그대로, DB 는 jungsi-api-prod 와 같은 Hyperdrive·역할, 비밀 설정은 Supabase 운영 값과 지문 같음(대표님 실행 pro_secrets.mjs, 시작 확인 3/3). 되돌림: 옛 Supabase 주소로 배포 또는 wrangler rollback."
     }
   ],
   "p1_recruitment_score_review_verification": {
