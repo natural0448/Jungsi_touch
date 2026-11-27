@@ -10256,6 +10256,17 @@
           "temporary": true,
           "purpose": "3·4페이지 Edge CPU 한도 초과(546) 수정: 4페이지 후보를 운영 환산 보유 모집행으로 먼저 거르고, 참고 환산 decode 재사용, 준비된 선택본 단일 실행 캐시(최대 4). 운영 배포·참고 환산 재연결은 최종 관리자 확인 뒤.",
           "base_commit": "738fc383ec320460221ab23661aa698f82f730cd"
+        },
+        {
+          "name": "feature/release-task/presentation-integration-1127",
+          "kind": "release_task",
+          "owner": "시스템기획팀(대표님 지시로 화면팀이 기획팀 역할 수행, 2026-11-27)",
+          "parent": "develop",
+          "pr_target": "develop",
+          "status": "active",
+          "temporary": true,
+          "purpose": "PR #74(feature/presentation-foundation → develop) 통합: 옛 이력 커밋 5e55e9dd 의 service_spec.json 검사 중단을 피하려고, 최신 develop 에서 화면 누적 변경을 한 커밋으로 합친 동등 트리를 develop 으로 PR 한다(담당자 후속 회신 11-27 PR74 통합검토 방향). 삭제 없음. 통합 뒤 retired_merged 로 바꾼다.",
+          "base_commit": "c509152d5896f17bf636bd38f6ef3a4f564b9cd1"
         }
       ],
       "planning_team_declaration": "JUNGSI_TEAM=planning (해당 셸 세션에만 설정; 신원 인증이나 GitHub 권한 분리는 아님)",
