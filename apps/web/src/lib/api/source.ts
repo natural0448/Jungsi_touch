@@ -148,6 +148,8 @@ export interface ForecastRevisionRef {
 export interface StatusScanRequest {
   codes: string[];
   after?: string;
+  /** 2026-11-27 서버 dep_r60: 조건에 맞는 목록에서 몇 번째부터(쪽 번호용, 0부터) */
+  offset?: number;
   limit?: number;
   region?: string;
   group?: string;

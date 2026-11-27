@@ -90,3 +90,27 @@ export function hrefWith(cur: Query, patch: Partial<Query>, destination: Catalog
   const s = u.toString();
   return s ? `${destination.path}?${s}` : destination.path;
 }
+
+/*
+  2026-11-27 대표님 요청(쪽 번호 1·2·3…): 검색 커서는 서버가 [자료판, 몇 번째부터, 조건 지문]을 base64url 로 담은 것이다(서버 catalog.ts,
+  회원과 묶이지 않고 서명이 아닌 조건 지문). 같은 조건의 커서에서 '몇 번째부터'만 바꿔 원하는 쪽으로 간다. 형식이 다르면 null(예전 단추 그대로)
+*/
+function decodeCursor(c: string): [string, number, string] | null {
+  try {
+    const v = JSON.parse(atob(c.replaceAll("-", "+").replaceAll("_", "/"))) as unknown;
+    if (Array.isArray(v) && v.length === 3 && typeof v[0] === "string" && Number.isSafeInteger(v[1]) && typeof v[2] === "string") return [v[0], v[1] as number, v[2]];
+  } catch {
+    // 형식이 다르면 쪽 번호를 그리지 않는다
+  }
+  return null;
+}
+export function cursorIndex(c: string | undefined): number | null {
+  if (!c) return 0;
+  const d = decodeCursor(c);
+  return d ? d[1] : null;
+}
+export function cursorAt(template: string, index: number): string | null {
+  const d = decodeCursor(template);
+  if (!d) return null;
+  return btoa(JSON.stringify([d[0], index, d[2]])).replaceAll("+", "-").replaceAll("/", "_");
+}

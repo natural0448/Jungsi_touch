@@ -27,7 +27,7 @@ import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
 import { MineBasis, MineCells, MineConds, MineDetail, MineLegend, MineTray, cellOf } from "./mine-parts";
-import { GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
+import { cursorAt, cursorIndex, GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
 import "./possibilities.css";
 
 /**
@@ -157,6 +157,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   let shown = items;
   let nextCursor = res.next_cursor;
   let scanned: number | null = null;
+  // 2026-11-27 대표님 요청: '이어서 찾기' 대신 쪽 번호(1·2·3…). pages 가 있으면 아래 쪽 번호를 그린다
+  let pages: { current: number; total: number; href: (n: number) => string } | null = null;
   // 수능 가채점 리포트(2026-11-23 전환): 9모 분석 요청·지원가능성 필터는 쓰지 않는다(검색·모집 정보는 그대로)
   // 학교별 수능 판정 화면(가채점·실채점)
   const provisional = csatJudged(report);
@@ -205,8 +207,39 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     const want = new Set<StatusKey>(cur.st);
     const STAGES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"];
     const codes = [...new Set(cur.st.flatMap((k) => (STAGES.includes(k) ? [k] : k === "none" || k === "ineligible" ? ["none"] : [])))];
-    const client = cur.st.includes("none") || cur.st.includes("ineligible");
-    if (codes.length) {
+    // 판정 없음(서버 'none')을 화면 규칙으로 '판정 근거 부족'과 '지원 조건 미충족' 중 하나만 고르면 화면에서 다시 거른다
+    const client = cur.st.includes("none") !== cur.st.includes("ineligible");
+    // 쪽 번호 방식: 서버가 고른 단계만 정확히 돌려주는 경우(판정 없음을 둘로 나눠 고르지 않을 때). 전문가용은 예전 방식
+    const pageMode = !pro && !client;
+    if (codes.length && pageMode) {
+      const pageNo = cur.cursor?.startsWith("sp:") ? Math.max(1, Math.min(10000, Number.parseInt(cur.cursor.slice(3), 10) || 1)) : 1;
+      const base = report;
+      const bandsAll: Record<string, ReferenceBandDto> = { ...(base.provisional_bands ?? {}) };
+      const got = await provisionalScan(src, caller, base, { codes, offset: (pageNo - 1) * LIMIT, limit: LIMIT, ...(cur.region ? { region: cur.region } : {}), ...(cur.group ? { group: cur.group } : {}) });
+      if (got) {
+        if (!got.complete) scanPartial = true;
+        Object.assign(bandsAll, got.bands);
+        Object.assign(minAll, got.min);
+        Object.assign(dispAll, got.display);
+        const missing = got.offerings.map((o) => o.offering_id).filter((id) =>
+          !bandsAll[id]?.school_score && !dispAll[id]?.central_score && keyOf(bandsAll, id) !== "ineligible");
+        let revision = base.report_version;
+        if (missing.length) {
+          const m = await provisionalBands(src, caller, base, missing);
+          revision = m.version;
+          Object.assign(bandsAll, m.bands);
+          Object.assign(minAll, m.min);
+          Object.assign(dispAll, m.display);
+        }
+        report = { ...base, report_version: revision, provisional_bands: bandsAll, provisional_min: minAll, overall: withSchoolDisplay(base.overall, dispAll) };
+        shown = got.offerings.filter((o) => want.has(keyOf(bandsAll, o.offering_id)));
+        nextCursor = null;
+        scanned = got.matched;
+        const total = Math.max(1, Math.ceil(got.matched / LIMIT));
+        if (total > 1) pages = { current: Math.min(pageNo, total), total, href: (n) => link({ cursor: n > 1 ? `sp:${n}` : undefined, open: undefined }) };
+        scanDone = true;
+      }
+    } else if (codes.length) {
       const base = report;
       const picked: OfferingDto[] = [];
       const bandsAll: Record<string, ReferenceBandDto> = { ...(base.provisional_bands ?? {}) };
@@ -308,6 +341,16 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       shown = picked;
       nextCursor = page.next_cursor;
       scanned = scannedN;
+    }
+  }
+  // 검색만 한 목록(필터·즐겨찾기 없음): 서버 커서의 '몇 번째부터'로 쪽 번호를 만든다
+  if (!pages && !cur.st && !cur.fav && !pro) {
+    const tpl = res.next_cursor ?? cur.cursor ?? null;
+    const at = cursorIndex(cur.cursor);
+    const count = res.matching_offering_count;
+    if (tpl && at !== null && typeof count === "number" && cursorAt(tpl, 0)) {
+      const total = Math.max(1, Math.ceil(count / LIMIT));
+      if (total > 1) pages = { current: Math.min(total, Math.floor(at / LIMIT) + 1), total, href: (n) => link({ cursor: n > 1 ? cursorAt(tpl, (n - 1) * LIMIT) ?? undefined : undefined, open: undefined }) };
     }
   }
   if (cur.st && report && !provisional) {
@@ -505,7 +548,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
               </>
             )}
 
-            {(cur.cursor || nextCursor) && !(groups.length === 0 && nextCursor) && (
+            {pages ? (
+              <PageNumbers {...pages} />
+            ) : (cur.cursor || nextCursor) && !(groups.length === 0 && nextCursor) && (
               <nav className="pager" aria-label="쪽 넘기기">
                 {cur.cursor ? <Link className="btn" href={link({ cursor: undefined, open: undefined })}>처음부터</Link> : <span />}
                 {nextCursor && <Link className="btn" href={link({ cursor: nextCursor, open: undefined })}>{cur.st ? "이어서 찾기" : `다음 ${LIMIT}개`}</Link>}
@@ -609,5 +654,29 @@ function ChipRow({ label, cur, destination, k, items }: {
         ))}
       </div>
     </div>
+  );
+}
+
+/** 쪽 번호(2026-11-27 대표님 요청): 이전 · 1 … 앞뒤 두 쪽 … 마지막 · 다음 */
+function PageNumbers({ current, total, href }: { current: number; total: number; href: (n: number) => string }) {
+  const nums: (number | "gap")[] = [];
+  const lo = Math.max(1, current - 2), hi = Math.min(total, current + 2);
+  if (lo > 1) nums.push(1);
+  if (lo > 2) nums.push("gap");
+  for (let n = lo; n <= hi; n++) nums.push(n);
+  if (hi < total - 1) nums.push("gap");
+  if (hi < total) nums.push(total);
+  return (
+    <nav className="pager pnum" aria-label="쪽 번호">
+      {current > 1 ? <Link className="btn" href={href(current - 1)}>이전</Link> : <span className="btn off" aria-hidden>이전</span>}
+      <span className="nums">
+        {nums.map((n, i) => n === "gap"
+          ? <span key={`g${i}`} className="gap">…</span>
+          : n === current
+          ? <span key={n} className="num on" aria-current="page">{n}</span>
+          : <Link key={n} className="num" href={href(n)}>{n}</Link>)}
+      </span>
+      {current < total ? <Link className="btn" href={href(current + 1)}>다음</Link> : <span className="btn off" aria-hidden>다음</span>}
+    </nav>
   );
 }

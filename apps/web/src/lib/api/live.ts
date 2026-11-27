@@ -401,6 +401,37 @@ const reportOfCached = cache(async (accessToken: string, reportId: string, _gen:
 const statusOf = (accessToken: string, examId: string, stage: string | undefined) => statusOfCached(accessToken, examId, stage, writeGeneration);
 const reportOf = (accessToken: string, reportId: string) => reportOfCached(accessToken, reportId, writeGeneration);
 
+const SEARCH_CACHE_TTL_S = 300;
+function searchEdgeCache(): Cache | null {
+  try {
+    return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+const searchCacheUrl = (path: string) => "https://jt-search-cache.invalid/v1" + path;
+async function searchCacheGet(path: string): Promise<CatalogSearchDto<OfferingDto> | null> {
+  const c = searchEdgeCache();
+  if (!c) return null;
+  try {
+    const r = await c.match(searchCacheUrl(path));
+    if (!r) return null;
+    const v = (await r.json()) as CatalogSearchDto<OfferingDto>;
+    return v && v.status === "ready" && Array.isArray(v.items) ? v : null;
+  } catch {
+    return null;
+  }
+}
+async function searchCachePut(path: string, v: CatalogSearchDto<OfferingDto>): Promise<void> {
+  const c = searchEdgeCache();
+  if (!c) return;
+  try {
+    await c.put(searchCacheUrl(path), new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${SEARCH_CACHE_TTL_S}` } }));
+  } catch {
+    // 캐시에 못 넣어도 화면은 그대로
+  }
+}
+
 export const liveSource: JungsiSource = {
   kind: "live",
   async getSession(caller) {
@@ -436,7 +467,15 @@ export const liveSource: JungsiSource = {
 
   searchOfferings: async (caller, q) => {
     try {
-      return await call<CatalogSearchDto<OfferingDto>>(caller, `/offerings/search${qs({ ...q })}`);
+      // 2026-11-27 속도(대표님 요청: 4페이지 검색 1.1초): 검색 결과는 회원과 무관한 공개 모집단위 목록이고 다음 쪽 커서도
+      // 회원과 묶이지 않는다(서버 catalog.ts: 판·쪽 번호·조건 지문). 같은 조건이면 데이터센터 캐시에서 5분 다시 쓴다.
+      // 권한(유료·무료 기간) 확인은 페이지가 먼저 한다. 판이 바뀐 뒤 옛 커서는 서버가 409/422 로 돌려 화면이 처음부터 다시 보인다
+      const path = `/offerings/search${qs({ ...q })}`;
+      const hit = await searchCacheGet(path);
+      if (hit) return hit;
+      const got = await call<CatalogSearchDto<OfferingDto>>(caller, path);
+      if (got && got.status === "ready") await searchCachePut(path, got);
+      return got;
     } catch (error) {
       if (q.cursor && error instanceof Stale) throw new Error("invalid_cursor");
       throw error;

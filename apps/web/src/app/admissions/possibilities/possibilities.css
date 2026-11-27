@@ -162,6 +162,14 @@
 .et .ps .empty-an p{margin:0;font-size:13px;color:var(--ink-2);flex:1;min-width:220px}
 
 .et .ps .pager{display:flex;justify-content:space-between}
+/* 쪽 번호(2026-11-27) */
+.et .ps .pager.pnum{align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+.et .ps .pager.pnum .nums{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;flex:1 1 auto}
+.et .ps .pager.pnum .num{min-width:36px;height:36px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);font-weight:700;font-size:14px;text-decoration:none;font-variant-numeric:tabular-nums}
+.et .ps .pager.pnum a.num:hover{border-color:var(--brand);color:var(--brand)}
+.et .ps .pager.pnum .num.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.et .ps .pager.pnum .gap{min-width:20px;text-align:center;color:var(--muted);align-self:center}
+.et .ps .pager.pnum .btn.off{opacity:.4;pointer-events:none}
 
 
 /* 지원가능성·유불리가 엇갈려 보이는 줄의 해석 한 줄(2026-11-25) */
