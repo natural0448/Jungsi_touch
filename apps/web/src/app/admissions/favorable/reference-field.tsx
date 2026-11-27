@@ -37,7 +37,8 @@ export function ReferenceFieldDetails({ pendingIds, summary, label, reportId, re
   return (
     <details className="sc-fg rf-fg" open={open} onToggle={onToggle}>
       <summary>{summary}</summary>
-      {open && busy ? <BookLoading compact text={<>{label} 학과들을 내 성적으로 계산하고 있습니다.</>} /> : children}
+      {/* 접힌 동안에는 학과 줄을 그리지 않는다: 3페이지 문서가 3.6MB(접힌 계열 540개 속 2.7MB)여서 첫 화면이 늦었다(2026-11-27 실측). 펼치면 바로 그린다 */}
+      {!open ? null : busy ? <BookLoading compact text={<>{label} 학과들을 내 성적으로 계산하고 있습니다.</>} /> : children}
     </details>
   );
 }
