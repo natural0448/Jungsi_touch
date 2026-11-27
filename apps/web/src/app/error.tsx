@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useAutoRetry } from "@/components/use-auto-retry";
 import { SUPPORT_HREF } from "@/lib/links";
 
 /**
@@ -12,11 +13,12 @@ export default function ErrorPage({ error, retry }: { error: Error & { digest?: 
   useEffect(() => {
     console.error(error);
   }, [error]);
+  const auto = useAutoRetry(retry);
   return (
     <div className="wrap pg-body">
       <section className="gate" aria-labelledby="err-h">
-        <h2 id="err-h">화면을 그리는 중에 문제가 생겼습니다</h2>
-        <p>저장한 성적과 리포트는 그대로 있습니다. 잠시 뒤 다시 시도해 주세요. 계속 같은 화면이 나오면 고객센터에 알려 주세요.</p>
+        <h2 id="err-h">{auto === "retrying" ? "화면을 다시 불러오고 있습니다" : "화면을 그리는 중에 문제가 생겼습니다"}</h2>
+        <p>{auto === "retrying" ? "잠시만 기다려 주세요. 저장한 성적과 리포트는 그대로 있습니다." : "저장한 성적과 리포트는 그대로 있습니다. 잠시 뒤 다시 시도해 주세요. 계속 같은 화면이 나오면 고객센터에 알려 주세요."}</p>
         <div className="acts">
           <button type="button" className="btn p" onClick={() => retry()}>
             다시 시도

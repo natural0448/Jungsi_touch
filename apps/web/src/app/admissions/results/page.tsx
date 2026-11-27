@@ -14,7 +14,8 @@ import { lockFor, page } from "@/lib/routes";
 import { GROUPS, PATH, REGIONS, hrefWith, parseQuery, type Query } from "./query";
 import { groupUnits, latestOf } from "./snapshot-table";
 import { UnitList, type SumItem } from "./unit-row";
-import { unitKey } from "@/lib/p1-shape";
+import { applicantEligibilityLabel, r27Summary, unitKey } from "@/lib/p1-shape";
+import { verifiedInitial } from "@/lib/p1-stage-verified";
 import "./results.css";
 
 const route = page("PAGE-01");
@@ -24,8 +25,8 @@ export const metadata: Metadata = { title: route.label };
   1페이지는 전국 정리본(history.snapshot.*, 기획 1.9.95)으로 그린다. 관리자가 미리 받아 검증·저장해 둔 학교별 묶음과
   작은 검색 색인만 읽으므로 첫 화면부터 전국 전체가 보이고, 검색은 서버 API 를 다시 부르지 않는다.
   옛 history.search 6쪽 조립·'조회 미완료'는 이 화면에서 쓰지 않는다(연결계약 v3 §4-5). 두 경로를 함께 부르지 않는다.
-  학년도 결합은 같은 원래 PK 일 때만, PK 미연결 관측은 따로 원문 그대로 보인다. 2027 모집 정보는 검증된 목표 모집행
-  ID 가 없어 연결하지 않는다(year_mapping).
+  학년도 결합은 같은 원래 PK 일 때만, PK 미연결 관측은 따로 원문 그대로 보인다. 2027 모집행은 자기 PK 로 따로 두고,
+  과거 행은 서버의 검토 확인 연결(historical_links)로만 묶는다. 부분 발행이면 맨 위에 그 사실을 알린다(담당자 1.9.141).
 */
 
 /**
@@ -39,7 +40,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
       kicker={`PAGE ${route.number}`}
       title={route.label}
       desc="성적 입력 없이, 대학이 발표한 3개 학년도 입시결과를 전국 대학 단위로 한 번에 확인하세요."
-      side={<Link className="btn" href={page("PAGE-03").path}>내 성적으로 가능성 보기</Link>}
+      side={<Link className="btn" href={page("PAGE-04").path}>내 성적으로 유리한 대학 찾기</Link>}
     />
   );
 
@@ -52,10 +53,12 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
   const cur = parseQuery(await searchParams);
   let snap: Current;
   let res: SearchResult | null = null;
+  let initial = new Set<string>();
   try {
     snap = await currentSnapshot(src, caller);
     if (snap.state === "ready")
       res = await searchSnapshot(snap.ready, { university: cur.university, unit: cur.unit, region: cur.region, group: cur.group, page: cur.page ? Number(cur.page) : 1 });
+    if (res) initial = await verifiedInitial(src, caller, res.schools.flatMap((x) => x.rows));
   } catch (e) {
     if (e instanceof ConnectionError) return <>{head}<ConnectionNotice e={e} /></>;
     if (e instanceof AccessDenied) return <>{head}<LoginGate /></>;
@@ -87,7 +90,11 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
           </Form>
           <ChipRow label="지역" cur={cur} k="region" items={REGIONS} />
           <ChipRow label="모집군" cur={cur} k="group" items={[...GROUPS]} suffix="군" />
-          <p className="hint">대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종 50%컷·70%컷은 같은 기준의 발표만 씁니다. &lsquo;확인 중&rsquo; 꼬리표는 값은 발표 그대로이고 정의·단위·발표일 확인이 남았다는 뜻입니다(꼬리표에 마우스를 올리면 사유가 보입니다).</p>
+          <p className="hint">
+            대학이 발표한 2024~2026학년도 결과를 학년도별로 보여 드립니다. 최종등록자 기준을 먼저 쓰고, 대학마다 발표 방식이 달라 학교마다 보이는 통계가 다를 수 있습니다.
+            <br />① 칸: 합격자 가운데쯤 점수(50%컷, 없으면 평균)
+            <br />② 칸: 합격자 70% 지점 점수(70%컷, 없으면 75%·80%컷 등)
+          </p>
         </section>
 
         {snap.state !== "ready" || !res ? (
@@ -97,13 +104,20 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             <div className="rs-count">
               <span>
                 <b className="num">{res.total_schools}</b>개 대학 · <b className="num">{res.total_units}</b>개 모집단위
-                {res.total_pending > 0 && <> · 모집행 연결 확인 중 <b className="num">{res.total_pending}</b>건</>}
+                {res.total_pending > 0 && <> · 학과 연결 확인 중 <b className="num">{res.total_pending}</b>건</>}
                 <small>
-                  {" "}· 정리본 갱신 {seoulDate(snap.ready.generated_at)} · 공식 발표 기준일 {asOfDate(snap.ready.source_as_of) ?? "확인 중"}
+                  {" "}· 정리본 갱신 {seoulDate(snap.ready.generated_at)}
+                  {/* 기준일이 없으면 '확인 중'을 쓰지 않고 항목을 뺀다(2026-11-05 사용자 결정: 안내문의 '확인 중'도 제거) */}
+                  {asOfDate(snap.ready.source_as_of) && <> · 공식 발표 기준일 {asOfDate(snap.ready.source_as_of)}</>}
                 </small>
               </span>
               {filtered && <Link href={hrefWith(cur, { university: undefined, unit: undefined, region: undefined, group: undefined })}>조건 지우기</Link>}
             </div>
+            {snap.ready.r27_scope_coverage && (
+              <p className="rs-idnote">
+                2027학년도 모집 정보는 지금 <b>일부 모집단위만</b> 반영되어 있습니다. 검토 중인 <b className="num">{snap.ready.r27_scope_coverage.review_pending_rows}</b>건은 확인이 끝나는 대로 더해집니다.
+              </p>
+            )}
 
             {res.schools.length === 0 ? (
               <section className="gate flat">
@@ -128,7 +142,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
                       {school.names.length > 1 && (
                         <p className="rs-names">학년도·자료마다 발표 대학명이 다릅니다: {school.names.join(" / ")}. 다른 이름의 행에는 그 해 발표명을 함께 적었습니다.</p>
                       )}
-                      <UnitList pub={snap.ready.pub} schoolId={school.id} schoolName={school.name} items={units.map(summaryOf)} />
+                      <UnitList pub={snap.ready.pub} schoolId={school.id} schoolName={school.name} items={units.map((u) => summaryOf(u, initial))} />
                     </section>
                   );
                 })}
@@ -146,7 +160,7 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
             )}
           </>
         )}
-        <p className="rs-foot">대학 발표 자료만 보여 줍니다. 추정 총 지원자(모집인원×경쟁률)와 추정 탈락자(추정 총 지원자−모집인원−충원인원) 두 칸만 계산한 값이고, 그 밖의 정시터치 추정값은 이 화면에 넣지 않습니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
+        <p className="rs-foot">대학 발표 자료를 보여 드립니다. 충원 발표는 실제 추가 합격 인원(명)과 최종 합격 예비번호(번)를 단위로 구분합니다. 추정 총 지원자(모집인원×경쟁률)와 추정 탈락자(추정 총 지원자−모집인원−실제 충원 인원)는 계산값입니다. 실제 충원 인원이 발표된 경우에만 추정 탈락자를 표시합니다. 내 성적과 견주어 보려면 {p3.label}를 이용하세요.</p>
       </div>
     </>
   );
@@ -154,18 +168,22 @@ export default async function Page({ searchParams }: PageProps<"/admissions/resu
 
 /**
  * 접힌 줄에 넘길 작은 요약: 2027학년도 모집인원만(2026-10-24 사용자 결정).
- * 정리본은 2024~2026 발표만 담고 1페이지 모집단위 → 2027 모집행 연결이 아직 없어(담당자 요청 10-24) r27 은 null 이다.
- * 담당자가 자료 모양을 정하면 여기서만 채운다.
+ * 2027 모집행(schema v2 의 r27_source)이 있으면 그 모집인원 원문을, 없으면 null('준비 중')을 넘긴다.
+ * 과거 학년도는 담당자가 검토 확인한 연결만 같은 줄로 묶인다(lib/p1-shape linkR27).
  */
-function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
-  const l = latestOf(rows);
+function summaryOf(rows: Parameters<typeof latestOf>[0], initial: ReadonlySet<string>): SumItem {
+  const l = latestOf(rows), r27 = rows.find((r) => r.y === 2027);
+  const s27 = r27 ? r27Summary(r27.q27) : null;
+  // 정리본에 단계가 없어도 모집 읽기로 최초 인원이 확인된 행은 '최초 모집'(lib/p1-stage-verified)
+  if (s27 && r27?.pk && initial.has(r27.pk) && s27.v !== null && !s27.carry) { s27.initial = true; s27.stageUnknown = false; }
   return {
     k: unitKey(l),
     // 모집군은 '가군·나군·다군'으로 통일해 보인다(발표 표기 '다'·'다군'이 섞여 있다, 10-24 사용자 결정)
     g: l.g ? l.g.replace(/^([가나다])군?$/, "$1군") : null,
     d: l.d,
-    sub: [l.c, l.t, l.pk === null ? "모집행 연결 확인 중" : null].filter(Boolean).join(" · "),
-    r27: null,
+    sub: [l.c, l.t, l.pk === null ? "학과 연결 확인 중" : null].filter(Boolean).join(" · "),
+    r27: s27,
+    eligibility27: applicantEligibilityLabel(r27?.ae27),
     ratio27: null, // 2027 반영비율도 담당자 자료(연도별 반영비 조회) 연결 뒤 여기서 채운다
   };
 }
@@ -173,12 +191,12 @@ function summaryOf(rows: Parameters<typeof latestOf>[0]): SumItem {
 function NotReady({ state }: { state: "none" | "changed" | "expired" | "checking" | "ready" }) {
   const text =
     state === "checking"
-      ? { h: "입시결과의 현재판을 확인하고 있습니다", p: "몇 초 뒤 자동으로 다시 불러옵니다. 계속 이 화면이면 잠시 후 다시 열어 주세요. 이전 판을 최신처럼 보여 드리지는 않습니다." }
+      ? { h: "입시결과 최신 자료를 확인하고 있습니다", p: "몇 초 뒤 자동으로 다시 불러옵니다. 계속 이 화면이면 잠시 후 다시 열어 주세요. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다." }
       : state === "changed"
-      ? { h: "입시결과 새 판을 준비하고 있습니다", p: "대학 발표 정리본이 새 판으로 바뀌어, 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 이전 판을 최신처럼 보이지 않기 위해서입니다." }
+      ? { h: "입시결과 새 자료를 준비하고 있습니다", p: "대학 발표 자료가 새로 바뀌어 확인을 마칠 때까지 잠시 보여 드리지 않습니다. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다." }
       : state === "expired"
-        ? { h: "입시결과 정리본의 확인 기간이 지났습니다", p: "새로 확인된 판을 준비하는 동안 잠시 보여 드리지 않습니다." }
-        : { h: "입시결과 자료를 준비하고 있습니다", p: "검수가 끝난 대학 발표 정리본을 준비하는 중입니다. 자료가 없는 것이지 결과가 0건인 것은 아닙니다." };
+        ? { h: "입시결과 자료를 새로 확인하고 있습니다", p: "새로 확인한 자료를 준비하는 동안 잠시 보여 드리지 않습니다. 정확하지 않은 결과를 보여 드리지 않으려고 잠시 멈춘 것입니다." }
+        : { h: "입시결과 자료를 준비하고 있습니다", p: "확인을 마친 대학 발표 자료를 준비하는 중입니다. 아직 자료가 준비되지 않은 것이지 결과가 0건인 것은 아닙니다." };
   return (
     <section className="gate flat">
       <h2>{text.h}</h2>

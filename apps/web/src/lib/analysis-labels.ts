@@ -14,7 +14,7 @@ export const POPULATION: Record<PopulationScope, { label: string; note: string }
   whole_complete: { label: "국·수·탐2 전체 응시자", note: "국어·수학·탐구 2과목을 모두 본 전체 응시자와 비교했습니다." },
   required_rule_inputs_present: {
     label: "이 대학 반영 성적 보유자",
-    note: "이 대학 반영에 필요한 성적을 모두 가진 응시자만 비교했습니다. 전체 응시자와 분모가 달라 전체 위치와의 차이(유불리)는 보류합니다.",
+    note: "이 대학 반영에 필요한 성적을 모두 가진 응시자만 비교했습니다. 전체 응시자와 비교하는 학생 범위가 달라 전체 위치와의 차이(유불리)는 보여 드리지 않습니다.",
   },
 };
 

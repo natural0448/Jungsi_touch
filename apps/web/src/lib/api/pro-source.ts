@@ -1,10 +1,10 @@
 import "server-only";
 import { headers as incomingHeaders } from "next/headers";
-import { professionalMutationOrigin } from "../professional-bff-origin";
-import type { ProfileDto, ReportDto, ScoresInput } from "@/lib/dto";
-import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
+import { professionalMutationOrigin, professionalRenderOrigin } from "../professional-bff-origin";
+import type { ProfileDto, ProvisionalScoresInput, ReportDto, ScoresInput } from "@/lib/dto";
+import type { ProAssignmentDto, ProBookmarksDto, ProCandidatesDto, ProEnvelope, ProMemberPageDto, ProP4Dto, ProP4Search, ProPrintDto, ProScoreStatusDto, ProSessionDto, ProStudentDto, ProStudentInput, ProStudentPageDto, ProStudentReportDto, ProStudentReportPageDto } from "@/lib/pro-dto";
 import { CATALOG, assess, buildCandidates } from "./synthetic-assessment";
-import { computeOverall } from "./synthetic-report";
+import { computeOverall, computeProvisional } from "./synthetic-report";
 import { buildTips } from "./synthetic-tips";
 import { apiMode } from "./index";
 import { AccessDenied, ConnectionError, type Caller, type Result } from "./source";
@@ -26,15 +26,19 @@ export interface ProSource {
   updateStudent(caller: Caller, orgId: string, studentId: string, input: ProStudentInput, expectedVersion: number, key: string): Promise<Result<ProStudentDto>>;
   scoreStatus(caller: Caller, orgId: string, studentId: string, examId: string, packVersion: string, stage: string): Promise<ProScoreStatusDto | null>;
   /** pro.score.create — 학생×시험×단계 입력 1회. 성적표에 없는 점수의 정상 거절도 1회 사용(422) */
-  createScore(caller: Caller, orgId: string, studentId: string, body: { exam_id: string; pack_version: string; stage: string; scores: ScoresInput; expected_entry_version: number }, key: string): Promise<Result<{ profile: ProfileDto }>>;
+  createScore(caller: Caller, orgId: string, studentId: string, body: { exam_id: string; pack_version: string; stage: string; scores: ScoresInput | ProvisionalScoresInput; expected_entry_version: number }, key: string): Promise<Result<{ profile: ProfileDto }>>;
   /** pro.overall.analyze — 저장한 성적으로 전체 위치(새 리포트 판) */
   analyzeOverall(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<{ report: ReportDto }>>;
   listReports(caller: Caller, orgId: string, studentId: string): Promise<ProStudentReportPageDto>;
   readReport(caller: Caller, orgId: string, studentId: string, reportId: string): Promise<ProStudentReportDto | null>;
+  /** pro.university.analyze(가채점 4페이지, 서버 dep_pro_r28) — 검색 조건 또는 모집단위 번호(30개까지)로 학교별 판정. 저장하지 않는다 */
+  analyzeP4(caller: Caller, orgId: string, studentId: string, body: { profile_id: string; expected_profile_version: string | number; offering_ids?: string[]; search?: ProP4Search }, key: string): Promise<Result<ProP4Dto>>;
   /** pro.candidates — 저장한 성적으로 유리한 대학 찾기(새 리포트 판에 남는다) */
   candidates(caller: Caller, orgId: string, studentId: string, profileId: string, expectedProfileVersion: string | number, key: string): Promise<Result<ProCandidatesDto>>;
   listBookmarks(caller: Caller, orgId: string, studentId: string, reportId?: string): Promise<ProBookmarksDto | null>;
   addBookmark(caller: Caller, orgId: string, studentId: string, reportId: string, offeringId: string, key: string): Promise<Result<ProBookmarksDto>>;
+  /** pro.bookmark.remove(2026-11-13) — 담은 학교 빼기. 서버는 장부를 지우지 않고 뺀 기록을 쌓는다 */
+  removeBookmark(caller: Caller, orgId: string, studentId: string, reportId: string, offeringId: string, key: string): Promise<Result<ProBookmarksDto>>;
   /** pro.report.export — 고정 판 인쇄본. 워터마크(기관·교사 코드·인쇄 시각·학생 이름)를 서버가 준다 */
   exportReport(caller: Caller, orgId: string, studentId: string, reportId: string, revisionId: number, key: string): Promise<Result<ProPrintDto>>;
   /** pro.member.list(기관 관리자) */
@@ -68,9 +72,14 @@ function headers(caller: Caller, extra?: Record<string, string>) {
 async function send(path: string, init: RequestInit): Promise<Response> {
   const base = process.env.JUNGSI_PRO_API_URL;
   if (!base) throw new ConnectionError("unconfigured", "pro_api_not_configured");
+  // 2026-11-27 속도 측정(대표님 요청: 전문가용 느림): 경로 모양·상태·걸린 시간만 남긴다(기관·학생·리포트 번호는 가린다)
+  const t0 = Date.now();
   try {
-    return await fetch(`${base}/api/v1/pro${path}`, { ...init, cache: "no-store" });
+    const res = await fetch(`${base}/api/v1/pro${path}`, { ...init, cache: "no-store" });
+    console.log(`[pro-api] ${init.method ?? "GET"} ${path.split("?")[0].replace(/\/organizations\/[^/]+/, "/organizations/:org").replace(/\/[A-Za-z_-]*\d[A-Za-z0-9_.:-]*/g, "/:id")} ${res.status} ${Date.now() - t0}ms`);
+    return res;
   } catch {
+    console.log(`[pro-api] ${init.method ?? "GET"} failed ${Date.now() - t0}ms`);
     throw new ConnectionError("unavailable", "backend_unreachable");
   }
 }
@@ -91,8 +100,9 @@ async function get<T>(caller: Caller, path: string): Promise<T | null> {
   if (!res.ok) throw new Error(`정시터치 전문가용 API ${res.status} ${(await code(res)) ?? ""}`);
   return ((await res.json()) as ProEnvelope<T>).data;
 }
-async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: string, body: unknown, key: string): Promise<Result<T>> {
-  const proof = professionalMutationOrigin(process.env.JUNGSI_PRO_BFF_ORIGIN, await incomingHeaders());
+async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: string, body: unknown, key: string, render = false): Promise<Result<T>> {
+  // render: 화면을 그리며 보내는 계산 요청(③ 판정·검색, 저장 안 함) — professionalRenderOrigin
+  const proof = (render ? professionalRenderOrigin : professionalMutationOrigin)(process.env.JUNGSI_PRO_BFF_ORIGIN, await incomingHeaders());
   if (!proof.ok) {
     if (proof.status === 503) throw new ConnectionError("unconfigured", proof.code);
     throw new AccessDenied(403, proof.code);
@@ -120,11 +130,14 @@ const liveSource: ProSource = {
   listReports: async (caller, orgId, id) =>
     (await get<ProStudentReportPageDto>(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
   readReport: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
+  analyzeP4: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/university-analysis`, body, key, true),
   candidates: (caller, orgId, id, profileId, v, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/candidates`, { profile_id: profileId, filters: {}, expected_profile_version: v }, key),
   listBookmarks: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks${qs({ report_id: reportId })}`),
   addBookmark: (caller, orgId, id, reportId, offeringId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks`, { report_id: reportId, offering_id: offeringId }, key),
+  removeBookmark: (caller, orgId, id, reportId, offeringId, key) =>
+    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks/remove`, { report_id: reportId, offering_id: offeringId }, key),
   exportReport: (caller, orgId, id, reportId, revisionId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key),
   listMembers: (caller, orgId) => get(caller, `/organizations/${enc(orgId)}/members${qs({ limit: 100 })}`),
@@ -136,19 +149,22 @@ const liveSource: ProSource = {
 
 /* ── synthetic(화면 제작용 메모리) ── */
 
-type SynScore = { entry: number; profile: (ProfileDto & { scores: ScoresInput }) | null; reports: ProStudentReportDto[]; keys: Map<string, unknown> };
+/** 입력 횟수는 단계(모의평가·가채점·실채점)마다 따로 센다(운영 정책과 같음) */
+type SynScore = { entry: Map<string, number>; profile: (ProfileDto & { scores: ScoresInput | ProvisionalScoresInput; stage: string }) | null; reports: ProStudentReportDto[]; keys: Map<string, unknown> };
+/** 수능 가채점 원점수 입력인가(국어에 원점수 칸이 있다) */
+const isRawScores = (s: ScoresInput | ProvisionalScoresInput): s is ProvisionalScoresInput => "raw_score" in s.korean;
 type SynStore = { students: ProStudentDto[]; keys: Map<string, ProStudentDto>; used: number; scores: Map<string, SynScore> };
 const syn: SynStore = ((globalThis as { __jtProSyn?: SynStore }).__jtProSyn ??= { students: seed(), keys: new Map(), used: 3, scores: new Map() });
 syn.scores ??= new Map();
 const synScore = (id: string): SynScore => {
   let x = syn.scores.get(id);
-  if (!x) syn.scores.set(id, (x = { entry: 0, profile: null, reports: [], keys: new Map() }));
+  if (!x) syn.scores.set(id, (x = { entry: new Map(), profile: null, reports: [], keys: new Map() }));
   return x;
 };
 function seed(): ProStudentDto[] {
   const at = "2026-11-20T01:00:00Z";
   return [
-    ["김하늘", "3-2", "7", ["정시"]],
+    ["김하늘", "3-2", "7", ["희망 계열: 공학", "희망 대학: 서울대, 연세대"]],
     ["이서준", "3-2", "15", []],
     ["박지민", "3-4", "3", ["재수"]],
   ].map(([name, cls, no, tags], i) => ({
@@ -157,9 +173,9 @@ function seed(): ProStudentDto[] {
   }));
 }
 const SYN_MEMBERS: ProMemberPageDto["items"] = [
-  { member_id: "1", subject_id: "syn-admin-1", role: "org_admin", status: "active", version: 1 },
-  { member_id: "2", subject_id: "syn-teacher-1", role: "teacher", status: "active", version: 1 },
-  { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1 },
+  { member_id: "1", subject_id: "syn-admin-1", role: "org_admin", status: "active", version: 1, display_name: "가상 관리자" },
+  { member_id: "2", subject_id: "syn-teacher-1", role: "teacher", status: "active", version: 1, display_name: "김가상" },
+  { member_id: "3", subject_id: "syn-teacher-2", role: "teacher", status: "active", version: 1, display_name: null },
   { member_id: "4", subject_id: "syn-viewer-1", role: "viewer", status: "active", version: 1 },
 ];
 const SYN_ORG = { org_id: "1", org_name: "합성 시범고등학교", contract_id: "syn-contract-1", academic_year: 2027, role: "teacher" as const, contract_status: "active" as const, contract_expires_at: "2027-01-07T14:59:59Z", contract_version: 1, contracted_student_count: 30 };
@@ -182,7 +198,7 @@ const synSource: ProSource = {
     if (orgId !== SYN_ORG.org_id) return { ok: false, code: "not_found", status: 404 };
     if (v !== SYN_ORG.contract_version) return { ok: false, code: "expected_version_changed", status: 409 };
     if (syn.used >= SYN_ORG.contracted_student_count) return { ok: false, code: "student_seat_limit_reached", status: 409 };
-    const s: ProStudentDto = { org_id: orgId, student_id: `syn-stu-${syn.students.length + 1}`, ...input, archived: false, version: 1, assigned_teacher_ids: ["syn-teacher-1"], created_at_utc: new Date().toISOString() };
+    const s: ProStudentDto = { org_id: orgId, student_id: `syn-stu-${syn.students.length + 1}`, ...input, memo: input.memo ?? null, archived: false, version: 1, assigned_teacher_ids: ["syn-teacher-1"], created_at_utc: new Date().toISOString() };
     syn.students.push(s);
     syn.used++;
     syn.keys.set(key, s);
@@ -204,19 +220,21 @@ const synSource: ProSource = {
   async scoreStatus(_c, orgId, id, examId, packVersion, stage) {
     if (!syn.students.some((s) => s.org_id === orgId && s.student_id === id)) return null;
     const x = synScore(id);
-    const used = x.entry > 0 ? 1 : 0;
-    return { org_id: orgId, student_id: id, exam_id: examId, pack_version: packVersion, stage, initial_used: used, initial_remaining: 1 - used, correction_granted: 0, correction_used: 0, entry_version: x.entry, current_profile_id: x.profile?.profile_id ?? null, current_report_id: x.reports.at(-1)?.report_id ?? null, last_rejection_code: null };
+    const entry = x.entry.get(stage) ?? 0, used = entry > 0 ? 1 : 0;
+    const mine = x.reports.filter((r) => r.stage === stage);
+    return { org_id: orgId, student_id: id, exam_id: examId, pack_version: packVersion, stage, initial_used: used, initial_remaining: 1 - used, correction_granted: 0, correction_used: 0, entry_version: entry, current_profile_id: x.profile?.stage === stage ? x.profile.profile_id : null, current_report_id: mine.at(-1)?.report_id ?? null, last_rejection_code: null };
   },
   async createScore(_c, orgId, id, body, key) {
     if (!syn.students.some((s) => s.org_id === orgId && s.student_id === id)) return { ok: false, code: "not_found", status: 404 };
     const x = synScore(id);
     const prior = x.keys.get(key) as { profile: ProfileDto } | undefined;
     if (prior) return { ok: true, value: prior };
-    if (x.entry > 0) return { ok: false, code: "input_right_exhausted", status: 409 };
-    if (body.expected_entry_version !== x.entry) return { ok: false, code: "expected_version_changed", status: 409 };
+    const entry = x.entry.get(body.stage) ?? 0;
+    if (entry > 0) return { ok: false, code: "input_right_exhausted", status: 409 };
+    if (body.expected_entry_version !== entry) return { ok: false, code: "expected_version_changed", status: 409 };
     const created = new Date().toISOString();
-    x.entry = 1;
-    x.profile = { profile_id: `syn-pro-profile-${id}-1`, profile_version: 1, confirmed: true, created_at: created, scores: body.scores };
+    x.entry.set(body.stage, 1);
+    x.profile = { profile_id: `syn-pro-profile-${id}-${body.stage}`, profile_version: 1, confirmed: true, created_at: created, scores: body.scores, stage: body.stage };
     const value = { profile: { profile_id: x.profile.profile_id, profile_version: 1, confirmed: true, created_at: created } };
     x.keys.set(key, value);
     return { ok: true, value };
@@ -228,8 +246,8 @@ const synSource: ProSource = {
     if (!x.profile || x.profile.profile_id !== profileId) return { ok: false, code: "profile_not_found", status: 404 };
     const n = x.reports.length + 1;
     const now = new Date().toISOString();
-    const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: `syn-pro-report-${id}`, report_version: n, profile_id: profileId, updated_at: now, overall: computeOverall(x.profile.scores) };
-    x.reports.push({ org_id: orgId, student_id: id, report_id: report.report_id, revision_id: n, exam_id: x.profile.scores.exam_id, stage: "mock", profile_id: profileId, published_result: report, counseling_reasons: [], created_at_utc: now });
+    const report: ReportDto = { format: "jungsi.persisted-report/v1", report_id: `syn-pro-report-${id}-${x.profile.stage}`, report_version: n, profile_id: profileId, updated_at: now, overall: isRawScores(x.profile.scores) ? computeProvisional(x.profile.scores) : computeOverall(x.profile.scores) };
+    x.reports.push({ org_id: orgId, student_id: id, report_id: report.report_id, revision_id: n, exam_id: x.profile.scores.exam_id, stage: x.profile.stage, profile_id: profileId, published_result: report, counseling_reasons: [], created_at_utc: now });
     const value = { report };
     x.keys.set(key, value);
     return { ok: true, value };
@@ -240,6 +258,10 @@ const synSource: ProSource = {
   async readReport(_c, _orgId, id, reportId) {
     return [...synScore(id).reports].reverse().find((r) => r.report_id === reportId) ?? null;
   },
+  // 화면 제작용 합성 응답은 가채점 학교별 판정을 만들지 않는다(4페이지는 '가채점 판정 준비 중')
+  async analyzeP4() {
+    return { ok: false, code: "professional_exam_unavailable", status: 409 };
+  },
   async candidates(_c, orgId, id, profileId, _v, key) {
     const x = synScore(id);
     const prior = x.keys.get(key) as ProCandidatesDto | undefined;
@@ -247,13 +269,16 @@ const synSource: ProSource = {
     if (!x.profile || x.profile.profile_id !== profileId) return { ok: false, code: "profile_not_found", status: 404 };
     const last = x.reports.at(-1);
     if (!last) return { ok: false, code: "initial_overall_report_required", status: 409 };
+    // 가채점 원점수 성적은 대학 환산을 하지 않는다(운영 서버 professional_exam_unavailable 409와 같음)
+    const scores = x.profile.scores;
+    if (isRawScores(scores)) return { ok: false, code: "professional_exam_unavailable", status: 409 };
     const overall = last.published_result.overall;
-    const analyses = Object.fromEntries(CATALOG.map((o) => [o.offering_id, assess(o, x.profile!.scores, overall)]));
+    const analyses = Object.fromEntries(CATALOG.map((o) => [o.offering_id, assess(o, scores, overall)]));
     const candidates = buildCandidates(analyses);
     const now = new Date().toISOString();
     const n = x.reports.length + 1;
     const report: ReportDto = { ...last.published_result, report_version: n, updated_at: now, analyses, candidates, shortlist: last.published_result.shortlist ?? {} };
-    x.reports.push({ ...last, revision_id: n, published_result: report, counseling_reasons: buildTips(analyses, x.profile.scores), created_at_utc: now });
+    x.reports.push({ ...last, revision_id: n, published_result: report, counseling_reasons: buildTips(analyses, scores), created_at_utc: now });
     const value = { org_id: orgId, student_id: id, candidates };
     x.keys.set(key, value);
     return { ok: true, value };
@@ -270,6 +295,19 @@ const synSource: ProSource = {
     if (!last || last.report_id !== reportId) return { ok: false, code: "professional_report_not_found", status: 404 };
     const a = last.published_result.analyses?.[offeringId];
     const shortlist = { ...(last.published_result.shortlist ?? {}), [offeringId]: { selected: true, changed_at: new Date().toISOString(), assessment_status: a?.status ?? "pending", profile_id: last.profile_id, catalog_version: "SYNTHETIC-catalog-v1" } };
+    last.published_result = { ...last.published_result, shortlist };
+    const value = { org_id: orgId, student_id: id, shortlist };
+    x.keys.set(key, value);
+    return { ok: true, value };
+  },
+  async removeBookmark(_c, orgId, id, reportId, offeringId, key) {
+    const x = synScore(id);
+    const prior = x.keys.get(key) as ProBookmarksDto | undefined;
+    if (prior) return { ok: true, value: prior };
+    const last = x.reports.at(-1);
+    if (!last || last.report_id !== reportId) return { ok: false, code: "professional_report_not_found", status: 404 };
+    if (!last.published_result.shortlist?.[offeringId]?.selected) return { ok: false, code: "professional_bookmark_not_found", status: 404 };
+    const shortlist = Object.fromEntries(Object.entries(last.published_result.shortlist).filter(([k]) => k !== offeringId));
     last.published_result = { ...last.published_result, shortlist };
     const value = { org_id: orgId, student_id: id, shortlist };
     x.keys.set(key, value);

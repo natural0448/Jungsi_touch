@@ -19,6 +19,8 @@ export interface Session {
   format: "jungsi.session/v1";
   member_tier: MemberTier;
   entitlement_expires_at: string | null; // UTC Z
+  /** 2026-11-26: 가채점 무료 공개 기간 끝(UTC Z). 서버 스위치가 켜져 있고 기간 안일 때만 온다 */
+  free_provisional_until?: string;
 }
 
 /** offering — 모집행 기본 정보 */
@@ -32,7 +34,9 @@ export interface OfferingDto {
   track: string | null;
   group: string; // 가·나·다
   region: string | null;
-  wildcard_group: "nursing" | "health" | "education" | null;
+  wildcard_group: WildcardGroup | null;
+  // W5 임시안(담당자 R18 승인 대기): 수능 외 조건 코드 배열. 없거나 빈 배열이면 안내를 숨긴다
+  non_csat_conditions?: string[] | null;
 }
 
 /** history_metric — offering 필드 + 대학이 발표한 지표 하나 */
@@ -114,6 +118,29 @@ export interface ScoresInput {
   inquiry: { subject: string; standard_score: number }[]; // 서로 다른 두 과목
   english_grade?: number;
   korean_history_grade?: number;
+  /** 제2외국어/한문: 과목과 등급만. null 은 미응시 */
+  second_language?: SecondLanguageDto | null;
+}
+
+/**
+  수능 가채점 입력(서버 dep_r19c validateRawScoreStructure). 원점수만 보낸다. 국어·수학 선택과목은 변환표를 고르는 데
+  필요해 필수다. 표준점수 범위·백분위·상대평가 등급은 서버가 가채점 변환표로 추정하고, 절대평가 등급은 서버가 고정 구간으로 정한다.
+*/
+export interface ProvisionalScoresInput {
+  exam_id: string;
+  pack_version: string;
+  korean: { raw_score: number; choice: string };
+  math: { raw_score: number; choice: string };
+  inquiry: { subject: string; raw_score: number }[];
+  english_raw?: number;
+  korean_history_raw?: number;
+  second_language?: { subject: string; raw_score: number } | null;
+}
+
+/** 제2외국어/한문 결과. 절대평가 등급이라 총점·전체 위치에 넣지 않는다 */
+export interface SecondLanguageDto {
+  subject: string;
+  grade: number;
 }
 
 /** profile — score-profile.create. 새 입력은 새 profile_id, 기존 성적은 고치지 않는다 */
@@ -133,6 +160,31 @@ export interface SubjectResultDto {
   top_percent_exclusive: string | null;
   top_percent_inclusive: string | null;
   basis: string | null;
+  /* 수능 가채점(score_basis provisional_estimate)에서만 온다. 그때 standard_score 는 null 이다 */
+  raw_score?: number;
+  /** 표준점수 추정 범위(낮음·중앙·높음). null 이면 이 원점수의 추정이 없다(provisional_conversion_unavailable) */
+  standard_score_range?: ProvisionalTripleDto | null;
+  percentile_range?: { low: number; high: number } | null;
+  /**
+   * 가운데 표준점수(standard_score_range.central)를 과목별 '표준점수→백분위' 대응표로 바꾼 값(정수 0~100, dep_r26, 2026-11-22).
+   * 옛 리포트·서버 배포 전에는 키가 없을 수 있다. 없거나 null 이면 화면은 percentile_range 범위로 보인다
+   */
+  percentile_at_central?: number | null;
+  grade_range?: { low: number; high: number } | null;
+  /** 2026-11-26 가채점 대표 등급(표시용 예상, 서버 계산). 등급 범위가 한 등급이면 그 등급, 옛 응답·다른 시험팩은 없음 */
+  representative_grade?: number | null;
+}
+
+/** 가채점 범위(낮음·중앙·높음) */
+export interface ProvisionalTripleDto {
+  low: number;
+  central: number;
+  high: number;
+}
+/** 가채점 전체 상위 누백 범위. 0.01% 단위 문자열(best=좋은 쪽 끝, worst=나쁜 쪽 끝) */
+export interface ProvisionalTopRangeDto {
+  best: string;
+  worst: string;
 }
 
 /**
@@ -152,7 +204,8 @@ export interface ComboPositionDto {
 }
 
 export interface OverallResultDto {
-  status: "observed" | "estimated" | "pending";
+  /** estimated_range: 수능 가채점 범위 결과(top_percent_range) */
+  status: "observed" | "estimated" | "pending" | "estimated_range";
   reason_code: string | null;
   top_percent: string | null;
   inclusive_top_percent: string | null;
@@ -163,6 +216,10 @@ export interface OverallResultDto {
   population_id: string | null;
   model_version: string | null;
   data_kind?: DataKind | null; // 1.7.0: 관측 도수인지 자체 추정 가중치인지
+  /* 수능 가채점(provisional_overall_position)에서만 온다 */
+  top_percent_range?: ProvisionalTopRangeDto | null;
+  exclusive_top_percent_range?: ProvisionalTopRangeDto | null;
+  total_standard_score_range?: ProvisionalTripleDto;
 }
 
 /** 누적의 근거. observed_counts=실제 도수, estimated_weights=공식 주변도수로 자체 추정한 가중치 */
@@ -173,6 +230,8 @@ export type PopulationScope = "whole_complete" | "required_rule_inputs_present";
 export type ScoreBasis = "actual_exam" | "mock_exam" | "year_equated_estimate";
 
 /** jungsi.overall-analysis/v1 — 리포트 안의 전체 분석 */
+export type WithheldSchoolRankDto = { basis: "csat_component" | "university_score"; top_percent: string };
+
 export interface OverallAnalysisDto {
   format: "jungsi.overall-analysis/v1";
   exam: { exam_id: string; academic_year: number; exam_type: string };
@@ -181,8 +240,41 @@ export interface OverallAnalysisDto {
   total_standard_score: number; // 국·수·탐2 표준점수 합. 영어·한국사 제외
   subjects: SubjectResultDto[];
   absolute_grades: { 영어?: number; 한국사?: number };
+  /** 없거나 null 이면 미응시. 이 필드가 생기기 전(2026-11-12)에 저장된 리포트에는 없다 → 미응시로 본다 */
+  second_language?: SecondLanguageDto | null;
   overall: OverallResultDto;
   combinations?: ComboPositionDto[] | null; // 제안 필드(위 ComboPositionDto 설명). 서버가 줄 때만 존재
+  /* 수능 가채점(score_basis provisional_estimate, input_kind provisional_raw)에서만 온다. 그때 total_standard_score 는 null */
+  input_kind?: string;
+  total_standard_range?: ProvisionalTripleDto;
+  /** 2026-11-24 담당자 단일 대표값(jungsi-api v330~). 예상 표준점수 합 하나와 가채점 모형 기준 추정 상위누백 하나. 옛 서버 응답에는 없다 */
+  provisional_representative?: {
+    estimated_standard_score_sum: number | null;
+    estimated_top_percent: string | null;
+    unavailable_reason: "missing_central_score" | "rank_curve_unavailable" | "outside_central_support" | null;
+  } | null;
+  /** Server-projected score for a held personal preliminary judgment. */
+  provisional_school_display?: Record<string, {
+    /** final_cutoffs_pending: 실채점 성적인데 실채점 판정 자료가 아직 없음(2026-11-25 실채점 전환 준비) */
+    reason: "non_csat_components_missing" | "comparison_axis_unverified" | "final_cutoffs_pending";
+    score_kind: "csat_component" | "university_score";
+    central_score: string | null;
+    central_rank?: WithheldSchoolRankDto;
+  }>;
+}
+
+/** 수능 가채점 원점수로 만든 전체 분석인가(서버 PROVISIONAL_SCORE_BASIS). 이때 표준점수 칸은 범위로만 온다 */
+export const PROVISIONAL_SCORE_BASIS = "provisional_estimate";
+export function isProvisionalOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return !!a && (a.score_basis === PROVISIONAL_SCORE_BASIS || a.input_kind === "provisional_raw");
+}
+/** 수능 실채점 성적(서버 score_basis actual_csat) */
+export function isCsatFinalOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return !!a && a.score_basis === "actual_csat";
+}
+/** 학교별 수능 판정 화면을 쓰는 성적(가채점·실채점) */
+export function isCsatJudgedOverall(a: OverallAnalysisDto | null | undefined): boolean {
+  return isProvisionalOverall(a) || isCsatFinalOverall(a);
 }
 
 export interface ShortlistEntryDto {
@@ -210,8 +302,111 @@ export interface HistoricalMetricDto {
   source_as_of: string | null; // YYYY-MM-DD
 }
 
+/** eligibility_conditions — 모집단위의 필수 응시 영역·지정 과목(서버 public_response_schemas 와 같은 모양) */
+export interface EligibilityConditionsDto {
+  required_areas: string[] | null; // [] 이면 별도 지정 없음
+  math_choices: string[] | null; // 목록이면 그 과목 중 하나
+  math_note: string | null; // 요강 문구 그대로
+  inquiry_domains: string[] | null; // 사회·과학·직업
+  inquiry_note: string | null; // 요강 문구 그대로
+}
+
+/** year_cutoff — 지난 학년도 합격선 하나(서버 public_response_schemas 와 같은 모양) */
+export interface YearCutoffDto {
+  academic_year: number;
+  published_metric: string; // 대학 발표 지표 이름(예: 최종등록자 70%컷)
+  cutoff_top_percent: string; // 그 합격선의 누적 백분위(전체 응시자 추정, 위에서 %)
+  observation_id: string;
+  /** 전형 통합 발표(예: 일반학생·지역인재를 합쳐 발표, 대표님 결정 2026-11-16) */
+  published_scope?: "combined_tracks";
+  /** 평균의 점수 성분: 수능 환산점수 평균 / 전형 총점 평균 */
+  score_component?: "csat_converted" | "selection_total";
+}
+
 /** assessment — 모집단위 하나의 개인 분석 (report.analyses[offering_id]) */
+/** 지원 판정 7단계(서버 band, 정책 20261118.relative-band-15-30.v1). 예상 합격권 폭에 대한 상대 위치 */
+export type BandCode = "stable" | "downward" | "target" | "aspirational" | "upward" | "challenge" | "outside";
+export interface BandDto {
+  code: BandCode;
+  label: string;
+  policy_version: string;
+  base_code?: BandCode;
+}
+
+/** 참고 기준 판정(대표님 승인 2026-11-18). 참고 누백을 승인된 예상 합격권과 견준 값이며 정식 판정(category·band)과 별개.
+ * 추천·와일드카드 선정에는 쓰이지 않는다. 누백이 범위면 불리한 끝의 판정이 upper_* 로 함께 온다 */
+export interface ReferenceBandDto {
+  /** reference_threshold: 3페이지 참고 묶음 행에 서버가 누백 없이 실어 보내는 문턱 판정(dep_r15, 2026-11-21) */
+  basis: "reference_percentile" | "reference_threshold";
+  code: BandCode;
+  label: string;
+  /** 문턱 판정 행에서는 생략될 수 있다(정책·승인판은 reference_threshold_summary.sources[source] 에 한 번만 싣는다) */
+  policy_version?: string;
+  approval_version?: string;
+  upper_code?: BandCode;
+  upper_label?: string;
+  source?: string;
+  /** 승인된 대표 성적 한 건으로 계산한 개인용 가채점 판정임을 표시한다. */
+  judgment_basis?: "central" | "interval";
+  /** false 면 3페이지 자동 후보에 넣지 않는다(충남대 2행: 같은 비교 집단 가운데 유불리가 유리일 때만) */
+  automatic_candidate?: boolean;
+  /**
+   * 2026-11-25 대표님 결정(서버 dep_r46): 학생부 등을 함께 반영하는 전형의 7단계를 수능 반영분만으로 판정한 행.
+   * 화면은 '수능 기준'을 함께 적고, 3페이지 자동 후보에는 오지 않는다(automatic_candidate=false)
+   */
+  score_scope?: "csat_component";
+  /** 화면 전용: 판정 보류 모집단위(lib/csat-held.ts). 환산점수만 쓰고 단계는 쓰지 않는다 */
+  held?: boolean;
+  /**
+   * 개인용 4페이지 가채점 판정 행만(서버 dep_r29b, 2026-11-23): 이 대학 방식 환산점수(소수 둘째 자리 문자열).
+   * central = 가운데 추정 점수(구간 점수·계산 불가면 null), low·high = 과목 표준점수 범위 끝 조합의 최저·최고(가운데 포함)
+   */
+  school_score?: { central: string | null; low: string; high: string };
+  /**
+   * 개인용 4페이지 가채점 판정 행만(서버 dep_r30, 2026-11-23): 대학 안 내 위치 — 이 대학 환산점수의 동점 포함 상위누백(%).
+   * central = 가운데 점수, best = 가장 좋은 끝(최고 점수), worst = 가장 나쁜 끝(최저 점수). 곡선 밖이면 null
+   */
+  school_rank?: { central: string | null; best: string | null; worst: string | null };
+  /**
+   * 개인용 4페이지 가채점 판정 행만(서버 dep_r31, 2026-11-23): 환산 유불리(%p, 부호 있는 문자열). 같은 학생 분기의
+   * 국·수·탐2 총점 상위누백 − 이 대학 환산 상위누백. 양수면 유리. central = 가운데 분기, low·high = 끝 조합의 최소·최대
+   */
+  school_gain?: { central: string | null; low: string; high: string };
+  /** 서버 dep_r37(11-24, 담당자 Q3): 가운데 판정일 때 가채점 점수 범위 안에서 가능한 가장 좋은·나쁜 단계 */
+  range_codes?: { best: string; worst: string };
+  /** 2026-11-26 무료 공개(일반 회원) 응답: 숫자 대신 받는 값. 유료 응답에는 없다 */
+  gain_tone?: "up" | "down" | "even" | "split";
+  /** 대학 안 위치 구간 위 끝(상위 N% 안쪽, 1·3·5·10·20·30·50·100) */
+  rank_bucket?: number;
+  /** 같은 단계 점수대 안 위치(0 아래 ~ 100 위) */
+  position_share?: number;
+  /** 서버 dep_r37(11-24, 담당자 Q4): 유불리를 내지 않은 사유 — 국·수·탐2 합이 비교 분포 밖 */
+  gain_note?: "comparison_total_out_of_support";
+  /** 전문가용 가채점 판정 행만(서버 dep_pro_r27): 중앙 추정 점수의 단계 안 위치. 이 대학 환산점수 단위 문자열 */
+  position?: { score: string; better_gap: string | null; worse_gap: string | null; share_pct: number | null };
+}
+
+/** candidates.reference_threshold_summary(dep_r15). complete=false 면 서버가 이번 요청에서 일부를 미뤘다(deferred) */
+export interface ReferenceThresholdSummaryDto {
+  basis: "reference_threshold";
+  threshold_version: string;
+  universe: number;
+  judged: number;
+  listed: number;
+  delivered: number;
+  complete: boolean;
+  deferred?: number;
+  sources?: Record<string, { policy_version: string; approval_version: string }>;
+  by_code?: Record<string, number>;
+  delivered_by_code?: Record<string, number>;
+  /** 2026-11-26 무료 공개: 3페이지 묶음마다 보이지 않은 대학 수 */
+  free_hidden_by_bucket?: { reach: number; core: number; safe: number };
+}
+
 export interface AssessmentDto {
+  reference_band?: ReferenceBandDto | null;
+  /** 7단계 판정. 누백 축 예상 기준이 발행된 모집단위에만 온다(없으면 category 만 쓴다) */
+  band?: BandDto | null;
   offering_id: string;
   status: "ready" | "pending" | "ineligible";
   reason_code: string | null;
@@ -242,11 +437,49 @@ export interface AssessmentDto {
   conversion?: ConversionDto | null;
   percentile?: PercentileDto | null;
   recommendation_reasons?: ReasonDto[] | null;
+  // 참고 누백(추정). 서버는 승인된 곡선의 값만 보내고, 계산이 안 되면 칸을 뺀다
+  reference_percentile?: ReferencePercentileDto | null;
+  // 학교 반영 백분위(참고, 2026-11-14). 허가된 2027 모집단위만, 읽을 때 서버가 계산해 붙인다
+  school_reflected?: SchoolReflectedDto | null;
+  // 지원 자격 조건(유료 report.read, 2026-11-15). 요강 정본에서 확정된 필드만 온다. 판정은 eligibility_status 그대로
+  eligibility_conditions?: EligibilityConditionsDto | null;
+  // 지난 학년도 합격선 누적 백분위(유료 report.read, R9 명부, 2026-11-15). 담당자 명부에 있는 모집단위만 온다
+  year_cutoffs?: YearCutoffDto[] | null;
+}
+
+/** 학교 반영 백분위(참고). value 는 0~100, 영어·한국사·가산점 제외 */
+export interface SchoolReflectedDto {
+  status: "reference" | "pending";
+  value: number | null;
+  reason_code: string | null;
+  eligibility_note: boolean;
+  excluded: ("english" | "korean_history" | "bonus")[];
+}
+
+/** 참고 누백(추정) — 9월 모의평가 응시자 전체 기준 추정 위치. 합격 가능성·지원 판정이 아니다 */
+export interface ReferencePercentileDto {
+  status: "reference_estimated";
+  estimated_upper_cumulative_percent_all_examinees: string; // 정확한 소수 문자열, 화면은 소수 첫째 자리
+  /** 상한(점수를 낼 수 없는 응시자를 모두 위로 둔 값). 없거나 하한과 같으면 한 값으로 보인다(대표님 결정 2026-11-16) */
+  estimated_upper_cumulative_percent_upper_bound?: string;
+  metric: string;
+  denominator_kind: string;
+  calculation_review_scope: string;
+  production_allowed: boolean;
+  actual_admission_full_total_approved: boolean;
+}
+
+/** candidates.reference_university_groups — 순위 없는 참고 묶음. basic_university_groups 와 섞지 않는다 */
+export interface ReferenceUniversityGroupDto {
+  university_id: string;
+  university_name: string;
+  /** dep_r15: 문턱 판정 행은 reference_percentile 없이 reference_band(basis reference_threshold)만 싣는다 */
+  offerings: { offering: OfferingDto; reference_percentile?: ReferencePercentileDto | null; reference_band?: ReferenceBandDto | null }[];
 }
 
 /** assessment.conversion — 대학 공식 반영식 환산. 판단이 보류여도 성공한 환산은 남는다 */
 export interface ConversionDto {
-  status: "ready" | "pending";
+  status: "ready" | "pending" | "reference_calculated"; // reference_calculated: 참고 점수(운영 확정본 아님)
   reason_code: string | null;
   score_basis: ScoreBasis | null;
   score_scope: string | null;
@@ -333,12 +566,38 @@ export interface CandidateItemDto {
   assessment: AssessmentDto;
 }
 
-/** candidates — candidates.build. 대학별 묶음과 간호·보건·교육 와일드카드, 판단 보류 목록 */
+/** 와일드카드 계열. contract·maritime·railway 는 서버 선택(wildcard_selection) 운영 연결 뒤에 나온다 */
+export type WildcardGroup = "nursing" | "health" | "education" | "contract" | "maritime" | "railway";
+
+/** candidates.wildcard_selection — 서버가 고른 와일드카드(최대 4장)의 순서 확정 상태. 없거나 null 이면 옛 방식 */
+export interface WildcardSelectionDto {
+  status: "ready" | "partial" | "pending";
+  reason_code: "wildcard_evidence_unavailable" | "wildcard_assessment_pending" | "wildcard_comparison_unverified" | null;
+  card_stability: { offering_id: string; status: "verified" | "pending" }[]; // wildcards 와 같은 순서·같은 길이
+}
+
+/** candidates — candidates.build. 대학별 묶음과 와일드카드, 판단 보류 목록 */
 export interface CandidatesDto {
   status: "ready" | "pending";
   reason_code: string | null;
   basic_university_groups: { university_id: string; university_name: string; offerings: CandidateItemDto[] }[];
-  wildcards: CandidateItemDto[];
+  wildcards: CandidateItemDto[]; // wildcard_selection 이 있으면 서버 순서 그대로, 최대 4장
+  wildcard_selection?: WildcardSelectionDto | null;
+  reference_university_groups?: ReferenceUniversityGroupDto[] | null; // 없거나 비면 영역을 숨긴다
+  reference_threshold_summary?: ReferenceThresholdSummaryDto | null;
+  /** 서버 dep_r38: 4페이지 지원가능성 필터 응답(고른 단계 모집단위 한 쪽, 판정 있는 행의 값은 reference_university_groups) */
+  /** 서버 2026-11-24: 수능 최저·최소 기준 미달(확정)·갈림 모집단위 */
+  csat_minimum_unmet?: string[] | null;
+  csat_minimum_partial?: string[] | null;
+  /** 서버 2026-11-24: 응시 과목 조건(과탐 분야·생명과학 등) 미충족 모집단위 */
+  csat_condition_unmet?: string[] | null;
+  /** 서버 2026-11-24: 가채점 탐구 표준점수 추정 끝이 과목 상한을 넘어 계산하지 않은 모집단위 */
+  csat_inquiry_cap?: string[] | null;
+  /** 2026-11-25 담당자 R21 B: 지원은 가능하나 이 성적 조합의 비교 모형 범위 밖(비교 자료 없음) */
+  csat_no_comparison?: string[] | null;
+  /** 2026-11-24 담당자 v3(서버 v334~): 7단계를 내지 않은 모집단위와 가운데 환산점수·사유 */
+  csat_withheld?: { offering_id: string; reason: string; score_kind: string; central_score: string | null; central_rank?: WithheldSchoolRankDto }[] | null;
+  status_scan?: { matched: number; next_after: string | null; complete: boolean; offerings: OfferingDto[] } | null;
   pending_offerings: OfferingStateDto[]; // 판단 보류(자료 부재 등)
   outside_offerings?: OfferingStateDto[]; // 판단 완료 · 추천 범위 밖 (1.7.1)
   ineligible_offerings?: OfferingStateDto[]; // 판단 완료 · 지원 조건 미충족 (1.7.1)
@@ -391,6 +650,17 @@ export interface ReportDto {
   candidates?: CandidatesDto | null;
   shortlist?: Record<string, ShortlistEntryDto>;
   analysis_status?: { status: string; reason_code: string | null };
+  /** 지금 자료판과 다른 판으로 계산돼 저장된 분석의 모집단위(서버 v224~, 읽을 때만 붙는다). 없으면 판단하지 않는다 */
+  stale_analysis_ids?: string[];
+  /** 저장된 후보 목록이 지금 자료판과 다른 판으로 만들어졌는지 */
+  candidates_stale?: boolean;
+  /**
+   * 화면 서버만 붙이는 값(서버 응답에는 없다). 4페이지 수능 가채점 판정: 모집단위 → 7단계 판정(source g).
+   * university.analyze 응답에만 실려 오는 것을 report-ops provisionalBands 가 모은다(서버 dep_r29, 2026-11-23)
+   */
+  provisional_bands?: Record<string, ReferenceBandDto>;
+  /** 서버 2026-11-24: 판정 없는 모집단위의 수능 최저 사유 — unmet(미달 확정)·partial(가채점에 따라 갈림). 화면 전용 */
+  provisional_min?: Record<string, CsatMinimum>;
 }
 
 /** snapshot — report.export. 고정된 revision 의 상담 리포트 */
@@ -575,6 +845,8 @@ export interface SnapshotHeadDto {
   full: SnapshotPartPin | null;
   parts: SnapshotPartPin[];
   expires_at: string;
+  /** 2027 부분 발행 때만(schema v2). 화면 수신 영수증을 낸 뒤에만 온다(담당자 1.9.141) */
+  r27_scope_coverage?: { status: "partial"; source_rows: number; included_rows: number; excluded_rows: number; review_pending_rows: number };
 }
 
 /* ── 2페이지 입력권·본인 목록·예시(기획 1.9.95, 결합 20) ── */
@@ -582,7 +854,8 @@ export interface SnapshotHeadDto {
 /** own_report_list — 현재 로그인한 본인의 리포트 요약 */
 export interface OwnReportListDto {
   format: "jungsi.own-report-list/v1";
-  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string }[];
+  /** stage·is_current: 담당자 서비스 후보(2026-10-28 cross-PC v4). 아직 운영 응답에 없을 수 있어 선택 필드다. null 은 서버가 모름 */
+  items: { report_id: string; exam_id: string | null; report_version: number; updated_at: string; stage?: string | null; is_current?: boolean | null }[];
   next_cursor: string | null;
   has_more: boolean;
 }
@@ -629,3 +902,7 @@ export interface SampleReportDto {
     persisted: false;
   };
 }
+
+/** 판정 없는 모집단위의 수능 최저 사유(서버 2026-11-24) */
+/** unloaded: 화면이 이 모집단위의 판정을 서버에서 받지 못함(일시 장애, 2026-11-25) — 판정 없음 사유가 아니다 */
+export type CsatMinimum = "unmet" | "partial" | "condition" | "cap" | "nocomp" | "unloaded";

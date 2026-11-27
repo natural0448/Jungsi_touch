@@ -6,6 +6,8 @@ from edge_source_scope import classify_sources
 from check_project_consistency import ROOT,GitSnapshot,validate_content,validate_changed_paths,snapshot_changed_paths,validate_snapshot_baseline,SPEC_PATH
 PYTHON_SUITE_TIMEOUT_SECONDS = 3600
 RETAINED_RUNNER_TIMEOUT_SECONDS = 4200
+# 2026-11-21: 서버(edge) 묶음이 300초 근처까지 늘어 통과한 시험도 시간 초과로 실패해 1,200초로 늘림(Python 묶음 3,600초와 같은 성격의 상한)
+EDGE_SUITE_TIMEOUT_SECONDS = 1200
 
 HELPER = """import importlib.util,json,pathlib,re,sys,time,unittest
 root=pathlib.Path.cwd()
@@ -223,7 +225,7 @@ def run_retained(workspace,manifest,destination,deno=None):
             args=[sys.executable,"-B","-X","utf8",str(workspace/"scripts/run_edge_tests.py"),"--snapshot-root",str(workspace),"--source-manifest",str((destination/"source_manifest.json").resolve()),"--python",sys.executable,"--output-root",str((destination/"edge").resolve())]
             if deno:args+=["--deno",deno]
             try:
-                edge_process=subprocess.run(args,cwd=workspace,capture_output=True,env=env,timeout=300)
+                edge_process=subprocess.run(args,cwd=workspace,capture_output=True,env=env,timeout=EDGE_SUITE_TIMEOUT_SECONDS)
             except subprocess.TimeoutExpired as error:
                 create(destination/"edge.stdout",error.stdout or b"");create(destination/"edge.stderr",error.stderr or b"")
                 edge=dict(successful=False,status="EDGE_TIMEOUT",timeout=True,

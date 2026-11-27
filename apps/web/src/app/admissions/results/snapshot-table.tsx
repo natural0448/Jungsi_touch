@@ -1,15 +1,23 @@
-import { asOfDate } from "@/lib/format";
-import { rankDisplayModel } from "@/lib/p1-field-qualification";
-import { unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { asOfDate, ratioText } from "@/lib/format";
+import { FILL_UNDISCLOSED, noRecruit, OFFICIAL_NOT_PUBLISHED, STATS_CODE_TEXT, STATS_LE3 } from "@/lib/p1-adiga-fill";
+import { derived, shownFillCount } from "@/lib/p1-derived";
+import { publishedStats, type PublishedStat } from "@/lib/p1-published-stats";
+import { historicalConditionLabel, unitKey, type Cell, type Row } from "@/lib/p1-shape";
+import { ScrollHint } from "./scroll-hint";
 
 /*
   정리본 한 모집단위: 학년도별 한 줄, 이전 고정 표 배치(연결계약 v3 §5).
-  모집인원 · 경쟁률 · 추정 총 지원자 · 충원인원 · 추정 탈락자 · 최종 합격 예비번호 · 최종 50%컷 · 최종 70%컷.
-  값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·컷 기준 꼬리표·'대학 발표 통계' 칸·출처 링크는
-  보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다.
-  값이 있는데 확인 중(pending_metadata)이면 값과 확인 사유를 함께 보인다. 예비번호는 '번', 충원은 '명'.
-  추정 2열만 기존 승인 산식(모집인원×경쟁률 반올림, −모집−충원)으로 계산하고 발표 칸을 덮지 않는다.
-  추정 총 지원자는 충원인원 없이도 계산하고, 추정 탈락자만 충원인원이 있어야 계산한다.
+  모집인원 · 경쟁률 · 추정 총 지원자 · 충원 발표 · 추정 탈락자 · 대학 발표 성적 ①·②.
+  충원 발표 한 열에서 실제 충원 인원(명)과 최종 합격 예비번호(번)를 각각 표시한다.
+  1페이지에 추정 상위 누백(참고)은 보이지 않는다(2026-11-16 결정).
+  값은 원문 표기 그대로, null 은 0 이 아니다. 모집인원 단계·대상 집단 꼬리표·출처 링크는 보이지 않는다(2026-10-24 사용자 결정).
+  발표 성적 두 칸은 대학마다 다른 통계(50·70%컷, 평균·75%컷 등) 중 두 개를 골라 통계 이름과 함께 보인다(2026-10-28 사용자 결정,
+  고르는 규칙은 lib/p1-published-stats.ts). ① 은 50%컷 자리, ② 는 70%컷 자리로 통계마다 칸이 고정된다(같은 날 정정). 별도 '대학 발표 추가 통계' 열은 만들지 않는다. 정리본 자료는 그대로 보존한다.
+  '확인 중' 꼬리표·확인 사유는 보이지 않는다(2026-11-04 사용자 결정, 자료의 status·reason 은 보존). 예비번호는 '번'.
+  추정 2열만 계산하고 발표 칸을 덮지 않는다: 추정 총 지원자 = 모집인원×경쟁률(반올림),
+  추정 탈락자 = 추정 총 지원자 − (모집인원 + 실제 충원 인원).
+  실제 충원 인원이 비어 있으면 추정 탈락자도 빈칸으로 둔다.
+  휴대폰처럼 표가 넘치면 학년도 열을 왼쪽에 고정하고 옆으로 넘기라는 안내를 보인다(scroll-hint.tsx, 2026-11-02).
 */
 
 export const PAST_YEARS = [2026, 2025, 2024] as const;
@@ -27,103 +35,63 @@ const REASON: Record<string, string> = {
   MULTIPLE_CURRENT_CANDIDATES_DEFINITION_EVENT_OR_VALUE_CONFLICT: "발표가 여러 건이고 정의·시점·값이 달라 확인 중",
   EXPLICIT75_ALTERNATE_NOT70_REPLACEMENT: "대학이 75%컷으로 발표(70%컷 대체 아님)",
   UNCLASSIFIED_BASIS_NEEDS_SOURCE_DEFINITION_NO_TOTAL_CUT_PROMOTION: "점수 기준 분류 전 — 원문 정의 확인 중",
-  OFFERING_MAPPING_PENDING_ORIGINAL_OBSERVATION_PRESERVED: "모집행 연결 확인 중(원문 보존)",
+  OFFERING_MAPPING_PENDING_ORIGINAL_OBSERVATION_PRESERVED: "학과 연결 확인 중(원문 그대로)",
   NONNUMERIC_LITERAL_REQUIRES_SOURCE_REVIEW: "숫자가 아닌 원문 값 — 확인 중",
 };
 export const reasonText = (code: string | null) => (code ? (REASON[code] ?? code) : null);
 
-/** 확인 중 표시(값 옆 작은 꼬리표). 사유는 title 과 화면 읽기 프로그램용 글자로 함께 */
-function Hold({ code }: { code: string | null }) {
-  const t = reasonText(code) ?? "확인 중";
-  return (
-    <span className="rs-hold" title={t}>
-      확인 중<span className="sr">: {t}</span>
-    </span>
-  );
-}
-
+/**
+ * 값 칸. '확인 중' 꼬리표와 확인 사유는 보이지 않는다(2026-11-04 사용자 결정: 1페이지 '확인 중' 꼬리표 전부 제거).
+ * 값은 발표 그대로, null 과 빈 문자열은 빈칸으로 표시한다. 실제 0과 자료의 status·reason 은 그대로 보존된다.
+ * 숫자가 아닌 원문 값(pending_value_type)도 값만 보인다. '원문' 꼬리표는 붙이지 않는다(2026-11-08 사용자 결정: 꼬리표는 화면에 보이지 않음).
+ */
 function Value({ c, unitOverride }: { c: Cell; unitOverride?: string }) {
-  if (c.v === null) {
-    const t = reasonText(c.r);
-    return c.s === "pending_metadata" ? <Hold code={c.r} /> : <span className="unpub" title={t ?? undefined}>─</span>;
-  }
+  if (c.v === null || c.v.trim() === "") return null;
   const unit = unitOverride ?? c.u;
   return (
     <>
       <b className="num">{c.v}</b>
       {unit && <small> {unit}</small>}
-      {c.s === "pending_value_type" ? <span className="rs-hold" title={reasonText(c.r) ?? undefined}>원문</span> : c.s.startsWith("pending") && <Hold code={c.r} />}
     </>
   );
 }
 
-function RankValue({ c }: { c: Cell }) {
-  const view = rankDisplayModel(c);
-  return <>
-    <Value c={view.cell} />
-    {view.qualified && <small className="rs-bs">이 필드의 서비스 자격 확인</small>}
-    {view.qualified && view.rawPending && <small className="rs-bs" title={reasonText(c.r) ?? undefined}>원자료 메타 상태: 확인 중</small>}
-  </>;
-}
-
-/** 컷 값. 점수 기준·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정) */
-function Cut({ c }: { c: Cell }) {
-  const asOf = asOfDate(c.at);
+/** 발표 성적 한 칸: 통계 이름 + 값. 대상 집단은 쓰지 않고, 학생부 등급일 때만 기준을 붙인다(2026-10-28 사용자 결정) */
+function Stat({ s }: { s: PublishedStat | undefined }) {
+  // 값이 없으면 사유는 자료에 보존하고 화면 셀은 비운다.
+  if (!s) return null;
+  const asOf = asOfDate(s.cell.at);
   return (
     <>
-      <Value c={c} />
-      {c.v !== null && asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
+      <small className="rs-stat">{s.label}</small> <Value c={s.cell} />
+      {s.schoolRecord && <small className="rs-bs">학생부 등급</small>}
+      {asOf && <small className="rs-bs">자료 기준 {asOf}</small>}
     </>
   );
-}
-
-/* 추정 2열 재료: 십진 문법을 직접 검사한다(Number("") → 0 같은 변환을 쓰지 않는다) */
-const personInt = (c: Cell): number | null => {
-  if (c.v === null || c.u !== "명") return null;
-  const s = c.v.trim();
-  return /^\d{1,9}$/.test(s) ? Number(s) : null;
-};
-const ratioOf = (c: Cell): { n: number; s: number } | null => {
-  if (c.v === null) return null;
-  if (c.u !== null && !c.u.includes("대")) return null;
-  const t = /^(\d+)(?:\.(\d+))?$/.exec(c.v.trim());
-  if (!t) return null;
-  const frac = t[2] ?? "";
-  if ((t[1] + frac).length > 10) return null;
-  return { n: Number(t[1] + frac), s: 10 ** frac.length };
-};
-/* 추정 총 지원자 = 모집인원×경쟁률(충원 불필요), 추정 탈락자 = 그 값 − 모집인원 − 충원인원(충원이 있을 때만). 2026-10-22 사용자 확인 */
-function derived(r: Row): { applicants: number | null; dropped: number | null; heldA: boolean; heldD: boolean } {
-  const cap = personInt(r.rc);
-  const fill = personInt(r.ad);
-  const ratio = ratioOf(r.cr);
-  const isHeld = (c: Cell) => c.s !== "verified_official" && c.s.startsWith("pending");
-  if (cap === null || ratio === null || cap >= 1e5) return { applicants: null, dropped: null, heldA: false, heldD: false };
-  // half-up(Q×R)을 정수 분수로: floor((2QR + s) / 2s)
-  const applicants = Math.floor((2 * cap * ratio.n + ratio.s) / (2 * ratio.s));
-  const heldA = isHeld(r.rc) || isHeld(r.cr);
-  if (fill === null) return { applicants, dropped: null, heldA, heldD: false };
-  const d = applicants - cap - fill;
-  return { applicants, dropped: d >= 0 ? d : null, heldA, heldD: heldA || isHeld(r.ad) };
 }
 
 export const latestOf = (rows: Row[]) => [...rows].sort((a, b) => b.y - a.y)[0];
 
 /** 한 모집단위(같은 원래 PK 또는 미연결 관측 하나)의 학년도별 고정 표 */
-export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: string }) {
+export function YearTable({ rows: all, schoolName }: { rows: Row[]; schoolName: string }) {
+  // 2027 모집행은 접힌 줄 요약에만 보이고, 이 표는 2024~2026 대학 발표 결과만 보인다(담당자 v9 §3)
+  const rows = all.filter((r) => r.y < 2027);
+  if (rows.length === 0)
+    return <p className="rs-idnote">이 모집단위는 2027학년도 모집 정보만 있습니다. 2024~2026학년도 대학 발표 결과와 같은 모집단위인지 아직 확인되지 않아 함께 보이지 않습니다.</p>;
   const latest = latestOf(rows);
   const byYear = new Map<number, Row[]>();
   for (const r of rows) byYear.set(r.y, [...(byYear.get(r.y) ?? []), r]);
   const years = [...byYear.keys()].sort((a, b) => b - a);
-  // 모집인원 단계·컷 기준·대학 발표 통계 열은 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
+  // 모집인원 단계·대상 집단 꼬리표는 보이지 않는다(2026-10-24 사용자 결정). 정리본 자료는 그대로 보존한다
   const pending = latest.pk === null;
-  const variants = Math.max(...rows.map((r) => r.idv));
+  // 과거 입결 참고 관측: 서버가 이 모집단위에 실제로 붙인 행이 있을 때만 열을 보인다. 대학 발표값·합격 판정이 아니다
+  // 추정 상위 누백(참고)은 1페이지에 보이지 않는다(2026-11-16 대표님 결정). 정리본 자료(hr)는 보존한다
+  // 표기 변형('같은 모집단위인지 확인 중') 안내는 보이지 않는다(2026-11-05 사용자 결정). 다른 이름의 행에는 발표명을 계속 적는다
   // 출처 링크는 보이지 않는다(2026-10-24 사용자 결정): 상당수가 어디가 내부 요청 주소라 직접 열면 오류 화면이 나온다
   return (
     <div className="rs-yt">
-      {pending && <p className="rs-idnote">모집행 연결 확인 중인 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다.</p>}
-      {variants > 1 && <p className="rs-idnote">대학명·전형 표기가 발표마다 달라({variants}가지) 같은 모집단위인지 확인 중입니다. 숫자는 발표 그대로입니다.</p>}
-      <div className="tblwrap">
+      {pending && <p className="rs-idnote">학과 연결을 확인하고 있는 발표입니다. 다른 학년도와 합치지 않고 원문 그대로 보입니다. 대학이 여러 학과를 묶어 한꺼번에 발표했을 수 있으니, 이 숫자를 이 학과만의 결과로 보지 마세요.</p>}
+      <ScrollHint>
         <table className="tb rs-years">
           <thead>
             <tr>
@@ -131,19 +99,22 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
               <th scope="col" className="r">모집인원</th>
               <th scope="col" className="r">경쟁률</th>
               <th scope="col" className="r derived">추정 총 지원자</th>
-              <th scope="col" className="r">충원인원</th>
+              <th scope="col" className="r">충원 발표</th>
               <th scope="col" className="r derived">추정 탈락자</th>
-              <th scope="col" className="r">최종 합격 예비번호</th>
-              <th scope="col" className="r">최종 50%컷</th>
-              <th scope="col" className="r">최종 70%컷</th>
+              <th scope="col" className="r">대학 발표 성적 ①</th>
+              <th scope="col" className="r">대학 발표 성적 ②</th>
             </tr>
           </thead>
           <tbody>
             {years.flatMap((y) =>
               byYear.get(y)!.map((r, i) => {
-                const dv = derived(r);
+                const none = noRecruit(r);
+                const dv = none ? { applicants: null, dropped: null, fill: null, rank: null } : derived(r);
+                const ps = publishedStats(r);
+                const shownFill = none ? null : shownFillCount(r);
                 const renamedDept = r.d !== latest.d ? r.d : null;
                 const otherName = r.n !== schoolName ? r.n : null;
+                const historicalConditions = historicalConditionLabel(r, all);
                 return (
                   <tr key={`${y}-${i}`}>
                     <th scope="row">
@@ -151,26 +122,31 @@ export function YearTable({ rows, schoolName }: { rows: Row[]; schoolName: strin
                       {byYear.get(y)!.length > 1 && <small>같은 해 발표 {i + 1}</small>}
                       {otherName && <small>발표명 {otherName}</small>}
                       {renamedDept && <small>당시 {renamedDept}</small>}
+                      {historicalConditions && <small>{historicalConditions}</small>}
                     </th>
-                    <td className="r"><Value c={r.rc} /></td>
-                    <td className="r"><Value c={r.cr} /></td>
+                    <td className="r">{none ? <small className="rs-bs">모집 없음</small> : <Value c={r.rc} />}</td>
+                    <td className="r">{none ? null : <Value c={r.cr.v === null || r.cr.v.trim() === "" ? r.cr : { ...r.cr, v: ratioText(r.cr.v) }} />}</td>
                     <td className="r derived">
-                      {dv.applicants === null ? <span className="unpub">─</span> : <><b className="num">{dv.applicants}</b><small> 명</small>{dv.heldA && <Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
+                      {dv.applicants === null ? null : <><b className="num">{dv.applicants}</b><small> 명</small></>}
                     </td>
-                    <td className="r"><Value c={r.ad} /></td>
+                    <td className="r">
+                      {shownFill !== null && <><b className="num">{shownFill}</b><small> 명</small></>}
+                      {shownFill !== null && dv.rank !== null && <small> · </small>}
+                      {dv.rank !== null && <><b className="num">{dv.rank}</b><small> 번</small></>}
+                      {!none && shownFill === null && dv.rank === null && (r.ad.r === FILL_UNDISCLOSED || r.ad.s === OFFICIAL_NOT_PUBLISHED || r.rk.s === OFFICIAL_NOT_PUBLISHED) && <small className="rs-bs">미발표</small>}
+                    </td>
                     <td className="r derived">
-                      {dv.dropped === null ? <span className="unpub">─</span> : <><b className="num">{dv.dropped}</b><small> 명</small>{dv.heldD &&<Hold code="SOURCE_DEFINITION_UNIT_OR_QUALIFICATION_PENDING" />}</>}
+                      {dv.dropped === null ? null : <><b className="num">{dv.dropped}</b><small> 명</small></>}
                     </td>
-                    <td className="r"><RankValue c={r.rk} /></td>
-                    <td className="r"><Cut c={r.c50} /></td>
-                    <td className="r"><Cut c={r.c70} /></td>
+                    <td className="r">{(r.c50.r ?? "").startsWith(`${STATS_LE3}:`) && !ps[0] && !ps[1] ? <small className="rs-bs">{STATS_CODE_TEXT[(r.c50.r ?? "").slice(STATS_LE3.length + 1)] ?? "미발표"}</small> : <Stat s={ps[0]} />}</td>
+                    <td className="r"><Stat s={ps[1]} /></td>
                   </tr>
                 );
               }),
             )}
           </tbody>
         </table>
-      </div>
+      </ScrollHint>
     </div>
   );
 }

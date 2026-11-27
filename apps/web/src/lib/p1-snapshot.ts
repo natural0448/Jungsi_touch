@@ -4,16 +4,20 @@ import type { SnapshotHeadDto, SnapshotPartPin } from "@/lib/dto";
 import { ConnectionError, SnapshotChanged, type Caller, type JungsiSource } from "@/lib/api/source";
 import { P1CoordinationCore, P1CoordinationError, localP1CoordinatorClient, p1CoordinatorClient, validatePublicHead,
   type CoordinatorState, type CoordinationStore, type CoordinationView, type PublicDocument } from "./p1-coordinator-core";
-import { unitKey, type Cell, type Row, type School } from "./p1-shape";
+import { linkR27, unitKey, type Cell, type R27Coverage, type Row, type School } from "./p1-shape";
 import { projectBackendValidatedRank } from "./p1-field-qualification";
+import { ADIGA_FILL_KEY, parseAdigaFill, type AdigaFill } from "./p1-adiga-fill";
 export type { Cell, Row, School } from "./p1-shape";
 
 /** Only immutable public bundles live in KV. The actor owns head/progress/ready and fences every commit.
  * Credentials and request-scoped I/O promises never enter shared state. Authenticate at each page/action.
  * Version 1 is retained; a new namespace cannot accidentally consume its unfenced ready/progress keys.
  */
-const FORMAT = 2;
+const FORMAT = 4;
+const R27_SNAPSHOT_SCHEMA = "jungsi.history-snapshot/v2";
 const PARTS_PER_STEP = 6;
+/** Equals the warm lease (120s): no step can outlive it, so a check this fresh cannot lapse before the step commits. */
+const WARM_HEAD_MARGIN_MS = 120000;
 const SCHOOLS_PER_STEP = 12;
 const INDEX_SCHOOLS_PER_STEP = 20;
 const MAX_FRAGMENT_READS = 20;
@@ -39,14 +43,14 @@ async function services(mode: Mode): Promise<Services> {
   // 명시한 합성+development 에서는 아래 메모리 상태 기계를 쓴다 — 배포(production)·live 는 이 분기를 타지 않는다
   const localDev = mode === "synthetic" && env().NODE_ENV === "development";
   if (!localDev && store && typeof store.get === "function" && typeof store.put === "function" && ns) {
-    const actorName = mode === "live" ? "public-v2:live" : "public-v2:synthetic";
+    const actorName = mode === "live" ? "public-v4:live" : "public-v4:synthetic";
     const stub = ns.getByName ? ns.getByName(actorName) : ns.idFromName && ns.get ? ns.get(ns.idFromName(actorName)) : null;
     if (stub) return { kv: store, coordinator: p1CoordinatorClient(stub) };
   }
   if (mode !== "synthetic" || !["development", "test"].includes(env().NODE_ENV ?? ""))
     throw new ConnectionError("unconfigured", "p1_shared_coordination_unconfigured");
-  const g = globalThis as { __jtP1ExplicitLocalV2?: Local };
-  const local = g.__jtP1ExplicitLocalV2 ??= { cache: new Map(), state: null };
+  const g = globalThis as { __jtP1ExplicitLocalV4?: Local };
+  const local = g.__jtP1ExplicitLocalV4 ??= { cache: new Map(), state: null };
   const atomic: CoordinationStore = { read: () => local.state, atomic: change => { const next = change(local.state); local.state = next.state; return next.result; } };
   return { kv: { get: async k => local.cache.get(k) ?? null, put: async (k, v) => { local.cache.set(k, v); } }, coordinator: localP1CoordinatorClient(new P1CoordinationCore(atomic)) };
 }
@@ -64,11 +68,11 @@ const pause = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, m
  * Polling never holds another request's I/O promise. A busy boundary stays pending, never stale-ready.
  * (10-24 QA: 700ms was shorter than a cold head read, so overlapping visitors saw "checking"; the page also retries itself.)
  */
-async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Client, afterRevision?: number): Promise<CoordinationView | null> {
-  let claim = await coordinator.claimHead(afterRevision);
+async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Client, afterRevision?: number, minFreshMs?: number): Promise<CoordinationView | null> {
+  let claim = await coordinator.claimHead(afterRevision, minFreshMs);
   for (const ms of [100, 200, 400, 800, 1000, 1000]) {
     if (claim.state !== "busy") break;
-    await pause(ms); claim = await coordinator.claimHead(afterRevision);
+    await pause(ms); claim = await coordinator.claimHead(afterRevision, minFreshMs);
   }
   if (claim.state === "busy") return null;
   if (claim.state === "cached") return claim.view;
@@ -82,10 +86,31 @@ async function checkedHead(src: JungsiSource, caller: Caller, coordinator: Clien
 }
 type Index = { schools: School[]; units: [number, string, string, string, string, string][]; school_keys: Record<string, string> };
 type IndexSegment = { schools: School[]; units: Index["units"]; rows: number; pending: number };
+
+/** Duplicate scope keys are held locally: they cannot identify one current offering. */
+function currentScopeCounts(rows: readonly Row[]): ReadonlyMap<string, number> {
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    if (r.y === 2027 && r.pk !== null && typeof r.scope27 === "string" && r.scope27.length > 0)
+      counts.set(r.scope27, (counts.get(r.scope27) ?? 0) + 1);
+  }
+  return counts;
+}
+/** Only a server-verified 2027 recruitment row anchors a current-year group. */
+function isCurrentRecruitment(r: Row, scopes: ReadonlyMap<string, number>): boolean {
+  return r.y === 2027 && r.pk !== null && typeof r.scope27 === "string" &&
+    r.scope27.length > 0 && scopes.get(r.scope27) === 1 && r.q27 !== undefined;
+}
+function hasCurrentRecruitment(rows: readonly Row[], scopes: ReadonlyMap<string, number>): boolean {
+  return rows.some(r => isCurrentRecruitment(r, scopes));
+}
 export type Ready = {
   snapshot_id: string; publication_sha256: string; source_head_sha256: string;
+  /** Older v1 cached ready records may omit this field. */
+  schema_version?: string;
   normalization_rules_version: string; selection_rules_version: string;
   generated_at: string; source_as_of: string | null; expires_at: string; counts: SnapshotHeadDto["counts"];
+  r27_scope_coverage?: R27Coverage;
   warmed_at: string; pub: string; index_key: string; cache_mode: Mode;
 };
 type Progress = {
@@ -141,6 +166,9 @@ function cell(o: unknown, extra?: "stage" | "cut", qualifiedRankRow?: Obj): Cell
   out.ctx = context ? { identity_variant_index: int(context.identity_variant_index), scope_status: String(context.scope_status) } : null;
   const url = str(c.source_url);
   if (url) out.url = url;
+  // 발표 용도. 실제 입결 / 다른 학년도 산식으로 다시 계산한 참고값 / 미확인. 모르는 값은 버린다(기존 v1 과 같게)
+  const role = ((c.publication_context ?? null) as Obj | null)?.publication_role;
+  if (role === "actual_result" || role === "simulation_reference" || role === "unresolved") out.pr = role;
   return out;
 }
 function compact(r: Obj): Row {
@@ -170,8 +198,53 @@ function compact(r: Obj): Row {
       om: int(alt.omitted_other_basis_count ?? 0),
       e: Array.isArray(alt.entries) ? (alt.entries as unknown[]).map((e) => cell(e, "cut")) : [],
     },
+    ...r27Of(r),
+    ...historicalRefsOf(r),
   };
 }
+/**
+ * 서버 검증(history_reference_estimates.ts)을 통과한 참고 관측만 옮긴다. 값 원문만 남기고 관측 ID 는 화면 자료에 넣지 않는다.
+ * 모양이 다르면 버린다(뜻을 지어내지 않는다).
+ */
+function historicalRefsOf(r: Obj): Pick<Row, "hr"> {
+  const list = r.historical_cutoff_references;
+  if (!Array.isArray(list)) return {};
+  const values = (list as Obj[]).filter(e => e && typeof e === "object" &&
+    e.format === "jungsi.historical-cutoff-reference/v1" && e.unit === "%" && e.status === "model_estimated" &&
+    e.display_role === "independent_observation" && e.production_allowed === false && e.engine_approved === false &&
+    int(e.academic_year) === int(r.academic_year))
+    .map(e => (e.value instanceof Raw ? e.value.text : str(e.value)))
+    .filter((v): v is string => typeof v === "string" && v.trim() !== "");
+  return values.length ? { hr: values } : {};
+}
+/** 2027 모집행의 r27_source 만 옮긴다. 모집인원·조건 원문은 그대로, 과거 연결은 서버가 검토 확인한 것만 */
+function r27Of(r: Obj): Pick<Row, "q27" | "hl" | "scope27" | "ae27"> {
+  const s = r.r27_source as Obj | undefined;
+  if (int(r.academic_year) !== 2027 || !s || typeof s !== "object") return {};
+  const q = (s.quota ?? {}) as Obj, qc = (q.quota_cell ?? null) as Obj | null;
+  const links = Array.isArray(s.historical_links) ? (s.historical_links as Obj[]) : [];
+  const rawEligibility = s.applicant_eligibility;
+  const eligibility = rawEligibility && typeof rawEligibility === "object" && !Array.isArray(rawEligibility)
+    ? rawEligibility as Obj : undefined;
+  return {
+    q27: { v: str(q.quota_value), ls: str(q.quota_literal_state), st: str(q.quota_stage), ct: str(q.quota_condition_text),
+      cs: qc ? str(qc.status) : null, rs: String(s.quota_review_status ?? "") },
+    scope27: str(s.scope_key) ?? undefined,
+    ...(eligibility ? { ae27: {
+      status: eligibility.status === "verified_official" ? "verified_official" as const : "pending" as const,
+      text: typeof eligibility.text === "string" ? eligibility.text : null,
+    } } : {}),
+    hl: links.map(l => ({ academic_year: int(l.academic_year), school_id: str(l.school_id),
+      original_pk: str(l.original_pk), campus: str(l.campus), admission_track: str(l.admission_track), group: str(l.group) })),
+  };
+}
+/** 분할 본문의 부분 발행 표시(무손실 파싱 숫자). 키가 다르면 head 와 같아질 수 없는 값으로 둔다 */
+function rawCoverage(v: unknown): unknown {
+  if (v === undefined) return undefined;
+  if (!v || typeof v !== "object" || Array.isArray(v) || Object.keys(v).length !== 5) return { status: "invalid" };
+  return Object.fromEntries(Object.entries(v as Obj).map(([k, x]) => [k, x instanceof Raw ? Number(x.text) : x]));
+}
+const canonicalCoverage = (v: unknown) => (v === undefined ? "" : JSON.stringify(v, ["status", "source_rows", "included_rows", "excluded_rows", "review_pending_rows"]));
 
 /* ── 받은 bytes 검증 ── */
 
@@ -221,9 +294,11 @@ async function cacheValue<T>(store: Kv, key: string | undefined): Promise<T> {
 async function readyOf(view: CoordinationView, mode: Mode): Promise<Ready | null> {
   if (!view.headFresh || !view.head || !view.ready) return null;
   const r = view.ready as unknown as Ready, h = view.head;
-  if (r.snapshot_id !== h.snapshot_id || r.publication_sha256 !== h.publication_sha256 || r.source_head_sha256 !== h.source_head_sha256 ||
+  if ((h.schema_version === R27_SNAPSHOT_SCHEMA && r.schema_version !== h.schema_version) ||
+      r.snapshot_id !== h.snapshot_id || r.publication_sha256 !== h.publication_sha256 || r.source_head_sha256 !== h.source_head_sha256 ||
       r.normalization_rules_version !== h.normalization_rules_version || r.selection_rules_version !== h.selection_rules_version ||
       r.expires_at !== h.expires_at || Date.parse(r.expires_at) <= Date.now() || r.cache_mode !== mode ||
+      canonicalCoverage(r.r27_scope_coverage) !== canonicalCoverage(h.r27_scope_coverage) ||
       r.pub !== await pubKeyOf(h) || typeof r.index_key !== "string") throw new ConnectionError("unavailable", "p1_ready_binding_invalid");
   return r;
 }
@@ -234,7 +309,8 @@ export async function warmStep(src: JungsiSource, caller: Caller): Promise<WarmS
 }
 async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<WarmStatus> {
   const mode = src.kind, { kv: store, coordinator } = await services(mode);
-  const view = await checkedHead(src, caller, coordinator);
+  // A step reads up to PARTS_PER_STEP parts and must commit before the 10-minute head check lapses (11-06 seq18 p1_head_check_required).
+  const view = await checkedHead(src, caller, coordinator, undefined, WARM_HEAD_MARGIN_MS);
   if (!view?.head) return running(initialProgress({ snapshot_id: "checking", publication_sha256: "" } as SnapshotHeadDto), 0, 1000);
   const head = view.head, pub = await pubKeyOf(head), claim = await coordinator.claimWarm(head.publication_sha256);
   if (claim.state === "ready") {
@@ -258,7 +334,9 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
       for (const pin of next) {
         const text = await verifiedText(await src.readSnapshotPart(caller, head.snapshot_id, pin.part_id), pin);
         const body = parseLossless(text) as Obj;
-        if (body.format !== "jungsi.history-snapshot/v1" || body.part_id !== pin.part_id || body.payload_id !== pin.payload_id || !Array.isArray(body.rows)) throw new Error(`p1_part_invalid ${pin.part_id}`);
+        const format = head.schema_version === "jungsi.history-snapshot/v2" ? "jungsi.history-snapshot/v2" : "jungsi.history-snapshot/v1";
+        if (body.format !== format || body.part_id !== pin.part_id || body.payload_id !== pin.payload_id || !Array.isArray(body.rows) ||
+            canonicalCoverage(rawCoverage(body.r27_scope_coverage)) !== canonicalCoverage(head.r27_scope_coverage)) throw new Error(`p1_part_invalid ${pin.part_id}`);
         const rows = (body.rows as Obj[]).map(r => [String(r.university_id ?? ""), compact(r)] as const);
         const mapped = rows.filter(([, r]) => r.pk !== null).length;
         if (rows.length !== pin.rows || mapped !== pin.mapped_rows || rows.length - mapped !== pin.mapping_pending_rows) throw new Error(`p1_part_counts_mismatch ${pin.part_id}`);
@@ -319,7 +397,7 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
           pg.school_assembly = { school_id: u, next_fragment: at, key, write_prefix: P, step: token.step };
           break;
         }
-        const key = `${P}:school:${u}`; await write(key, rows); pg.school_keys[u] = key; completed++;
+        const key = `${P}:school:${u}`; await write(key, linkR27(rows, u)); pg.school_keys[u] = key; completed++;
         delete pg.school_assembly;
       }
       pg.schoolsDone += completed;
@@ -329,16 +407,30 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
       for (let at = pg.indexDone; at < Math.min(ids.length, pg.indexDone + INDEX_SCHOOLS_PER_STEP); at++) {
         const u = ids[at], rows = await cacheValue<Row[]>(store, pg.school_keys[u]); segment.rows += rows.length;
         const names = [...new Set([...rows].sort((a, b) => b.y - a.y).map(r => r.n))];
-        const regions = [...new Set(rows.map(r => r.rg).filter((x): x is string => !!x))], by = new Map<string, Row[]>();
+        const by = new Map<string, Row[]>();
         for (const r of rows) by.set(unitKey(r), [...(by.get(unitKey(r)) ?? []), r]);
-        let pending = 0;
+        const isR27 = head.schema_version === R27_SNAPSHOT_SCHEMA;
+        const scopes = isR27 ? currentScopeCounts(rows) : new Map<string, number>();
+        const currentRows: Row[] = [];
+        let rawPending = 0, visiblePending = 0, visibleUnits = 0;
         for (const [k, rs] of by) {
-          if (k.startsWith("ob:")) pending++;
-          const uniq = (f: (r: Row) => string | null) => [...new Set(rs.map(f).filter((x): x is string => !!x))].join("\n");
-          segment.units.push([at, k, uniq(r => r.d), uniq(r => r.g), uniq(r => r.rg), uniq(r => r.n)]);
+          if (k.startsWith("ob:")) rawPending++;
+          // 2027 모집행 중심 목록(대표님 결정 2026-11-16): 2027 모집행에 연결되지 않은 과거 전용 묶음은 목록에 따로 두지 않는다(원본 캐시에는 보존)
+          if (isR27 && !hasCurrentRecruitment(rs, scopes)) continue;
+          if (k.startsWith("ob:")) visiblePending++;
+          visibleUnits++;
+          const conditionRows = isR27 ? rs.filter(r => isCurrentRecruitment(r, scopes)) : rs;
+          if (isR27) currentRows.push(...conditionRows);
+          const uniq = (source: readonly Row[], f: (r: Row) => string | null) => [...new Set(source.map(f).filter((x): x is string => !!x))].join("\n");
+          // Past department and school names are searchable aliases, but current-year
+          // enrollment filters must never inherit a historical group or region.
+          segment.units.push([at, k, uniq(rs, r => r.d), uniq(conditionRows, r => r.g), uniq(conditionRows, r => r.rg), uniq(rs, r => r.n)]);
         }
-        segment.pending += pending;
-        segment.schools.push({ id: u, name: names[0] ?? u, names, region: regions.length === 1 ? regions[0] : regions.join("·") || null, units: by.size - pending, pending });
+        // Head counts cover all original rows, including unverified current groups.
+        segment.pending += rawPending;
+        const regions = [...new Set((isR27 ? currentRows : rows).map(r => r.rg).filter((x): x is string => !!x))];
+        const name = isR27 ? currentRows[0]?.n ?? names[0] ?? u : names[0] ?? u;
+        segment.schools.push({ id: u, name, names, region: regions.length === 1 ? regions[0] : regions.join("·") || null, units: visibleUnits - visiblePending, pending: visiblePending });
       }
       const segmentKey = `${P}:index-segment:${pg.indexDone}`; await write(segmentKey, segment);
       pg.index_segments.push(segmentKey); pg.indexDone += segment.schools.length;
@@ -355,8 +447,10 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
         const finalView = await checkedHead(src, caller, coordinator, beforeFinalCheck.headRevision);
         if (!finalView?.head || await pubKeyOf(finalView.head) !== pub) throw new SnapshotChanged();
         ready = { snapshot_id: head.snapshot_id, publication_sha256: head.publication_sha256, source_head_sha256: head.source_head_sha256,
+          schema_version: head.schema_version,
           normalization_rules_version: head.normalization_rules_version, selection_rules_version: head.selection_rules_version,
           generated_at: head.generated_at, source_as_of: head.source_as_of, expires_at: head.expires_at, counts: head.counts,
+          ...(head.r27_scope_coverage ? { r27_scope_coverage: head.r27_scope_coverage } : {}),
           warmed_at: new Date().toISOString(), pub, index_key: indexKey, cache_mode: mode };
         pg.phase = "ready";
       }
@@ -382,6 +476,32 @@ async function coordinatedWarmStep(src: JungsiSource, caller: Caller): Promise<W
   }
 }
 
+/**
+ * 관리자 '정리본 다시 만들기'(2026-11-16). 같은 판(발행판)의 정리본을 처음부터 다시 만든다 — 화면 정리본 형식이 바뀌어
+ * 새 칸을 채워야 할 때 새 발행판을 내지 않고 쓴다. 다시 만드는 동안 1페이지는 이전 준비본(대기본)을 그대로 쓴다.
+ * 시작만 한다. 이어서 준비 단계(warmStep)를 끝까지 부른다.
+ */
+export async function rebuildStart(src: JungsiSource, caller: Caller): Promise<WarmStatus> {
+  try {
+    const { coordinator } = await services(src.kind);
+    const view = await checkedHead(src, caller, coordinator, undefined, WARM_HEAD_MARGIN_MS);
+    if (!view?.head) return running(initialProgress({ snapshot_id: "checking", publication_sha256: "" } as SnapshotHeadDto), 0, 1000);
+    await coordinator.rebuildWarm(view.head.publication_sha256);
+    return running(initialProgress(view.head), view.head.parts.length);
+  } catch (error) { return servicesFailure(error); }
+}
+
+/** 대학어디가 빈칸 채움 표(2026-11-17 대표님 결정). 읽지 못하면 null — 채우지 않을 뿐 화면은 그대로 보인다. 5분마다 다시 읽는다. */
+let fillCache: { at: number; fill: AdigaFill | null } | null = null;
+export async function loadAdigaFill(): Promise<AdigaFill | null> {
+  if (configuredMode() !== "live") return null;
+  if (fillCache && Date.now() - fillCache.at < 5 * 60 * 1000) return fillCache.fill;
+  let fill: AdigaFill | null = null;
+  try { fill = parseAdigaFill(await (await services("live")).kv.get(ADIGA_FILL_KEY, "text")); } catch { fill = null; }
+  fillCache = { at: Date.now(), fill };
+  return fill;
+}
+
 /** Admin status only; an unfresh actor never exposes the stored ready as current. */
 /** 관리 화면용. stale: 현재판 확인 기한(10분)이 지나 아직 다시 확인하지 않은 상태 — 준비본이 없는 것과 구분한다(10-24 Root 관측).
  * 오래된 판을 준비 완료로 인정하지는 않는다(ready 는 그대로 null). */
@@ -392,6 +512,19 @@ export async function warmInfo(): Promise<{ ready: Ready | null; stale: { snapsh
     return { ready, stale: !ready && view.head && !view.headFresh ? { snapshot_id: view.head.snapshot_id } : null };
   }
   catch (error) { return servicesFailure(error); }
+}
+
+/**
+ * 3페이지 연도별 근거의 1페이지 성적 칸 전용(표시만). 저장된 준비본이 만료 전이면 서비스 API 머리 확인 없이 쓴다
+ * (2026-11-17 대표님 요청: 펼침이 10~15초 늦음). 머리 확인 기한(10분)이 지난 준비본도 만료 전이면 같은 공개 자료다.
+ * 준비본이 없거나 묶음이 맞지 않으면 null — 칸은 '자료 없음'으로 남는다. 1페이지 자체는 그대로 currentSnapshot 을 쓴다.
+ */
+export async function displayReady(): Promise<Ready | null> {
+  try {
+    const mode = configuredMode(), { coordinator } = await services(mode), view = await coordinator.peek();
+    if (!view.head || !view.ready) return null;
+    return await readyOf({ ...view, headFresh: true }, mode);
+  } catch { return null; }
 }
 
 /* ── 조회(회원): no shared I/O promises or private results ── */
@@ -433,17 +566,36 @@ const norm = (s: string) => s.normalize("NFC").replace(/\s+/g, "").toLowerCase()
 export type SearchResult = { total_schools: number; total_units: number; total_pending: number; page: number; pages: number; schools: { school: School; rows: Row[]; keys: Set<string> }[] };
 /** 쉼표(, ， 、)로 나눈 여러 검색어. 하나라도 맞으면 찾는다(10-24: "강원대, 홍익대"가 한 글자열로 취급돼 0건이었다) */
 const terms = (s?: string) => (s ?? "").split(/[,，、]/).map(norm).filter(Boolean).slice(0, 10);
-const anyHit = (qs: string[], hay: string[]) => qs.some(q => hay.some(h => norm(h).includes(q)));
+type PreparedSearch = {
+  schoolNames: string[][];
+  units: (readonly [number, string, string[], string[], string[], string[]])[];
+};
+// A new immutable index gets its own search fields. Do not retain previous index generations.
+const preparedSearches = new WeakMap<Index, PreparedSearch>();
+function preparedSearch(ix: Index): PreparedSearch {
+  const cached = preparedSearches.get(ix);
+  if (cached) return cached;
+  const prepared: PreparedSearch = {
+    schoolNames: ix.schools.map(s => s.names.map(norm)),
+    units: ix.units.map(([si, key, deps, groups, regions, names]) => [
+      si, key, deps.split("\n").map(norm), groups.split("\n").map(g => g.replace(/군$/, "")),
+      regions.split("\n"), names.split("\n").map(norm),
+    ] as const),
+  };
+  preparedSearches.set(ix, prepared);
+  return prepared;
+}
+const anyHit = (qs: string[], hay: string[]) => qs.some(q => hay.some(h => h.includes(q)));
 export async function searchSnapshot(ready: Ready, q: { university?: string; unit?: string; region?: string; group?: string; page?: number }): Promise<SearchResult> {
   const ix = await index(ready), uq = terms(q.university), dq = terms(q.unit);
-  const schoolHit = ix.schools.map(s => !uq.length || anyHit(uq, s.names));
+  const search = preparedSearch(ix);
+  const schoolHit = search.schoolNames.map(names => !uq.length || anyHit(uq, names));
   const matched = new Map<number, Set<string>>(); let units = 0, pending = 0;
-  for (const [si, key, deps, groups, regions, names] of ix.units) {
-    if (!schoolHit[si] && !(uq.length && anyHit(uq, names.split("\n")))) continue;
-    if (dq.length && !anyHit(dq, deps.split("\n"))) continue;
-    // 발표 표기가 '다'와 '다군'으로 섞여 있어 '군'을 떼고 비교한다(10-24 QA)
-    if (q.group && !groups.split("\n").some(g => g.replace(/군$/, "") === q.group)) continue;
-    if (q.region && !regions.split("\n").includes(q.region)) continue;
+  for (const [si, key, deps, groups, regions, names] of search.units) {
+    if (!schoolHit[si] && !anyHit(uq, names)) continue;
+    if (dq.length && !anyHit(dq, deps)) continue;
+    if (q.group && !groups.includes(q.group)) continue;
+    if (q.region && !regions.includes(q.region)) continue;
     let set = matched.get(si); if (!set) matched.set(si, set = new Set()); set.add(key);
     if (key.startsWith("ob:")) pending++; else units++;
   }
@@ -455,6 +607,42 @@ export async function searchSnapshot(ready: Ready, q: { university?: string; uni
   }));
   return { total_schools: order.length, total_units: units, total_pending: pending, page, pages, schools };
 }
+/**
+ * 3페이지 연도별 근거의 '대학 발표 입시결과' 칸(2026-11-17 대표님 결정 1-가): 2027 모집행(pk)과 같은 묶음의
+ * 1페이지 2024~2026 행. 대학 이름으로 학교를 찾고, 그 학교에서 이 2027 행과 같은 표시 키를 가진 과거 행만 돌려준다.
+ */
+export async function pastRowsFor2027(ready: Ready, university: string, pk27: string): Promise<Row[]> {
+  const ix = await index(ready), q = norm(university);
+  const exact = ix.schools.filter(s => s.names.some(n => norm(n) === q));
+  for (const s of exact.length ? exact : ix.schools.filter(s => s.names.some(n => norm(n).includes(q)))) {
+    const rows = await school(ready, s.id);
+    const anchor = rows.find(r => r.y === 2027 && r.pk === pk27);
+    if (!anchor) continue;
+    const key = unitKey(anchor);
+    return rows.filter(r => r.y < 2027 && unitKey(r) === key);
+  }
+  return [];
+}
+/** 이 2027 모집행(1페이지 스냅샷의 2027 행). 없으면 null(2026-11-25 4페이지 모집 인원) */
+export async function row2027For(ready: Ready, university: string, pk27: string): Promise<Row | null> {
+  const ix = await index(ready), q = norm(university);
+  const exact = ix.schools.filter(s => s.names.some(n => norm(n) === q));
+  for (const s of exact.length ? exact : ix.schools.filter(s => s.names.some(n => norm(n).includes(q)))) {
+    const anchor = (await school(ready, s.id)).find(r => r.y === 2027 && r.pk === pk27);
+    if (anchor) return anchor;
+  }
+  return null;
+}
 export async function unitRows(ready: Ready, schoolId: string, key: string): Promise<Row[]> {
-  return (await school(ready, schoolId)).filter(r => unitKey(r) === key);
+  return (await schoolUnitRows(ready, schoolId, [key]))[key] ?? [];
+}
+/** 한 학교의 여러 모집단위를 한 번에. 2027 모집행에 연결된 묶음만 돌려준다(과거 전용·미검증 2027 묶음은 빈 목록). */
+export async function schoolUnitRows(ready: Ready, schoolId: string, keys: readonly string[]): Promise<Record<string, Row[]>> {
+  const allRows = await school(ready, schoolId);
+  const isR27 = ready.schema_version === R27_SNAPSHOT_SCHEMA, scopes = isR27 ? currentScopeCounts(allRows) : new Map<string, number>();
+  const wanted = new Set(keys), by = new Map<string, Row[]>();
+  for (const r of allRows) { const k = unitKey(r); if (wanted.has(k)) by.set(k, [...(by.get(k) ?? []), r]); }
+  const out: Record<string, Row[]> = {};
+  for (const k of wanted) { const rows = by.get(k) ?? []; out[k] = isR27 && !hasCurrentRecruitment(rows, scopes) ? [] : rows; }
+  return out;
 }

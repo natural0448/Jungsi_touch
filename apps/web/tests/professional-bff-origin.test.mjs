@@ -49,7 +49,7 @@ registerHooks({ resolve(specifier, context, nextResolve) {
   if (context.parentURL?.endsWith("/api/pro-source.ts")) {
     if (specifier === "./index") return js("export function apiMode(){return 'live';}");
     if (specifier === "./synthetic-assessment") return js("export const CATALOG=[]; export function assess(){throw Error('not used');} export function buildCandidates(){throw Error('not used');}");
-    if (specifier === "./synthetic-report") return js("export function computeOverall(){throw Error('not used');}");
+    if (specifier === "./synthetic-report") return js("export function computeOverall(){throw Error('not used');} export function computeProvisional(){throw Error('not used');}");
     if (specifier === "./synthetic-tips") return js("export function buildTips(){throw Error('not used');}");
     if (specifier === "./synthetic") return js("export function readSyntheticState(){throw Error('not used in live transport verification');}");
     if (specifier === "./source" || specifier === "../professional-bff-origin") return nextResolve(new URL(specifier + ".ts", context.parentURL).href, context);
@@ -102,4 +102,15 @@ test("actual adapter rejects missing deployment origin before fetch", async () =
     await assert.rejects(proSource().createStudent(caller, "synthetic-org", {}, 2, "synthetic-idempotency"), (e) => e.kind === "unconfigured" && e.code === "pro_bff_origin_not_configured");
     assert.equal(calls.length, 0);
   });
+});
+
+// 2026-11-23: ③ 가능성 보기 화면을 그리며 보내는 계산 요청(저장 안 함) — 설정된 출처만 확인한다(본체가 넘길 때 헤더가 바뀐다)
+test("render origin: needs only a configured https origin", async () => {
+  const { professionalRenderOrigin } = await import(new URL("../src/lib/professional-bff-origin.ts", import.meta.url).href);
+  const h = (o) => ({ get: (k) => o[k.toLowerCase()] ?? null });
+  const cfg = "https://edutouch.co.kr";
+  assert.deepEqual(professionalRenderOrigin(cfg, h({ "sec-fetch-site": "cross-site" })), { ok: true, origin: cfg });
+  assert.deepEqual(professionalRenderOrigin(cfg, h({})), { ok: true, origin: cfg });
+  assert.equal(professionalRenderOrigin(undefined, h({})).ok, false);
+  assert.equal(professionalRenderOrigin("http://edutouch.co.kr", h({})).ok, false);
 });

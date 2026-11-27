@@ -3,12 +3,14 @@
 import { useActionState } from "react";
 import Link from "@/components/link";
 import type { ProStudentDto } from "@/lib/pro-dto";
+import { PROFILE_FIELDS, PROFILE_MAX_ITEMS, tagsToProfile } from "@/lib/pro-profile";
 import { createStudent, updateStudent, type StudentFormState } from "./actions";
 
-/** 학생 추가·수정 양식. 이름(실명 허용)·반·번호·태그·메모만 받는다 — 연락처·주민등록번호 칸은 없다 */
+/** 학생 추가·수정 양식. 이름(실명 허용)·반·번호·상담 참고(희망 계열·전공·대학·지역·기타)만 받는다 — 연락처·주민등록번호 칸은 없다 */
 export function StudentForm({ orgId, idem, contractVersion, student, onDone }: { orgId: string; idem: string; contractVersion?: number; student?: ProStudentDto; onDone?: string }) {
   const [state, action, pending] = useActionState<StudentFormState, FormData>(student ? updateStudent : createStudent, null);
-  const v = (k: "display_name" | "class_label" | "class_number" | "tags" | "memo", d: string) => state?.values[k] ?? d;
+  const v = (k: string, d: string) => state?.values[k] ?? d;
+  const profile = tagsToProfile(student?.tags ?? []);
   return (
     <form action={action} className="pro-form">
       <input type="hidden" name="org_id" value={orgId} />
@@ -33,14 +35,15 @@ export function StudentForm({ orgId, idem, contractVersion, student, onDone }: {
         <span>번호</span>
         <input name="class_number" inputMode="numeric" maxLength={3} defaultValue={v("class_number", student?.class_number ?? "")} placeholder="예: 15" />
       </label>
-      <label className="w2">
-        <span>태그(쉼표로 구분, 5개까지)</span>
-        <input name="tags" maxLength={80} defaultValue={v("tags", student?.tags.join(", ") ?? "")} placeholder="예: 정시, 재수" />
-      </label>
-      <label className="w4">
-        <span>메모(상담 참고, 300자)</span>
-        <input name="memo" maxLength={300} defaultValue={v("memo", student?.memo ?? "")} />
-      </label>
+      <fieldset className="pro-profile w4">
+        <legend>상담 참고 <small>항목마다 쉼표로 구분해 {PROFILE_MAX_ITEMS}개까지</small></legend>
+        {PROFILE_FIELDS.map((f) => (
+          <label key={f.key}>
+            <span>{f.label}</span>
+            <input name={`p_${f.key}`} maxLength={100} defaultValue={v(`p_${f.key}`, profile[f.key].join(", "))} placeholder={f.ph} />
+          </label>
+        ))}
+      </fieldset>
       <div className="acts w4">
         {state?.error && <p className="err" role="alert">{state.error}</p>}
         <button className="btn p" type="submit" disabled={pending}>{pending ? "저장하는 중…" : student ? "학생 정보 저장" : "학생 추가"}</button>

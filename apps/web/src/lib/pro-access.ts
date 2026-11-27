@@ -1,5 +1,6 @@
 import "server-only";
 import { apiMode } from "@/lib/api";
+import { readSyntheticState } from "@/lib/api/synthetic";
 import { supabaseServer } from "@/lib/supabase/server";
 
 /*
@@ -36,8 +37,9 @@ function valid(r: unknown): r is ProOrg {
 export async function proAccess(): Promise<ProOrg[] | null> {
   const mode = apiMode();
   if (mode === "synthetic") {
-    // 합성 모드: 화면 제작용 가상 기관 하나(실제 기관·계약이 아니다)
-    return [{ org_id: 1, org_name: "합성 시범고등학교", org_kind: "school", member_id: 1, role: "teacher", contract_id: 1, academic_year: 2027, starts_on: "2026-11-20", ends_on: "2027-01-07", purge_on: "2027-01-08", seats: 30 }];
+    // 합성 모드: 화면 제작용 가상 기관 하나(실제 기관·계약이 아니다). 합성 '운영자'는 기관 관리자로 본다(합성 서비스 세션과 같게)
+    const role = (await readSyntheticState()) === "operator" ? "org_admin" : "teacher";
+    return [{ org_id: 1, org_name: "합성 시범고등학교", org_kind: "school", member_id: 1, role, contract_id: 1, academic_year: 2027, starts_on: "2026-11-20", ends_on: "2027-01-07", purge_on: "2027-01-08", seats: 30 }];
   }
   if (mode !== "live") return null;
   try {

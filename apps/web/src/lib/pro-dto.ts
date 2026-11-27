@@ -3,7 +3,7 @@
   서버 구현(develop 00c8d795, supabase/functions/jungsi-pro-api · professional_projection.ts)과 같은 필드 이름을 쓴다. 기관·학생 권한은 서버가 판단한다.
 */
 
-import type { CandidatesDto, ReportDto, ShortlistEntryDto, SnapshotDto } from "@/lib/dto";
+import type { CandidatesDto, CatalogSearchDto, OfferingDto, ReportDto, ShortlistEntryDto, SnapshotDto } from "@/lib/dto";
 
 export type ProRole = "org_admin" | "teacher" | "viewer";
 
@@ -86,7 +86,8 @@ export interface ProStudentInput {
   class_label: string | null;
   class_number: string | null;
   tags: string[];
-  memo: string | null;
+  /** 2026-11-13부터 화면은 메모를 보내지 않는다(빼면 서버가 예전 값을 그대로 둔다) */
+  memo?: string | null;
 }
 
 /** student_report — 학생별 리포트 판. published_result 는 개인용과 같은 persisted-report 모양 */
@@ -154,6 +155,29 @@ export interface ProCandidatesDto {
   candidates: CandidatesDto;
 }
 
+/**
+ * pro.university.analyze 의 가채점 4페이지 응답(서버 dep_pro_r28, 2026-11-23). 저장하지 않고 응답에만 싣는다.
+ * candidates.reference_university_groups: 요청한 모집단위의 학교별 7단계(source g, school_score·position)
+ * search: 개인용 offerings.search 와 같은 형식(검색으로 부른 경우·번호 목록이면 그 모집단위들)
+ */
+export interface ProP4Dto {
+  org_id: string;
+  student_id: string;
+  candidates?: CandidatesDto;
+  search?: CatalogSearchDto<OfferingDto>;
+}
+export interface ProP4Search {
+  university_q?: string;
+  department_q?: string;
+  region?: string;
+  group?: string;
+  cursor?: string;
+  /** 서버 dep_pro_r38: 지원가능성 필터 — 쉼표로 이은 7단계 코드·none, 다음 위치, 한 쪽 개수(문자열) */
+  st?: string;
+  after?: string;
+  limit?: string;
+}
+
 /** student_bookmarks — 학생별 담은 학교 */
 export interface ProBookmarksDto {
   org_id: string;
@@ -174,7 +198,8 @@ export interface ProPrintDto {
 /** member_page — 기관 구성원(이메일·이름 없이 구성원 번호·로그인 ID·역할만) */
 export interface ProMemberPageDto {
   org_id: string;
-  items: { member_id: string; subject_id: string; role: ProRole; status: "active" | "inactive"; version: number }[];
+  /** display_name: 기관 관리자에게만 오는 구성원 이름(2026-11-13). 서버에 이름 기능이 없거나 이름이 비면 null·없음 */
+  items: { member_id: string; subject_id: string; role: ProRole; status: "active" | "inactive"; version: number; display_name?: string | null }[];
   next_cursor: string | null;
   has_more: boolean;
 }

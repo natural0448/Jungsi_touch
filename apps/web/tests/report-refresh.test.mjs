@@ -9,9 +9,14 @@ const data = (code) => "data:text/javascript," + encodeURIComponent(code);
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied,ConnectionError} from ${JSON.stringify(classesUrl)};export const getCaller=async()=>globalThis.__refreshFixture.caller;export const source=()=>globalThis.__refreshFixture.src;`)],
-  ["@/lib/report-ref", data("export const getReportId=async()=>globalThis.__refreshFixture.cookie;")],
+  // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
+  ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
+  ["@/lib/candidate-eligibility", new URL("../src/lib/candidate-eligibility.ts", import.meta.url).href],
+  ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export const currentReportId=async()=>globalThis.__refreshFixture.cookie;")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
+  // connection-text 가 시각 표시용으로 부르는 같은 폴더 모듈(429 안내, 2026-11-19)
+  ["./format", new URL("../src/lib/format.ts", import.meta.url).href],
   ["next/cache", data("export const revalidatePath=(...args)=>globalThis.__refreshFixture.revalidations.push(args);")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });

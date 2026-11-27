@@ -1,0 +1,11 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { publishedScoreNullLabel } from "../apps/web/src/lib/p1-published-stats.ts";
+const cell={v:null,b:"대학 환산점수",pr:"actual_result"};
+test("검증된 다른 통계만 발표 사유는 해당조건미발표로 표시한다",()=>assert.equal(publishedScoreNullLabel({...cell,verified_score_null_reasons:["other_statistic_only"]}),"해당조건미발표"));
+test("검증된 3인 이하 사유는 3인이하미발표로 표시한다",()=>assert.equal(publishedScoreNullLabel({...cell,verified_score_null_reasons:["three_or_fewer"]}),"3인이하미발표"));
+test("두 사유가 독립 검증되면 순서에 관계없이 3인 이하를 우선한다",()=>{for(const reasons of [["three_or_fewer","other_statistic_only"],["other_statistic_only","three_or_fewer"]])assert.equal(publishedScoreNullLabel({...cell,verified_score_null_reasons:reasons}),"3인이하미발표")});
+test("사유 필드가 공급되기 전에는 기존 표시를 유지한다",()=>assert.equal(publishedScoreNullLabel(cell),"3인이하미발표"));
+test("공급된 사유가 비었거나 알 수 없거나 중복되면 단정하지 않는다",()=>{for(const reasons of [[],["unknown"],["three_or_fewer","unknown"],["three_or_fewer","three_or_fewer"]])assert.equal(publishedScoreNullLabel({...cell,verified_score_null_reasons:reasons}),null)});
+test("실제 0과 정상 값은 빈칸 문구로 바꾸지 않는다",()=>{for(const v of ["0","75"])assert.equal(publishedScoreNullLabel({...cell,v,verified_score_null_reasons:["other_statistic_only"]}),null)});
+test("기준 미확인이나 비입결 값은 이유를 표시하지 않는다",()=>{assert.equal(publishedScoreNullLabel({...cell,b:"대학 발표 성적 · 기준 확인 중",verified_score_null_reasons:["three_or_fewer"]}),null);assert.equal(publishedScoreNullLabel({...cell,pr:"simulation",verified_score_null_reasons:["other_statistic_only"]}),null)});

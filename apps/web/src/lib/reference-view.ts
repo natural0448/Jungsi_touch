@@ -1,0 +1,182 @@
+import type { AssessmentDto, BandCode, OfferingDto, OverallResultDto, ReferenceBandDto, ReferencePercentileDto, ReferenceUniversityGroupDto, WildcardGroup, YearCutoffDto } from "./dto";
+import { fieldGroupOf, groupByField } from "./field-group";
+import { referenceAdvantage, type ReferenceAdvantage } from "./reference-advantage";
+import { thresholdBandOf } from "./reference-percentile";
+
+/*
+  3번째 화면(유리한 대학 찾기)의 참고 목록(대표님 결정 2026-11-19 낮·저녁).
+  판정이 켜진 대학이 없는 동안: 참고 누백이 나온 학과 가운데 **지난해 합격선(70%컷, 없으면 50%컷)에 내 위치가 닿는 곳만**
+  대학 → 계열 → 학과로 보인다. 합격선보다 확실히 아래인 곳과 합격선 자료가 없는 곳은 넣지 않고 숫자만 알린다.
+  순서는 합격선과의 여유(내 범위의 불리한 끝 기준)가 큰 순서. 참고 유불리는 보조로 함께 보인다.
+  와일드카드도 같은 목록에서 간호·보건·교육 계열을 여유 큰 순서로 최대 4장(앞 3장, 한 장 더 보기).
+  판정·순위·담기는 만들지 않는다.
+*/
+const DEC = /^(\d{1,3})(?:\.(\d+))?$/;
+const micro = (s: string | null | undefined): number | null => {
+  const m = typeof s === "string" ? DEC.exec(s.trim()) : null;
+  if (!m) return null;
+  return Number(m[1]) * 1e6 + Number((m[2] ?? "").slice(0, 6).padEnd(6, "0"));
+};
+const r1 = (v: number) => (Math.round(Math.abs(v) / 1e5) / 10).toFixed(1);
+
+export interface CutoffMargin {
+  year: number;
+  metric: "70%컷" | "50%컷";
+  /** above: 내 범위 전체가 합격선 위, near: 범위가 합격선에 걸침, below: 전체가 아래 */
+  side: "above" | "near" | "below";
+  /** 예: "2025 70%컷보다 7.2~10.7%p 위" */
+  text: string;
+  /** 정렬용: 불리한 끝 기준 여유(%p, 위면 +) */
+  worst: number;
+}
+
+/** 가장 최근 학년도의 70%컷(없으면 50%컷) 합격선과 내 참고 누백을 견준다. 자료가 없으면 null */
+export function cutoffMargin(cutoffs: YearCutoffDto[] | null | undefined, p: ReferencePercentileDto | null | undefined): CutoffMargin | null {
+  if (!p || p.status !== "reference_estimated") return null;
+  const lo = micro(p.estimated_upper_cumulative_percent_all_examinees);
+  if (lo === null) return null;
+  const upRaw = micro(p.estimated_upper_cumulative_percent_upper_bound ?? null);
+  const hi = upRaw !== null && upRaw > lo ? upRaw : lo;
+  // 모양이 어긋난 합격선 행(이름이 없는 등)은 건너뛴다 — 행 하나로 화면 전체가 깨지지 않게(2026-11-22)
+  const list = (Array.isArray(cutoffs) ? cutoffs : []).filter((x) => x && typeof x.published_metric === "string" && typeof x.academic_year === "number");
+  const years = [...new Set(list.map((c) => c.academic_year))].sort((a, b) => b - a);
+  for (const y of years) {
+    for (const metric of ["70%컷", "50%컷"] as const) {
+      const c = list.find((x) => x.academic_year === y && !x.score_component && x.published_metric.replace(/\s+/g, "").endsWith(metric));
+      const cut = c ? micro(c.cutoff_top_percent) : null;
+      if (cut === null) continue;
+      // 위에서 몇 %: 숫자가 작을수록 위. 여유 = 합격선 − 내 값
+      const best = cut - lo, worst = cut - hi;
+      const label = `${y} ${metric}`;
+      if (worst > 0) {
+        const t = r1(worst) === r1(best) ? r1(best) : `${r1(worst)}~${r1(best)}`;
+        return { year: y, metric, side: "above", text: `${label}보다 ${t}%p 위`, worst: worst / 1e6 };
+      }
+      if (best < 0) {
+        const t = r1(best) === r1(worst) ? r1(best) : `${r1(best)}~${r1(worst)}`;
+        return { year: y, metric, side: "below", text: `${label}보다 ${t}%p 아래`, worst: worst / 1e6 };
+      }
+      return { year: y, metric, side: "near", text: `${label}과 비슷한 위치`, worst: worst / 1e6 };
+    }
+  }
+  return null;
+}
+
+export interface ReferenceItem {
+  offering: OfferingDto;
+  reference_percentile: ReferencePercentileDto | null;
+  advantage: ReferenceAdvantage | null;
+  margin: CutoffMargin | null;
+  /** 참고 기준 7단계(리포트 읽기가 붙인 reference_band). 있으면 합격선 위치보다 먼저 쓴다(2026-11-21 p3_empty) */
+  band?: ReferenceBandDto | null;
+  /** 문턱 판정만 있고 누백·합격선 위치·유불리를 아직 계산하지 않은 행(dep_r15). 계열을 펼칠 때 university.analyze 로 채운다 */
+  pending?: boolean;
+}
+export interface ReferenceField { label: string; provisional: boolean; items: ReferenceItem[]; best: CutoffMargin | null; bestBand?: ReferenceBandDto | null }
+export interface ReferenceUniversity { university_id: string; university_name: string; region: string | null; count: number; best: CutoffMargin | null; bestBand?: ReferenceBandDto | null; fields: ReferenceField[] }
+export interface ReferencePool { items: ReferenceItem[]; below: number; noCutoff: number; ineligible: number; outsideBand: number }
+
+/** 3번째 화면 자동 목록에 넣는 7단계(상향까지, 대표님 결정 2026-11-19). 서버 RECOMMENDED_BAND_CODES 와 같다 */
+export const LISTED_BANDS: readonly BandCode[] = ["stable", "downward", "target", "aspirational", "upward"];
+/** 목록 순서: 적정·소신 → 상향 → 하향 → 안정(서버 참고 후보 고르는 순서와 같다) */
+const BAND_ORDER: Record<BandCode, number> = { target: 0, aspirational: 1, upward: 2, downward: 3, stable: 4, challenge: 5, outside: 6 };
+/**
+ * 범위로 나온 누백도 추정값(점수를 낸 응시자 기준 누백, estimated_upper_cumulative_percent_all_examinees — 범위의 유리한 끝)으로
+ * 정한 단계 하나로 넣고 뺀다(대표님 결정 2026-11-22, 전에는 불리한 끝 upper_code). 서버 reference_band.code 가 바로 그 값으로
+ * 정한 단계이고(school_reflected_projection.ts: code = classify(추정값), upper_code = classify(상한)), 목록·상세 배지도 같은 값을 쓴다
+ */
+export const estimateBand = (b: ReferenceBandDto): BandCode => b.code;
+const bandRank = (b: ReferenceBandDto | null | undefined) => (b ? BAND_ORDER[estimateBand(b)] ?? 9 : 9);
+
+const worstOf = (m: CutoffMargin | null) => (m ? m.worst : -Infinity);
+const byMargin = (a: ReferenceItem, b: ReferenceItem) => bandRank(a.band) - bandRank(b.band) || worstOf(b.margin) - worstOf(a.margin);
+const bestOf = (items: ReferenceItem[]) => items.reduce<CutoffMargin | null>((m, x) => (worstOf(x.margin) > worstOf(m) ? x.margin : m), null);
+const bestBandOf = (items: ReferenceItem[]) => items.reduce<ReferenceBandDto | null>((m, x) => (x.band && bandRank(x.band) < bandRank(m) ? x.band : m), null);
+
+/**
+ * 참고 누백이 나온 학과 가운데 넣을 곳을 고른다. 빠진 곳은 숫자로 센다.
+ * 1) 참고 기준 7단계(reference_band)가 붙은 곳: 추정값 단계(estimateBand)가 상향까지면 넣고, 도전·불가면 뺀다(outsideBand).
+ * 2) 7단계가 없는 곳: 지난해 합격선(70%컷, 없으면 50%컷)에 닿는 곳(위·비슷)만(기존 규칙).
+ */
+export function referencePool(groups: ReferenceUniversityGroupDto[], overall: OverallResultDto | null | undefined, analyses: Record<string, AssessmentDto> | null | undefined): ReferencePool {
+  let below = 0, noCutoff = 0, ineligible = 0, outsideBand = 0;
+  const items: ReferenceItem[] = [];
+  for (const it of groups.flatMap((g) => g.offerings)) {
+    // 행 하나의 모양이 어긋나 계산이 실패해도 그 행만 빼고 나머지를 그린다(2026-11-22 운영 사고 방어)
+    try {
+      poolRow(it);
+    } catch {
+      noCutoff++;
+    }
+  }
+  return { items: items.sort(byMargin), below, noCutoff, ineligible, outsideBand };
+
+  function poolRow(it: ReferenceUniversityGroupDto["offerings"][number]) {
+    const raw = analyses?.[it.offering.offering_id];
+    const a = raw && typeof raw === "object" ? raw : undefined;
+    // 지원 필수 조건이 확인된 모집단위에서 내가 조건을 못 채우면 넣지 않는다(지원 조건 미충족)
+    if (a?.status === "ineligible") { ineligible++; return; }
+    // 2026-11-21 p3_thresh(dep_r15): 서버 문턱 판정 행은 누백 없이 행에 reference_band(basis reference_threshold)를 싣는다.
+    // 리포트 읽기가 붙인 판정(analyses[id].reference_band)이 있으면 그것이 먼저다(서버가 같은 값이 나오는지 전수 대조함).
+    // 누백도 분석에 있으면 그것을 쓴다(펼칠 때 university.analyze 로 채워진 정확한 값)
+    const pct = it.reference_percentile ?? a?.reference_percentile ?? null;
+    const margin = cutoffMargin(a?.year_cutoffs, pct);
+    // 분석의 판정은 코드가 7단계일 때만 쓴다(모양이 어긋나면 행의 문턱 판정으로)
+    const own = a?.reference_band && typeof a.reference_band.code === "string" && a.reference_band.code in BAND_ORDER ? a.reference_band : null;
+    const band = own ?? thresholdBandOf(it.reference_band);
+    // 누백·합격선 위치·유불리를 아직 내 성적으로 정확히 계산하지 않은 행(문턱 판정만 있음)
+    const pending = !pct;
+    if (band) {
+      if (!LISTED_BANDS.includes(estimateBand(band))) { outsideBand++; return; }
+      items.push({ offering: it.offering, reference_percentile: pct, advantage: referenceAdvantage(pct, overall), margin, band, pending });
+      return;
+    }
+    if (!margin) { noCutoff++; return; }
+    if (margin.side === "below") { below++; return; }
+    items.push({ offering: it.offering, reference_percentile: pct, advantage: referenceAdvantage(pct, overall), margin, band: null, pending });
+  }
+}
+
+export function referenceUniversities(pool: ReferencePool): ReferenceUniversity[] {
+  const by = new Map<string, ReferenceItem[]>();
+  for (const it of pool.items) by.set(it.offering.university_id, [...(by.get(it.offering.university_id) ?? []), it]);
+  return [...by.entries()]
+    .map(([id, items]) => {
+      const fields = groupByField(items, (x) => x.offering.offering_id).map((f) => ({ ...f, items: [...f.items].sort(byMargin), best: bestOf(f.items), bestBand: bestBandOf(f.items) }));
+      fields.sort((a, b) => bandRank(a.bestBand) - bandRank(b.bestBand) || worstOf(b.best) - worstOf(a.best));
+      return { university_id: id, university_name: items[0].offering.university_name, region: items[0].offering.region ?? null, count: items.length, best: bestOf(items), bestBand: bestBandOf(items), fields };
+    })
+    .sort((a, b) => bandRank(a.bestBand) - bandRank(b.bestBand) || worstOf(b.best) - worstOf(a.best));
+}
+
+export const REFERENCE_WILDCARD_GROUPS: WildcardGroup[] = ["nursing", "health", "education"];
+export const REFERENCE_WILDCARD_FEATURED = 3;
+export const REFERENCE_WILDCARD_MAX = 4;
+
+/**
+ * 와일드카드 계열. 서버가 준 표시(wildcard_group)가 간호·보건·교육이면 그것을 쓰고, 운영 자료처럼 비었거나 다른 표기면
+ * 계열과 학과 이름으로 가린다: 이름에 '간호' → 간호, 교육 계열·'○○교육과' → 교육,
+ * 의약 계열(의예·치의예·한의예·약학·수의예 제외) → 보건.
+ */
+const MEDICAL = /의예|의학과|약학|수의/;
+export function referenceWildcardGroup(o: OfferingDto): WildcardGroup | null {
+  // 서버 값이 세 계열 가운데 하나일 때만 그대로 쓴다. 비었거나 다른 표기(운영 정본의 원문 표기 등)면 이름으로 가린다
+  if (typeof o.wildcard_group === "string" && REFERENCE_WILDCARD_GROUPS.includes(o.wildcard_group)) return o.wildcard_group;
+  const dept = o.department ?? "";
+  const field = fieldGroupOf(o.offering_id)?.name ?? null;
+  if (dept.includes("간호")) return "nursing";
+  if (field === "교육" || /교육(과|학과|학부|전공)/.test(dept)) return "education";
+  if (field === "의약" && !MEDICAL.test(dept)) return "health";
+  return null;
+}
+
+/** 와일드카드: 같은 목록(합격선에 닿는 곳)의 간호·보건·교육 계열, 여유 큰 순서로 최대 4장(앞 3장, 한 장 더 보기) */
+export function referenceWildcards(pool: ReferencePool): { featured: ReferenceItem[]; rest: ReferenceItem[] } {
+  const all = pool.items
+    .flatMap((it) => {
+      const wg = referenceWildcardGroup(it.offering);
+      return wg ? [{ ...it, offering: { ...it.offering, wildcard_group: wg } }] : [];
+    })
+    .slice(0, REFERENCE_WILDCARD_MAX);
+  return { featured: all.slice(0, REFERENCE_WILDCARD_FEATURED), rest: all.slice(REFERENCE_WILDCARD_FEATURED) };
+}

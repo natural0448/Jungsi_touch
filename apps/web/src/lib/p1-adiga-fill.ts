@@ -1,0 +1,201 @@
+import type { Cell, Row } from "./p1-shape";
+
+/**
+ * 1페이지 빈 50%·70%컷 칸을 대학어디가 발표값으로 채운다(2026-11-17 대표님 결정).
+ * - 값은 DB의 대학어디가 원문 관측만, 같은 칸 후보가 여럿이면 어디가 첫 화면 표와 일치하는 값만 쓴다(화면팀이 대조해 만든 표).
+ * - 이미 보이는 값은 바꾸지 않는다. 빈칸만 채운다.
+ * - 표는 공개 저장소가 아니라 화면 서버 KV(ADIGA_FILL_KEY)에 둔다.
+ */
+export const ADIGA_FILL_KEY = "p1-adiga-fill:v1";
+export const ADIGA_FILL_FORMAT = "jungsi.p1-adiga-fill/v1";
+export const ADIGA_FILL_STATUS = "screen_adiga_fill";
+const BASIS = "대학 환산점수";
+const SLOTS = [["c50", "50%컷", 50], ["c70", "70%컷", 70]] as const;
+const KEY = /^(2024|2025|2026)\|[0-9]{1,12}\|(50|70)%컷$/;
+const VALUE = /^[0-9]{1,4}(?:\.[0-9]{1,4})?$/;
+const MAX = 20000;
+const RANK_KEY = /^(2024|2025|2026)\|[0-9]{1,12}\|[^|]{1,80}\|[가나다]$/;
+const RANK_VALUE = /^[1-9][0-9]{0,5}$/;
+const FILL_VALUE = /^(?:0|[1-9][0-9]{0,5}|undisclosed|unavailable)$/;
+/** 충원 칸 사유 코드(2026-11-19 대표님: 빈칸 없음, 발표 안 함·자료 없음은 '미발표') */
+export const FILL_UNDISCLOSED = "fill_undisclosed";
+/** 성적 칸 사유 코드: 3인 이하라 대학이 성적을 발표하지 않음 */
+export const STATS_LE3 = "stats_le3_undisclosed";
+/** 정본이 출처로 확인한 공식 미발표 상태(current_public_catalog 의 publication_status) */
+export const OFFICIAL_NOT_PUBLISHED = "not_published";
+const STAT_LABELS = new Set(["50%컷", "70%컷", "평균", "최저", "최고", "80%컷", "85%컷", "90%컷", "100%컷"]);
+/** 원문 기준 표기 → 화면 기준 이름(p1-published-stats 의 BASIS_ORDER) */
+const STAT_BASIS: Record<string, string> = {
+  "대학 환산점수": "대학 환산점수",
+  "수능 백분위(대학 반영 방식)": "대학 반영 백분위",
+  "수능 등급 평균": "발표 수능 평균등급",
+  "수능 성적(대학 발표 기준)": "대학 발표 총점",
+};
+/** 성적 칸 사유 코드 → 화면 문구(2026-11-20 대표님: 성적 칸도 빈칸 없음) */
+export const STATS_CODE_TEXT: Record<string, string> = {
+  le3: "3인 이하 미발표", no_recruit: "모집 없음", no_registrant: "등록자 없음", not_csat: "수능 미반영", undisclosed: "미발표",
+};
+/** p1-published-stats 의 statName 과 같은 규칙으로 50·70%컷 이름만 맞춘다(시험이 TS 확장자 없이 불러오도록 값 가져오기를 두지 않음) */
+const cutName = (l: string | null) => {
+  const m = /^(\d{1,3})(?:%컷|%cut|_percent_cut|%)$/i.exec((l ?? "").replace(/\s+/g, ""));
+  return m ? `${Number(m[1])}%컷` : null;
+};
+
+export type AdigaFill = ReadonlyMap<string, string>;
+
+/** KV 문자열을 검사해 표로 바꾼다. 형식이 하나라도 어긋나면 표 전체를 쓰지 않는다(null). */
+export function parseAdigaFill(text: string | null): AdigaFill | null {
+  if (text === null) return null;
+  let doc: unknown;
+  try { doc = JSON.parse(text); } catch { return null; }
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) return null;
+  const { format, cells, ranks, fills, confirmed } = doc as { format?: unknown; cells?: unknown; ranks?: unknown; fills?: unknown; confirmed?: unknown };
+  if (format !== ADIGA_FILL_FORMAT || !cells || typeof cells !== "object" || Array.isArray(cells)) return null;
+  const entries = Object.entries(cells as Record<string, unknown>);
+  if (entries.length === 0 || entries.length > MAX) return null;
+  const out = new Map<string, string>();
+  for (const [k, v] of entries) {
+    if (!KEY.test(k) || typeof v !== "string" || !VALUE.test(v)) return null;
+    out.set(k, v);
+  }
+  // 최종 합격 예비번호(담당자 v41 후속 대조로 원문에서 확인된 양수, 2026-11-19). 키: 학년도|PK|전형|군
+  if (ranks !== undefined) {
+    if (!ranks || typeof ranks !== "object" || Array.isArray(ranks)) return null;
+    const rs = Object.entries(ranks as Record<string, unknown>);
+    if (rs.length > MAX) return null;
+    for (const [k, v] of rs) {
+      if (!RANK_KEY.test(k) || typeof v !== "string" || !RANK_VALUE.test(v)) return null;
+      out.set(`R|${k}`, v);
+    }
+  }
+  // 대학어디가 원본의 성적(50%·70%컷) 또는 3인 이하 미발표(le3). 키: 학년도|PK|전형|군
+  const { stats } = doc as { stats?: unknown };
+  if (stats !== undefined) {
+    if (!stats || typeof stats !== "object" || Array.isArray(stats)) return null;
+    const ss = Object.entries(stats as Record<string, unknown>);
+    if (ss.length > MAX) return null;
+    for (const [k, v] of ss) {
+      if (!RANK_KEY.test(k)) return null;
+      if (typeof v === "string") {
+        if (!Object.hasOwn(STATS_CODE_TEXT, v)) return null;
+        out.set(`S|${k}`, v);
+        continue;
+      }
+      if (!Array.isArray(v) || v.length < 1 || v.length > 4) return null;
+      for (const it of v) {
+        const { label, value, basis } = (it ?? {}) as { label?: unknown; value?: unknown; basis?: unknown };
+        if (typeof label !== "string" || !STAT_LABELS.has(label) || typeof value !== "string" || !VALUE.test(value)) return null;
+        if (typeof basis !== "string" || !Object.hasOwn(STAT_BASIS, basis)) return null;
+        out.set(`S|${k}|${label}`, `${STAT_BASIS[basis]}\u0000${value}`);
+      }
+    }
+  }
+  // 대학어디가 '전형 결과' 표의 충원인원(명, 2026-11-19 화면팀 원문 대조). 0은 원문 표 값이 0인 칸만 담는다
+  if (fills !== undefined) {
+    if (!fills || typeof fills !== "object" || Array.isArray(fills)) return null;
+    const fs = Object.entries(fills as Record<string, unknown>);
+    if (fs.length > MAX) return null;
+    for (const [k, v] of fs) {
+      if (!RANK_KEY.test(k) || typeof v !== "string" || !FILL_VALUE.test(v)) return null;
+      out.set(`F|${k}`, v);
+    }
+  }
+  // 2026-11-24 담당자 회신12 03·03c: 정본 칸이 이미 보이는 실제 충원 인원(명)과 같은 값이면 '확인된 실제 충원 인원'으로 올린다.
+  // 값이 다르면 아무것도 바꾸지 않는다(관측 ID·원문 좌표는 데이터팀 결속 자료에 있다). 키: 학년도|PK|전형|군
+  if (confirmed !== undefined) {
+    if (!confirmed || typeof confirmed !== "object" || Array.isArray(confirmed)) return null;
+    const cs = Object.entries(confirmed as Record<string, unknown>);
+    if (cs.length > MAX) return null;
+    for (const [k, v] of cs) {
+      if (!RANK_KEY.test(k) || typeof v !== "string" || !/^\d{1,6}$/.test(v)) return null;
+      out.set(`C|${k}`, v);
+    }
+  }
+  return out;
+}
+
+const filled = (label: string, p: number, v: string): Cell => ({
+  v, s: ADIGA_FILL_STATUS, r: null, u: null, l: label, b: BASIS, co: "final_registrants", cc: "final_registrants",
+  p, bc: "university_converted_score", at: null, ctx: null, url: null,
+});
+
+/** 행을 바꾸지 않고, 채운 칸이 있는 행만 새 객체로 돌려준다. */
+export function applyAdigaFill(rows: Row[], fill: AdigaFill | null): Row[] {
+  if (!fill || fill.size === 0) return rows;
+  return rows.map((r) => {
+    if (r.pk === null || r.y >= 2027) return r;
+    let next: Row | null = null;
+    // 학년도·PK·전형·군이 같은 검수된 발표값만 각 빈 칸에 채운다.
+    const key = `${r.y}|${r.pk}|${r.t ?? ""}|${(r.g ?? "").replace(/군$/, "")}`;
+    const rank = fill.get(`R|${key}`), people = fill.get(`F|${key}`);
+    // 이전 KV의 값은 정본이 미발표로 판정한 칸을 덮지 않는다.
+    if (r.rk.s !== OFFICIAL_NOT_PUBLISHED && (r.rk.v ?? "").trim() === "" && rank !== undefined) {
+      next = { ...r, rk: { v: rank, s: ADIGA_FILL_STATUS, r: null, u: "번", l: "최종 합격 예비번호", at: null, ctx: null } };
+    }
+    const confirmedPeople = fill.get(`C|${key}`);
+    if (confirmedPeople !== undefined && r.ad.u === "명" && r.ad.s !== OFFICIAL_NOT_PUBLISHED && r.ad.s !== "verified_official" &&
+      (r.ad.v ?? "").trim().replace(/\.0+$/, "") === confirmedPeople) {
+      next = { ...(next ?? r), ad: { ...r.ad, s: ADIGA_FILL_STATUS, r: null, l: "충원인원" } };
+    }
+    if (r.ad.s !== OFFICIAL_NOT_PUBLISHED && (r.ad.v ?? "").trim() === "" && people !== undefined) {
+      const missing = people === "undisclosed" || people === "unavailable";
+      next = { ...(next ?? r), ad: { v: missing ? null : people, s: ADIGA_FILL_STATUS, r: missing ? FILL_UNDISCLOSED : null, u: missing ? null : "명", l: "충원인원", at: null, ctx: null } };
+    }
+    const code = fill.get(`S|${key}`);
+    let addedStats = false;
+    for (const [slot, label, p] of SLOTS) {
+      const cur = (next ?? r)[slot];
+      if (cur.v !== null && cur.v.trim() !== "") continue;
+      const v = fill.get(`S|${key}|${label}`);
+      if (v !== undefined) {
+        const [basis, value] = v.split("\u0000");
+        next ??= { ...r };
+        next[slot] = { ...filled(label, p, value), b: basis };
+        addedStats = true;
+      }
+    }
+    // 50%·70%컷 밖의 지표(평균·최저·최고·다른 %컷)는 대체 통계 목록에 붙인다. 이미 값이 보이는 행에는 붙이지 않는다
+    const base = next ?? r;
+    const shown = [base.c50, base.c70, ...base.alt.e].some((c) => c.v !== null && c.v.trim() !== "");
+    if (!shown || addedStats) {
+      const extra: Cell[] = [];
+      for (const label of STAT_LABELS) {
+        if (label === "50%컷" || label === "70%컷") continue;
+        const v = fill.get(`S|${key}|${label}`);
+        if (v === undefined) continue;
+        const [basis, value] = v.split("\u0000");
+        extra.push({ v: value, s: ADIGA_FILL_STATUS, r: null, u: null, l: label, b: basis, co: "final_registrants", cc: "final_registrants", at: null, ctx: null } as Cell);
+      }
+      if (extra.length) {
+        next ??= { ...r };
+        next.alt = { ...base.alt, e: [...base.alt.e, ...extra] };
+        addedStats = true;
+      }
+    }
+    if (code !== undefined && !addedStats && !shown) {
+      next ??= { ...r };
+      next.c50 = { ...(next.c50), r: `${STATS_LE3}:${code}` };
+    }
+    for (const [slot, label, p] of SLOTS) {
+      const cur = r[slot];
+      if (cur.v !== null && cur.v.trim() !== "") continue;
+      const v = fill.get(`${r.y}|${r.pk}|${label}`);
+      if (v === undefined) continue;
+      // 같은 이름·같은 기준의 다른 값이 이미 있으면 화면이 둘 다 숨기므로 채우지 않는다
+      if (r.alt.e.some((e) => cutName(e.l) === label && e.v !== null && e.v.trim() !== "" && (e.b ?? null) === BASIS)) continue;
+      next ??= { ...r };
+      next[slot] = filled(label, p, v);
+    }
+    return next ?? r;
+  });
+}
+
+/**
+ * 그해 정시에서 뽑지 않은 행(2026-11-20 대표님 결정): 모집인원이 0이고 대학 발표 성적 값이 하나도 없으면
+ * 모집인원 칸에 '모집 없음'을 쓰고 충원·경쟁률·추정 칸은 비운다. 성적 값이 있는 0명 행(수시 이월 선발 가능)은 그대로 둔다.
+ */
+export function noRecruit(r: Pick<Row, "y" | "rc" | "c50" | "c70" | "alt">): boolean {
+  if (r.y >= 2027 || r.rc.v === null || !/^0+$/.test(r.rc.v.trim())) return false;
+  const has = (c: Cell) => c.v !== null && c.v.trim() !== "";
+  return !has(r.c50) && !has(r.c70) && !r.alt.e.some(has);
+}

@@ -14,13 +14,19 @@ export function source(){return globalThis.__reportOpsFixture.src}`);
 const mocks = new Map([
   ["server-only", data("export {}")],
   ["@/lib/api", apiUrl],
-  ["@/lib/report-ref", data("export async function getReportId(){return globalThis.__reportOpsFixture.reportId}")],
+  // 계정의 현재 리포트 번호(서버 입력 상태)만 대신한다. 브라우저 번호는 없다(2026-11-04)
+  // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
+  ["@/lib/report-pure", new URL("../src/lib/report-pure.ts", import.meta.url).href],
+  ["@/lib/candidate-eligibility", new URL("../src/lib/candidate-eligibility.ts", import.meta.url).href],
+  ["@/lib/report-ref", data("export const screenReport=(c,r)=>r;export async function currentReportId(){return globalThis.__reportOpsFixture.reportId}")],
   ["@/lib/report-ops", opsUrl],
   ["@/lib/connection-text", new URL("../src/lib/connection-text.ts", import.meta.url).href],
+  // connection-text 가 시각 표시용으로 부르는 같은 폴더 모듈(429 안내, 2026-11-19)
+  ["./format", new URL("../src/lib/format.ts", import.meta.url).href],
   ["next/cache", data("export function revalidatePath(...args){globalThis.__reportOpsFixture.revalidations.push(args)}")],
 ]);
 registerHooks({ resolve(id, context, next) { return next(mocks.get(id) ?? id, context); } });
-const { ensureAnalyses, ensureCandidates, togglePickOn, loadMine, canonicalOfferingIds } = await import(opsUrl);
+const { ensureAnalyses, ensureCandidates, togglePickOn, loadMine, loadMineAfter, rememberCurrentReport, canonicalOfferingIds } = await import(opsUrl);
 const { analyzeNow, buildNow } = await import("../src/app/analysis-actions.ts");
 const { AccessDenied, ConnectionError } = await import(classesUrl);
 
@@ -168,15 +174,44 @@ test("explicit candidate action preserves a stored pending result without POST",
   const f = fixture(report({ candidates })); assert.deepEqual(await buildNow(), { error: null });
   assert.equal(writes(f, "cb").length, 0); assert.equal(reads(f).length, 1);
 });
-for (const error of [new AccessDenied(401, "unauthorized"), new AccessDenied(403, "forbidden"), new ConnectionError("rate_limited", "quota"), new ConnectionError("unavailable", "down")]) {
+for (const error of [new AccessDenied(401, "unauthorized"), new AccessDenied(403, "forbidden"), new ConnectionError("rate_limited", "quota")]) {
   test(`action maps ${error.message} without false success`, async () => {
     const f = fixture(report(), { writes: [error] }); assert.ok((await buildNow()).error); assert.equal(f.revalidations.length, 0);
   });
 }
+// 503(unavailable)은 서버가 저장을 마친 뒤 응답만 실패했을 수 있다(10-26 운영 관측). 오류는 그대로 보이되 화면은 다시 읽는다
+test("action maps unavailable as an error and refreshes the page to show the real saved state", async () => {
+  const f = fixture(report(), { writes: [new ConnectionError("unavailable", "down")] }); const out = await buildNow();
+  assert.ok(out.error); assert.match(out.error, /실제 저장 상태/); assert.deepEqual(f.revalidations, [["/", "layout"]]);
+});
 test("caller failure is mapped by the same action error boundary", async () => {
   const f = fixture(report(), { callerError: new AccessDenied(401, "expired") });
   assert.match((await buildNow()).error, /로그인/); assert.equal(f.calls.length, 0);
 });
 test("unexpected port error is not disguised as ready", async () => {
   fixture(report(), { writes: [new Error("synthetic-unexpected")] }); await assert.rejects(buildNow, /synthetic-unexpected/);
+});
+
+test("page 3 gated load: with a hint the report read starts before the gate and the status check waits for it (2026-11-18)", async () => {
+  const f = fixture();
+  await rememberCurrentReport(f.src, caller, "synthetic-report-A");
+  let open; const gate = new Promise((r) => { open = r; });
+  const p = loadMineAfter(f.src, caller, gate);
+  await new Promise((r) => setTimeout(r, 5));
+  assert.equal(reads(f).length, 1); // 힌트 리포트는 이미 읽기 시작
+  open();
+  assert.equal((await p).report_id, "synthetic-report-A");
+  assert.equal(reads(f).length, 1); // 같은 번호면 다시 읽지 않는다
+});
+test("page 3 gated load: a stale hint is discarded and the current report is read; no hint keeps the old order", async () => {
+  const f = fixture(report({ report_id: "synthetic-report-B" }));
+  await rememberCurrentReport(f.src, caller, "synthetic-report-OLD");
+  const r = await loadMineAfter(f.src, caller, Promise.reject(new Error("search failed")).catch(() => {}));
+  assert.equal(r.report_id, "synthetic-report-B");
+  assert.deepEqual(reads(f).map((c) => c.args[1]), ["synthetic-report-OLD", "synthetic-report-B"]);
+  const g = fixture();
+  await rememberCurrentReport(g.src, caller, null);
+  let opened = false; const never = new Promise(() => {});
+  const q = await Promise.race([loadMineAfter(g.src, caller, never).then((x) => { opened = true; return x; }), new Promise((r) => setTimeout(() => r("timeout"), 200))]);
+  assert.equal(opened, true); assert.equal(q.report_id, "synthetic-report-A"); // 힌트가 없으면 gate 를 기다리지 않는다
 });

@@ -2,7 +2,7 @@
 
 import { isEdutouchAdmin } from "@/lib/admin";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { warmStep, type WarmStatus } from "@/lib/p1-snapshot";
+import { rebuildStart, warmStep, type WarmStatus } from "@/lib/p1-snapshot";
 
 export type StepResult = { ok: true; status: WarmStatus } | { ok: false; code: string; retryable: boolean };
 
@@ -19,5 +19,20 @@ export async function runWarmStep(): Promise<StepResult> {
     if (e instanceof AccessDenied) return { ok: false, code: e.code, retryable: false };
     const m = e instanceof Error ? /^(p1_[a-z0-9_]+)/.exec(e.message)?.[1] : undefined;
     return { ok: false, code: m ?? "warm_failed", retryable: false };
+  }
+}
+
+/**
+ * '정리본 다시 만들기' 시작(관리자만, 2026-11-16). 같은 판의 정리본을 처음부터 다시 만든다. 다시 만드는 동안
+ * 1페이지는 이전 준비본을 그대로 쓴다. 시작한 뒤 화면이 runWarmStep 을 끝까지 이어 부른다
+ */
+export async function runRebuildStart(): Promise<StepResult> {
+  if (!(await isEdutouchAdmin())) return { ok: false, code: "admin_required", retryable: false };
+  try {
+    return { ok: true, status: await rebuildStart(source(), await getCaller()) };
+  } catch (e) {
+    if (e instanceof ConnectionError) return { ok: false, code: e.code, retryable: false };
+    if (e instanceof AccessDenied) return { ok: false, code: e.code, retryable: false };
+    return { ok: false, code: "rebuild_failed", retryable: false };
   }
 }

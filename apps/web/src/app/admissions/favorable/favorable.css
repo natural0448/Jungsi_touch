@@ -1,5 +1,5 @@
 /* ===================================================================
-   4페이지 · 유리한 대학 찾기
+   유리한 대학 찾기(화면 번호 3 — 2026-11-15 순서 교체, 화면 ID는 PAGE-04)
    왼쪽 2/3 기본 학교 목록(차분한 흰 카드), 오른쪽 1/3 와일드카드(짙은 남색 판 위의 상아색 패).
    service_spec PAGE-04 desktop_columns [2,1]. 휴대폰에서는 목록 → 와일드카드 순으로 세로.
    =================================================================== */
@@ -57,7 +57,7 @@
 .et .sc.open .sc-toggle .ic-chev{transform:rotate(90deg)}
 
 .et .sc-rows{margin-top:10px;border-top:1px solid var(--line)}
-.et .sc-rhd,.et .sc-row .line{display:grid;grid-template-columns:minmax(0,1.5fr) 40px minmax(0,1fr) 112px minmax(0,1fr) 60px;gap:10px;align-items:center}
+.et .sc-rhd,.et .sc-row .line{display:grid;grid-template-columns:minmax(0,1.5fr) 40px minmax(0,1fr) 112px minmax(0,1fr) 96px;gap:10px;align-items:center}
 .et .sc-rhd{padding:8px 10px;margin:0 -10px;font-size:12px;font-weight:800;color:var(--deep);background:var(--jt-head);border-bottom:1px solid var(--jt-head-line);border-radius:var(--r-sm) var(--r-sm) 0 0}
 .et .sc .r{text-align:right}
 .et .sc-row{padding:10px 0;border-bottom:1px solid var(--line);display:grid;gap:4px}
@@ -118,6 +118,11 @@
 .et .wc.cat-N .wc-corner{color:#C8321E}
 .et .wc.cat-H .wc-corner{color:#102554}
 .et .wc.cat-E .wc-corner{color:#168A5B}
+.et .wc.cat-C .wc-corner{color:#6A3FA0}
+.et .wc.cat-M .wc-corner{color:#0B6A94}
+.et .wc.cat-R .wc-corner{color:#7A5A1E}
+.et .wc-order{margin-left:6px;padding:1px 6px;border-radius:4px;border:1px solid currentColor;font-size:12px;font-weight:700;color:#7A5A1E}
+.et .wd-note{margin:6px 0 0;font-size:13px;color:var(--on-dark);line-height:1.6}
 
 .et .wc>*:not(.wc-corner){margin-left:20px;margin-right:18px}
 .et .wc-top{display:flex;justify-content:flex-end}
@@ -129,6 +134,9 @@
 .et .wc-score{display:flex;align-items:baseline;gap:5px;margin-top:14px}
 .et .wc-score b{font-size:30px;font-weight:900;letter-spacing:-1px;color:var(--deep)}
 .et .wc-score i{font-style:normal;font-size:13px;font-weight:700;color:#8C8470}
+.et .wc-score.ref{flex-direction:column;align-items:flex-start;gap:2px}
+.et .wc-score.ref b{font-size:22px;letter-spacing:-.6px;white-space:nowrap}
+.et .wc-score.ref b small{font-size:12px;font-weight:700;color:#8C8470;letter-spacing:0}
 .et .wc-move{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:13px}
 .et .wc-move small{display:block;font-size:11px;font-weight:600;color:#8C8470;margin-bottom:1px}
 .et .wc-move .from{color:#8C8470;font-weight:700}
@@ -159,6 +167,36 @@
 
 /* 좁은 화면에서 와일드카드로 내려가는 띠 */
 .et .wd-teaser{display:none}
+
+/* 참고 누백(추정) 묶음 — 순위·판정 아님, 색 신호 없음 */
+.et .fv-ref{display:grid;gap:10px;margin-top:22px}
+.et .fv-ref-note{margin:0 2px;font-size:13px;color:var(--ink-2);line-height:1.6}
+.et .fv-lock-note{margin:6px 2px;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);background:var(--sub);font-size:13px;color:var(--muted);text-align:center}
+.et .fv-ref-list{display:grid;gap:12px}
+.et .rf{border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);padding:14px 18px}
+.et .rf h3{font-size:16px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
+.et .rf h3 small{margin-left:8px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0}
+.et .rf-hd{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:6px}
+.et .rf .v{font-size:13px;font-weight:800;min-width:0;display:inline-block;text-align:right}
+.et .rf .v b{font-size:13px;font-weight:800;color:inherit}
+.et .rf .v.even{color:var(--fit)}
+.et .rf .v.up{color:var(--safe)}
+.et .rf .v.down{color:var(--ink-2)}
+.et .rf .v .ref{font-weight:600}
+.et .rf-fg:last-child{border-bottom:0}
+.et .rf-fg>summary .rf-best{margin-left:auto}
+.et .rf-fg li>.v{margin-left:auto}
+.et .rf-fg li .star-f{flex:none}
+.et .rf-m{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:0}
+.et .rf-m .v{white-space:normal;text-align:right}
+.et .rf-adv{font-size:12px;color:var(--muted)}
+.et .rf .v.down{color:var(--ink-2)}
+.et .rf ul{list-style:none;margin:8px 0 0;padding:0}
+.et .rf li{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid var(--line)}
+.et .rf li:first-child{border-top:0}
+.et .rf .u{min-width:0;display:flex;flex-direction:column}
+.et .rf .u b{font-size:15px;font-weight:800;color:var(--ink)}
+.et .rf .u small,.et .rf .v small{font-size:12px;color:var(--muted)}
 
 @media (max-width:1100px){
   .et .sc-row .adv .bar{display:none}
@@ -193,3 +231,60 @@
   .et .wd-deck li{animation:none}
   .et .wc,.et .wc:hover{transform:none}
 }
+
+.et .sc-row .sr-line{margin:0;font-size:12px;color:var(--ink-2);line-height:1.5}
+.et .sc-row .sr-line b{color:var(--deep);font-weight:700}
+.et .sc-row .sr-line .num{font-weight:800;color:var(--deep)}
+.et .sc-row .sr-line .sr-elig{color:var(--muted)}
+
+/* 환산 완료·판정 대기(2026-11-15 담당자 인계): 판정 목록과 섞지 않는 별도 묶음 */
+.fv .fv-cp{display:grid;gap:8px;padding-block:12px;border-top:1px solid var(--line)}
+.fv .fv-cp h3{font-size:15px;margin:0}
+.fv .fv-cp ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.fv .fv-cp li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:14px}
+
+/* 계열 묶음(2026-11-18): 학교 카드에는 계열과 학과 수를, 펼친 뒤에는 계열을 눌러 학과를 연다 */
+.et .sc-fields{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.et .sc-fields>small{font-size:12px;font-weight:800;color:var(--muted);margin-right:2px}
+.et .sc-field{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:13px;font-weight:700;color:var(--deep)}
+.et .sc-field:hover{border-color:var(--brand)}
+.et .sc-field.on{border-color:var(--brand);background:var(--brand);color:#fff}
+.et .sc-field.none{font-weight:600;color:var(--muted)}
+.et .sc-field.on.none{color:#fff}
+.et .sc-fnote{font-size:12px;color:var(--muted)}
+.et .sc-fg{border-bottom:1px solid var(--line)}
+.et .sc-fg>summary{display:flex;align-items:center;gap:8px;padding:11px 2px;cursor:pointer;font-size:14px;color:var(--deep);list-style:none}
+.et .sc-fg>summary::-webkit-details-marker{display:none}
+.et .sc-fg>summary::before{content:"";width:6px;height:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s;flex:none}
+.et .sc-fg[open]>summary::before{transform:rotate(45deg)}
+.et .sc-fg>summary .num{font-size:12px;color:var(--muted)}
+.et .sc-fg>summary small{font-size:12px;color:var(--muted)}
+.et .wc-field{margin-top:3px;font-size:12px}
+.et .sc-row .c-pick{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.et .wc-field{display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+@media (max-width:640px){
+  .et .rf-hd,.et .rf-fg>summary{flex-wrap:wrap}
+  .et .rf-fg>summary .rf-best{flex-basis:100%;text-align:right}
+}
+
+/* 9월 모의평가 기준으로 보기(2026-11-22): 입구 한 줄과 읽기 전용 머리 띠 */
+.et .fv-past-entry{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;font-size:13px;color:var(--muted)}
+.et .fv-past{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:10px}
+.et .fv-past-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.et .fv-past-meta .btn{margin-left:auto}
+.et .fv-past-tag,.et .fv-past-cur{display:inline-block;padding:1px 8px;border-radius:10px;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700}
+.et .fv-past-cur{margin-left:8px}
+.et .fv-past .fv-note{margin:0}
+.et .fv-past-list{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.et .fv-past-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+.et .fv-past-list .on{font-size:12px;font-weight:700;color:var(--brand)}
+@media (max-width:640px){
+  .et .fv-past-meta .btn{margin-left:0}
+}
+/* 가채점 참고 후보(2026-11-23): 그룹마다 접고 펼친다 */
+.et .fv-csat-cands{display:grid;gap:10px;margin-top:22px}
+.et .fv-cand-g{border:1px solid var(--line);border-radius:var(--r-card);padding:10px 14px;background:var(--bg)}
+.et .fv-cand-g>summary{cursor:pointer;font-size:15px;color:var(--deep);list-style-position:inside}
+.et .fv-cand-g>summary b{font-weight:900;margin-right:4px}
+.et .fv-cand-g .fv-ref{margin-top:10px}
