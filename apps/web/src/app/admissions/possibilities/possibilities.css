@@ -62,6 +62,17 @@
 .et .ps .recruit .rc-conds b{display:inline;font-size:13px}
 .et .ps .recruit .rc-conds .rc-note{margin:0;font-size:13px;color:var(--muted)}
 .et .ps .four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+/* 2026-11-27 대표님 지적: 네 칸은 값과 한두 줄만, 긴 설명은 아래 '이 결과 읽는 법' 띠로(칸 높이를 맞춘다) */
+.et .ps .card p.key{margin-top:2px;padding:6px 10px;border-radius:var(--r-sm);background:var(--sub);color:var(--ink);font-size:13px;font-weight:700}
+.et .ps .readband{margin-top:12px;padding:14px 18px;border-radius:var(--r-card);border:1px solid var(--line);background:var(--bg)}
+.et .ps .readband h3{margin:0 0 10px;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px}
+.et .ps .readband .rb-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 20px}
+.et .ps .readband .rb{min-width:0;padding-left:12px;border-left:3px solid var(--brand-soft)}
+.et .ps .readband .rb>b{display:block;margin-bottom:4px;font-size:13.5px;font-weight:800;color:var(--ink)}
+.et .ps .readband .rb p{margin:0 0 4px;font-size:13px;line-height:1.65;color:var(--ink-2)}
+.et .ps .readband .rb p.sub{font-size:12.5px;color:var(--muted)}
+.et .ps .readband .rb p b{font-weight:800;color:var(--ink)}
+.et .ps .readband .rb-foot{margin:10px 0 0;font-size:12px;color:var(--muted)}
 /* 환산·누백·판단 준비 상태 띠 */
 .et .ps .strip{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:0;list-style:none}
 .et .ps .strip li{font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink-2)}

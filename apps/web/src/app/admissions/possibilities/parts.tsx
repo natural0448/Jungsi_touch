@@ -122,6 +122,24 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
   const withheldRank = !final && !rk ? c1?.centralRank : undefined;
   // 환산 유불리(서버 dep_r31). 보류 모집단위는 csatGainView 가 null
   const gain = csatGainView(judged);
+  // 2026-11-27 대표님 지적(지원가능성 칸만 길어 다른 칸이 빈약해 보임): 판정이 있으면 네 칸은 값과 한두 줄만,
+  // 긴 설명(한 줄로 보면·왜 이 단계·무엇을 비교했나)은 칸 아래 '이 결과 읽는 법' 띠로 모은다
+  const combo = judged && tone ? csatComboNote(judged.code, judged.upper_code, gain?.tone) : null;
+  const why = judged && tone && pos && !upper ? (() => {
+    const i = STAGE_ORDER.indexOf(judged.code as (typeof STAGE_ORDER)[number]);
+    return boundaryNote({
+      label: tone.label,
+      better: i > 0 ? BAND[STAGE_ORDER[i - 1]].label : null,
+      worse: i >= 0 && i < STAGE_ORDER.length - 1 ? BAND[STAGE_ORDER[i + 1]].label : null,
+      pos,
+      final,
+    });
+  })() : null;
+  const compare = judged?.school_gain?.central && rk?.central ? (() => {
+    const school = Number(rk.central), g = Number(judged.school_gain!.central);
+    return { total: (Math.round((school + g) * 100) / 100).toFixed(2), school: rk.central, g };
+  })() : null;
+  const short = !!judged && !!tone;
   const items = [
     { k: "점수 변환", ok: !!s || !!c1, label: s || c1 ? "계산됨" : undefined, why: `${EXAM} 성적으로 이 대학 환산점수를 계산하지 못했습니다` },
     { k: "대학 안 내 위치", ok: !!rk || !!withheldRank || rankBucket !== null, label: rk || withheldRank || rankBucket !== null ? "계산됨" : undefined, why: `${EXAM} 성적의 대학 안 위치는 준비 중입니다` },
@@ -148,7 +166,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 {s.central !== null && s.low !== s.high && <>범위 {range} · </>}
                 <span className="tag">학교 수능 반영분</span>
               </p>
-              <p>{final ? "성적표의 표준점수·백분위·등급을 이 대학 방식으로 계산한 값입니다." : "가채점 원점수로 추정한 표준점수·백분위를 이 대학 방식으로 계산한 값입니다. 성적표가 나오면 달라질 수 있습니다."}</p>
+              <p>{final ? "성적표 성적을 이 대학 방식으로 계산한 값입니다." : "가채점 성적을 이 대학 방식으로 계산한 값입니다. 성적표가 나오면 달라질 수 있습니다."}</p>
             </>
           ) : c1 ? (
             // 담당자 C1(11-23): 예외 7곳은 7단계 없이 수능 반영분·우수 3영역 점수만
@@ -178,7 +196,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               <p>
                 {rk.central !== null && rkRange && <>범위 상위 {rkRange}%</>}
               </p>
-              <span className="note">이 대학 방식 환산점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함). 이 숫자만으로 합격 여부를 판단하지 않습니다 — 판단은 <b>지원가능성</b> 칸이 담당합니다.</span>
+              <p>이 대학 방식 점수로 전체 응시자 중 위에서 몇 %인지입니다(같은 점수 포함).</p>
             </>
           ) : rankBucket !== null ? (
             // 무료 공개: 구간만(정확한 값은 실채점 이용권)
@@ -210,37 +228,8 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
                 {isMedicalGeneralBasis(o.offering_id) && <small className="scope"> · {MEDICAL_GENERAL_TAG}</small>}
               </div>
               <p>{tone.desc}</p>
-              {judged.score_scope === "csat_component" && <p>{CSAT_SCOPE_NOTE} {CSAT_SCOPE_BASIS_NOTE[csatScopeBasis(o.offering_id)]}</p>}
-              {isMedicalGeneralBasis(o.offering_id) && <p>{MEDICAL_GENERAL_NOTE}</p>}
-              {(() => {
-                const note = csatComboNote(judged.code, judged.upper_code, gain?.tone);
-                return note ? <p className="why"><b>한 줄로 보면</b> {note} 지원가능성은 합격선과의 거리, 환산 유불리는 이 대학 계산 방식의 득실이라 따로 봅니다.</p> : null;
-              })()}
+              {why?.exact && <p className="key num">{why.exact}</p>}
               {upper && <p>가채점 점수 범위에 따라 {tone.label}부터 {upper.label}까지 나옵니다.</p>}
-              {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
-                <p>가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
-              )}
-              {pos && !upper && (() => {
-                // 왜 이 단계인지(11-24 대표님 지적) → 11-26 대표님 결정: '몇 점 부족' 대신 위·아래 경계에 얼마나 가까운지를 말로,
-                // 정확한 점수는 따로 한 줄(무료 범위를 열 때 유료에만 보낼 줄). 서버 dep_r37b position(share_pct 포함)
-                const i = STAGE_ORDER.indexOf(judged.code as (typeof STAGE_ORDER)[number]);
-                const note = boundaryNote({
-                  label: tone.label,
-                  better: i > 0 ? BAND[STAGE_ORDER[i - 1]].label : null,
-                  worse: i >= 0 && i < STAGE_ORDER.length - 1 ? BAND[STAGE_ORDER[i + 1]].label : null,
-                  pos,
-                  final,
-                });
-                if (!note) return null;
-                return (
-                  <>
-                    <p className="why"><b>왜 {tone.label}인가요?</b> {note.lead}</p>
-                    {note.exact && <p className="why-num num">{note.exact}</p>}
-                    {!note.exact && freeView && <p className="why-num lock-note">정확한 점수 차이는 {FREE_LOCK_NOTE}</p>}
-                  </>
-                );
-              })()}
-              <p>{final ? "성적표 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다." : "가채점 원점수로 추정한 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다. 합격 확률이 아닙니다."}</p>
             </>
           ) : ex ? (
             <>
@@ -263,18 +252,7 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
               <p>
                 {gain.tone === "split" ? <>가채점 결과에 따라 이 대학 방식이 유리할 수도, 불리할 수도 있는 범위입니다. 성적표가 나오면 한쪽으로 정해집니다.</> : gain.range && <>범위 {gain.range}%p</>}
               </p>
-              {judged?.school_gain?.central && rk?.central && (() => {
-                // 유불리가 무엇과 무엇의 차이인지(2026-11-24 대표님 지적): 유불리 = 총점 위치 − 학교 위치 이므로 총점 위치 = 학교 위치 + 유불리
-                const school = Number(rk.central), g = Number(judged.school_gain!.central);
-                const total = (Math.round((school + g) * 100) / 100).toFixed(2);
-                return (
-                  <p className="why">
-                    <b>무엇을 비교했나요?</b> 이 대학의 유불리 비교 집단에서 국·수·탐2 표준점수 합으로 줄 세우면 상위 <b className="num">{total}</b>%, 같은 집단에서 이 대학 방식 환산점수로 줄 세우면 상위 <b className="num">{rk.central}</b>% →{" "}
-                    {g > 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(g).toFixed(2)}</b>%p 더 앞에 섭니다(유리).</> : g < 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(g).toFixed(2)}</b>%p 더 뒤에 섭니다(불리).</> : <>두 위치가 같습니다.</>}
-                  </p>
-                );
-              })()}
-              <p>이 대학이 과목마다 다른 비중·변환점수를 써서, 같은 성적이라도 줄 세운 순서가 달라지는 정도입니다. 합격 가능성(지원가능성)과는 별개이며, 유리해도 합격선에 못 미치면 불가일 수 있습니다.</p>
+              {gain.tone !== "split" && <p>{gain.tone === "up" ? "이 대학 계산 방식이 내게 유리합니다." : gain.tone === "down" ? "이 대학 계산 방식이 내게 불리합니다." : "이 대학 계산 방식의 득실이 거의 없습니다."}</p>}
             </>
           ) : judged?.gain_note === "comparison_total_out_of_support" ? (
             <>
@@ -289,6 +267,42 @@ export function CsatDetail({ o, band, exception = null, noJudgment = null, c1 = 
           )}
         </section>
       </div>
+      {short && judged && tone && (
+        <section className="readband" aria-label="이 결과 읽는 법">
+          <h3>이 결과 읽는 법</h3>
+          <div className="rb-cols">
+            <div className="rb">
+              <b>한 줄로 보면</b>
+              <p>{combo ? <>{combo} </> : null}지원가능성은 합격선과의 거리, 환산 유불리는 이 대학 계산 방식의 득실이라 따로 봅니다. 대학 안 위치만으로 합격 여부를 판단하지 않습니다.</p>
+            </div>
+            <div className="rb">
+              <b>왜 {upper ? `${tone.label}~${upper.label}` : tone.label}인가요?</b>
+              {why ? <p>{why.lead}</p> : null}
+              {why?.exact && <p className="num sub">{why.exact}</p>}
+              {!why?.exact && why && freeView && <p className="sub lock-note">정확한 점수 차이는 {FREE_LOCK_NOTE}</p>}
+              {upper && <p>가채점 점수 범위에 따라 {tone.label}부터 {upper.label}까지 나옵니다.</p>}
+              {!upper && judged.range_codes && BAND[judged.range_codes.best as keyof typeof BAND] && BAND[judged.range_codes.worst as keyof typeof BAND] && (
+                <p className="sub">가운데 추정 점수로 본 판정입니다. 가채점 점수 범위 안에서는 {BAND[judged.range_codes.best as keyof typeof BAND].label}부터 {BAND[judged.range_codes.worst as keyof typeof BAND].label}까지 나올 수 있습니다.</p>
+              )}
+              {judged.score_scope === "csat_component" && <p className="sub">{CSAT_SCOPE_NOTE} {CSAT_SCOPE_BASIS_NOTE[csatScopeBasis(o.offering_id)]}</p>}
+              {isMedicalGeneralBasis(o.offering_id) && <p className="sub">{MEDICAL_GENERAL_NOTE}</p>}
+            </div>
+            {gain && (
+              <div className="rb">
+                <b>환산 유불리는 무엇을 비교했나요?</b>
+                {compare ? (
+                  <p>
+                    이 대학의 유불리 비교 집단에서 국·수·탐2 표준점수 합으로 줄 세우면 상위 <b className="num">{compare.total}</b>%, 이 대학 방식 환산점수로 줄 세우면 상위 <b className="num">{compare.school}</b>% →{" "}
+                    {compare.g > 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(compare.g).toFixed(2)}</b>%p 더 앞에 섭니다(유리).</> : compare.g < 0 ? <>이 대학 방식에서 <b className="num">{Math.abs(compare.g).toFixed(2)}</b>%p 더 뒤에 섭니다(불리).</> : <>두 위치가 같습니다.</>}
+                  </p>
+                ) : null}
+                <p className="sub">이 대학이 과목마다 다른 비중·변환점수를 써서 같은 성적이라도 줄 세운 순서가 달라지는 정도입니다. 유리해도 합격선에 못 미치면 불가일 수 있습니다.</p>
+              </div>
+            )}
+          </div>
+          <p className="rb-foot">{final ? "성적표 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다." : "가채점 원점수로 추정한 성적을 이 대학 방식으로 계산해 예상 합격권과 견준 판정입니다."} 합격 확률이 아닙니다.</p>
+        </section>
+      )}
       {acts && (
         <div className="acts">
           <PickButton id={o.offering_id} on={picked} variant="wide" />
