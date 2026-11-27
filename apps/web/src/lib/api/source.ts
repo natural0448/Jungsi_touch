@@ -89,6 +89,8 @@ export interface JungsiSource {
   analyzeOverall(caller: Caller, body: { profile_id: string; report_id?: string; expected_version?: number }, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** report.read (본인). 없거나 남의 리포트면 null(서버는 같은 404). 일반 회원 응답에는 유료 필드가 없다 */
   readReport(caller: Caller, reportId: string): Promise<ReportDto | null>;
+  /** readReport 가 붙이는 화면 보정(지원 조건 표시)을 이미 받은 리포트에 붙인다(다시 읽지 않으려고). 없으면 다시 읽는다 */
+  correctReport?(report: ReportDto): Promise<ReportDto>;
   /** report.list-own (일반·유료). 현재 로그인한 본인 리포트 요약만. cursor 는 받은 그대로 되돌려 준다 */
   listOwnReports(caller: Caller, q: { exam_id?: string; cursor?: string; limit?: number }): Promise<OwnReportListDto>;
   /** score-input.status.read (일반·유료). 이 시험·단계의 입력권 상태 */

@@ -422,6 +422,10 @@ export const liveSource: JungsiSource = {
   // stage 는 수능 가채점(provisional)처럼 단계를 밝혀 저장할 때만 보낸다(서버 score-profile.create 선택 필드). 9월 모의평가는 지금처럼 보내지 않는다
   createScoreProfile: (caller, scores, confirmed, key, stage) => write<ProfileDto>(caller, "POST", "/score-profiles", stage ? { scores, confirmed, stage } : { scores, confirmed }, key),
   analyzeOverall: (caller, body, key) => write<ReportDto>(caller, "POST", "/overall-reports", body, key),
+  async correctReport(r) {
+    await ensureEligibilityTables();
+    return withRequiredUnmet(CONDITION_UNMET_ENABLED ? withConditionUnmet(r) : r);
+  },
   readReport: (caller, reportId) => (caller.accessToken ? reportOf(caller.accessToken, reportId) : orNull(call<ReportDto>(caller, `/reports/${enc(reportId)}`))),
   listOwnReports: (caller, q) => call<OwnReportListDto>(caller, `/me/reports${qs({ ...q })}`),
   readScoreInputStatus: (caller, examId, stage) =>

@@ -247,3 +247,23 @@ test("if the combined request fails, the missing rows are still tried once on th
   assert.deepEqual(writes(p)[0].args[3], ["A", "B"]);
   assert.deepEqual(writes(p)[1].args[3], ["B"]);
 });
+
+test("2026-11-27 speed: same-revision candidates reply is corrected in place, no extra report read", async () => {
+  // 무료 회원 다시 열기: 서버가 새 판을 쓰지 않아 판 번호가 같다 → 화면 보정만 붙이고 다시 읽지 않는다
+  const lists = { reference_university_groups: [{ university: "U", offerings: [{ offering: { offering_id: "2027:1" } }] }], reference_threshold_summary: { complete: true } };
+  const mine = report({ candidates: { catalog_version: "c1" }, stale_analysis_ids: ["X"], candidates_stale: true });
+  const built = report({ candidates: { catalog_version: "c1", ...lists } });
+  const p = port([{ ok: true, value: built }]);
+  let corrected = 0;
+  p.src.correctReport = async (r) => { corrected++; return { ...r, corrected: true }; };
+  const out = await settleCandidates(p.src, caller, mine);
+  assert.deepEqual(p.calls.map((c) => c.op), ["cb"]);
+  assert.equal(corrected, 1);
+  assert.equal(out.corrected, true);
+  assert.deepEqual(out.stale_analysis_ids, ["X"]);
+  // 새 판을 썼으면(판 번호가 오름) 예전처럼 다시 읽는다
+  const p2 = port([{ ok: true, value: report({ report_version: 8, candidates: { catalog_version: "c1", ...lists } }) }, report({ report_version: 8, candidates: { catalog_version: "c1" } })]);
+  p2.src.correctReport = async (r) => r;
+  await settleCandidates(p2.src, caller, mine);
+  assert.deepEqual(p2.calls.map((c) => c.op), ["cb", "read"]);
+});

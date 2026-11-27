@@ -714,7 +714,9 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
     }
   }
   // 2026-11-25: 평소 열 때도 같은 리포트·성적의 10분 안 목록을 다시 쓴다(화면 서버 기억 → Cloudflare 캐시)
-  if (opts.shared && report.candidates && !report.candidates_stale) {
+  // 2026-11-27 속도: 가채점·실채점 판정 리포트는 서버가 후보 기준값(basis)을 두지 않아 report.read 가 늘 candidates_stale 을 켠다.
+  // 그래서 11-25 의 10분 재사용이 한 번도 쓰이지 않고 열 때마다 다시 계산했다. 판정 리포트는 이 표시와 관계없이 같은 리포트·성적(열쇠)이면 다시 쓴다
+  if (opts.shared && report.candidates && (!report.candidates_stale || csatJudged(report))) {
     const lists = await recallReferenceShared(report);
     if (lists) {
       logSettle("candidates", { sent: false, reused: true, shared: true });
@@ -736,7 +738,12 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
       const built = res.value;
       const lists = referenceListsOf(built.candidates);
       if (lists?.reference_university_groups?.length) await rememberReferenceShared(built, lists);
-      const read = await rereadOr(src, caller, built);
+      // 2026-11-27 속도: 서버가 새 판을 쓰지 않았으면(판 번호 같음, 무료 회원 다시 열기) 다시 읽지 않는다(약 0.4초).
+      // 받은 응답에 화면 보정(지원 조건 표시)을 바로 붙이고, 읽기에서만 붙는 표식(stale_analysis_ids·candidates_stale)은 방금 읽은 리포트 것을 쓴다
+      const sameRevision = src.correctReport && built.report_id === current.report_id && built.report_version === current.report_version;
+      const read = sameRevision
+        ? await src.correctReport!({ ...built, stale_analysis_ids: current.stale_analysis_ids, candidates_stale: current.candidates_stale }).catch(() => null)
+        : await rereadOr(src, caller, built);
       const base = read ? newerVersion(read, built) : built;
       const baseCatalog = base.candidates?.catalog_version;
       const builtCatalog = built.candidates?.catalog_version;
