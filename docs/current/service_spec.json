@@ -10281,10 +10281,16 @@
           "owner": "시스템기획팀(대표님 지시로 화면팀이 기획팀 역할 수행, 2026-11-27)",
           "parent": "develop",
           "pr_target": "develop",
-          "status": "active",
+          "status": "retired_merged",
           "temporary": true,
           "purpose": "PR #74(feature/presentation-foundation → develop) 통합: 옛 이력 커밋 5e55e9dd 의 service_spec.json 검사 중단을 피하려고, 최신 develop 에서 화면 누적 변경을 한 커밋으로 합친 동등 트리를 develop 으로 PR 한다(담당자 후속 회신 11-27 PR74 통합검토 방향). 삭제 없음. 통합 뒤 retired_merged 로 바꾼다.",
-          "base_commit": "c509152d5896f17bf636bd38f6ef3a4f564b9cd1"
+          "base_commit": "c509152d5896f17bf636bd38f6ef3a4f564b9cd1",
+          "observed_head": "fbfa67db5adb50787a7e76311d9a1038cfd0b5b5",
+          "pull_request": 76,
+          "github_state": "merged",
+          "merge_commit": "1242675712840cd947a7859f88f4e11c19950232",
+          "merged_at": "2026-11-27T15:55:22Z",
+          "remote_ref_state": "retained"
         }
       ],
       "planning_team_declaration": "JUNGSI_TEAM=planning (해당 셸 세션에만 설정; 신원 인증이나 GitHub 권한 분리는 아님)",
