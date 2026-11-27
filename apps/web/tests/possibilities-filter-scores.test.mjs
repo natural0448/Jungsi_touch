@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 const s = readFileSync(new URL("../src/app/admissions/possibilities/catalog-browse.tsx", import.meta.url), "utf8");
 
 test("status filter hydrates withheld rows on the visible page (not only judged rows)", () => {
-  assert.match(s, /!bandsAll\[id\]\?\.school_score && !dispAll\[id\]\?\.central_score && keyOf\(bandsAll, id\) !== "ineligible"/);
+  assert.match(s, /!bandsAll\[id\]\?\.school_score && !freeBand\(bandsAll\[id\]\) && !dispAll\[id\]\?\.central_score && keyOf\(bandsAll, id\) !== "ineligible"/);
   assert.doesNotMatch(s, /keyOf\(bandsAll, id\) !== "none" && keyOf\(bandsAll, id\) !== "ineligible"\)/);
 });
 test("status filter keeps withheld display and minimum reasons when following later pages", () => {

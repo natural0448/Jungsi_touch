@@ -410,6 +410,25 @@ function searchEdgeCache(): Cache | null {
   }
 }
 const searchCacheUrl = (path: string) => "https://jt-search-cache.invalid/v1" + path;
+async function publicCacheGet<T>(path: string): Promise<T | null> {
+  const c = searchEdgeCache();
+  if (!c) return null;
+  try {
+    const r = await c.match(searchCacheUrl(path));
+    return r ? ((await r.json()) as T) : null;
+  } catch {
+    return null;
+  }
+}
+async function publicCachePut(path: string, v: unknown): Promise<void> {
+  const c = searchEdgeCache();
+  if (!c) return;
+  try {
+    await c.put(searchCacheUrl(path), new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${SEARCH_CACHE_TTL_S}` } }));
+  } catch {
+    // 캐시에 못 넣어도 화면은 그대로
+  }
+}
 async function searchCacheGet(path: string): Promise<CatalogSearchDto<OfferingDto> | null> {
   const c = searchEdgeCache();
   if (!c) return null;
@@ -481,7 +500,15 @@ export const liveSource: JungsiSource = {
       throw error;
     }
   },
-  readOffering: (caller, id) => orNull(call<OfferingDetailDto>(caller, `/offerings/${enc(id)}`)),
+  // 2026-11-27 속도: 모집단위 정보도 회원과 무관한 공개 자료라 검색처럼 데이터센터 캐시에 5분(권한 확인은 페이지가 먼저)
+  readOffering: async (caller, id) => {
+    const path = `/offerings/${enc(id)}`;
+    const hit = await publicCacheGet<OfferingDetailDto>(path);
+    if (hit) return hit;
+    const got = await orNull(call<OfferingDetailDto>(caller, path));
+    if (got && got.offering) await publicCachePut(path, got);
+    return got;
+  },
   analyzeUniversities: (caller, reportId, expected, ids, key) =>
     write<ReportDto>(caller, "POST", `/reports/${enc(reportId)}/university-results`, { expected_version: expected, offering_ids: ids }, key, true),
   scanUniversities: (caller, reportId, expected, scan, key) =>

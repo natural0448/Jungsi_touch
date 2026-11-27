@@ -222,7 +222,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         Object.assign(minAll, got.min);
         Object.assign(dispAll, got.display);
         const missing = got.offerings.map((o) => o.offering_id).filter((id) =>
-          !bandsAll[id]?.school_score && !dispAll[id]?.central_score && keyOf(bandsAll, id) !== "ineligible");
+          // 2026-11-27 속도: 무료 공개 판정이 이미 온 학과는 다시 받지 않는다(그 응답은 점수 칸이 원래 없어 30곳을 매번 다시 받았다).
+          // 보류 행(R22)·점수 없는 판정은 예전처럼 채운다
+          !bandsAll[id]?.school_score && !freeBand(bandsAll[id]) && !dispAll[id]?.central_score && keyOf(bandsAll, id) !== "ineligible");
         let revision = base.report_version;
         if (missing.length) {
           const m = await provisionalBands(src, caller, base, missing);
@@ -276,7 +278,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       if (ok) {
         // Also hydrate withheld rows with the existing by-ID detail path for this visible page only.
         const missing = picked.map((o) => o.offering_id).filter((id) =>
-          !bandsAll[id]?.school_score && !dispAll[id]?.central_score && keyOf(bandsAll, id) !== "ineligible");
+          // 2026-11-27 속도: 무료 공개 판정이 이미 온 학과는 다시 받지 않는다(그 응답은 점수 칸이 원래 없어 30곳을 매번 다시 받았다).
+          // 보류 행(R22)·점수 없는 판정은 예전처럼 채운다
+          !bandsAll[id]?.school_score && !freeBand(bandsAll[id]) && !dispAll[id]?.central_score && keyOf(bandsAll, id) !== "ineligible");
         let revision = base.report_version;
         if (missing.length) {
           const m = pro ? await pro.byIds(missing) : await provisionalBands(src, caller, base, missing);
@@ -679,4 +683,9 @@ function PageNumbers({ current, total, href }: { current: number; total: number;
       {current < total ? <Link className="btn" href={href(current + 1)}>다음</Link> : <span className="btn off" aria-hidden>다음</span>}
     </nav>
   );
+}
+
+/** 무료 공개 응답의 판정(정확한 점수·위치 대신 같은 단계 안 위치·구간만 온다, 2026-11-26). 다시 받아도 같은 값이라 채우지 않는다 */
+function freeBand(b: ReferenceBandDto | undefined): boolean {
+  return !!b && !b.held && !b.school_score && (typeof b.position_share === "number" || typeof b.rank_bucket === "number" || !!b.gain_tone);
 }
