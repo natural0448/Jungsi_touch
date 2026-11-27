@@ -361771,6 +361771,14 @@
         "PAGE-04"
       ],
       "summary": "전문가용 서버 Cloudflare 이전(11-27 대표님 승인): 화면의 JUNGSI_PRO_API_URL 을 jungsi-pro-api-prod.edutouch-web.workers.dev/jungsi-pro-api 로. 서버 코드는 dep_pro_r50 그대로, DB 는 jungsi-api-prod 와 같은 Hyperdrive·역할, 비밀 설정은 Supabase 운영 값과 지문 같음(대표님 실행 pro_secrets.mjs, 시작 확인 3/3). 되돌림: 옛 Supabase 주소로 배포 또는 wrangler rollback."
+    },
+    {
+      "date": "2026-11-27",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "전문가용 학생용 리포트(인쇄본)를 개인용 학생용 리포트와 같은 내용으로(11-27 대표님 요청): 수능 판정 리포트면 조합별 점수·전국 위치 그래프, 핵심 지원 학교 표(판정·환산점수·유불리)와 학교별 상세(네 칸·읽는 법·모집 정보·학년도별 입결)를 개인용 인쇄본과 같은 부품으로 그린다. 판정은 ③과 같은 전문가용 서버 판정(loadProPrintBands). 점수는 전문가용 범위 표시 그대로(11-24). 선생님용은 그대로."
     }
   ],
   "p1_recruitment_score_review_verification": {

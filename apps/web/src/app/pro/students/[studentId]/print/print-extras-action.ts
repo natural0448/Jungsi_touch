@@ -6,6 +6,8 @@ import { mapPool } from "@/lib/print-pool";
 import { counselYears } from "@/lib/pro-counsel-data";
 import type { CounselYear } from "@/lib/pro-counsel";
 import type { Extras } from "@/app/admissions/possibilities/extras-actions";
+import type { CsatMinimum, OfferingDto, OverallAnalysisDto, ReferenceBandDto } from "@/lib/dto";
+import { loadProForAction, proP4 } from "@/lib/pro-p4";
 
 const ID = /^[A-Za-z0-9._:-]{1,128}$/;
 /** 한 인쇄본에 넣는 학교 수 상한(개인용 담기 한도 15의 두 배 — 전문가용 담기 한도가 달라도 넉넉하게) */
@@ -54,4 +56,26 @@ export async function loadProCounselData(
     Object.assign(quotas, Object.fromEntries(list));
   }
   return { years, quotas };
+}
+
+/**
+ * 2026-11-27 대표님 요청: 전문가용 학생용 리포트도 개인용 학생용 리포트와 같은 내용. 담은 학교의 학교별 수능 판정
+ * (환산점수·대학 안 위치·유불리·판정)을 ③과 같은 전문가용 판정(pro.university-analysis)으로 받는다. 학생·기관 권한은 서버가 다시 확인한다
+ */
+export async function loadProPrintBands(org: string, student: string, report: string, ids: string[]): Promise<{
+  bands: Record<string, ReferenceBandDto>;
+  min: Record<string, CsatMinimum>;
+  display: NonNullable<OverallAnalysisDto["provisional_school_display"]>;
+  /** 후보 목록에 없는 담은 학교의 이름·군(③ 검색 결과와 같은 카탈로그) */
+  offerings: OfferingDto[];
+}> {
+  const none = { bands: {}, min: {}, display: {}, offerings: [] };
+  if (![org, student, report].every((x) => typeof x === "string" && ID.test(x)) || !Array.isArray(ids)) return none;
+  const want = ids.filter((i) => typeof i === "string" && ID.test(i)).slice(0, PRINT_MAX);
+  if (want.length === 0) return none;
+  const caller = await getCaller();
+  const got = await loadProForAction(caller, org, student, report);
+  if (got.kind !== "ok") return none;
+  const r = await proP4(caller, got.view, { offering_ids: want }).catch(() => null);
+  return r ? { bands: r.bands, min: r.min, display: r.display, offerings: r.search?.items ?? [] } : none;
 }

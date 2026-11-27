@@ -4,20 +4,24 @@ import { useActionState, useState } from "react";
 import { CATEGORY } from "@/components/offering-parts";
 import { REFERENCE_PERCENTILE_NOTE, REFERENCE_PERCENTILE_TITLE, referencePercentText } from "@/lib/reference-percentile";
 import { GRADE_RUMOR_NOTE, tipLine, tipsByOffering, tipTitle } from "@/lib/pro-tips";
-import { isProvisionalOverall } from "@/lib/dto";
-import { OverallCard, PositionChart, ProvisionalOverallCard, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../../reports/me/report-view";
+import { isCsatJudgedOverall, isProvisionalOverall, type CsatMinimum, type OfferingDto, type OverallAnalysisDto, type ReferenceBandDto } from "@/lib/dto";
+import { OverallCard, PositionChart, ProvisionalComboScores, ProvisionalOverallCard, ProvisionalPositionChart, ProvisionalSubjectsSheet, SubjectsSheet } from "../../../../reports/me/report-view";
+import { CsatPickedDetails, CsatPickedTable } from "../../../../reports/me/csat-picked";
+import { withSchoolDisplay } from "@/lib/report-pure";
+import type { PickedItem } from "@/lib/shortlist";
 import { PrintButton } from "../../../../reports/me/print/print-button";
 import { exportStudentReport, type PrintState } from "../../../actions";
 import type { Extras } from "@/app/admissions/possibilities/extras-actions";
 import { PrintDetail } from "../../../../reports/me/print-detail";
-import { loadProCounselData, loadProPrintExtras } from "./print-extras-action";
+import { loadProCounselData, loadProPrintBands, loadProPrintExtras } from "./print-extras-action";
 import type { CounselYear } from "@/lib/pro-counsel";
 import { counselSchools, csatRows } from "@/lib/pro-counsel-view";
 import { confirmedIneligibleIds } from "@/lib/candidate-eligibility";
 import { ChoiceGuideView, CounselTips, CounselYearsTable, CsatBadge, guideOf } from "../../../counsel-view";
 
 type Counsel = { years: Record<string, CounselYear[] | null>; quotas: Record<string, number | null> };
-type SheetState = (Extract<PrintState, { ok: true }> & { extras: Record<string, Extras>; counsel: Counsel | null }) | Exclude<PrintState, { ok: true }>;
+type CsatPrint = { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: NonNullable<OverallAnalysisDto["provisional_school_display"]>; offerings: OfferingDto[] };
+type SheetState = (Extract<PrintState, { ok: true }> & { extras: Record<string, Extras>; counsel: Counsel | null; csat: CsatPrint | null }) | Exclude<PrintState, { ok: true }>;
 
 /**
  * 인쇄본 만들기 → 고정 판을 받고, 담은 학교마다 펼친 상세에 쓸 자료(모집 정보·발행 기준·학년도별 성적)까지 받은 뒤 한 번에 그린다
@@ -35,8 +39,15 @@ async function exportWithDetails(prev: SheetState, fd: FormData): Promise<SheetS
     const o = known.get(id);
     return o ? [{ offering_id: id, university_name: o.university_name }] : [];
   });
-  // 상세 자료를 받지 못해도 인쇄본은 그린다(그 칸은 '미공개'·'자료 없음'). 가채점은 4페이지 펼친 상세가 없다
-  const extras = items.length && !provisional ? await loadProPrintExtras(items).catch(() => ({})) : {};
+  // 상세 자료를 받지 못해도 인쇄본은 그린다(그 칸은 '미공개'·'자료 없음').
+  // 2026-11-27 대표님 요청: 수능 판정 리포트도 개인용 학생용 인쇄본처럼 학교별 상세(모집 정보·학년도별 입결·네 칸)를 붙인다
+  const csatJudged = isCsatJudgedOverall(snap.report.overall);
+  const [extras, csat] = await Promise.all([
+    items.length && (!provisional || (csatJudged && !teacher)) ? loadProPrintExtras(items).catch(() => ({})) : Promise.resolve({}),
+    csatJudged && !teacher && ids.length
+      ? loadProPrintBands(String(fd.get("org_id") ?? ""), String(fd.get("student_id") ?? ""), String(fd.get("report_id") ?? ""), ids).catch(() => null)
+      : Promise.resolve(null),
+  ]);
   // 선생님용: 상담 팁의 학년도 값·2027 모집인원(9월은 위 extras 의 모집 정보를 쓴다)
   let counsel: Counsel | null = null;
   if (teacher && items.length) {
@@ -48,7 +59,7 @@ async function exportWithDetails(prev: SheetState, fd: FormData): Promise<SheetS
       }
     }
   }
-  return { ...r, extras, counsel };
+  return { ...r, extras: extras as Record<string, Extras>, counsel, csat };
 }
 
 /** 고정 판의 후보 목록에서 모집단위 이름(OfferingDto)을 찾는다 */
@@ -89,6 +100,11 @@ export function PrintSheet({ fields, teacher = false }: { fields: Record<string,
   // 가채점 학교별 판정(서버 dep_pro_r27, source g). 학생용·선생님용 모두 담은 학교 표의 판정 칸에 쓴다
   const ineligible = confirmedIneligibleIds(snapshot.report);
   const csat = new Map(csatRows(cands, snapshot.report).map((r) => [r.offering.offering_id, r.band]));
+  // 학생용 수능 판정 리포트: 개인용 인쇄본과 같은 부품으로 그린다(판정은 전문가용 ③과 같은 서버 판정)
+  const csatStudent = !teacher && isCsatJudgedOverall(a);
+  const csatA = withSchoolDisplay(a, state.csat?.display ?? null);
+  const more = new Map((state.csat?.offerings ?? []).map((o) => [o.offering_id, o]));
+  const pickedList: PickedItem[] = shortlist.map((id) => ({ offering: names.get(id) ?? more.get(id) ?? null, offering_id: id, entry: snapshot.report.shortlist![id], assessment: snapshot.report.analyses?.[id] ?? null }));
   const counsel = teacher ? counselSchools(snapshot.report, provisional, shortlist, state.counsel?.years ?? {}, state.counsel?.quotas ?? {}) : [];
   const guide = teacher ? guideOf(counsel) : null;
   return (
@@ -140,6 +156,9 @@ export function PrintSheet({ fields, teacher = false }: { fields: Record<string,
             <ProvisionalOverallCard a={a} fold={false} />
             <h2>과목별 예상 성적</h2>
             <ProvisionalSubjectsSheet a={a} />
+            {/* 2026-11-27 대표님 요청: 학생용은 개인용 학생용 인쇄본과 같은 내용(조합별 점수·전국 위치 그래프). 전문가용은 범위 표시 그대로(11-24) */}
+            {!teacher && <ProvisionalComboScores a={a} />}
+            {!teacher && <ProvisionalPositionChart a={a} />}
           </>
         ) : (
           <>
@@ -149,9 +168,15 @@ export function PrintSheet({ fields, teacher = false }: { fields: Record<string,
             <PositionChart a={a} />
           </>
         )}
-        <h2>담은 학교 <span className="num">{shortlist.length}</span></h2>
+        <h2>{csatStudent ? "핵심 지원 학교" : "담은 학교"} <span className="num">{shortlist.length}</span></h2>
         {shortlist.length === 0 ? (
           <p className="rp-foot">담은 학교가 없습니다.</p>
+        ) : csatStudent ? (
+          // 2026-11-27 대표님 요청: 학생용은 개인용 학생용 인쇄본과 같은 표·학교별 상세(reports/me/print 와 같은 부품)
+          <>
+            <CsatPickedTable items={pickedList} bands={state.csat?.bands ?? {}} a={csatA} print min={state.csat?.min ?? {}} />
+            <CsatPickedDetails items={pickedList} bands={state.csat?.bands ?? {}} a={csatA} print min={state.csat?.min ?? {}} wrap={(s, detail) => <PrintDetail o={s.offering!} a={s.assessment} extras={state.extras[s.offering_id]} csat={detail} />} />
+          </>
         ) : (
           <table className="tb">
             <thead><tr><th scope="col">분류</th><th scope="col">대학·모집단위</th><th scope="col" className="r">환산점수</th><th scope="col" className="r">환산 유불리</th>{showRef && <th scope="col" className="r">{REFERENCE_PERCENTILE_TITLE}</th>}</tr></thead>

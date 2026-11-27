@@ -79,7 +79,7 @@ test("상세 카드 안에는 접힌 설명(details·접기 단추)이 없다 �
 
 test("전문가용 학생 인쇄: 인쇄본을 만들 때 상세 자료까지 받아, 담은 학교마다 한 줄 아래에 상세를 펼친 채로", () => {
   const sheet = code(src("../src/app/pro/students/[studentId]/print/print-sheet.tsx"));
-  assert.match(sheet, /await loadProPrintExtras\(/);
+  assert.match(sheet, /loadProPrintExtras\(items\)/);
   assert.match(sheet, /<tbody key=\{id\} className="pr-unit">/);
   assert.match(sheet, /<PrintDetail o=\{o\} a=\{x \?\? null\} extras=\{state\.extras\[id\]\}/);
   assert.match(sheet, /<ProvisionalOverallCard a=\{a\} fold=\{false\} \/>/);
@@ -90,6 +90,19 @@ test("전문가용 학생 인쇄: 인쇄본을 만들 때 상세 자료까지 �
   assert.match(act, /loadPrintExtras\(source\(\), await getCaller\(\), /);
   // 학생 성적·리포트는 이 동작으로 보내지 않는다(모집단위 번호·대학 이름만)
   assert.doesNotMatch(act, /exportReport|readReport|scores/);
+});
+
+test("전문가용 학생용 인쇄(2026-11-27 대표님): 수능 판정 리포트는 개인용 학생용 인쇄본과 같은 부품(조합별 점수·위치 그래프·핵심 지원 학교 표·학교별 상세)", () => {
+  const sheet = code(src("../src/app/pro/students/[studentId]/print/print-sheet.tsx"));
+  assert.match(sheet, /const csatStudent = !teacher && isCsatJudgedOverall\(a\)/);
+  assert.match(sheet, /<CsatPickedTable items=\{pickedList\}/);
+  assert.match(sheet, /<CsatPickedDetails items=\{pickedList\}[^>]*wrap=\{\(s, detail\) => <PrintDetail o=\{s\.offering!\} a=\{s\.assessment\} extras=\{state\.extras\[s\.offering_id\]\} csat=\{detail\} \/>\}/);
+  assert.match(sheet, /\{!teacher && <ProvisionalComboScores a=\{a\} \/>\}/);
+  assert.match(sheet, /\{!teacher && <ProvisionalPositionChart a=\{a\} \/>\}/);
+  // 판정은 ③과 같은 전문가용 서버 판정(학생·기관 권한은 서버가 다시 확인)
+  const act = code(src("../src/app/pro/students/[studentId]/print/print-extras-action.ts"));
+  assert.match(act, /const got = await loadProForAction\(caller, org, student, report\);/);
+  assert.match(act, /proP4\(caller, got\.view, \{ offering_ids: want \}\)/);
 });
 
 test("개인용 가채점 단일 대표값(2026-11-24 담당자): 내 성적·리포트·인쇄는 single, 전문가용은 범위 그대로", () => {
