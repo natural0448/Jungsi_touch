@@ -469,7 +469,16 @@ export const liveSource: JungsiSource = {
   searchHistory: (caller, q: HistorySearchQuery) => call<CatalogSearchDto<HistoryMetricDto>>(caller, `/admission-history${qs({ ...q })}`),
   readSnapshotHead: (caller) => call<SnapshotHeadDto>(caller, "/admission-history/snapshot/head", true),
   readSnapshotPart: (caller, snapshotId, partId) => callBytes(caller, `/admission-history/snapshots/${snapshotSegment(snapshotId)}${qs({ part_id: partId })}`),
-  readRecruitment: (caller, id) => orNull(call<RecruitmentDto>(caller, `/offerings/${enc(id)}/recruitment`)),
+  // 2026-11-27 속도(대표님: 학교별 펼치기 1초대): 모집 정보는 로그인 회원 누구나(일반·유료) 보는 공개 자료라 데이터센터 캐시에 30분.
+  // 처음 펼칠 때 서버 DB 계보 조회가 1.3초 걸린다. 발행 기준(forecast.published.read)은 유료 전용이라 공유하지 않는다
+  readRecruitment: async (caller, id) => {
+    const path = `/offerings/${enc(id)}/recruitment`;
+    const hit = await publicCacheGet<RecruitmentDto>(path);
+    if (hit && hit.status === "ready") return hit;
+    const got = await orNull(call<RecruitmentDto>(caller, path));
+    if (got && got.status === "ready") await publicCachePut(path, got);
+    return got;
+  },
 
   // stage 는 수능 가채점(provisional)처럼 단계를 밝혀 저장할 때만 보낸다(서버 score-profile.create 선택 필드). 9월 모의평가는 지금처럼 보내지 않는다
   createScoreProfile: (caller, scores, confirmed, key, stage) => write<ProfileDto>(caller, "POST", "/score-profiles", stage ? { scores, confirmed, stage } : { scores, confirmed }, key),

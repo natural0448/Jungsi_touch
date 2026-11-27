@@ -645,12 +645,17 @@ async function recallReferenceShared(r: ReportDto): Promise<ReferenceLists | nul
     return null;
   }
 }
+/*
+  2026-11-27: Cloudflare Cache API 는 'private' 응답을 저장하지 않는다 — 11-25 3페이지 재사용과 4페이지 공유가 실제로는 한 번도 저장되지 않았다.
+  이 캐시는 화면 서버 안에서만 쓰는 내부 주소(.invalid, 리포트·프로필 번호 열쇠)라 public 이어도 밖으로 나가지 않는다.
+  꺼낼 때는 늘 본인 리포트(서버가 준 리포트 번호)로만 찾는다
+*/
 async function rememberReferenceShared(r: ReportDto, lists: ReferenceLists) {
   rememberReference(r, lists);
   const cache = edgeCache();
   if (!cache) return;
   try {
-    await cache.put(p3CacheUrl(r), new Response(JSON.stringify(lists), { headers: { "content-type": "application/json", "cache-control": `private, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
+    await cache.put(p3CacheUrl(r), new Response(JSON.stringify(lists), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
   } catch {
     // 캐시에 못 넣어도 화면은 그대로
   }
