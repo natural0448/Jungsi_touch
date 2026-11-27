@@ -3,14 +3,18 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AccessDenied, ConnectionError, getCaller } from "@/lib/api";
+import { emptyProfile, PROFILE_FIELDS, profileProblem, profileToTags, splitItems } from "@/lib/pro-profile";
 import { proSource, validId } from "@/lib/api/pro-source";
 import type { ScoresInput } from "@/lib/dto";
-import { EXAM } from "@/lib/exam";
+import { CSAT_EXAM, EXAM, csatOpen, finalOpen, proCsatEnabled } from "@/lib/exam";
+import { buildProvisionalScores, type ProvisionalValues } from "@/lib/provisional-report";
+import { badScoreText, MISSING_STANDARD, missingStandard, UNATTAINABLE_FIRST, unattainableRaw } from "@/lib/score-validity";
+import type { ProvisionalFormState } from "../reports/me/provisional-actions";
 import type { ProPrintDto, ProStudentInput } from "@/lib/pro-dto";
 import type { ScoreFormState } from "../reports/me/actions";
 import type { ScoreDefaults } from "../reports/me/score-form";
 
-export type StudentFormState = { error: string; values: Partial<Record<keyof ProStudentInput, string>> } | null;
+export type StudentFormState = { error: string; values: Record<string, string> } | null;
 
 const MESSAGE: Record<string, string> = {
   student_seat_limit_reached: "계약한 학생 수를 모두 사용했습니다. 학생을 더 추가하려면 기관 관리자에게 계약 학생 수 조정을 요청해 주세요.",
@@ -21,21 +25,28 @@ const MESSAGE: Record<string, string> = {
   invalid_request: "입력 칸을 다시 확인해 주세요.",
 };
 
-/** 폼 → 학생 입력. 이름 필수(실명 허용), 반·번호·태그·메모는 선택. 연락처·주민번호 칸은 두지 않는다 */
+/**
+ * 폼 → 학생 입력. 이름 필수(실명 허용), 반·번호·상담 참고는 선택. 연락처·주민번호 칸은 두지 않는다.
+ * 상담 참고(희망 계열·전공·대학·지역·기타, 항목마다 5개까지)는 서버 태그에 항목 하나씩 담는다(lib/pro-profile).
+ * 메모 칸은 2026-11-13 최종관리자 결정으로 뺐다 — 보내지 않으므로 예전에 적은 메모는 서버에 그대로 남는다.
+ */
 function parse(fd: FormData): { input: ProStudentInput; values: Record<string, string> } | { error: string; values: Record<string, string> } {
-  const values = Object.fromEntries(["display_name", "class_label", "class_number", "tags", "memo"].map((k) => [k, String(fd.get(k) ?? "").trim()]));
+  const keys = ["display_name", "class_label", "class_number", ...PROFILE_FIELDS.map((f) => `p_${f.key}`)];
+  const values = Object.fromEntries(keys.map((k) => [k, String(fd.get(k) ?? "").trim()]));
   const name = values.display_name;
   if (!name || name.length > 40) return { error: "학생 이름을 1~40자로 넣어 주세요.", values };
   if (values.class_label.length > 20) return { error: "반은 20자 안으로 넣어 주세요.", values };
   if (values.class_number && !/^\d{1,3}$/.test(values.class_number)) return { error: "번호는 숫자로 넣어 주세요.", values };
-  if (values.memo.length > 300) return { error: "메모는 300자 안으로 넣어 주세요.", values };
-  const tags = values.tags ? values.tags.split(/[,\s]+/).filter(Boolean).slice(0, 5).map((t) => t.slice(0, 12)) : [];
-  return { input: { display_name: name, class_label: values.class_label || null, class_number: values.class_number || null, tags, memo: values.memo || null }, values };
+  const profile = emptyProfile();
+  for (const f of PROFILE_FIELDS) profile[f.key] = splitItems(values[`p_${f.key}`]);
+  const problem = profileProblem(profile);
+  if (problem) return { error: problem, values };
+  return { input: { display_name: name, class_label: values.class_label || null, class_number: values.class_number || null, tags: profileToTags(profile) }, values };
 }
 
 function failText(e: unknown): string | null {
-  if (e instanceof AccessDenied) return e.status === 401 ? "로그인이 필요합니다. 다시 로그인해 주세요." : MESSAGE[e.code] ?? `권한이 없어 처리하지 못했습니다. (사유 코드 ${e.code})`;
-  if (e instanceof ConnectionError) return e.kind === "rate_limited" ? "요청이 겹쳐 잠시 제한되었습니다. 몇 초 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다." : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. (사유 코드 ${e.code})`;
+  if (e instanceof AccessDenied) return e.status === 401 ? "로그인이 필요합니다. 다시 로그인해 주세요." : MESSAGE[e.code] ?? `권한이 없어 처리하지 못했습니다. (문의 번호 ${e.code})`;
+  if (e instanceof ConnectionError) return e.kind === "rate_limited" ? "요청이 겹쳐 잠시 제한되었습니다. 몇 초 뒤 다시 저장해 주세요. 입력한 값은 그대로 남아 있습니다." : `정시터치 서버에 연결할 수 없어 저장하지 못했습니다. (문의 번호 ${e.code})`;
   return null;
 }
 
@@ -55,7 +66,7 @@ export async function createStudent(_prev: StudentFormState, fd: FormData): Prom
   let studentId: string;
   try {
     const r = await proSource().createStudent(await getCaller(), orgId, p.input, cv, key);
-    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (사유 코드 ${r.code})`, values: p.values };
+    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (문의 번호 ${r.code})`, values: p.values };
     studentId = r.value.student_id;
   } catch (e) {
     const t = failText(e);
@@ -76,7 +87,7 @@ export async function updateStudent(_prev: StudentFormState, fd: FormData): Prom
   if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(v)) return { error: "화면을 새로 고친 뒤 다시 저장해 주세요.", values: p.values };
   try {
     const r = await proSource().updateStudent(await getCaller(), orgId, studentId, p.input, v, key);
-    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (사유 코드 ${r.code})`, values: p.values };
+    if (!r.ok) return { error: MESSAGE[r.code] ?? `저장하지 못했습니다. (문의 번호 ${r.code})`, values: p.values };
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t, values: p.values };
@@ -95,8 +106,10 @@ const SCORE_MESSAGE: Record<string, string> = {
 const CONTENT_REJECTIONS = new Set(["unobserved_standard_score", "invalid_score", "invalid_integer", "invalid_grade", "invalid_reported_grade", "invalid_reported_percentile", "reported_grade_conflict", "reported_percentile_conflict"]);
 
 /**
- * 전문가용 학생 성적 저장 → 전체 위치. 학생×시험×단계 입력 1회(개인용과 같은 규칙). 같은 화면에서 두 번 눌러도
- * 같은 요청 키라 한 번만 저장된다. 성적은 저장됐는데 분석만 못 했으면 그 사실을 알리고 다시 저장하지 말라고 한다
+ * 전문가용 학생 성적 저장 → 전체 위치 → 유리한 대학 찾기(자동 1회). 학생×시험×단계 입력 1회(개인용과 같은 규칙). 같은 화면에서 두 번 눌러도
+ * 같은 요청 키라 한 번만 저장된다. 성적은 저장됐는데 분석만 못 했으면 그 사실을 알리고 다시 저장하지 말라고 한다.
+ * 유리한 대학 찾기는 같은 성적이면 결과가 같으므로 저장 때 한 번만 계산한다(2026-11-13 최종관리자 결정: '다시 찾기' 없음,
+ * 계산 횟수 = 학생·단계당 입력 1 + 정정 1). 이 단계만 실패하면 저장·전체 위치는 그대로 두고 학생 화면의 '찾기' 버튼으로 한 번 더 할 수 있다
  */
 export async function submitStudentScores(prev: ScoreFormState, fd: FormData): Promise<ScoreFormState> {
   const int = (k: string) => {
@@ -114,8 +127,11 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
   const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
   const entry = Number(fd.get("entry_version")), stage = String(fd.get("stage") ?? "");
   if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(entry) || !["mock", "provisional", "final"].includes(stage)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
+  // 2026-11-23 0시 수능 가채점 전환 뒤에는 9월 모의평가 표준점수를 받지 않는다(서버도 9월 단계를 닫는다). 입력 횟수를 쓰지 않게 보내지 않는다
+  if (csatOpen() && stage !== "final") return fail("9월 모의평가 성적 입력은 수능 가채점 전환과 함께 끝났습니다. 화면을 새로 고쳐 주세요. 입력 횟수는 쓰이지 않았습니다.");
   const ks = values.korean, ms = values.math, i1 = values.inq1_score, i2 = values.inq2_score;
-  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !values.inq1 || !values.inq2) return fail("국어·수학·탐구 두 과목의 표준점수를 모두 넣어 주세요.");
+  // 모든 과목 필수(2026-11-22 대표님 결정). 개인용과 같은 목록
+  if ([ks, ms, i1, i2].some((v) => v === undefined || Number.isNaN(v)) || !values.inq1 || !values.inq2 || missingStandard((k) => values[k]).length > 0) return fail(MISSING_STANDARD);
   if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 점수를 확인하고 '이대로 저장'을 눌러 주세요.", "confirm");
   const scores: ScoresInput = {
     exam_id: EXAM.exam_id,
@@ -132,15 +148,18 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
   try {
     const saved = await src.createScore(caller, orgId, studentId, { exam_id: EXAM.exam_id, pack_version: EXAM.pack_version, stage, scores, expected_entry_version: entry }, `${key}:profile`);
     if (!saved.ok) {
-      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code)) return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. 이 학생의 입력 1회가 사용되었습니다. 정정은 고객센터에 요청해 주세요. (사유 코드 ${saved.code})`);
-      return fail(SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (사유 코드 ${saved.code})`);
+      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code)) return fail(`실제 성적표의 표준점수를 입력하지 않아 정상적인 계산이 불가능합니다. 이 학생의 입력 1회가 사용되었습니다. 정정은 고객센터에 요청해 주세요. (문의 번호 ${saved.code})`);
+      return fail(SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (문의 번호 ${saved.code})`);
     }
     step = "전체 분석";
     const p = saved.value.profile;
     const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
-    if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (사유 코드 ${r.code})`);
+    if (!r.ok) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
+    step = "대학 찾기";
+    // 실패해도 저장·전체 위치는 끝났다. 학생 화면에 '찾기' 버튼이 남아 한 번 더 할 수 있다
+    await candidatesWarm(src, caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
   } catch (e) {
-    if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (사유 코드 ${e.code})`);
+    if (step === "전체 분석" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`성적은 저장됐지만 전체 분석을 완료하지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
     const t = failText(e);
     if (t) return fail(t);
     throw e;
@@ -148,7 +167,106 @@ export async function submitStudentScores(prev: ScoreFormState, fd: FormData): P
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
 }
 
-export type ProActionState = { error: string } | null;
+const PROVISIONAL_MESSAGE: Record<string, string> = {
+  invalid_choice: "국어·수학 선택과목을 목록에서 골라 주세요.",
+  invalid_inquiry: "탐구 과목을 목록에서 골라 주세요.",
+  duplicate_inquiry: "탐구 두 과목은 서로 달라야 합니다.",
+  invalid_score: "원점수 범위를 확인해 주세요. 국어·수학·영어는 0~100, 한국사·탐구·제2외국어/한문은 0~50입니다.",
+  invalid_integer: "원점수는 정수로 넣어 주세요.",
+  invalid_second_language: "제2외국어/한문 과목과 원점수(0~50)를 확인해 주세요. 응시하지 않았으면 '미응시'를 골라 주세요.",
+  score_stage_closed: "지금은 수능 가채점 성적을 입력할 수 있는 기간이 아닙니다. 입력 횟수는 쓰이지 않았습니다.",
+  score_input_version_conflict: "다른 화면에서 이 학생의 성적이 먼저 저장되었습니다. 화면을 새로 고쳐 확인해 주세요.",
+};
+
+/**
+ * 전문가용 학생 수능 가채점 저장(2026-11-21 대표님 결정: 오픈 때 개인용과 함께). 원점수는 개인용과 같은 형식으로
+ * 그 학생의 pro.score.create(stage provisional) → pro.overall.analyze 로 저장한다. 교사 본인 계정(개인용 경로)에는
+ * 절대 저장하지 않는다. 학생×가채점 단계 입력 1회 + 정정 1회(서버). 대학 찾기는 학교별 가채점 7단계 판정으로 한 번 부른다(2026-11-22).
+ * 서버가 원점수 경로를 알기 전(JUNGSI_PRO_CSAT_ENABLED 꺼짐)에는 서버로 보내지 않는다.
+ */
+export async function submitStudentProvisional(prev: ProvisionalFormState, fd: FormData): Promise<ProvisionalFormState> {
+  const int = (k: string) => {
+    const v = String(fd.get(k) ?? "").trim();
+    return v === "" ? undefined : Number(v);
+  };
+  const values: ProvisionalValues = {
+    korean_choice: String(fd.get("korean_choice") ?? "") || undefined, korean: int("korean"),
+    math_choice: String(fd.get("math_choice") ?? "") || undefined, math: int("math"),
+    inq1: String(fd.get("inq1") ?? "") || undefined, inq1_raw: int("inq1_raw"),
+    inq2: String(fd.get("inq2") ?? "") || undefined, inq2_raw: int("inq2_raw"),
+    english: int("english"), history: int("history"),
+    sl_subject: String(fd.get("sl_subject") ?? "") || undefined, sl_raw: int("sl_raw"),
+  };
+  const fail = (error: string, field?: string): ProvisionalFormState => ({ error, field, values, attempt: (prev?.attempt ?? 0) + 1 });
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), key = String(fd.get("idem") ?? "");
+  const entry = Number(fd.get("entry_version"));
+  // 2026-11-25: 수능 실채점 전환 뒤에는 가채점 원점수를 받지 않는다(학생 성적 입력은 표준점수 양식으로)
+  if (!proCsatEnabled() || !csatOpen() || finalOpen()) return fail("지금은 이 화면에서 수능 가채점을 저장할 수 없습니다. 입력 횟수는 쓰이지 않았습니다. 화면을 새로 고쳐 주세요.");
+  if (!validId(orgId) || !validId(studentId) || !/^[0-9a-f-]{36}$/i.test(key) || !Number.isSafeInteger(entry)) return fail("화면을 새로 고친 뒤 다시 저장해 주세요.");
+  // 제2외국어/한문 미선택·과목만 고르고 원점수 없음은 서버로 보내기 전에 막는다(학생 입력 횟수를 쓰지 않는다)
+  const built = buildProvisionalScores(values, CSAT_EXAM);
+  if (!built.ok) return fail(built.error, built.field);
+  if (fd.get("confirm") !== "on") return fail("저장 전 확인 창에서 학생 이름과 원점수를 확인하고 '이대로 저장'을 눌러 주세요.");
+  // 받을 수 없는 원점수는 확인 창의 두 번 경고(학생 이름)를 거친 요청만 보낸다(2026-11-22 대표님 결정)
+  const bad = unattainableRaw(values);
+  if (bad.length > 0 && fd.get("ack_unattainable") !== "on") return fail(`${UNATTAINABLE_FIRST} (${badScoreText(bad)})`);
+  const caller = await getCaller();
+  const src = proSource();
+  let step = "성적 저장";
+  try {
+    const saved = await src.createScore(caller, orgId, studentId, { exam_id: CSAT_EXAM.exam_id, pack_version: CSAT_EXAM.pack_version, stage: "provisional", scores: built.scores, expected_entry_version: entry }, `${key}:profile`);
+    if (!saved.ok) {
+      // 서버가 계산 단계에서 정상 거절한 경우만 입력 1회가 쓰인다(형식 오류는 저장 전에 422 로 막혀 쓰이지 않는다)
+      if (saved.status === 422 && CONTENT_REJECTIONS.has(saved.code))
+        return fail(`넣은 원점수로는 정상적인 계산이 되지 않았습니다. 학생 화면을 새로 고쳐 남은 입력 횟수를 확인해 주세요. 다 썼으면 정정은 고객센터에 요청해 주세요. (문의 번호 ${saved.code})`);
+      return fail(PROVISIONAL_MESSAGE[saved.code] ?? SCORE_MESSAGE[saved.code] ?? MESSAGE[saved.code] ?? `저장하지 못했습니다. (문의 번호 ${saved.code})`);
+    }
+    step = "예상 위치 계산";
+    const p = saved.value.profile;
+    const r = await src.analyzeOverall(caller, orgId, studentId, p.profile_id, p.profile_version, `${key}:overall`);
+    if (!r.ok) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 말고 잠시 뒤 학생 화면을 다시 열어 주세요. (문의 번호 ${r.code})`);
+    // 학교별 가채점 판정(서버 dep_pro_r27)도 저장 때 자동 1회(11-13 결정과 같은 규칙). 서버가 아직 못 내면(409) 화면에 찾기 버튼이 남는다
+    await candidatesWarm(src, caller, orgId, studentId, p.profile_id, p.profile_id, `${key}:candidates`).catch(() => null);
+  } catch (e) {
+    if (step !== "성적 저장" && (e instanceof AccessDenied || e instanceof ConnectionError)) return fail(`가채점 성적은 저장됐지만 예상 위치 계산을 끝내지 못했습니다. 같은 성적을 다시 저장하지 마세요. (문의 번호 ${e.code})`);
+    const t = failText(e);
+    if (t) return fail(t);
+    throw e;
+  }
+  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+export type ProActionState = { error: string; done?: undefined } | { done: string; error?: undefined } | null;
+
+/**
+ * 담기·빼기 성공 뒤(2026-11-23 대표님 지적: '담는 중…'에서 멈춘 채 리포트에 바로 보이지 않았다).
+ * 전에는 학생 화면 전체로 다시 이동해 그 화면(유리한 대학 찾기 수백 줄·상담 자료)을 다 그릴 때까지 버튼이 '담는 중'이었다.
+ * 이제 버튼은 바로 '담음'으로 바뀌고, 화면 새로 그리기는 버튼 쪽에서 뒤에서 한다. 스크립트 없는 양식 제출은 예전처럼 이동한다
+ */
+/**
+ * 2026-11-24 운영: 전문가용 서버가 한동안 요청이 없다 깨어나는 첫 요청에서 대학 찾기가 CPU 시간 한도(2초, 546)에 걸린다
+ * (판정 묶음·시험팩·카탈로그를 처음 읽는 비용). 실패하면 가벼운 ③ 판정 요청(한 대학 검색, 저장하지 않음)으로 서버가
+ * 자료를 먼저 읽게 한 뒤 다른 요청 키로 한 번만 다시 찾는다. 계산과 결과는 그대로다
+ */
+async function candidatesWarm(
+  src: ReturnType<typeof proSource>,
+  caller: Awaited<ReturnType<typeof getCaller>>,
+  orgId: string,
+  studentId: string,
+  profileId: string,
+  pv: string | number,
+  key: string,
+) {
+  const r = await src.candidates(caller, orgId, studentId, profileId, pv, key);
+  if (r.ok || r.code !== "request_failed") return r;
+  await src.analyzeP4(caller, orgId, studentId, { profile_id: profileId, expected_profile_version: pv, search: { university_q: "서울대학교" } }, `${key}:warm`).catch(() => null);
+  return src.candidates(caller, orgId, studentId, profileId, pv, `${key}:retry`);
+}
+
+async function doneOrBack(path: string, done: string): Promise<ProActionState> {
+  if ((await headers()).has("next-action")) return { done };
+  redirect(`/jeongsi${path}`);
+}
 
 /** 유리한 대학 찾기: 지금 학생의 최근 성적(profile)으로 pro.candidates. 결과는 새 리포트 판에 남는다 */
 export async function findCandidates(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
@@ -156,14 +274,33 @@ export async function findCandidates(_prev: ProActionState, fd: FormData): Promi
   const pv = String(fd.get("profile_version") ?? ""), key = String(fd.get("idem") ?? "");
   if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
-    const r = await proSource().candidates(await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
-    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `대학을 찾지 못했습니다. (사유 코드 ${r.code})` };
+    const r = await candidatesWarm(proSource(), await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
+    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `대학을 찾지 못했습니다. (문의 번호 ${r.code})` };
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t };
     throw e;
   }
   return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+}
+
+/**
+ * 2026-11-24 대표님 결정: ② 탭을 열었는데 저장 때 자동 찾기가 실패해 결과가 아예 없으면 화면이 한 번 알아서 다시 찾는다.
+ * 계산은 버튼(findCandidates)과 같고, 끝나면 학생 화면으로 옮기지 않고 그 자리에서 새로 그린다
+ */
+export async function autoFindCandidates(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), profileId = String(fd.get("profile_id") ?? "");
+  const pv = String(fd.get("profile_version") ?? ""), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(profileId) || !pv || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 아래 버튼을 눌러 주세요." };
+  try {
+    const r = await candidatesWarm(proSource(), await getCaller(), orgId, studentId, profileId, /^\d+$/.test(pv) ? Number(pv) : pv, key);
+    if (!r.ok) return { error: r.code === "initial_overall_report_required" ? "먼저 전체 위치 리포트를 만든 뒤 찾을 수 있습니다." : `자동으로 찾지 못했습니다. 아래 버튼으로 다시 찾아 주세요. (문의 번호 ${r.code})` };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { error: t };
+    return { error: "자동으로 찾지 못했습니다. 아래 버튼으로 다시 찾아 주세요." };
+  }
+  return { done: "찾음" };
 }
 
 /** 학생별 담기(찜). 고정된 리포트 판에 결속된다 */
@@ -173,13 +310,29 @@ export async function addStudentBookmark(_prev: ProActionState, fd: FormData): P
   if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !validId(offeringId) || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
     const r = await proSource().addBookmark(await getCaller(), orgId, studentId, reportId, offeringId, key);
-    if (!r.ok) return { error: `담지 못했습니다. (사유 코드 ${r.code})` };
+    if (!r.ok) return { error: `담지 못했습니다. (문의 번호 ${r.code})` };
   } catch (e) {
     const t = failText(e);
     if (t) return { error: t };
     throw e;
   }
-  return back(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`);
+  return doneOrBack(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`, "담음");
+}
+
+/** 담은 학교 빼기(2026-11-13, pro.bookmark.remove). 서버는 지우지 않고 뺀 기록을 쌓는다. 이미 빠졌으면 그대로 돌아간다 */
+export async function removeStudentBookmark(_prev: ProActionState, fd: FormData): Promise<ProActionState> {
+  const orgId = String(fd.get("org_id") ?? ""), studentId = String(fd.get("student_id") ?? ""), reportId = String(fd.get("report_id") ?? "");
+  const offeringId = String(fd.get("offering_id") ?? ""), key = String(fd.get("idem") ?? "");
+  if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !validId(offeringId) || !/^[0-9a-f-]{36}$/i.test(key)) return { error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
+  try {
+    const r = await proSource().removeBookmark(await getCaller(), orgId, studentId, reportId, offeringId, key);
+    if (!r.ok && r.code !== "professional_bookmark_not_found") return { error: `빼지 못했습니다. (문의 번호 ${r.code})` };
+  } catch (e) {
+    const t = failText(e);
+    if (t) return { error: t };
+    throw e;
+  }
+  return doneOrBack(`/pro/students/${encodeURIComponent(studentId)}?org=${encodeURIComponent(orgId)}`, "뺌");
 }
 
 export type PrintState = { ok: true; data: ProPrintDto } | { ok: false; error: string } | null;
@@ -194,7 +347,7 @@ export async function exportStudentReport(_prev: PrintState, fd: FormData): Prom
   if (!validId(orgId) || !validId(studentId) || !validId(reportId) || !Number.isSafeInteger(rev) || rev < 1 || !/^[0-9a-f-]{36}$/i.test(key)) return { ok: false, error: "화면을 새로 고친 뒤 다시 눌러 주세요." };
   try {
     const r = await proSource().exportReport(await getCaller(), orgId, studentId, reportId, rev, key);
-    if (!r.ok) return { ok: false, error: `인쇄본을 만들지 못했습니다. (사유 코드 ${r.code})` };
+    if (!r.ok) return { ok: false, error: `인쇄본을 만들지 못했습니다. (문의 번호 ${r.code})` };
     return { ok: true, data: r.value };
   } catch (e) {
     const t = failText(e);
@@ -209,7 +362,7 @@ const ADMIN_MESSAGE: Record<string, string> = {
   expected_version_changed: "다른 화면에서 이 학생 정보가 먼저 바뀌었습니다. 화면을 새로 고쳐 주세요.",
   invalid_request: "고른 담당자가 이 기관의 교사·열람 전용 구성원이 아닙니다.",
 };
-const adminText = (code: string) => ADMIN_MESSAGE[code] ?? `처리하지 못했습니다. (사유 코드 ${code})`;
+const adminText = (code: string) => ADMIN_MESSAGE[code] ?? `처리하지 못했습니다. (문의 번호 ${code})`;
 
 /** 기관 관리자: 학생 담당 교사(·열람 전용) 목록을 새로 정한다(체크한 구성원 전체로 바꿈) */
 export async function assignStudentAction(_prev: ProActionState, fd: FormData): Promise<ProActionState> {

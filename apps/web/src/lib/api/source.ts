@@ -11,6 +11,7 @@ import type {
   OfferingDto,
   OwnReportListDto,
   ProfileDto,
+  ProvisionalScoresInput,
   RecruitmentDto,
   ReportDto,
   SampleReportDto,
@@ -60,7 +61,8 @@ export class SnapshotChanged extends Error {
 }
 
 /** offerings.search 쿼리 (history.search 와 같은 조건, 기본 정보만) */
-export type OfferingSearchQuery = HistorySearchQuery;
+/** offset: 조건 없는 전체 목록의 '몇 번째부터'(서버 dep_r63, 커서·검색어·지역·군과 함께 쓰지 않는다) */
+export type OfferingSearchQuery = HistorySearchQuery & { offset?: number };
 
 /**
  * 화면이 데이터를 얻는 유일한 창구. 경로·모양은 develop 의 API_DTO 계약(lib/dto.ts)을 따른다.
@@ -82,12 +84,14 @@ export interface JungsiSource {
   /** recruitment.read (일반·유료). 없는 모집행이면 null */
   readRecruitment(caller: Caller, offeringId: string): Promise<RecruitmentDto | null>;
 
-  /** score-profile.create (일반·유료). 새 프로필. 검증 실패는 서버 오류 코드 */
-  createScoreProfile(caller: Caller, scores: ScoresInput, confirmed: boolean, idempotencyKey: string): Promise<Result<ProfileDto>>;
+  /** score-profile.create (일반·유료). 새 프로필. 검증 실패는 서버 오류 코드. stage 를 주면 그 입력 단계(provisional 등)로 저장한다 */
+  createScoreProfile(caller: Caller, scores: ScoresInput | ProvisionalScoresInput, confirmed: boolean, idempotencyKey: string, stage?: string): Promise<Result<ProfileDto>>;
   /** overall.analyze (일반·유료). report_id 가 있으면 그 리포트의 새 revision */
   analyzeOverall(caller: Caller, body: { profile_id: string; report_id?: string; expected_version?: number }, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** report.read (본인). 없거나 남의 리포트면 null(서버는 같은 404). 일반 회원 응답에는 유료 필드가 없다 */
   readReport(caller: Caller, reportId: string): Promise<ReportDto | null>;
+  /** readReport 가 붙이는 화면 보정(지원 조건 표시)을 이미 받은 리포트에 붙인다(다시 읽지 않으려고). 없으면 다시 읽는다 */
+  correctReport?(report: ReportDto): Promise<ReportDto>;
   /** report.list-own (일반·유료). 현재 로그인한 본인 리포트 요약만. cursor 는 받은 그대로 되돌려 준다 */
   listOwnReports(caller: Caller, q: { exam_id?: string; cursor?: string; limit?: number }): Promise<OwnReportListDto>;
   /** score-input.status.read (일반·유료). 이 시험·단계의 입력권 상태 */
@@ -105,6 +109,8 @@ export interface JungsiSource {
   readOffering(caller: Caller, offeringId: string): Promise<OfferingDetailDto | null>;
   /** university.analyze (유료·본인·확인 성적). report.analyses 를 갱신한 리포트 */
   analyzeUniversities(caller: Caller, reportId: string, expectedVersion: number, offeringIds: string[], idempotencyKey: string): Promise<Result<ReportDto>>;
+  /** 서버 dep_r38: 가채점 4페이지 지원가능성 필터 — 전국(지역·모집군 조건 안) 판정에서 고른 단계 모집단위 한 쪽 */
+  scanUniversities(caller: Caller, reportId: string, expectedVersion: number, scan: StatusScanRequest, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** candidates.build (유료·본인·확인 성적). report.candidates 를 갱신한 리포트 */
   buildCandidates(caller: Caller, reportId: string, expectedVersion: number, idempotencyKey: string): Promise<Result<ReportDto>>;
   /** shortlist.update (유료·본인). report.shortlist 를 갱신한 리포트. 해제도 selected=false 로 남는다 */
@@ -137,4 +143,15 @@ export interface ForecastRevisionRef {
   expected_revision: number;
   base_result_hash: string;
   policy_version: string;
+}
+
+/** 서버 dep_r38 status_scan 요청. codes = 7단계 코드와 "none"(판정 없음) */
+export interface StatusScanRequest {
+  codes: string[];
+  after?: string;
+  /** 2026-11-27 서버 dep_r60: 조건에 맞는 목록에서 몇 번째부터(쪽 번호용, 0부터) */
+  offset?: number;
+  limit?: number;
+  region?: string;
+  group?: string;
 }

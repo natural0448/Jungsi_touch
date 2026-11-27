@@ -1,5 +1,6 @@
-import { LoadingNotice } from "@/components/loading-notice";
+import { BookLoading } from "@/components/book-loading";
 
+// 경로 전환 직후(회원 이름을 읽기 전) 대기 화면. 본문 대기는 page.tsx 가 이름을 넣어 다시 그린다
 export default function Loading() {
-  return <LoadingNotice title="유리한 대학을 찾고 있습니다" desc="내 성적 기준으로 환산에 유리한 학교와 학과를 확인하는 중입니다." />;
+  return <BookLoading name="회원" kind="favorable" />;
 }

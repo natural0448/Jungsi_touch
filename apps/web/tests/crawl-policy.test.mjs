@@ -6,8 +6,9 @@ import { CRAWL_ROBOTS } from "../src/lib/crawl-policy.ts";
 const read = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 class SyntheticNextResponse extends Response {
   static next() { return new SyntheticNextResponse(null); }
+  static redirect(url, status) { return new SyntheticNextResponse(null, { status, headers: { location: String(url) } }); }
 }
-function loadProxy(env = {}) {
+function loadProxy(env = {}, client = null) {
   const code = stripTypeScriptTypes(read("../src/proxy.ts"), { mode: "transform" })
     .replace(/^import[^\n]+\n/gm, "")
     .replaceAll("export async function proxy", "async function proxy")
@@ -15,7 +16,7 @@ function loadProxy(env = {}) {
   let authCalls = 0;
   const forbidden = () => { authCalls++; throw new Error("No real auth or data request allowed"); };
   const value = new Function("NextResponse", "createServerClient", "ignoreCookieWrites", "noRefreshFetch", "CRAWL_ROBOTS", "process", code + "; return {proxy, config};")
-    (SyntheticNextResponse, forbidden, () => {}, forbidden, CRAWL_ROBOTS, { env });
+    (SyntheticNextResponse, client ?? forbidden, () => {}, forbidden, CRAWL_ROBOTS, { env });
   return { ...value, authCalls: () => authCalls };
 }
 function nextConfig() {
@@ -61,6 +62,7 @@ test("crawl policy changes add no user-agent authorization or broad robots auth 
   const proxy = read("../src/proxy.ts");
   assert.ok(!/user-agent/i.test(proxy)); assert.ok(!/robots\.txt/.test(proxy));
   assert.ok(proxy.includes('process.env.JEONGSI_ACCESS_GATE === "preview"'));
+  assert.ok(proxy.includes('process.env.JEONGSI_ACCESS_GATE === "members"'));
 });
 
 test("crawl policy never treats ordinary or AI user-agent text as preview authorization", async () => {
@@ -70,4 +72,30 @@ test("crawl policy never treats ordinary or AI user-agent text as preview author
     assert.equal(response.status, 403); assert.equal(response.headers.get("x-robots-tag"), CRAWL_ROBOTS);
     assert.equal(f.authCalls(), 0);
   }
+});
+
+// 회원 공개(members) 모드(2026-10-27): 로그인 없는 화면 요청은 본체 로그인으로, 그 밖의 요청은 401. 실제 인증 호출 대신 합성 클라이언트
+function anonymousClient() {
+  return () => ({ auth: { getUser: async () => ({ data: { user: null } }) }, from: () => { throw new Error("no profile read without a user"); } });
+}
+const memberEnv = { JEONGSI_ACCESS_GATE: "members", NEXT_PUBLIC_SUPABASE_URL: "https://SYNTHETIC.invalid", NEXT_PUBLIC_SUPABASE_ANON_KEY: "SYNTHETIC" };
+function req(pathname, headers = {}, method = "GET", search = "", hostname = "jeongsi-touch.SYNTHETIC.workers.dev") {
+  return { method, url: `https://${hostname}/jeongsi${pathname}${search}`, nextUrl: { pathname: `/jeongsi${pathname}`, search, hostname }, headers: new Headers(headers), cookies: { getAll: () => [] } };
+}
+test("members gate sends an anonymous page request to EduTouch login with the original path and query", async () => {
+  const f = loadProxy(memberEnv, anonymousClient());
+  const r = await f.proxy(req("/admissions/results", { accept: "text/html" }, "GET", "?university=SYNTHETIC"));
+  assert.equal(r.status, 307); assert.equal(r.headers.get("cache-control"), "private, no-store"); assert.equal(r.headers.get("x-robots-tag"), CRAWL_ROBOTS);
+  assert.equal(r.headers.get("location"), "https://edutouch.co.kr/login?next=" + encodeURIComponent("/jeongsi/admissions/results?university=SYNTHETIC"));
+});
+test("members gate answers anonymous RSC, server action and non-HTML requests with 401, never a redirect", async () => {
+  const f = loadProxy(memberEnv, anonymousClient());
+  for (const r of [req("/reports/me", { accept: "*/*", rsc: "1" }), req("/reports/me", { accept: "text/html", "next-action": "SYNTHETIC" }, "POST"), req("/reports/me", { accept: "application/json" })]) {
+    const res = await f.proxy(r); assert.equal(res.status, 401); assert.equal(res.headers.get("location"), null);
+  }
+});
+test("members gate stays closed when the Supabase public settings are missing", async () => {
+  const f = loadProxy({ JEONGSI_ACCESS_GATE: "members" });
+  const res = await f.proxy(req("/", { accept: "text/html" }));
+  assert.equal(res.status, 403); assert.equal(f.authCalls(), 0);
 });

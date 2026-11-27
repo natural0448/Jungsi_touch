@@ -1,0 +1,16 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {r27Summary} from "../apps/web/src/lib/p1-shape.ts";
+const q={v:"30",ls:"numeric_literal",st:"initial",ct:null,cs:"verified_official",rs:"verified"};
+test("검증된 숫자 모집인원은 최초 단계와 함께 표시한다",()=>{const x=r27Summary(q);assert.equal(x.v,"30");assert.equal(x.hold,false);assert.equal(x.initial,true);assert.equal(x.carry,false)});
+test("최종 인원과 단계 미상 양수도 수치를 보존한다",()=>{assert.equal(r27Summary({...q,st:"final"}).v,"30");assert.equal(r27Summary({...q,st:null}).v,"30")});
+test("원문 0은 단계와 관계없이 0 그대로 둔다",()=>{for(const st of ["initial","final",null]){const x=r27Summary({...q,v:"0",st});assert.equal(x.v,"0");assert.equal(x.hold,false)}});
+test("조건부 이월은 실제 0으로 치환하지 않고 초기 0과 구분한다",()=>{const c=r27Summary({...q,v:null,ls:"conditional_transfer",st:null});assert.equal(c.v,null);assert.equal(c.hold,false);assert.equal(c.carry,true);const z=r27Summary({...q,v:"0",ls:"conditional_transfer"});assert.equal(z.v,"0");assert.equal(z.carry,true)});
+test("공란·잘못된 문자·범위 밖 숫자·출처 충돌은 보류한다",()=>{for(const v of [null,"","30명","9007199254740992","-1"])assert.equal(r27Summary({...q,v}).hold,true);assert.equal(r27Summary({...q,rs:"source_conflict"}).hold,true);assert.equal(r27Summary({...q,ls:"unknown"}).hold,true)});
+test("숫자 원문이 비어 있으면 이월 설명이 있어도 임의 확정하지 않는다",()=>assert.equal(r27Summary({...q,v:null,ct:"조건 확인"}).hold,true));
+
+test("일반 조건은 이월이 아니며, 최초와 검증 이월은 함께 표시한다",()=>{const a=r27Summary({...q,ct:"일반 자격조건"});assert.equal(a.carry,false);assert.equal(a.initial,true);assert.match(a.note,/일반 자격조건/);const b=r27Summary({...q,ls:"conditional_transfer"});assert.equal(b.carry,true);assert.equal(b.initial,true)});
+test("최종 단계와 미확정 이월이 충돌하면 해당 행을 보류한다",()=>{for(const ls of ["conditional_transfer","conditional_carryover"])for(const v of ["30","0",null])assert.equal(r27Summary({...q,ls,st:"final",v}).hold,true)});
+test("숫자가 있고 단계가 확인되지 않으면 단계 확인을 표시한다",()=>{assert.equal(r27Summary({...q,st:null}).stageUnknown,true);assert.equal(r27Summary({...q,st:"final"}).stageUnknown,false)});
+
+test("숫자 원문 표기를 보존한다",()=>assert.equal(r27Summary({...q,v:"0030"}).v,"0030"));

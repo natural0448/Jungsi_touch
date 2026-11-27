@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { AccessDenied, ConnectionError, getCaller, source } from "@/lib/api";
-import { connectionText, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
+import { MAYBE_SAVED, connectionText, OFFERING_NOT_LINKED_NOTICE, SCORE_INPUT_TRANSITION_NOTICE } from "@/lib/connection-text";
 import { canonicalOfferingIds, ensureAnalyses, ensureCandidates, loadMine, refreshAnalyses, refreshCandidates, type RefreshIntent, type ReportState } from "@/lib/report-ops";
 
 export type RunResult = { error: string | null };
@@ -14,8 +14,10 @@ export type RunResult = { error: string | null };
 */
 
 function explain(st: ReportState, failed: string): RunResult {
-  if (st.kind === "failed" && st.code === "score_input_transition_pending") return { error: `${failed}. ${SCORE_INPUT_TRANSITION_NOTICE} (사유 코드 score_input_transition_pending)` };
-  if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (사유 코드 ${st.code})` };
+  // 모집단위가 분석 자료에 연결되지 않은 경우. 다시 눌러도 같으므로 '잠시 뒤 다시'라고 하지 않는다(담당자 회신 10-26 문구)
+  if (st.kind === "failed" && st.code === "offering_not_found") return { error: `${failed}. ${OFFERING_NOT_LINKED_NOTICE} (문의 번호: offering_not_found)` };
+  if (st.kind === "failed" && st.code === "score_input_transition_pending") return { error: `${failed}. ${SCORE_INPUT_TRANSITION_NOTICE} (문의 번호 score_input_transition_pending)` };
+  if (st.kind === "failed") return { error: `${failed}. 잠시 뒤 다시 눌러 주세요. (문의 번호 ${st.code})` };
   if (st.kind === "score_required") return { error: `${failed}. 성적 확인이 끝난 뒤 분석할 수 있습니다.` };
   if (st.kind === "none") return { error: `${failed}. 내 성적 리포트를 먼저 열어 주세요.` };
   return { error: null };
@@ -29,8 +31,18 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
     if (out.error) return out;
   } catch (e) {
     if (e instanceof AccessDenied) return { error: `${failed}. ${e.status === 401 ? "다시 로그인해 주세요." : "이용권 회원만 분석할 수 있습니다."}` };
-    if (e instanceof ConnectionError)
+    // 서버가 저장을 끝낸 뒤 응답 단계에서 503 을 낼 수 있다(10-26 운영: 가천대 분석·담기가 저장된 채 503).
+    // 실패로만 두지 않고 화면을 다시 읽어 실제 저장 상태를 보이게 한다
+    if (e instanceof ConnectionError) {
+      // 전환 보류(score_input_transition_pending)는 쓰기 전에 막힌 것이라 다시 읽지 않는다
+      const unsure = e.kind === "unavailable" && e.code !== "score_input_transition_pending";
+      if (unsure) revalidatePath("/", "layout");
+      // 저장됐을 수 있으므로 '못했습니다·다시 눌러 주세요'라고 하지 않는다(10-27 사용자 지적)
+      if (unsure) return { error: `${MAYBE_SAVED} (문의 번호 ${e.code})` };
+      // 요청 겹침은 '못했습니다'로 말하지 않는다 — 약 2분 조용히 다시 보낸 뒤에도 안 풀릴 때만 차분한 한 줄(2026-11-21)
+      if (e.kind === "rate_limited" && e.code !== "analysis_quota_exceeded") return { error: connectionText(e) };
       return { error: `${failed}. ${connectionText(e)}` };
+    }
     throw e;
   }
   revalidatePath("/", "layout");
@@ -41,8 +53,13 @@ async function run(failed: string, work: (src: ReturnType<typeof source>, caller
 export async function analyzeNow(_prev: RunResult, fd: FormData): Promise<RunResult> {
   const ids = canonicalOfferingIds(String(fd.get("ids") ?? "").split(",")).slice(0, 100);
   if (ids.length === 0) return { error: null };
+  // 화면이 알고 있는 최신 리포트 판(3페이지는 candidates.build 응답의 판). 쓰기 직후 다시 읽은 리포트가 앞 판을 돌려줄 수 있어
+  // 둘 중 큰 판으로 보낸다(2026-11-22 운영: 계열 펼침 계산이 409 를 두 번 받음). 같은 리포트일 때만 쓴다
+  const hintId = String(fd.get("report_id") ?? "");
+  const hintVersion = Number(fd.get("report_version") ?? "");
   return run("분석하지 못했습니다", async (src, caller) => {
-    const mine = await loadMine(src, caller);
+    const loaded = await loadMine(src, caller);
+    const mine = loaded && hintId === loaded.report_id && Number.isSafeInteger(hintVersion) && hintVersion > loaded.report_version ? { ...loaded, report_version: hintVersion } : loaded;
     return mine ? ensureAnalyses(src, caller, mine, ids) : { kind: "none" };
   });
 }

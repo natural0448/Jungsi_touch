@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 /*
   전문가용 기관 관리(계약 pro.members). 기관 관리자만: 구성원 목록, 학생 담당 변경, 학생 보관.
   담당 변경·보관은 서버가 2단계 인증(aal2)을 다시 확인한다. 성적 정정 기능은 여기에 없다(고객센터 전용).
-  구성원은 이메일·이름 없이 구성원 번호·역할로만 보인다(서버 응답 계약).
+  구성원은 이름(기관 관리자에게만, 2026-11-13)·역할로 보인다. 이메일은 보이지 않고, 서버가 이름을 주지 않으면 구성원 번호로 보인다.
 */
 export default async function Page({ searchParams }: PageProps<"/pro/management">) {
   const head = <PageHead kicker="전문가용" title="기관 관리" desc="구성원과 학생 담당을 관리합니다. 담당 변경·보관은 2단계 인증(OTP) 세션에서만 됩니다." />;
@@ -46,7 +46,7 @@ export default async function Page({ searchParams }: PageProps<"/pro/management"
   const ROLE = { teacher: "교사", viewer: "열람 전용", org_admin: "기관 관리자" } as const;
   const label = (id: string) => {
     const m = members?.items.find((x) => x.subject_id === id);
-    return m ? `구성원 ${m.member_id}` : "확인 안 된 구성원";
+    return m ? (m.display_name || `구성원 ${m.member_id}`) : "확인 안 된 구성원";
   };
 
   return (
@@ -61,7 +61,7 @@ export default async function Page({ searchParams }: PageProps<"/pro/management"
               <thead><tr><th scope="col">구성원</th><th scope="col">역할</th><th scope="col">상태</th></tr></thead>
               <tbody>
                 {(members?.items ?? []).map((m) => (
-                  <tr key={m.subject_id}><th scope="row">구성원 {m.member_id}</th><td>{ROLE[m.role]}</td><td>{m.status === "active" ? "이용 중" : "해제됨"}</td></tr>
+                  <tr key={m.subject_id}><th scope="row">{m.display_name || `구성원 ${m.member_id}`}</th><td>{ROLE[m.role]}</td><td>{m.status === "active" ? "이용 중" : "해제됨"}</td></tr>
                 ))}
               </tbody>
             </table>

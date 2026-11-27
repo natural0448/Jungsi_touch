@@ -1,5 +1,5 @@
 /* 2페이지 · 내 성적 리포트 — 성적 입력, 전체 위치, 과목 결과, 핵심 지원 학교, 인쇄 */
-.et .rp{display:grid;gap:16px;padding-bottom:40px}
+.et .rp{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding-bottom:40px}
 .et .rp-note{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--brand-soft);font-size:13px}
 
 /* ── 성적 입력: 수능 성적표와 같은 가로 표 ──
@@ -22,13 +22,12 @@
 .et .sf-sheet{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #CBD2E1;border-radius:var(--r-card)}
 .et .sf-sheet table{width:100%;min-width:800px;border-collapse:collapse;table-layout:fixed;font-size:13px}
 .et .sf-sheet col.c-head{width:96px}
-.et .sf-sheet col.c-main{width:16%}
-.et .sf-sheet col.c-grade{width:13%}
+/* 영역 열은 모두 같은 폭(구분 열만 고정). 폭을 비워 두면 table-layout:fixed 가 남은 폭을 똑같이 나눈다(2026-11-12) */
 .et .sf-sheet th,.et .sf-sheet td{border:1px solid var(--line);text-align:center;vertical-align:middle}
 .et .sf-sheet thead th{height:34px;padding:7px 4px;background:var(--deep);border-color:#22396F;font-weight:800;color:#fff;line-height:1.3;letter-spacing:-.2px}
 .et .sf-sheet thead th.sub{height:28px;background:#1A3268;font-size:12px;font-weight:700;color:#C9D4F0}
 .et .sf-sheet thead th.corner{color:#9FB0D8;font-weight:700}
-.et .sf-sheet tbody th{position:sticky;left:0;z-index:1;padding:0 12px;background:var(--sub);border-color:var(--line);font-weight:800;color:var(--ink);text-align:left}
+.et .sf-sheet tbody th{position:sticky;left:0;z-index:1;padding:0 12px;background:var(--sub);border-color:var(--line);font-weight:800;color:var(--ink);text-align:center}
 .et .sf-sheet tbody th small{display:inline-block;margin-top:3px;padding:1px 6px;border-radius:3px;background:var(--brand);font-size:10px;font-weight:800;color:#fff;letter-spacing:.2px}
 .et .sf-sheet tbody td{height:58px;padding:0}
 
@@ -74,6 +73,23 @@
 .et .sf-acts .btn{height:48px;padding:0 26px;font-size:14.5px;font-weight:800;box-shadow:0 4px 12px rgba(30,86,214,.22)}
 .et .sf-acts .btn:disabled{box-shadow:none;opacity:.7}
 .et .sf-note{margin:0;font-size:12px;color:var(--muted)}
+/* 수능 가채점·실채점(2026-11-12 최종관리자 결정) */
+.et .sf-banner{margin:0;padding:10px 12px;border-left:3px solid var(--touch);border-radius:0 4px 4px 0;background:var(--sub);font-size:13px;line-height:1.55;color:var(--ink)}
+.et .sf-max{display:block;margin-top:2px;font-size:10px;color:var(--muted)}
+/* 칸 옆 짧은 안내(제2외국어/한문 필수 선택, 2026-11-22). 보조 글자 13 */
+.et .sf-hint{display:block;margin-top:4px;font-size:13px;font-weight:700;line-height:1.35;color:var(--risk);white-space:normal;word-break:keep-all}
+.et .sf-grade{font-size:18px;font-weight:900;color:var(--deep);font-variant-numeric:tabular-nums}
+.et .sf-grade small{margin-left:2px;font-size:11px;font-weight:700;color:var(--muted)}
+.et .sf-sheet tbody th small.sf-rowsub{display:block;margin-top:3px;padding:0;background:none;font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0;line-height:1.3}
+.et .rp-steps{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.et .rp-steps li{flex:1 1 220px;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--sub)}
+.et .rp-steps li b{display:block;font-size:13px;color:var(--muted)}
+.et .rp-steps li small{font-size:11px;color:var(--muted)}
+.et .rp-steps li.on{border-color:var(--deep);background:var(--brand-soft)}
+.et .rp-steps li.on b{color:var(--deep)}
+.et .rp-steps li.done b{color:var(--ink-2)}
+.et .rp-steps li.locked{background:var(--bg);border-style:dashed}
+.et .rp-steps li.locked b,.et .rp-steps li.locked small{color:#A3A9B8}
 .et .sf-confirm-note{margin:0;font-size:13px;font-weight:700;color:var(--ink)}
 
 /* 저장 전 확인 창: 넣은 값을 성적표처럼 한 줄씩 다시 보여 준다 */
@@ -96,7 +112,8 @@
 /* ── 리포트 ── */
 .et .rp-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
 .et .rp-meta .btn{margin-left:auto}
-.et .rp-overall{display:grid;grid-template-columns:1fr 1.4fr;gap:16px;padding:22px 24px;border:1px solid var(--line);border-top:3px solid var(--deep);border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
+/* 왼쪽 총점 칸은 내용 폭만, 오른쪽 누백 설명을 넓게. 가운데 여백은 예전(약 310px)의 30%만 남긴다(2026-11-04 사용자 결정) */
+.et .rp-overall{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:16px 94px;padding:22px 24px;border:1px solid var(--line);border-top:3px solid var(--deep);border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
 .et .rp-overall .n{min-width:0}
 .et .rp-overall small{display:block;font-size:12px;font-weight:700;color:var(--brand);margin-bottom:4px}
 .et .rp-overall .big{font-size:36px;font-weight:900;letter-spacing:-1px;color:var(--deep);font-variant-numeric:tabular-nums}
@@ -104,7 +121,9 @@
 .et .rp-overall .est{margin-left:8px;padding:2px 7px;border-radius:3px;background:var(--reach-soft);color:var(--reach);font-size:12px;font-weight:700;vertical-align:middle}
 .et .rp-overall .wait{font-size:22px;font-weight:900;color:var(--muted)}
 .et .rp-overall .tie{margin:6px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6}
-.et .rp-sec{display:grid;gap:10px}
+.et .rp-overall .tie-more{margin-top:6px}
+.et .rp-overall .tie-more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--touch)}
+.et .rp-sec{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .et .rp-sec h2,.et .pr-sheet h2{font-size:18px;font-weight:900;letter-spacing:-.4px;color:var(--deep)}
 .et .rp-sec h2::before{content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:var(--touch);vertical-align:.25em}
 .et .rp-sec h2 .num{color:var(--muted);font-weight:700}
@@ -115,32 +134,89 @@
 .et .rp-abs{margin:0;display:flex;gap:16px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--ink-2)}
 .et .rp-abs b{color:var(--ink)}
 .et .rp-abs small{color:var(--muted)}
-.et .rp-short{min-width:560px}
-.et .rp-short tbody th{font-weight:800;color:var(--ink);background:none}
-.et .rp-short tbody th small{font-weight:600;color:var(--ink-2)}
-.et .rp-short .stale-tag{display:inline-block;margin-left:8px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:11px;font-weight:700;color:var(--muted)}
-.et .rp-short .why{white-space:normal;min-width:220px;color:var(--ink-2)}
+/*
+  칸 너비(2026-11-22 대표님 지적: 환산 유불리 글자가 판단 근거 칸을 덮었다). 표는 칸을 고정하고(세 군의 표 칸 맞춤),
+  칸 안 글자는 넘치지 않고 줄을 바꾼다 — 표 기본(base.css)의 white-space:nowrap 을 이 표에서만 푼다.
+*/
+.et .rp-short{min-width:760px;width:100%;table-layout:fixed}
+.et .rp-short col.c-name{width:21%}
+.et .rp-short col.c-score{width:12%}
+.et .rp-short col.c-st{width:14%}
+.et .rp-short col.c-adv{width:19%}
+.et .rp-short col.c-chev{width:44px}
+.et .rp-short.names{min-width:0;table-layout:auto}
+.et .rp-short:not(.names) td{white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.et .rp-short .st{height:auto;min-height:26px;padding:3px 9px;white-space:normal;line-height:1.35}
+.et .rp-short .adv{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px 8px;max-width:100%}
+.et .rp-short .adv .bar{flex:0 1 64px;min-width:32px}
+.et .rp-short .adv .v{min-width:0;white-space:normal}
+/* 줄 펼침: 학교 이름·화살표를 누르면 4페이지와 같은 상세 카드가 바로 아래 줄에 펼쳐진다 */
+.et .rp-short .rp-unit{display:block;width:100%;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.et .rp-short .rp-unit:hover .uni,.et .rp-short .rp-unit:hover .dept{color:var(--brand)}
+.et .rp-short td.rp-chev{padding:0;text-align:center}
+.et .rp-short td.rp-chev button{display:inline-grid;place-items:center;width:32px;height:32px;border:0;border-radius:6px;background:none;color:var(--muted);cursor:pointer}
+.et .rp-short td.rp-chev button:hover{background:var(--sub);color:var(--brand)}
+.et .rp-short .ic-chev{transition:transform .15s}
+.et .rp-short tr.open .ic-chev{transform:rotate(90deg)}
+.et .rp-short tr.rp-row.open>*{background:var(--jt-picked)}
+.et .rp-short tr.rp-drow>td{padding:0;white-space:normal}
+.et .rp-short .rp-ps{display:block;padding:0;gap:0}
+.et .rp-short .rp-ps .detail{border-top:0}
+.et .rp-short tbody th{font-weight:800;color:var(--ink);background:none;white-space:normal;word-break:keep-all}
+/* 모집단위명은 학교 이름 아래 줄에 본문 크기로(대표님 요청 2026-11-21, 글자 기준 본문15·보조13·배지12) */
+.et .rp-short tbody th .uni{display:block}
+.et .rp-short tbody th .dept{display:block;margin-top:2px;font-size:15px;font-weight:700;color:var(--deep);line-height:1.4}
+.et .rp-short .stale-tag{display:inline-block;margin-top:4px;padding:1px 6px;border-radius:4px;background:var(--sub);font-size:12px;font-weight:700;color:var(--muted)}
+.et .rp-short .why{white-space:normal;font-size:13px;line-height:1.55;color:var(--ink-2)}
+/* 좁은 화면(모바일 400px 등): 표를 옆으로 밀지 않고 줄마다 카드로 쌓는다. 칸 이름은 data-label */
+@media (max-width:640px){
+  .et .rp-short:not(.names){min-width:0;table-layout:auto}
+  .et .rp-short:not(.names) colgroup,.et .rp-short:not(.names) thead{display:none}
+  .et .rp-short:not(.names),.et .rp-short:not(.names) tbody{display:block;width:100%}
+  .et .rp-short:not(.names) tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .et .rp-short:not(.names) tr>th,.et .rp-short:not(.names) tr>td{display:block;grid-column:1 / -1;padding:4px 0;border:0;text-align:left}
+  .et .rp-short:not(.names) tr>th{grid-column:1}
+  .et .rp-short:not(.names) tr>td.rp-chev{grid-column:2;grid-row:1;align-self:start}
+  .et .rp-short:not(.names) td[data-label]{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px;align-items:center}
+  .et .rp-short:not(.names) td[data-label]::before{content:attr(data-label);font-size:12px;font-weight:700;color:var(--muted)}
+  .et .rp-short:not(.names) td.r .score{align-items:flex-start}
+  .et .rp-short .adv{justify-content:flex-start}
+  .et .rp-short:not(.names) tr.rp-drow{display:block;padding:0}
+  .et .rp-short:not(.names) tr.rp-drow>td{padding:0}
+  .et .rp-short .rp-ps .detail{padding:12px}
+}
+/* 가·나·다군 묶음 */
+.et .rp-picked{display:grid;gap:14px}
+.et .rp-group{display:grid;gap:6px}
+.et .rp-group h3{display:flex;align-items:baseline;gap:8px;font-size:15px;font-weight:900;color:var(--deep)}
+.et .rp-group h3 small{font-size:13px;font-weight:700;color:var(--muted)}
+.et .rp-group-empty{margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:13px;color:var(--muted)}
+.et .rp-picked.print .rp-group{break-inside:avoid}
 .et .rp-empty{border:1.5px dashed var(--jt-field);border-radius:var(--r-card);padding:18px 20px;background:var(--sub)}
 .et .rp-empty p{margin:0 0 10px;font-size:13px;color:var(--ink-2)}
 .et .rp-empty .acts{display:flex;gap:8px;flex-wrap:wrap}
 .et .rp-foot{margin:0;font-size:12px;color:var(--muted)}
-.et .rp-lock{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-card)}
-.et .rp-lock .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--touch-soft);color:var(--touch);flex:none}
-.et .rp-lock div:nth-child(2){flex:1;min-width:220px}
-.et .rp-lock h2{font-size:15px;font-weight:900}
-.et .rp-lock p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
 
 /* ── 인쇄용 ── */
 .et .pr{display:grid;gap:14px;padding-bottom:40px}
 .et .pr-tools{display:flex;justify-content:space-between;gap:8px}
 .et .pr-sheet{display:grid;gap:14px;max-width:860px;width:100%;margin:0 auto;padding:28px 32px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
 .et .pr-hd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:2px solid var(--ink)}
-.et .pr-brand{margin:0 0 4px;font-size:12px;font-weight:800;color:var(--touch)}
+.et .pr-brand{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;font-weight:800;color:var(--touch)}
+.et .pr-brand img{display:block;height:22px;width:auto;max-width:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .et .pr-hd h1{font-size:22px;font-weight:900}
 .et .pr-hd dl{display:flex;gap:18px;margin:0}
 .et .pr-hd dt{font-size:11px;color:var(--muted)}
 .et .pr-hd dd{margin:0;font-weight:800}
 .et .pr-foot{padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.6}
+/* 인쇄본의 담은 학교 상세(print-detail.tsx, 2026-11-22): 표의 한 줄 아래에 늘 펼쳐 둔다. 학교 하나(한 줄 + 상세)는 tbody 하나 */
+.et .pr-detail{display:block;padding:0;gap:0}
+.et .pr-detail .detail{border-top:0;padding:12px 12px 16px}
+.et .pr-sheet .pr-detail .four{grid-template-columns:repeat(2,minmax(0,1fr))}
+.et tr.pr-open>td{padding:0;white-space:normal}
+.et .pr-sheet .pr-unit{break-inside:avoid;page-break-inside:avoid}
+.et .rp-picked.print.full .rp-group{break-inside:auto}
+.et .pr-unit+.pr-unit>tr:first-child>*{border-top:2px solid var(--line)}
 
 @media (max-width:640px){
   .et .sf{padding:18px 16px}
@@ -148,25 +224,29 @@
   .et .sf-acts,.et .sf-acts .btn{width:100%}
   .et .sf-sheet table{min-width:900px}
   .et .sf-sheet td.in{padding:7px 5px}
-  .et .rp-overall{grid-template-columns:1fr}
+  .et .rp-overall{grid-template-columns:1fr;column-gap:0}
   .et .pr-sheet{padding:18px 16px}
 }
 @media print{
   .et .pr-tools{display:none}
   .et .pr-sheet{border:0;padding:0;max-width:none}
   .et .tblwrap{overflow:visible;border:0}
+  /* 펼친 상세: 화면 이동 링크는 종이에 쓸모가 없어 숨기고, 그림자·옅은 배경은 흑백에서도 읽히게 */
+  .et .pr-detail .recruit a{display:none}
+  .et .pr-detail .card,.et .pr-detail .years,.et .pr-detail .reasons,.et .pr-detail .published,.et .pr-detail .evidence{box-shadow:none;border-color:#999}
+  .et .pr-detail .detail{background:#fff}
+  .et .pr-detail .card,.et .pr-detail .years{break-inside:avoid}
 }
 
 /* ── 과목별 결과: 수능 성적표와 같은 가로 표(읽기 전용) ── */
 .et .rp-sheet{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #CBD2E1;border-radius:var(--r-card);background:var(--bg);box-shadow:var(--jt-card-shadow)}
-.et .rp-sheet table{width:100%;min-width:640px;border-collapse:collapse;table-layout:fixed;font-size:13px}
+.et .rp-sheet table{width:100%;min-width:760px;border-collapse:collapse;table-layout:fixed;font-size:13px}
 .et .rp-sheet col.c-head{width:108px}
-.et .rp-sheet col.c-main{width:16%}
 .et .rp-sheet th,.et .rp-sheet td{border:1px solid var(--line);text-align:center;vertical-align:middle}
 .et .rp-sheet thead th{height:34px;padding:7px 4px;background:var(--deep);font-weight:800;color:#fff;line-height:1.3;border-color:#22396F;letter-spacing:-.2px}
 .et .rp-sheet thead th.sub{height:28px;background:#1A3268;font-size:12px;font-weight:700;color:#C9D4F0}
 .et .rp-sheet thead th.corner{color:#9FB0D8;font-weight:700}
-.et .rp-sheet tbody th{position:sticky;left:0;z-index:1;padding:6px 12px;background:var(--sub);font-weight:800;color:var(--ink);text-align:left;border-color:var(--line)}
+.et .rp-sheet tbody th{position:sticky;left:0;z-index:1;padding:6px 12px;background:var(--sub);font-weight:800;color:var(--ink);text-align:center;border-color:var(--line)}
 .et .rp-sheet tbody th small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
 .et .rp-sheet tbody td{height:44px;padding:2px 6px}
 .et .rp-sheet tr.key td{background:var(--jt-filled);font-size:18px;font-weight:800;color:var(--deep)}
@@ -183,25 +263,54 @@
 .et .rp-chart header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:2px}
 .et .rp-chart h3{font-size:14px;font-weight:900;color:var(--deep)}
 .et .rp-chart header small{font-size:11px;color:var(--muted)}
-.et .pc-row{display:grid;grid-template-columns:96px 1fr 58px;align-items:center;gap:10px}
+.et .pc-row{display:grid;grid-template-columns:96px 1fr 104px;align-items:center;gap:10px}
 .et .pc-label{min-width:0;font-size:12px;font-weight:800;color:var(--ink);line-height:1.25}
 .et .pc-label small{display:block;font-size:10px;font-weight:600;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.et .pc-track{position:relative;height:16px;border-radius:8px;background:linear-gradient(90deg,var(--brand-soft),var(--sub) 60%);outline:1px solid var(--line);outline-offset:-1px}
-.et .pc-track::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),#D5D9E4 calc(25% - 1px) 25%);border-radius:8px;opacity:.6}
+.et .pc-track{position:relative;height:18px;margin-top:16px;border-radius:8px;background:linear-gradient(90deg,var(--brand-soft),var(--sub) 60%);outline:1px solid var(--line);outline-offset:-1px}
+.et .pc-track::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),#D5D9E4 calc(10% - 1px) 10%);border-radius:8px;opacity:.6}
 .et .pc-band{position:absolute;top:3px;bottom:3px;border-radius:5px;background:var(--brand);opacity:.3}
 .et .pc-dot{position:absolute;top:50%;width:11px;height:11px;transform:translate(-50%,-50%);border-radius:50%;background:var(--brand);border:2px solid var(--bg);box-shadow:0 0 0 1.5px var(--brand)}
 .et .pc-band.strong{background:var(--deep);opacity:.35}
 .et .pc-dot.strong{background:var(--deep);box-shadow:0 0 0 1.5px var(--deep)}
 .et .pc-track.pending{display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,var(--sub) 0 6px,var(--bg) 6px 12px)}
 .et .pc-track.pending span{font-size:10px;font-weight:600;color:var(--muted)}
-.et .pc-val{font-size:12px;font-weight:800;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
-.et .pc-axis .axis{position:relative;display:flex;justify-content:space-between;font-size:9px;color:var(--muted)}
+.et .pc-val{font-size:13px;font-weight:800;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.25}
+.et .pc-val small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.et .pc-tip{position:absolute;bottom:100%;margin-bottom:2px;transform:translateX(-50%);padding:0 4px;border-radius:3px;background:var(--brand);font-size:10px;font-weight:800;line-height:14px;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
+.et .pc-tip.end{transform:translateX(-100%)}
+.et .pc-tip.strong{background:var(--deep)}
+.et .pc-scale{margin:0 0 2px;font-size:11px;color:var(--ink-2)}
+.et .pc-summary{margin:0 0 4px;padding:8px 10px;border-radius:6px;background:var(--sub);font-size:13px;color:var(--ink);line-height:1.5}
+.et .pc-summary b{color:var(--deep)}
+.et .pc-summary small{font-size:11px;color:var(--muted)}
+.et .pc-best{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:0 0 4px;padding:10px 12px;border:1px solid var(--deep);border-radius:6px;background:var(--brand-soft)}
+.et .pc-best-in{flex:1 1 300px;min-width:0}
+.et .pc-best p{margin:0;font-size:13px;color:var(--ink);line-height:1.5}
+.et .pc-best small{display:block;margin-top:4px;font-size:11px;color:var(--ink-2);line-height:1.5}
+.et .pc-best b{color:var(--deep)}
+.et .pc-best-go{flex:none;font-size:12px;font-weight:800;color:var(--deep);text-decoration:underline;text-underline-offset:3px}
+.et .pc-scale b{color:var(--deep)}
+.et .pc-axis .axis{position:relative;height:14px;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.et .pc-axis .axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.et .pc-axis .axis span:first-child{transform:none}
+.et .pc-axis .axis span:last-child{transform:translateX(-100%)}
 .et .pc-note{margin:2px 0 0;font-size:11px;color:var(--ink-2);line-height:1.5}
 .et .rp-short-note{margin:8px 0 0;font-size:11px;color:var(--ink-2);line-height:1.6}
 .et .rp-combo-wait{margin:0;padding:10px 12px;border:1px dashed var(--line);border-radius:var(--r-sm);font-size:12px;color:var(--muted)}
+/* 두 표의 높이를 같게(2026-11-12 최종관리자): 칸을 늘려 맞추고 줄 높이를 나눠 갖는다. 글자는 가운데 */
+.et .rp-combo-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;align-items:stretch}
+.et .rp-combo-wrap>.tblwrap{display:flex}
+.et .rp-combo-wrap>.tblwrap>table{height:100%}
+.et .rp-combo-wrap>*{min-width:0}
+@media (max-width:760px){.et .rp-combo-wrap{grid-template-columns:minmax(0,1fr)}}
+.et .rp-combo{width:100%;font-variant-numeric:tabular-nums}
+.et .rp-combo td.r{width:110px}
+.et .rp-chart table.tb.rp-combo th,.et .rp-chart table.tb.rp-combo td{text-align:center}
+.et .rp-combo th[scope=row]{font-weight:700}
+.et .rp-combo td .num{font-weight:800;color:var(--deep)}
 
 @media (max-width:480px){
-  .et .pc-row{grid-template-columns:72px 1fr 50px;gap:7px}
+  .et .pc-row{grid-template-columns:72px 1fr 84px;gap:7px}
   .et .rp-chart{padding:12px}
 }
 @media print{
@@ -222,20 +331,12 @@
   .et .rs-wait,.et .rp-combo-wait{color:#555}
 }
 
-/* 전체 위치 다시 계산: 자료 연결 전 저장된 리포트에만 보인다 */
-.et .rp-refresh{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:10px 0 0;padding:12px 16px;border:1px solid var(--line);border-left:3px solid var(--accent, #1d4ed8);border-radius:var(--r-card, 10px);background:var(--sub)}
-.et .rp-refresh > div{flex:1 1 280px;min-width:0}
-.et .rp-refresh b{font-size:13px;color:var(--ink)}
-.et .rp-refresh p{margin:4px 0 0;font-size:12px;color:var(--ink-2);line-height:1.6}
-.et .rp-refresh p.err{color:var(--reach);font-weight:700}
 
 /* 입력권 상태·예시 리포트·내 리포트 목록(1.9.95) */
 .et .rp-rights{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--sub);font-size:13px;color:var(--ink-2)}
 .et .rp-rights>b{color:var(--deep)}
 .et .rp-rights .num{color:var(--ink)}
 .et .rp-rights .warn{color:var(--reach);font-weight:700}
-.et .rp-sample{display:grid;gap:12px}
-.et .rp-sample h2 small{margin-left:8px;font-size:12px;font-weight:700;color:var(--reach)}
 .et .rp-own{display:grid;gap:8px;padding:14px 18px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
 .et .rp-own h2{font-size:15px}
 .et .rp-own ul{display:grid;gap:6px;margin:0;padding:0;list-style:none}
@@ -245,3 +346,85 @@
 .et .rp .model-ref{color:var(--muted);font-size:11px}
 
 .et .sf-dialog-subject{margin:4px 0 10px;padding:10px 14px;border-radius:var(--r-sm);background:var(--touch,#F46A3C);color:#fff;font-size:22px;font-weight:900;letter-spacing:-.5px;text-align:center}
+
+/* 성적 정정 요청(2026-10-28): 바르게 고칠 점수 + 성적표 사진 */
+.et .rp-correct{display:grid;gap:14px;border:1px solid var(--line);border-radius:var(--r-card);padding:20px 22px;background:var(--bg)}
+.et .rp-correct label{display:grid;gap:6px;font-size:14px}
+.et .rp-correct textarea{width:100%;min-height:72px;padding:10px 12px;border:1px solid var(--jt-field);border-radius:var(--r-sm);font:inherit;font-size:14px}
+.et .rp-correct input[type=file]{font-size:13px;max-width:100%}
+.et .rp-correct .hint{font-size:12px;color:var(--muted);margin:0}
+.et .rp-correct .btn{justify-self:start}
+.et .rp-err{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:var(--risk-soft);color:var(--risk);font-size:13px}
+/* 리포트 표시: '현재 성적'·'정정 입력'(판 번호 대신, 2026-10-28) */
+.et .rp-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:10px;background:var(--brand-soft);color:var(--brand);font-size:12px;font-weight:700;vertical-align:middle}
+
+/* 수능 가채점 예상 성적 미리보기(2026-11-20) */
+.pv{display:grid;gap:14px;padding:18px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
+.pv-hd h2{margin:0 0 6px;font-size:18px;color:var(--deep)}
+.pv-hd p{margin:0;font-size:15px;line-height:1.6;color:var(--sub)}
+.pv-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;align-items:end}
+.pv-form fieldset{margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);display:grid;gap:6px;min-width:0}
+.pv-form legend{padding:0 4px;font-size:13px;font-weight:700;color:var(--ink)}
+.pv-form select,.pv-form input{width:100%;min-width:0;font-size:15px;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-sm)}
+.pv-in{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.pv-form .btn{grid-column:1/-1;justify-self:start}
+.pv-err{margin:0;color:var(--risk);font-size:15px}
+.pv-out{display:grid;gap:8px;overflow-x:auto}
+.pv-out caption{text-align:left;font-size:13px;font-weight:800;color:var(--brand);padding-bottom:4px}
+
+/* 지난 기록(2026-11-23 수능 가채점 전환 뒤 9월 모의평가 리포트, 읽기 전용) */
+.et .rp-past{display:grid;gap:4px;margin:0 0 12px;padding:0;list-style:none}
+.et .rp-past li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.et .rp-past .cur{font-size:12px;font-weight:700;color:var(--brand)}
+.et .rp-pastdoc{display:grid;gap:14px;margin-top:8px;padding-top:12px;border-top:2px solid var(--line)}
+/* 가채점 성적표의 가운데 값 */
+.et .rp-sheet .rs-mid{display:block;font-size:11px;color:var(--muted)}
+/* 가운데 값으로 보일 때 낮음~높음 범위 보조 줄(보조 글자 13px, 2026-11-22) */
+.et .rp-sheet .rs-range{display:block;margin-top:1px;font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* 리포트 탭·인쇄본의 가채점 담은 학교 표(csat-picked.tsx, 2026-11-23) */
+.et .rp-cp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+.et .rp-cp-g h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+.et .rp-cp-g h3 .num { color: var(--ink-2); font-weight: 700; margin-left: 4px; }
+.et .rp-cp-scroll { overflow-x: auto; }
+.et .rp-cp table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; }
+.et .rp-cp th, .et .rp-cp td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+.et .rp-cp thead th { font-size: 13px; font-weight: 700; color: var(--ink-2); background: var(--sub); border-top: 1px solid var(--line); white-space: nowrap; }
+.et .rp-cp tbody th { font-weight: 500; }
+.et .rp-cp tbody th b { font-weight: 800; }
+.et .rp-cp tbody th small { color: var(--ink-2); font-size: 13px; }
+.et .rp-cp td.r { text-align: right; white-space: nowrap; }
+.et .rp-cp td .score { display: inline-flex; flex-direction: column; align-items: flex-end; }
+.et .rp-cp td .score small { font-size: 12px; color: var(--ink-2); }
+.et .rp-cp td .adv { justify-content: flex-end; }
+.et .rp-cp .acts { margin-top: 4px; }
+@media print {
+  .et .rp-cp table { min-width: 0; font-size: 12px; }
+  .et .rp-cp th, .et .rp-cp td { padding: 6px 8px; }
+  .et .rp-cp-g { break-inside: avoid; }
+}
+/* 군별 표끼리 칸 너비를 같게(2026-11-23) */
+.et .rp-cp table { table-layout: fixed; }
+.et .rp-cp thead th:nth-child(1) { width: 34%; }
+.et .rp-cp thead th:nth-child(2) { width: 13%; }
+.et .rp-cp thead th:nth-child(3) { width: 15%; }
+.et .rp-cp thead th:nth-child(4) { width: 19%; }
+.et .rp-cp thead th:nth-child(5) { width: 19%; }
+.et .rp-cp thead th:nth-child(n+3) { text-align: right; }
+
+/* 담은 학교별 가채점 상세(2026-11-24) — 리포트 탭은 접고, 인쇄본은 펼친다 */
+.et .rp-cpd { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 18px; }
+.et .rp-cpd > h3 { margin: 0; font-size: 15px; font-weight: 800; }
+.et .rp-cpd-i { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); min-width: 0; }
+.et .rp-cpd-i > summary, .et .rp-cpd-i > h4 { padding: 12px 14px; font-size: 14px; font-weight: 500; margin: 0; }
+.et .rp-cpd-i > summary { cursor: pointer; }
+.et .rp-cpd-i > summary b, .et .rp-cpd-i > h4 b { font-weight: 800; }
+.et .rp-cpd-i small { color: var(--ink-2); font-size: 13px; }
+.et .rp-cpd-i .detail { padding: 0 14px 14px; }
+/* 인쇄본(상담 리포트) 표는 쪽 폭에 맞춘다 — 가로 넘김 막대가 생기지 않게(2026-11-24) */
+.et .pr .rp-cp-scroll { overflow-x: visible; }
+.et .pr .rp-cp table { min-width: 0; font-size: 13px; }
+.et .pr .rp-cp td.r { white-space: normal; }
+.et .pr .rp-cp .adv .bar { display: none; }
+.et .pr .rp-cp .adv .v { min-width: 0; white-space: normal; }
+.et .pr .rp-cpd-i { break-inside: avoid-page; }

@@ -18,6 +18,7 @@ type Manifest = {
   schema_version?: string;
   selection_rules_version?: string;
   source_as_of?: string | null;
+  r27_scope_coverage?: SnapshotHeadDto["r27_scope_coverage"];
 };
 
 const SNAPSHOT_ID = "p1-public-history:00000000000000000001";
@@ -59,6 +60,7 @@ export async function syntheticSnapshotHead(): Promise<SnapshotHeadDto> {
     full: manifest.full ? pin(manifest.full) : null,
     parts: manifest.parts.map(pin),
     expires_at: String(head.expires_at),
+    ...(manifest.r27_scope_coverage ? { r27_scope_coverage: manifest.r27_scope_coverage } : {}),
   };
 }
 

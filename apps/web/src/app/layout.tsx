@@ -7,9 +7,12 @@ import "@/styles/base.css";
 import "@/styles/jungsi.css";
 import "@/styles/offering.css";
 import { SiteHeader } from "@/components/site-header";
+import { EdutouchUtil } from "@/components/edutouch-util";
 import { SyntheticBar } from "@/components/synthetic-bar";
 import { LocalBar } from "@/components/local-bar";
 import { ConnectionNotice } from "@/components/connection-notice";
+import { NavPending } from "@/components/nav-pending";
+import { Suspense } from "react";
 import { ConnectionError, getCaller, source } from "@/lib/api";
 import type { Session } from "@/lib/dto";
 
@@ -34,8 +37,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   try {
     session = await source().getSession(await getCaller());
   } catch (e) {
-    if (!(e instanceof ConnectionError)) throw e;
-    down = e;
+    // 2026-11-25: 어떤 예외든 전체 오류 화면 대신 연결 대기 안내(스스로 다시 엶). 원인은 서버 기록에 남긴다
+    if (!(e instanceof ConnectionError)) console.error("jt_layout_session_failed", e);
+    down = e instanceof ConnectionError ? e : new ConnectionError("unavailable", "session_unexpected");
   }
   return (
     <html lang="ko" className={montserrat.variable}>
@@ -50,8 +54,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <div className="et jt">
           <SyntheticBar />
           <LocalBar />
+          <EdutouchUtil />
           <SiteHeader session={session} down={Boolean(down)} />
-          <main>{down ? <ConnectionNotice e={down} /> : children}</main>
+          <main>
+            {/* 누르는 순간 바뀌는 안내(서버 응답 전). components/nav-pending.tsx */}
+            <Suspense fallback={null}>
+              <NavPending />
+            </Suspense>
+            {down ? <ConnectionNotice e={down} reopenUnavailable /> : children}
+          </main>
           <footer className="jt-foot">
             <div className="wrap">
               <p>지원가능성은 합격 확률이 아닙니다. 대학마다 만점과 반영 방식이 달라 다른 대학의 환산점수와 크기를 비교할 수 없습니다.</p>
