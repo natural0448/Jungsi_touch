@@ -30,6 +30,7 @@ const STAGES = ["stable", "downward", "target", "aspirational", "upward", "chall
 const MARKS: { label: string; tone: "inel" | "check" | "note"; what: string; when: string }[] = [
   { label: "지원 조건 미충족", tone: "inel", what: "모집요강이 요구하는 과목·자격(예: 과학탐구 필수, 제2외국어 응시)을 지금 입력한 성적이 채우지 않습니다.", when: "입력한 과목이 바뀌지 않으면 그대로입니다." },
   { label: "반영 과목 불일치", tone: "inel", what: "이 모집단위가 점수에 반영하는 과목(수학 선택과목, 탐구 영역)과 입력한 과목이 다릅니다.", when: "모집요강에서 반영 과목을 확인해 주세요." },
+  { label: "제2외국어/한문 확인 필요", tone: "check", what: "서울대 유형Ⅰ처럼 제2외국어/한문 응시가 필요한 경우인데, 성적 입력에 그 등급이 없습니다.", when: "응시했다면 등급을 넣으면 수능 반영분 점수가 나옵니다." },
   { label: "수능 최저 미충족", tone: "inel", what: "이 모집단위의 수능 최저학력기준을 지금 성적으로는 넘지 못합니다.", when: "가채점 범위 전체에서 못 넘을 때만 나옵니다." },
   { label: "수능 최저 충족 여부 갈림", tone: "check", what: "가채점 점수 범위에 따라 최저기준을 넘기도, 못 넘기도 합니다.", when: "실채점 성적을 넣으면 하나로 정해집니다." },
   { label: "탐구 점수 환산 범위 확인", tone: "check", what: "추정한 탐구 표준점수가 대학 환산표 범위를 벗어나 이 대학 점수를 계산하지 않았습니다.", when: "실채점 성적을 넣으면 계산됩니다." },

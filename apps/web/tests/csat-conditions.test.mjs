@@ -59,12 +59,31 @@ test("D1 confirms unmet conditions and server minimum reasons (2026-11-24)", () 
 test("SNU type I (담당자 R4): second language required, score = 국1.0+수1.2+탐0.8 − 감점", () => {
   const sub = (area, subject, r) => ({ area, subject, standard_score: null, standard_score_range: { low: r[0], central: r[1], high: r[2] } });
   const base = { subjects: [sub("korean", "국어", [120, 125, 130]), { ...sub("math", "수학", [120, 125, 130]), choice: "확률과 통계" }, sub("inquiry1", "생활과 윤리", [60, 62, 64]), sub("inquiry2", "사회·문화", [60, 62, 64])], absolute_grades: { 영어: 2, 한국사: 4 } };
-  assert.equal(csatNoJudgmentView("2027:1000000747", { ...base, second_language: null }).label, "지원 조건 미충족");
+  assert.equal(csatNoJudgmentView("2027:1000000747", { ...base, second_language: null }).label, "제2외국어/한문 확인 필요"); // R27: 확인 안내
   const with2 = { ...base, second_language: { subject: "일본어Ⅰ", grade: 3 } };
   const c = csatC1Score("2027:1000000747", with2);
   // 가운데: 10*125+12*125+8*124 − (영어2 5 + 한국사4 4 + 제2외3 5) = 3742−14 = 3728 → 372.80
   assert.equal(c.central, "372.80");
   assert.equal(csatNoJudgmentView("2027:1000000747", with2).label, "유형Ⅰ 점수만 계산");
+  // 서버가 '조건'으로 알려도(유형Ⅱ-2 경로가 받지 않음) 유형Ⅰ 안내가 먼저다(11-27 dep_r52 뒤 가려지던 것)
+  assert.equal(csatNoJudgmentView("2027:1000000747", with2, "condition").label, "유형Ⅰ 점수만 계산");
+  assert.equal(csatNoJudgmentView("2027:1000000747", { ...base, second_language: null }, "condition").label, "제2외국어/한문 확인 필요");
+});
+
+test("R27 정확한 128개 조합만 지원 조건 미충족(서버가 조건으로 알린 경우)", () => {
+  const s2 = (k, m, q1, q2) => ({ subjects: [{ area: "korean", subject: "국어", choice: k }, { area: "math", subject: "수학", choice: m }, { area: "inquiry1", subject: q1 }, { area: "inquiry2", subject: q2 }], absolute_grades: {} });
+  // 서울대 749(084-2027-R02): 화작/확통/생윤·사문은 목록에 있다 → 과탐 조건
+  const hit = csatNoJudgmentView("2027:1000000749", s2("화법과 작문", "확률과 통계", "사회·문화", "생활과 윤리"), "condition");
+  assert.equal(hit.label, "지원 조건 미충족");
+  assert.match(hit.desc, /과학탐구 2과목/);
+  // 같은 모집단위의 목록 밖 조합(세계지리·경제)은 넓히지 않는다
+  assert.equal(csatNoJudgmentView("2027:1000000749", s2("화법과 작문", "확률과 통계", "세계지리", "경제"), "condition").label, "반영 과목 불일치");
+  // 물리·화학 조건(758): 생명Ⅰ·지구Ⅰ
+  assert.match(csatNoJudgmentView("2027:1000000758", s2("화법과 작문", "미적분", "생명과학Ⅰ", "지구과학Ⅰ"), "condition").desc, /물리학/);
+  // 성신여대 간호(인문) 3844: 과탐만 2과목
+  assert.match(csatNoJudgmentView("2027:1000003844", s2("언어와 매체", "미적분", "물리학Ⅰ", "화학Ⅰ"), "condition").desc, /사회탐구 1과목/);
+  // 목록 밖 모집단위는 그대로 반영 과목 불일치
+  assert.equal(csatNoJudgmentView("2027:1000000297", s2("화법과 작문", "확률과 통계", "사회·문화", "생활과 윤리"), "condition").label, "반영 과목 불일치");
 });
 
 test("담당자 v3 판정 보류(서버 csat_withheld → overall.provisional_school_display): 사유 이름과 가운데 환산점수", () => {

@@ -1,6 +1,7 @@
 import { R23_NO_COMPARISON } from "./r23-comparison";
 import type { CsatMinimum, OverallAnalysisDto, SubjectResultDto } from "./dto";
 import { INQUIRY_SUBJECTS } from "./exam";
+import { confirmedConditionOf } from "./condition-confirmed";
 
 /*
   수능 가채점 판정 없음의 화면 처리(담당자 11-23 회신 D1·C1, 대표님 승인).
@@ -43,7 +44,7 @@ const SOCIAL = new Set(INQUIRY_SUBJECTS[0].subjects);
 const SCIENCE = new Set(INQUIRY_SUBJECTS[1].subjects);
 const kindOf = (s?: SubjectResultDto): "social" | "science" | null => (!s ? null : SOCIAL.has(s.subject) ? "social" : SCIENCE.has(s.subject) ? "science" : null);
 
-export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "환산점수만 제공" | "수능 반영분만 비교" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요" | "판정 다시 불러오기" | "비교 자료 없음"; cls: string; desc: string };
+export type NoJudgmentView = { label: "지원 조건 미충족" | "반영 과목 불일치" | "제2외국어/한문 확인 필요" | "탐구 점수 환산 범위 확인" | "유형Ⅰ 점수만 계산" | "환산점수만 제공" | "수능 반영분만 비교" | "수능 최저 미충족" | "수능 최저 충족 여부 갈림" | "비교 기준 확인 필요" | "판정 다시 불러오기" | "비교 자료 없음"; cls: string; desc: string };
 /** 판정·예외 이름이 없는 모집단위의 사유. 리포트가 없으면 null */
 /** min: 서버가 알려 준 수능 최저 사유(2026-11-24) — unmet 미달 확정, partial 가채점 점수에 따라 충족 여부 갈림 */
 export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | null | undefined, min?: CsatMinimum | null): NoJudgmentView | null {
@@ -51,7 +52,16 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
   // 2026-11-25: 서버 일시 장애로 판정을 받지 못한 행을 '비교 기준 확인 필요'로 보이지 않는다(11-24 22:09 운영 503)
   if (min === "unloaded") return { label: "판정 다시 불러오기", cls: "check", desc: "판정을 잠시 불러오지 못했습니다. 화면을 새로 고치면 다시 받아 옵니다." };
   if (min === "unmet") return { label: "수능 최저 미충족", cls: "inel", desc: "이 모집단위의 수능 최저학력기준(또는 의약 계열 최소 기준)을 지금 성적으로는 넘지 못합니다. 기준을 넘지 못하면 합격할 수 없습니다." };
-  if (min === "condition") return MISMATCH("이 모집단위는 2027 반영 과목(과학탐구 분야·과목, 수학 선택 등)이 정해져 있습니다.");
+  if (min === "condition") {
+    // 2026-11-27 담당자 R27(대표님 결정): 모집요강 필수 조건 위반이 확인된 정확한 128개 조합만 '지원 조건 미충족'
+    const by0 = new Map(a.subjects.map((s) => [s.area, s]));
+    const why = confirmedConditionOf(offeringId, by0.get("korean")?.choice, by0.get("math")?.choice, [by0.get("inquiry1")?.subject, by0.get("inquiry2")?.subject]);
+    if (why === "S") return { label: "지원 조건 미충족", cls: "inel", desc: "서울대 이 모집단위는 2027 모집요강에서 과학탐구 2과목(또는 허용된 직업탐구 조합) 응시를 지원 조건으로 정합니다. 지금 입력한 탐구 과목은 이 조건을 채우지 않습니다." };
+    if (why === "P") return { label: "지원 조건 미충족", cls: "inel", desc: "서울대 이 모집단위는 2027 모집요강에서 물리학Ⅰ·Ⅱ 또는 화학Ⅰ·Ⅱ 가운데 1과목 이상 응시를 지원 조건으로 정합니다. 지금 입력한 탐구 과목에는 해당 과목이 없습니다." };
+    if (why === "C") return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 사회탐구 1과목 이상 응시를 필수로 합니다(지정과목 미응시 시 선발 제외)." };
+    // 서울대 간호·식품영양·의류는 유형Ⅰ 점수 안내가 먼저다(유형Ⅱ-2 경로가 이 조합을 받지 않아 서버가 '조건'으로 알린다)
+    if (!SNU_TYPE1.has(offeringId)) return MISMATCH("이 모집단위는 2027 반영 과목(과학탐구 분야·과목, 수학 선택 등)이 정해져 있습니다.");
+  }
   if (min === "cap") return { label: "탐구 점수 환산 범위 확인", cls: "check", desc: "가채점으로 추정한 탐구 표준점수가 이 대학 환산표의 범위를 넘어 이 대학 방식 점수를 계산하지 않았습니다. 성적표가 나오면 확정 점수로 계산됩니다." };
   // 2026-11-25 담당자 R21 B: 이 성적 조합은 대학별 비교 모형(과거 지원자 분포) 범위 밖
   if (min === "nocomp") return { label: "비교 자료 없음", cls: "check", desc: "이 성적 조합으로 지원한 과거 사례가 비교 모형에 없어 지원가능성을 판정하지 않았습니다. 지원 자격과는 관계없습니다." };
@@ -99,7 +109,8 @@ export function csatNoJudgmentView(offeringId: string, a: OverallAnalysisDto | n
     return { label: "유형Ⅰ 점수만 계산", cls: "check", desc: "서울대 유형Ⅰ(사탐·확통 등) 수능 반영분 점수만 계산했습니다. 유형Ⅰ 지원자끼리의 위치와 7단계 판정은 대학 자료가 연결된 뒤 보입니다." };
   }
   if (SNU_TYPE1.has(offeringId) && !a.second_language) {
-    return { label: "지원 조건 미충족", cls: "inel", desc: "서울대 이 모집단위는 과탐 2과목·미적분/기하(유형Ⅱ-2)가 아니면 유형Ⅰ로 지원하며, 유형Ⅰ은 제2외국어/한문 응시가 필요합니다. 응시했다면 성적 입력에 제2외국어/한문 등급을 넣어 주세요." };
+    // 2026-11-27 담당자 R27: 제2외국어/한문 등급이 없으면 '확인 안내'(미응시 확정이 아니라 입력이 없을 수 있다)
+    return { label: "제2외국어/한문 확인 필요", cls: "check", desc: "서울대 이 모집단위는 과탐 2과목·미적분/기하(유형Ⅱ-2)가 아니면 유형Ⅰ로 지원하며, 유형Ⅰ은 제2외국어/한문 응시가 필요합니다. 응시했다면 성적 입력에 제2외국어/한문 등급을 넣어 주세요. 유형Ⅰ 수능 반영분 점수를 계산해 보여 드립니다." };
   }
   if (PNU_SCIENCE_1.has(offeringId) && scienceCount < 1) {
     return { label: "지원 조건 미충족", cls: "inel", desc: "이 모집단위는 2027 모집요강에서 사회/과학탐구 2과목 중 과학탐구(과목 I 이상) 1과목 이상을 필수로 합니다." };
