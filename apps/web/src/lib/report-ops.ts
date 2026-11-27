@@ -282,15 +282,17 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
   if (!csatJudged(report)) return null;
   // 2026-11-27: 지원가능성 필터의 전국 판정 훑기(서버 3.4초·CPU 1.5초)도 4페이지 판정과 같은 규칙으로 10분 다시 쓴다
   // (같은 리포트·성적·판·훑기 조건·미충족 확정 목록 지문, 대표님 결정 11-27). 다 훑은 결과만 넣는다
-  await refreshCsatEpoch();
-  const sk = JSON.stringify(["p4scan-v1", report.report_id, report.profile_id, report.report_version, scan, eligibilityFingerprint(report), csatEpoch()]);
-  const smemo = scanMemo.get(sk);
-  if (smemo && Date.now() - smemo.at <= P3_REUSE_TTL_MS) return smemo.v;
-  const sshared = await recallScanShared(sk);
-  if (sshared) {
-    scanMemo.set(sk, { v: sshared, at: Date.now() });
-    logSettle("p4_scan", { matched: sshared.matched, page: sshared.offerings.length, shared: true });
-    return sshared;
+  const epoch = await readCsatEpoch();
+  const sk = epoch === null ? null : JSON.stringify(["p4scan-v1", report.report_id, report.profile_id, report.report_version, scan, eligibilityFingerprint(report), epoch]);
+  if (sk !== null) {
+    const smemo = scanMemo.get(sk);
+    if (smemo && Date.now() - smemo.at <= P3_REUSE_TTL_MS) return smemo.v;
+    const sshared = await recallScanShared(sk);
+    if (sshared) {
+      scanMemo.set(sk, { v: sshared, at: Date.now() });
+      logSettle("p4_scan", { matched: sshared.matched, page: sshared.offerings.length, shared: true });
+      return sshared;
+    }
   }
   const request = crypto.randomUUID();
   const ask = (attempt: number) =>
@@ -323,7 +325,7 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
   }
   logSettle("p4_scan", { matched: sc.matched, page: sc.offerings.length });
   const out: ScanShared = { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min, display: schoolDisplayOf(state.report.candidates) };
-  if (out.complete && !csatBandsIncomplete(bands)) {
+  if (sk !== null && out.complete && !csatBandsIncomplete(bands)) {
     scanMemo.delete(sk);
     scanMemo.set(sk, { v: out, at: Date.now() });
     while (scanMemo.size > REFERENCE_MAX) scanMemo.delete(scanMemo.keys().next().value as string);
@@ -358,35 +360,40 @@ async function rememberScanShared(sk: string, v: ScanShared) {
 /*
   2026-11-27 대표님 결정(담당자 후속 회신 ① 대안): 수능 판정 묶음·지원 조건 자료판을 바꿀 때 3·4페이지 재사용 결과를 한 번에 버린다.
   화면 서버 KV(JT_SHARED_CACHE)의 이 값이 바뀌면 재사용 열쇠가 모두 달라진다(옛 결과는 열쇠가 맞지 않아 쓰이지 않고 10분 뒤 사라진다).
-  묶음 교체 절차에서 화면팀이 C:\jd\w\band\csat_epoch.mjs bump 로 바꾼다. 읽지 못하면 지난 값을 그대로 쓴다(재사용은 10분 상한 그대로).
+  화면팀이 자료판 교체 후 KV 값을 갱신한다. 요청이 얻은 값을 조회와 저장에 함께 쓴다.
+  유효한 교체값을 확인하지 못한 요청은 계산 결과를 재사용하거나 캐시에 쓰지 않는다.
   반영까지: 이 실행본 30초 + KV 가장자리 기억 최대 60초.
 */
 const CSAT_EPOCH_KEY = "jt:csat-cache-epoch";
 const EPOCH_TTL_MS = 30_000;
-let epochValue = "0";
-let epochAt = 0;
+let epochValue: string | null = null;
+let epochCheckAgainAt = 0;
+let readingEpoch = false;
 
-/** 지금 아는 값(동기). refreshCsatEpoch() 를 먼저 부른다 */
-function csatEpoch(): string {
-  return epochValue;
-}
-
-async function refreshCsatEpoch(): Promise<void> {
-  if (epochAt && Date.now() - epochAt < EPOCH_TTL_MS) return;
-  epochAt = Date.now();
+async function readCsatEpoch(): Promise<string | null> {
+  if (Date.now() < epochCheckAgainAt) return epochValue;
+  // 다른 요청의 KV 작업을 기다리지 않는다. 갱신이 겹친 요청은 일반 조회로 진행한다.
+  if (readingEpoch) return null;
+  readingEpoch = true;
+  let observed: string | null = null;
   try {
     const { getCloudflareContext } = await import("@opennextjs/cloudflare");
     const env = (await getCloudflareContext({ async: true })).env as Record<string, unknown>;
     const kv = env.JT_SHARED_CACHE as { get(k: string, o: { type: "text"; cacheTtl: number }): Promise<string | null> } | undefined;
-    if (!kv || typeof kv.get !== "function") return;
+    if (!kv || typeof kv.get !== "function") return null;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    const got = await Promise.race([
+    const value = await Promise.race([
       kv.get(CSAT_EPOCH_KEY, { type: "text", cacheTtl: 60 }),
       new Promise<null>((done) => { timer = setTimeout(() => done(null), 1500); }),
     ]).finally(() => clearTimeout(timer));
-    if (typeof got === "string" && /^[A-Za-z0-9._:-]{1,64}$/.test(got)) epochValue = got;
+    if (typeof value === "string" && value.length > 0 && value.length <= 64 && !/[^A-Za-z0-9._:-]/.test(value)) observed = value;
+    return observed;
   } catch {
-    /* 읽지 못하면 지난 값 */
+    return null;
+  } finally {
+    epochValue = observed;
+    epochCheckAgainAt = Date.now() + (observed === null ? 1_000 : EPOCH_TTL_MS);
+    readingEpoch = false;
   }
 }
 
@@ -399,15 +406,17 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   if (targets.length === 0) return none;
   // 2026-11-27 대표님 결정: 같은 리포트·성적·판·학과 묶음·미충족 확정 목록이면 10분 다시 쓴다(이 화면 서버 기억 → 데이터센터 캐시)
   // 묶음 교체 표시(csat-epoch, 대표님 결정 11-27)가 바뀌면 열쇠가 달라져 옛 판정을 쓰지 않는다
-  await refreshCsatEpoch();
-  const mk = JSON.stringify(["p4-v2", report.report_id, report.profile_id, report.report_version, targets, eligibilityFingerprint(report), csatEpoch()]);
-  const memo = p4Memo.get(mk);
-  if (memo && Date.now() - memo.at <= P3_REUSE_TTL_MS) return { ...memo.v, version: report.report_version };
-  const shared = await recallP4Shared(mk);
-  if (shared) {
-    p4Memo.set(mk, { v: shared, at: Date.now() });
-    logSettle("p4_csat", { asked: targets.length, judged: Object.keys(shared.bands).length, shared: true });
-    return { ...shared, version: report.report_version };
+  const epoch = await readCsatEpoch();
+  const mk = epoch === null ? null : JSON.stringify(["p4-v2", report.report_id, report.profile_id, report.report_version, targets, eligibilityFingerprint(report), epoch]);
+  if (mk !== null) {
+    const memo = p4Memo.get(mk);
+    if (memo && Date.now() - memo.at <= P3_REUSE_TTL_MS) return { ...memo.v, version: report.report_version };
+    const shared = await recallP4Shared(mk);
+    if (shared) {
+      p4Memo.set(mk, { v: shared, at: Date.now() });
+      logSettle("p4_csat", { asked: targets.length, judged: Object.keys(shared.bands).length, shared: true });
+      return { ...shared, version: report.report_version };
+    }
   }
   const request = crypto.randomUUID();
   let state: ReportState;
@@ -449,7 +458,7 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   logSettle("p4_csat", { asked: targets.length, judged: Object.keys(bands).length });
   const display = schoolDisplayOf(state.report.candidates);
   // 덜 찬 결과(곡선 미완)는 다시 쓰지 않는다
-  if (!csatBandsIncomplete(bands) && (Object.keys(bands).length || Object.keys(display).length)) {
+  if (mk !== null && !csatBandsIncomplete(bands) && (Object.keys(bands).length || Object.keys(display).length)) {
     const v = { bands, min, display };
     p4Memo.delete(mk);
     p4Memo.set(mk, { v, at: Date.now() });
@@ -766,16 +775,16 @@ function eligibilityFingerprint(r: ReportDto): string {
   return `${ids.length}:${h.toString(16)}`;
 }
 // 2026-11-25: 판 번호는 4페이지 조회마다 올라가 3페이지를 매번 새로 만들게 하므로 열쇠에 넣지 않는다(제외 정보는 성적·카탈로그가 같으면 같다)
-const memoKey = (r: ReportDto) => JSON.stringify([referenceCacheVersion, r.report_id, r.profile_id, r.candidates?.catalog_version ?? null, eligibilityFingerprint(r), csatEpoch()]);
+const memoKey = (r: ReportDto, epoch: string) => JSON.stringify([referenceCacheVersion, r.report_id, r.profile_id, r.candidates?.catalog_version ?? null, eligibilityFingerprint(r), epoch]);
 
-function rememberReference(r: ReportDto, lists: ReferenceLists) {
-  const k = memoKey(r);
+function rememberReference(r: ReportDto, epoch: string, lists: ReferenceLists) {
+  const k = memoKey(r, epoch);
   referenceMemo.delete(k);
   referenceMemo.set(k, { lists, at: Date.now() });
   while (referenceMemo.size > REFERENCE_MAX) referenceMemo.delete(referenceMemo.keys().next().value as string);
 }
-function recallReference(r: ReportDto, ttl = REFERENCE_TTL_MS): ReferenceLists | null {
-  const k = memoKey(r);
+function recallReference(r: ReportDto, epoch: string, ttl = REFERENCE_TTL_MS): ReferenceLists | null {
+  const k = memoKey(r, epoch);
   const hit = referenceMemo.get(k);
   if (!hit) return null;
   if (Date.now() - hit.at > ttl) {
@@ -791,7 +800,7 @@ function recallReference(r: ReportDto, ttl = REFERENCE_TTL_MS): ReferenceLists |
   전달하지 않으므로 수능 후보는 이전 요청 캐시를 쓰지 않는다. 다른 시험의 기존 재사용 조건은 유지한다.
 */
 export const P3_REUSE_TTL_MS = 10 * 60_000;
-const p3CacheUrl = (r: ReportDto) => `https://p3-reference.invalid/${encodeURIComponent(memoKey(r))}`;
+const p3CacheUrl = (r: ReportDto, epoch: string) => `https://p3-reference.invalid/${encodeURIComponent(memoKey(r, epoch))}`;
 function edgeCache(): Cache | null {
   try {
     const c = (globalThis as unknown as { caches?: { default?: Cache } }).caches;
@@ -800,17 +809,17 @@ function edgeCache(): Cache | null {
     return null;
   }
 }
-async function recallReferenceShared(r: ReportDto): Promise<ReferenceLists | null> {
-  const local = recallReference(r, P3_REUSE_TTL_MS);
+async function recallReferenceShared(r: ReportDto, epoch: string): Promise<ReferenceLists | null> {
+  const local = recallReference(r, epoch, P3_REUSE_TTL_MS);
   if (local) return local;
   const cache = edgeCache();
   if (!cache) return null;
   try {
-    const hit = await cache.match(p3CacheUrl(r));
+    const hit = await cache.match(p3CacheUrl(r, epoch));
     if (!hit) return null;
     const lists = (await hit.json()) as ReferenceLists;
     if (!lists || !Array.isArray(lists.reference_university_groups) || lists.reference_university_groups.length === 0) return null;
-    rememberReference(r, lists);
+    rememberReference(r, epoch, lists);
     return lists;
   } catch {
     return null;
@@ -821,13 +830,12 @@ async function recallReferenceShared(r: ReportDto): Promise<ReferenceLists | nul
   이 캐시는 화면 서버 안에서만 쓰는 내부 주소(.invalid, 리포트·프로필 번호 열쇠)라 public 이어도 밖으로 나가지 않는다.
   꺼낼 때는 늘 본인 리포트(서버가 준 리포트 번호)로만 찾는다
 */
-async function rememberReferenceShared(r: ReportDto, lists: ReferenceLists) {
-  await refreshCsatEpoch();
-  rememberReference(r, lists);
+async function rememberReferenceShared(r: ReportDto, epoch: string, lists: ReferenceLists) {
+  rememberReference(r, epoch, lists);
   const cache = edgeCache();
   if (!cache) return;
   try {
-    await cache.put(p3CacheUrl(r), new Response(JSON.stringify(lists), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
+    await cache.put(p3CacheUrl(r, epoch), new Response(JSON.stringify(lists), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
   } catch {
     // 캐시에 못 넣어도 화면은 그대로
   }
@@ -892,7 +900,8 @@ async function settleCandidateReport(src: JungsiSource, caller: Caller, report: 
   // 2026-11-27 대표님 결정: 수능 판정 리포트도 다시 쓴다. 응시 조건(지원 조건 미충족) 확정 목록의 지문을 열쇠에 넣어,
   // 그것이 바뀌면 새로 만든다. 조건 반영(withCandidateEligibility)은 다시 쓸 때도 지금 리포트로 매번 다시 한다.
   // 판정 리포트는 서버가 후보 기준값을 두지 않아 report.read 가 늘 candidates_stale 을 켜므로 그 표시는 보지 않는다
-  const canReuse = csatJudged(report) || !report.candidates_stale;
+  const epoch = csatJudged(report) ? await readCsatEpoch() : "non-csat";
+  const canReuse = epoch !== null && (csatJudged(report) || !report.candidates_stale);
   const fallback = (r: ReportDto) => {
     const c = r.candidates;
     if (!csatJudged(r) || !c) return r;
@@ -901,16 +910,15 @@ async function settleCandidateReport(src: JungsiSource, caller: Caller, report: 
   };
   // 가채점 리포트도 보낸다(dep_r22). 판정 Secret 이 없으면 응답에 참고 묶음이 없고 3페이지는 '가채점 판정 준비 중'
   // 재사용 열쇠에 묶음 교체 표시(csat-epoch)가 들어간다 — 먼저 지금 값을 읽는다
-  if (canReuse && (opts.reuse || opts.shared)) await refreshCsatEpoch();
-  if (opts.reuse && canReuse) {
-    const lists = recallReference(report);
+  if (opts.reuse && canReuse && epoch !== null) {
+    const lists = recallReference(report, epoch);
     if (lists && report.candidates) {
       logSettle("candidates", { sent: false, reused: true });
       return withReference(report, lists);
     }
   }
-  if (opts.shared && report.candidates && canReuse) {
-    const lists = await recallReferenceShared(report);
+  if (opts.shared && report.candidates && canReuse && epoch !== null) {
+    const lists = await recallReferenceShared(report, epoch);
     if (lists) {
       logSettle("candidates", { sent: false, reused: true, shared: true });
       return withReference(report, lists);
@@ -930,8 +938,6 @@ async function settleCandidateReport(src: JungsiSource, caller: Caller, report: 
     if (res.ok) {
       const built = res.value;
       const lists = referenceListsOf(built.candidates);
-      // 꺼낼 때는 연 리포트(report.read)로 열쇠를 만들므로 넣을 때도 같은 리포트로(응답의 미충족 목록은 읽기와 다를 수 있다)
-      if (canReuse && lists?.reference_university_groups?.length) await rememberReferenceShared(current.candidates && current.report_id === built.report_id ? current : built, lists);
       // 2026-11-27 속도: 서버가 새 판을 쓰지 않았으면(판 번호 같음, 무료 회원 다시 열기) 다시 읽지 않는다(약 0.4초).
       // 받은 응답에 화면 보정(지원 조건 표시)을 바로 붙이고, 읽기에서만 붙는 표식(stale_analysis_ids·candidates_stale)은 방금 읽은 리포트 것을 쓴다
       const sameRevision = src.correctReport && built.report_id === current.report_id && built.report_version === current.report_version;
@@ -947,6 +953,11 @@ async function settleCandidateReport(src: JungsiSource, caller: Caller, report: 
       const sum = lists?.reference_threshold_summary;
       logSettle("candidates", { sent: true, attempt, rows: (lists?.reference_university_groups ?? []).reduce((n, g) => n + (g?.offerings?.length ?? 0), 0), complete: sum ? sum.complete !== false : true });
       if (!sameSnapshot) return fallback(base);
+      // 2026-11-28 담당자 회신 30 패치 중 "덜 찬 목록은 저장 안 함"은 이번 지적(교체 표시 경합) 밖이라 넣지 않는다(기존 재사용 유지)
+      if (canReuse && epoch !== null && lists?.reference_university_groups?.length) {
+        const keyReport = current.candidates && current.report_id === built.report_id && current.profile_id === built.profile_id ? current : built;
+        await rememberReferenceShared(keyReport, epoch, lists);
+      }
       if (csatJudged(base)) return { ...base, candidates: built.candidates ?? null };
       return withReference(base, lists, built.candidates);
     }

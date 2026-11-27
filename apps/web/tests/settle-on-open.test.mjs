@@ -8,6 +8,8 @@ const opsUrl = new URL("../src/lib/report-ops.ts", import.meta.url).href;
 const classesUrl = new URL("../src/lib/api/source.ts", import.meta.url).href;
 const data = (code) => "data:text/javascript," + encodeURIComponent(code);
 const mocks = new Map([
+  // 2026-11-28 담당자 회신 30(01 패치): 재사용은 유효한 묶음 교체 표시를 읽은 요청에서만 — 시험은 KV 에 고정 값을 둔다
+  ["@opennextjs/cloudflare", data('export async function getCloudflareContext(){return {env:{JT_SHARED_CACHE:{get:async()=>"fixture-epoch"}}}}')],
   ["server-only", data("export {}")],
   ["@/lib/api", data(`export {AccessDenied, ConnectionError} from ${JSON.stringify(classesUrl)};`)],
   // report-ops 가 브라우저 화면과 함께 쓰는 읽기 전용 판단(2026-11-22 ship54 분리)
