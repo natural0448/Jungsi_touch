@@ -365,8 +365,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     const total = Math.max(1, Math.ceil(res.matching_offering_count / LIMIT));
     if (total > 1) pages = { current: Math.min(total, plainPage), total, href: (n) => link({ cursor: n > 1 ? `pg:${n}` : undefined, open: undefined }) };
   }
-  // 검색만 한 목록(필터·즐겨찾기 없음): 서버 커서의 '몇 번째부터'로 쪽 번호를 만든다
-  if (!pages && !cur.st && !cur.fav && !pro) {
+  // 검색만 한 목록(필터·즐겨찾기 없음): 서버 커서의 '몇 번째부터'로 쪽 번호를 만든다.
+  // 2026-11-27 대표님 요청: 전문가용 ③도(전문가용 검색은 맞는 수와 '몇 번째부터' 커서를 준다)
+  if (!pages && !cur.st && !cur.fav) {
     const tpl = res.next_cursor ?? cur.cursor ?? null;
     const at = cursorIndex(cur.cursor);
     const count = res.matching_offering_count;
