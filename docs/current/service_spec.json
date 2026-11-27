@@ -361723,6 +361723,14 @@
         "PAGE-04"
       ],
       "summary": "3페이지 첫 화면 줄이기(11-27 실측): 문서가 3.6MB인데 보이는 글자는 6KB, 접힌 계열 540개 속 학과 줄이 2.7MB였다. 접힌 동안에는 학과 줄을 그리지 않고 펼칠 때 그린다(reference-field.tsx)."
+    },
+    {
+      "date": "2026-11-27",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "4페이지 지원가능성 필터 두 가지 고침(11-27 실측): ① 필터 결과 위에 '현재 검색 범위에서 판정 가능한 모집단위가 없습니다'가 함께 뜨던 것 — 안내 여부를 판정을 받은 뒤 값(provisionalShown)으로 본다(ship146 scanWillRun 부작용). ② 필터 쪽 번호(sp:N)를 검색 커서로 보내 서버가 400 으로 거절하던 것 — st: 처럼 검색에는 보내지 않는다(ship144 부작용)."
     }
   ],
   "p1_recruitment_score_review_verification": {

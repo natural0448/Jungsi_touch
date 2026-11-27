@@ -83,7 +83,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const searching = cur.fav
     ? favoring.then((f) => favoriteResult(f, cur))
     : pro
-    ? pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: cur.cursor?.startsWith("st:") ? undefined : cur.cursor }).then((r) => {
+    ? pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") ? undefined : cur.cursor }).then((r) => {
       proBands = r.bands;
       proMin = r.min;
       proDisplay = r.display ?? {};
@@ -91,7 +91,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       return r.search ?? { status: "ready" as const, reason_code: null, items: [], matching_offering_count: null, matching_school_count: null, catalog_version: null, as_of: null, next_cursor: null };
     })
     // 서버 지원가능성 필터의 다음 쪽(st:…)은 검색 커서가 아니다 — 검색은 첫 쪽(건수·기준일)만 받는다
-    : skipEmptyPages(src, caller, toSearch(cur.cursor?.startsWith("st:") ? { ...cur, cursor: undefined } : cur));
+    // 2026-11-27: 필터 쪽 번호(sp:N)도 검색 커서가 아니다 — 그대로 보내면 서버가 400 으로 거절했다
+    : skipEmptyPages(src, caller, toSearch(cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") ? { ...cur, cursor: undefined } : cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
   const mine = pro ? searching.then(() => ({ ok: true as const, report: pro.report })) : startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
@@ -385,6 +386,11 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     if (last && last.id === o.university_id) last.rows.push(o);
     else groups.push({ id: o.university_id, name: o.university_name, rows: [o] });
   }
+  // 2026-11-27: 필터(scan)로 찾으면 위 provisionalJudged 계산 때는 판정을 아직 받지 않았다(ship146 scanWillRun) → 판정을 받은 뒤 값으로 다시 본다.
+  // 이것이 없으면 소신 필터 결과 215개 위에 '판정 가능한 모집단위가 없습니다'가 함께 떴다
+  const provisionalShown = provisionalJudged || (provisional && (
+    Object.keys(report?.provisional_bands ?? {}).length > 0 || Object.keys(minAll).length > 0 || Object.keys(dispAll).length > 0
+  ));
   // 즐겨찾기만 보기도 조건이다 — 0건을 '올해 모집 정보 미연결'로 안내하지 않는다
   const filtered = Boolean(cur.university_q || cur.department_q || cur.region || cur.group || cur.fav || cur.st);
   const star = (o: OfferingDto) => <span className="c-star">{favs && <StarButton id={o.offering_id} on={favs.ids.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}</span>;
@@ -398,7 +404,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       <div className="wrap pg-body ps">
         <MineBasis report={report} single={pointBased} />
         {/* 가채점 판정을 하나도 받지 못했을 때만 안내 한 줄(판정이 있으면 9월과 같은 화면, 2026-11-23) */}
-        {provisional && !provisionalJudged && <ProvisionalPendingNote scoped={groups.length > 0} />}
+        {provisional && !provisionalShown && <ProvisionalPendingNote scoped={groups.length > 0} />}
         {provisional && Object.values(minAll).includes("unloaded") && (
           <p className="ps-prov" role="alert"><b>판정을 잠시 불러오지 못했습니다</b> — 서버 응답이 늦어 이 화면의 지원가능성 판정을 받지 못했습니다. 화면을 새로 고치면 다시 받아 옵니다.</p>
         )}

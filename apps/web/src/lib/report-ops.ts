@@ -241,6 +241,17 @@ function schoolConditions(input: ReportDto, result: ReportDto) {
  */
 export async function provisionalScan(src: JungsiSource, caller: Caller, report: ReportDto, scan: StatusScanRequest): Promise<{ offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean; min: Record<string, CsatMinimum>; display: SchoolDisplay } | null> {
   if (!csatJudged(report)) return null;
+  // 2026-11-27: 지원가능성 필터의 전국 판정 훑기(서버 3.4초·CPU 1.5초)도 4페이지 판정과 같은 규칙으로 10분 다시 쓴다
+  // (같은 리포트·성적·판·훑기 조건·미충족 확정 목록 지문, 대표님 결정 11-27). 다 훑은 결과만 넣는다
+  const sk = JSON.stringify(["p4scan-v1", report.report_id, report.profile_id, report.report_version, scan, eligibilityFingerprint(report)]);
+  const smemo = scanMemo.get(sk);
+  if (smemo && Date.now() - smemo.at <= P3_REUSE_TTL_MS) return smemo.v;
+  const sshared = await recallScanShared(sk);
+  if (sshared) {
+    scanMemo.set(sk, { v: sshared, at: Date.now() });
+    logSettle("p4_scan", { matched: sshared.matched, page: sshared.offerings.length, shared: true });
+    return sshared;
+  }
   const request = crypto.randomUUID();
   const ask = (attempt: number) =>
     retryOnConflict(src, caller, report, async (r) => {
@@ -271,7 +282,37 @@ export async function provisionalScan(src: JungsiSource, caller: Caller, report:
     }
   }
   logSettle("p4_scan", { matched: sc.matched, page: sc.offerings.length });
-  return { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min, display: schoolDisplayOf(state.report.candidates) };
+  const out: ScanShared = { offerings: sc.offerings, bands, matched: sc.matched, next: sc.next_after, complete: sc.complete, min, display: schoolDisplayOf(state.report.candidates) };
+  if (out.complete && !csatBandsIncomplete(bands)) {
+    scanMemo.delete(sk);
+    scanMemo.set(sk, { v: out, at: Date.now() });
+    while (scanMemo.size > REFERENCE_MAX) scanMemo.delete(scanMemo.keys().next().value as string);
+    await rememberScanShared(sk, out);
+  }
+  return out;
+}
+type ScanShared = { offerings: OfferingDto[]; bands: Record<string, ReferenceBandDto>; matched: number; next: string | null; complete: boolean; min: Record<string, CsatMinimum>; display: SchoolDisplay };
+const scanMemo = new Map<string, { v: ScanShared; at: number }>();
+async function recallScanShared(sk: string): Promise<ScanShared | null> {
+  const cache = edgeCache();
+  if (!cache) return null;
+  try {
+    const hit = await cache.match(await p4CacheUrl(sk));
+    if (!hit) return null;
+    const v = (await hit.json()) as ScanShared;
+    return v && Array.isArray(v.offerings) && typeof v.bands === "object" && v.bands && typeof v.matched === "number" && v.complete === true && typeof v.min === "object" && typeof v.display === "object" ? v : null;
+  } catch {
+    return null;
+  }
+}
+async function rememberScanShared(sk: string, v: ScanShared) {
+  const cache = edgeCache();
+  if (!cache) return;
+  try {
+    await cache.put(await p4CacheUrl(sk), new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
+  } catch {
+    // 캐시에 못 넣어도 화면은 그대로
+  }
 }
 
 /** 판정을 받지 못한 모집단위(화면은 '판정 다시 불러오기'로 보인다) */
