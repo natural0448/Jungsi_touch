@@ -48,13 +48,14 @@ test("explicit ineligibility on the same report overrides stale positive recomme
   } finally { setEligibilityTablesForTest(null); }
 });
 
-test("an unbound CSAT recommendation cache cannot mask changed eligibility at the same profile and catalog", async () => {
+test("a CSAT recommendation cache cannot mask changed eligibility on the opened report (2026-11-27: 미충족 지문 열쇠)", async () => {
   const old = report("rebuild");
   const current = { ...old, candidates: { ...candidates, csat_condition_unmet: [PK] } };
   let builds = 0;
   const src = { buildCandidates: async () => ({ ok: true, value: ++builds === 1 ? old : current }), readReport: async () => builds === 1 ? old : current };
-  assert.equal(listed(await settleCandidates(src, caller, old)), 1);
-  const reread = { ...old, candidates: { ...candidates, reference_university_groups: [] } };
+  assert.equal(listed(await settleCandidates(src, caller, old, { shared: true })), 1);
+  // 연 리포트에서 이 학과가 지원 조건 미충족으로 확정되면 지문이 바뀌어 다시 만든다
+  const reread = { ...old, analyses: { [PK]: { offering_id: PK, status: "ineligible", reason_code: "eligibility_not_met" } }, candidates: { ...candidates, reference_university_groups: [] } };
   assert.equal(listed(await settleCandidates(src, caller, reread, { shared: true, reuse: true })), 0);
   assert.equal(builds, 2);
 });
@@ -75,7 +76,9 @@ test("provisional details reread changed eligibility and preserve the university
   const src = { analyzeUniversities: async () => ({ ok: true, value: ++analysisCount === 1 ? saved : now }) };
   const old = await provisionalBands(src, caller, saved, [PK]);
   assert.equal(old.bands[PK].held, undefined);
-  const result = await provisionalBands(src, caller, saved, [PK]);
+  // 연 리포트의 미충족 확정 목록이 바뀌면 다시 받는다
+  const changed = { ...saved, analyses: { [PK]: { offering_id: PK, status: "ineligible", reason_code: "eligibility_not_met" } } };
+  const result = await provisionalBands(src, caller, changed, [PK]);
   assert.equal(analysisCount, 2);
   assert.equal(result.min[PK], "condition");
   assert.equal(result.bands[PK].held, true);

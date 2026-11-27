@@ -53,6 +53,11 @@
 /* 펼친 상세 */
 .et .ps .detail{border-top:1px solid var(--line);background:var(--jt-picked);padding:16px}
 .et .ps .recruit{display:flex;gap:22px;flex-wrap:wrap;align-items:baseline;font-size:12px;color:var(--ink-2);margin-bottom:14px}
+/* 2026-11-27 펼치기 즉시 표시: 모집 정보·학년도별 성적 자리(글자 없음) */
+.et .ps .recruit.rc-wait{min-height:44px;border-radius:var(--r-sm);background:linear-gradient(90deg,var(--sub) 0%,var(--bg) 50%,var(--sub) 100%);background-size:200% 100%;animation:ps-sk 1.2s ease-in-out infinite}
+.et .ps .na.sk{display:inline-block;width:64px;height:12px;border-radius:4px;vertical-align:middle;background:linear-gradient(90deg,var(--sub) 0%,var(--bg) 50%,var(--sub) 100%);background-size:200% 100%;animation:ps-sk 1.2s ease-in-out infinite}
+@keyframes ps-sk{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.et .ps .recruit.rc-wait,.et .ps .na.sk{animation:none}}
 .et .ps .recruit b{display:block;font-size:16px;font-weight:900;color:var(--ink)}
 .et .ps .recruit .wait{font-size:13px;font-weight:700;color:var(--reach)}
 .et .ps .recruit a{margin-left:auto;color:var(--brand);font-weight:700}

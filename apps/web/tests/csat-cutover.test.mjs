@@ -176,7 +176,7 @@ test("raw-score report: university.analyze stays blocked, candidates.build is se
 });
 
 // 같은 성적이라도 현재 응시조건판 결속이 없으면 수능 후보는 새로 확인한다.
-test("settleCandidates shared: CSAT always rebuilds when active admission rules are not bound", async () => {
+test("settleCandidates shared: CSAT reuses within the same report·profile·eligibility, rebuilds when the profile changes (2026-11-27 대표님 결정)", async () => {
   const calls = [];
   const lists = { reference_university_groups: [{ university_id: "u1", offerings: [{ offering: { offering_id: "2027:1" }, reference_band: { basis: "reference_threshold", source: "g", code: "stable" } }] }], reference_threshold_summary: { complete: true } };
   const base = { ...provisionalReport, report_id: "rp-shared", profile_id: "pf-1", report_version: 5, candidates: { status: "ready", reason_code: null, basic_university_groups: [], wildcards: [] } };
@@ -194,10 +194,11 @@ test("settleCandidates shared: CSAT always rebuilds when active admission rules 
   assert.deepEqual(calls, ["buildCandidates", "readReport"]);
   const again = await ops.settleCandidates(src, {}, { ...built, candidates: base.candidates }, { shared: true });
   assert.equal(again.candidates.reference_university_groups.length, 1);
-  assert.deepEqual(calls, ["buildCandidates", "readReport", "buildCandidates", "correctReport"]);
+  // 같은 리포트·성적·미충족 목록이면 다시 만들지 않는다
+  assert.deepEqual(calls, ["buildCandidates", "readReport"]);
   built = { ...built, profile_id: "pf-2" };
   const newProfile = await ops.settleCandidates(src, {}, { ...base, profile_id: "pf-2" }, { shared: true });
   assert.equal(newProfile.profile_id, "pf-2");
-  assert.deepEqual(calls, ["buildCandidates", "readReport", "buildCandidates", "correctReport", "buildCandidates", "readReport"]);
+  assert.deepEqual(calls, ["buildCandidates", "readReport", "buildCandidates", "readReport"]);
   assert.equal(ops.P3_REUSE_TTL_MS, 600000);
 });

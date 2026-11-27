@@ -18,7 +18,8 @@ test("R24: automatic candidates drop rows the server marked as condition or mini
 });
 test("R24: 3페이지 재사용 열쇠에 판 번호를 넣지 않는다(4페이지 조회마다 다시 만들지 않게)", () => {
   const ops = src("../src/lib/report-ops.ts");
-  assert.match(ops, /const memoKey = \(r: ReportDto\) => JSON\.stringify\(\[referenceCacheVersion, r\.report_id, r\.profile_id, r\.candidates\?\.catalog_version \?\? null\]\);/);
+  // 2026-11-27 대표님 결정: 판 번호 대신 미충족 확정 목록 지문(eligibilityFingerprint)을 넣는다
+  assert.match(ops, /const memoKey = \(r: ReportDto\) => JSON\.stringify\(\[referenceCacheVersion, r\.report_id, r\.profile_id, r\.candidates\?\.catalog_version \?\? null, eligibilityFingerprint\(r\)\]\);/);
 });
 test("R21 B: server no-comparison rows show '비교 자료 없음' (not an eligibility failure)", async () => {
   const s = src("../src/lib/csat-conditions.ts");

@@ -2,7 +2,7 @@ import "server-only";
 import { AccessDenied, ConnectionError, type Caller, type JungsiSource, type StatusScanRequest } from "@/lib/api";
 import type { AssessmentDto, CandidatesDto, CsatMinimum, OfferingDto, OverallAnalysisDto, ReferenceBandDto, ReportDto, ShortlistEntryDto } from "@/lib/dto";
 import { currentReportId, screenReport } from "@/lib/report-ref";
-import { csatJudged, pickedIds, provisionalOnly } from "@/lib/report-pure";
+import { csatBandsIncomplete, csatJudged, pickedIds, provisionalOnly } from "@/lib/report-pure";
 import { confirmedIneligibleIds, holdIneligibleBand, withCandidateEligibility } from "@/lib/candidate-eligibility";
 
 // 브라우저 화면도 쓰는 읽기 전용 판단은 report-pure 에 둔다(서버 전용 모듈이 브라우저 묶음에 끌려가지 않게, 2026-11-22)
@@ -281,6 +281,16 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   if (!csatJudged(report)) return none;
   const targets = canonicalOfferingIds(ids).slice(0, 100);
   if (targets.length === 0) return none;
+  // 2026-11-27 대표님 결정: 같은 리포트·성적·판·학과 묶음·미충족 확정 목록이면 10분 다시 쓴다(이 화면 서버 기억 → 데이터센터 캐시)
+  const mk = JSON.stringify(["p4-v2", report.report_id, report.profile_id, report.report_version, targets, eligibilityFingerprint(report)]);
+  const memo = p4Memo.get(mk);
+  if (memo && Date.now() - memo.at <= P3_REUSE_TTL_MS) return { ...memo.v, version: report.report_version };
+  const shared = await recallP4Shared(mk);
+  if (shared) {
+    p4Memo.set(mk, { v: shared, at: Date.now() });
+    logSettle("p4_csat", { asked: targets.length, judged: Object.keys(shared.bands).length, shared: true });
+    return { ...shared, version: report.report_version };
+  }
   const request = crypto.randomUUID();
   let state: ReportState;
   const ask = (attempt: number) =>
@@ -320,7 +330,43 @@ export async function provisionalBands(src: JungsiSource, caller: Caller, report
   }
   logSettle("p4_csat", { asked: targets.length, judged: Object.keys(bands).length });
   const display = schoolDisplayOf(state.report.candidates);
+  // 덜 찬 결과(곡선 미완)는 다시 쓰지 않는다
+  if (!csatBandsIncomplete(bands) && (Object.keys(bands).length || Object.keys(display).length)) {
+    const v = { bands, min, display };
+    p4Memo.delete(mk);
+    p4Memo.set(mk, { v, at: Date.now() });
+    while (p4Memo.size > REFERENCE_MAX) p4Memo.delete(p4Memo.keys().next().value as string);
+    await rememberP4Shared(mk, v);
+  }
   return { bands, version: Math.max(report.report_version, state.report.report_version), min, display };
+}
+type P4Shared = { bands: Record<string, ReferenceBandDto>; min: Record<string, CsatMinimum>; display: SchoolDisplay };
+const p4Memo = new Map<string, { v: P4Shared; at: number }>();
+async function p4CacheUrl(mk: string): Promise<string> {
+  const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(mk)));
+  return "https://p4-provisional.invalid/" + [...d].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function recallP4Shared(mk: string): Promise<P4Shared | null> {
+  const cache = edgeCache();
+  if (!cache) return null;
+  try {
+    const hit = await cache.match(await p4CacheUrl(mk));
+    if (!hit) return null;
+    const v = (await hit.json()) as P4Shared;
+    return v && typeof v.bands === "object" && v.bands && typeof v.min === "object" && typeof v.display === "object" ? v : null;
+  } catch {
+    return null;
+  }
+}
+async function rememberP4Shared(mk: string, v: P4Shared) {
+  const cache = edgeCache();
+  if (!cache) return;
+  try {
+    // 내부 주소(.invalid) 캐시 — Cloudflare 캐시는 private 를 저장하지 않으므로 public(밖으로 나가지 않는다)
+    await cache.put(await p4CacheUrl(mk), new Response(JSON.stringify(v), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${P3_REUSE_TTL_MS / 1000}` } }));
+  } catch {
+    // 캐시에 못 넣어도 화면은 그대로
+  }
 }
 
 /** 후보가 아직 없으면 candidates.build 로 만든다 */
@@ -593,9 +639,16 @@ type ReferenceLists = Pick<CandidatesDto,
 const REFERENCE_TTL_MS = 15 * 60_000;
 const REFERENCE_MAX = 300;
 const referenceMemo = new Map<string, { lists: ReferenceLists; at: number }>();
-const referenceCacheVersion = "eligibility-v1";
+const referenceCacheVersion = "eligibility-v2";
+/** 2026-11-27(대표님 결정): 지금 '지원 조건 미충족'으로 확정된 학과 목록의 지문. 이것이 바뀌면 재사용 열쇠도 바뀐다 */
+function eligibilityFingerprint(r: ReportDto): string {
+  const ids = [...confirmedIneligibleIds(r)].sort().join(",");
+  let h = 0x811c9dc5;
+  for (let i = 0; i < ids.length; i++) { h ^= ids.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return `${ids.length}:${h.toString(16)}`;
+}
 // 2026-11-25: 판 번호는 4페이지 조회마다 올라가 3페이지를 매번 새로 만들게 하므로 열쇠에 넣지 않는다(제외 정보는 성적·카탈로그가 같으면 같다)
-const memoKey = (r: ReportDto) => JSON.stringify([referenceCacheVersion, r.report_id, r.profile_id, r.candidates?.catalog_version ?? null]);
+const memoKey = (r: ReportDto) => JSON.stringify([referenceCacheVersion, r.report_id, r.profile_id, r.candidates?.catalog_version ?? null, eligibilityFingerprint(r)]);
 
 function rememberReference(r: ReportDto, lists: ReferenceLists) {
   const k = memoKey(r);
@@ -717,7 +770,10 @@ export async function settleCandidates(src: JungsiSource, caller: Caller, report
 }
 
 async function settleCandidateReport(src: JungsiSource, caller: Caller, report: ReportDto, opts: { reuse?: boolean; shared?: boolean }): Promise<ReportDto> {
-  const canReuse = !csatJudged(report) && !report.candidates_stale;
+  // 2026-11-27 대표님 결정: 수능 판정 리포트도 다시 쓴다. 응시 조건(지원 조건 미충족) 확정 목록의 지문을 열쇠에 넣어,
+  // 그것이 바뀌면 새로 만든다. 조건 반영(withCandidateEligibility)은 다시 쓸 때도 지금 리포트로 매번 다시 한다.
+  // 판정 리포트는 서버가 후보 기준값을 두지 않아 report.read 가 늘 candidates_stale 을 켜므로 그 표시는 보지 않는다
+  const canReuse = csatJudged(report) || !report.candidates_stale;
   const fallback = (r: ReportDto) => {
     const c = r.candidates;
     if (!csatJudged(r) || !c) return r;
@@ -753,7 +809,8 @@ async function settleCandidateReport(src: JungsiSource, caller: Caller, report: 
     if (res.ok) {
       const built = res.value;
       const lists = referenceListsOf(built.candidates);
-      if (canReuse && lists?.reference_university_groups?.length) await rememberReferenceShared(built, lists);
+      // 꺼낼 때는 연 리포트(report.read)로 열쇠를 만들므로 넣을 때도 같은 리포트로(응답의 미충족 목록은 읽기와 다를 수 있다)
+      if (canReuse && lists?.reference_university_groups?.length) await rememberReferenceShared(current.candidates && current.report_id === built.report_id ? current : built, lists);
       // 2026-11-27 속도: 서버가 새 판을 쓰지 않았으면(판 번호 같음, 무료 회원 다시 열기) 다시 읽지 않는다(약 0.4초).
       // 받은 응답에 화면 보정(지원 조건 표시)을 바로 붙이고, 읽기에서만 붙는 표식(stale_analysis_ids·candidates_stale)은 방금 읽은 리포트 것을 쓴다
       const sameRevision = src.correctReport && built.report_id === current.report_id && built.report_version === current.report_version;

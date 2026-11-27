@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BookLoading } from "@/components/book-loading";
 import type { Cell } from "@/components/offering-parts";
 import type { OfferingDto } from "@/lib/dto";
 import { enqueue } from "@/lib/client-queue";
@@ -49,7 +48,16 @@ export function useOfferingExtras(o: OfferingDto, initialOpen: boolean) {
  * '모집 인원 불러오는 중…'·'판정 근거 부족'이 먼저 보였다가 바뀌는 일이 없게 한다.
  */
 export function ExtrasBody({ o, a, extras, p1Fast, detail, conds }: { o: OfferingDto; a: Cell; extras: Extras | null; p1Fast: P1Year[] | null | undefined; detail: ReactNode; conds?: ReactNode }) {
-  if (extras === null) return <BookLoading compact text={<>{o.university_name} {o.department}의 모집 정보와 지원 판단 근거를 모으고 있습니다.</>} />;
+  // 2026-11-27 대표님 결정(학교별 펼치기 1초대): 환산·위치·판정 네 칸과 해설 띠는 이미 준비돼 있어 누르는 즉시 보인다.
+  // 모집 정보 줄·학년도별 성적 칸만 받는 동안 글자 없는 연한 자리를 잡아 두었다가 자료가 오면 채운다('불러오는 중' 문구는 쓰지 않는다)
+  if (extras === null) {
+    return (
+      <>
+        <div className="recruit rc-wait" aria-busy="true" aria-label={`${o.university_name} ${o.department} 모집 정보`} />
+        <P1YearsContext.Provider value={p1Fast ?? undefined}>{detail}</P1YearsContext.Provider>
+      </>
+    );
+  }
   return (
     <>
       {/* 받지 못했으면 값이 없는 것과 같은 확정 표시(미공개)로 그린다. 문의 번호·'불러오지 못했습니다'는 보이지 않는다 */}

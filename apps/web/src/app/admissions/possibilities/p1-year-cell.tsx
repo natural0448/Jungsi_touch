@@ -9,7 +9,8 @@ export const P1YearsContext = createContext<P1Year[] | null | undefined>(undefin
 /** 연도별 근거의 '대학 발표 입시결과' 칸: 1페이지와 같은 ①② 성적(2026-11-17 대표님 결정 1-가) */
 export function P1YearCell({ year }: { year: number }) {
   const all = useContext(P1YearsContext);
-  if (all === undefined) return <span className="na">불러오는 중…</span>;
+  // 받는 중(2026-11-27): 문구 대신 글자 없는 자리
+  if (all === undefined) return <span className="na sk" aria-busy="true" />;
   const stats = (all ?? []).filter((y) => y.year === year).flatMap((y) => y.stats);
   if (stats.length === 0) return <span className="na">자료 없음</span>;
   return (
