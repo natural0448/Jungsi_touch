@@ -401,7 +401,8 @@ const reportOfCached = cache(async (accessToken: string, reportId: string, _gen:
 const statusOf = (accessToken: string, examId: string, stage: string | undefined) => statusOfCached(accessToken, examId, stage, writeGeneration);
 const reportOf = (accessToken: string, reportId: string) => reportOfCached(accessToken, reportId, writeGeneration);
 
-const SEARCH_CACHE_TTL_S = 300;
+// 공개 모집단위 자료는 자료판이 바뀔 때만 달라진다(11-27: 5분은 드문드문 오는 학생에게 자주 비어 30분으로)
+const SEARCH_CACHE_TTL_S = 1800;
 function searchEdgeCache(): Cache | null {
   try {
     return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null;

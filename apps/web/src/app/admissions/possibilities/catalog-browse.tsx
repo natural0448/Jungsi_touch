@@ -163,7 +163,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 학교별 수능 판정 화면(가채점·실채점)
   const provisional = csatJudged(report);
   // 수능 가채점 학교별 판정(서버 dep_r29, 2026-11-23): 보이는 모집단위만 판정을 받아 붙인다. 받지 못하면 '가채점 판정 준비 중'
-  if (provisional && report) {
+  // 2026-11-27 속도: 지원가능성 필터를 서버 전국 판정(scan)으로 찾는 경우에는 필터 없는 검색 결과 30곳을 판정하지 않는다(화면에 쓰지 않는다)
+  const scanWillRun = !pro && !!cur.st && !cur.fav && !cur.university_q && !cur.department_q;
+  if (provisional && report && !scanWillRun) {
     if (pro) {
       const got = cur.fav ? await pro.byIds(items.map((o) => o.offering_id)) : { bands: proBands ?? {}, min: proMin, display: proDisplay };
       report = { ...report, provisional_bands: got.bands, provisional_min: got.min, overall: withSchoolDisplay(report.overall, got.display) };
@@ -316,7 +318,8 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       for (;;) {
         const its = page.items ?? [];
         if (its.length) {
-          const detail = pages === 0 ? null : pro ? proPageDetails.get(page) : await provisionalBands(src, caller, base, its.map((o) => o.offering_id));
+          // 첫 쪽 판정은 위에서 받았다. 다만 전국 판정(scan)이 실패해 여기로 왔으면 위에서 건너뛰었으므로 받는다
+          const detail = pages === 0 && !scanWillRun ? null : pro ? proPageDetails.get(page) : await provisionalBands(src, caller, base, its.map((o) => o.offering_id));
           if (detail) {
             Object.assign(bandsAll, detail.bands);
             Object.assign(minAll, detail.min);
