@@ -260,3 +260,5 @@
 .et .ps .univ .pending-rows>summary::before{content:"▸";display:inline-block;margin-right:8px;transition:transform .15s}
 .et .ps .univ .pending-rows[open]>summary::before{transform:rotate(90deg)}
 .et .ps .univ .pending-rows>summary b{color:var(--ink, inherit)}
+.et .ps .univ .pending-rows .upd{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:#FFF1E8;color:#C2410C;font-size:12px;font-weight:700}
+.et .ps .univ .pending-rows .pending-note{margin:0;padding:10px 18px;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--line)}

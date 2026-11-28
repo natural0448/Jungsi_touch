@@ -170,3 +170,15 @@ body{background:#fff;color:#15192a;font-family:var(--font-kr);font-size:14px;lin
 .et .jt-book-wait.compact{gap:8px;padding:20px 12px 24px}
 .et .jt-book-wait.compact .jt-book{width:100px;height:62px}
 .et .jt-book-wait.compact .jt-book-text{margin:4px 0 0;font-size:15px}
+
+/* 2026-11-28 대표님 요청: 3·4페이지 머리 설명을 더 잘 보이게(공통) */
+.et .pg-head p:has(.fav-lead){max-width:none}
+.et .fav-lead{display:grid;gap:10px;margin-top:4px}
+.et .fav-lead-main{font-size:16px;line-height:1.55;color:var(--ink);font-weight:500}
+.et .fav-lead-main b{font-weight:800;color:var(--brand, #1E4FD8)}
+.et .fav-lead-steps{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--ink)}
+.et .fav-lead-steps>span{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.et .fav-lead-steps em{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--deep, #13254F);color:#fff;font-size:12px;font-weight:800}
+.et .fav-lead-steps b{font-weight:800}
+.et .fav-lead-steps .star{color:#F5A623}
+@media (max-width:640px){.et .fav-lead-main{font-size:15px}.et .fav-lead-steps>span{border-radius:10px}}

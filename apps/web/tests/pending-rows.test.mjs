@@ -29,3 +29,16 @@ test("유리한 대학 찾기 설명: 요약 한 줄과 ★ 두 단계", () => {
   const lead = p.slice(at, p.indexOf("</span>", p.indexOf("fav-lead-steps", at)) + 400);
   assert.ok(lead.length > 0 && !lead.includes("참고"));
 });
+
+// 2026-11-28 대표님 요청: 4페이지 담기 설명 크게, 준비 중 학과는 계속 업데이트 중 표시
+test("4페이지 설명 세 단계·준비 중 학과 업데이트 표시", () => {
+  const p = src("app/admissions/possibilities/page.tsx");
+  assert.match(p, /className="fav-lead"/);
+  assert.match(p, /<b>담기<\/b> 누르기/);
+  assert.match(p, /<em>3<\/em><b>리포트<\/b>/);
+  const c = src("app/admissions/possibilities/catalog-browse.tsx");
+  assert.match(c, /판정 근거 계속 업데이트 중/);
+  assert.match(c, /판정 근거를 계속 추가하고 있습니다/);
+  assert.match(src("lib/position-note.ts"), /판정 근거는 계속 업데이트하고 있어/);
+  assert.match(src("styles/jungsi.css"), /\.et \.fav-lead\{/);
+});

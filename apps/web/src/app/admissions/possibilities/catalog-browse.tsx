@@ -585,7 +585,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                           {ready.length > 0 && <ul>{ready.map(row)}</ul>}
                           {waiting.length > 0 && (
                             <details className="pending-rows" open={waiting.some((o) => o.offering_id === cur.open) ? true : undefined}>
-                              <summary>가채점 판정 준비 중인 학과 <b className="num">{waiting.length}</b>개</summary>
+                              <summary>가채점 판정 준비 중인 학과 <b className="num">{waiting.length}</b>개 <span className="upd">판정 근거 계속 업데이트 중</span></summary>
+                              {/* 2026-11-28 대표님 요청: 준비 중 학과는 계속 업데이트 중이라는 표시 */}
+                              <p className="pending-note">이 학과들은 대학 발표 자료와 환산 기준을 확인해 <b>판정 근거를 계속 추가하고 있습니다.</b> 근거가 추가되면 이 화면에서 바로 판정이 나옵니다.</p>
                               <ul>{waiting.map(row)}</ul>
                             </details>
                           )}

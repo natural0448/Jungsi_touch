@@ -8,6 +8,7 @@ import { BookLoading } from "@/components/book-loading";
 import { getCaller, sessionOrDown, source } from "@/lib/api";
 import { memberName } from "@/lib/member-name";
 import { lockFor, page } from "@/lib/routes";
+import { PICK_GROUP_LIMIT, PICK_TOTAL_LIMIT } from "@/lib/picked-view";
 import { CatalogBrowse } from "./catalog-browse";
 import { listKey } from "./query";
 
@@ -20,7 +21,17 @@ export default async function Page({ searchParams }: PageProps<"/admissions/poss
     <PageHead
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
-      desc="대학과 학과를 직접 검색해 모집단위마다 내 환산점수 · 지원가능성 · 환산 유불리를 확인하세요. 지원할 학과는 '담기'를 누르면 리포트에 모입니다."
+      desc={
+        // 2026-11-28 대표님 요청: 담기 설명을 잘 보이게 — 한 줄 요약 + 세 단계
+        <span className="fav-lead">
+          <span className="fav-lead-main"><b>대학과 학과를 직접 검색</b>해 모집단위마다 <b>내 환산점수 · 지원가능성 · 환산 유불리</b>를 확인합니다.</span>
+          <span className="fav-lead-steps">
+            <span><em>1</em>대학·학과를 검색하거나 지원가능성으로 골라 보기</span>
+            <span><em>2</em>지원할 학과의 <b>담기</b> 누르기(군마다 {PICK_GROUP_LIMIT}곳, 모두 {PICK_TOTAL_LIMIT}곳까지)</span>
+            <span><em>3</em><b>리포트</b>에서 담은 학과를 한 번에 비교</span>
+          </span>
+        </span>
+      }
       side={<Link prefetch={false} className="btn" href={page("PAGE-04").path}>유리한 대학 추천 다시 보기</Link>}
     />
   );
