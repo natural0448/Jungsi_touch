@@ -13,10 +13,12 @@ test("이용 안내가 1번째 탭, 리포트가 6번째", () => {
   assert.ok(header.indexOf("GUIDE_TAB") < header.indexOf("PAGES"), "안내 탭이 앞");
 });
 
-test("처음 온 사람만 안내로, 본 사람은 하던 화면으로", () => {
+// 2026-11-28 대표님 결정: 정시터치 루트는 늘 이용 안내로
+test("정시터치 루트는 늘 이용 안내로", () => {
   const root = src("app/page.tsx");
-  assert.match(root, /GUIDE_SEEN_COOKIE/);
-  assert.match(root, /redirect\(seen \? ROOT_REDIRECT : GUIDE_TAB\.path\)/);
+  assert.match(root, /redirect\(GUIDE_TAB\.path\)/);
+  assert.ok(!/ROOT_REDIRECT/.test(root));
+  assert.match(src("components/nav-pending.tsx"), /BASE \+ GUIDE_TAB\.path \+ url\.search/);
   assert.match(src("app/guide/seen.tsx"), /max-age=31536000/);
 });
 

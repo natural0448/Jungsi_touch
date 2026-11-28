@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BOOK_SUB, BookLoading } from "@/components/book-loading";
 import { LoadingNotice } from "@/components/loading-notice";
-import { ROOT_REDIRECT } from "@/lib/routes";
+import { GUIDE_TAB } from "@/lib/routes";
 
 /*
   누르는 순간 화면이 바뀌게(2026-11-10 사용자 요청: 전체 화면이 자연스럽고 부드럽게 열리기를).
@@ -51,8 +51,8 @@ type Pending = ({ kind: "page"; notice: Notice } | { kind: "same" }) & { from: s
 function target(url: URL): URL | null {
   if (url.origin !== location.origin) return null;
   if (url.pathname !== BASE && !url.pathname.startsWith(`${BASE}/`)) return null;
-  // 루트는 서버가 1페이지로 돌려보낸다. 1페이지에서 루트를 누르면 주소가 그대로라 안내가 20초 남았다(11-11 운영 재현)
-  if (url.pathname === BASE || url.pathname === `${BASE}/`) url = new URL(BASE + ROOT_REDIRECT + url.search, url);
+  // 루트는 서버가 이용 안내로 돌려보낸다(11-28). 안내에서 루트를 누르면 주소가 그대로라 안내가 20초 남았다(11-11 운영 재현)
+  if (url.pathname === BASE || url.pathname === `${BASE}/`) url = new URL(BASE + GUIDE_TAB.path + url.search, url);
   if (url.pathname === location.pathname && url.search === location.search) return null; // 같은 주소·#만 바뀜
   return url;
 }
