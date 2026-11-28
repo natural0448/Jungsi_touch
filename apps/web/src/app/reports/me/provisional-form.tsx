@@ -24,7 +24,7 @@ const REQUIRED = ["korean_choice", "math_choice", "inq1", "inq2", "sl_subject", 
  * hidden 에 기관·학생·입력 판을, subject 에 학생 이름을 넘긴다(확인 창에 크게 보인다).
  * idem: 이 화면의 요청 키(두 번 눌러도 한 번만 저장)
  */
-export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit = submitProvisional, hidden, subject, name, correcting = false }: {
+export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit = submitProvisional, hidden, subject, name, correcting = false, exempt = false }: {
   examLabel: string;
   idem: string;
   defaults?: ProvisionalValues;
@@ -36,6 +36,8 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
   name?: string;
   /** 정정 입력(승인된 정정권으로 저장) — 확인 창에 재입력 경고를 보인다 */
   correcting?: boolean;
+  /** 미리보기 계정(서버 input_limit_mode=preview_exempt) — 입력 횟수를 세지 않는다(2026-11-28 담당자 검수: 확인 창이 '입력 1회 사용'으로 어긋났다) */
+  exempt?: boolean;
 }) {
   const [state, action, pending] = useActionState<ProvisionalFormState, FormData>(submit, null);
   const d: ProvisionalValues = state?.values ?? defaults;
@@ -339,8 +341,12 @@ export function ProvisionalForm({ examLabel, idem, defaults = {}, update, submit
             ) : (
               <>
                 {subject && <p className="sf-dialog-subject">{subject}</p>}
-                {correcting && <p className="sf-dialog-problem">{REENTRY_WARNING}</p>}
-                <p><b>저장하면 {subject ? "이 학생의 " : ""}가채점 단계의 {correcting ? "정정 입력 1회" : "입력 1회"}를 사용합니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
+                {correcting && !exempt && <p className="sf-dialog-problem">{REENTRY_WARNING}</p>}
+                {exempt ? (
+                  <p><b>미리보기 계정이라 입력 횟수를 세지 않습니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
+                ) : (
+                  <p><b>저장하면 {subject ? "이 학생의 " : ""}가채점 단계의 {correcting ? "정정 입력 1회" : "입력 1회"}를 사용합니다.</b> 채점표와 한 칸씩 대조해 주세요.</p>
+                )}
                 <dl className="sf-dialog-rows">
                   {review.rows.map(([k, v]) => (
                     <div key={k}>

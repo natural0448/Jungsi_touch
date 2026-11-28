@@ -428,3 +428,9 @@
 .et .pr .rp-cp .adv .bar { display: none; }
 .et .pr .rp-cp .adv .v { min-width: 0; white-space: normal; }
 .et .pr .rp-cpd-i { break-inside: avoid-page; }
+
+/* 2026-11-28 성적 정정 전 확인(한 번뿐) */
+.et .rp-once{display:grid;gap:14px;padding:22px 24px;border:2px solid var(--risk);border-radius:var(--r-md, 12px);background:var(--risk-soft)}
+.et .rp-once h2{margin:0;font-size:20px;color:var(--risk)}
+.et .rp-once ul{margin:0;padding-left:20px;display:grid;gap:6px;font-size:15px;line-height:1.6}
+.et .rp-once-act{display:flex;flex-wrap:wrap;gap:10px}

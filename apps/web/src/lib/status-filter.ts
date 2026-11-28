@@ -22,7 +22,7 @@ export const STATUS_LABEL: Record<StatusKey, string> = {
   challenge: "도전",
   outside: "불가",
   line: "합격선 대비 위치",
-  none: "판정 근거 부족",
+  none: "가채점 판정 준비 중",
   ineligible: "지원 조건 미충족",
   other: "그 밖",
 };

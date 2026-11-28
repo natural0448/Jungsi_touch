@@ -253,3 +253,10 @@
 .et .ps .card p.why b{font-weight:800}
 .et .ps .card p.why-num{margin-top:-4px;padding:0 10px;color:var(--muted);font-size:13px}
 .et .ps .card .lock-note{color:var(--muted);font-size:13px}
+/* 2026-11-28 대표님 결정(A안): 가채점 판정 준비 중인 학과는 학교 아래에 접어 둔다 */
+.et .ps .univ .pending-rows{border-top:1px solid var(--line)}
+.et .ps .univ .pending-rows>summary{cursor:pointer;list-style:none;padding:11px 18px;font-size:13px;color:var(--sub);background:var(--soft, #F6F8FC)}
+.et .ps .univ .pending-rows>summary::-webkit-details-marker{display:none}
+.et .ps .univ .pending-rows>summary::before{content:"▸";display:inline-block;margin-right:8px;transition:transform .15s}
+.et .ps .univ .pending-rows[open]>summary::before{transform:rotate(90deg)}
+.et .ps .univ .pending-rows>summary b{color:var(--ink, inherit)}

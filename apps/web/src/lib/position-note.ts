@@ -24,7 +24,8 @@ export type PositionNote =
   | { kind: "line"; margin: CutoffMargin; basis: "school" | "overall" }
   | { kind: "none" };
 
-export const POSITION_NONE_LABEL = "판정 근거 부족";
+// 2026-11-28 대표님 결정(A안): '판정 근거 부족' → '가채점 판정 준비 중'(실채점 전환 때 문구 다시 볼 것)
+export const POSITION_NONE_LABEL = "가채점 판정 준비 중";
 export const POSITION_NONE_DESC =
   "지난해 합격선을 내 위치와 같은 기준(전체 응시자 누적 백분위)으로 옮긴 자료가 없어 지원 판정을 만들지 않았습니다. 대학이 합격선을 발표하지 않았거나, 발표한 값(대학 자체 점수·백분위 평균 등)을 이 기준으로 옮길 수 없는 모집단위입니다. 위의 내 위치와 아래 연도별 근거의 대학 발표 입시결과를 함께 보고 판단하세요.";
 export const POSITION_LINE_DESC =

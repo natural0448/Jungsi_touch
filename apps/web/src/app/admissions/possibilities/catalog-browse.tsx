@@ -400,6 +400,12 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     if (last && last.id === o.university_id) last.rows.push(o);
     else groups.push({ id: o.university_id, name: o.university_name, rows: [o] });
   }
+  // 2026-11-28 대표님 결정(A안): 이 쪽 안에서 가채점 판정이 나온 학과가 있는 학교를 먼저(받은 순서는 그대로 유지). 지원가능성 필터를 고르면 그대로
+  if (provisional && report && !cur.st) {
+    const hasReady = (g: { rows: OfferingDto[] }) => g.rows.some((o) => keyOf(report?.provisional_bands, o.offering_id) !== "none");
+    const anyBand = Object.keys(report.provisional_bands ?? {}).length > 0 || Object.keys(dispAll).length > 0 || Object.keys(minAll).length > 0;
+    if (anyBand) groups.sort((x, y) => Number(hasReady(y)) - Number(hasReady(x)));
+  }
   // 2026-11-27: 필터(scan)로 찾으면 위 provisionalJudged 계산 때는 판정을 아직 받지 않았다(ship146 scanWillRun) → 판정을 받은 뒤 값으로 다시 본다.
   // 이것이 없으면 소신 필터 결과 215개 위에 '판정 가능한 모집단위가 없습니다'가 함께 떴다
   const provisionalShown = provisionalJudged || (provisional && (
@@ -536,8 +542,9 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                       <span />
                       <span />
                     </div>
-                    <ul>
-                      {g.rows.map((o) => {
+                    {(() => {
+                      // 2026-11-28 대표님 결정(A안): 가채점 판정이 나온 학과를 먼저, 판정 준비 중(none)인 학과는 학교 아래에 접어 둔다
+                      const row = (o: OfferingDto) => {
                         const open = cur.open === o.offering_id;
                         return (
                           <ItemShell
@@ -569,8 +576,22 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
                             conds={<MineConds report={report} o={o} />}
                           />
                         );
-                      })}
-                    </ul>
+                      };
+                      const split = provisionalShown && report && !cur.st;
+                      const ready = split ? g.rows.filter((o) => keyOf(report?.provisional_bands, o.offering_id) !== "none") : g.rows;
+                      const waiting = split ? g.rows.filter((o) => keyOf(report?.provisional_bands, o.offering_id) === "none") : [];
+                      return (
+                        <>
+                          {ready.length > 0 && <ul>{ready.map(row)}</ul>}
+                          {waiting.length > 0 && (
+                            <details className="pending-rows" open={waiting.some((o) => o.offering_id === cur.open) ? true : undefined}>
+                              <summary>가채점 판정 준비 중인 학과 <b className="num">{waiting.length}</b>개</summary>
+                              <ul>{waiting.map(row)}</ul>
+                            </details>
+                          )}
+                        </>
+                      );
+                    })()}
                   </section>
                 ))}
               </div>

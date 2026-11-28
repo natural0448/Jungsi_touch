@@ -37,7 +37,7 @@ test("no school position: falls back to the overall position, labelled overall",
 test("no cutoff: 판정 근거 부족, never 판단 보류", () => {
   const n = positionNoteOf({ ...base, year_cutoffs: [], reference_percentile: ref("5") }, overall);
   assert.equal(n.kind, "none");
-  assert.equal(positionNoteShort(n), "판정 근거 부족");
+  assert.equal(positionNoteShort(n), "가채점 판정 준비 중");
 });
 
 test("not used for ready, reference band, ineligible, or my-input reasons", () => {

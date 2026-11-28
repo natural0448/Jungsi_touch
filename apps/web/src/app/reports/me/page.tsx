@@ -168,17 +168,41 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
   // 부정확 입력(받을 수 없는 점수로 저장, 서버 상태 기준): 분석 대신 안내만, 3·4페이지도 막힌다(lib/report-ref)
   const inaccurate = isInaccurate(status, report);
   if (sp.correct === "1" && provisionalStage && (selfCorrect || (inputOpen && status.correction_granted > status.correction_used))) {
+    // 2026-11-28 대표님 결정: 양식을 열기 전에 '정정은 한 번뿐, 이번에 저장하면 더 고칠 수 없음'을 먼저 확인받는다
+    if (sp.go !== "1") {
+      return (
+        <>
+          {head}
+          <div className="wrap pg-body rp">
+            <InputStatus st={status} />
+            <section className="rp-once" aria-labelledby="once-h">
+              <h2 id="once-h">가채점 성적 정정은 한 번만 할 수 있습니다</h2>
+              <ul>
+                <li>가채점 원점수 정정 기회는 <b>이 단계에서 1회</b>뿐입니다.</li>
+                <li><b>이번에 정정해서 저장하면, 그 뒤로는 더 이상 정정할 수 없습니다.</b></li>
+                <li>저장하기 전에 채점표와 과목·선택과목·점수를 한 칸씩 대조해 주세요.</li>
+              </ul>
+              <div className="rp-once-act">
+                <Link className="btn p" href={`${route.path}?correct=1&go=1`}>확인했습니다. 성적 정정하기</Link>
+                <Link className="btn" href={route.path}>정정하지 않고 돌아가기</Link>
+              </div>
+            </section>
+          </div>
+        </>
+      );
+    }
     return (
       <>
         {head}
         <div className="wrap pg-body rp">
           <InputStatus st={status} />
-          <p className="rp-note" role="status">가채점 원점수 정정 요청이 바로 승인되었습니다. 바른 원점수를 다시 넣어 주세요. 정정은 이 단계에서 한 번뿐입니다.</p>
+          <p className="rp-err" role="status">정정 입력 화면입니다. <b>이번 정정이 마지막 기회입니다.</b> 바른 원점수를 넣어 저장하면 더 이상 정정할 수 없습니다.</p>
           <ProvisionalForm
             examLabel={title}
             idem={idem}
             name={name}
             correcting
+            exempt={status.input_limit_mode === "preview_exempt"}
             defaults={report && isProvisionalReport(report) ? provisionalDefaults(report) : {}}
             update={report && isProvisionalReport(report) && !inaccurate ? { reportId: report.report_id, version: report.report_version } : undefined}
           />
@@ -252,6 +276,7 @@ export default async function Page({ searchParams }: PageProps<"/reports/me">) {
                 idem={idem}
                 name={name}
                 correcting={correcting}
+                exempt={status.input_limit_mode === "preview_exempt"}
                 defaults={report && provisional ? provisionalDefaults(report) : {}}
                 update={report && provisional ? { reportId: report.report_id, version: report.report_version } : undefined}
               />

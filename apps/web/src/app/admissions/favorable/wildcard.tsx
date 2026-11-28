@@ -223,7 +223,7 @@ function ReferenceWildCard({ w, fav }: { w: ReferenceItem; fav: boolean | null }
         <span>
           <small>지원가능성</small>
           {/* 참고 판정(문턱 판정 포함, 추정값 단계 하나)이 있으면 그 배지를 보인다(2026-11-21 p3_thresh) */}
-          {w.band && BAND[w.band.code] ? <span className={`st ${BAND[w.band.code].cls}`} title={BAND[w.band.code].desc}>{referenceBandLabel(w.band)}</span> : <b>판정 근거 부족</b>}
+          {w.band && BAND[w.band.code] ? <span className={`st ${BAND[w.band.code].cls}`} title={BAND[w.band.code].desc}>{referenceBandLabel(w.band)}</span> : <b>가채점 판정 준비 중</b>}
         </span>
         <span>
           <small>환산 유불리</small>

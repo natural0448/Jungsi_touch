@@ -48,7 +48,7 @@ test("바꾼 말: 상세 카드 제목·상태 칩·계열 근거 표시", () =>
   assert.match(parts, /<h3>내 환산점수<\/h3>/);
   assert.match(parts, /label: ref \? "계산됨"/);
   assert.match(parts, /label: refPct \? "추정됨"/);
-  assert.match(parts, /"합격선 대비 위치" : "판정 근거 부족"/);
+  assert.match(parts, /"합격선 대비 위치" : "가채점 판정 준비 중"/);
   assert.match(parts, /label: referenceBandOf\(a\) \? "판정"/);
   assert.match(parts, /<span className="tag">학교 수능 반영분<\/span>/);
   assert.match(parts, /<h3>환산 유불리<\/h3>/);

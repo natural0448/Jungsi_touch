@@ -324,7 +324,7 @@ function StatusStrip({ a, overall }: { a: AssessmentDto; overall: OverallResultD
     { k: "점수 변환", ok: conv === "ready" || ref, label: ref ? "계산됨" : undefined, why: a.conversion?.reason_code },
     { k: "대학 안 내 위치", ok: pct === "ready" || refPct, label: refPct ? "추정됨" : undefined, why: a.percentile?.reason_code },
     pn
-      ? { k: "지원 판단", ok: true, label: pn.kind === "line" ? "합격선 대비 위치" : "판정 근거 부족", why: undefined }
+      ? { k: "지원 판단", ok: true, label: pn.kind === "line" ? "합격선 대비 위치" : "가채점 판정 준비 중", why: undefined }
       : { k: "지원 판단", ok: a.status === "ready" || !!referenceBandOf(a), label: referenceBandOf(a) ? "판정" : undefined, why: a.status === "ineligible" ? "eligibility_not_met" : decisionReasonCode(a) },
   ];
   return (
