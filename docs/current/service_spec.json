@@ -361907,6 +361907,14 @@
         "PAGE-04"
       ],
       "summary": "가채점 분석 무료 공개(11-28 대표님 결정, ~12-13): 정시터치 화면 문(JEONGSI_ACCESS_GATE)을 preview에서 members로 바꿔 활동 회원 모두에게 연다. 본체 JEONGSI_OPEN=members와 같은 날, 서버 무료 스위치를 먼저 켠 뒤 배포한다. 긴급 점검 때는 preview로 되돌린다."
+    },
+    {
+      "date": "2026-11-28",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "전문가용 학생 목록은 실채점이 열리기 전(finalOpen 거짓) 학생마다 실채점 성적 상태를 묻지 않는다. 운영 기록에서 학생마다 503 professional_exam_unavailable 거절이 났다. 칸은 지금처럼 \"─\"."
     }
   ],
   "p1_recruitment_score_review_verification": {

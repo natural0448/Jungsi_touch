@@ -10,7 +10,7 @@ import { edutouch, loginHref } from "@/lib/links";
 import type { ProOrganization, ProStudentPageDto } from "@/lib/pro-dto";
 import { KIND_LABEL, ROLE_LABEL, daysUntil, proAccess, type ProOrg } from "@/lib/pro-access";
 import { plainDate } from "@/lib/format";
-import { EXAM } from "@/lib/exam";
+import { EXAM, finalOpen } from "@/lib/exam";
 import { inBatches } from "@/lib/pro-stage";
 import { ProfileView } from "./profile-view";
 import { StudentForm } from "./student-form";
@@ -65,7 +65,9 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
         const used = (id: string, stage: "provisional" | "final") =>
           src.scoreStatus(caller, s.org_id, id, EXAM.exam_id, EXAM.pack_version, stage).then((r) => (r ? r.initial_used > 0 : null), () => null);
         // 학생마다 두 단계를 읽는다. 2026-11-28: 계정당 동시 한도가 2라 3명씩 물으면 하나가 503으로 거절됐다(운영 기록) → 2명씩
-        const done = await inBatches(page.items, 2, async (x) => ({ provisional: await used(x.student_id, "provisional"), final: await used(x.student_id, "final") }));
+        // 2026-11-28: 실채점이 열리기 전에는 실채점 상태를 묻지 않는다(서버가 학생마다 503 professional_exam_unavailable 로 거절했다). 칸은 지금처럼 '─'
+        const finalReady = finalOpen();
+        const done = await inBatches(page.items, 2, async (x) => ({ provisional: await used(x.student_id, "provisional"), final: finalReady ? await used(x.student_id, "final") : null }));
         page.items.forEach((x, i) => entered.set(x.student_id, done[i]));
       }
     } catch (e) {

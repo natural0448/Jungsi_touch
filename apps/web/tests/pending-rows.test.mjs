@@ -42,3 +42,10 @@ test("4페이지 설명 세 단계·준비 중 학과 업데이트 표시", () =
   assert.match(src("lib/position-note.ts"), /판정 근거는 계속 업데이트하고 있어/);
   assert.match(src("styles/jungsi.css"), /\.et \.fav-lead\{/);
 });
+
+// 2026-11-28: 학생 목록은 실채점이 열리기 전 실채점 상태를 묻지 않는다(학생마다 503 거절이 났다)
+test("전문가용 학생 목록: 실채점 전에는 final 상태 요청 없음", () => {
+  const p = src("app/pro/page.tsx");
+  assert.match(p, /const finalReady = finalOpen\(\);/);
+  assert.match(p, /final: finalReady \? await used\(x\.student_id, "final"\) : null/);
+});
