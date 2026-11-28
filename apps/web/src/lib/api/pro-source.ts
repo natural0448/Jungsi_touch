@@ -118,10 +118,12 @@ async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: 
 
 /*
   2026-11-28 대표님 승인(전문가용 속도 ①): 화면 한 장이 로그인 확인(/session)·학생 정보를 매번 서버에 다시 물어 0.5~1초가 들었다.
-  같은 회원(로그인 토큰 지문)·같은 주소의 성공 응답만 20초 기억한다(서버 로그인 확인 캐시와 같은 20초). 이 화면 서버 실행본 → 데이터센터 캐시.
-  학생 정보를 바꾸는 요청(수정·담당 지정·보관)을 보내면 그 학생 기억을 지운다. 오류·없음(404)은 기억하지 않는다
+  같은 회원(로그인 토큰 지문)·같은 주소의 성공 응답만 기억한다. 이 화면 서버 실행본 → 데이터센터 캐시.
+  2026-11-28 대표님 결정: 20초 → 60분(사실상 로그아웃까지 — 로그인 토큰은 1시간마다 새로 받으므로 그때 한 번 다시 읽는다).
+  학생 정보를 바꾸는 요청(수정·담당 지정·보관)을 보내면 성공·거절(판 번호 다름 포함) 모두 그 학생 기억을 지운다. 오류·없음(404)은 기억하지 않는다.
+  성적·리포트·판정 요청은 기억하지 않아 서버가 매번 권한을 확인한다
 */
-const READ_TTL_MS = 20_000;
+const READ_TTL_MS = 60 * 60_000;
 const readMemo = new Map<string, { at: number; v: unknown }>();
 async function readKey(caller: Caller, path: string): Promise<string | null> {
   if (!caller.accessToken) return null;
@@ -163,7 +165,7 @@ async function cachedGet<T>(caller: Caller, path: string): Promise<T | null> {
     while (readMemo.size > 500) readMemo.delete(readMemo.keys().next().value as string);
     if (edge) {
       try {
-        await edge.put(readUrl(k), new Response(JSON.stringify({ at, v }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=20" } }));
+        await edge.put(readUrl(k), new Response(JSON.stringify({ at, v }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=3600" } }));
       } catch {
         // 못 넣어도 화면은 그대로
       }
@@ -178,7 +180,7 @@ async function forgetRead(caller: Caller, path: string) {
   try {
     await readEdge()?.delete(readUrl(k));
   } catch {
-    // 20초 뒤 사라진다
+    // 60분 뒤 사라진다
   }
 }
 async function thenForget<T>(caller: Caller, path: string, p: Promise<Result<T>>): Promise<Result<T>> {
