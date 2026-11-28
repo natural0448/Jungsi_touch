@@ -7,6 +7,7 @@ import type { OfferingDto, ReportDto } from "@/lib/dto";
 import { csatFinalOnly, csatJudged, pickedIds } from "@/lib/report-pure";
 import { ConditionsBlock, CsatDetail, Detail } from "./parts";
 import { csatExceptionView } from "@/lib/csat-exceptions";
+import { SCHOOL_VIOLENCE_NOTICE, hasSchoolViolenceDeduction } from "@/lib/school-violence";
 
 /*
   4페이지·2페이지 펼친 상세에서 '내 리포트'로 그리는 카드. 서버 화면과 브라우저 화면(전문가용 인쇄 print-sheet → report-view)이
@@ -22,7 +23,16 @@ export function cellOf(report: ReportDto | null, id: string): Cell {
 
 /** 펼친 카드의 환산·누백·판단 카드 */
 /** acts=false: 2페이지 핵심 지원 학교 표에서 펼칠 때(담기·'내 성적 리포트에서 보기' 줄 없음) */
-export function MineDetail({ report, o, acts = true, single = false }: { report: ReportDto | null; o: OfferingDto; acts?: boolean; single?: boolean }) {
+/** 학교폭력 감점 모집단위 안내(2026-11-28 대표님 결정) */
+function SchoolViolenceNote({ id }: { id: string }) {
+  return hasSchoolViolenceDeduction(id) ? <p className="sv-note" role="note"><b>학교폭력 감점</b> {SCHOOL_VIOLENCE_NOTICE}</p> : null;
+}
+
+export function MineDetail(props: { report: ReportDto | null; o: OfferingDto; acts?: boolean; single?: boolean }) {
+  return <><SchoolViolenceNote id={props.o.offering_id} /><MineDetailBody {...props} /></>;
+}
+
+function MineDetailBody({ report, o, acts = true, single = false }: { report: ReportDto | null; o: OfferingDto; acts?: boolean; single?: boolean }) {
   if (report && csatJudged(report)) {
     // 2026-11-23 대표님 요청: 9월 모의평가 때와 같은 상세 카드(가채점 값으로)
     const ineligible = isConfirmedIneligible(report, o.offering_id);

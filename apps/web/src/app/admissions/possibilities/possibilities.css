@@ -262,3 +262,6 @@
 .et .ps .univ .pending-rows>summary b{color:var(--ink, inherit)}
 .et .ps .univ .pending-rows .upd{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:#FFF1E8;color:#C2410C;font-size:12px;font-weight:700}
 .et .ps .univ .pending-rows .pending-note{margin:0;padding:10px 18px;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--line)}
+/* 2026-11-28 학교폭력 감점 안내 */
+.et .sv-note{margin:0 0 10px;padding:10px 14px;border-radius:var(--r-sm, 8px);background:#FFF4E5;border:1px solid #F5C27A;font-size:13px;line-height:1.6;color:var(--ink)}
+.et .sv-note b{margin-right:6px;color:#B45309}
