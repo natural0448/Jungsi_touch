@@ -155,7 +155,7 @@ async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: 
   같은 회원(로그인 토큰 지문)·같은 주소의 성공 응답만 기억한다. 이 화면 서버 실행본 → 데이터센터 캐시.
   2026-11-28 대표님 결정: 20초 → 60분(사실상 로그아웃까지 — 로그인 토큰은 1시간마다 새로 받으므로 그때 한 번 다시 읽는다).
   학생 정보를 바꾸는 요청(수정·담당 지정·보관)을 보내면 성공·거절(판 번호 다름 포함) 모두 그 학생 기억을 지운다. 오류·없음(404)은 기억하지 않는다.
-  성적·리포트·판정 요청은 기억하지 않아 서버가 매번 권한을 확인한다
+  성적 상태·리포트는 아래 학생별 변경 표시(Q1)로 5분만 기억한다. 판정 요청은 기억하지 않는다
 */
 const READ_TTL_MS = 60 * 60_000;
 const readMemo = new Map<string, { at: number; v: unknown }>();
@@ -225,37 +225,122 @@ async function thenForget<T>(caller: Caller, path: string, p: Promise<Result<T>>
   }
 }
 
+/*
+  2026-11-28 대표님 승인(속도 Q1): 화면마다 리포트 목록·성적 상태·리포트 본문을 다시 물어 0.6~1초가 들었다.
+  학생별 '변경 표시'를 화면 서버 데이터센터 캐시에 두고, 기억 열쇠에 넣는다. 그 학생의 성적 저장·판정·후보·리포트 내보내기·정정 허용·학생 정보 변경 요청을
+  보내면(성공·거절 모두) 표시를 새로 바꿔 이전 기억은 다시 쓰지 않는다. 표시를 못 읽으면 기억을 쓰지 않는다.
+  다른 데이터센터에서 바뀐 경우를 생각해 5분만 기억한다. 오류·없음은 기억하지 않는다
+*/
+const STUDENT_TTL_MS = 5 * 60_000;
+const genMemo = new Map<string, string>();
+const genUrl = (orgId: string, id: string) => `https://jt-pro-gen.invalid/${encodeURIComponent(orgId)}/${encodeURIComponent(id)}`;
+const freshGen = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+async function putGen(orgId: string, id: string, g: string) {
+  genMemo.set(`${orgId}\u0000${id}`, g);
+  while (genMemo.size > 2000) genMemo.delete(genMemo.keys().next().value as string);
+  try {
+    await readEdge()?.put(genUrl(orgId, id), new Response(g, { headers: { "content-type": "text/plain", "cache-control": "public, max-age=3600" } }));
+  } catch {
+    // 못 넣으면 다음 요청이 새 표시를 만든다
+  }
+}
+async function studentGen(orgId: string, id: string): Promise<string | null> {
+  const edge = readEdge();
+  if (!edge) return null;
+  try {
+    const hit = await edge.match(genUrl(orgId, id));
+    if (hit) {
+      const g = (await hit.text()).trim();
+      if (g && g.length <= 40) {
+        genMemo.set(`${orgId}\u0000${id}`, g);
+        return g;
+      }
+    }
+  } catch {
+    return null;
+  }
+  // 표시가 없으면(처음·캐시에서 밀려남) 새로 만든다 — 이전 기억은 열쇠가 달라 다시 쓰이지 않는다
+  const g = freshGen();
+  await putGen(orgId, id, g);
+  return g;
+}
+async function studentGet<T>(caller: Caller, orgId: string, id: string, path: string): Promise<T | null> {
+  const g = await studentGen(orgId, id);
+  if (!g || !caller.accessToken) return get<T>(caller, path);
+  const k = await readKey(caller, `${path}\u0000gen:${g}`);
+  if (!k) return get<T>(caller, path);
+  const m = readMemo.get(k);
+  if (m && Date.now() - m.at < STUDENT_TTL_MS) return m.v as T;
+  const edge = readEdge();
+  if (edge) {
+    try {
+      const hit = await edge.match(readUrl(k));
+      if (hit) {
+        const j = (await hit.json()) as { at: number; v: T };
+        if (j && typeof j.at === "number" && Date.now() - j.at < STUDENT_TTL_MS && j.v != null) {
+          readMemo.set(k, { at: j.at, v: j.v });
+          return j.v;
+        }
+      }
+    } catch {
+      // 기억을 못 읽으면 서버에 묻는다
+    }
+  }
+  const v = await get<T>(caller, path);
+  // 묻는 사이 표시가 바뀌었으면(같은 실행본에서 쓰기 요청) 저장하지 않는다
+  if (v != null && genMemo.get(`${orgId}\u0000${id}`) === g) {
+    const at = Date.now();
+    readMemo.set(k, { at, v });
+    while (readMemo.size > 500) readMemo.delete(readMemo.keys().next().value as string);
+    if (edge) {
+      try {
+        await edge.put(readUrl(k), new Response(JSON.stringify({ at, v }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=300" } }));
+      } catch {
+        // 못 넣어도 화면은 그대로
+      }
+    }
+  }
+  return v;
+}
+async function thenBump<T>(orgId: string, id: string, p: Promise<Result<T>>): Promise<Result<T>> {
+  try {
+    return await p;
+  } finally {
+    await putGen(orgId, id, freshGen());
+  }
+}
+
 const liveSource: ProSource = {
   session: async (caller) => (await cachedGet<ProSessionDto>(caller, "/session")) ?? { organizations: [], org_id: null, role: null, contract_status: "selection_required" },
   listStudents: async (caller, orgId, q) => (await get<ProStudentPageDto>(caller, `/organizations/${enc(orgId)}/students${qs(q)}`)) ?? { items: [], next_cursor: null, has_more: false },
   createStudent: (caller, orgId, input, v, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students`, { ...input, expected_contract_version: v }, key),
   readStudent: (caller, orgId, id) => cachedGet(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`),
   updateStudent: (caller, orgId, id, input, v, key) =>
-    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, write(caller, "PATCH", `/organizations/${enc(orgId)}/students/${enc(id)}`, { ...input, expected_version: v }, key)),
+    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, thenBump(orgId, id, write(caller, "PATCH", `/organizations/${enc(orgId)}/students/${enc(id)}`, { ...input, expected_version: v }, key))),
   scoreStatus: (caller, orgId, id, examId, packVersion, stage) =>
-    get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/score-input-status${qs({ exam_id: examId, pack_version: packVersion, stage })}`),
-  createScore: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/score-profiles`, { ...body, confirmed: true }, key),
+    studentGet(caller, orgId, id, `/organizations/${enc(orgId)}/students/${enc(id)}/score-input-status${qs({ exam_id: examId, pack_version: packVersion, stage })}`),
+  createScore: (caller, orgId, id, body, key) => thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/score-profiles`, { ...body, confirmed: true }, key)),
   analyzeOverall: (caller, orgId, id, profileId, v, key) =>
-    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/overall-analysis`, { profile_id: profileId, expected_profile_version: v }, key),
+    thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/overall-analysis`, { profile_id: profileId, expected_profile_version: v }, key)),
   listReports: async (caller, orgId, id) =>
-    (await get<ProStudentReportPageDto>(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
-  readReport: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
-  analyzeP4: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/university-analysis`, body, key, true),
+    (await studentGet<ProStudentReportPageDto>(caller, orgId, id, `/organizations/${enc(orgId)}/students/${enc(id)}/reports${qs({ limit: 20 })}`)) ?? { org_id: orgId, student_id: id, items: [], next_cursor: null, has_more: false },
+  readReport: (caller, orgId, id, reportId) => studentGet(caller, orgId, id, `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}`),
+  analyzeP4: (caller, orgId, id, body, key) => thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/university-analysis`, body, key, true)),
   candidates: (caller, orgId, id, profileId, v, key) =>
-    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/candidates`, { profile_id: profileId, filters: {}, expected_profile_version: v }, key),
+    thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/candidates`, { profile_id: profileId, filters: {}, expected_profile_version: v }, key)),
   listBookmarks: (caller, orgId, id, reportId) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks${qs({ report_id: reportId })}`),
   addBookmark: (caller, orgId, id, reportId, offeringId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks`, { report_id: reportId, offering_id: offeringId }, key),
   removeBookmark: (caller, orgId, id, reportId, offeringId, key) =>
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/bookmarks/remove`, { report_id: reportId, offering_id: offeringId }, key),
   exportReport: (caller, orgId, id, reportId, revisionId, key) =>
-    write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key),
+    thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key)),
   listMembers: (caller, orgId) => get(caller, `/organizations/${enc(orgId)}/members${qs({ limit: 100 })}`),
   assignStudent: (caller, orgId, id, ids, v, key) =>
-    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, write(caller, "PUT", `/organizations/${enc(orgId)}/students/${enc(id)}/assignments`, { assigned_teacher_ids: ids, expected_version: v }, key)),
+    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, thenBump(orgId, id, write(caller, "PUT", `/organizations/${enc(orgId)}/students/${enc(id)}/assignments`, { assigned_teacher_ids: ids, expected_version: v }, key))),
   archiveStudent: (caller, orgId, id, v, key) =>
-    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/archive`, { expected_version: v }, key)),
-  grantCorrection: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/management/score-input-corrections`, body, key),
+    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/archive`, { expected_version: v }, key))),
+  grantCorrection: (caller, orgId, id, body, key) => thenBump(orgId, id, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/management/score-input-corrections`, body, key)),
 };
 
 /* ── synthetic(화면 제작용 메모리) ── */

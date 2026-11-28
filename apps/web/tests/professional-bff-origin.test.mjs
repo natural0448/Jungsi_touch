@@ -135,3 +135,54 @@ test("session·student reads are remembered per token for 60 minutes, and a stud
     assert.ok(calls.every((c) => c.init.cache === "no-store"));
   });
 });
+
+// 2026-11-28 대표님 승인(속도 Q1): 성적 상태·리포트 목록·리포트 본문은 학생별 변경 표시와 함께 5분 기억하고, 그 학생에게 쓰기 요청을 보내면 다시 받는다
+test("student-scoped reads reuse until a write to that student changes its mark", async () => {
+  const store = new Map();
+  const prev = globalThis.caches;
+  globalThis.caches = { default: {
+    async match(u) { const v = store.get(String(u)); return v === undefined ? undefined : new Response(v); },
+    async put(u, r) { store.set(String(u), await r.text()); },
+    async delete(u) { return store.delete(String(u)); },
+  } };
+  try {
+    await withTransport(h({ origin, "sec-fetch-site": "same-origin" }), origin, async (calls) => {
+      const src = proSource();
+      const me = { accessToken: "invented-jwt-q1-a" };
+      await src.listReports(me, "org-q", "student-q");
+      await src.scoreStatus(me, "org-q", "student-q", "exam-x", "pack-x", "provisional");
+      await src.readReport(me, "org-q", "student-q", "report-q");
+      assert.equal(calls.length, 3);
+      await src.listReports(me, "org-q", "student-q");
+      await src.scoreStatus(me, "org-q", "student-q", "exam-x", "pack-x", "provisional");
+      await src.readReport(me, "org-q", "student-q", "report-q");
+      assert.equal(calls.length, 3);
+      // 다른 회원은 따로 묻는다
+      await src.listReports({ accessToken: "invented-jwt-q1-b" }, "org-q", "student-q");
+      assert.equal(calls.length, 4);
+      // 다른 학생 쓰기는 영향 없음
+      await src.createScore(me, "org-q", "student-other", { profile: {} }, "k-q1-0");
+      await src.listReports(me, "org-q", "student-q");
+      assert.equal(calls.length, 5);
+      // 이 학생 성적 저장 → 세 읽기 모두 새로
+      await src.createScore(me, "org-q", "student-q", { profile: {} }, "k-q1-1");
+      assert.equal(calls.length, 6);
+      await src.listReports(me, "org-q", "student-q");
+      await src.scoreStatus(me, "org-q", "student-q", "exam-x", "pack-x", "provisional");
+      await src.readReport(me, "org-q", "student-q", "report-q");
+      assert.equal(calls.length, 9);
+      await src.listReports(me, "org-q", "student-q");
+      assert.equal(calls.length, 9);
+      // 판정 요청도 표시를 바꾼다
+      await src.analyzeOverall(me, "org-q", "student-q", "profile-q", 1, "k-q1-2");
+      await src.readReport(me, "org-q", "student-q", "report-q");
+      assert.equal(calls.length, 11);
+      // 표시가 캐시에서 사라지면 새 표시 → 다시 받는다
+      for (const k of [...store.keys()]) if (k.includes("jt-pro-gen.invalid")) store.delete(k);
+      await src.readReport(me, "org-q", "student-q", "report-q");
+      assert.equal(calls.length, 12);
+    });
+  } finally {
+    globalThis.caches = prev;
+  }
+});
