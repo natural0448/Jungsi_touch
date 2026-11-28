@@ -64,8 +64,8 @@ export default async function Page({ searchParams }: PageProps<"/pro">) {
         const s = svc;
         const used = (id: string, stage: "provisional" | "final") =>
           src.scoreStatus(caller, s.org_id, id, EXAM.exam_id, EXAM.pack_version, stage).then((r) => (r ? r.initial_used > 0 : null), () => null);
-        // 학생마다 두 단계를 읽는다. 동시 요청은 6개 안쪽(계정당 동시 한도 429를 피한다)
-        const done = await inBatches(page.items, 3, async (x) => ({ provisional: await used(x.student_id, "provisional"), final: await used(x.student_id, "final") }));
+        // 학생마다 두 단계를 읽는다. 2026-11-28: 계정당 동시 한도가 2라 3명씩 물으면 하나가 503으로 거절됐다(운영 기록) → 2명씩
+        const done = await inBatches(page.items, 2, async (x) => ({ provisional: await used(x.student_id, "provisional"), final: await used(x.student_id, "final") }));
         page.items.forEach((x, i) => entered.set(x.student_id, done[i]));
       }
     } catch (e) {

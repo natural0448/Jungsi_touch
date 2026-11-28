@@ -114,3 +114,24 @@ test("render origin: needs only a configured https origin", async () => {
   assert.equal(professionalRenderOrigin(undefined, h({})).ok, false);
   assert.equal(professionalRenderOrigin("http://edutouch.co.kr", h({})).ok, false);
 });
+
+// 2026-11-28 대표님 승인(전문가용 속도 ①): 로그인 확인·학생 정보는 같은 회원·같은 주소의 성공 응답만 20초 기억하고, 학생을 바꾸면 지운다
+test("session·student reads are remembered per token for 20s, and a student write forgets that student", async () => {
+  await withTransport(h({ origin, "sec-fetch-site": "same-origin" }), origin, async (calls) => {
+    const src = proSource();
+    const me = { accessToken: "invented-jwt-memo-a" };
+    await src.session(me);
+    await src.session(me);
+    assert.equal(calls.length, 1);
+    await src.session({ accessToken: "invented-jwt-memo-b" });
+    assert.equal(calls.length, 2);
+    await src.readStudent(me, "org-m", "student-m");
+    await src.readStudent(me, "org-m", "student-m");
+    assert.equal(calls.length, 3);
+    await src.updateStudent(me, "org-m", "student-m", { display_name: "가상", class_label: null, class_number: null, tags: [], memo: null }, 1, "k-memo");
+    assert.equal(calls.length, 4);
+    await src.readStudent(me, "org-m", "student-m");
+    assert.equal(calls.length, 5);
+    assert.ok(calls.every((c) => c.init.cache === "no-store"));
+  });
+});

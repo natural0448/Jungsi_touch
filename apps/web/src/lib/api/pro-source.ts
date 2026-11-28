@@ -116,12 +116,86 @@ async function write<T>(caller: Caller, method: "POST" | "PATCH" | "PUT", path: 
   return { ok: true, value: ((await res.json()) as ProEnvelope<T>).data };
 }
 
+/*
+  2026-11-28 대표님 승인(전문가용 속도 ①): 화면 한 장이 로그인 확인(/session)·학생 정보를 매번 서버에 다시 물어 0.5~1초가 들었다.
+  같은 회원(로그인 토큰 지문)·같은 주소의 성공 응답만 20초 기억한다(서버 로그인 확인 캐시와 같은 20초). 이 화면 서버 실행본 → 데이터센터 캐시.
+  학생 정보를 바꾸는 요청(수정·담당 지정·보관)을 보내면 그 학생 기억을 지운다. 오류·없음(404)은 기억하지 않는다
+*/
+const READ_TTL_MS = 20_000;
+const readMemo = new Map<string, { at: number; v: unknown }>();
+async function readKey(caller: Caller, path: string): Promise<string | null> {
+  if (!caller.accessToken) return null;
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(caller.accessToken + "\u0000" + path));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function readEdge(): Cache | null {
+  try {
+    return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+const readUrl = (k: string) => `https://jt-pro-read.invalid/${k}`;
+async function cachedGet<T>(caller: Caller, path: string): Promise<T | null> {
+  const k = await readKey(caller, path);
+  if (!k) return get<T>(caller, path);
+  const m = readMemo.get(k);
+  if (m && Date.now() - m.at < READ_TTL_MS) return m.v as T;
+  const edge = readEdge();
+  if (edge) {
+    try {
+      const hit = await edge.match(readUrl(k));
+      if (hit) {
+        const j = (await hit.json()) as { at: number; v: T };
+        if (j && typeof j.at === "number" && Date.now() - j.at < READ_TTL_MS && j.v != null) {
+          readMemo.set(k, { at: j.at, v: j.v });
+          return j.v;
+        }
+      }
+    } catch {
+      // 기억을 못 읽으면 서버에 묻는다
+    }
+  }
+  const v = await get<T>(caller, path);
+  if (v != null) {
+    const at = Date.now();
+    readMemo.set(k, { at, v });
+    while (readMemo.size > 500) readMemo.delete(readMemo.keys().next().value as string);
+    if (edge) {
+      try {
+        await edge.put(readUrl(k), new Response(JSON.stringify({ at, v }), { headers: { "content-type": "application/json", "cache-control": "public, max-age=20" } }));
+      } catch {
+        // 못 넣어도 화면은 그대로
+      }
+    }
+  }
+  return v;
+}
+async function forgetRead(caller: Caller, path: string) {
+  const k = await readKey(caller, path);
+  if (!k) return;
+  readMemo.delete(k);
+  try {
+    await readEdge()?.delete(readUrl(k));
+  } catch {
+    // 20초 뒤 사라진다
+  }
+}
+async function thenForget<T>(caller: Caller, path: string, p: Promise<Result<T>>): Promise<Result<T>> {
+  try {
+    return await p;
+  } finally {
+    await forgetRead(caller, path);
+  }
+}
+
 const liveSource: ProSource = {
-  session: async (caller) => (await get<ProSessionDto>(caller, "/session")) ?? { organizations: [], org_id: null, role: null, contract_status: "selection_required" },
+  session: async (caller) => (await cachedGet<ProSessionDto>(caller, "/session")) ?? { organizations: [], org_id: null, role: null, contract_status: "selection_required" },
   listStudents: async (caller, orgId, q) => (await get<ProStudentPageDto>(caller, `/organizations/${enc(orgId)}/students${qs(q)}`)) ?? { items: [], next_cursor: null, has_more: false },
   createStudent: (caller, orgId, input, v, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students`, { ...input, expected_contract_version: v }, key),
-  readStudent: (caller, orgId, id) => get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`),
-  updateStudent: (caller, orgId, id, input, v, key) => write(caller, "PATCH", `/organizations/${enc(orgId)}/students/${enc(id)}`, { ...input, expected_version: v }, key),
+  readStudent: (caller, orgId, id) => cachedGet(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`),
+  updateStudent: (caller, orgId, id, input, v, key) =>
+    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, write(caller, "PATCH", `/organizations/${enc(orgId)}/students/${enc(id)}`, { ...input, expected_version: v }, key)),
   scoreStatus: (caller, orgId, id, examId, packVersion, stage) =>
     get(caller, `/organizations/${enc(orgId)}/students/${enc(id)}/score-input-status${qs({ exam_id: examId, pack_version: packVersion, stage })}`),
   createScore: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/score-profiles`, { ...body, confirmed: true }, key),
@@ -142,8 +216,9 @@ const liveSource: ProSource = {
     write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/reports/${enc(reportId)}/export`, { revision_id: revisionId }, key),
   listMembers: (caller, orgId) => get(caller, `/organizations/${enc(orgId)}/members${qs({ limit: 100 })}`),
   assignStudent: (caller, orgId, id, ids, v, key) =>
-    write(caller, "PUT", `/organizations/${enc(orgId)}/students/${enc(id)}/assignments`, { assigned_teacher_ids: ids, expected_version: v }, key),
-  archiveStudent: (caller, orgId, id, v, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/archive`, { expected_version: v }, key),
+    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, write(caller, "PUT", `/organizations/${enc(orgId)}/students/${enc(id)}/assignments`, { assigned_teacher_ids: ids, expected_version: v }, key)),
+  archiveStudent: (caller, orgId, id, v, key) =>
+    thenForget(caller, `/organizations/${enc(orgId)}/students/${enc(id)}`, write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/archive`, { expected_version: v }, key)),
   grantCorrection: (caller, orgId, id, body, key) => write(caller, "POST", `/organizations/${enc(orgId)}/students/${enc(id)}/management/score-input-corrections`, body, key),
 };
 
