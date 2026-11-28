@@ -218,10 +218,17 @@ async function sendOnceMore(path: string, init: RequestInit, replayable: boolean
 
 async function send(path: string, init: RequestInit): Promise<Response> {
   const key = new Headers(init.headers).get("Authorization") ?? "anonymous";
+  // 2026-11-28 속도 원인 나누기(대표님 요청: 처음 여는 화면 3초대): 차례 기다림(wait)과 서버 응답(ms)만 남긴다. 경로의 번호는 가린다
+  const queued = Date.now();
   return withLane(key, async () => {
+    const t0 = Date.now();
+    const shape = `${init.method ?? "GET"} ${path.split("?")[0].replace(/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, ":id").replace(/\/[A-Za-z_-]*\d[A-Za-z0-9_.:-]*/g, "/:id")}`;
     try {
-      return await fetch(`${base()}${path}`, { ...init, cache: "no-store" });
+      const res = await fetch(`${base()}${path}`, { ...init, cache: "no-store" });
+      console.log(`[api] ${shape} ${res.status} wait=${t0 - queued}ms ms=${Date.now() - t0}`);
+      return res;
     } catch {
+      console.log(`[api] ${shape} failed wait=${t0 - queued}ms ms=${Date.now() - t0}`);
       throw new ConnectionError("unavailable", "backend_unreachable");
     }
   });
