@@ -1,5 +1,6 @@
 import { CsatBadge } from "@/components/csat-badge";
 import type { ReferenceUniversity } from "@/lib/reference-view";
+import type { ReferenceBandDto } from "@/lib/dto";
 import { ReferenceFieldDetails } from "./reference-field";
 import { CsatFieldRows } from "./csat-field-rows";
 
@@ -52,7 +53,7 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, 
                     department: o.department,
                     sub: [o.group ? `${o.group}군` : null, o.track].filter(Boolean).join(" · "),
                     name: `${o.university_name} ${o.department}`,
-                    band: band ?? null,
+                    band: slimBand(band),
                     fav: !!favs?.has(o.offering_id),
                   }))}
                 />
@@ -68,4 +69,13 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, 
       </p>}
     </section>
   );
+}
+
+/** 학과 줄 배지가 쓰는 칸만 보낸다(2026-11-28: 줄마다 판정 정보 전체 약 500바이트 × 930줄 = 488KB였다).
+ *  배지·안내 문구(CsatBadge)가 읽는 것: 단계·범위 끝·보류·수능 반영분 표시·유불리 방향. 위치·환산점수 칸은 이 목록에 보이지 않는다 */
+function slimBand(b: ReferenceBandDto | null | undefined): ReferenceBandDto | null {
+  if (!b) return null;
+  const out: Record<string, unknown> = { basis: b.basis, code: b.code, label: b.label, source: b.source };
+  for (const k of ["held", "upper_code", "score_scope", "school_gain", "gain_tone"] as const) if (b[k] !== undefined && b[k] !== null) out[k] = b[k];
+  return out as unknown as ReferenceBandDto;
 }
