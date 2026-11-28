@@ -85,6 +85,19 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   // 검색 목록(필터·즐겨찾기 없음, 검색어·지역·군은 있어도 됨): 서버가 맞는 수를 주고 offset 으로 아무 쪽이나 연다
   // (전체 목록 dep_r63, 검색 dep_r64 — 대표님 요청 11-27 '검색할 때도 숫자 쪽')
   const plainList = !pro && !cur.fav && !cur.st;
+  // 2026-11-28 대표님 승인(4페이지 처음 열기 속도): 지원가능성 필터로 전국 판정 훑기를 하는 화면은 검색 결과를 목록에 쓰지 않는다.
+  // 계정당 동시 2건이라 예전 순서(리포트+검색 → 성적 상태 → 훑기)는 줄이 길었다(운영 3.7초).
+  // 이 화면만 (리포트+성적 상태) → (훑기+검색) 순서로 보낸다. 훑기 요청은 아래 쪽 번호 방식 분기와 같은 값으로 미리 만든다
+  const scanFirst = !pro && !!cur.st && !cur.fav && !cur.university_q && !cur.department_q;
+  const SCAN_STAGES = ["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"];
+  const scanCodes = cur.st ? [...new Set(cur.st.flatMap((k) => (SCAN_STAGES.includes(k) ? [k] : k === "none" || k === "ineligible" ? ["none"] : [])))] : [];
+  const scanPageMode = scanFirst && !!cur.st && cur.st.includes("none") === cur.st.includes("ineligible") && scanCodes.length > 0;
+  const scanPageNo = cur.cursor?.startsWith("sp:") ? Math.max(1, Math.min(10000, Number.parseInt(cur.cursor.slice(3), 10) || 1)) : 1;
+  const scanReq = { codes: scanCodes, offset: (scanPageNo - 1) * LIMIT, limit: LIMIT, ...(cur.region ? { region: cur.region } : {}), ...(cur.group ? { group: cur.group } : {}) };
+  const mineFirst = scanFirst ? startMine(src, caller, Promise.resolve()) : null;
+  const earlyScan = scanPageMode && mineFirst
+    ? mineFirst.then((m) => (m.ok && m.report && csatJudged(m.report) ? provisionalScan(src, caller, m.report, scanReq).then((got) => ({ report: m.report!, got })) : null)).catch(() => null)
+    : null;
   const plainPage = cur.cursor?.startsWith("pg:") ? Math.max(1, Math.min(10000, Number.parseInt(cur.cursor.slice(3), 10) || 1)) : 1;
   const searching = cur.fav
     ? favoring.then((f) => favoriteResult(f, cur))
@@ -101,9 +114,12 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
     // 조건 없는 전체 목록의 쪽 번호(pg:N)는 서버 offset 으로 바로 그 쪽을 받는다(서버 dep_r63, 대표님 요청 11-27)
     : plainList && cur.cursor?.startsWith("pg:")
     ? skipEmptyPages(src, caller, { ...toSearch({ ...cur, cursor: undefined }), offset: (plainPage - 1) * LIMIT })
+    : scanFirst && mineFirst
+    // 필터 화면: 리포트·성적 상태를 받은 뒤 훑기와 함께 보낸다(위 scanFirst)
+    ? mineFirst.then(() => skipEmptyPages(src, caller, toSearch({ ...cur, cursor: undefined })))
     : skipEmptyPages(src, caller, toSearch(cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") || cur.cursor?.startsWith("pg:") ? { ...cur, cursor: undefined } : cur));
   searching.catch(() => {}); // 아래 try 가 같은 약속을 기다려 처리한다
-  const mine = pro ? searching.then(() => ({ ok: true as const, report: pro.report })) : startMine(src, caller, searching);
+  const mine = pro ? searching.then(() => ({ ok: true as const, report: pro.report })) : mineFirst ?? startMine(src, caller, searching);
   let res: CatalogSearchDto<OfferingDto>;
   try {
     res = await searching;
@@ -229,7 +245,11 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
       const pageNo = cur.cursor?.startsWith("sp:") ? Math.max(1, Math.min(10000, Number.parseInt(cur.cursor.slice(3), 10) || 1)) : 1;
       const base = report;
       const bandsAll: Record<string, ReferenceBandDto> = { ...(base.provisional_bands ?? {}) };
-      const got = await provisionalScan(src, caller, base, { codes, offset: (pageNo - 1) * LIMIT, limit: LIMIT, ...(cur.region ? { region: cur.region } : {}), ...(cur.group ? { group: cur.group } : {}) });
+      // 미리 보낸 훑기(같은 리포트·같은 요청)가 있으면 그 결과를 쓴다
+      const early = earlyScan ? await earlyScan : null;
+      const got = early && early.report.report_id === base.report_id && early.report.report_version === base.report_version && pageNo === scanPageNo && codes.join() === scanCodes.join()
+        ? early.got
+        : await provisionalScan(src, caller, base, { codes, offset: (pageNo - 1) * LIMIT, limit: LIMIT, ...(cur.region ? { region: cur.region } : {}), ...(cur.group ? { group: cur.group } : {}) });
       if (got) {
         if (!got.complete) scanPartial = true;
         Object.assign(bandsAll, got.bands);

@@ -49,3 +49,13 @@ test("전문가용 학생 목록: 실채점 전에는 final 상태 요청 없음
   assert.match(p, /const finalReady = finalOpen\(\);/);
   assert.match(p, /final: finalReady \? await used\(x\.student_id, "final"\) : null/);
 });
+
+// 2026-11-28 대표님 승인: 필터 화면 4페이지는 (리포트+성적 상태) → (훑기+검색) 순서, 미리 보낸 훑기 결과를 쓴다
+test("4페이지 필터 화면 요청 순서", () => {
+  const c = src("app/admissions/possibilities/catalog-browse.tsx");
+  assert.match(c, /const mineFirst = scanFirst \? startMine\(src, caller, Promise\.resolve\(\)\) : null;/);
+  assert.match(c, /\? mineFirst\.then\(\(\) => skipEmptyPages\(src, caller, toSearch\(\{ \.\.\.cur, cursor: undefined \}\)\)\)/);
+  assert.match(c, /: mineFirst \?\? startMine\(src, caller, searching\);/);
+  assert.match(c, /const early = earlyScan \? await earlyScan : null;/);
+  assert.match(c, /early\.report\.report_version === base\.report_version && pageNo === scanPageNo/);
+});
