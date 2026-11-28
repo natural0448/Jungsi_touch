@@ -38,10 +38,16 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   if (got.kind === "connection") return <>{head}<ConnectionNotice e={got.error} /></>;
   if (got.kind !== "ok") return <>{head}<NotFoundNote orgParam={orgParam} /></>;
   const v = got.view;
-  // 2026-11-28 속도: 담은 곳 판정은 기다리지 않고 시작만 한다(목록 판정과 동시 2건 — 계정당 동시 한도 2 안)
+  // 2026-11-28 속도 ㉢: 두 판정을 동시에 보내면 서버의 같은 회원 사용량 기록 줄을 서로 잠가 둘 다 느렸다(각 1.3~1.4초).
+  // 목록 판정을 먼저 혼자 보내 목록이 먼저 뜨게 하고, 담은 곳 판정은 그 뒤에 보낸다(아래 띠만 그 결과를 기다린다)
   const picked = v.report ? [...pickedIds(v.report)] : [];
+  let listDone: () => void = () => {};
+  const listGate = new Promise<void>((go) => { listDone = go; });
+  const afterList = <T,>(p: Promise<T>) => { p.then(listDone, listDone); return p; };
+  // 목록 판정이 없는 화면(필터 없음·오류)이어도 3초 뒤에는 띠를 채운다
+  setTimeout(listDone, 3000);
   const pickedItems: Promise<OfferingDto[]> = picked.length
-    ? proP4(caller, v, { offering_ids: picked.slice(0, 30) }).then((r) => r.search?.items ?? [], () => [])
+    ? listGate.then(() => proP4(caller, v, { offering_ids: picked.slice(0, 30) })).then((r) => r.search?.items ?? [], () => [])
     : Promise.resolve([]);
   const favorites = await proFavorites(v.svc.org_id, v.student.student_id);
   const pro: ProBrowse = {
@@ -49,10 +55,10 @@ export default async function Page({ params, searchParams }: { params: Promise<{
     params: { org: v.svc.org_id },
     report: v.report,
     favorites,
-    search: (q) => proP4(caller, v, { search: Object.fromEntries(Object.entries(q).filter(([, x]) => typeof x === "string" && x !== "")) }),
+    search: (q) => afterList(proP4(caller, v, { search: Object.fromEntries(Object.entries(q).filter(([, x]) => typeof x === "string" && x !== "")) })),
     byIds: async (ids) => (ids.length ? proP4(caller, v, { offering_ids: ids.slice(0, 30) }) : { bands: {}, min: {}, display: {} }),
     // 지원가능성 필터(서버 dep_pro_r38): 전국 판정에서 고른 단계 모집단위 한 쪽
-    scan: (q) => proP4(caller, v, { search: { st: q.codes.join(","), limit: String(q.limit), ...(q.after ? { after: q.after } : {}), ...(q.region ? { region: q.region } : {}), ...(q.group ? { group: q.group } : {}) } }),
+    scan: (q) => afterList(proP4(caller, v, { search: { st: q.codes.join(","), limit: String(q.limit), ...(q.after ? { after: q.after } : {}), ...(q.region ? { region: q.region } : {}), ...(q.group ? { group: q.group } : {}) } })),
     picked: pickedItems,
     tray: { other: proTabHref(v.svc.org_id, v.student.student_id, "favorable"), report: proTabHref(v.svc.org_id, v.student.student_id, "report"), reportLabel: "정시 리포트에서 정리" },
   };

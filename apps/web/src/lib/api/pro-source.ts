@@ -69,13 +69,47 @@ function headers(caller: Caller, extra?: Record<string, string>) {
   if (relay) h.set("X-Jungsi-Relay-Token", relay);
   return h;
 }
+/*
+  2026-11-28 대표님 승인(속도 P1): 화면 서버 → 판정 서버를 공개 주소 대신 Cloudflare 내부 연결(서비스 바인딩)로 부른다.
+  같은 요청인데 판정 서버 안 0.5초가 화면 서버에서는 0.9~1.4초였다(서버 사이 이동). 주소가 Cloudflare 판정 서버일 때만 쓰고,
+  바인딩이 없으면(시험·Supabase 되돌림) 지금처럼 주소로 부른다. 요청 내용·머리말은 그대로다
+*/
+const BOUND_HOSTS: Record<string, string> = {
+  "jungsi-api-prod.edutouch-web.workers.dev": "JUNGSI_API_SVC",
+  "jungsi-pro-api-prod.edutouch-web.workers.dev": "JUNGSI_PRO_API_SVC",
+};
+type Bound = { fetch(r: Request): Promise<Response> };
+async function boundService(url: string): Promise<Bound | null> {
+  let host: string;
+  try {
+    host = new URL(url).host;
+  } catch {
+    return null;
+  }
+  const name = BOUND_HOSTS[host];
+  if (!name) return null;
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const env = (await getCloudflareContext({ async: true })).env as Record<string, unknown>;
+    const b = env[name] as Bound | undefined;
+    return b && typeof b.fetch === "function" ? b : null;
+  } catch {
+    return null;
+  }
+}
+async function callBackend(url: string, init: RequestInit): Promise<Response> {
+  const b = await boundService(url);
+  if (!b) return fetch(url, { ...init, cache: "no-store" });
+  const { cache: _ignored, ...rest } = init;
+  return b.fetch(new Request(url, rest));
+}
 async function send(path: string, init: RequestInit): Promise<Response> {
   const base = process.env.JUNGSI_PRO_API_URL;
   if (!base) throw new ConnectionError("unconfigured", "pro_api_not_configured");
   // 2026-11-27 속도 측정(대표님 요청: 전문가용 느림): 경로 모양·상태·걸린 시간만 남긴다(기관·학생·리포트 번호는 가린다)
   const t0 = Date.now();
   try {
-    const res = await fetch(`${base}/api/v1/pro${path}`, { ...init, cache: "no-store" });
+    const res = await callBackend(`${base}/api/v1/pro${path}`, init);
     console.log(`[pro-api] ${init.method ?? "GET"} ${path.split("?")[0].replace(/\/organizations\/[^/]+/, "/organizations/:org").replace(/\/[A-Za-z_-]*\d[A-Za-z0-9_.:-]*/g, "/:id")} ${res.status} ${Date.now() - t0}ms`);
     return res;
   } catch {

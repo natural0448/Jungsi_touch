@@ -216,6 +216,40 @@ async function sendOnceMore(path: string, init: RequestInit, replayable: boolean
   return sendContended(path, init);
 }
 
+/*
+  2026-11-28 대표님 승인(속도 P1): 화면 서버 → 판정 서버를 공개 주소 대신 Cloudflare 내부 연결(서비스 바인딩)로 부른다.
+  같은 요청인데 판정 서버 안 0.5초가 화면 서버에서는 0.9~1.4초였다(서버 사이 이동). 주소가 Cloudflare 판정 서버일 때만 쓰고,
+  바인딩이 없으면(시험·Supabase 되돌림) 지금처럼 주소로 부른다. 요청 내용·머리말은 그대로다
+*/
+const BOUND_HOSTS: Record<string, string> = {
+  "jungsi-api-prod.edutouch-web.workers.dev": "JUNGSI_API_SVC",
+  "jungsi-pro-api-prod.edutouch-web.workers.dev": "JUNGSI_PRO_API_SVC",
+};
+type Bound = { fetch(r: Request): Promise<Response> };
+async function boundService(url: string): Promise<Bound | null> {
+  let host: string;
+  try {
+    host = new URL(url).host;
+  } catch {
+    return null;
+  }
+  const name = BOUND_HOSTS[host];
+  if (!name) return null;
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const env = (await getCloudflareContext({ async: true })).env as Record<string, unknown>;
+    const b = env[name] as Bound | undefined;
+    return b && typeof b.fetch === "function" ? b : null;
+  } catch {
+    return null;
+  }
+}
+async function callBackend(url: string, init: RequestInit): Promise<Response> {
+  const b = await boundService(url);
+  if (!b) return fetch(url, { ...init, cache: "no-store" });
+  const { cache: _ignored, ...rest } = init;
+  return b.fetch(new Request(url, rest));
+}
 async function send(path: string, init: RequestInit): Promise<Response> {
   const key = new Headers(init.headers).get("Authorization") ?? "anonymous";
   // 2026-11-28 속도 원인 나누기(대표님 요청: 처음 여는 화면 3초대): 차례 기다림(wait)과 서버 응답(ms)만 남긴다. 경로의 번호는 가린다
@@ -224,7 +258,7 @@ async function send(path: string, init: RequestInit): Promise<Response> {
     const t0 = Date.now();
     const shape = `${init.method ?? "GET"} ${path.split("?")[0].replace(/[0-9a-f]{8}-[0-9a-f-]{27,}/gi, ":id").replace(/\/[A-Za-z_-]*\d[A-Za-z0-9_.:-]*/g, "/:id")}`;
     try {
-      const res = await fetch(`${base()}${path}`, { ...init, cache: "no-store" });
+      const res = await callBackend(`${base()}${path}`, init);
       console.log(`[api] ${shape} ${res.status} wait=${t0 - queued}ms ms=${Date.now() - t0}`);
       return res;
     } catch {
