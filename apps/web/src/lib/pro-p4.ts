@@ -123,9 +123,80 @@ function minimumOf(c: CandidatesDto | null | undefined): Record<string, CsatMini
 }
 const BAND_CODES = new Set(["stable", "downward", "target", "aspirational", "upward", "challenge", "outside"]);
 
-/** 이 학생의 가채점 판정에는 활성 지원조건판·곡선·판정판이 함께 필요하다.
- * 리포트 조회는 현재 판의 지문을 제공하지 않으므로 판정을 요청 사이에 다시 쓰지 않는다.
- */
+/*
+  2026-11-28 대표님 결정(전문가용 속도 ㉠): ②③ 판정 응답을 10분 다시 쓴다 — 개인용 3·4페이지(11-27 결정)와 같은 규칙.
+  열쇠: 기관·학생·리포트·리포트 판(revision)·프로필·요청 내용·묶음 교체 표시(KV jt:csat-cache-epoch).
+  판정 묶음·응시조건판을 바꾸면 교체 표시를 갱신해 옛 결과를 모두 버린다. 교체 표시를 못 읽으면 다시 쓰지 않는다.
+  덜 찬 응답(complete=false·판정 요약 없음)은 기억하지 않는다. 지원 조건 미충족 반영은 다시 쓸 때도 지금 리포트로 매번 한다.
+*/
+const P4_TTL_MS = 10 * 60_000;
+type AnalyzeOk = { ok: true; value: { search?: CatalogSearchDto<OfferingDto> | null; candidates?: CandidatesDto | null } };
+const p4Memo = new Map<string, { at: number; v: AnalyzeOk["value"] }>();
+let proEpoch: string | null = null;
+let proEpochAgainAt = 0;
+async function proCsatEpoch(): Promise<string | null> {
+  if (Date.now() < proEpochAgainAt) return proEpoch;
+  let seen: string | null = null;
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const env = (await getCloudflareContext({ async: true })).env as Record<string, unknown>;
+    const kv = env.JT_SHARED_CACHE as { get(k: string, o: { type: "text"; cacheTtl: number }): Promise<string | null> } | undefined;
+    if (kv && typeof kv.get === "function") {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const value = await Promise.race([
+        kv.get("jt:csat-cache-epoch", { type: "text", cacheTtl: 60 }),
+        new Promise<null>((done) => { timer = setTimeout(() => done(null), 1500); }),
+      ]).finally(() => clearTimeout(timer));
+      if (typeof value === "string" && value.length > 0 && value.length <= 64 && !/[^A-Za-z0-9._:-]/.test(value)) seen = value;
+    }
+  } catch {
+    seen = null;
+  }
+  proEpoch = seen;
+  proEpochAgainAt = Date.now() + (seen === null ? 1_000 : 30_000);
+  return seen;
+}
+async function p4Key(parts: unknown[]): Promise<string> {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(parts)));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function p4Edge(): Cache | null {
+  try {
+    return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null;
+  } catch {
+    return null;
+  }
+}
+async function recallP4(k: string): Promise<AnalyzeOk | null> {
+  const m = p4Memo.get(k);
+  if (m && Date.now() - m.at < P4_TTL_MS) return { ok: true, value: m.v };
+  const edge = p4Edge();
+  if (!edge) return null;
+  try {
+    const hit = await edge.match(`https://jt-pro-p4.invalid/${k}`);
+    if (!hit) return null;
+    const j = (await hit.json()) as { at: number; v: AnalyzeOk["value"] };
+    if (!j || typeof j.at !== "number" || Date.now() - j.at >= P4_TTL_MS || !j.v?.candidates?.reference_threshold_summary) return null;
+    p4Memo.set(k, { at: j.at, v: j.v });
+    return { ok: true, value: j.v };
+  } catch {
+    return null;
+  }
+}
+async function rememberP4(k: string, v: AnalyzeOk["value"]) {
+  const at = Date.now();
+  p4Memo.delete(k);
+  p4Memo.set(k, { at, v });
+  while (p4Memo.size > 200) p4Memo.delete(p4Memo.keys().next().value as string);
+  const edge = p4Edge();
+  if (!edge) return;
+  try {
+    await edge.put(`https://jt-pro-p4.invalid/${k}`, new Response(JSON.stringify({ at, v }), { headers: { "content-type": "application/json", "cache-control": `public, max-age=${P4_TTL_MS / 1000}` } }));
+  } catch {
+    // 못 넣어도 화면은 그대로
+  }
+}
+
 export async function proP4(caller: Caller, v: ProStudentView, req: { offering_ids?: string[]; search?: ProP4Search }): Promise<P4Result> {
   const shown = v.shown;
   if (!shown) return { search: null, bands: {}, groups: [], failed: "no_report", min: {}, display: {} };
@@ -133,8 +204,11 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
   const src = proSource();
   const analyze = () => src.analyzeP4(caller, v.svc.org_id, v.student.student_id, body, crypto.randomUUID());
   let out: P4Result;
+  const epoch = await proCsatEpoch();
+  const mk = epoch === null ? null : await p4Key(["pro-p4-v1", v.svc.org_id, v.student.student_id, shown.report_id, shown.revision_id, shown.profile_id, req, epoch]);
   try {
-    let r = await analyze();
+    const remembered = mk === null ? null : await recallP4(mk);
+    let r = remembered ?? (await analyze());
     // 2026-11-24: 새 서버 판이 처음 깨어날 때 자원 한도(546)로 실패한 적이 있다 — 1초 뒤 다른 키로 한 번만 다시 묻는다
     if (!r.ok && r.code === "request_failed") {
       await new Promise((res) => setTimeout(res, 1000));
@@ -152,6 +226,9 @@ export async function proP4(caller: Caller, v: ProStudentView, req: { offering_i
       await new Promise((res) => setTimeout(res, 800));
       const again = await analyze().catch(() => null);
       if (again?.ok) r = again;
+    }
+    if (mk !== null && !remembered && r.ok && r.value.candidates?.reference_threshold_summary && r.value.candidates.reference_threshold_summary.complete !== false) {
+      await rememberP4(mk, { search: r.value.search ?? null, candidates: r.value.candidates });
     }
     if (!r.ok) {
       out = { search: null, bands: {}, groups: [], failed: r.code, min: {}, display: {} };

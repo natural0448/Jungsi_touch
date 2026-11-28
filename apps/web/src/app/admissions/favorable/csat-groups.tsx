@@ -1,8 +1,7 @@
-import { StarButton } from "@/components/star-button";
 import { CsatBadge } from "@/components/csat-badge";
-import { csatUpper } from "@/lib/provisional-view";
 import type { ReferenceUniversity } from "@/lib/reference-view";
 import { ReferenceFieldDetails } from "./reference-field";
+import { CsatFieldRows } from "./csat-field-rows";
 
 // 가채점 7단계 배지는 components/csat-badge.tsx(4페이지와 함께 쓴다)
 
@@ -46,25 +45,17 @@ export function CsatGroups({ universities, favs, outsideBand, p3Label, heading, 
                   </>
                 }
               >
-                <ul>
-                  {f.items.map(({ offering: o, band }) => {
-                    const upper = band ? csatUpper(band) : null;
-                    return (
-                      // 범위 판정이면 학과 줄에 범위임을 한 번 더 적는다(배지는 '적정~소신')
-                      <li key={o.offering_id}>
-                        <span className="u">
-                          <b>{o.department}</b>
-                          <small>{[o.group ? `${o.group}군` : null, o.track].filter(Boolean).join(" · ")}</small>
-                        </span>
-                        <span className="rf-m">
-                          <CsatBadge band={band} id={o.offering_id} />
-                          {band && upper && <small className="rf-adv">가채점 점수 범위에 따른 판정</small>}
-                        </span>
-                        {favs && <StarButton id={o.offering_id} on={favs.has(o.offering_id)} name={`${o.university_name} ${o.department}`} />}
-                      </li>
-                    );
-                  })}
-                </ul>
+                <CsatFieldRows
+                  stars={!!favs}
+                  rows={f.items.map(({ offering: o, band }) => ({
+                    id: o.offering_id,
+                    department: o.department,
+                    sub: [o.group ? `${o.group}군` : null, o.track].filter(Boolean).join(" · "),
+                    name: `${o.university_name} ${o.department}`,
+                    band: band ?? null,
+                    fav: !!favs?.has(o.offering_id),
+                  }))}
+                />
               </ReferenceFieldDetails>
             ))}
           </article>
