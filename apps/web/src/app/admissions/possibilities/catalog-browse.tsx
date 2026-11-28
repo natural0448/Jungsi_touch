@@ -27,6 +27,7 @@ import { memberName } from "@/lib/member-name";
 import { viewPath } from "@/lib/content-view";
 import { page, type PageRoute } from "@/lib/routes";
 import { ItemShell } from "./item-shell";
+import { expandUniversityQuery } from "../../../lib/university-alias";
 import { MineBasis, MineCells, MineConds, MineDetail, MineLegend, MineTray, cellOf } from "./mine-parts";
 import { cursorAt, cursorIndex, GROUPS, hrefWith, LIMIT, parseQuery, skipEmptyPages, toSearch, type CatalogDestination, type Query, YEAR } from "./query";
 import "./possibilities.css";
@@ -88,7 +89,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
   const searching = cur.fav
     ? favoring.then((f) => favoriteResult(f, cur))
     : pro
-    ? pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") ? undefined : cur.cursor }).then((r) => {
+    ? pro.search({ university_q: expandUniversityQuery(cur.university_q), department_q: cur.department_q, region: cur.region, group: cur.group, cursor: cur.cursor?.startsWith("st:") || cur.cursor?.startsWith("sp:") ? undefined : cur.cursor }).then((r) => {
       proBands = r.bands;
       proMin = r.min;
       proDisplay = r.display ?? {};
@@ -343,7 +344,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
         if (picked.length >= LIMIT || !page.next_cursor || pages >= SCAN_PAGES || empty >= SCAN_EMPTY_HOPS) break;
         try {
           if (pro) {
-            const r = await pro.search({ university_q: cur.university_q, department_q: cur.department_q, region: cur.region, group: cur.group, cursor: page.next_cursor });
+            const r = await pro.search({ university_q: expandUniversityQuery(cur.university_q), department_q: cur.department_q, region: cur.region, group: cur.group, cursor: page.next_cursor });
             if (!r.search) break;
             proPageDetails.set(r.search, r);
             page = r.search;
@@ -678,7 +679,7 @@ function StatusChips({ cur, destination }: { cur: Query; destination: CatalogDes
 function favoriteResult(f: Favorites | null, cur: Query): CatalogSearchDto<OfferingDto> {
   const has = (v: string | null | undefined, q?: string) => !q || (v ?? "").includes(q);
   const items = (f?.items ?? [])
-    .filter((o) => o.academic_year === YEAR && has(o.university_name, cur.university_q) && has(o.department, cur.department_q) && (!cur.region || o.region === cur.region) && (!cur.group || o.group.startsWith(cur.group)))
+    .filter((o) => o.academic_year === YEAR && has(o.university_name, expandUniversityQuery(cur.university_q)) && has(o.department, cur.department_q) && (!cur.region || o.region === cur.region) && (!cur.group || o.group.startsWith(cur.group)))
     .sort((a, b) => a.university_name.localeCompare(b.university_name, "ko") || a.department.localeCompare(b.department, "ko"));
   return { status: "ready", reason_code: null, items, matching_offering_count: items.length, matching_school_count: new Set(items.map((o) => o.university_id)).size, catalog_version: null, as_of: null, next_cursor: null };
 }

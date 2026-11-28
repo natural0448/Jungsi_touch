@@ -1,3 +1,4 @@
+import { expandUniversityQuery } from "../../../lib/university-alias";
 import type { Caller, JungsiSource, OfferingSearchQuery } from "@/lib/api";
 import type { CatalogSearchDto, OfferingDto } from "@/lib/dto";
 // 상대 경로: 이 파일은 테스트(national-catalog-navigation)가 별칭 없이 바로 읽는다
@@ -45,7 +46,7 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): Q
 }
 
 export function toSearch(q: Query): OfferingSearchQuery {
-  return { academic_year: YEAR, university_q: q.university_q, department_q: q.department_q, region: q.region, group: q.group, cursor: q.cursor, limit: LIMIT };
+  return { academic_year: YEAR, university_q: expandUniversityQuery(q.university_q), department_q: q.department_q, region: q.region, group: q.group, cursor: q.cursor, limit: LIMIT };
 }
 
 /** Keep a continuation when the operation's bounded scan finds only empty pages. */

@@ -1,3 +1,4 @@
+import { expandUniversityTerm } from "./university-alias";
 import "server-only";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { SnapshotHeadDto, SnapshotPartPin } from "@/lib/dto";
@@ -566,6 +567,8 @@ const norm = (s: string) => s.normalize("NFC").replace(/\s+/g, "").toLowerCase()
 export type SearchResult = { total_schools: number; total_units: number; total_pending: number; page: number; pages: number; schools: { school: School; rows: Row[]; keys: Set<string> }[] };
 /** 쉼표(, ， 、)로 나눈 여러 검색어. 하나라도 맞으면 찾는다(10-24: "강원대, 홍익대"가 한 글자열로 취급돼 0건이었다) */
 const terms = (s?: string) => (s ?? "").split(/[,，、]/).map(norm).filter(Boolean).slice(0, 10);
+/** 대학 검색어: 약칭(금오공대·서울과기대·한기대 등)은 정식 이름의 일부도 함께 찾는다(2026-11-28 담당자 R29 §2) */
+const schoolTerms = (s?: string) => [...new Set(terms(s).flatMap((t) => [t, norm(expandUniversityTerm(t))]))];
 type PreparedSearch = {
   schoolNames: string[][];
   units: (readonly [number, string, string[], string[], string[], string[]])[];
@@ -587,7 +590,7 @@ function preparedSearch(ix: Index): PreparedSearch {
 }
 const anyHit = (qs: string[], hay: string[]) => qs.some(q => hay.some(h => h.includes(q)));
 export async function searchSnapshot(ready: Ready, q: { university?: string; unit?: string; region?: string; group?: string; page?: number }): Promise<SearchResult> {
-  const ix = await index(ready), uq = terms(q.university), dq = terms(q.unit);
+  const ix = await index(ready), uq = schoolTerms(q.university), dq = terms(q.unit);
   const search = preparedSearch(ix);
   const schoolHit = search.schoolNames.map(names => !uq.length || anyHit(uq, names));
   const matched = new Map<number, Set<string>>(); let units = 0, pending = 0;
