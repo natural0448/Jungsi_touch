@@ -47,7 +47,8 @@ export interface ProBrowse {
   /** 지원가능성 필터(서버 dep_pro_r38) */
   scan: (q: { codes: string[]; after?: string; limit: number; region?: string; group?: string }) => Promise<{ search: CatalogSearchDto<OfferingDto> | null; bands: Record<string, ReferenceBandDto>; failed: string | null; min: Record<string, CsatMinimum>; display?: NonNullable<OverallAnalysisDto["provisional_school_display"]> }>;
   /** 띠의 이름·군(담은 곳이 지금 목록에 없을 때) */
-  picked: OfferingDto[];
+  /** 담은 곳(이 화면 밖 모집단위). 2026-11-28: 목록 판정과 함께 받으려고 약속(Promise)으로도 받는다 */
+  picked: OfferingDto[] | Promise<OfferingDto[]>;
   tray: { other: string; report: string; reportLabel?: string };
 }
 
@@ -590,7 +591,7 @@ export async function CatalogBrowse({ src, caller, sp, route, features, catalogV
 
       {/* 띠는 담은 곳의 이름·모집군을 모두 받은 뒤 한 번에 그린다. 목록은 띠를 기다리지 않는다 */}
       <Suspense fallback={null}>
-        <MineTray report={report} items={pro ? [...items, ...pro.picked] : items} src={src} caller={caller} links={pro?.tray} />
+        <PickedTray report={report} items={items} picked={pro ? pro.picked : []} src={src} caller={caller} links={pro?.tray} />
       </Suspense>
     </>
   );
@@ -712,4 +713,10 @@ function PageNumbers({ current, total, href }: { current: number; total: number;
 /** 무료 공개 응답의 판정(정확한 점수·위치 대신 같은 단계 안 위치·구간만 온다, 2026-11-26). 다시 받아도 같은 값이라 채우지 않는다 */
 function freeBand(b: ReferenceBandDto | undefined): boolean {
   return !!b && !b.held && !b.school_score && (typeof b.position_share === "number" || typeof b.rank_bucket === "number" || !!b.gain_tone);
+}
+
+/** 2026-11-28 전문가용 ③ 속도: 담은 곳 판정을 목록 판정과 동시에 받고, 띠만 그것을 기다린다(목록은 기다리지 않는다) */
+async function PickedTray({ items, picked, ...rest }: Omit<Parameters<typeof MineTray>[0], "items"> & { items: OfferingDto[]; picked: OfferingDto[] | Promise<OfferingDto[]> }) {
+  const extra = await Promise.resolve(picked).catch(() => [] as OfferingDto[]);
+  return <MineTray {...rest} items={extra.length ? [...items, ...extra] : items} />;
 }

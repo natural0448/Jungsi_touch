@@ -1,3 +1,4 @@
+import type { OfferingDto } from "@/lib/dto";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "@/components/link";
@@ -37,9 +38,12 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   if (got.kind === "connection") return <>{head}<ConnectionNotice e={got.error} /></>;
   if (got.kind !== "ok") return <>{head}<NotFoundNote orgParam={orgParam} /></>;
   const v = got.view;
-  const favorites = await proFavorites(v.svc.org_id, v.student.student_id);
+  // 2026-11-28 속도: 담은 곳 판정은 기다리지 않고 시작만 한다(목록 판정과 동시 2건 — 계정당 동시 한도 2 안)
   const picked = v.report ? [...pickedIds(v.report)] : [];
-  const pickedItems = picked.length ? ((await proP4(caller, v, { offering_ids: picked.slice(0, 30) })).search?.items ?? []) : [];
+  const pickedItems: Promise<OfferingDto[]> = picked.length
+    ? proP4(caller, v, { offering_ids: picked.slice(0, 30) }).then((r) => r.search?.items ?? [], () => [])
+    : Promise.resolve([]);
+  const favorites = await proFavorites(v.svc.org_id, v.student.student_id);
   const pro: ProBrowse = {
     path: `/pro/students/${encodeURIComponent(v.student.student_id)}/possibilities`,
     params: { org: v.svc.org_id },
