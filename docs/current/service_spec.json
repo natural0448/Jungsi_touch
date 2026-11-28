@@ -361899,6 +361899,14 @@
         "PAGE-04"
       ],
       "summary": "4페이지 머리 설명을 크게(11-28 대표님 요청): 요약 한 줄 + 세 단계(검색·필터 → 담기, 군마다 5곳·모두 15곳 → 리포트에서 비교), 3·4페이지 설명 스타일 공통(styles/jungsi.css). 가채점 판정 준비 중 학과에 \"판정 근거 계속 업데이트 중\" 표시와 안내 한 줄, 칸 설명에도 같은 뜻."
+    },
+    {
+      "date": "2026-11-28",
+      "requirements": [
+        "PAGE-03",
+        "PAGE-04"
+      ],
+      "summary": "가채점 분석 무료 공개(11-28 대표님 결정, ~12-13): 정시터치 화면 문(JEONGSI_ACCESS_GATE)을 preview에서 members로 바꿔 활동 회원 모두에게 연다. 본체 JEONGSI_OPEN=members와 같은 날, 서버 무료 스위치를 먼저 켠 뒤 배포한다. 긴급 점검 때는 preview로 되돌린다."
     }
   ],
   "p1_recruitment_score_review_verification": {

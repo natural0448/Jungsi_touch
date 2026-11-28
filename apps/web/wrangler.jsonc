@@ -64,6 +64,8 @@
     "JUNGSI_CURRENT_REVIEW_URL": "https://ksrpnhvyfdwysrexdhrd.supabase.co/functions/v1/current-admission-review",
     // 2026-10-13 사용자 결정: 오픈 전에는 에듀터치 관리자와 허용 명단(JEONGSI_PREVIEW_EMAILS, wrangler secret)만
     // 들어온다(src/proxy.ts). Supabase 두 공개값은 빌드 때 .env.production(Git 제외)으로 넣는다. 오픈 때 지운다.
-    "JEONGSI_ACCESS_GATE": "preview"
+    // 2026-11-28 대표님 결정: 가채점 분석 무료 공개(~12-13) — 활동 회원 모두에게 연다(본체 JEONGSI_OPEN=members 와 같은 날, 회원가입 필수).
+    // 되돌림(긴급 점검): "preview" 로 바꿔 배포
+    "JEONGSI_ACCESS_GATE": "members"
   }
 }
