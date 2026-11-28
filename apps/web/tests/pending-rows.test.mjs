@@ -17,3 +17,15 @@ test("'판정 근거 부족' 문구는 '가채점 판정 준비 중'으로", () 
   assert.match(src("lib/status-filter.ts"), /none: "가채점 판정 준비 중"/);
   assert.ok(!src("app/admissions/favorable/wildcard.tsx").includes(">판정 근거 부족<"));
 });
+
+// 2026-11-28 대표님 요청: 유리한 대학 찾기 설명을 더 잘 보이게(요약 + 두 단계)
+test("유리한 대학 찾기 설명: 요약 한 줄과 ★ 두 단계", () => {
+  const p = src("app/admissions/favorable/page.tsx");
+  assert.match(p, /className="fav-lead"/);
+  assert.match(p, /<b>내 성적으로 지원에 유리한 대학<\/b>/);
+  assert.match(p, /<em>1<\/em>/);
+  assert.match(p, /<em>2<\/em>/);
+  const at = p.indexOf('className="fav-lead"');
+  const lead = p.slice(at, p.indexOf("</span>", p.indexOf("fav-lead-steps", at)) + 400);
+  assert.ok(lead.length > 0 && !lead.includes("참고"));
+});

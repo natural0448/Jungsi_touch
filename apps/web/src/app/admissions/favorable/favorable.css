@@ -288,3 +288,15 @@
 .et .fv-cand-g>summary{cursor:pointer;font-size:15px;color:var(--deep);list-style-position:inside}
 .et .fv-cand-g>summary b{font-weight:900;margin-right:4px}
 .et .fv-cand-g .fv-ref{margin-top:10px}
+
+/* 2026-11-28 대표님 요청: 유리한 대학 찾기 설명을 더 잘 보이게 */
+.et .pg-head p:has(.fav-lead){max-width:none}
+.et .fav-lead{display:grid;gap:10px;margin-top:4px}
+.et .fav-lead-main{font-size:16px;line-height:1.55;color:var(--ink);font-weight:500}
+.et .fav-lead-main b{font-weight:800;color:var(--brand, #1E4FD8)}
+.et .fav-lead-steps{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--ink)}
+.et .fav-lead-steps>span{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.et .fav-lead-steps em{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--deep, #13254F);color:#fff;font-size:12px;font-weight:800}
+.et .fav-lead-steps b{font-weight:800}
+.et .fav-lead-steps .star{color:#F5A623}
+@media (max-width:640px){.et .fav-lead-main{font-size:15px}.et .fav-lead-steps>span{border-radius:10px}}

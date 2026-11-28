@@ -52,7 +52,16 @@ export default async function Page({ searchParams }: PageProps<"/admissions/favo
     <PageHead
       kicker={`PAGE ${route.number} · 유료`}
       title={route.label}
-      desc={catalogView ? "전국 대학과 학과를 검색하고 모집단위별 지원 정보를 확인하세요." : "내 성적으로 지원에 유리한 대학과 지원가능성을 봅니다. 관심 학교는 ★로 표시해 두면 다음 화면에서 학과별로 자세히 보고 담을 수 있습니다."}
+      desc={catalogView ? "전국 대학과 학과를 검색하고 모집단위별 지원 정보를 확인하세요." : (
+        // 2026-11-28 대표님 요청: 설명을 더 잘 보이게 — 한 줄 요약 + 두 단계 사용법
+        <span className="fav-lead">
+          <span className="fav-lead-main"><b>내 성적으로 지원에 유리한 대학</b>과 학교별 <b>지원가능성</b>을 한눈에 봅니다.</span>
+          <span className="fav-lead-steps">
+            <span><em>1</em>마음에 드는 학교에 <b className="star">★</b>를 눌러 표시</span>
+            <span><em>2</em>다음 화면 <b>전체 대학·학과 가능성 보기</b>에서 학과별로 자세히 보고 담기</span>
+          </span>
+        </span>
+      )}
       side={<Link prefetch={false} className="btn" href={catalogView ? route.path : `${route.path}?view=catalog`}>{catalogView ? "유리한 대학 추천 보기" : "전국 대학·학과 보기"}</Link>}
     />
   );
